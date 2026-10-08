@@ -19,6 +19,7 @@ object WearRoutes {
     const val MENU = "menu"
     const val PICKER = "picker"
     const val SUMMARY = "summary"
+    const val INFO = "info"
 }
 
 @Composable
@@ -79,9 +80,11 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
                             session = session,
                             onBack = { nav.popBackStack() },
                             onAddExercise = { nav.navigate(WearRoutes.PICKER) },
+                            onInfo = { nav.navigate(WearRoutes.INFO) },
                             onDiscarded = { nav.navigate(WearRoutes.HOME) { popUpTo(0) } },
                         )
                     }
+                    composable(WearRoutes.INFO) { ExerciseInfoScreen(session) }
                     composable(WearRoutes.PICKER) {
                         ExercisePickerScreen(container) { exercise ->
                             session.addExercise(exercise)

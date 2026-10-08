@@ -64,4 +64,27 @@ class WearUiTest {
         settle()
         shot("rest")
     }
+
+    @Test
+    fun menu_and_info() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNodeWithText("Entrenamiento vacío").performClick()
+        settle()
+        compose.onNodeWithText("＋").performClick()
+        settle()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Pecho"))
+        compose.onNodeWithText("Pecho").performClick()
+        settle()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Press banca"))
+        compose.onNodeWithText("Press banca").performClick()
+        settle()
+        compose.onNodeWithContentDescription("Más opciones").performClick()
+        settle()
+        shot("menu")
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Progreso y discos"))
+        compose.onNodeWithText("Progreso y discos").performClick()
+        settle()
+        shot("info")
+    }
 }

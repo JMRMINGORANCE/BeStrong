@@ -301,6 +301,10 @@
     <string name="superset_label">Superserie %1$s</string>
     <string name="superset_remove">Quitar de la superserie</string>
     <string name="superset_with_next">Superserie con el siguiente</string>
+    <string name="tempo">Tempo</string>
+    <string name="tempo_help">Segundos de bajada-pausa-subida-pausa, p. ej. 3-1-1-0 (X = explosivo). El reloj te guía con vibraciones.</string>
+    <string name="tempo_invalid">Formato: 3-1-1 o 3-1-1-0 (0 a 10 s)</string>
+    <string name="tempo_line">Tempo %1$s · %2$d s bajo tensión por serie</string>
     <string name="today_cycle_week">Ciclo %1$d · semana %2$d de %3$d</string>
     <string name="today_session_n">Sesión %1$d</string>
     <string name="today_start">Empezar sesión</string>

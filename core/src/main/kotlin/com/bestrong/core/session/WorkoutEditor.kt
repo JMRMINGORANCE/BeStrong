@@ -7,6 +7,8 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
+import com.bestrong.core.training.WarmupGenerator
+import com.bestrong.core.util.WeightUnit
 
 /**
  * Operaciones inmutables sobre el entrenamiento en curso. Las usan tanto el móvil como el reloj.
@@ -66,6 +68,14 @@ object WorkoutEditor {
                 type = if (last?.type == SetType.WARMUP) SetType.NORMAL else last?.type ?: SetType.NORMAL,
             ),
         )
+    }
+
+    /** Añade series de aproximación antes de la primera serie de trabajo (sustituye calentamientos pendientes). */
+    fun addWarmup(workout: Workout, workoutExerciseId: String, unit: WeightUnit): Workout = updateExercise(workout, workoutExerciseId) { we ->
+        val working = we.sets.firstOrNull { it.type != SetType.WARMUP }?.weightKg ?: return@updateExercise we
+        val warmups = WarmupGenerator.generate(working, unit)
+        if (warmups.isEmpty()) return@updateExercise we
+        we.copy(sets = we.sets.filter { it.type == SetType.WARMUP && it.completed } + warmups + we.sets.filter { it.type != SetType.WARMUP })
     }
 
     fun removeSet(workout: Workout, workoutExerciseId: String, setId: String): Workout =

@@ -301,6 +301,10 @@
     <string name="superset_label">Superset %1$s</string>
     <string name="superset_remove">Remove from superset</string>
     <string name="superset_with_next">Superset with next</string>
+    <string name="tempo">Tempo</string>
+    <string name="tempo_help">Seconds of lowering-pause-lifting-pause, e.g. 3-1-1-0 (X = explosive). The watch guides you with vibrations.</string>
+    <string name="tempo_invalid">Format: 3-1-1 or 3-1-1-0 (0 to 10 s)</string>
+    <string name="tempo_line">Tempo %1$s · %2$d s under tension per set</string>
     <string name="today_cycle_week">Cycle %1$d · week %2$d of %3$d</string>
     <string name="today_session_n">Session %1$d</string>
     <string name="today_start">Start session</string>

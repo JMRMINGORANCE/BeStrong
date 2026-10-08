@@ -186,8 +186,9 @@ fun WorkoutScreen(
                 previous?.let {
                     Text(
                         stringResource(R.string.previous, unit.format(it.weightKg), it.reps),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        // «La última vez» bien visible: es lo que hay que batir
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary,
                     )
                 }
                 Spacer(Modifier.height(4.dp))

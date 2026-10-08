@@ -13,12 +13,14 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.session.WorkoutEditor
+import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
+import com.bestrong.core.training.Tempo
 import com.bestrong.wear.ApplicationScope
 import com.bestrong.wear.data.PhoneSync
 import com.bestrong.wear.data.WearStore
@@ -281,6 +283,7 @@ class WorkoutSession @Inject constructor(
      * al cerrar la ronda arranca el descanso. Devuelve true si empieza un descanso.
      */
     fun completeSet(): Boolean {
+        stopTempo()
         val w0 = _workout.value ?: return false
         val index = _exerciseIndex.value
         val we = currentExercise() ?: return false
@@ -342,6 +345,60 @@ class WorkoutSession @Inject constructor(
             repCounter.reset()
             haptic(longArrayOf(0, 300, 150, 300, 150, 300))
         }
+    }
+
+    // --- Calentamiento, progreso y tempo ------------------------------------------------------
+
+    /** Series de aproximación para el ejercicio actual (barra, 40 %, 60 %, 80 %). */
+    fun addWarmup() {
+        val we = currentExercise() ?: return
+        edit { WorkoutEditor.addWarmup(it, we.id, store.settings.value.unit) }
+    }
+
+    /** Evolución del 1RM estimado y demás marcas del ejercicio (historial del móvil + del reloj). */
+    fun progressFor(exerciseId: String): List<ExerciseProgressPoint> = WorkoutStats.exerciseProgress(exerciseId, store.history.value)
+
+    private val _tempoActive = MutableStateFlow(false)
+    val tempoActive: StateFlow<Boolean> = _tempoActive.asStateFlow()
+    private var tempoJob: Job? = null
+
+    /**
+     * Guía de tempo con vibraciones para la serie actual: un toque largo al empezar a bajar,
+     * uno corto en cada pausa y dos al subir. Se para al completar la serie o al volver a pulsar.
+     */
+    fun toggleTempo() {
+        if (_tempoActive.value) {
+            stopTempo()
+            return
+        }
+        val we = currentExercise() ?: return
+        val tempo = Tempo.parse(we.tempo) ?: return
+        val reps = currentSet()?.reps?.takeIf { it > 0 } ?: 10
+        _tempoActive.value = true
+        tempoJob = scope.launch {
+            haptic(longArrayOf(0, 60, 120, 60, 120, 60)) // preparados
+            delay(1_500)
+            repeat(reps) {
+                tempo.phases.forEach { (phase, seconds) ->
+                    haptic(
+                        when (phase) {
+                            Tempo.Phase.ECCENTRIC -> longArrayOf(0, 180)
+                            Tempo.Phase.CONCENTRIC -> longArrayOf(0, 60, 80, 60)
+                            else -> longArrayOf(0, 30)
+                        },
+                    )
+                    delay(seconds * 1_000L)
+                }
+            }
+            haptic(longArrayOf(0, 400))
+            _tempoActive.value = false
+        }
+    }
+
+    private fun stopTempo() {
+        tempoJob?.cancel()
+        tempoJob = null
+        _tempoActive.value = false
     }
 
     private fun haptic(pattern: LongArray) {

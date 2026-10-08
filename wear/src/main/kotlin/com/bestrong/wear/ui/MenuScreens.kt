@@ -32,7 +32,7 @@ import com.bestrong.wear.WearContainer
 import com.bestrong.wear.session.WorkoutSession
 
 @Composable
-fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () -> Unit, onDiscarded: () -> Unit) {
+fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () -> Unit, onInfo: () -> Unit, onDiscarded: () -> Unit) {
     val workout by session.workout.collectAsStateWithLifecycle()
     val index by session.exerciseIndex.collectAsStateWithLifecycle()
     val repCounting by session.repCounting.collectAsStateWithLifecycle()
@@ -66,6 +66,18 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
                     colors = if (done == we.sets.size) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.filledTonalButtonColors(),
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+            item {
+                Button(
+                    onClick = onInfo,
+                    label = { Text(stringResource(R.string.menu_progress)) },
+                    secondaryLabel = { Text(stringResource(R.string.menu_progress_sub)) },
+                    colors = ButtonDefaults.filledTonalButtonColors(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            item {
+                Button(onClick = { session.addWarmup(); onBack() }, label = { Text(stringResource(R.string.menu_warmup)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }
             item {
                 Button(onClick = { session.addSet(); onBack() }, label = { Text(stringResource(R.string.add_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())

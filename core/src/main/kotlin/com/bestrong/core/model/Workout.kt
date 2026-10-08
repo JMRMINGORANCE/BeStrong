@@ -39,6 +39,8 @@ data class WorkoutExercise(
     val notes: String = "",
     /** Ejercicios con el mismo id forman una superserie (se alternan sin descanso). */
     val supersetId: String? = null,
+    /** Tempo de la repetición, p. ej. "3-1-1-0" (bajada-pausa-subida-pausa, en segundos). Ver [com.bestrong.core.training.Tempo]. */
+    val tempo: String? = null,
 ) {
     val completedSets: List<WorkoutSet> get() = sets.filter { it.completed }
 

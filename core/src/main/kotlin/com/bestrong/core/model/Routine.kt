@@ -19,6 +19,7 @@ data class RoutineExercise(
     val restSeconds: Int = WorkoutExercise.DEFAULT_REST_SECONDS,
     val notes: String = "",
     val supersetId: String? = null,
+    val tempo: String? = null,
 )
 
 @Serializable
@@ -49,6 +50,7 @@ data class Routine(
                 restSeconds = re.restSeconds,
                 notes = re.notes,
                 supersetId = re.supersetId,
+                tempo = re.tempo,
                 sets = re.sets.mapIndexed { i, rs ->
                     val prev = previous.getOrNull(i)
                     WorkoutSet(
@@ -71,6 +73,7 @@ data class Routine(
                     exercise = we.exercise,
                     restSeconds = we.restSeconds,
                     supersetId = we.supersetId,
+                    tempo = we.tempo,
                     sets = we.sets.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) },
                 )
             },

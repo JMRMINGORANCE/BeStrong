@@ -79,6 +79,7 @@ import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.training.SuggestionKind
+import com.bestrong.core.training.Tempo
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.R
@@ -355,6 +356,7 @@ private fun ExerciseCard(
     var menu by remember { mutableStateOf(false) }
     var editRest by remember { mutableStateOf(false) }
     var editNotes by remember { mutableStateOf(false) }
+    var editTempo by remember { mutableStateOf(false) }
     var showInfo by remember { mutableStateOf(false) }
     var showPlates by remember { mutableStateOf(false) }
 
@@ -392,11 +394,21 @@ private fun ExerciseCard(
                         if (we.supersetId != null) DropdownMenuItem(text = { Text(stringResource(R.string.superset_remove)) }, onClick = { menu = false; vm.unlinkSuperset(we.id) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.rest_time)) }, onClick = { menu = false; editRest = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.notes)) }, onClick = { menu = false; editNotes = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
                         if (index > 0) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; vm.moveExercise(index, index - 1) })
                         if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; vm.moveExercise(index, index + 1) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.remove_exercise)) }, onClick = { menu = false; vm.removeExercise(we.id) })
                     }
                 }
+            }
+            Tempo.parse(we.tempo)?.let { t ->
+                val reps = we.sets.firstOrNull { it.type != SetType.WARMUP }?.reps ?: 10
+                Text(
+                    stringResource(R.string.tempo_line, t.toString(), t.timeUnderTension(reps)),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                )
             }
             if (we.notes.isNotBlank()) {
                 Text(we.notes, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 12.dp))
@@ -466,6 +478,29 @@ private fun ExerciseCard(
                 }
             },
             confirmButton = { TextButton(onClick = { editRest = false }) { Text(stringResource(R.string.action_close)) } },
+        )
+    }
+    if (editTempo) {
+        var tempo by remember { mutableStateOf(we.tempo.orEmpty()) }
+        val valid = tempo.isBlank() || Tempo.parse(tempo) != null
+        AlertDialog(
+            onDismissRequest = { editTempo = false },
+            title = { Text(stringResource(R.string.tempo)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.tempo_help), style = MaterialTheme.typography.bodySmall)
+                    OutlinedTextField(
+                        tempo,
+                        { tempo = it },
+                        singleLine = true,
+                        isError = !valid,
+                        placeholder = { Text("3-1-1-0") },
+                        supportingText = { if (!valid) Text(stringResource(R.string.tempo_invalid)) },
+                    )
+                }
+            },
+            confirmButton = { Button(onClick = { vm.setTempo(we.id, tempo); editTempo = false }, enabled = valid) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = { TextButton(onClick = { editTempo = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
     if (editNotes) {

@@ -12,7 +12,7 @@ import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
-import com.bestrong.core.training.WarmupGenerator
+import com.bestrong.core.training.Tempo
 import com.bestrong.mobile.WatchMetricsStore
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
@@ -101,12 +101,11 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /** Añade series de aproximación antes de la primera serie de trabajo. */
-    fun addWarmup(weId: String) = edit { w ->
-        WorkoutEditor.updateExercise(w, weId) { we ->
-            val working = we.sets.firstOrNull { it.type != SetType.WARMUP }?.weightKg ?: return@updateExercise we
-            val warmups = WarmupGenerator.generate(working, settings.value.unit)
-            we.copy(sets = warmups + we.sets.filter { it.type != SetType.WARMUP || it.completed })
-        }
+    fun addWarmup(weId: String) = edit { w -> WorkoutEditor.addWarmup(w, weId, settings.value.unit) }
+
+    /** Tempo de la repetición (p. ej. "3-1-1-0"); vacío lo quita. */
+    fun setTempo(weId: String, tempo: String) = edit { w ->
+        WorkoutEditor.updateExercise(w, weId) { it.copy(tempo = Tempo.parse(tempo)?.toString()) }
     }
 
     /** Aplica la sugerencia de progresión a las series pendientes. */
