@@ -1,5 +1,8 @@
 package com.bestrong.mobile.ui.home
 
+import com.bestrong.mobile.ui.components.uiLanguage
+import com.bestrong.core.library.TrainingProgram
+import com.bestrong.core.library.Programs
 import com.bestrong.mobile.ui.components.defaultWorkoutName
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
@@ -67,6 +70,15 @@ class HomeViewModel @Inject constructor(
 
     fun duplicate(routine: Routine) = viewModelScope.launch {
         repo.saveRoutine(routine.copy(id = com.bestrong.core.util.newId(), name = context.getString(R.string.routine_copy_name, routine.name)))
+    }
+
+    val programs: List<TrainingProgram> = Programs.all
+
+    /** Crea las rutinas del programa elegido en el idioma de la app. */
+    fun addProgram(program: TrainingProgram) = viewModelScope.launch {
+        val routines = program.toRoutines(context.uiLanguage())
+        repo.addRoutines(routines)
+        _messages.tryEmit(context.getString(R.string.msg_program_added, program.name(context.uiLanguage()), routines.size))
     }
 
     fun delete(routine: Routine) = viewModelScope.launch { repo.deleteRoutine(routine.id) }

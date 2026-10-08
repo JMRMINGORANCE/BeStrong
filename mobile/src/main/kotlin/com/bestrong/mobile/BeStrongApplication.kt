@@ -1,5 +1,7 @@
 package com.bestrong.mobile
 
+import com.bestrong.mobile.backup.AutoBackupWorker
+import com.bestrong.mobile.notify.ReminderWorker
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -99,6 +101,15 @@ class AppSync @Inject constructor(
                     watchMetrics.metrics.value = null
                 }
             }
+        }
+        // Recordatorios y copia de seguridad semanal (WorkManager)
+        scope.launch {
+            settings.settings.map { Triple(it.reminderDays, it.reminderHour, it.reminderMinute) }.distinctUntilChanged()
+                .collect { (days, h, m) -> runCatching { ReminderWorker.schedule(context, days, h, m) }.onFailure { Log.w("AppSync", "Recordatorios", it) } }
+        }
+        scope.launch {
+            settings.settings.map { it.backupFolderUri != null }.distinctUntilChanged()
+                .collect { on -> runCatching { AutoBackupWorker.schedule(context, on) }.onFailure { Log.w("AppSync", "Copia de seguridad", it) } }
         }
     }
 }

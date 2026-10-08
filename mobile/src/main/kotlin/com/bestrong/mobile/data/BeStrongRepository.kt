@@ -5,6 +5,8 @@ import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
+import com.bestrong.core.io.Persistence
+import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SyncContract.json
@@ -31,11 +33,11 @@ import kotlinx.coroutines.sync.withLock
 class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @ApplicationScope scope: CoroutineScope) {
 
     val history: StateFlow<List<Workout>> = dao.workouts()
-        .map { list -> list.mapNotNull { runCatching { json.decodeFromString(Workout.serializer(), it.json) }.getOrNull() } }
+        .map { list -> list.mapNotNull { runCatching { Persistence.decodeWorkout(it.json) }.getOrNull() } }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     val routines: StateFlow<List<Routine>> = dao.routines()
-        .map { list -> list.mapNotNull { runCatching { json.decodeFromString(Routine.serializer(), it.json) }.getOrNull() } }
+        .map { list -> list.mapNotNull { runCatching { Persistence.decodeRoutine(it.json) }.getOrNull() } }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     private val customExercises: Flow<List<Exercise>> = dao.customExercises()
@@ -51,7 +53,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     val activeWorkout: StateFlow<Workout?> = dao.value(KEY_ACTIVE)
-        .map { s -> s?.let { runCatching { json.decodeFromString(Workout.serializer(), it) }.getOrNull() } }
+        .map { s -> s?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
     /** Últimas series de cada ejercicio, para la columna "Anterior". */
@@ -72,7 +74,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     private suspend fun write(workout: Workout?) {
         if (workout == null) dao.deleteValue(KEY_ACTIVE)
-        else dao.putValue(KeyValueEntity(KEY_ACTIVE, json.encodeToString(Workout.serializer(), workout)))
+        else dao.putValue(KeyValueEntity(KEY_ACTIVE, Persistence.encodeWorkout(workout)))
     }
 
     /** Aplica un cambio sobre el último estado guardado (evita perder ediciones rápidas). */
@@ -82,12 +84,13 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     }
 
     private suspend fun currentActive(): Workout? =
-        dao.valueOnce(KEY_ACTIVE)?.let { runCatching { json.decodeFromString(Workout.serializer(), it) }.getOrNull() }
+        dao.valueOnce(KEY_ACTIVE)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
 
-    /** Estado que llega del reloj: solo se aplica si es más reciente que el local. */
+    /** Estado que llega del reloj: se fusiona serie a serie con el local (no se pierde ninguna serie hecha). */
     suspend fun applyRemoteActive(remote: Workout) = activeMutex.withLock {
         val local = currentActive()
-        if (local == null || remote.updatedAtEpochMs > local.updatedAtEpochMs) write(remote)
+        val merged = if (local == null) remote else WorkoutMerge.merge(local, remote)
+        if (merged != local) write(merged)
     }
 
     /** El reloj terminó o descartó el entreno: lo quitamos sin guardarlo (el terminado llega aparte). */
@@ -112,19 +115,28 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     // --- Historial ---------------------------------------------------------------------------
 
     suspend fun saveWorkout(workout: Workout) =
-        dao.upsertWorkout(WorkoutEntity(workout.id, workout.startedAtEpochMs, json.encodeToString(Workout.serializer(), workout)))
+        dao.upsertWorkout(WorkoutEntity(workout.id, workout.startedAtEpochMs, Persistence.encodeWorkout(workout)))
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
     suspend fun historyOnce(): List<Workout> =
-        dao.workoutsOnce().mapNotNull { runCatching { json.decodeFromString(Workout.serializer(), it.json) }.getOrNull() }
+        dao.workoutsOnce().mapNotNull { runCatching { Persistence.decodeWorkout(it.json) }.getOrNull() }
 
     // --- Rutinas -----------------------------------------------------------------------------
 
     suspend fun saveRoutine(routine: Routine) {
         val position = if (routines.value.any { it.id == routine.id }) routine.position else (routines.value.maxOfOrNull { it.position } ?: -1) + 1
         val r = routine.copy(position = position)
-        dao.upsertRoutine(RoutineEntity(r.id, r.position, json.encodeToString(Routine.serializer(), r)))
+        dao.upsertRoutine(RoutineEntity(r.id, r.position, Persistence.encodeRoutine(r)))
+    }
+
+    /** Guarda varias rutinas nuevas al final de la lista (p. ej. al añadir un programa). */
+    suspend fun addRoutines(list: List<Routine>) {
+        var next = (routinesOnce().maxOfOrNull { it.position } ?: -1) + 1
+        list.forEach { r ->
+            val placed = r.copy(position = next++)
+            dao.upsertRoutine(RoutineEntity(placed.id, placed.position, Persistence.encodeRoutine(placed)))
+        }
     }
 
     suspend fun deleteRoutine(id: String) = dao.deleteRoutine(id)
@@ -132,7 +144,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     suspend fun routine(id: String): Routine? = routinesOnce().firstOrNull { it.id == id }
 
     suspend fun routinesOnce(): List<Routine> =
-        dao.routinesOnce().mapNotNull { runCatching { json.decodeFromString(Routine.serializer(), it.json) }.getOrNull() }
+        dao.routinesOnce().mapNotNull { runCatching { Persistence.decodeRoutine(it.json) }.getOrNull() }
 
     // --- Ejercicios personalizados ----------------------------------------------------------
 

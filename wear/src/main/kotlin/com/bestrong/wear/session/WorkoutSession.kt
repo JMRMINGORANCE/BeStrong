@@ -10,6 +10,7 @@ import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
+import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.session.WorkoutEditor
@@ -185,10 +186,11 @@ class WorkoutSession @Inject constructor(
 
     // --- Sincronización en vivo con el móvil ------------------------------------------------
 
-    /** Llega el entreno desde el móvil: lo adoptamos si es nuevo o más reciente. */
-    fun applyRemote(remote: Workout) {
+    /** Llega el entreno desde el móvil: se fusiona serie a serie con el local (no se pierde ninguna serie hecha). */
+    fun applyRemote(incoming: Workout) {
         val local = _workout.value
-        if (local != null && remote.updatedAtEpochMs <= local.updatedAtEpochMs) return
+        val remote = if (local == null) incoming else WorkoutMerge.merge(local, incoming)
+        if (remote == local) return
         val isNew = local == null || local.id != remote.id
         _workout.value = remote
         store.activeWorkout = remote

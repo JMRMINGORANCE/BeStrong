@@ -5,6 +5,7 @@ import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.bestrong.core.io.Persistence
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.SharedSettings
@@ -80,9 +81,9 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         set(value) = prefs.edit { putBoolean(KEY_REP_COUNTER, value) }
 
     var activeWorkout: Workout?
-        get() = prefs.getString(KEY_ACTIVE, null)?.let { runCatching { SyncContract.decodeWorkout(it.encodeToByteArray()) }.getOrNull() }
+        get() = prefs.getString(KEY_ACTIVE, null)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
         set(value) = prefs.edit {
-            if (value == null) remove(KEY_ACTIVE) else putString(KEY_ACTIVE, SyncContract.encodeWorkout(value).decodeToString())
+            if (value == null) remove(KEY_ACTIVE) else putString(KEY_ACTIVE, Persistence.encodeWorkout(value))
         }
 
     private companion object {

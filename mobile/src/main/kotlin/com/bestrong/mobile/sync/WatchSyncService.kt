@@ -1,5 +1,8 @@
 package com.bestrong.mobile.sync
 
+import com.bestrong.mobile.notify.Notifier
+import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.core.stats.WorkoutStats
 import android.util.Log
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.mobile.WatchMetricsStore
@@ -31,6 +34,7 @@ class WatchSyncService : WearableListenerService() {
     @Inject lateinit var repository: BeStrongRepository
     @Inject lateinit var actions: WorkoutActions
     @Inject lateinit var watchMetrics: WatchMetricsStore
+    @Inject lateinit var settings: SettingsStore
     @Inject @ApplicationScope lateinit var appScope: CoroutineScope
 
     override fun onDataChanged(events: DataEventBuffer) {
@@ -43,8 +47,13 @@ class WatchSyncService : WearableListenerService() {
                     path.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
                         val workout = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
+                        val isNew = repository.historyOnce().none { it.id == workout.id }
                         repository.saveWorkout(workout)
                         repository.clearRemoteActive(workout.id)
+                        if (isNew) {
+                            val records = WorkoutStats.newRecordsIn(workout, repository.historyOnce())
+                            Notifier.records(this@WatchSyncService, workout, records, settings.settings.value.unit)
+                        }
                         Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.name}")
                         runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
                         appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }

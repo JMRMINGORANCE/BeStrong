@@ -1,5 +1,12 @@
 package com.bestrong.mobile.ui.home
 
+import com.bestrong.mobile.ui.components.uiLanguage
+import com.bestrong.core.library.TrainingProgram
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material3.TextButton
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.R
 import androidx.compose.ui.res.stringResource
@@ -66,7 +73,11 @@ fun HomeScreen(
     val active by vm.active.collectAsStateWithLifecycle()
     val history by vm.history.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
+    var showPrograms by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
+    if (showPrograms) {
+        ProgramsDialog(vm.programs, onPick = { vm.addProgram(it); showPrograms = false }, onDismiss = { showPrograms = false })
+    }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("BeStrong", fontWeight = FontWeight.Black) }) },
@@ -114,15 +125,19 @@ fun HomeScreen(
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     SectionHeader(stringResource(R.string.home_my_routines, routines.size), Modifier.weight(1f))
+                    TextButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_programs)) }
                     OutlinedButton(onClick = { onEditRoutine(null) }) { Text(stringResource(R.string.home_new_routine)) }
                 }
             }
             if (routines.isEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text(
-                        stringResource(R.string.home_no_routines),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            stringResource(R.string.home_no_routines),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        FilledTonalButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_browse_programs)) }
+                    }
                 }
             }
             items(routines, key = { it.id }) { routine ->
@@ -185,4 +200,32 @@ private fun RoutineCard(
             }
         }
     }
+}
+
+/** Programas predefinidos: al elegir uno se crean todas sus rutinas. */
+@Composable
+private fun ProgramsDialog(programs: List<TrainingProgram>, onPick: (TrainingProgram) -> Unit, onDismiss: () -> Unit) {
+    val lang = uiLanguage()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.programs_title)) },
+        text = {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(programs, key = { it.id }) { p ->
+                    Card(onClick = { onPick(p) }, modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text(p.name(lang), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                stringResource(R.string.program_meta, p.daysPerWeek, p.routines.size),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(p.description(lang), style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
 }

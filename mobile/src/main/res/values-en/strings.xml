@@ -2,10 +2,12 @@
 <resources>
     <string name="action_back">Back</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_choose_folder">Choose folder</string>
     <string name="action_close">Close</string>
     <string name="action_continue">Continue</string>
     <string name="action_create">Create</string>
     <string name="action_delete">Delete</string>
+    <string name="action_disable">Turn off</string>
     <string name="action_discard">Discard</string>
     <string name="action_done">Done</string>
     <string name="action_duplicate">Duplicate</string>
@@ -26,6 +28,11 @@
     <string name="all">All</string>
     <string name="and_n_more">and %1$d more…</string>
     <string name="app_name">BeStrong</string>
+    <string name="auto_backup">Weekly backup</string>
+    <string name="auto_backup_last">Last backup: %1$s</string>
+    <string name="auto_backup_off">Pick a folder (e.g. Google Drive) to save CSV + JSON every week.</string>
+    <string name="auto_backup_on">On. First backup in progress.</string>
+    <string name="backup_started">Backing up…</string>
     <string name="best_1rm">Best estimated 1RMs</string>
     <string name="body_weight_unit">Body weight (%1$s)</string>
     <string name="bpm_value">%1$d bpm</string>
@@ -76,6 +83,7 @@
     <string name="history_empty_title">No workouts yet</string>
     <string name="history_pick_body">You\'ll see every set, record and stat.</string>
     <string name="history_pick_title">Pick a workout</string>
+    <string name="home_browse_programs">Browse ready-made programs</string>
     <string name="home_empty_workout">Empty workout</string>
     <string name="home_in_progress">Workout in progress</string>
     <string name="home_in_progress_detail">%1$s · %2$d/%3$d sets</string>
@@ -83,6 +91,7 @@
     <string name="home_new_routine">+ New routine</string>
     <string name="home_no_routines">Create your first routine (e.g. Push / Pull / Legs) or save a workout as a routine when you finish it.</string>
     <string name="home_on_watch">On watch</string>
+    <string name="home_programs">Programs</string>
     <string name="home_start">Start</string>
     <string name="import_done">%1$s: %2$d workouts imported</string>
     <string name="import_error">Import failed: %1$s</string>
@@ -111,6 +120,7 @@
     <string name="more_options">More options</string>
     <string name="msg_no_watch">No connected watch found</string>
     <string name="msg_opening_on_watch">Opening BeStrong on your Galaxy Watch</string>
+    <string name="msg_program_added">%1$s: %2$d routines added</string>
     <string name="msg_routine_missing">That routine no longer exists</string>
     <string name="msg_workout_already_active">You already have a workout in progress</string>
     <string name="muscle_abs">Abs</string>
@@ -123,6 +133,8 @@
     <string name="muscle_full_body">Full body</string>
     <string name="muscle_glutes">Glutes</string>
     <string name="muscle_hamstrings">Hamstrings</string>
+    <string name="muscle_map_body">Effective sets per muscle. Recommended: %1$d–%2$d per week.</string>
+    <string name="muscle_map_title">This week\'s muscle map</string>
     <string name="muscle_quadriceps">Quads</string>
     <string name="muscle_shoulders">Shoulders</string>
     <string name="muscle_traps">Traps</string>
@@ -131,6 +143,7 @@
     <string name="n_records">🏆 %1$d records</string>
     <string name="n_reps">%1$d reps</string>
     <string name="n_sets">%1$s sets</string>
+    <string name="n_sets_value">%1$s sets</string>
     <string name="n_times">%1$d times</string>
     <string name="name">Name</string>
     <string name="nav_exercises">Exercises</string>
@@ -148,7 +161,13 @@
     <string name="notes">Notes</string>
     <string name="notif_channel">Workout in progress</string>
     <string name="notif_channel_desc">Workout stopwatch and rest timer</string>
+    <string name="notif_channel_records">Personal records</string>
+    <string name="notif_channel_reminders">Workout reminders</string>
     <string name="notif_progress">%1$d/%2$d sets completed</string>
+    <string name="notif_records_title">🏆 %1$d new records!</string>
+    <string name="notif_reminder_routine">Next routine: %1$s</string>
+    <string name="notif_reminder_text">Open BeStrong and start your workout.</string>
+    <string name="notif_reminder_title">Time to train today 💪</string>
     <string name="notif_rest_text">Next set when the countdown ends</string>
     <string name="notif_rest_title">Rest · %1$s</string>
     <string name="one_rm_value">1RM %1$s</string>
@@ -181,6 +200,8 @@
     <string name="prog_deload">%1$d sessions without progress: deload to 90%%</string>
     <string name="prog_increase">You completed every set: add weight</string>
     <string name="prog_repeat">High RPE: repeat and consolidate</string>
+    <string name="program_meta">%1$d days/week · %2$d routines</string>
+    <string name="programs_title">Training programs</string>
     <string name="progression_setting">Automatic progressive overload</string>
     <string name="progression_setting_body">Suggests weight and reps from your last session and proposes deloads when you stall</string>
     <string name="record_1rm">Best estimated 1RM</string>
@@ -188,6 +209,10 @@
     <string name="record_line">%1$s: %2$s %3$s</string>
     <string name="record_most_reps">Most reps</string>
     <string name="record_set_volume">Best set volume</string>
+    <string name="reminders">Reminders</string>
+    <string name="reminders_body">We\'ll remind you on the chosen days if you haven\'t trained yet.</string>
+    <string name="reminders_off">Off</string>
+    <string name="reminders_summary">%1$s at %2$s</string>
     <string name="remove_exercise">Remove exercise</string>
     <string name="remove_named">Remove %1$s</string>
     <string name="remove_set">Remove set</string>
@@ -239,6 +264,9 @@
     <string name="sets_per_muscle">Sets per muscle (30 days)</string>
     <string name="sets_times_exercise">%1$d × %2$s</string>
     <string name="settings">Settings</string>
+    <string name="share_more_exercises">+ %1$d more exercises</string>
+    <string name="share_text">%1$s · trained with BeStrong 💪</string>
+    <string name="share_workout">Share image</string>
     <string name="stat_avg_hr">Avg HR</string>
     <string name="stat_calories">Calories</string>
     <string name="stat_duration">Duration</string>
@@ -263,6 +291,10 @@
     <string name="track_time">Time</string>
     <string name="track_weight_reps">Weight &amp; reps</string>
     <string name="vibrate_rest">Vibrate when rest ends</string>
+    <string name="volume_high">High</string>
+    <string name="volume_low">Low</string>
+    <string name="volume_none">None</string>
+    <string name="volume_optimal">Optimal</string>
     <string name="watch_metrics">Galaxy Watch · ♥ %1$s bpm · avg %2$s · %3$s kcal</string>
     <string name="watch_sync">Sync with Galaxy Watch</string>
     <string name="watch_sync_body">Send routines and history to the watch now</string>

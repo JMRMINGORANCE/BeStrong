@@ -1,5 +1,11 @@
 package com.bestrong.mobile
 
+import com.bestrong.mobile.share.WorkoutShareCard
+import com.bestrong.core.util.WeightUnit
+import com.bestrong.core.model.WorkoutSet
+import com.bestrong.core.model.WorkoutExercise
+import com.bestrong.core.model.Workout
+import com.bestrong.core.library.ExerciseLibrary
 import android.os.Looper
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -124,6 +130,43 @@ class UiFlowTest {
         compose.onNodeWithText("Sentadilla").performClick()
         settle()
         shot("exercises_unfolded")
+    }
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
+    fun programs_folded() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNodeWithText("Ver programas predefinidos").performClick()
+        settle()
+        shot("programs_folded")
+        compose.onNodeWithText("Full Body 3 días").performClick()
+        settle(25)
+        assertNotNull(compose.onNodeWithText("Full Body 3 días · A").fetchSemanticsNode())
+        shot("programs_added_folded")
+    }
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
+    fun share_card() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        val bench = ExerciseLibrary.byId("bench_press")!!
+        val squat = ExerciseLibrary.byId("squat")!!
+        val start = 1_760_000_000_000L
+        val w = Workout(
+            name = "Empuje",
+            startedAtEpochMs = start,
+            finishedAtEpochMs = start + 62 * 60_000,
+            exercises = listOf(
+                WorkoutExercise(exercise = bench, sets = List(4) { WorkoutSet(weightKg = 80.0, reps = 8, completed = true) }),
+                WorkoutExercise(exercise = squat, sets = List(3) { WorkoutSet(weightKg = 100.0, reps = 5, completed = true) }),
+            ),
+            avgHeartRate = 128,
+            calories = 410,
+        )
+        val bmp = WorkoutShareCard.render(compose.activity, w, emptyList(), WeightUnit.KG)
+        bmp.captureRoboImage("build/outputs/roborazzi/share_card.png")
     }
 
     @Test

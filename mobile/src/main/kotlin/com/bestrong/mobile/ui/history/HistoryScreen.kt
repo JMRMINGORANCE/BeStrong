@@ -1,5 +1,8 @@
 package com.bestrong.mobile.ui.history
 
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material.icons.filled.Share
+import com.bestrong.mobile.share.WorkoutShareCard
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.R
@@ -130,12 +133,14 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     val unit = LocalWeightUnit.current
     var menu by remember { mutableStateOf(false) }
     val records = remember(w.id) { vm.recordsIn(w) }
+    val context = LocalContext.current
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(w.name) },
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
                 Box {
+                    IconButton(onClick = { WorkoutShareCard.share(context, w, records, unit) }) { Icon(Icons.Default.Share, stringResource(R.string.share_workout)) }
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.repeat_workout)) }, onClick = { menu = false; vm.repeat(w, onWorkoutStarted) })

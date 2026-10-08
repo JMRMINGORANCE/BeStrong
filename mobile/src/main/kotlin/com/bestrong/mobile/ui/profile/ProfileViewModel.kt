@@ -1,5 +1,7 @@
 package com.bestrong.mobile.ui.profile
 
+import com.bestrong.mobile.backup.AutoBackupWorker
+import android.content.Intent
 import com.bestrong.mobile.R
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -41,6 +43,8 @@ data class ProfileStats(
     val weeks: List<WeekBucket> = emptyList(),
     val muscles30d: Map<MuscleGroup, Double> = emptyMap(),
     val topOneRepMax: List<PersonalRecord> = emptyList(),
+    /** Series de esta semana por músculo (para el mapa con el objetivo de 10–20). */
+    val weeklyMuscles: Map<MuscleGroup, Double> = emptyMap(),
 )
 
 @HiltViewModel
@@ -66,6 +70,7 @@ class ProfileViewModel @Inject constructor(
                 .mapNotNull { it[RecordType.BEST_ONE_REP_MAX] }
                 .sortedByDescending { it.value }
                 .take(8),
+            weeklyMuscles = WorkoutStats.weeklySetsPerMuscle(history, today, zone),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
@@ -121,6 +126,24 @@ class ProfileViewModel @Inject constructor(
                 { context.getString(R.string.import_error, it.message.orEmpty()) },
             ),
         )
+    }
+
+    /** Carpeta elegida para la copia semanal: guardamos el permiso y hacemos una copia ya. */
+    fun setBackupFolder(uri: Uri?) {
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            }
+        } else {
+            settings.value.backupFolderUri?.let { old ->
+                runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(old), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
+            }
+        }
+        settingsStore.update { it.copy(backupFolderUri = uri?.toString()) }
+        if (uri != null) {
+            AutoBackupWorker.runNow(context)
+            _messages.tryEmit(context.getString(R.string.backup_started))
+        }
     }
 
     fun syncWatchNow() = viewModelScope.launch {

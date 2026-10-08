@@ -1,5 +1,7 @@
 package com.bestrong.mobile.ui.workout
 
+import androidx.compose.material.icons.filled.Share
+import com.bestrong.mobile.share.WorkoutShareCard
 import com.bestrong.mobile.ui.components.uiLanguage
 import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.label
@@ -121,8 +123,11 @@ fun ActiveWorkoutScreen(
     KeepScreenOn(settings.keepScreenOn)
     LaunchedEffect(Unit) { vm.focusExercise.collect { listState.animateScrollToItem(it) } }
 
+    val context = LocalContext.current
+    val unitForShare = LocalWeightUnit.current
     summary?.let { s ->
         WorkoutSummaryDialog(
+            onShare = { WorkoutShareCard.share(context, s.workout, s.records, unitForShare) },
             summary = s,
             onSaveRoutine = { vm.saveSummaryAsRoutine(); vm.dismissSummary(); onFinished() },
             onDone = { vm.dismissSummary(); onFinished() },
@@ -497,7 +502,7 @@ private fun ExerciseCard(
 }
 
 @Composable
-fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, onDone: () -> Unit) {
+fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, onDone: () -> Unit, onShare: () -> Unit = {}) {
     val w = summary.workout
     val unit = LocalWeightUnit.current
     AlertDialog(
@@ -517,6 +522,10 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
                     summary.records.forEach { pr ->
                         Text(stringResource(R.string.record_line, pr.exerciseName, pr.type.label(), unit.format(pr.value)), style = MaterialTheme.typography.bodySmall)
                     }
+                }
+                OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Default.Share, null)
+                    Text(stringResource(R.string.share_workout), Modifier.padding(start = 8.dp))
                 }
             }
         },

@@ -1,5 +1,11 @@
 package com.bestrong.mobile.ui.profile
 
+import com.bestrong.mobile.ui.components.formatDate
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import android.os.Build
+import android.Manifest
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.R
 import androidx.compose.ui.res.stringResource
@@ -75,6 +81,20 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     val snackbar = remember { SnackbarHostState() }
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri -> uri?.let(vm::exportCsv) }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::importCsv) }
+    val folderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let(vm::setBackupFolder) }
+    val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    var showReminders by rememberSaveable { mutableStateOf(false) }
+    if (showReminders) {
+        RemindersDialog(
+            settings = settings,
+            onSave = { days, h, m ->
+                if (days.isNotEmpty() && Build.VERSION.SDK_INT >= 33) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                vm.updateSettings { it.copy(reminderDays = days, reminderHour = h, reminderMinute = m) }
+                showReminders = false
+            },
+            onDismiss = { showReminders = false },
+        )
+    }
     LaunchedEffect(Unit) { vm.refreshHealthConnect() }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
 
@@ -139,6 +159,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                     }
                 }
             }
+            item { WeeklyMuscleMap(stats.weeklyMuscles) }
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {
@@ -216,6 +237,30 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                         else vm.updateSettings { it.copy(healthConnectExport = on) }
                                     },
                                 )
+                            },
+                        )
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.reminders)) },
+                            supportingContent = { Text(reminderSummary(settings)) },
+                            modifier = Modifier.clickable { showReminders = true },
+                        )
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.auto_backup)) },
+                            supportingContent = {
+                                Text(
+                                    when {
+                                        settings.backupFolderUri == null -> stringResource(R.string.auto_backup_off)
+                                        settings.lastBackupEpochMs > 0 -> stringResource(R.string.auto_backup_last, formatDate(settings.lastBackupEpochMs))
+                                        else -> stringResource(R.string.auto_backup_on)
+                                    },
+                                )
+                            },
+                            trailingContent = {
+                                if (settings.backupFolderUri == null) {
+                                    TextButton(onClick = { folderLauncher.launch(null) }) { Text(stringResource(R.string.action_choose_folder)) }
+                                } else {
+                                    TextButton(onClick = { vm.setBackupFolder(null) }) { Text(stringResource(R.string.action_disable)) }
+                                }
                             },
                         )
                         ListItem(
