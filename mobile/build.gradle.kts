@@ -62,6 +62,7 @@ ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":designsystem"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)

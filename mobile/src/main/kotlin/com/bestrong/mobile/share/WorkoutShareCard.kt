@@ -20,6 +20,7 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatDuration
+import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
@@ -42,7 +43,7 @@ object WorkoutShareCard {
         val c = Canvas(bmp)
         val bg = Paint().apply { shader = LinearGradient(0f, 0f, W.toFloat(), H.toFloat(), Color.rgb(18, 18, 24), Color.rgb(40, 20, 12), Shader.TileMode.CLAMP) }
         c.drawRect(0f, 0f, W.toFloat(), H.toFloat(), bg)
-        val accent = Color.rgb(255, 112, 67)
+        val accent = BeStrongPalette.OrangeArgb
 
         fun text(size: Float, color: Int = Color.WHITE, bold: Boolean = false) = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             textSize = size

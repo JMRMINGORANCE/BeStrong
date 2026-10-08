@@ -58,6 +58,7 @@ android {
 
 dependencies {
     implementation(project(":core"))
+    implementation(project(":designsystem"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.core.ktx)

@@ -90,13 +90,23 @@ def main():
     src = open(NAMES_KT, encoding="utf-8").read()
     # Solo el mapa de nombres (el archivo también tiene las instrucciones en inglés)
     block = src.split("englishNames", 1)[1].split("\n)", 1)[0]
+    # Licencias de wger por id (p. ej. 1 = CC-BY-SA 4.0)
+    licenses = {}
+    page = fetch("https://wger.de/api/v2/license/?limit=100")
+    for lic in page["results"]:
+        licenses[lic["id"]] = {"short": lic.get("short_name") or lic.get("full_name"), "url": lic.get("url") or ""}
+    print("Licencias:", {k: v["short"] for k, v in licenses.items()})
     ours = dict(re.findall(r'"([a-z0-9_]+)" to "([^"]+)"', block))
     candidates = {}  # nombre normalizado -> (nombre, imagen)
     offset = 0
     while True:
         page = fetch(API.format(offset))
         for ex in page["results"]:
-            images = [i for i in ex.get("images", []) if i.get("image")]
+            # Solo imágenes con licencia abierta conocida (Creative Commons o dominio público)
+            images = [
+                i for i in ex.get("images", [])
+                if i.get("image") and re.search(r"CC|Creative|Public", str(licenses.get(i.get("license"), {}).get("short", "")), re.I)
+            ]
             if not images:
                 continue
             main_img = next((i for i in images if i.get("is_main")), images[0])
@@ -128,8 +138,10 @@ def main():
             "wgerUrl": f"https://wger.de/exercise/{wid}/view/",
             "author": img.get("license_author") or "",
             "authorUrl": img.get("license_author_url") or "",
-            "license": img.get("license_title") or "CC-BY-SA 4.0",
-            "licenseUrl": img.get("license_object_url") or "https://creativecommons.org/licenses/by-sa/4.0/",
+            "title": img.get("license_title") or "",
+            "license": licenses[img["license"]]["short"],
+            "licenseUrl": licenses[img["license"]]["url"],
+            "sourceUrl": img.get("license_object_url") or "",
         }
     import os
     os.makedirs(os.path.dirname(OUT), exist_ok=True)

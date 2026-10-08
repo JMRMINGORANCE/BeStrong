@@ -42,6 +42,7 @@ import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.stats.MuscleTargets
 import com.bestrong.core.stats.VolumeStatus
 import com.bestrong.core.util.formatWeight
+import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.R
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.ui.components.SectionHeader
@@ -54,9 +55,9 @@ private val MAP_MUSCLES = MuscleGroup.entries - MuscleGroup.FULL_BODY - MuscleGr
 @Composable
 private fun VolumeStatus.color(): Color = when (this) {
     VolumeStatus.NONE -> MaterialTheme.colorScheme.outlineVariant
-    VolumeStatus.LOW -> Color(0xFFF5A623)
-    VolumeStatus.OPTIMAL -> Color(0xFF34A853)
-    VolumeStatus.HIGH -> Color(0xFFE5484D)
+    VolumeStatus.LOW -> BeStrongPalette.VolumeLow
+    VolumeStatus.OPTIMAL -> BeStrongPalette.VolumeOptimal
+    VolumeStatus.HIGH -> BeStrongPalette.VolumeHigh
 }
 
 @Composable

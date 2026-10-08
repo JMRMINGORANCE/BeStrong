@@ -6,10 +6,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material3.ColorScheme
 import androidx.wear.compose.material3.MaterialTheme
 import com.bestrong.core.util.WeightUnit
+import com.bestrong.designsystem.BeStrongPalette
 
-val Brand = Color(0xFFFF6B1A)
-val Done = Color(0xFF7DD99A)
-val HeartRed = Color(0xFFFF5252)
+val Brand = BeStrongPalette.Orange
+val Done = BeStrongPalette.Success
+val HeartRed = BeStrongPalette.Heart
 
 /** Unidad de peso elegida en el móvil. */
 val LocalWeightUnit = staticCompositionLocalOf { WeightUnit.KG }
@@ -17,10 +18,10 @@ val LocalWeightUnit = staticCompositionLocalOf { WeightUnit.KG }
 private val BeStrongColors = ColorScheme(
     primary = Brand,
     onPrimary = Color.Black,
-    primaryContainer = Color(0xFF7A3000),
-    onPrimaryContainer = Color(0xFFFFDBCA),
-    secondary = Color(0xFFFFB68F),
-    onSecondary = Color(0xFF552000),
+    primaryContainer = BeStrongPalette.OrangeContainerDark,
+    onPrimaryContainer = BeStrongPalette.OrangeContainerLight,
+    secondary = BeStrongPalette.OrangeLight,
+    onSecondary = BeStrongPalette.OnOrangeLight,
     tertiary = Done,
     onTertiary = Color.Black,
 )
