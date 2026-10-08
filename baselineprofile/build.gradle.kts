@@ -8,18 +8,17 @@ plugins {
 
 android {
     namespace = "com.bestrong.baselineprofile"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 36
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
 
     targetProjectPath = ":mobile"
 
@@ -43,3 +42,5 @@ dependencies {
     implementation(libs.uiautomator)
     implementation(libs.benchmark.macro.junit4)
 }
+
+kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }

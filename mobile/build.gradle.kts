@@ -17,13 +17,13 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "com.bestrong.mobile"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         // Debe coincidir con el applicationId del módulo wear para la Data Layer
         applicationId = "com.bestrong"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.2.0"
     }
@@ -55,7 +55,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
 }
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
@@ -108,3 +107,5 @@ dependencies {
     testImplementation(libs.androidx.window.testing)
     testImplementation(libs.androidx.test.ext.junit)
 }
+
+kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }

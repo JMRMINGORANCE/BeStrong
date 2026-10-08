@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Android 16: notificación del entreno como Live Update (Now Bar en Samsung) -->
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <uses-permission android:name="android.health.permission.WRITE_EXERCISE" />
     <uses-permission android:name="android.health.permission.WRITE_TOTAL_CALORIES_BURNED" />
 

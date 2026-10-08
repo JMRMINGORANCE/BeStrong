@@ -16,13 +16,13 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "com.bestrong.wear"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         // Mismo applicationId que el móvil: requisito de la Wearable Data Layer
         applicationId = "com.bestrong"
         minSdk = 30 // Wear OS 3+ (Galaxy Watch Ultra usa Wear OS 5)
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.2.0"
     }
@@ -54,7 +54,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
 }
 
 dependencies {
@@ -95,3 +94,5 @@ dependencies {
     testImplementation(libs.compose.ui.test.junit4)
     testImplementation(libs.androidx.test.ext.junit)
 }
+
+kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }

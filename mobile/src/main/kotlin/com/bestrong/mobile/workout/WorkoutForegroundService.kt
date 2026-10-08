@@ -109,6 +109,9 @@ class WorkoutForegroundService : LifecycleService() {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(open)
             .setUsesChronometer(true)
+            // Android 16 «Live Updates»: chip en la barra de estado, pantalla de bloqueo y Now Bar de One UI 8
+            .setRequestPromotedOngoing(true)
+        workoutProgress(w)?.let(b::setStyle)
         if (rest != null) {
             b.setContentTitle(getString(R.string.notif_rest_title, w.name))
                 .setContentText(getString(R.string.notif_rest_text))
@@ -121,8 +124,20 @@ class WorkoutForegroundService : LifecycleService() {
                 .setContentText(getString(R.string.notif_progress, w.completedSetCount, w.totalSetCount))
                 .setWhen(w.startedAtEpochMs)
                 .setChronometerCountDown(false)
+                // Texto corto del chip (en descanso se muestra la cuenta atrás)
+                .setShortCriticalText("${w.completedSetCount}/${w.totalSetCount}")
         }
         return b.build()
+    }
+
+    /** Barra de progreso por segmentos: un segmento por ejercicio, avanza con cada serie hecha. */
+    private fun workoutProgress(w: Workout): NotificationCompat.ProgressStyle? {
+        val segments = w.exercises.filter { it.sets.isNotEmpty() }.map { NotificationCompat.ProgressStyle.Segment(it.sets.size) }
+        if (segments.isEmpty()) return null
+        return NotificationCompat.ProgressStyle()
+            .setProgressSegments(segments)
+            .setProgress(w.completedSetCount)
+            .setStyledByProgress(true)
     }
 
     companion object {
