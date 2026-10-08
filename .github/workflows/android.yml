@@ -48,7 +48,9 @@ jobs:
       - name: Publicar capturas en la rama "capturas"
         if: always() && github.ref == 'refs/heads/main'
         run: |
-          if [ -d mobile/build/outputs/roborazzi ] && [ -n "$(ls -A mobile/build/outputs/roborazzi)" ]; then
+          mkdir -p mobile/build/outputs/roborazzi/test-results
+          cp mobile/build/test-results/testDebugUnitTest/*.xml mobile/build/outputs/roborazzi/test-results/ 2>/dev/null || true
+          if [ -n "$(ls -A mobile/build/outputs/roborazzi)" ]; then
             cd mobile/build/outputs/roborazzi
             git init -q -b capturas
             git add -A

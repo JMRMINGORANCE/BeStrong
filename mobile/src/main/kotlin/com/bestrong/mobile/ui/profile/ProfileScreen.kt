@@ -15,6 +15,7 @@ import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.PrivacyPolicyActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -83,11 +84,22 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatTile("Entrenamientos", "${stats.totalWorkouts}", Modifier.weight(1f))
-                    StatTile("Racha semanal", "🔥 ${stats.weeklyStreak}", Modifier.weight(1f))
-                    StatTile("Volumen total", unit.formatVolume(stats.totalVolume), Modifier.weight(1f))
-                    StatTile("Tiempo", formatDuration(stats.totalDurationSec), Modifier.weight(1f))
+                // 4 en fila en el Fold desplegado; 2 × 2 en la pantalla exterior
+                BoxWithConstraints {
+                    val tiles: List<Pair<String, String>> = listOf(
+                        "Entrenamientos" to "${stats.totalWorkouts}",
+                        "Racha semanal" to "🔥 ${stats.weeklyStreak}",
+                        "Volumen total" to unit.formatVolume(stats.totalVolume),
+                        "Tiempo" to formatDuration(stats.totalDurationSec),
+                    )
+                    val perRow = if (maxWidth < 600.dp) 2 else 4
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        tiles.chunked(perRow).forEach { row ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                row.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
+                            }
+                        }
+                    }
                 }
             }
             item {

@@ -63,6 +63,10 @@ fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: D
 @Composable
 fun BarChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: Dp = 160.dp) {
     if (points.isEmpty()) return
+    if (points.all { it.value == 0.0 }) {
+        Text("Aún no hay entrenamientos en estas semanas", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        return
+    }
     val color = MaterialTheme.colorScheme.primary
     val empty = MaterialTheme.colorScheme.surfaceVariant
     val max = points.maxOf { it.value }.takeIf { it > 0 } ?: 1.0
