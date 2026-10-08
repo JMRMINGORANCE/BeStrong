@@ -19,7 +19,9 @@ import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.share.WorkoutShareCard
+import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.captureScreenRoboImage
 import org.junit.Assert.assertNotNull
 import org.junit.Rule
 import org.junit.Test
@@ -38,6 +40,7 @@ import org.robolectric.annotation.GraphicsMode
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [34])
+@OptIn(ExperimentalRoborazziApi::class)
 class UiFlowTest {
     private val compose = createAndroidComposeRule<MainActivity>()
     private val publisher = WindowLayoutInfoPublisherRule()
@@ -139,7 +142,8 @@ class UiFlowTest {
         settle()
         compose.onNodeWithText("Ver programas predefinidos").performClick()
         settle()
-        shot("programs_folded")
+        // Con un diálogo hay dos raíces: se captura la pantalla entera
+        captureScreenRoboImage("build/outputs/roborazzi/programs_folded.png")
         compose.onNodeWithText("Full Body 3 días").performClick()
         settle(25)
         assertNotNull(compose.onNodeWithText("Full Body 3 días · A").fetchSemanticsNode())

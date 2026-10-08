@@ -80,9 +80,12 @@ object WorkoutShareCard {
         y += 240f
 
         // Ejercicios con su mejor serie
-        val nameP = text(40f, bold = true)
-        val detailP = text(36f, Color.LTGRAY)
         val done = w.exercises.filter { e -> e.sets.any { it.completed } }
+        // Con pocos ejercicios, filas más grandes para llenar la tarjeta
+        val roomy = done.size <= 4
+        val rowHeight = if (roomy) 96f else 64f
+        val nameP = text(if (roomy) 48f else 40f, bold = true)
+        val detailP = text(if (roomy) 42f else 36f, Color.LTGRAY)
         done.take(MAX_EXERCISES).forEach { e ->
             val sets = e.sets.filter { it.completed && it.type != SetType.WARMUP }.ifEmpty { e.sets.filter { it.completed } }
             val best = sets.maxByOrNull { it.estimatedOneRepMax.takeIf { v -> v > 0 } ?: (it.reps + it.durationSec).toDouble() }
@@ -95,7 +98,7 @@ object WorkoutShareCard {
             val dw = detailP.measureText(detail)
             c.drawText(fit(e.exercise.displayName(context), nameP, contentWidth - dw - 32f), PAD, y, nameP)
             c.drawText(detail, W - PAD - dw, y, detailP)
-            y += 64f
+            y += rowHeight
         }
         if (done.size > MAX_EXERCISES) {
             c.drawText(context.getString(R.string.share_more_exercises, done.size - MAX_EXERCISES), PAD, y, detailP)

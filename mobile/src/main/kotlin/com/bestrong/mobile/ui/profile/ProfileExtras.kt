@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.stats.MuscleTargets
@@ -92,15 +93,15 @@ fun WeeklyMuscleMap(weekly: Map<MuscleGroup, Double>) {
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = "$name: $setsText, $statusText" },
                 ) {
-                    Text(name, Modifier.weight(0.34f), style = MaterialTheme.typography.bodyMedium)
+                    Text(name, Modifier.weight(0.3f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     // Barra hasta 25 series con marcas en 10 y 20
-                    Box(Modifier.weight(0.42f).height(12.dp).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                    Box(Modifier.weight(0.36f).height(12.dp).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))) {
                         val fraction = (sets / 25.0).coerceIn(0.0, 1.0).toFloat()
                         if (fraction > 0f) Box(Modifier.fillMaxWidth(fraction).height(12.dp).background(status.color()))
                     }
-                    Text(formatWeight(sets), Modifier.weight(0.1f).padding(start = 8.dp), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+                    Text(formatWeight(sets), Modifier.weight(0.1f).padding(start = 8.dp), maxLines = 1, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                     Box(Modifier.size(10.dp).clip(CircleShape).background(status.color()))
-                    Text(statusText, Modifier.weight(0.14f).padding(start = 4.dp), style = MaterialTheme.typography.labelSmall)
+                    Text(statusText, Modifier.weight(0.24f).padding(start = 4.dp), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
