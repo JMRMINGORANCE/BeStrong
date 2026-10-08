@@ -36,6 +36,21 @@ data class ExerciseProgressPoint(
 
 data class WeekBucket(val weekStart: LocalDate, val workouts: Int, val volume: Double, val durationSec: Long)
 
+enum class VolumeStatus { NONE, LOW, OPTIMAL, HIGH }
+
+/** Series semanales recomendadas por músculo (rango habitual en hipertrofia: 10–20). */
+object MuscleTargets {
+    const val MIN_WEEKLY_SETS = 10.0
+    const val MAX_WEEKLY_SETS = 20.0
+
+    fun status(sets: Double): VolumeStatus = when {
+        sets <= 0.0 -> VolumeStatus.NONE
+        sets < MIN_WEEKLY_SETS -> VolumeStatus.LOW
+        sets <= MAX_WEEKLY_SETS -> VolumeStatus.OPTIMAL
+        else -> VolumeStatus.HIGH
+    }
+}
+
 /** Cálculos sobre el historial. Todas las funciones son puras: [history] = entrenamientos terminados. */
 object WorkoutStats {
 
@@ -148,6 +163,17 @@ object WorkoutStats {
         history.filter { it.isFinished }
             .map { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() }
             .toSet()
+
+    /** Series por músculo de la semana (lunes a domingo) que contiene [day]. */
+    fun weeklySetsPerMuscle(history: List<Workout>, day: LocalDate, zone: ZoneId): Map<MuscleGroup, Double> {
+        val start = day.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val end = start.plusDays(7)
+        val inWeek = history.filter {
+            val d = Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate()
+            !d.isBefore(start) && d.isBefore(end)
+        }
+        return setsPerMuscle(inWeek, 0)
+    }
 
     /** Series efectivas por grupo muscular (el principal cuenta 1, los secundarios 0,5). */
     fun setsPerMuscle(history: List<Workout>, sinceEpochMs: Long): Map<MuscleGroup, Double> {
