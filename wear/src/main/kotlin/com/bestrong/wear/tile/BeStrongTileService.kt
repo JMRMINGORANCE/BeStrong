@@ -1,5 +1,6 @@
 package com.bestrong.wear.tile
 
+import com.bestrong.wear.R
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.ColorBuilders.argb
 import androidx.wear.protolayout.DeviceParametersBuilders.DeviceParameters
@@ -73,13 +74,13 @@ class BeStrongTileService : TileService() {
                     .build(),
             )
             .addContent(
-                Text.Builder(this, "entrenos esta semana")
+                Text.Builder(this, getString(R.string.tile_week))
                     .setTypography(Typography.TYPOGRAPHY_CAPTION2)
                     .setColor(argb(0xFFFFFFFF.toInt()))
                     .build(),
             )
             .addContent(
-                Text.Builder(this, "🔥 $streak sem · ${container.store.settings.value.unit.formatVolume(week.volume)}")
+                Text.Builder(this, getString(R.string.tile_streak, streak, container.store.settings.value.unit.formatVolume(week.volume)))
                     .setTypography(Typography.TYPOGRAPHY_CAPTION2)
                     .setColor(argb(0xFFBDBDBD.toInt()))
                     .build(),
@@ -93,7 +94,7 @@ class BeStrongTileService : TileService() {
             )
             .setContent(content)
             .setPrimaryChipContent(
-                CompactChip.Builder(this, if (active != null) "Continuar" else "Entrenar", launch, device).build(),
+                CompactChip.Builder(this, getString(if (active != null) R.string.continue_ else R.string.train), launch, device).build(),
             )
             .build()
     }

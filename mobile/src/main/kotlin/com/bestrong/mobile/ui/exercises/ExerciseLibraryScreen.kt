@@ -1,5 +1,9 @@
 package com.bestrong.mobile.ui.exercises
 
+import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -65,7 +69,7 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
             AnimatedPane {
                 ExerciseSearchList(
                     vm = vm,
-                    title = "Ejercicios",
+                    title = stringResource(R.string.nav_exercises),
                     selected = setOfNotNull((navigator.currentDestination?.content as? String)),
                     multiSelect = false,
                     onClick = { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, it.id) },
@@ -75,7 +79,7 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
         detailPane = {
             AnimatedPane {
                 val id = (navigator.currentDestination?.content as? String)
-                if (id == null) EmptyState(Icons.Default.Search, "Elige un ejercicio", "Verás tu progreso, récords e historial.")
+                if (id == null) EmptyState(Icons.Default.Search, stringResource(R.string.exercise_pick_title), stringResource(R.string.exercise_pick_body))
                 else ExerciseDetailScreen(vm, id, onBack = if (navigator.canNavigateBack()) ({ navigator.navigateBack() }) else null)
             }
         },
@@ -90,8 +94,8 @@ fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Añadir ejercicios") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver") } },
+                title = { Text(stringResource(R.string.add_exercises)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
             )
         },
         floatingActionButton = {
@@ -99,7 +103,7 @@ fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (
                 ExtendedFloatingActionButton(
                     onClick = { onPicked(picked.toList()) },
                     icon = { Icon(Icons.Default.Check, null) },
-                    text = { Text("Añadir ${picked.size}") },
+                    text = { Text(stringResource(R.string.add_n, picked.size)) },
                 )
             }
         },
@@ -134,14 +138,14 @@ fun ExerciseSearchList(
         if (title != null) {
             TopAppBar(
                 title = { Text(title) },
-                actions = { IconButton(onClick = { creating = true }) { Icon(Icons.Default.Add, "Crear ejercicio") } },
+                actions = { IconButton(onClick = { creating = true }) { Icon(Icons.Default.Add, stringResource(R.string.create_exercise)) } },
             )
         }
         OutlinedTextField(
             value = filter.query,
             onValueChange = { q -> vm.filter.value = filter.copy(query = q) },
             leadingIcon = { Icon(Icons.Default.Search, null) },
-            placeholder = { Text("Buscar ejercicio") },
+            placeholder = { Text(stringResource(R.string.search_exercise)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         )
@@ -149,21 +153,23 @@ fun ExerciseSearchList(
             Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            EnumFilter("Músculo", MuscleGroup.entries, filter.muscle, { it.label }) { vm.filter.value = filter.copy(muscle = it) }
-            EnumFilter("Equipo", Equipment.entries, filter.equipment, { it.label }) { vm.filter.value = filter.copy(equipment = it) }
-            if (title == null) FilterChip(selected = false, onClick = { creating = true }, label = { Text("+ Crear") })
+            EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, filter.muscle, { it.label() }) { vm.filter.value = filter.copy(muscle = it) }
+            EnumFilter(stringResource(R.string.filter_equipment), Equipment.entries, filter.equipment, { it.label() }) { vm.filter.value = filter.copy(equipment = it) }
+            if (title == null) FilterChip(selected = false, onClick = { creating = true }, label = { Text(stringResource(R.string.create_short)) })
         }
         LazyColumn(Modifier.fillMaxSize()) {
             items(results, key = { it.id }) { ex ->
                 ListItem(
-                    headlineContent = { Text(ex.name) },
+                    headlineContent = { Text(ex.displayName()) },
                     supportingContent = {
                         val times = usage[ex.id]
-                        Text(buildString {
-                            append(ex.primaryMuscle.label).append(" · ").append(ex.equipment.label)
-                            if (ex.isCustom) append(" · Personalizado")
-                            if (times != null) append(" · $times veces")
-                        })
+                        val parts = listOfNotNull(
+                            ex.primaryMuscle.label(),
+                            ex.equipment.label(),
+                            if (ex.isCustom) stringResource(R.string.custom) else null,
+                            times?.let { stringResource(R.string.n_times, it) },
+                        )
+                        Text(parts.joinToString(" · "))
                     },
                     trailingContent = if (multiSelect) ({ Checkbox(checked = ex.id in selected, onCheckedChange = { onClick(ex) }) }) else null,
                     tonalElevation = if (!multiSelect && ex.id in selected) 4.dp else 0.dp,
@@ -186,16 +192,16 @@ fun ExerciseSearchList(
 }
 
 @Composable
-private fun <T> EnumFilter(label: String, values: List<T>, selected: T?, name: (T) -> String, onSelect: (T?) -> Unit) {
+private fun <T> EnumFilter(label: String, values: List<T>, selected: T?, name: @Composable (T) -> String, onSelect: (T?) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Column {
         FilterChip(
             selected = selected != null,
             onClick = { open = true },
-            label = { Text(selected?.let(name) ?: label) },
+            label = { Text(if (selected != null) name(selected) else label) },
         )
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            DropdownMenuItem(text = { Text("Todos") }, onClick = { onSelect(null); open = false })
+            DropdownMenuItem(text = { Text(stringResource(R.string.all)) }, onClick = { onSelect(null); open = false })
             values.forEach { v -> DropdownMenuItem(text = { Text(name(v)) }, onClick = { onSelect(v); open = false }) }
         }
     }
@@ -209,22 +215,26 @@ private fun CreateExerciseDialog(onDismiss: () -> Unit, onCreate: (String, Muscl
     var tracking by remember { mutableStateOf(TrackingType.WEIGHT_REPS) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo ejercicio") },
+        title = { Text(stringResource(R.string.new_exercise)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(name, { name = it }, label = { Text("Nombre") }, singleLine = true)
+                OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.name)) }, singleLine = true)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    EnumFilter("Músculo", MuscleGroup.entries, muscle, { it.label }) { it?.let { m -> muscle = m } }
-                    EnumFilter("Equipo", Equipment.entries, equipment, { it.label }) { it?.let { e -> equipment = e } }
+                    EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, muscle, { it.label() }) { it?.let { m -> muscle = m } }
+                    EnumFilter(stringResource(R.string.filter_equipment), Equipment.entries, equipment, { it.label() }) { it?.let { e -> equipment = e } }
                 }
-                Text("Registrar", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.track), style = MaterialTheme.typography.labelLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(TrackingType.WEIGHT_REPS to "Peso y reps", TrackingType.REPS_ONLY to "Solo reps", TrackingType.DURATION to "Tiempo")
+                    listOf(
+                        TrackingType.WEIGHT_REPS to stringResource(R.string.track_weight_reps),
+                        TrackingType.REPS_ONLY to stringResource(R.string.track_reps),
+                        TrackingType.DURATION to stringResource(R.string.track_time),
+                    )
                         .forEach { (t, l) -> FilterChip(selected = tracking == t, onClick = { tracking = t }, label = { Text(l) }) }
                 }
             }
         },
-        confirmButton = { Button(enabled = name.isNotBlank(), onClick = { onCreate(name, muscle, equipment, tracking) }) { Text("Crear") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
+        confirmButton = { Button(enabled = name.isNotBlank(), onClick = { onCreate(name, muscle, equipment, tracking) }) { Text(stringResource(R.string.action_create)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }

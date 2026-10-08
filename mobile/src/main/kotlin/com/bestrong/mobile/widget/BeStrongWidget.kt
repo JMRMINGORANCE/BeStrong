@@ -1,5 +1,6 @@
 package com.bestrong.mobile.widget
 
+import com.bestrong.mobile.R
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -66,18 +67,19 @@ class BeStrongWidget : GlanceAppWidget() {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = GlanceModifier.fillMaxWidth()) {
                 Text("BeStrong", style = TextStyle(color = brand, fontWeight = FontWeight.Bold, fontSize = 16.sp))
                 Spacer(GlanceModifier.defaultWeight())
-                Text("🔥 $streak sem", style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 13.sp))
+                Text(context.getString(R.string.widget_streak, streak), style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 13.sp))
             }
             Text(
-                "$week entrenos esta semana",
+                context.getString(R.string.widget_week, week),
                 style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp),
             )
             Spacer(GlanceModifier.height(8.dp))
-            WidgetButton("Entrenar", brand, onBrand, Intent(context, MainActivity::class.java).setAction(MainActivity.ACTION_START_EMPTY))
+            WidgetButton(context.getString(R.string.nav_train), context.getString(R.string.widget_start, context.getString(R.string.nav_train)), brand, onBrand, Intent(context, MainActivity::class.java).setAction(MainActivity.ACTION_START_EMPTY))
             routines.forEach { r ->
                 Spacer(GlanceModifier.height(6.dp))
                 WidgetButton(
                     r.name,
+                    context.getString(R.string.widget_start, r.name),
                     GlanceTheme.colors.secondaryContainer,
                     GlanceTheme.colors.onSecondaryContainer,
                     Intent(context, MainActivity::class.java).setAction(MainActivity.ACTION_START_ROUTINE).putExtra(MainActivity.EXTRA_ROUTINE_ID, r.id),
@@ -87,11 +89,11 @@ class BeStrongWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun WidgetButton(text: String, bg: ColorProvider, fg: ColorProvider, intent: Intent) {
+    private fun WidgetButton(text: String, description: String, bg: ColorProvider, fg: ColorProvider, intent: Intent) {
         Row(
             modifier = GlanceModifier.fillMaxWidth().background(bg).cornerRadius(14.dp).padding(horizontal = 12.dp, vertical = 8.dp)
                 .clickable(actionStartActivity(intent))
-                .semantics { contentDescription = "Empezar $text" },
+                .semantics { contentDescription = description },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text("▶  $text", maxLines = 1, style = TextStyle(color = fg, fontWeight = FontWeight.Medium, fontSize = 14.sp))

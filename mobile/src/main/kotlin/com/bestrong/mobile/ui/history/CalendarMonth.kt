@@ -1,5 +1,7 @@
 package com.bestrong.mobile.ui.history
 
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,23 +38,23 @@ import java.util.Locale
 fun CalendarMonth(trainingDays: Set<LocalDate>, modifier: Modifier = Modifier) {
     var monthOffset by rememberSaveable { mutableStateOf(0L) }
     val month = YearMonth.now().plusMonths(monthOffset)
-    val locale = Locale.forLanguageTag("es-ES")
+    val locale = Locale.getDefault()
     val today = LocalDate.now()
     val count = trainingDays.count { YearMonth.from(it) == month }
 
     Column(modifier) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { monthOffset-- }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Mes anterior") }
+            IconButton(onClick = { monthOffset-- }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.month_previous)) }
             Text(
-                "${month.month.getDisplayName(TextStyle.FULL_STANDALONE, locale).replaceFirstChar { it.uppercase() }} ${month.year} · $count entrenos",
+                stringResource(R.string.calendar_title, month.month.getDisplayName(TextStyle.FULL_STANDALONE, locale).replaceFirstChar { it.uppercase() }, month.year, count),
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f),
             )
-            IconButton(onClick = { monthOffset++ }, enabled = monthOffset < 0) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Mes siguiente") }
+            IconButton(onClick = { monthOffset++ }, enabled = monthOffset < 0) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.month_next)) }
         }
         Row(Modifier.fillMaxWidth()) {
-            listOf("L", "M", "X", "J", "V", "S", "D").forEach {
+            java.time.DayOfWeek.entries.map { it.getDisplayName(TextStyle.NARROW_STANDALONE, locale) }.forEach {
                 Text(it, Modifier.weight(1f), textAlign = TextAlign.Center, style = MaterialTheme.typography.labelSmall)
             }
         }

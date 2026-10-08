@@ -1,5 +1,7 @@
 package com.bestrong.wear.ui
 
+import com.bestrong.wear.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,7 +41,7 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
     Box(Modifier.fillMaxSize().background(Color.Black).padding(24.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(w.name, color = Color.Gray, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            we?.let { Text(it.exercise.name, color = Color.White, fontSize = 16.sp, maxLines = 2, textAlign = TextAlign.Center) }
+            we?.let { Text(it.exercise.displayName(), color = Color.White, fontSize = 16.sp, maxLines = 2, textAlign = TextAlign.Center) }
             set?.let {
                 Text(
                     "${unit.format(it.weightKg)} ${unit.label} × ${it.reps}",
@@ -50,7 +52,7 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
             }
             rest?.let { r ->
                 val end = DateTimeFormatter.ofPattern("HH:mm:ss").format(Instant.ofEpochMilli(r.endsAtEpochMs).atZone(ZoneId.systemDefault()))
-                Text("Descanso hasta $end", color = Color.Gray, fontSize = 13.sp)
+                Text(stringResource(R.string.rest_until, end), color = Color.Gray, fontSize = 13.sp)
             }
         }
     }

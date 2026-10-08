@@ -40,12 +40,12 @@ class WeeklyComplicationService : SuspendingComplicationDataSourceService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val icon = MonochromaticImage.Builder(Icon.createWithResource(this, R.drawable.ic_dumbbell)).build()
-        val description = PlainComplicationText.Builder("$count entrenamientos esta semana").build()
+        val description = PlainComplicationText.Builder(getString(R.string.complication_desc, count)).build()
         return when (type) {
             ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(
                 PlainComplicationText.Builder("$count").build(),
                 description,
-            ).setTitle(PlainComplicationText.Builder("sem").build())
+            ).setTitle(PlainComplicationText.Builder(getString(R.string.week_short)).build())
                 .setMonochromaticImage(icon)
                 .setTapAction(tap)
                 .build()

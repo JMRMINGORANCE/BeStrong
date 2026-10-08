@@ -1,5 +1,9 @@
 package com.bestrong.mobile.ui.history
 
+import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -64,9 +68,9 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
         listPane = {
             AnimatedPane {
                 Column(Modifier.fillMaxSize()) {
-                    TopAppBar(title = { Text("Historial") })
+                    TopAppBar(title = { Text(stringResource(R.string.nav_history)) })
                     if (history.isEmpty()) {
-                        EmptyState(Icons.Default.History, "Sin entrenamientos todavía", "Cuando termines un entrenamiento aparecerá aquí.")
+                        EmptyState(Icons.Default.History, stringResource(R.string.history_empty_title), stringResource(R.string.history_empty_body))
                         return@Column
                     }
                     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -83,7 +87,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                 val id = (navigator.currentDestination?.content as? String)
                 val w = history.firstOrNull { it.id == id }
                 if (w == null) {
-                    EmptyState(Icons.Default.FitnessCenter, "Elige un entrenamiento", "Verás todas las series, récords y estadísticas.")
+                    EmptyState(Icons.Default.FitnessCenter, stringResource(R.string.history_pick_title), stringResource(R.string.history_pick_body))
                 } else {
                     WorkoutDetail(
                         w = w,
@@ -104,18 +108,18 @@ private fun WorkoutCard(w: Workout, modifier: Modifier = Modifier) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(w.name, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                if (w.source == WorkoutSource.WATCH) Icon(Icons.Default.Watch, "Registrado en el reloj", Modifier.padding(start = 4.dp))
+                if (w.source == WorkoutSource.WATCH) Icon(Icons.Default.Watch, stringResource(R.string.logged_on_watch), Modifier.padding(start = 4.dp))
             }
             Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
             Text(
-                "${formatDuration(w.durationSeconds())} · ${unit.formatVolume(w.totalVolume)} · ${w.completedSetCount} series",
+                stringResource(R.string.history_card_detail, formatDuration(w.durationSeconds()), unit.formatVolume(w.totalVolume), w.completedSetCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             w.exercises.take(4).forEach { we ->
-                Text("${we.sets.size} × ${we.exercise.name}", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.sets_times_exercise, we.sets.size, we.exercise.displayName()), style = MaterialTheme.typography.bodySmall)
             }
-            if (w.exercises.size > 4) Text("y ${w.exercises.size - 4} más…", style = MaterialTheme.typography.bodySmall)
+            if (w.exercises.size > 4) Text(stringResource(R.string.and_n_more, w.exercises.size - 4), style = MaterialTheme.typography.bodySmall)
         }
     }
 }
@@ -129,14 +133,14 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(w.name) },
-            navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver") } } },
+            navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
                 Box {
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "Opciones") }
+                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text("Repetir entrenamiento") }, onClick = { menu = false; vm.repeat(w, onWorkoutStarted) })
-                        DropdownMenuItem(text = { Text("Guardar como rutina") }, onClick = { menu = false; vm.saveAsRoutine(w) })
-                        DropdownMenuItem(text = { Text("Eliminar") }, onClick = { menu = false; vm.delete(w.id); onBack?.invoke() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.repeat_workout)) }, onClick = { menu = false; vm.repeat(w, onWorkoutStarted) })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.save_as_routine)) }, onClick = { menu = false; vm.saveAsRoutine(w) })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; vm.delete(w.id); onBack?.invoke() })
                     }
                 }
             },
@@ -145,17 +149,17 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             item { Text(formatDate(w.startedAtEpochMs), color = MaterialTheme.colorScheme.onSurfaceVariant) }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatTile("Duración", formatDuration(w.durationSeconds()), Modifier.weight(1f))
-                    StatTile("Volumen", unit.formatVolume(w.totalVolume), Modifier.weight(1f))
-                    StatTile("Series", "${w.completedSetCount}", Modifier.weight(1f))
+                    StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f))
+                    StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
+                    StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}", Modifier.weight(1f))
                 }
             }
             if (w.avgHeartRate != null || w.calories != null) {
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        w.avgHeartRate?.let { StatTile("FC media", "$it ppm", Modifier.weight(1f)) }
-                        w.maxHeartRate?.let { StatTile("FC máx.", "$it ppm", Modifier.weight(1f)) }
-                        w.calories?.let { StatTile("Calorías", "$it kcal", Modifier.weight(1f)) }
+                        w.avgHeartRate?.let { StatTile(stringResource(R.string.stat_avg_hr), stringResource(R.string.bpm_value, it), Modifier.weight(1f)) }
+                        w.maxHeartRate?.let { StatTile(stringResource(R.string.stat_max_hr), stringResource(R.string.bpm_value, it), Modifier.weight(1f)) }
+                        w.calories?.let { StatTile(stringResource(R.string.stat_calories), stringResource(R.string.kcal_value, it), Modifier.weight(1f)) }
                     }
                 }
             }
@@ -163,8 +167,8 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                 item {
                     Card(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(12.dp)) {
-                            Text("🏆 ${records.size} récords", fontWeight = FontWeight.Bold)
-                            records.forEach { Text("${it.exerciseName}: ${it.type.label} ${unit.format(it.value)}", style = MaterialTheme.typography.bodySmall) }
+                            Text(stringResource(R.string.n_records, records.size), fontWeight = FontWeight.Bold)
+                            records.forEach { Text(stringResource(R.string.record_line, it.exerciseName, it.type.label(), unit.format(it.value)), style = MaterialTheme.typography.bodySmall) }
                         }
                     }
                 }
@@ -173,12 +177,12 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             items(w.exercises, key = { it.id }) { we ->
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(12.dp)) {
-                        Text(we.exercise.name, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                        Text(we.exercise.displayName(), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
                         we.sets.forEachIndexed { i, set ->
                             Row {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
                                 Text(describeSet(set, we.exercise.tracking, unit), Modifier.weight(1f))
-                                if (set.estimatedOneRepMax > 0) Text("1RM ${unit.format(set.estimatedOneRepMax)}", style = MaterialTheme.typography.bodySmall)
+                                if (set.estimatedOneRepMax > 0) Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax)), style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }

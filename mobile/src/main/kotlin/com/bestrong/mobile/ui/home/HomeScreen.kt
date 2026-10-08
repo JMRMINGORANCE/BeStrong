@@ -1,5 +1,8 @@
 package com.bestrong.mobile.ui.home
 
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -86,38 +89,38 @@ fun HomeScreen(
                     ) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
-                                Text("Entrenamiento en curso", style = MaterialTheme.typography.labelLarge)
+                                Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.labelLarge)
                                 Text(w.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                                Text("${formatDuration(w.durationSeconds(now))} · ${w.completedSetCount}/${w.totalSetCount} series")
+                                Text(stringResource(R.string.home_in_progress_detail, formatDuration(w.durationSeconds(now)), w.completedSetCount, w.totalSetCount))
                             }
-                            Icon(Icons.Default.PlayArrow, "Continuar")
+                            Icon(Icons.Default.PlayArrow, stringResource(R.string.action_continue))
                         }
                     }
                 }
             }
-            item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader("Empezar") }
+            item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(stringResource(R.string.home_start)) }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { vm.startEmpty(onOpenWorkout) }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Default.Add, null)
-                        Text("Entrenamiento vacío", Modifier.padding(start = 8.dp))
+                        Text(stringResource(R.string.home_empty_workout), Modifier.padding(start = 8.dp))
                     }
                     FilledTonalButton(onClick = { vm.startOnWatch(null) }) {
                         Icon(Icons.Default.Watch, null)
-                        Text("En el reloj", Modifier.padding(start = 8.dp))
+                        Text(stringResource(R.string.home_on_watch), Modifier.padding(start = 8.dp))
                     }
                 }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionHeader("Mis rutinas (${routines.size})", Modifier.weight(1f))
-                    OutlinedButton(onClick = { onEditRoutine(null) }) { Text("+ Nueva rutina") }
+                    SectionHeader(stringResource(R.string.home_my_routines, routines.size), Modifier.weight(1f))
+                    OutlinedButton(onClick = { onEditRoutine(null) }) { Text(stringResource(R.string.home_new_routine)) }
                 }
             }
             if (routines.isEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(
-                        "Crea tu primera rutina (p. ej. Push / Pull / Pierna) o guarda un entrenamiento como rutina al terminarlo.",
+                        stringResource(R.string.home_no_routines),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -158,27 +161,27 @@ private fun RoutineCard(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(routine.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 Box {
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "Opciones de la rutina") }
+                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.routine_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text("Editar") }, onClick = { menu = false; onEdit() })
-                        DropdownMenuItem(text = { Text("Empezar en el reloj") }, onClick = { menu = false; onStartWatch() })
-                        DropdownMenuItem(text = { Text("Duplicar") }, onClick = { menu = false; onDuplicate() })
-                        DropdownMenuItem(text = { Text("Subir") }, onClick = { menu = false; onMoveUp() })
-                        DropdownMenuItem(text = { Text("Bajar") }, onClick = { menu = false; onMoveDown() })
-                        DropdownMenuItem(text = { Text("Eliminar") }, onClick = { menu = false; onDelete() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_edit)) }, onClick = { menu = false; onEdit() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.routine_start_on_watch)) }, onClick = { menu = false; onStartWatch() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_duplicate)) }, onClick = { menu = false; onDuplicate() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; onMoveUp() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; onMoveDown() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; onDelete() })
                     }
                 }
             }
             Text(
-                routine.exercises.joinToString { it.exercise.name }.ifBlank { "Sin ejercicios" },
+                routine.exercises.joinToString { it.exercise.displayName() }.ifBlank { stringResource(R.string.routine_no_exercises) },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            lastDone?.let { Text("Última vez: $it", style = MaterialTheme.typography.labelSmall) }
+            lastDone?.let { Text(stringResource(R.string.routine_last_done, it), style = MaterialTheme.typography.labelSmall) }
             Button(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), enabled = routine.exercises.isNotEmpty()) {
-                Text("Empezar rutina")
+                Text(stringResource(R.string.routine_start))
             }
         }
     }

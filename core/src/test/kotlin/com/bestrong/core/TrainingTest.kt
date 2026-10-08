@@ -109,3 +109,14 @@ class TrainingTest {
         ExerciseLibrary.englishAliases.values.forEach { assertTrue(it, ExerciseLibrary.byId(it) != null) }
     }
 }
+
+class LocalizationTest {
+    @Test fun everyExerciseHasEnglishNameAndInstructions() {
+        val lib = com.bestrong.core.library.ExerciseLibrary
+        val missing = lib.all.filter { lib.displayName(it, "en") == it.name && it.id != "squat" && it.id != "plank" && it.id != "burpee" && it.id != "deadlift" && it.id != "shrug" && it.id != "crunch" && it.id != "face_pull" && it.id != "hip_thrust" && it.id != "pec_deck" }
+            .filter { com.bestrong.core.library.englishNames[it.id] == null }
+        org.junit.Assert.assertEquals(emptyList<String>(), missing.map { it.id })
+        lib.all.forEach { org.junit.Assert.assertNotNull(it.id, com.bestrong.core.library.ExerciseInfo.instructions(it.id, "en")) }
+        org.junit.Assert.assertTrue(lib.search(lib.all, "bench", nameOf = { e -> lib.displayName(e, "en") }).any { it.id == "bench_press" })
+    }
+}

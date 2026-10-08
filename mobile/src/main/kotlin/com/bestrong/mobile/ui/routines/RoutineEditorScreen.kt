@@ -1,5 +1,8 @@
 package com.bestrong.mobile.ui.routines
 
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -55,11 +58,11 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (vm.isNew) "Nueva rutina" else "Editar rutina") },
-                navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Cancelar") } },
+                title = { Text(stringResource(if (vm.isNew) R.string.routine_new else R.string.routine_edit)) },
+                navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_cancel)) } },
                 actions = {
-                    if (!vm.isNew) IconButton(onClick = { vm.delete(onClose) }) { Icon(Icons.Default.Delete, "Eliminar rutina") }
-                    TextButton(onClick = { vm.save(onClose) }) { Text("Guardar") }
+                    if (!vm.isNew) IconButton(onClick = { vm.delete(onClose) }) { Icon(Icons.Default.Delete, stringResource(R.string.routine_delete)) }
+                    TextButton(onClick = { vm.save(onClose) }) { Text(stringResource(R.string.action_save)) }
                 },
             )
         },
@@ -73,8 +76,8 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
             val content = Modifier.widthIn(max = 720.dp).fillMaxWidth().padding(horizontal = 16.dp)
             item {
                 Column(content, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(routine.name, vm::rename, label = { Text("Nombre de la rutina") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                    OutlinedTextField(routine.notes, vm::setNotes, label = { Text("Notas") }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(routine.name, vm::rename, label = { Text(stringResource(R.string.routine_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(routine.notes, vm::setNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.fillMaxWidth())
                 }
             }
             itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
@@ -82,19 +85,19 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                     Column(Modifier.padding(12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
-                                Text(re.exercise.name, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
-                                Text("Descanso ${formatDuration(re.restSeconds.toLong())}", style = MaterialTheme.typography.bodySmall)
+                                Text(re.exercise.displayName(), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                                Text(stringResource(R.string.rest_value, formatDuration(re.restSeconds.toLong())), style = MaterialTheme.typography.bodySmall)
                             }
-                            IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, "Subir") }
-                            IconButton(onClick = { vm.moveExercise(index, index + 1) }, enabled = index < routine.exercises.lastIndex) { Icon(Icons.Default.KeyboardArrowDown, "Bajar") }
-                            IconButton(onClick = { vm.removeExercise(re.id) }) { Icon(Icons.Default.Close, "Quitar ${re.exercise.name}") }
+                            IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.action_move_up)) }
+                            IconButton(onClick = { vm.moveExercise(index, index + 1) }, enabled = index < routine.exercises.lastIndex) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.action_move_down)) }
+                            IconButton(onClick = { vm.removeExercise(re.id) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_named, re.exercise.displayName())) }
                         }
                         if (index < routine.exercises.lastIndex) {
                             val linked = re.supersetId != null && re.supersetId == routine.exercises[index + 1].supersetId
                             FilterChip(
                                 selected = linked,
                                 onClick = { vm.toggleSupersetWithNext(re.id) },
-                                label = { Text(if (linked) "En superserie con el siguiente" else "Superserie con el siguiente") },
+                                label = { Text(stringResource(if (linked) R.string.in_superset_with_next else R.string.superset_with_next)) },
                             )
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -108,24 +111,24 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                             key(re.id, i, re.sets.size) { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("${i + 1}", Modifier.widthIn(min = 24.dp), fontWeight = FontWeight.Bold)
                                 if (re.exercise.tracking == TrackingType.DURATION) {
-                                    SmallNumberField("Seg", set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
+                                    SmallNumberField(stringResource(R.string.seconds_short), set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
                                 } else {
                                     SmallNumberField(unit.label, unit.format(set.weightKg), Modifier.weight(1f), decimal = true) { v ->
                                         vm.updateSet(re.id, i) { it.copy(weightKg = unit.parseToKg(v) ?: 0.0) }
                                     }
-                                    SmallNumberField("reps", set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
+                                    SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
                                 }
-                                IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, "Quitar serie") }
+                                IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set)) }
                             } }
                         }
-                        OutlinedButton(onClick = { vm.addSet(re.id) }, modifier = Modifier.fillMaxWidth()) { Text("+ Añadir serie") }
+                        OutlinedButton(onClick = { vm.addSet(re.id) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.add_set)) }
                     }
                 }
             }
             item {
                 Button(onClick = onAddExercises, modifier = content) {
                     Icon(Icons.Default.Add, null)
-                    Text("Añadir ejercicios", Modifier.padding(start = 8.dp))
+                    Text(stringResource(R.string.add_exercises), Modifier.padding(start = 8.dp))
                 }
             }
         }

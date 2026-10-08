@@ -24,15 +24,15 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val spanish = Locale.forLanguageTag("es-ES")
-private val dateFormatter = DateTimeFormatter.ofPattern("EEE d MMM yyyy", spanish)
-private val shortDateFormatter = DateTimeFormatter.ofPattern("d MMM", spanish)
+// Formato de fecha localizado al idioma del sistema
+private fun dateFormatter() = DateTimeFormatter.ofPattern("EEE d MMM yyyy", Locale.getDefault())
+private fun shortDateFormatter() = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
 
 fun formatDate(epochMs: Long): String =
-    dateFormatter.format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault())).replaceFirstChar { it.uppercase() }
+    dateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault())).replaceFirstChar { it.uppercase() }
 
 fun formatShortDate(epochMs: Long): String =
-    shortDateFormatter.format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
+    shortDateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
 
 @Composable
 fun SectionHeader(text: String, modifier: Modifier = Modifier) {

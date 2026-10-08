@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.bestrong.mobile.ui.theme.BeStrongTheme
 
@@ -43,8 +44,8 @@ fun PrivacyPolicy(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Privacidad") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver") } },
+                title = { Text(stringResource(R.string.privacy)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
             )
         },
     ) { padding ->
@@ -52,16 +53,16 @@ fun PrivacyPolicy(onBack: () -> Unit) {
             Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).widthIn(max = 720.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Política de privacidad de BeStrong", style = MaterialTheme.typography.titleLarge)
-            Text("Todos tus datos (entrenamientos, rutinas, medidas y ajustes) se guardan solo en tu móvil y en tu reloj. BeStrong no tiene servidores, no crea cuentas y no envía datos a terceros.")
-            Text("Health Connect", style = MaterialTheme.typography.titleMedium)
-            Text("Si activas la exportación, BeStrong escribe en Health Connect cada entrenamiento terminado como sesión de pesas (hora de inicio, fin, nombre y notas) y las calorías estimadas por el reloj. BeStrong no lee ningún dato de Health Connect. Puedes retirar el permiso en cualquier momento desde Ajustes › Health Connect.")
-            Text("Galaxy Watch", style = MaterialTheme.typography.titleMedium)
-            Text("El reloj mide tu pulso y calorías con Health Services solo mientras hay un entrenamiento en curso. Los datos viajan entre el móvil y el reloj mediante la conexión Bluetooth/Wi-Fi de Wear OS y no salen de tus dispositivos.")
-            Text("Exportar e importar", style = MaterialTheme.typography.titleMedium)
-            Text("Los archivos CSV que exportas se guardan donde tú elijas. BeStrong solo lee los CSV que tú seleccionas para importar.")
-            Text("Borrar tus datos", style = MaterialTheme.typography.titleMedium)
-            Text("Desinstalar la app o borrar sus datos desde Ajustes de Android elimina toda la información de BeStrong del dispositivo.")
+            Text(stringResource(R.string.privacy_title), style = MaterialTheme.typography.titleLarge)
+            Text(stringResource(R.string.privacy_intro))
+            Text(stringResource(R.string.privacy_hc_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.privacy_hc))
+            Text(stringResource(R.string.privacy_watch_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.privacy_watch))
+            Text(stringResource(R.string.privacy_csv_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.privacy_csv))
+            Text(stringResource(R.string.privacy_delete_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.privacy_delete))
         }
     }
 }

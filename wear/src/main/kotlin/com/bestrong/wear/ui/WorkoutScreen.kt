@@ -1,5 +1,7 @@
 package com.bestrong.wear.ui
 
+import com.bestrong.wear.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -89,6 +91,7 @@ fun WorkoutScreen(
     val setNumber = we?.sets?.indexOf(set)?.plus(1) ?: 0
     val previous = we?.let { session.previousFor(it.exercise.id).getOrNull(setNumber - 1) }
 
+    val completeDescription = stringResource(R.string.complete_set)
     ScreenScaffold {
         Box(
             Modifier
@@ -121,11 +124,11 @@ fun WorkoutScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(formatDuration(w.durationSeconds(now)), style = MaterialTheme.typography.labelSmall)
                     Text("♥ ${metrics.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.labelSmall)
-                    metrics.calories?.let { Text("$it kcal", style = MaterialTheme.typography.labelSmall) }
+                    metrics.calories?.let { Text(stringResource(R.string.kcal, it), style = MaterialTheme.typography.labelSmall) }
                 }
                 if (we == null) {
                     Spacer(Modifier.height(8.dp))
-                    Text("Añade tu primer ejercicio", textAlign = TextAlign.Center)
+                    Text(stringResource(R.string.add_first_exercise), textAlign = TextAlign.Center)
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         TextButton(onClick = onMenu, colors = TextButtonDefaults.filledTonalTextButtonColors()) { Text("⋯") }
@@ -133,9 +136,9 @@ fun WorkoutScreen(
                     }
                     return@Column
                 }
-                if (we.supersetId != null) Text("Superserie", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                if (we.supersetId != null) Text(stringResource(R.string.superset), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
                 Text(
-                    we.exercise.name,
+                    we.exercise.displayName(),
                     style = MaterialTheme.typography.titleMedium,
                     color = Brand,
                     maxLines = 1,
@@ -143,7 +146,7 @@ fun WorkoutScreen(
                     textAlign = TextAlign.Center,
                 )
                 if (set == null) {
-                    Text("Ejercicio completado ✓", color = Done, style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.exercise_done), color = Done, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         TextButton(onClick = session::addSet, colors = TextButtonDefaults.filledTonalTextButtonColors()) { Text("+1") }
@@ -153,12 +156,12 @@ fun WorkoutScreen(
                     return@Column
                 }
                 val typeLabel = when (set.type) {
-                    SetType.WARMUP -> " · Calentamiento"
-                    SetType.DROP -> " · Drop set"
-                    SetType.FAILURE -> " · Al fallo"
+                    SetType.WARMUP -> stringResource(R.string.type_warmup)
+                    SetType.DROP -> stringResource(R.string.type_drop)
+                    SetType.FAILURE -> stringResource(R.string.type_failure)
                     SetType.NORMAL -> ""
                 }
-                Text("Serie $setNumber/${we.sets.size}$typeLabel", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.set_of, setNumber, we.sets.size, typeLabel), style = MaterialTheme.typography.labelSmall)
 
                 when (we.exercise.tracking) {
                     TrackingType.DURATION -> BigValue("${set.durationSec}", "s", selected = true) {}
@@ -176,11 +179,11 @@ fun WorkoutScreen(
                     }
                 }
                 if (repCounting) {
-                    Text("Contadas: $countedReps reps (beta)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    Text(stringResource(R.string.counted_reps, countedReps), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
                 }
                 previous?.let {
                     Text(
-                        "Anterior: ${unit.format(it.weightKg)}×${it.reps}",
+                        stringResource(R.string.previous, unit.format(it.weightKg), it.reps),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -200,7 +203,7 @@ fun WorkoutScreen(
                     onClick = { if (session.completeSet()) onRest() },
                     buttonSize = EdgeButtonSize.Medium,
                     colors = ButtonDefaults.buttonColors(containerColor = Done, contentColor = Color.Black),
-                    modifier = Modifier.align(Alignment.BottomCenter).semantics { contentDescription = "Completar serie" },
+                    modifier = Modifier.align(Alignment.BottomCenter).semantics { contentDescription = completeDescription },
                 ) { Text("✓", fontSize = 24.sp, fontWeight = FontWeight.Bold) }
             }
         }

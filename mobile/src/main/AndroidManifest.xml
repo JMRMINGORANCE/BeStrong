@@ -38,7 +38,7 @@
         <activity
             android:name=".PrivacyPolicyActivity"
             android:exported="true"
-            android:label="Privacidad">
+            android:label="@string/privacy">
             <!-- Health Connect: explicación de permisos (Android 13 y anteriores) -->
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />

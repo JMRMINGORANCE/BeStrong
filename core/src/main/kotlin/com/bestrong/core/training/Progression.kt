@@ -7,13 +7,29 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.stats.WorkoutStats
 
-enum class SuggestionKind { INCREASE_WEIGHT, ADD_REPS, REPEAT, DELOAD }
+enum class SuggestionKind {
+    /** Subir el peso (todas las series completadas). */
+    INCREASE_WEIGHT,
+    /** Mismo peso, buscar [ProgressionSuggestion.targetReps] en todas las series. */
+    ADD_REPS,
+    /** Ejercicio sin peso: +1 repetición por serie. */
+    ADD_ONE_REP,
+    /** Ejercicio por tiempo: +5 s por serie. */
+    ADD_TIME,
+    /** RPE alto: repetir y consolidar. */
+    REPEAT,
+    /** Estancado [ProgressionSuggestion.stallSessions] sesiones: descarga al 90 %. */
+    DELOAD,
+}
 
 data class ProgressionSuggestion(
     val kind: SuggestionKind,
     /** Series de trabajo propuestas para hoy (peso en kg). */
     val sets: List<WorkoutSet>,
+    /** Explicación en español (la app la traduce a partir de [kind]). */
     val reason: String,
+    val targetReps: Int = 0,
+    val stallSessions: Int = 0,
 )
 
 /**
@@ -35,7 +51,7 @@ object Progression {
 
         if (isStalled(exercise.id, history, stallSessions)) {
             val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
-            return ProgressionSuggestion(SuggestionKind.DELOAD, sets, "Llevas $stallSessions sesiones sin progresar: descarga al 90 %")
+            return ProgressionSuggestion(SuggestionKind.DELOAD, sets, "Llevas $stallSessions sesiones sin progresar: descarga al 90 %", stallSessions = stallSessions)
         }
 
         val targetReps = last.first().reps
@@ -45,11 +61,11 @@ object Progression {
         return when {
             exercise.tracking == TrackingType.DURATION -> {
                 val sets = last.map { it.copy(durationSec = it.durationSec + 5, completed = false, rpe = null) }
-                ProgressionSuggestion(SuggestionKind.ADD_REPS, sets, "+5 s por serie")
+                ProgressionSuggestion(SuggestionKind.ADD_TIME, sets, "+5 s por serie")
             }
             exercise.tracking == TrackingType.REPS_ONLY && last.all { it.weightKg == 0.0 } -> {
                 val sets = last.map { it.copy(reps = it.reps + 1, completed = false, rpe = null) }
-                ProgressionSuggestion(SuggestionKind.ADD_REPS, sets, "+1 repetición por serie")
+                ProgressionSuggestion(SuggestionKind.ADD_ONE_REP, sets, "+1 repetición por serie")
             }
             hitAll && easy -> {
                 val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = targetReps, completed = false, rpe = null) }
@@ -57,7 +73,7 @@ object Progression {
             }
             !hitAll -> {
                 val sets = last.map { it.copy(reps = targetReps, completed = false, rpe = null) }
-                ProgressionSuggestion(SuggestionKind.ADD_REPS, sets, "Mismo peso: intenta $targetReps reps en todas las series")
+                ProgressionSuggestion(SuggestionKind.ADD_REPS, sets, "Mismo peso: intenta $targetReps reps en todas las series", targetReps = targetReps)
             }
             else -> ProgressionSuggestion(SuggestionKind.REPEAT, last.map { it.copy(completed = false, rpe = null) }, "RPE alto: repite y consolida")
         }

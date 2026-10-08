@@ -79,7 +79,7 @@ class ExerciseService : LifecycleService() {
 
     private fun goForeground(): Boolean {
         val nm = getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, "Entrenamiento", NotificationManager.IMPORTANCE_DEFAULT))
+        nm.createNotificationChannel(NotificationChannel(CHANNEL_ID, getString(R.string.notif_channel), NotificationManager.IMPORTANCE_DEFAULT))
         val openApp = PendingIntent.getActivity(
             this, 0,
             Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
@@ -88,7 +88,7 @@ class ExerciseService : LifecycleService() {
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_dumbbell)
             .setContentTitle("BeStrong")
-            .setContentText("Entrenamiento en curso")
+            .setContentText(getString(R.string.notif_text))
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
             .setOngoing(true)
             .setSilent(true)
@@ -102,7 +102,7 @@ class ExerciseService : LifecycleService() {
             .setStatus(
                 Status.Builder()
                     .addTemplate("#name# · #time#")
-                    .addPart("name", Status.TextPart(session.workout.value?.name ?: "Entrenando"))
+                    .addPart("name", Status.TextPart(session.workout.value?.name ?: getString(R.string.training)))
                     .addPart("time", Status.StopwatchPart(elapsedBase))
                     .build(),
             )

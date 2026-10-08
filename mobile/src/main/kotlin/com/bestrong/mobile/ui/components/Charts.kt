@@ -1,5 +1,7 @@
 package com.bestrong.mobile.ui.components
 
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,8 +34,8 @@ fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: D
     val range = (max - min).takeIf { it > 0 } ?: 1.0
     Column(modifier) {
         Row(Modifier.fillMaxWidth()) {
-            Text("Máx ${valueFormatter(max)}", style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
-            Text("Mín ${valueFormatter(min)}", style = MaterialTheme.typography.labelSmall)
+            Text(stringResource(R.string.chart_max, valueFormatter(max)), style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.chart_min, valueFormatter(min)), style = MaterialTheme.typography.labelSmall)
         }
         Canvas(Modifier.fillMaxWidth().height(height)) {
             val stepX = if (points.size > 1) size.width / (points.size - 1) else 0f
@@ -64,7 +66,7 @@ fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: D
 fun BarChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: Dp = 160.dp) {
     if (points.isEmpty()) return
     if (points.all { it.value == 0.0 }) {
-        Text("Aún no hay entrenamientos en estas semanas", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.chart_no_weeks), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
     val color = MaterialTheme.colorScheme.primary

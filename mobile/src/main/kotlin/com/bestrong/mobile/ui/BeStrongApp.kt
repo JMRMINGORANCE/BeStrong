@@ -1,5 +1,8 @@
 package com.bestrong.mobile.ui
 
+import androidx.annotation.StringRes
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import com.bestrong.mobile.LaunchRequest
@@ -52,11 +55,11 @@ import com.bestrong.mobile.ui.routines.RoutineEditorViewModel
 import com.bestrong.mobile.ui.workout.ActiveWorkoutScreen
 import com.bestrong.mobile.ui.workout.ActiveWorkoutViewModel
 
-enum class TopLevel(val route: String, val label: String, val icon: ImageVector) {
-    TRAIN("train", "Entrenar", Icons.Default.FitnessCenter),
-    HISTORY("history", "Historial", Icons.Default.History),
-    EXERCISES("exercises", "Ejercicios", Icons.AutoMirrored.Filled.List),
-    PROFILE("profile", "Perfil", Icons.Default.Person),
+enum class TopLevel(val route: String, @StringRes val label: Int, val icon: ImageVector) {
+    TRAIN("train", R.string.nav_train, Icons.Default.FitnessCenter),
+    HISTORY("history", R.string.nav_history, Icons.Default.History),
+    EXERCISES("exercises", R.string.nav_exercises, Icons.AutoMirrored.Filled.List),
+    PROFILE("profile", R.string.nav_profile, Icons.Default.Person),
 }
 
 private object Routes {
@@ -114,8 +117,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                     item(
                         selected = dest == topLevel,
                         onClick = { nav.navigateTopLevel(dest.route) },
-                        icon = { Icon(dest.icon, contentDescription = dest.label) },
-                        label = { Text(dest.label) },
+                        icon = { Icon(dest.icon, contentDescription = stringResource(dest.label)) },
+                        label = { Text(stringResource(dest.label)) },
                     )
                 }
             },

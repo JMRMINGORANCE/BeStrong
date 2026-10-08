@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.profile
 
+import com.bestrong.mobile.R
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.bestrong.core.io.WorkoutCsv
@@ -92,17 +93,17 @@ class ProfileViewModel @Inject constructor(
         val result = runCatching {
             val csv = WorkoutCsv.export(repo.historyOnce())
             withContext(Dispatchers.IO) {
-                context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error("No se pudo abrir el archivo")
+                context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error(context.getString(R.string.file_open_error))
             }
         }
-        _messages.tryEmit(result.fold({ "Historial exportado" }, { "Error al exportar: ${it.message}" }))
+        _messages.tryEmit(result.fold({ context.getString(R.string.export_done) }, { context.getString(R.string.export_error, it.message.orEmpty()) }))
     }
 
     /** Importa un CSV de BeStrong, Hevy o Strong. */
     fun importCsv(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
             val text = withContext(Dispatchers.IO) {
-                context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error("No se pudo abrir el archivo")
+                context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error(context.getString(R.string.file_open_error))
             }
             val parsed = withContext(Dispatchers.Default) {
                 WorkoutCsv.import(text, repo.exercises.value, strongUnit = settings.value.unit)
@@ -112,12 +113,12 @@ class ProfileViewModel @Inject constructor(
         _messages.tryEmit(
             result.fold(
                 { (r, added) ->
-                    "${r.format.label}: $added entrenamientos importados" +
-                        (if (r.workouts.size > added) " (${r.workouts.size - added} ya existían)" else "") +
-                        (if (r.newExercises.isNotEmpty()) " · ${r.newExercises.size} ejercicios nuevos" else "") +
-                        (if (r.skippedRows > 0) " · ${r.skippedRows} filas ignoradas" else "")
+                    context.getString(R.string.import_done, r.format.label, added) +
+                        (if (r.workouts.size > added) context.getString(R.string.import_existing, r.workouts.size - added) else "") +
+                        (if (r.newExercises.isNotEmpty()) context.getString(R.string.import_new_exercises, r.newExercises.size) else "") +
+                        (if (r.skippedRows > 0) context.getString(R.string.import_skipped, r.skippedRows) else "")
                 },
-                { "Error al importar: ${it.message}" },
+                { context.getString(R.string.import_error, it.message.orEmpty()) },
             ),
         )
     }

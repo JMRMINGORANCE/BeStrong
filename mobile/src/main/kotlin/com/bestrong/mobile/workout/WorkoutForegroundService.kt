@@ -81,8 +81,8 @@ class WorkoutForegroundService : LifecycleService() {
 
     private fun createChannel() {
         getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL_ID, "Entrenamiento en curso", NotificationManager.IMPORTANCE_LOW).apply {
-                description = "Cronómetro del entreno y temporizador de descanso"
+            NotificationChannel(CHANNEL_ID, getString(R.string.notif_channel), NotificationManager.IMPORTANCE_LOW).apply {
+                description = getString(R.string.notif_channel_desc)
                 setShowBadge(false)
             },
         )
@@ -109,15 +109,15 @@ class WorkoutForegroundService : LifecycleService() {
             .setContentIntent(open)
             .setUsesChronometer(true)
         if (rest != null) {
-            b.setContentTitle("Descanso · ${w.name}")
-                .setContentText("Siguiente serie al terminar la cuenta atrás")
+            b.setContentTitle(getString(R.string.notif_rest_title, w.name))
+                .setContentText(getString(R.string.notif_rest_text))
                 .setWhen(rest.endsAtEpochMs)
                 .setChronometerCountDown(true)
-                .addAction(0, "+15 s", action(ACTION_PLUS_15, 1))
-                .addAction(0, "Saltar", action(ACTION_SKIP, 2))
+                .addAction(0, getString(R.string.rest_plus_15), action(ACTION_PLUS_15, 1))
+                .addAction(0, getString(R.string.rest_skip), action(ACTION_SKIP, 2))
         } else {
             b.setContentTitle(w.name)
-                .setContentText("${w.completedSetCount}/${w.totalSetCount} series completadas")
+                .setContentText(getString(R.string.notif_progress, w.completedSetCount, w.totalSetCount))
                 .setWhen(w.startedAtEpochMs)
                 .setChronometerCountDown(false)
         }

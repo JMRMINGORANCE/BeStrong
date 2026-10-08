@@ -1,5 +1,7 @@
 package com.bestrong.mobile.ui.profile
 
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,11 +55,11 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Medidas corporales") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver") } },
+                title = { Text(stringResource(R.string.measurements)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
             )
         },
-        floatingActionButton = { FloatingActionButton(onClick = { adding = true }) { Icon(Icons.Default.Add, "Añadir medida") } },
+        floatingActionButton = { FloatingActionButton(onClick = { adding = true }) { Icon(Icons.Default.Add, stringResource(R.string.add_measurement)) } },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val weights = list.filter { it.weightKg != null }.sortedBy { it.dateEpochMs }
@@ -65,7 +67,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                 item {
                     Card {
                         Column(Modifier.padding(16.dp)) {
-                            SectionHeader("Peso corporal (${unit.label})")
+                            SectionHeader(stringResource(R.string.body_weight_unit, unit.label))
                             LineChart(weights.map { ChartPoint(formatShortDate(it.dateEpochMs), it.weightKg!!) }, valueFormatter = { unit.format(it) })
                         }
                     }
@@ -78,16 +80,16 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                         supportingContent = {
                             Text(
                                 listOfNotNull(
-                                    m.weightKg?.let { "Peso ${unit.format(it, withUnit = true)}" },
-                                    m.bodyFatPct?.let { "Grasa ${formatWeight(it)} %" },
-                                    m.waistCm?.let { "Cintura ${formatWeight(it)} cm" },
-                                    m.chestCm?.let { "Pecho ${formatWeight(it)} cm" },
-                                    m.armCm?.let { "Brazo ${formatWeight(it)} cm" },
-                                    m.thighCm?.let { "Muslo ${formatWeight(it)} cm" },
+                                    m.weightKg?.let { stringResource(R.string.m_weight, unit.format(it, withUnit = true)) },
+                                    m.bodyFatPct?.let { stringResource(R.string.m_fat, formatWeight(it)) },
+                                    m.waistCm?.let { stringResource(R.string.m_waist, formatWeight(it)) },
+                                    m.chestCm?.let { stringResource(R.string.m_chest, formatWeight(it)) },
+                                    m.armCm?.let { stringResource(R.string.m_arm, formatWeight(it)) },
+                                    m.thighCm?.let { stringResource(R.string.m_thigh, formatWeight(it)) },
                                 ).joinToString(" · "),
                             )
                         },
-                        trailingContent = { IconButton(onClick = { vm.deleteMeasurement(m.id) }) { Icon(Icons.Default.Delete, "Eliminar") } },
+                        trailingContent = { IconButton(onClick = { vm.deleteMeasurement(m.id) }) { Icon(Icons.Default.Delete, stringResource(R.string.action_delete)) } },
                     )
                 }
             }
@@ -95,11 +97,18 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     }
     if (adding) {
         val fields = remember { List(6) { mutableStateOf("") } }
-        val labels = listOf("Peso (${unit.label})", "Grasa corporal (%)", "Cintura (cm)", "Pecho (cm)", "Brazo (cm)", "Muslo (cm)")
+        val labels = listOf(
+            stringResource(R.string.f_weight, unit.label),
+            stringResource(R.string.f_fat),
+            stringResource(R.string.f_waist),
+            stringResource(R.string.f_chest),
+            stringResource(R.string.f_arm),
+            stringResource(R.string.f_thigh),
+        )
         fun v(i: Int) = fields[i].value.replace(',', '.').toDoubleOrNull()
         AlertDialog(
             onDismissRequest = { adding = false },
-            title = { Text("Nueva medida") },
+            title = { Text(stringResource(R.string.new_measurement)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     labels.forEachIndexed { i, l ->
@@ -117,9 +126,9 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                 Button(onClick = {
                     vm.saveMeasurement(BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = v(0)?.let(unit::toKg), bodyFatPct = v(1), waistCm = v(2), chestCm = v(3), armCm = v(4), thighCm = v(5)))
                     adding = false
-                }) { Text("Guardar") }
+                }) { Text(stringResource(R.string.action_save)) }
             },
-            dismissButton = { TextButton(onClick = { adding = false }) { Text("Cancelar") } },
+            dismissButton = { TextButton(onClick = { adding = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }

@@ -1,5 +1,7 @@
 package com.bestrong.mobile.ui.workout
 
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -40,35 +42,35 @@ fun PlateCalculatorDialog(initialKg: Double, onDismiss: () -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Calculadora de discos") },
+        title = { Text(stringResource(R.string.plates_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     text,
                     { text = it.filter { c -> c.isDigit() || c == ',' || c == '.' }.take(6) },
-                    label = { Text("Peso objetivo (${unit.label})") },
+                    label = { Text(stringResource(R.string.plates_target, unit.label)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 )
-                Text("Barra", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.plates_bar), style = MaterialTheme.typography.labelLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     bars.forEach { b -> FilterChip(selected = bar == b, onClick = { bar = b }, label = { Text("${formatWeight(b)} ${unit.label}") }) }
                 }
-                Text("Por cada lado", style = MaterialTheme.typography.labelLarge)
-                if (load.perSide.isEmpty()) Text("Solo la barra")
+                Text(stringResource(R.string.plates_per_side), style = MaterialTheme.typography.labelLarge)
+                if (load.perSide.isEmpty()) Text(stringResource(R.string.plates_only_bar))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     load.perSide.forEach { p -> SuggestionChip(onClick = {}, label = { Text(formatWeight(p), fontWeight = FontWeight.Bold) }) }
                 }
-                Text("Total: ${formatWeight(load.achieved)} ${unit.label}", fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.plates_total, formatWeight(load.achieved), unit.label), fontWeight = FontWeight.SemiBold)
                 if (load.remainder > 0) {
                     Text(
-                        "Faltan ${formatWeight(load.remainder)} ${unit.label}: no se puede cargar exactamente con discos estándar.",
+                        stringResource(R.string.plates_remainder, formatWeight(load.remainder), unit.label),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
     )
 }

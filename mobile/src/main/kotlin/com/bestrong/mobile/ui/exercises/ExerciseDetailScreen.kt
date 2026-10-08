@@ -1,5 +1,9 @@
 package com.bestrong.mobile.ui.exercises
 
+import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -55,28 +59,33 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
 
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text(s.exercise.name) },
-            navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver") } } },
+            title = { Text(s.exercise.displayName()) },
+            navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
                 if (s.exercise.isCustom) IconButton(onClick = { vm.deleteCustom(s.exercise.id); onBack?.invoke() }) {
-                    Icon(Icons.Default.Delete, "Eliminar ejercicio")
+                    Icon(Icons.Default.Delete, stringResource(R.string.delete_exercise))
                 }
             },
         )
         if (s.progress.isEmpty()) {
-            EmptyState(Icons.Default.ShowChart, "Aún no hay datos", "Completa series de este ejercicio para ver tu progreso.")
+            EmptyState(Icons.Default.ShowChart, stringResource(R.string.no_data_title), stringResource(R.string.no_data_body))
             return
         }
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item {
                 Text(
-                    "${s.exercise.primaryMuscle.label} · ${s.exercise.equipment.label}" +
-                        s.exercise.secondaryMuscles.takeIf { it.isNotEmpty() }?.joinToString(prefix = " · Secundarios: ") { it.label }.orEmpty(),
+                    "${s.exercise.primaryMuscle.label()} · ${s.exercise.equipment.label()}" +
+                        (s.exercise.secondaryMuscles.takeIf { it.isNotEmpty() }?.map { it.label() }?.joinToString()?.let { stringResource(R.string.secondary_muscles, it) } ?: ""),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             item {
-                val labels = listOf("1RM", "Peso máx.", "Volumen", "Reps")
+                val labels = listOf(
+                    stringResource(R.string.metric_1rm),
+                    stringResource(R.string.metric_max_weight),
+                    stringResource(R.string.metric_volume),
+                    stringResource(R.string.metric_reps),
+                )
                 SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                     labels.forEachIndexed { i, l ->
                         SegmentedButton(selected = metric == i, onClick = { metric = i }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
@@ -92,17 +101,17 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                 }
                 LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { unit.format(it) })
             }
-            item { SectionHeader("Récords personales") }
+            item { SectionHeader(stringResource(R.string.personal_records)) }
             item {
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         RecordType.entries.forEach { type ->
                             val pr = s.records[type] ?: return@forEach
                             Row(Modifier.fillMaxWidth()) {
-                                Text(type.label, Modifier.weight(1f))
+                                Text(type.label(), Modifier.weight(1f))
                                 Text(
                                     when (type) {
-                                        RecordType.MOST_REPS -> "${pr.value.toInt()} reps"
+                                        RecordType.MOST_REPS -> stringResource(R.string.n_reps, pr.value.toInt())
                                         RecordType.BEST_SET_VOLUME -> unit.formatVolume(pr.value)
                                         else -> unit.format(pr.value, withUnit = true)
                                     },
@@ -113,14 +122,14 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     }
                 }
             }
-            item { SectionHeader("Historial") }
+            item { SectionHeader(stringResource(R.string.nav_history)) }
             items(s.recentSessions, key = { it.id }) { w ->
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(12.dp)) {
                         Text(w.name, fontWeight = FontWeight.SemiBold)
                         Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
                         w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
-                            Text("${i + 1}. ${describeSet(set, s.exercise.tracking, unit)}" + if (set.estimatedOneRepMax > 0) "  (1RM ≈ ${unit.format(set.estimatedOneRepMax)})" else "")
+                            Text("${i + 1}. ${describeSet(set, s.exercise.tracking, unit)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax)) else "")
                         }
                     }
                 }

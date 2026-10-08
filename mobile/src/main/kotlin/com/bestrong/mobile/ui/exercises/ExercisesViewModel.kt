@@ -1,5 +1,8 @@
 package com.bestrong.mobile.ui.exercises
 
+import com.bestrong.mobile.ui.components.displayName
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.library.ExerciseLibrary
@@ -33,13 +36,16 @@ data class ExerciseDetailState(
 )
 
 @HiltViewModel
-class ExercisesViewModel @Inject constructor(private val repo: BeStrongRepository) : ViewModel() {
+class ExercisesViewModel @Inject constructor(
+    private val repo: BeStrongRepository,
+    @ApplicationContext private val context: Context,
+) : ViewModel() {
 
     val filter = MutableStateFlow(ExerciseFilter())
 
     /** Ejercicios usados recientemente, primero (como Hevy). */
     val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history) { all, f, history ->
-        val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment)
+        val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }
         if (f.query.isBlank() && f.muscle == null && f.equipment == null) {
             val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)
             val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id } }

@@ -1,5 +1,11 @@
 package com.bestrong.mobile.ui.workout
 
+import com.bestrong.mobile.ui.components.uiLanguage
+import com.bestrong.mobile.ui.components.reasonText
+import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.foundation.background
@@ -124,7 +130,7 @@ fun ActiveWorkoutScreen(
         return
     }
     val w = workout ?: run {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text("No hay ningún entrenamiento en curso") }
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { Text(stringResource(R.string.workout_none)) }
         return
     }
     val liveMetrics = metrics?.takeIf { it.workoutId == w.id && System.currentTimeMillis() - it.timestampEpochMs < 30_000 }
@@ -139,7 +145,7 @@ fun ActiveWorkoutScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Minimizar entrenamiento") } },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.workout_minimize)) } },
                 title = {
                     TextButton(onClick = { renaming = true }, contentPadding = PaddingValues(0.dp)) {
                         Text(w.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -147,11 +153,11 @@ fun ActiveWorkoutScreen(
                 },
                 actions = {
                     var menu by remember { mutableStateOf(false) }
-                    Button(onClick = { confirmFinish = true }) { Text("Terminar") }
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "Más opciones") }
+                    Button(onClick = { confirmFinish = true }) { Text(stringResource(R.string.workout_finish)) }
+                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text("Renombrar") }, onClick = { menu = false; renaming = true })
-                        DropdownMenuItem(text = { Text("Descartar entrenamiento") }, onClick = { menu = false; confirmDiscard = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.workout_discard)) }, onClick = { menu = false; confirmDiscard = true })
                     }
                 },
             )
@@ -192,37 +198,37 @@ fun ActiveWorkoutScreen(
         val pending = w.totalSetCount - w.completedSetCount
         AlertDialog(
             onDismissRequest = { confirmFinish = false },
-            title = { Text("¿Terminar entrenamiento?") },
+            title = { Text(stringResource(R.string.workout_finish_q)) },
             text = {
                 Text(
                     when {
-                        w.completedSetCount == 0 -> "No has completado ninguna serie: el entrenamiento se descartará."
-                        pending > 0 -> "Hay $pending series sin completar que no se guardarán."
-                        else -> "Se guardará en tu historial."
+                        w.completedSetCount == 0 -> stringResource(R.string.workout_finish_empty)
+                        pending > 0 -> stringResource(R.string.workout_finish_pending, pending)
+                        else -> stringResource(R.string.workout_finish_ok)
                     },
                 )
             },
-            confirmButton = { Button(onClick = { confirmFinish = false; vm.finish(); if (w.completedSetCount == 0) onFinished() }) { Text("Terminar") } },
-            dismissButton = { TextButton(onClick = { confirmFinish = false }) { Text("Seguir") } },
+            confirmButton = { Button(onClick = { confirmFinish = false; vm.finish(); if (w.completedSetCount == 0) onFinished() }) { Text(stringResource(R.string.workout_finish)) } },
+            dismissButton = { TextButton(onClick = { confirmFinish = false }) { Text(stringResource(R.string.action_keep_going)) } },
         )
     }
     if (confirmDiscard) {
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },
-            title = { Text("¿Descartar entrenamiento?") },
-            text = { Text("Se perderán todas las series registradas.") },
-            confirmButton = { Button(onClick = { confirmDiscard = false; vm.discard(); onFinished() }) { Text("Descartar") } },
-            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text("Cancelar") } },
+            title = { Text(stringResource(R.string.workout_discard_q)) },
+            text = { Text(stringResource(R.string.workout_discard_body)) },
+            confirmButton = { Button(onClick = { confirmDiscard = false; vm.discard(); onFinished() }) { Text(stringResource(R.string.action_discard)) } },
+            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
     if (renaming) {
         var name by remember { mutableStateOf(w.name) }
         AlertDialog(
             onDismissRequest = { renaming = false },
-            title = { Text("Nombre del entrenamiento") },
+            title = { Text(stringResource(R.string.workout_name)) },
             text = { OutlinedTextField(name, { name = it }, singleLine = true) },
-            confirmButton = { Button(onClick = { vm.rename(name); renaming = false }) { Text("Guardar") } },
-            dismissButton = { TextButton(onClick = { renaming = false }) { Text("Cancelar") } },
+            confirmButton = { Button(onClick = { vm.rename(name); renaming = false }) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = { TextButton(onClick = { renaming = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }
@@ -241,10 +247,10 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
     val now = rememberNow()
     val unit = LocalWeightUnit.current
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        StatTile("Duración", formatDuration(w.durationSeconds(now)), Modifier.weight(1f))
-        StatTile("Volumen", unit.formatVolume(w.totalVolume), Modifier.weight(1f))
-        StatTile("Series", "${w.completedSetCount}/${w.totalSetCount}", Modifier.weight(1f))
-        metrics?.heartRate?.let { StatTile("♥ Reloj", "$it", Modifier.weight(0.8f)) }
+        StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds(now)), Modifier.weight(1f))
+        StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
+        StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}/${w.totalSetCount}", Modifier.weight(1f))
+        metrics?.heartRate?.let { StatTile(stringResource(R.string.stat_watch_hr), "$it", Modifier.weight(0.8f)) }
     }
 }
 
@@ -255,7 +261,7 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
         StatsRow(w, metrics)
         metrics?.let { m ->
             Text(
-                "Galaxy Watch · ♥ ${m.heartRate ?: "--"} ppm · media ${m.avgHeartRate ?: "--"} · ${m.calories ?: "--"} kcal",
+                stringResource(R.string.watch_metrics, m.heartRate?.toString() ?: "--", m.avgHeartRate?.toString() ?: "--", m.calories?.toString() ?: "--"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -264,11 +270,11 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
         if (muscles.isNotEmpty()) {
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp)) {
-                    Text("Músculos trabajados", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(R.string.muscles_worked), fontWeight = FontWeight.SemiBold)
                     muscles.entries.take(6).forEach { (m, sets) ->
                         Row(Modifier.fillMaxWidth()) {
-                            Text(m.label, Modifier.weight(1f))
-                            Text("${formatWeight(sets)} series")
+                            Text(m.label(), Modifier.weight(1f))
+                            Text(stringResource(R.string.n_sets, formatWeight(sets)))
                         }
                     }
                 }
@@ -280,10 +286,10 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
             val prev = previous(we.exercise.id).getOrNull(we.sets.indexOf(set))
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(12.dp)) {
-                    Text("Siguiente", style = MaterialTheme.typography.labelMedium)
-                    Text(we.exercise.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.next_up), style = MaterialTheme.typography.labelMedium)
+                    Text(we.exercise.displayName(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(describeSet(set, we.exercise.tracking, unit), style = MaterialTheme.typography.headlineMedium)
-                    prev?.let { Text("Anterior: ${describeSet(it, we.exercise.tracking, unit)}", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    prev?.let { Text(stringResource(R.string.previous_value, describeSet(it, we.exercise.tracking, unit)), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
             }
         }
@@ -313,7 +319,7 @@ private fun ExerciseList(
                 count = w.exercises.size,
                 previous = previous(we.exercise.id),
                 suggestion = suggestions[we.exercise.id],
-                supersetLabel = groupIndex?.let { "Superserie ${'A' + it}" },
+                supersetLabel = groupIndex?.let { stringResource(R.string.superset_label, ('A' + it).toString()) },
                 supersetColor = groupIndex?.let { supersetColors[it % supersetColors.size] },
                 nextInSuperset = w.exercises.getOrNull(index + 1)?.supersetId?.let { it == we.supersetId } == true,
                 vm = vm,
@@ -322,7 +328,7 @@ private fun ExerciseList(
         item {
             Button(onClick = onAddExercises, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                 Icon(Icons.Default.Add, null)
-                Text("Añadir ejercicios", Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.add_exercises), Modifier.padding(start = 8.dp))
             }
         }
     }
@@ -355,35 +361,35 @@ private fun ExerciseCard(
                 Column(Modifier.weight(1f)) {
                     supersetLabel?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = supersetColor ?: Color.Unspecified, fontWeight = FontWeight.Bold) }
                     Text(
-                        we.exercise.name,
+                        we.exercise.displayName(),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.semantics { heading() },
                     )
                     Text(
-                        "${we.exercise.primaryMuscle.label} · ${we.exercise.equipment.label} · Descanso ${formatDuration(we.restSeconds.toLong())}",
+                        stringResource(R.string.exercise_subtitle_rest, we.exercise.primaryMuscle.label(), we.exercise.equipment.label(), formatDuration(we.restSeconds.toLong())),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 if (ExerciseInfo.instructions(we.exercise.id) != null) {
-                    IconButton(onClick = { showInfo = true }) { Icon(Icons.Default.Info, "Cómo se hace ${we.exercise.name}") }
+                    IconButton(onClick = { showInfo = true }) { Icon(Icons.Default.Info, stringResource(R.string.exercise_how_to, we.exercise.displayName())) }
                 }
                 Box {
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, "Opciones de ${we.exercise.name}") }
+                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.exercise_options, we.exercise.displayName())) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         if (we.exercise.tracking == TrackingType.WEIGHT_REPS) {
-                            DropdownMenuItem(text = { Text("Añadir calentamiento") }, onClick = { menu = false; vm.addWarmup(we.id) })
-                            DropdownMenuItem(text = { Text("Calculadora de discos") }, onClick = { menu = false; showPlates = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.add_warmup)) }, onClick = { menu = false; vm.addWarmup(we.id) })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.plates_title)) }, onClick = { menu = false; showPlates = true })
                         }
-                        if (index < count - 1) DropdownMenuItem(text = { Text("Superserie con el siguiente") }, onClick = { menu = false; vm.linkWithNext(we.id) })
-                        if (we.supersetId != null) DropdownMenuItem(text = { Text("Quitar de la superserie") }, onClick = { menu = false; vm.unlinkSuperset(we.id) })
-                        DropdownMenuItem(text = { Text("Tiempo de descanso") }, onClick = { menu = false; editRest = true })
-                        DropdownMenuItem(text = { Text("Notas") }, onClick = { menu = false; editNotes = true })
-                        if (index > 0) DropdownMenuItem(text = { Text("Subir") }, onClick = { menu = false; vm.moveExercise(index, index - 1) })
-                        if (index < count - 1) DropdownMenuItem(text = { Text("Bajar") }, onClick = { menu = false; vm.moveExercise(index, index + 1) })
-                        DropdownMenuItem(text = { Text("Quitar ejercicio") }, onClick = { menu = false; vm.removeExercise(we.id) })
+                        if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.superset_with_next)) }, onClick = { menu = false; vm.linkWithNext(we.id) })
+                        if (we.supersetId != null) DropdownMenuItem(text = { Text(stringResource(R.string.superset_remove)) }, onClick = { menu = false; vm.unlinkSuperset(we.id) })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.rest_time)) }, onClick = { menu = false; editRest = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.notes)) }, onClick = { menu = false; editNotes = true })
+                        if (index > 0) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; vm.moveExercise(index, index - 1) })
+                        if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; vm.moveExercise(index, index + 1) })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.remove_exercise)) }, onClick = { menu = false; vm.removeExercise(we.id) })
                     }
                 }
             }
@@ -404,7 +410,7 @@ private fun ExerciseCard(
                     AssistChip(
                         onClick = { vm.applySuggestion(we.id, s) },
                         enabled = differs,
-                        label = { Text("$icon ${describeSet(first, we.exercise.tracking, unit)} · ${s.reason}" + if (differs) " · Aplicar" else " ✓", maxLines = 2) },
+                        label = { Text(stringResource(if (differs) R.string.suggestion_apply else R.string.suggestion_applied, icon, describeSet(first, we.exercise.tracking, unit), s.reasonText()), maxLines = 2) },
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
                 }
@@ -433,7 +439,7 @@ private fun ExerciseCard(
             OutlinedButton(
                 onClick = { vm.addSet(we.id) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
-            ) { Text("+ Añadir serie") }
+            ) { Text(stringResource(R.string.add_set)) }
         }
     }
     if (!nextInSuperset) HorizontalDivider()
@@ -442,46 +448,46 @@ private fun ExerciseCard(
         val options = listOf(0, 30, 45, 60, 90, 120, 150, 180, 240, 300)
         AlertDialog(
             onDismissRequest = { editRest = false },
-            title = { Text("Descanso") },
+            title = { Text(stringResource(R.string.rest)) },
             text = {
                 Column {
                     options.forEach { s ->
                         ListItem(
-                            headlineContent = { Text(if (s == 0) "Sin descanso" else formatDuration(s.toLong())) },
+                            headlineContent = { Text(if (s == 0) stringResource(R.string.no_rest) else formatDuration(s.toLong())) },
                             modifier = Modifier.clickable { vm.setRestSeconds(we.id, s); editRest = false },
                             trailingContent = { if (s == we.restSeconds) Text("✓") },
                         )
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { editRest = false }) { Text("Cerrar") } },
+            confirmButton = { TextButton(onClick = { editRest = false }) { Text(stringResource(R.string.action_close)) } },
         )
     }
     if (editNotes) {
         var notes by remember { mutableStateOf(we.notes) }
         AlertDialog(
             onDismissRequest = { editNotes = false },
-            title = { Text("Notas") },
+            title = { Text(stringResource(R.string.notes)) },
             text = { OutlinedTextField(notes, { notes = it }, minLines = 3) },
-            confirmButton = { Button(onClick = { vm.setExerciseNotes(we.id, notes); editNotes = false }) { Text("Guardar") } },
-            dismissButton = { TextButton(onClick = { editNotes = false }) { Text("Cancelar") } },
+            confirmButton = { Button(onClick = { vm.setExerciseNotes(we.id, notes); editNotes = false }) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = { TextButton(onClick = { editNotes = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
-            title = { Text(we.exercise.name) },
+            title = { Text(we.exercise.displayName()) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(ExerciseInfo.instructions(we.exercise.id).orEmpty())
+                    Text(ExerciseInfo.instructions(we.exercise.id, uiLanguage()).orEmpty())
                     Text(
-                        "Principal: ${we.exercise.primaryMuscle.label}" +
-                            we.exercise.secondaryMuscles.takeIf { it.isNotEmpty() }?.joinToString(prefix = " · Secundarios: ") { it.label }.orEmpty(),
+                        stringResource(R.string.primary_muscle, we.exercise.primaryMuscle.label()) +
+                            (we.exercise.secondaryMuscles.takeIf { it.isNotEmpty() }?.map { it.label() }?.joinToString()?.let { stringResource(R.string.secondary_muscles, it) } ?: ""),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
             },
-            confirmButton = { TextButton(onClick = { showInfo = false }) { Text("Cerrar") } },
+            confirmButton = { TextButton(onClick = { showInfo = false }) { Text(stringResource(R.string.action_close)) } },
         )
     }
     if (showPlates) {
@@ -497,24 +503,24 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
     AlertDialog(
         onDismissRequest = onDone,
         icon = { Icon(Icons.Default.EmojiEvents, null) },
-        title = { Text("¡Entrenamiento completado!") },
+        title = { Text(stringResource(R.string.workout_completed)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatTile("Duración", formatDuration(w.durationSeconds()), Modifier.weight(1f))
-                    StatTile("Volumen", unit.formatVolume(w.totalVolume), Modifier.weight(1f))
+                    StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f))
+                    StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
                 }
-                Text("${w.completedSetCount} series · ${w.exercises.size} ejercicios")
-                w.avgHeartRate?.let { Text("♥ media $it ppm · máx ${w.maxHeartRate ?: "--"}" + (w.calories?.let { c -> " · $c kcal" } ?: "")) }
+                Text(stringResource(R.string.summary_sets_exercises, w.completedSetCount, w.exercises.size))
+                w.avgHeartRate?.let { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") + (w.calories?.let { c -> stringResource(R.string.summary_kcal, c) } ?: "")) }
                 if (summary.records.isNotEmpty()) {
-                    Text("🏆 Nuevos récords", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
                     summary.records.forEach { pr ->
-                        Text("${pr.exerciseName}: ${pr.type.label} ${unit.format(pr.value)}", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.record_line, pr.exerciseName, pr.type.label(), unit.format(pr.value)), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
         },
-        confirmButton = { Button(onClick = onDone) { Text("Listo") } },
-        dismissButton = if (w.routineId == null) ({ TextButton(onClick = onSaveRoutine) { Text("Guardar como rutina") } }) else null,
+        confirmButton = { Button(onClick = onDone) { Text(stringResource(R.string.action_done)) } },
+        dismissButton = if (w.routineId == null) ({ TextButton(onClick = onSaveRoutine) { Text(stringResource(R.string.save_as_routine)) } }) else null,
     )
 }

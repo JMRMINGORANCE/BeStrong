@@ -1,5 +1,7 @@
 package com.bestrong.wear.ui
 
+import com.bestrong.wear.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,7 +40,7 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
             item { ListHeader { Text("BeStrong", color = Brand, style = MaterialTheme.typography.titleLarge) } }
             item {
                 Text(
-                    "$thisWeek entrenos esta semana · 🔥 $streak",
+                    stringResource(R.string.week_summary, thisWeek, streak),
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,
                 )
@@ -47,7 +49,7 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
                 item {
                     Button(
                         onClick = onStart,
-                        label = { Text("Continuar") },
+                        label = { Text(stringResource(R.string.continue_)) },
                         secondaryLabel = { Text(w.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -57,16 +59,16 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
                 item {
                     Button(
                         onClick = { container.session.startEmpty(); onStart() },
-                        label = { Text("Entrenamiento vacío") },
+                        label = { Text(stringResource(R.string.empty_workout)) },
                         icon = { Text("＋") },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
-                item { ListHeader { Text("Rutinas") } }
+                item { ListHeader { Text(stringResource(R.string.routines)) } }
                 if (routines.isEmpty()) {
                     item {
                         Text(
-                            "Crea rutinas en el móvil y aparecerán aquí",
+                            stringResource(R.string.create_routines_on_phone),
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
                         )
@@ -76,14 +78,14 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
                     Button(
                         onClick = { container.session.startRoutine(routine); onStart() },
                         label = { Text(routine.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        secondaryLabel = { Text("${routine.exercises.size} ejercicios") },
+                        secondaryLabel = { Text(stringResource(R.string.n_exercises, routine.exercises.size)) },
                         colors = ButtonDefaults.filledTonalButtonColors(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
             history.firstOrNull()?.let { last ->
-                item { ListHeader { Text("Último") } }
+                item { ListHeader { Text(stringResource(R.string.last)) } }
                 item {
                     Button(
                         onClick = {},

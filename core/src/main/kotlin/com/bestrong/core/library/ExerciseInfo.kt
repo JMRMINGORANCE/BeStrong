@@ -75,5 +75,6 @@ object ExerciseInfo {
         "burpee" to "Sentadilla, manos al suelo, salto atrás a plancha, flexión, recoger y saltar arriba.",
     )
 
-    fun instructions(exerciseId: String): String? = tips[exerciseId]
+    fun instructions(exerciseId: String, language: String = "es"): String? =
+        if (language == "en") englishInstructions[exerciseId] else tips[exerciseId]
 }

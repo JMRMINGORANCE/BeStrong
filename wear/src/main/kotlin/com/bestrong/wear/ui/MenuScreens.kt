@@ -1,5 +1,7 @@
 package com.bestrong.wear.ui
 
+import com.bestrong.wear.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,42 +44,42 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
     ScreenScaffold(
         scrollState = listState,
         edgeButton = {
-            EdgeButton(onClick = session::finish) { Text("Terminar") }
+            EdgeButton(onClick = session::finish) { Text(stringResource(R.string.finish)) }
         },
     ) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
             item { ListHeader { Text(w.name, maxLines = 1, overflow = TextOverflow.Ellipsis) } }
             item {
                 Text(
-                    "${w.completedSetCount} series · ${unit.formatVolume(w.totalVolume)}",
+                    stringResource(R.string.sets_volume, w.completedSetCount, unit.formatVolume(w.totalVolume)),
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,
                 )
             }
-            item { ListHeader { Text("Ejercicios") } }
+            item { ListHeader { Text(stringResource(R.string.exercises)) } }
             itemsIndexed(w.exercises, key = { _, we -> we.id }) { i, we ->
                 val done = we.sets.count { it.completed }
                 Button(
                     onClick = { session.selectExercise(i); onBack() },
-                    label = { Text(we.exercise.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                    secondaryLabel = { Text("$done/${we.sets.size} series" + if (i == index) " · actual" else "") },
+                    label = { Text(we.exercise.displayName(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    secondaryLabel = { Text(stringResource(R.string.done_of_sets, done, we.sets.size) + if (i == index) stringResource(R.string.current_suffix) else "") },
                     colors = if (done == we.sets.size) ButtonDefaults.outlinedButtonColors() else ButtonDefaults.filledTonalButtonColors(),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
             item {
-                Button(onClick = { session.addSet(); onBack() }, label = { Text("Añadir serie") }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                Button(onClick = { session.addSet(); onBack() }, label = { Text(stringResource(R.string.add_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }
             item {
-                Button(onClick = onAddExercise, label = { Text("Añadir ejercicio") }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                Button(onClick = onAddExercise, label = { Text(stringResource(R.string.add_exercise)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }
             if (session.repCounter.isAvailable) {
                 item {
                     SwitchButton(
                         checked = repCounting,
                         onCheckedChange = session::setRepCounting,
-                        label = { Text("Contar reps (beta)") },
-                        secondaryLabel = { Text("Con el acelerómetro") },
+                        label = { Text(stringResource(R.string.count_reps)) },
+                        secondaryLabel = { Text(stringResource(R.string.with_accelerometer)) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -85,7 +87,7 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
             item {
                 Button(
                     onClick = { if (confirmDiscard) { session.discard(); onDiscarded() } else confirmDiscard = true },
-                    label = { Text(if (confirmDiscard) "Toca otra vez para descartar" else "Descartar entreno") },
+                    label = { Text(stringResource(if (confirmDiscard) R.string.tap_again_discard else R.string.discard_workout)) },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -112,24 +114,24 @@ fun ExercisePickerScreen(container: WearContainer, onPick: (Exercise) -> Unit) {
             val m = muscle
             if (m == null) {
                 if (recent.isNotEmpty()) {
-                    item { ListHeader { Text("Recientes") } }
+                    item { ListHeader { Text(stringResource(R.string.recent)) } }
                     items(recent, key = { "r-" + it.id }) { ex ->
-                        Button(onClick = { onPick(ex) }, label = { Text(ex.name, maxLines = 2) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                        Button(onClick = { onPick(ex) }, label = { Text(ex.displayName(), maxLines = 2) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
                     }
                 }
-                item { ListHeader { Text("Grupo muscular") } }
+                item { ListHeader { Text(stringResource(R.string.muscle_group)) } }
                 items(MuscleGroup.entries.filter { g -> known.any { it.primaryMuscle == g } }, key = { it.name }) { g ->
-                    Button(onClick = { muscle = g }, label = { Text(g.label) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                    Button(onClick = { muscle = g }, label = { Text(g.label()) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
                 }
             } else {
                 item {
-                    Button(onClick = { muscle = null }, label = { Text("‹ ${m.label}") }, colors = ButtonDefaults.outlinedButtonColors(), modifier = Modifier.fillMaxWidth())
+                    Button(onClick = { muscle = null }, label = { Text(stringResource(R.string.back_to, m.label())) }, colors = ButtonDefaults.outlinedButtonColors(), modifier = Modifier.fillMaxWidth())
                 }
-                items(known.filter { it.primaryMuscle == m }.sortedBy { it.name }, key = { it.id }) { ex ->
+                items(known.filter { it.primaryMuscle == m }.sortedBy { it.id }, key = { it.id }) { ex ->
                     Button(
                         onClick = { onPick(ex) },
-                        label = { Text(ex.name, maxLines = 2) },
-                        secondaryLabel = { Text(ex.equipment.label) },
+                        label = { Text(ex.displayName(), maxLines = 2) },
+                        secondaryLabel = { Text(ex.equipment.label()) },
                         colors = ButtonDefaults.filledTonalButtonColors(),
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -148,17 +150,17 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
     val listState = rememberScalingLazyListState()
     ScreenScaffold(
         scrollState = listState,
-        edgeButton = { EdgeButton(onClick = onDone) { Text("Listo") } },
+        edgeButton = { EdgeButton(onClick = onDone) { Text(stringResource(R.string.done)) } },
     ) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
-            item { ListHeader { Text("¡Completado! 💪", color = Brand) } }
+            item { ListHeader { Text(stringResource(R.string.completed), color = Brand) } }
             item { Text(w.name, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center) }
-            item { Text("⏱ ${formatDuration(w.durationSeconds())}") }
-            item { Text("🏋 ${unit.formatVolume(w.totalVolume)} · ${w.completedSetCount} series") }
-            w.avgHeartRate?.let { item { Text("♥ media $it · máx ${w.maxHeartRate ?: "--"}", color = HeartRed) } }
-            w.calories?.let { item { Text("🔥 $it kcal") } }
+            item { Text(stringResource(R.string.summary_duration, formatDuration(w.durationSeconds()))) }
+            item { Text(stringResource(R.string.summary_volume, unit.formatVolume(w.totalVolume), w.completedSetCount)) }
+            w.avgHeartRate?.let { item { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--"), color = HeartRed) } }
+            w.calories?.let { item { Text(stringResource(R.string.summary_kcal, it)) } }
             if (s.records.isNotEmpty()) {
-                item { ListHeader { Text("🏆 ${s.records.size} récords") } }
+                item { ListHeader { Text(stringResource(R.string.n_records, s.records.size)) } }
                 items(s.records) { pr ->
                     Text(
                         "${pr.exerciseName}: ${unit.format(pr.value)}",
@@ -167,7 +169,7 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                     )
                 }
             }
-            item { Text("Se sincroniza con el móvil", style = MaterialTheme.typography.labelSmall) }
+            item { Text(stringResource(R.string.syncs_with_phone), style = MaterialTheme.typography.labelSmall) }
         }
     }
 }

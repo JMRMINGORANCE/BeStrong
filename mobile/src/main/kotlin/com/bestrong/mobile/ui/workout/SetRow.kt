@@ -1,5 +1,7 @@
 package com.bestrong.mobile.ui.workout
 
+import com.bestrong.mobile.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -58,18 +60,18 @@ fun SetHeader(tracking: TrackingType) {
     val unit = LocalWeightUnit.current.label.uppercase()
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         val style = MaterialTheme.typography.labelSmall
-        Text("SERIE", style = style, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text("ANTERIOR", style = style, modifier = Modifier.weight(1.4f), textAlign = TextAlign.Center)
+        Text(stringResource(R.string.set_col_set), style = style, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text(stringResource(R.string.set_col_previous), style = style, modifier = Modifier.weight(1.4f), textAlign = TextAlign.Center)
         when (tracking) {
             TrackingType.WEIGHT_REPS -> {
                 Text(unit, style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-                Text("REPS", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(stringResource(R.string.set_col_reps), style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
             TrackingType.REPS_ONLY -> {
                 Text("+$unit", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-                Text("REPS", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(stringResource(R.string.set_col_reps), style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
-            TrackingType.DURATION -> Text("SEG", style = style, modifier = Modifier.weight(2f), textAlign = TextAlign.Center)
+            TrackingType.DURATION -> Text(stringResource(R.string.set_col_seconds), style = style, modifier = Modifier.weight(2f), textAlign = TextAlign.Center)
         }
         Box(Modifier.size(48.dp))
     }
@@ -109,7 +111,7 @@ fun SetRow(
             Box(
                 Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(end = 16.dp),
                 contentAlignment = Alignment.CenterEnd,
-            ) { Icon(Icons.Default.Delete, "Eliminar serie", tint = MaterialTheme.colorScheme.onErrorContainer) }
+            ) { Icon(Icons.Default.Delete, stringResource(R.string.set_delete), tint = MaterialTheme.colorScheme.onErrorContainer) }
         },
     ) {
         val bg = if (set.completed) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surface
@@ -119,6 +121,8 @@ fun SetRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             var menu by remember { mutableStateOf(false) }
+            val typeDescription = stringResource(R.string.set_type_and_rpe, label)
+            val stateText = stringResource(if (set.completed) R.string.set_done else R.string.set_pending)
             val labelColor = when (set.type) {
                 SetType.WARMUP -> MaterialTheme.colorScheme.tertiary
                 SetType.DROP -> MaterialTheme.colorScheme.secondary
@@ -128,22 +132,27 @@ fun SetRow(
             Box(Modifier.weight(0.6f)) {
                 Column(
                     Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)).clickable { menu = true }.padding(vertical = 6.dp)
-                        .semantics { contentDescription = "Serie $label, tipo y RPE" },
+                        .semantics { contentDescription = typeDescription },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(label, fontWeight = FontWeight.Bold, color = labelColor, textAlign = TextAlign.Center)
                     set.rpe?.let { Text("@${it.toString().removeSuffix(".0")}", style = MaterialTheme.typography.labelSmall) }
                 }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    listOf(SetType.NORMAL to "Normal", SetType.WARMUP to "Calentamiento", SetType.DROP to "Drop set", SetType.FAILURE to "Al fallo")
+                    listOf(
+                        SetType.NORMAL to stringResource(R.string.set_type_normal),
+                        SetType.WARMUP to stringResource(R.string.set_type_warmup),
+                        SetType.DROP to stringResource(R.string.set_type_drop),
+                        SetType.FAILURE to stringResource(R.string.set_type_failure),
+                    )
                         .forEach { (t, l) -> DropdownMenuItem(text = { Text(if (t == set.type) "✓ $l" else l) }, onClick = { onType(t); menu = false }) }
                     HorizontalDivider()
-                    Text("RPE", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                    Text(stringResource(R.string.rpe), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                     RPE_VALUES.forEach { v ->
                         val t = v.toString().removeSuffix(".0")
-                        DropdownMenuItem(text = { Text(if (set.rpe == v) "✓ RPE $t" else "RPE $t") }, onClick = { onRpe(v); menu = false })
+                        DropdownMenuItem(text = { Text((if (set.rpe == v) "✓ " else "") + stringResource(R.string.rpe_value, t)) }, onClick = { onRpe(v); menu = false })
                     }
-                    if (set.rpe != null) DropdownMenuItem(text = { Text("Quitar RPE") }, onClick = { onRpe(null); menu = false })
+                    if (set.rpe != null) DropdownMenuItem(text = { Text(stringResource(R.string.rpe_remove)) }, onClick = { onRpe(null); menu = false })
                 }
             }
             Text(
@@ -152,29 +161,29 @@ fun SetRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                modifier = Modifier.weight(1.4f).clickable(enabled = previous != null, onClickLabel = "Copiar serie anterior") {
+                modifier = Modifier.weight(1.4f).clickable(enabled = previous != null, onClickLabel = stringResource(R.string.set_copy_previous)) {
                     previous?.let { onWeightKg(it.weightKg); onReps(it.reps); onDuration(it.durationSec) }
                 },
             )
             when (tracking) {
                 TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY -> {
-                    NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", "Peso en ${unit.label}", Modifier.weight(1f), decimal = true) {
+                    NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", stringResource(R.string.set_weight_in, unit.label), Modifier.weight(1f), decimal = true) {
                         if (it.isEmpty()) onWeightKg(0.0) else unit.parseToKg(it)?.let(onWeightKg)
                     }
-                    NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", "Repeticiones", Modifier.weight(1f)) {
+                    NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps), Modifier.weight(1f)) {
                         if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
                     }
                 }
-                TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", "Segundos", Modifier.weight(2f)) {
+                TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_seconds), Modifier.weight(2f)) {
                     if (it.isEmpty()) onDuration(0) else it.toIntOrNull()?.let(onDuration)
                 }
             }
             FilledIconToggleButton(
                 checked = set.completed,
                 onCheckedChange = { onToggle() },
-                modifier = Modifier.semantics { stateDescription = if (set.completed) "Completada" else "Pendiente" },
+                modifier = Modifier.semantics { stateDescription = stateText },
             ) {
-                Icon(Icons.Default.Check, "Completar serie $label")
+                Icon(Icons.Default.Check, stringResource(R.string.set_complete, label))
             }
         }
     }

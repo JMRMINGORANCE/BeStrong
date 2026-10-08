@@ -1,5 +1,8 @@
 package com.bestrong.mobile.ui.routines
 
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
+import com.bestrong.mobile.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
@@ -20,6 +23,7 @@ import kotlinx.coroutines.launch
 class RoutineEditorViewModel @Inject constructor(
     private val repo: BeStrongRepository,
     savedStateHandle: SavedStateHandle,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
     /** Argumento de navegación "id" (null = rutina nueva). */
     private val routineId: String? = savedStateHandle.get<String>("id")
@@ -85,7 +89,7 @@ class RoutineEditorViewModel @Inject constructor(
 
     fun save(onSaved: () -> Unit) = viewModelScope.launch {
         val r = _routine.value
-        repo.saveRoutine(r.copy(name = r.name.ifBlank { "Rutina sin nombre" }))
+        repo.saveRoutine(r.copy(name = r.name.ifBlank { context.getString(R.string.routine_untitled) }))
         onSaved()
     }
 

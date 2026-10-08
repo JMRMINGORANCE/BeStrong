@@ -1,5 +1,9 @@
 package com.bestrong.mobile.ui.home
 
+import com.bestrong.mobile.ui.components.defaultWorkoutName
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
+import com.bestrong.mobile.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
@@ -20,6 +24,7 @@ class HomeViewModel @Inject constructor(
     private val repo: BeStrongRepository,
     private val actions: WorkoutActions,
     private val watchSync: WatchSync,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     val routines: StateFlow<List<Routine>> = repo.routines
@@ -30,13 +35,13 @@ class HomeViewModel @Inject constructor(
     val messages: SharedFlow<String> = _messages
 
     fun startEmpty(onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeWorkout.value == null) repo.setActive(WorkoutEditor.empty(System.currentTimeMillis()))
+        if (repo.activeWorkout.value == null) repo.setActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
         onStarted()
     }
 
     fun startRoutine(routine: Routine, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeWorkout.value != null) {
-            _messages.tryEmit("Ya tienes un entrenamiento en curso")
+            _messages.tryEmit(context.getString(R.string.msg_workout_already_active))
             onStarted()
             return@launch
         }
@@ -48,7 +53,7 @@ class HomeViewModel @Inject constructor(
     fun startRoutineById(id: String, onStarted: () -> Unit) = viewModelScope.launch {
         val routine = repo.routine(id)
         if (routine == null) {
-            _messages.tryEmit("La rutina ya no existe")
+            _messages.tryEmit(context.getString(R.string.msg_routine_missing))
             return@launch
         }
         startRoutine(routine, onStarted)
@@ -57,11 +62,11 @@ class HomeViewModel @Inject constructor(
     fun startOnWatch(routine: Routine?) = viewModelScope.launch {
         watchSync.pushRoutines(repo.routines.value)
         val ok = watchSync.startOnWatch(routine?.id)
-        _messages.tryEmit(if (ok) "Abriendo BeStrong en tu Galaxy Watch" else "No se encontró ningún reloj conectado")
+        _messages.tryEmit(context.getString(if (ok) R.string.msg_opening_on_watch else R.string.msg_no_watch))
     }
 
     fun duplicate(routine: Routine) = viewModelScope.launch {
-        repo.saveRoutine(routine.copy(id = com.bestrong.core.util.newId(), name = "${routine.name} (copia)"))
+        repo.saveRoutine(routine.copy(id = com.bestrong.core.util.newId(), name = context.getString(R.string.routine_copy_name, routine.name)))
     }
 
     fun delete(routine: Routine) = viewModelScope.launch { repo.deleteRoutine(routine.id) }

@@ -135,7 +135,8 @@ class WorkoutSession @Inject constructor(
 
     fun startEmpty() {
         if (_workout.value != null) return
-        begin(WorkoutEditor.empty(System.currentTimeMillis(), WorkoutSource.WATCH))
+        val now = System.currentTimeMillis()
+        begin(WorkoutEditor.empty(now, WorkoutSource.WATCH, com.bestrong.wear.ui.defaultWorkoutName(context, now)))
     }
 
     fun startRoutine(routine: Routine) {

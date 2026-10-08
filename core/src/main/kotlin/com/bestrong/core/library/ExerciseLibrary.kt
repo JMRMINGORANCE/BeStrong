@@ -163,19 +163,24 @@ object ExerciseLibrary {
 
     fun byId(id: String): Exercise? = byId[id]
 
+    /** Nombre para mostrar según el idioma ("en" o cualquier otro = español). Los personalizados no se traducen. */
+    fun displayName(exercise: Exercise, language: String): String =
+        if (language == "en" && !exercise.isCustom) englishNames[exercise.id] ?: exercise.name else exercise.name
+
     /** Búsqueda sin tildes ni mayúsculas, filtrando por músculo y equipo. */
     fun search(
         exercises: List<Exercise>,
         query: String,
         muscle: MuscleGroup? = null,
         equipment: Equipment? = null,
+        nameOf: (Exercise) -> String = { it.name },
     ): List<Exercise> {
         val q = query.normalized()
         return exercises
             .filter { muscle == null || it.primaryMuscle == muscle || muscle in it.secondaryMuscles }
             .filter { equipment == null || it.equipment == equipment }
-            .filter { q.isBlank() || q.split(' ').all { token -> it.name.normalized().contains(token) } }
-            .sortedWith(compareBy({ !it.name.normalized().startsWith(q) }, { it.name }))
+            .filter { q.isBlank() || q.split(' ').all { token -> nameOf(it).normalized().contains(token) } }
+            .sortedWith(compareBy({ !nameOf(it).normalized().startsWith(q) }, { nameOf(it) }))
     }
 
     internal fun String.normalized(): String =

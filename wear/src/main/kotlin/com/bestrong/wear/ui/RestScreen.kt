@@ -1,5 +1,7 @@
 package com.bestrong.wear.ui
 
+import com.bestrong.wear.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,12 +58,12 @@ fun RestScreen(session: WorkoutSession) {
                 strokeWidth = 8.dp,
             )
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text("Descanso", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.rest), style = MaterialTheme.typography.labelMedium)
                 Text(formatDuration(remaining), fontSize = 40.sp, fontWeight = FontWeight.Bold)
                 Text("♥ ${metrics.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.labelSmall)
                 next?.let { (we, s) ->
                     Text(
-                        "Sig.: ${we.exercise.name} ${unit.format(s.weightKg)}×${s.reps}",
+                        stringResource(R.string.next_short, we.exercise.displayName(), unit.format(s.weightKg), s.reps),
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
