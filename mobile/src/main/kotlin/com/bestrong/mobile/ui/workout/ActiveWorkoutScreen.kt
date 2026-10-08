@@ -63,6 +63,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowWidthSizeClass
@@ -141,7 +142,7 @@ fun ActiveWorkoutScreen(
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Minimizar entrenamiento") } },
                 title = {
                     TextButton(onClick = { renaming = true }, contentPadding = PaddingValues(0.dp)) {
-                        Text(w.name, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                        Text(w.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 },
                 actions = {
