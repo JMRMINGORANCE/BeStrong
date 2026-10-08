@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.wear.compose.material.Text
+import androidx.wear.compose.material3.Text
 import com.bestrong.wear.session.WorkoutSession
 import java.time.Instant
 import java.time.ZoneId

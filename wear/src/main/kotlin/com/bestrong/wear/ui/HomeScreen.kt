@@ -10,16 +10,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
-import androidx.wear.compose.material.Chip
-import androidx.wear.compose.material.ChipDefaults
-import androidx.wear.compose.material.ListHeader
-import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.PositionIndicator
-import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.TimeText
-import androidx.wear.compose.material.Vignette
-import androidx.wear.compose.material.VignettePosition
+import androidx.wear.compose.material3.Button
+import androidx.wear.compose.material3.ButtonDefaults
+import androidx.wear.compose.material3.ListHeader
+import androidx.wear.compose.material3.MaterialTheme
+import androidx.wear.compose.material3.ScreenScaffold
+import androidx.wear.compose.material3.Text
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.util.formatDuration
 import com.bestrong.wear.WearContainer
@@ -31,43 +27,38 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
     val routines by container.store.routines.collectAsStateWithLifecycle()
     val history by container.store.history.collectAsStateWithLifecycle()
     val active by container.session.workout.collectAsStateWithLifecycle()
+    val unit = LocalWeightUnit.current
     val listState = rememberScalingLazyListState()
     val zone = ZoneId.systemDefault()
     val thisWeek = WorkoutStats.weeklySummary(history, 1, LocalDate.now(zone), zone).first().workouts
     val streak = WorkoutStats.weeklyStreak(history, LocalDate.now(zone), zone)
 
-    Scaffold(
-        timeText = { TimeText() },
-        vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
-        positionIndicator = { PositionIndicator(scalingLazyListState = listState) },
-    ) {
-        ScalingLazyColumn(state = listState, modifier = Modifier.fillMaxWidth()) {
-            item { ListHeader { Text("BeStrong", color = Brand, style = MaterialTheme.typography.title2) } }
+    ScreenScaffold(scrollState = listState) { contentPadding ->
+        ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
+            item { ListHeader { Text("BeStrong", color = Brand, style = MaterialTheme.typography.titleLarge) } }
             item {
                 Text(
                     "$thisWeek entrenos esta semana · 🔥 $streak",
-                    style = MaterialTheme.typography.caption2,
+                    style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,
                 )
             }
             active?.let { w ->
                 item {
-                    Chip(
+                    Button(
                         onClick = onStart,
                         label = { Text("Continuar") },
                         secondaryLabel = { Text(w.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        colors = ChipDefaults.gradientBackgroundChipColors(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
             if (active == null) {
                 item {
-                    Chip(
+                    Button(
                         onClick = { container.session.startEmpty(); onStart() },
                         label = { Text("Entrenamiento vacío") },
                         icon = { Text("＋") },
-                        colors = ChipDefaults.primaryChipColors(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -76,17 +67,17 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
                     item {
                         Text(
                             "Crea rutinas en el móvil y aparecerán aquí",
-                            style = MaterialTheme.typography.caption3,
+                            style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
                         )
                     }
                 }
                 items(routines, key = { it.id }) { routine ->
-                    Chip(
+                    Button(
                         onClick = { container.session.startRoutine(routine); onStart() },
                         label = { Text(routine.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         secondaryLabel = { Text("${routine.exercises.size} ejercicios") },
-                        colors = ChipDefaults.secondaryChipColors(),
+                        colors = ButtonDefaults.filledTonalButtonColors(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -94,11 +85,11 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
             history.firstOrNull()?.let { last ->
                 item { ListHeader { Text("Último") } }
                 item {
-                    Chip(
+                    Button(
                         onClick = {},
                         enabled = false,
                         label = { Text(last.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        secondaryLabel = { Text("${formatDuration(last.durationSeconds())} · ${LocalWeightUnit.current.formatVolume(last.totalVolume)}") },
+                        secondaryLabel = { Text("${formatDuration(last.durationSeconds())} · ${unit.formatVolume(last.totalVolume)}") },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
