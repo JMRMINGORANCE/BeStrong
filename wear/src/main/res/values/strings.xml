@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="a11y_add_exercise">Añadir ejercicio</string>
+    <string name="a11y_add_one_set">Añadir una serie</string>
+    <string name="a11y_menu">Más opciones</string>
+    <string name="a11y_next_exercise">Siguiente ejercicio</string>
+    <string name="a11y_rest_minus">Quitar 15 segundos</string>
+    <string name="a11y_rest_plus">Añadir 15 segundos</string>
+    <string name="a11y_skip_rest">Saltar descanso</string>
     <string name="add_exercise">Añadir ejercicio</string>
     <string name="add_first_exercise">Añade tu primer ejercicio</string>
     <string name="add_set">Añadir serie</string>

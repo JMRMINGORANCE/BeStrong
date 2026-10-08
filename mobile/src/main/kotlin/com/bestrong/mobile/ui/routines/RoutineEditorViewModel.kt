@@ -1,17 +1,17 @@
 package com.bestrong.mobile.ui.routines
 
-import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
-import com.bestrong.mobile.R
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.RoutineExercise
 import com.bestrong.core.model.RoutineSet
 import com.bestrong.core.model.TrackingType
-import androidx.lifecycle.SavedStateHandle
+import com.bestrong.mobile.R
 import com.bestrong.mobile.data.BeStrongRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,12 +62,17 @@ class RoutineEditorViewModel @Inject constructor(
     fun addExercises(ids: List<String>) {
         val lookup = repo.previousSetsLookup.value
         _routine.update { r ->
-            r.copy(exercises = r.exercises + ids.mapNotNull { repo.exercise(it) }.map { ex ->
-                val prev = lookup(ex.id)
-                val sets = if (prev.isNotEmpty()) prev.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) }
-                else List(3) { RoutineSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
-                RoutineExercise(exercise = ex, sets = sets)
-            })
+            r.copy(
+                exercises = r.exercises + ids.mapNotNull { repo.exercise(it) }.map { ex ->
+                    val prev = lookup(ex.id)
+                    val sets = if (prev.isNotEmpty()) {
+                        prev.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) }
+                    } else {
+                        List(3) { RoutineSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
+                    }
+                    RoutineExercise(exercise = ex, sets = sets)
+                },
+            )
         }
     }
 
@@ -77,8 +82,11 @@ class RoutineEditorViewModel @Inject constructor(
     fun removeExercise(id: String) = _routine.update { r -> r.copy(exercises = r.exercises.filterNot { it.id == id }) }
 
     fun moveExercise(from: Int, to: Int) = _routine.update { r ->
-        if (from !in r.exercises.indices || to !in r.exercises.indices) r
-        else r.copy(exercises = r.exercises.toMutableList().apply { add(to, removeAt(from)) })
+        if (from !in r.exercises.indices || to !in r.exercises.indices) {
+            r
+        } else {
+            r.copy(exercises = r.exercises.toMutableList().apply { add(to, removeAt(from)) })
+        }
     }
 
     fun addSet(id: String) = updateExercise(id) { re -> re.copy(sets = re.sets + (re.sets.lastOrNull() ?: RoutineSet())) }

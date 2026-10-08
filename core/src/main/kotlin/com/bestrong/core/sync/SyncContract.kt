@@ -13,14 +13,19 @@ import kotlinx.serialization.json.Json
 object SyncContract {
     /** DataItem con las rutinas (móvil → reloj). */
     const val PATH_ROUTINES = "/bestrong/routines"
+
     /** Prefijo de DataItems con entrenamientos terminados (reloj → móvil); se añade el id. */
     const val PATH_FINISHED_WORKOUT_PREFIX = "/bestrong/finished-workout/"
+
     /** DataItem con el historial reciente (móvil → reloj) para "anterior", tile y complicación. */
     const val PATH_RECENT_HISTORY = "/bestrong/recent-history"
+
     /** DataItem con el entrenamiento en curso, compartido en vivo entre móvil y reloj. */
     const val PATH_ACTIVE_WORKOUT = "/bestrong/active-workout"
+
     /** DataItem con los ajustes que el reloj necesita (unidad de peso). */
     const val PATH_SETTINGS = "/bestrong/settings"
+
     /** Mensaje reloj → móvil con las métricas de salud en directo. */
     const val PATH_METRICS = "/bestrong/metrics"
     const val KEY_PAYLOAD = "payload"

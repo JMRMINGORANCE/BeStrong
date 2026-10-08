@@ -1,21 +1,21 @@
 package com.bestrong.mobile.ui.home
 
-import com.bestrong.mobile.ui.components.uiLanguage
-import com.bestrong.core.library.TrainingProgram
-import com.bestrong.core.library.Programs
-import com.bestrong.mobile.ui.components.defaultWorkoutName
-import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
-import com.bestrong.mobile.R
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bestrong.core.library.Programs
+import com.bestrong.core.library.TrainingProgram
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.session.WorkoutEditor
+import com.bestrong.mobile.R
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.sync.WatchSync
+import com.bestrong.mobile.ui.components.defaultWorkoutName
+import com.bestrong.mobile.ui.components.uiLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow

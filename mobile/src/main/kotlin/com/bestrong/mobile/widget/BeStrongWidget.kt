@@ -1,6 +1,5 @@
 package com.bestrong.mobile.widget
 
-import com.bestrong.mobile.R
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -34,12 +33,13 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.bestrong.core.model.Routine
 import com.bestrong.core.stats.WorkoutStats
+import com.bestrong.mobile.MainActivity
+import com.bestrong.mobile.R
 import com.bestrong.mobile.data.BeStrongRepository
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import com.bestrong.mobile.MainActivity
 import java.time.LocalDate
 import java.time.ZoneId
 

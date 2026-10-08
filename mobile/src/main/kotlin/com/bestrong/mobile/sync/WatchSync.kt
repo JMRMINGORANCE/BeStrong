@@ -10,10 +10,10 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.sync.SyncContract
 import com.google.android.gms.wearable.PutDataMapRequest
+import com.google.android.gms.wearable.Wearable
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.tasks.await
 

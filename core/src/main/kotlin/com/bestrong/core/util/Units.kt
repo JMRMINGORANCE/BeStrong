@@ -1,13 +1,14 @@
 package com.bestrong.core.util
 
-import kotlinx.serialization.Serializable
 import kotlin.math.roundToLong
+import kotlinx.serialization.Serializable
 
 /** Los pesos se guardan siempre en kg; la unidad solo afecta a cómo se muestran y se introducen. */
 @Serializable
 enum class WeightUnit(val label: String, val kgPerUnit: Double, val defaultIncrement: Double) {
     KG("kg", 1.0, 2.5),
-    LB("lb", 0.45359237, 5.0);
+    LB("lb", 0.45359237, 5.0),
+    ;
 
     fun fromKg(kg: Double): Double = kg / kgPerUnit
     fun toKg(value: Double): Double = value * kgPerUnit

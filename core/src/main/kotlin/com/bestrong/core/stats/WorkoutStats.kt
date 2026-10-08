@@ -117,14 +117,17 @@ object WorkoutStats {
             .mapNotNull { w ->
                 val sets = w.exercises.filter { it.exercise.id == exerciseId }
                     .flatMap { it.completedSets }.filter { it.type != SetType.WARMUP }
-                if (sets.isEmpty()) null
-                else ExerciseProgressPoint(
-                    dateEpochMs = w.startedAtEpochMs,
-                    bestOneRepMax = sets.maxOf { it.estimatedOneRepMax },
-                    heaviestWeight = sets.maxOf { it.weightKg },
-                    volume = sets.sumOf { it.volume },
-                    bestReps = sets.maxOf { it.reps },
-                )
+                if (sets.isEmpty()) {
+                    null
+                } else {
+                    ExerciseProgressPoint(
+                        dateEpochMs = w.startedAtEpochMs,
+                        bestOneRepMax = sets.maxOf { it.estimatedOneRepMax },
+                        heaviestWeight = sets.maxOf { it.weightKg },
+                        volume = sets.sumOf { it.volume },
+                        bestReps = sets.maxOf { it.reps },
+                    )
+                }
             }
 
     fun weekStart(epochMs: Long, zone: ZoneId): LocalDate =

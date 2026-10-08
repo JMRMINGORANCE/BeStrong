@@ -27,12 +27,17 @@ object WorkoutEditor {
     }
 
     fun addExercises(workout: Workout, exercises: List<Exercise>, previousSets: (String) -> List<WorkoutSet> = { emptyList() }): Workout =
-        workout.copy(exercises = workout.exercises + exercises.map { ex ->
-            val prev = previousSets(ex.id)
-            val sets = if (prev.isNotEmpty()) prev.map { it.copy(id = com.bestrong.core.util.newId(), completed = false, rpe = null) }
-            else List(3) { WorkoutSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
-            WorkoutExercise(exercise = ex, sets = sets)
-        })
+        workout.copy(
+            exercises = workout.exercises + exercises.map { ex ->
+                val prev = previousSets(ex.id)
+                val sets = if (prev.isNotEmpty()) {
+                    prev.map { it.copy(id = com.bestrong.core.util.newId(), completed = false, rpe = null) }
+                } else {
+                    List(3) { WorkoutSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
+                }
+                WorkoutExercise(exercise = ex, sets = sets)
+            },
+        )
 
     fun removeExercise(workout: Workout, workoutExerciseId: String): Workout =
         workout.copy(exercises = workout.exercises.filterNot { it.id == workoutExerciseId })
@@ -53,12 +58,14 @@ object WorkoutEditor {
     /** Añade una serie copiando la última (peso y reps). */
     fun addSet(workout: Workout, workoutExerciseId: String): Workout = updateExercise(workout, workoutExerciseId) { we ->
         val last = we.sets.lastOrNull()
-        we.copy(sets = we.sets + WorkoutSet(
-            weightKg = last?.weightKg ?: 0.0,
-            reps = last?.reps ?: 10,
-            durationSec = last?.durationSec ?: 0,
-            type = if (last?.type == SetType.WARMUP) SetType.NORMAL else last?.type ?: SetType.NORMAL,
-        ))
+        we.copy(
+            sets = we.sets + WorkoutSet(
+                weightKg = last?.weightKg ?: 0.0,
+                reps = last?.reps ?: 10,
+                durationSec = last?.durationSec ?: 0,
+                type = if (last?.type == SetType.WARMUP) SetType.NORMAL else last?.type ?: SetType.NORMAL,
+            ),
+        )
     }
 
     fun removeSet(workout: Workout, workoutExerciseId: String, setId: String): Workout =
@@ -92,13 +99,15 @@ object WorkoutEditor {
         val b = workout.exercises[i + 1]
         val group = a.supersetId ?: b.supersetId ?: com.bestrong.core.util.newId()
         val oldB = b.supersetId
-        return workout.copy(exercises = workout.exercises.map {
-            when {
-                it.id == a.id || it.id == b.id -> it.copy(supersetId = group)
-                oldB != null && it.supersetId == oldB -> it.copy(supersetId = group)
-                else -> it
-            }
-        })
+        return workout.copy(
+            exercises = workout.exercises.map {
+                when {
+                    it.id == a.id || it.id == b.id -> it.copy(supersetId = group)
+                    oldB != null && it.supersetId == oldB -> it.copy(supersetId = group)
+                    else -> it
+                }
+            },
+        )
     }
 
     /** Saca el ejercicio de su superserie; si queda uno solo en el grupo, el grupo desaparece. */

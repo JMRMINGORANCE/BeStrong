@@ -1,7 +1,5 @@
 package com.bestrong.wear.ui
 
-import com.bestrong.wear.R
-import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,6 +30,7 @@ import androidx.wear.compose.material3.TextButton
 import androidx.wear.compose.material3.TextButtonDefaults
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.util.formatDuration
+import com.bestrong.wear.R
 import com.bestrong.wear.session.WorkoutSession
 import kotlinx.coroutines.delay
 
@@ -72,9 +72,9 @@ fun RestScreen(session: WorkoutSession) {
                     )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(onClick = { session.adjustRest(-15) }, colors = TextButtonDefaults.filledTonalTextButtonColors()) { Text("-15") }
-                    TextButton(onClick = session::stopRest, colors = TextButtonDefaults.filledTextButtonColors()) { Text("⏭") }
-                    TextButton(onClick = { session.adjustRest(15) }, colors = TextButtonDefaults.filledTonalTextButtonColors()) { Text("+15") }
+                    TextButton(onClick = { session.adjustRest(-15) }, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_rest_minus))) { Text("-15") }
+                    TextButton(onClick = session::stopRest, colors = TextButtonDefaults.filledTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_skip_rest))) { Text("⏭") }
+                    TextButton(onClick = { session.adjustRest(15) }, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_rest_plus))) { Text("+15") }
                 }
             }
         }

@@ -1,27 +1,10 @@
 package com.bestrong.mobile.ui.profile
 
-import com.bestrong.mobile.ui.components.formatDate
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import android.os.Build
 import android.Manifest
-import com.bestrong.mobile.ui.components.label
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
-import com.bestrong.mobile.ui.components.LocalWeightUnit
 import android.content.Intent
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import com.bestrong.core.util.WeightUnit
-import com.bestrong.mobile.PrivacyPolicyActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -29,11 +12,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
@@ -43,6 +26,11 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,18 +38,31 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.core.util.formatWeight
+import com.bestrong.mobile.PrivacyPolicyActivity
+import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.BarChart
 import com.bestrong.mobile.ui.components.ChartPoint
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.StatTile
+import com.bestrong.mobile.ui.components.formatDate
+import com.bestrong.mobile.ui.components.label
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -204,41 +205,33 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 }
                             },
                         )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.progression_setting)) },
-                            supportingContent = { Text(stringResource(R.string.progression_setting_body)) },
-                            trailingContent = { Switch(settings.progressionEnabled, { v -> vm.updateSettings { it.copy(progressionEnabled = v) } }) },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.vibrate_rest)) },
-                            trailingContent = { Switch(settings.vibrateOnRestEnd, { v -> vm.updateSettings { it.copy(vibrateOnRestEnd = v) } }) },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.keep_screen_on)) },
-                            trailingContent = { Switch(settings.keepScreenOn, { v -> vm.updateSettings { it.copy(keepScreenOn = v) } }) },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.hc_export)) },
-                            supportingContent = {
-                                Text(
-                                    when {
-                                        !vm.healthConnectAvailable -> stringResource(R.string.hc_unavailable)
-                                        settings.healthConnectExport && !hcGranted -> stringResource(R.string.hc_missing_perms)
-                                        else -> stringResource(R.string.hc_body)
-                                    },
-                                )
+                        SwitchItem(
+                            title = stringResource(R.string.progression_setting),
+                            body = stringResource(R.string.progression_setting_body),
+                            checked = settings.progressionEnabled,
+                        ) { v -> vm.updateSettings { it.copy(progressionEnabled = v) } }
+                        SwitchItem(stringResource(R.string.vibrate_rest), checked = settings.vibrateOnRestEnd) { v ->
+                            vm.updateSettings { it.copy(vibrateOnRestEnd = v) }
+                        }
+                        SwitchItem(stringResource(R.string.keep_screen_on), checked = settings.keepScreenOn) { v ->
+                            vm.updateSettings { it.copy(keepScreenOn = v) }
+                        }
+                        SwitchItem(
+                            title = stringResource(R.string.hc_export),
+                            body = when {
+                                !vm.healthConnectAvailable -> stringResource(R.string.hc_unavailable)
+                                settings.healthConnectExport && !hcGranted -> stringResource(R.string.hc_missing_perms)
+                                else -> stringResource(R.string.hc_body)
                             },
-                            trailingContent = {
-                                Switch(
-                                    checked = settings.healthConnectExport && hcGranted,
-                                    enabled = vm.healthConnectAvailable,
-                                    onCheckedChange = { on ->
-                                        if (on && !hcGranted) hcLauncher.launch(vm.healthConnectPermissions)
-                                        else vm.updateSettings { it.copy(healthConnectExport = on) }
-                                    },
-                                )
-                            },
-                        )
+                            checked = settings.healthConnectExport && hcGranted,
+                            enabled = vm.healthConnectAvailable,
+                        ) { on ->
+                            if (on && !hcGranted) {
+                                hcLauncher.launch(vm.healthConnectPermissions)
+                            } else {
+                                vm.updateSettings { it.copy(healthConnectExport = on) }
+                            }
+                        }
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.reminders)) },
                             supportingContent = { Text(reminderSummary(settings)) },
@@ -288,4 +281,18 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             }
         }
     }
+}
+
+/**
+ * Ajuste con interruptor: toda la fila es pulsable y TalkBack la lee como
+ * «<título>, interruptor, activado» en lugar de un interruptor sin nombre.
+ */
+@Composable
+private fun SwitchItem(title: String, body: String? = null, checked: Boolean, enabled: Boolean = true, onChange: (Boolean) -> Unit) {
+    ListItem(
+        headlineContent = { Text(title) },
+        supportingContent = body?.let { { Text(it) } },
+        trailingContent = { Switch(checked = checked, onCheckedChange = null, enabled = enabled) },
+        modifier = Modifier.toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onChange),
+    )
 }

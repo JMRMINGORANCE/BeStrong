@@ -1,39 +1,39 @@
 package com.bestrong.mobile.ui.profile
 
-import com.bestrong.mobile.backup.AutoBackupWorker
+import android.content.Context
 import android.content.Intent
-import com.bestrong.mobile.R
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.bestrong.core.io.WorkoutCsv
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.withContext
 import androidx.lifecycle.viewModelScope
+import com.bestrong.core.io.WorkoutCsv
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WeekBucket
 import com.bestrong.core.stats.WorkoutStats
-import android.content.Context
+import com.bestrong.mobile.R
+import com.bestrong.mobile.backup.AutoBackupWorker
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.health.HealthConnectExporter
 import com.bestrong.mobile.sync.WatchSync
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.LocalDate
+import java.time.ZoneId
 import javax.inject.Inject
-import com.bestrong.mobile.data.UserSettings
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.ZoneId
+import kotlinx.coroutines.withContext
 
 data class ProfileStats(
     val totalWorkouts: Int = 0,

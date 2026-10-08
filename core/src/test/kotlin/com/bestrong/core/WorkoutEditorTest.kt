@@ -64,9 +64,11 @@ class WorkoutEditorTest {
     @Test fun librarySearchIgnoresAccents() {
         val all = ExerciseLibrary.all
         assertTrue(ExerciseLibrary.search(all, "press frances").any { it.id == "skull_crusher" })
-        assertTrue(ExerciseLibrary.search(all, "", muscle = MuscleGroup.CALVES).all {
-            it.primaryMuscle == MuscleGroup.CALVES || MuscleGroup.CALVES in it.secondaryMuscles
-        })
+        assertTrue(
+            ExerciseLibrary.search(all, "", muscle = MuscleGroup.CALVES).all {
+                it.primaryMuscle == MuscleGroup.CALVES || MuscleGroup.CALVES in it.secondaryMuscles
+            },
+        )
         assertEquals(all.size, all.map { it.id }.toSet().size)
     }
 

@@ -4,13 +4,13 @@ import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.model.SetType
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WorkoutStats
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalDate
 
 class WorkoutStatsTest {
-    private val d1 = LocalDate.of(2026, 9, 7)   // lunes
+    private val d1 = LocalDate.of(2026, 9, 7) // lunes
     private val d2 = LocalDate.of(2026, 9, 14)
     private val d3 = LocalDate.of(2026, 9, 21)
 

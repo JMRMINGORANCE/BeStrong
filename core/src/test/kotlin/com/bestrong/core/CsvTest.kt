@@ -7,10 +7,10 @@ import com.bestrong.core.io.WorkoutCsv
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.SetType
 import com.bestrong.core.util.WeightUnit
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalDate
 
 class CsvTest {
     @Test fun parserHandlesQuotes() {

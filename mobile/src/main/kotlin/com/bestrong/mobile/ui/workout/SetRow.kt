@@ -1,7 +1,5 @@
 package com.bestrong.mobile.ui.workout
 
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -39,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -52,6 +51,7 @@ import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.util.WeightUnit
+import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 
 /** Cabecera de la tabla de series: SERIE | ANTERIOR | KG | REPS | ✓ */

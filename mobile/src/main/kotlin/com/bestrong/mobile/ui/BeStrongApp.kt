@@ -1,18 +1,7 @@
 package com.bestrong.mobile.ui
 
-import androidx.annotation.StringRes
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.CompositionLocalProvider
-import com.bestrong.mobile.LaunchRequest
-import com.bestrong.mobile.ui.components.LocalWeightUnit
-import kotlinx.coroutines.flow.StateFlow
-import androidx.lifecycle.ViewModel
-import com.bestrong.mobile.data.SettingsStore
-import com.bestrong.mobile.data.UserSettings
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -20,14 +9,19 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -37,8 +31,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.bestrong.mobile.LaunchRequest
+import com.bestrong.mobile.R
+import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.data.UserSettings
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.exercises.ExerciseDetailScreen
 import com.bestrong.mobile.ui.exercises.ExerciseLibraryScreen
 import com.bestrong.mobile.ui.exercises.ExercisePickerScreen
@@ -54,6 +51,9 @@ import com.bestrong.mobile.ui.routines.RoutineEditorScreen
 import com.bestrong.mobile.ui.routines.RoutineEditorViewModel
 import com.bestrong.mobile.ui.workout.ActiveWorkoutScreen
 import com.bestrong.mobile.ui.workout.ActiveWorkoutViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
 enum class TopLevel(val route: String, @StringRes val label: Int, val icon: ImageVector) {
     TRAIN("train", R.string.nav_train, Icons.Default.FitnessCenter),
@@ -106,8 +106,11 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
         onLaunchHandled()
     }
 
-    val layoutType = if (topLevel == null) NavigationSuiteType.None
-    else NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+    val layoutType = if (topLevel == null) {
+        NavigationSuiteType.None
+    } else {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+    }
 
     CompositionLocalProvider(LocalWeightUnit provides settings.unit) {
         NavigationSuiteScaffold(

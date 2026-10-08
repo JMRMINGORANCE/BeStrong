@@ -1,7 +1,5 @@
 package com.bestrong.mobile.ui.exercises
 
-import com.bestrong.mobile.ui.components.displayName
-import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,7 +15,9 @@ import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.util.newId
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -50,7 +50,9 @@ class ExercisesViewModel @Inject constructor(
             val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)
             val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id } }
             recent + (found - recent.toSet())
-        } else found
+        } else {
+            found
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val usageCount: StateFlow<Map<String, Int>> = combine(repo.history, filter) { h, _ ->

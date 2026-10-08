@@ -12,13 +12,13 @@ import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.wear.data.WearStore
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import com.bestrong.wear.MainActivity
 import com.bestrong.wear.R
+import com.bestrong.wear.data.WearStore
+import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
 import java.time.ZoneId
+import javax.inject.Inject
 
 /** Complicación para la esfera: entrenos de esta semana (objetivo: 4). */
 @AndroidEntryPoint

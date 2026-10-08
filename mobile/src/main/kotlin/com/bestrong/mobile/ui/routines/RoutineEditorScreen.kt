@@ -1,9 +1,5 @@
 package com.bestrong.mobile.ui.routines
 
-import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
-import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,13 +38,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.util.formatDuration
-import com.bestrong.core.util.formatWeight
+import com.bestrong.mobile.R
+import com.bestrong.mobile.ui.components.LocalWeightUnit
+import com.bestrong.mobile.ui.components.displayName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,18 +107,20 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                             }
                         }
                         re.sets.forEachIndexed { i, set ->
-                            key(re.id, i, re.sets.size) { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Text("${i + 1}", Modifier.widthIn(min = 24.dp), fontWeight = FontWeight.Bold)
-                                if (re.exercise.tracking == TrackingType.DURATION) {
-                                    SmallNumberField(stringResource(R.string.seconds_short), set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
-                                } else {
-                                    SmallNumberField(unit.label, unit.format(set.weightKg), Modifier.weight(1f), decimal = true) { v ->
-                                        vm.updateSet(re.id, i) { it.copy(weightKg = unit.parseToKg(v) ?: 0.0) }
+                            key(re.id, i, re.sets.size) {
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text("${i + 1}", Modifier.widthIn(min = 24.dp), fontWeight = FontWeight.Bold)
+                                    if (re.exercise.tracking == TrackingType.DURATION) {
+                                        SmallNumberField(stringResource(R.string.seconds_short), set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
+                                    } else {
+                                        SmallNumberField(unit.label, unit.format(set.weightKg), Modifier.weight(1f), decimal = true) { v ->
+                                            vm.updateSet(re.id, i) { it.copy(weightKg = unit.parseToKg(v) ?: 0.0) }
+                                        }
+                                        SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
                                     }
-                                    SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
+                                    IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set)) }
                                 }
-                                IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set)) }
-                            } }
+                            }
                         }
                         OutlinedButton(onClick = { vm.addSet(re.id) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.add_set)) }
                     }

@@ -9,12 +9,12 @@ import com.bestrong.core.training.Progression
 import com.bestrong.core.training.SuggestionKind
 import com.bestrong.core.training.WarmupGenerator
 import com.bestrong.core.util.WeightUnit
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalDate
 
 class TrainingTest {
     private val d = LocalDate.of(2026, 9, 1)

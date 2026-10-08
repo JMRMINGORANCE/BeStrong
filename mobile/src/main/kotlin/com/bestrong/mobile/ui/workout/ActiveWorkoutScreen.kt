@@ -1,13 +1,5 @@
 package com.bestrong.mobile.ui.workout
 
-import androidx.compose.material.icons.filled.Share
-import com.bestrong.mobile.share.WorkoutShareCard
-import com.bestrong.mobile.ui.components.uiLanguage
-import com.bestrong.mobile.ui.components.reasonText
-import com.bestrong.mobile.ui.components.label
-import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
 import android.app.Activity
 import android.view.WindowManager
 import androidx.compose.foundation.background
@@ -37,6 +29,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -68,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -87,11 +81,17 @@ import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.training.SuggestionKind
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatWeight
+import com.bestrong.mobile.R
+import com.bestrong.mobile.share.WorkoutShareCard
 import com.bestrong.mobile.ui.FoldPosture
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.RestTimerBar
 import com.bestrong.mobile.ui.components.StatTile
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.rememberNow
+import com.bestrong.mobile.ui.components.uiLanguage
 import com.bestrong.mobile.ui.rememberFoldPosture
 
 /**

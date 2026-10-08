@@ -1,7 +1,5 @@
 package com.bestrong.wear.ui
 
-import com.bestrong.wear.R
-import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -9,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -28,6 +27,7 @@ import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.util.formatDuration
+import com.bestrong.wear.R
 import com.bestrong.wear.WearContainer
 import com.bestrong.wear.session.WorkoutSession
 
@@ -104,9 +104,11 @@ fun ExercisePickerScreen(container: WearContainer, onPick: (Exercise) -> Unit) {
     var muscle by remember { mutableStateOf<MuscleGroup?>(null) }
     val listState = rememberScalingLazyListState()
     // Ejercicios personalizados del móvil llegan dentro del historial/rutinas
-    val known = (ExerciseLibrary.all +
-        routines.flatMap { r -> r.exercises.map { it.exercise } } +
-        history.flatMap { w -> w.exercises.map { it.exercise } }).distinctBy { it.id }
+    val known = (
+        ExerciseLibrary.all +
+            routines.flatMap { r -> r.exercises.map { it.exercise } } +
+            history.flatMap { w -> w.exercises.map { it.exercise } }
+        ).distinctBy { it.id }
     val recent = history.flatMap { w -> w.exercises.map { it.exercise } }.distinctBy { it.id }.take(6)
 
     ScreenScaffold(scrollState = listState) { contentPadding ->

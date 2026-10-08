@@ -1,6 +1,5 @@
 package com.bestrong.wear.tile
 
-import com.bestrong.wear.R
 import androidx.wear.protolayout.ActionBuilders
 import androidx.wear.protolayout.ColorBuilders.argb
 import androidx.wear.protolayout.DeviceParametersBuilders.DeviceParameters
@@ -16,14 +15,15 @@ import androidx.wear.tiles.RequestBuilders
 import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.TileService
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.wear.WearContainer
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import com.bestrong.wear.MainActivity
+import com.bestrong.wear.R
+import com.bestrong.wear.WearContainer
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
 import java.time.ZoneId
+import javax.inject.Inject
 
 /** Tile: entrenos de la semana, racha y botón para empezar a entrenar. */
 @AndroidEntryPoint

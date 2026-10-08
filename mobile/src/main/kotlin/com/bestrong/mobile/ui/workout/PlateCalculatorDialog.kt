@@ -1,7 +1,5 @@
 package com.bestrong.mobile.ui.workout
 
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -21,12 +19,14 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.bestrong.core.training.PlateCalculator
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatWeight
+import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 
 /** Qué discos poner en cada lado de la barra para un peso objetivo. */

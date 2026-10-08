@@ -1,9 +1,5 @@
 package com.bestrong.mobile.ui.exercises
 
-import com.bestrong.mobile.ui.components.label
-import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -50,13 +47,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.model.TrackingType
+import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.EmptyState
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.label
 
 /** Pestaña "Ejercicios": lista y detalle lado a lado en el Fold desplegado. */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
@@ -79,8 +81,11 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
         detailPane = {
             AnimatedPane {
                 val id = (navigator.currentDestination?.content as? String)
-                if (id == null) EmptyState(Icons.Default.Search, stringResource(R.string.exercise_pick_title), stringResource(R.string.exercise_pick_body))
-                else ExerciseDetailScreen(vm, id, onBack = if (navigator.canNavigateBack()) ({ navigator.navigateBack() }) else null)
+                if (id == null) {
+                    EmptyState(Icons.Default.Search, stringResource(R.string.exercise_pick_title), stringResource(R.string.exercise_pick_body))
+                } else {
+                    ExerciseDetailScreen(vm, id, onBack = if (navigator.canNavigateBack()) ({ navigator.navigateBack() }) else null)
+                }
             }
         },
     )
@@ -171,9 +176,14 @@ fun ExerciseSearchList(
                         )
                         Text(parts.joinToString(" · "))
                     },
-                    trailingContent = if (multiSelect) ({ Checkbox(checked = ex.id in selected, onCheckedChange = { onClick(ex) }) }) else null,
+                    trailingContent = if (multiSelect) ({ Checkbox(checked = ex.id in selected, onCheckedChange = null) }) else null,
                     tonalElevation = if (!multiSelect && ex.id in selected) 4.dp else 0.dp,
-                    modifier = Modifier.clickable { onClick(ex) },
+                    // En selección múltiple toda la fila es la casilla (TalkBack: «Press banca, casilla, marcada»)
+                    modifier = if (multiSelect) {
+                        Modifier.toggleable(value = ex.id in selected, role = Role.Checkbox) { onClick(ex) }
+                    } else {
+                        Modifier.clickable { onClick(ex) }
+                    },
                 )
             }
         }

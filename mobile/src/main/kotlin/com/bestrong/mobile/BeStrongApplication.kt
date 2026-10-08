@@ -1,7 +1,5 @@
 package com.bestrong.mobile
 
-import com.bestrong.mobile.backup.AutoBackupWorker
-import com.bestrong.mobile.notify.ReminderWorker
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -11,10 +9,12 @@ import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.training.Progression
+import com.bestrong.mobile.backup.AutoBackupWorker
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.di.ApplicationScope
 import com.bestrong.mobile.health.HealthConnectExporter
+import com.bestrong.mobile.notify.ReminderWorker
 import com.bestrong.mobile.sync.WatchSync
 import com.bestrong.mobile.widget.BeStrongWidget
 import com.bestrong.mobile.workout.RestTimerController
@@ -95,8 +95,9 @@ class AppSync @Inject constructor(
         scope.launch {
             repository.activeWorkout.drop(1).debounce(300).collect { w ->
                 watchSync.pushActive(w)
-                if (w != null) WorkoutForegroundService.start(context)
-                else {
+                if (w != null) {
+                    WorkoutForegroundService.start(context)
+                } else {
                     restTimer.skip()
                     watchMetrics.metrics.value = null
                 }

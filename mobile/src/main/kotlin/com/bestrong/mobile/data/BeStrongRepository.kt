@@ -1,15 +1,15 @@
 package com.bestrong.mobile.data
 
+import com.bestrong.core.io.Persistence
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
-import com.bestrong.core.io.Persistence
-import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SyncContract.json
+import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.mobile.data.db.BeStrongDao
 import com.bestrong.mobile.data.db.CustomExerciseEntity
 import com.bestrong.mobile.data.db.KeyValueEntity
@@ -73,8 +73,11 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     suspend fun setActive(workout: Workout?) = activeMutex.withLock { write(workout?.copy(updatedAtEpochMs = System.currentTimeMillis())) }
 
     private suspend fun write(workout: Workout?) {
-        if (workout == null) dao.deleteValue(KEY_ACTIVE)
-        else dao.putValue(KeyValueEntity(KEY_ACTIVE, Persistence.encodeWorkout(workout)))
+        if (workout == null) {
+            dao.deleteValue(KEY_ACTIVE)
+        } else {
+            dao.putValue(KeyValueEntity(KEY_ACTIVE, Persistence.encodeWorkout(workout)))
+        }
     }
 
     /** Aplica un cambio sobre el último estado guardado (evita perder ediciones rápidas). */

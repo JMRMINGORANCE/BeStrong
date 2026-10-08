@@ -17,11 +17,11 @@ import com.bestrong.mobile.WatchMetricsStore
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.data.UserSettings
+import com.bestrong.mobile.ui.components.RestState
 import com.bestrong.mobile.workout.RestTimerController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import com.bestrong.mobile.data.UserSettings
-import com.bestrong.mobile.ui.components.RestState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -57,8 +57,11 @@ class ActiveWorkoutViewModel @Inject constructor(
         repo.history,
         settings,
     ) { exercises, history, s ->
-        if (!s.progressionEnabled) emptyMap()
-        else exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.unit.stepKg())?.let { ex.id to it } }.toMap()
+        if (!s.progressionEnabled) {
+            emptyMap()
+        } else {
+            exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.unit.stepKg())?.let { ex.id to it } }.toMap()
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     private val _summary = MutableStateFlow<FinishedSummary?>(null)
@@ -110,10 +113,15 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun applySuggestion(weId: String, suggestion: ProgressionSuggestion) = edit { w ->
         WorkoutEditor.updateExercise(w, weId) { we ->
             var i = 0
-            we.copy(sets = we.sets.map { s ->
-                if (s.completed || s.type == SetType.WARMUP) s
-                else suggestion.sets.getOrNull(i++)?.let { sug -> s.copy(weightKg = sug.weightKg, reps = sug.reps, durationSec = sug.durationSec) } ?: s
-            })
+            we.copy(
+                sets = we.sets.map { s ->
+                    if (s.completed || s.type == SetType.WARMUP) {
+                        s
+                    } else {
+                        suggestion.sets.getOrNull(i++)?.let { sug -> s.copy(weightKg = sug.weightKg, reps = sug.reps, durationSec = sug.durationSec) } ?: s
+                    }
+                },
+            )
         }
     }
 

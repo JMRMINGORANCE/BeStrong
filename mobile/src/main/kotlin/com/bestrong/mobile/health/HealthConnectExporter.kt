@@ -9,9 +9,9 @@ import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.units.Energy
 import com.bestrong.core.model.Workout
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
-import java.time.Instant
 
 /**
  * Exporta entrenamientos a Health Connect. Samsung Health los lee desde ahí,

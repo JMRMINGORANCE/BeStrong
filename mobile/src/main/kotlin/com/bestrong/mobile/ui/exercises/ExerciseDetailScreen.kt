@@ -1,10 +1,5 @@
 package com.bestrong.mobile.ui.exercises
 
-import com.bestrong.mobile.ui.components.label
-import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
-import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,8 +10,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,18 +29,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.util.formatVolume
-import com.bestrong.core.util.formatWeight
+import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.EmptyState
 import com.bestrong.mobile.ui.components.LineChart
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
+import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatShortDate
+import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.workout.describeSet
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,8 +61,10 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             title = { Text(s.exercise.displayName()) },
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
-                if (s.exercise.isCustom) IconButton(onClick = { vm.deleteCustom(s.exercise.id); onBack?.invoke() }) {
-                    Icon(Icons.Default.Delete, stringResource(R.string.delete_exercise))
+                if (s.exercise.isCustom) {
+                    IconButton(onClick = { vm.deleteCustom(s.exercise.id); onBack?.invoke() }) {
+                        Icon(Icons.Default.Delete, stringResource(R.string.delete_exercise))
+                    }
                 }
             },
         )

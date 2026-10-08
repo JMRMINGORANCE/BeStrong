@@ -1,23 +1,23 @@
 package com.bestrong.mobile.sync
 
-import com.bestrong.mobile.notify.Notifier
-import com.bestrong.mobile.data.SettingsStore
-import com.bestrong.core.stats.WorkoutStats
 import android.util.Log
+import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.mobile.WatchMetricsStore
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.di.ApplicationScope
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
+import com.bestrong.mobile.notify.Notifier
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
@@ -32,9 +32,13 @@ import kotlinx.coroutines.tasks.await
 class WatchSyncService : WearableListenerService() {
 
     @Inject lateinit var repository: BeStrongRepository
+
     @Inject lateinit var actions: WorkoutActions
+
     @Inject lateinit var watchMetrics: WatchMetricsStore
+
     @Inject lateinit var settings: SettingsStore
+
     @Inject @ApplicationScope lateinit var appScope: CoroutineScope
 
     override fun onDataChanged(events: DataEventBuffer) {

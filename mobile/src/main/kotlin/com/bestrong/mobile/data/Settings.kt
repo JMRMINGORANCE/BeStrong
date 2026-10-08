@@ -2,10 +2,10 @@ package com.bestrong.mobile.data
 
 import android.content.Context
 import androidx.core.content.edit
+import com.bestrong.core.util.WeightUnit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import com.bestrong.core.util.WeightUnit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

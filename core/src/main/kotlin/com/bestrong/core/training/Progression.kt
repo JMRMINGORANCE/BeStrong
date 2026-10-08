@@ -10,14 +10,19 @@ import com.bestrong.core.stats.WorkoutStats
 enum class SuggestionKind {
     /** Subir el peso (todas las series completadas). */
     INCREASE_WEIGHT,
+
     /** Mismo peso, buscar [ProgressionSuggestion.targetReps] en todas las series. */
     ADD_REPS,
+
     /** Ejercicio sin peso: +1 repetición por serie. */
     ADD_ONE_REP,
+
     /** Ejercicio por tiempo: +5 s por serie. */
     ADD_TIME,
+
     /** RPE alto: repetir y consolidar. */
     REPEAT,
+
     /** Estancado [ProgressionSuggestion.stallSessions] sesiones: descarga al 90 %. */
     DELOAD,
 }

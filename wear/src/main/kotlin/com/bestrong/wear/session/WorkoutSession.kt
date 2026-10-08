@@ -10,18 +10,18 @@ import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
-import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
+import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.training.Progression
+import com.bestrong.wear.ApplicationScope
 import com.bestrong.wear.data.PhoneSync
 import com.bestrong.wear.data.WearStore
 import com.bestrong.wear.health.ExerciseService
-import com.bestrong.wear.ApplicationScope
 import com.bestrong.wear.health.RepCounter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -286,7 +286,9 @@ class WorkoutSession @Inject constructor(
         edit { w ->
             val withReps = if (_repCounting.value && counted > 0 && we.exercise.tracking != TrackingType.DURATION) {
                 WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = counted) }
-            } else w
+            } else {
+                w
+            }
             WorkoutEditor.toggleSetCompleted(withReps, we.id, s.id)
         }
         repCounter.reset()
@@ -297,7 +299,9 @@ class WorkoutSession @Inject constructor(
         return if (next != null && restSeconds > 0) {
             startRest(restSeconds)
             true
-        } else false
+        } else {
+            false
+        }
     }
 
     // --- Descanso ----------------------------------------------------------------------------

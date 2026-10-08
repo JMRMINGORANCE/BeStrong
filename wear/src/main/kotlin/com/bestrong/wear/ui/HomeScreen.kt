@@ -1,11 +1,11 @@
 package com.bestrong.wear.ui
 
-import com.bestrong.wear.R
-import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -20,6 +20,7 @@ import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.util.formatDuration
+import com.bestrong.wear.R
 import com.bestrong.wear.WearContainer
 import java.time.LocalDate
 import java.time.ZoneId
@@ -60,7 +61,7 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
                     Button(
                         onClick = { container.session.startEmpty(); onStart() },
                         label = { Text(stringResource(R.string.empty_workout)) },
-                        icon = { Text("＋") },
+                        icon = { Text("＋", Modifier.clearAndSetSemantics { }) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

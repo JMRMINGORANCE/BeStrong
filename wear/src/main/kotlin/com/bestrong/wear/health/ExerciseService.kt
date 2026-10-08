@@ -26,11 +26,11 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
+import com.bestrong.wear.MainActivity
+import com.bestrong.wear.R
 import com.bestrong.wear.session.WorkoutSession
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import com.bestrong.wear.MainActivity
-import com.bestrong.wear.R
 import kotlinx.coroutines.launch
 
 /**

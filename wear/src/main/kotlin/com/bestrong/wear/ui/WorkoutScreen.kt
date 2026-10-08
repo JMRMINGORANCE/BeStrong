@@ -1,7 +1,5 @@
 package com.bestrong.wear.ui
 
-import com.bestrong.wear.R
-import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -32,6 +30,7 @@ import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +50,7 @@ import androidx.wear.compose.material3.TextButtonDefaults
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.util.formatDuration
+import com.bestrong.wear.R
 import com.bestrong.wear.session.RotaryTarget
 import com.bestrong.wear.session.WorkoutSession
 import kotlinx.coroutines.delay
@@ -111,7 +111,9 @@ fun WorkoutScreen(
                     if (e.key.nativeKeyCode in STEM_KEYS) {
                         if (e.type == KeyEventType.KeyUp && session.currentSet() != null && session.completeSet()) onRest()
                         true
-                    } else false
+                    } else {
+                        false
+                    }
                 }
                 .focusRequester(focus)
                 .focusable(),
@@ -131,8 +133,8 @@ fun WorkoutScreen(
                     Text(stringResource(R.string.add_first_exercise), textAlign = TextAlign.Center)
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        TextButton(onClick = onMenu, colors = TextButtonDefaults.filledTonalTextButtonColors()) { Text("⋯") }
-                        TextButton(onClick = onAddExercise, colors = TextButtonDefaults.filledTextButtonColors()) { Text("＋") }
+                        TextButton(onClick = onMenu, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_menu))) { Text("⋯") }
+                        TextButton(onClick = onAddExercise, colors = TextButtonDefaults.filledTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_add_exercise))) { Text("＋") }
                     }
                     return@Column
                 }
@@ -149,9 +151,9 @@ fun WorkoutScreen(
                     Text(stringResource(R.string.exercise_done), color = Done, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(6.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        TextButton(onClick = session::addSet, colors = TextButtonDefaults.filledTonalTextButtonColors()) { Text("+1") }
-                        TextButton(onClick = onMenu, colors = TextButtonDefaults.filledTonalTextButtonColors()) { Text("⋯") }
-                        TextButton(onClick = session::nextExercise, enabled = index < w.exercises.lastIndex) { Text("▶") }
+                        TextButton(onClick = session::addSet, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_add_one_set))) { Text("+1") }
+                        TextButton(onClick = onMenu, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_menu))) { Text("⋯") }
+                        TextButton(onClick = session::nextExercise, enabled = index < w.exercises.lastIndex, modifier = Modifier.describedAs(stringResource(R.string.a11y_next_exercise))) { Text("▶") }
                     }
                     return@Column
                 }
@@ -190,11 +192,12 @@ fun WorkoutScreen(
                 }
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    TextButton(onClick = onMenu, colors = TextButtonDefaults.filledTonalTextButtonColors()) { Text("⋯") }
+                    TextButton(onClick = onMenu, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_menu))) { Text("⋯") }
                     TextButton(
                         onClick = session::nextExercise,
                         enabled = index < w.exercises.lastIndex,
                         colors = TextButtonDefaults.filledTonalTextButtonColors(),
+                        modifier = Modifier.describedAs(stringResource(R.string.a11y_next_exercise)),
                     ) { Text("▶") }
                 }
             }

@@ -2,14 +2,14 @@ package com.bestrong.wear.data
 
 import android.content.Context
 import androidx.core.content.edit
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import com.bestrong.core.io.Persistence
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.sync.SyncContract
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,6 +29,7 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
     private val _phoneHistory = MutableStateFlow(readWorkouts(KEY_PHONE_HISTORY))
     private val _localHistory = MutableStateFlow(readWorkouts(KEY_LOCAL_HISTORY))
     private val _history = MutableStateFlow(merge())
+
     /** Historial combinado (móvil + reloj), más reciente primero. */
     val history: StateFlow<List<Workout>> = _history.asStateFlow()
 
@@ -68,6 +69,7 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
     private val _settings = MutableStateFlow(
         prefs.getString(KEY_SETTINGS, null)?.let { runCatching { SyncContract.decodeSettings(it.encodeToByteArray()) }.getOrNull() } ?: SharedSettings(),
     )
+
     /** Unidad de peso y progresión, elegidas en el móvil. */
     val settings: StateFlow<SharedSettings> = _settings.asStateFlow()
 

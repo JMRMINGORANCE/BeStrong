@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Librerías y plugins de Gradle (gradle/libs.versions.toml)
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      androidx:
+        patterns: ["androidx.*"]
+      kotlin:
+        patterns: ["org.jetbrains.kotlin*", "com.google.devtools.ksp*", "org.jetbrains.kotlinx*"]
+      testing:
+        patterns: ["org.robolectric*", "io.github.takahirom.roborazzi*", "junit*"]
+  # Acciones de GitHub de los workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"

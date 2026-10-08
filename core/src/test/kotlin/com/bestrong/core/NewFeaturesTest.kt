@@ -4,16 +4,15 @@ import com.bestrong.core.io.Persistence
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.library.Programs
 import com.bestrong.core.model.MuscleGroup
-import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.MuscleTargets
 import com.bestrong.core.stats.VolumeStatus
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.WorkoutMerge
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalDate
 
 class MergeTest {
     private fun base() = WorkoutEditor.addExercises(WorkoutEditor.empty(0), listOf(bench, squat)).copy(updatedAtEpochMs = 100)

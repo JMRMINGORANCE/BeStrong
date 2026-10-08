@@ -11,8 +11,8 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
-import android.text.TextUtils
 import android.text.TextPaint
+import android.text.TextUtils
 import androidx.core.content.FileProvider
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType

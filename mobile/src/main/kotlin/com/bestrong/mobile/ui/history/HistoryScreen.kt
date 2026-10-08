@@ -1,13 +1,5 @@
 package com.bestrong.mobile.ui.history
 
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.material.icons.filled.Share
-import com.bestrong.mobile.share.WorkoutShareCard
-import com.bestrong.mobile.ui.components.label
-import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.R
-import androidx.compose.ui.res.stringResource
-import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
@@ -46,6 +39,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,10 +48,14 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
-import com.bestrong.core.util.formatWeight
+import com.bestrong.mobile.R
+import com.bestrong.mobile.share.WorkoutShareCard
 import com.bestrong.mobile.ui.components.EmptyState
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.StatTile
+import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
+import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.workout.describeSet
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)

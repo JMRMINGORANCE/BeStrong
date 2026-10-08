@@ -88,8 +88,10 @@ object WorkoutCsv {
 
         val resolver = ExerciseResolver(known)
         var skipped = 0
-        data class Row(val key: String, val name: String, val start: Long, val end: Long?, val notes: String, val exercise: Exercise,
-                       val exNotes: String, val superset: String?, val set: WorkoutSet)
+        data class Row(
+            val key: String, val name: String, val start: Long, val end: Long?, val notes: String, val exercise: Exercise,
+            val exNotes: String, val superset: String?, val set: WorkoutSet,
+        )
 
         val parsed = rows.drop(1).mapNotNull { r ->
             try {

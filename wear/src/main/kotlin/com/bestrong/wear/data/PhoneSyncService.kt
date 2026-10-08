@@ -2,12 +2,12 @@ package com.bestrong.wear.data
 
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.wear.WearContainer
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.WearableListenerService
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
 
 /** Recibe del móvil: rutinas, historial, ajustes y el entreno en curso (en vivo). */

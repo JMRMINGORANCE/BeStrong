@@ -14,12 +14,12 @@ import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.bestrong.core.model.Workout
-import com.bestrong.mobile.data.BeStrongRepository
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import com.bestrong.mobile.MainActivity
 import com.bestrong.mobile.R
+import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.ui.components.RestState
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 class WorkoutForegroundService : LifecycleService() {
 
     @Inject lateinit var repository: BeStrongRepository
+
     @Inject lateinit var restTimer: RestTimerController
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
