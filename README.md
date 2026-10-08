@@ -20,11 +20,19 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
   y **récords personales** (se celebran al terminar el entreno).
 - **Programas predefinidos** (Full Body 3 días, Push / Pull / Legs, Torso / Pierna 4 días, 5×5 Fuerza,
   Glúteo y pierna): un toque crea todas sus rutinas.
+- **Programas con progresión automática**: **5/3/1 Boring But Big** (ciclos de 4 semanas sobre tu training max, que sube
+  solo al acabar cada ciclo) y **GZCLP** (T1/T2/T3 con progresión lineal y descarga al 90 % tras dos fallos).
+- **«Hoy toca»** en Inicio con las cargas ya calculadas (también llega al reloj), o la rutina que lleva más tiempo sin hacerse.
+- **Semana planificada vs hecha**: días entrenados L–D, sesiones frente al objetivo y constancia de las últimas semanas.
+- **Ficha de ejercicio** con imagen de **wger.de** (licencia abierta, con autor y licencia visibles) y **notas de técnica
+  propias con foto o vídeo** (se guardan solo en el móvil).
+- **Tempo por ejercicio** (p. ej. 3-1-1-0) con tiempo bajo tensión.
 - **Mapa muscular semanal**: series efectivas por músculo frente a la recomendación de 10–20 por semana (bajo / óptimo / alto).
 - **Compartir entreno como imagen** (tarjeta 4:5 con cifras, ejercicios y récords) desde el resumen o el historial.
 - **Recordatorios** los días elegidos a la hora elegida (solo si ese día no has entrenado; sugiere la rutina que toca).
 - **Notificación de récords** cuando terminas un entreno en el reloj.
-- **Copias de seguridad**: semanal (CSV + JSON) en la carpeta que elijas (p. ej. Google Drive) y Android Auto Backup de la base de datos.
+- **Copias de seguridad**: semanal (CSV + JSON) en la carpeta que elijas (p. ej. Google Drive), **restaurar** desde el JSON
+  (añade lo que falte, no borra nada) y Android Auto Backup de la base de datos.
 - **Perfil**: racha semanal, volumen semanal, entrenos por semana, series por músculo (30 días), mejores 1RM.
 - **Medidas corporales** (peso, % grasa, cintura, pecho, brazo, muslo) con gráfica de peso.
 - **Health Connect** (opcional): cada entreno se guarda como sesión de pesas → aparece en **Samsung Health**.
@@ -51,6 +59,9 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
 - **Health Services** (`ExerciseType.WEIGHTLIFTING`): pulso en directo, media/máximo y calorías.
 - **Servicio en primer plano + Ongoing Activity**: el entreno sigue con la pantalla apagada y aparece en la esfera.
 - Pantalla de **descanso** con anillo por el borde, aviso háptico a 10 s y al terminar.
+- **Progreso y discos**: «la última vez», mejor 1RM estimado con su evolución y discos por lado para la serie actual.
+- **Calentamiento automático** y **guía de tempo con vibraciones** (un toque largo al bajar, corto en las pausas, doble al subir).
+- La sesión de **«Hoy toca»** del programa llega como primera rutina, con sus cargas.
 - **Tile** (entrenos de la semana, racha, botón Entrenar) y **complicación** de esfera (entrenos/objetivo semanal).
 - Al terminar, el entrenamiento viaja al móvil por la **Wearable Data Layer** (aunque estén desconectados en ese momento).
 
@@ -70,6 +81,7 @@ el estado al plegar/desplegar.
 |---|---|
 | `core` (Kotlin/JVM puro) | Modelos, biblioteca de ejercicios, `WorkoutEditor` (edición inmutable del entreno), `WorkoutStats` (récords, progreso, rachas, músculos), contrato de sincronización. Con tests unitarios. |
 | `mobile` | Jetpack Compose + Material 3 adaptativo, Room, Navigation, Health Connect, Data Layer. |
+| `designsystem` | Paleta de marca y espaciados compartidos por móvil y reloj. |
 | `wear` | Compose for Wear OS, Health Services, Tiles (ProtoLayout), Complications, Ongoing Activity, Data Layer. |
 
 - **Hilt** para la inyección de dependencias en móvil y reloj (ViewModels `@HiltViewModel`, servicios `@AndroidEntryPoint`, widget vía `EntryPoint`).
@@ -102,7 +114,10 @@ GitHub Actions compila los dos APK en cada push (`.github/workflows/android.yml`
 - Reloj: capturas de la esfera redonda (inicio, entreno, serie, descanso).
 - Build release con R8 en cada push y prueba de humo minificada en emulador (workflow *Baseline Profile*).
 - Estilo: **ktlint** vía Spotless (`./gradlew spotlessCheck` / `spotlessApply`), reglas en `.editorconfig`.
-- Lint en ambos módulos y **Dependabot** para dependencias y acciones.
+- Tests de **Room** (en memoria) y de los **Workers** (recordatorios y copias) en Robolectric.
+- **Tiempo de arranque** medido con Macrobenchmark en el workflow *Baseline Profile*; falla si empeora más de un 25 %.
+- Lint en ambos módulos y **Dependabot** (versiones menores y parches) para dependencias y acciones.
+- `tools/wger_media.py` + workflow *Exercise media*: cruza la biblioteca con wger y publica el resultado para revisarlo.
 
 ## Publicar
 Crea `keystore.properties` en la raíz (no se sube a git):
@@ -117,5 +132,5 @@ y ejecuta `./gradlew :mobile:bundleRelease :wear:bundleRelease`. La política de
 
 ## Pendiente
 - Firebase: cuenta, copia en la nube, parte social e informes de errores (Crashlytics).
-- Imágenes/animaciones de ejercicios: requieren contenido con licencia (propio o comprado).
+- Imágenes de ejercicios: wger cubre ~40 de 70; para el resto (y animaciones) haría falta contenido propio o con licencia.
 - Publicación en Play Store: icono definitivo, onboarding, capturas de la ficha y formulario de seguridad de datos.
