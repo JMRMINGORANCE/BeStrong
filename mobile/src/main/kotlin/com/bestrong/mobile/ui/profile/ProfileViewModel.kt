@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bestrong.core.io.Backup
 import com.bestrong.core.io.WorkoutCsv
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.MuscleGroup
@@ -12,13 +13,13 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WeekBucket
 import com.bestrong.core.stats.WorkoutStats
+import com.bestrong.mobile.AppSync
 import com.bestrong.mobile.R
 import com.bestrong.mobile.backup.AutoBackupWorker
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.health.HealthConnectExporter
-import com.bestrong.mobile.sync.WatchSync
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
@@ -53,7 +54,7 @@ class ProfileViewModel @Inject constructor(
     private val repo: BeStrongRepository,
     private val settingsStore: SettingsStore,
     private val healthConnect: HealthConnectExporter,
-    private val watchSync: WatchSync,
+    private val appSync: AppSync,
 ) : ViewModel() {
 
     val stats: StateFlow<ProfileStats> = repo.history.map { history ->
@@ -128,6 +129,23 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
+    /** Restaura una copia JSON de BeStrong (añade lo que falte, no borra nada). */
+    fun restoreBackup(uri: Uri) = viewModelScope.launch {
+        val result = runCatching {
+            val text = withContext(Dispatchers.IO) {
+                context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error(context.getString(R.string.file_open_error))
+            }
+            val data = withContext(Dispatchers.Default) { Backup.decode(text) }
+            data to repo.restore(data)
+        }
+        _messages.tryEmit(
+            result.fold(
+                { (data, added) -> context.getString(R.string.restore_done, data.history.size, data.routines.size, added) },
+                { context.getString(R.string.restore_error, it.message.orEmpty()) },
+            ),
+        )
+    }
+
     /** Carpeta elegida para la copia semanal: guardamos el permiso y hacemos una copia ya. */
     fun setBackupFolder(uri: Uri?) {
         if (uri != null) {
@@ -147,7 +165,6 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun syncWatchNow() = viewModelScope.launch {
-        watchSync.pushRoutines(repo.routines.value)
-        watchSync.pushHistory(repo.history.value)
+        appSync.pushToWatchNow()
     }
 }

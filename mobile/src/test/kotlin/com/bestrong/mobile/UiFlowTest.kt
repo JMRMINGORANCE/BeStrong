@@ -1,12 +1,16 @@
 package com.bestrong.mobile
 
 import android.os.Looper
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.layout.FoldingFeature
@@ -23,6 +27,7 @@ import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.github.takahirom.roborazzi.captureScreenRoboImage
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -144,10 +149,39 @@ class UiFlowTest {
         settle()
         // Con un diálogo hay dos raíces: se captura la pantalla entera
         captureScreenRoboImage("build/outputs/roborazzi/programs_folded.png")
+        programsList().performScrollToNode(hasText("Full Body 3 días"))
         compose.onNodeWithText("Full Body 3 días").performClick()
         settle(25)
         assertNotNull(compose.onNodeWithText("Full Body 3 días · A").fetchSemanticsNode())
         shot("programs_added_folded")
+    }
+
+    /** Lista del diálogo de programas (la rejilla de Inicio también es desplazable). */
+    private fun programsList() = compose.onNode(hasScrollToNodeAction() and hasAnyDescendant(hasText("GZCLP")))
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
+    fun periodized_program_today() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNodeWithText("Ver programas predefinidos").performClick()
+        settle()
+        compose.onNodeWithText("5/3/1 Boring But Big").performClick()
+        settle()
+        // TM del press militar; el resto se queda vacío
+        compose.onNode(hasSetTextAction() and hasText("TM Press militar", substring = true)).performTextInput("60")
+        settle()
+        captureScreenRoboImage("build/outputs/roborazzi/program_setup_folded.png")
+        compose.onNodeWithText("Empezar programa").performClick()
+        settle(25)
+        assertNotNull(compose.onNodeWithText("Hoy toca").fetchSemanticsNode())
+        // Semana 1 del 5/3/1 con TM 60: 65/75/85 % → 40 / 45 / 50 kg
+        assertNotNull(compose.onNodeWithText("40×5  45×5  50×5 kg").fetchSemanticsNode())
+        shot("today_folded")
+        compose.onNodeWithText("Empezar sesión").performClick()
+        settle()
+        assertTrue(compose.onAllNodesWithText("Press militar", substring = true).fetchSemanticsNodes().isNotEmpty())
+        shot("today_workout_folded")
     }
 
     @Test

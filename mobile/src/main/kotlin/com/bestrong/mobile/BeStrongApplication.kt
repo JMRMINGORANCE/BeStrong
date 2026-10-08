@@ -3,11 +3,14 @@ package com.bestrong.mobile
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.SharedSettings
+import com.bestrong.core.training.ActiveProgram
+import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
 import com.bestrong.mobile.backup.AutoBackupWorker
 import com.bestrong.mobile.data.BeStrongRepository
@@ -16,6 +19,7 @@ import com.bestrong.mobile.di.ApplicationScope
 import com.bestrong.mobile.health.HealthConnectExporter
 import com.bestrong.mobile.notify.ReminderWorker
 import com.bestrong.mobile.sync.WatchSync
+import com.bestrong.mobile.ui.components.uiLanguage
 import com.bestrong.mobile.widget.BeStrongWidget
 import com.bestrong.mobile.workout.RestTimerController
 import com.bestrong.mobile.workout.WorkoutForegroundService
@@ -26,6 +30,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -76,10 +81,24 @@ class AppSync @Inject constructor(
     private val restTimer: RestTimerController,
     private val watchMetrics: WatchMetricsStore,
 ) {
+    private fun routinesForWatch(routines: List<Routine>, program: ActiveProgram?, history: List<Workout>): List<Routine> {
+        val today = program?.let { Periodization.nextSession(it, history, context.uiLanguage())?.routine }
+        return listOfNotNull(today) + routines
+    }
+
+    /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
+    suspend fun pushToWatchNow() {
+        watchSync.pushRoutines(routinesForWatch(repository.routines.value, repository.activeProgram.value, repository.history.value))
+        watchSync.pushHistory(repository.history.value)
+    }
+
     @OptIn(FlowPreview::class)
     fun start() {
         scope.launch {
-            repository.routines.debounce(1_000).collect { watchSync.pushRoutines(it) }
+            // La sesión de hoy del programa activo va la primera, con sus cargas calculadas
+            combine(repository.routines, repository.activeProgram, repository.history) { routines, program, history ->
+                routinesForWatch(routines, program, history)
+            }.debounce(1_000).distinctUntilChanged().collect { watchSync.pushRoutines(it) }
         }
         scope.launch {
             repository.history.debounce(2_000).collect {

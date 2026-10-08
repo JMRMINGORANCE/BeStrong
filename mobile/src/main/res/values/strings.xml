@@ -18,6 +18,7 @@
     <string name="action_move_down">Bajar</string>
     <string name="action_move_up">Subir</string>
     <string name="action_rename">Renombrar</string>
+    <string name="action_restore">Restaurar</string>
     <string name="action_save">Guardar</string>
     <string name="action_sync">Sincronizar</string>
     <string name="add_exercises">Añadir ejercicios</string>
@@ -48,6 +49,8 @@
     <string name="csv_import">Importar CSV</string>
     <string name="csv_import_body">Desde BeStrong, Hevy o Strong (Strong usa la unidad elegida arriba)</string>
     <string name="custom">Personalizado</string>
+    <string name="day_not_trained">sin entrenar</string>
+    <string name="day_trained">entrenado</string>
     <string name="delete_exercise">Eliminar ejercicio</string>
     <string name="equip_band">Banda elástica</string>
     <string name="equip_barbell">Barra</string>
@@ -121,6 +124,7 @@
     <string name="msg_no_watch">No se encontró ningún reloj conectado</string>
     <string name="msg_opening_on_watch">Abriendo BeStrong en tu Galaxy Watch</string>
     <string name="msg_program_added">%1$s: %2$d rutinas añadidas</string>
+    <string name="msg_program_started">Programa «%1$s» activo: lo verás en «Hoy toca»</string>
     <string name="msg_routine_missing">La rutina ya no existe</string>
     <string name="msg_workout_already_active">Ya tienes un entrenamiento en curso</string>
     <string name="muscle_abs">Abdominales</string>
@@ -201,6 +205,13 @@
     <string name="prog_increase">Completaste todas las series: sube el peso</string>
     <string name="prog_repeat">RPE alto: repite y consolida</string>
     <string name="program_meta">%1$d días/semana · %2$d rutinas</string>
+    <string name="program_meta_periodized">%1$d días/semana · cargas calculadas</string>
+    <string name="program_start">Empezar programa</string>
+    <string name="program_stop">Dejar el programa</string>
+    <string name="program_tm_help">Training max (TM): el 90 % de tu 1RM. Lo rellenamos con tu historial; ajústalo si hace falta.</string>
+    <string name="program_tm_label">TM %1$s (%2$s)</string>
+    <string name="programs_periodized">Con progresión automática</string>
+    <string name="programs_templates">Plantillas de rutinas</string>
     <string name="programs_title">Programas de entrenamiento</string>
     <string name="progression_setting">Sobrecarga progresiva automática</string>
     <string name="progression_setting_body">Sugiere peso y reps según tu última sesión y propone descargas si te estancas</string>
@@ -225,6 +236,10 @@
     <string name="rest_time">Tiempo de descanso</string>
     <string name="rest_title">Descanso %1$s</string>
     <string name="rest_value">Descanso %1$s</string>
+    <string name="restore_backup">Restaurar copia</string>
+    <string name="restore_backup_body">Desde un archivo bestrong-*.json. Añade lo que falte; no borra nada.</string>
+    <string name="restore_done">Copia con %1$d entrenos y %2$d rutinas: %3$d elementos añadidos</string>
+    <string name="restore_error">No se pudo restaurar: %1$s</string>
     <string name="routine_copy_name">%1$s (copia)</string>
     <string name="routine_delete">Eliminar rutina</string>
     <string name="routine_edit">Editar rutina</string>
@@ -286,6 +301,11 @@
     <string name="superset_label">Superserie %1$s</string>
     <string name="superset_remove">Quitar de la superserie</string>
     <string name="superset_with_next">Superserie con el siguiente</string>
+    <string name="today_cycle_week">Ciclo %1$d · semana %2$d de %3$d</string>
+    <string name="today_session_n">Sesión %1$d</string>
+    <string name="today_start">Empezar sesión</string>
+    <string name="today_suggested">Te toca</string>
+    <string name="today_title">Hoy toca</string>
     <string name="track">Registrar</string>
     <string name="track_reps">Solo reps</string>
     <string name="track_time">Tiempo</string>
@@ -298,6 +318,10 @@
     <string name="watch_metrics">Galaxy Watch · ♥ %1$s ppm · media %2$s · %3$s kcal</string>
     <string name="watch_sync">Sincronizar con Galaxy Watch</string>
     <string name="watch_sync_body">Envía rutinas e historial al reloj ahora</string>
+    <string name="week_adherence">Constancia de las últimas semanas: %1$d %%</string>
+    <string name="week_goal_less">Bajar objetivo semanal</string>
+    <string name="week_goal_more">Subir objetivo semanal</string>
+    <string name="week_sessions">Esta semana: %1$d de %2$d sesiones</string>
     <string name="weekly_volume">Volumen semanal (%1$s)</string>
     <string name="weight_unit">Unidad de peso</string>
     <string name="widget_description">Racha, entrenos de la semana y acceso rápido a tus rutinas</string>

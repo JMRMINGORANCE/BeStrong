@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
@@ -60,18 +61,18 @@ fun SetHeader(tracking: TrackingType) {
     val unit = LocalWeightUnit.current.label.uppercase()
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         val style = MaterialTheme.typography.labelSmall
-        Text(stringResource(R.string.set_col_set), style = style, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
-        Text(stringResource(R.string.set_col_previous), style = style, modifier = Modifier.weight(1.4f), textAlign = TextAlign.Center)
+        Text(stringResource(R.string.set_col_set), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        Text(stringResource(R.string.set_col_previous), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1.4f), textAlign = TextAlign.Center)
         when (tracking) {
             TrackingType.WEIGHT_REPS -> {
-                Text(unit, style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-                Text(stringResource(R.string.set_col_reps), style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(unit, style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(stringResource(R.string.set_col_reps), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
             TrackingType.REPS_ONLY -> {
-                Text("+$unit", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-                Text(stringResource(R.string.set_col_reps), style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text("+$unit", style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(stringResource(R.string.set_col_reps), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
-            TrackingType.DURATION -> Text(stringResource(R.string.set_col_seconds), style = style, modifier = Modifier.weight(2f), textAlign = TextAlign.Center)
+            TrackingType.DURATION -> Text(stringResource(R.string.set_col_seconds), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(2f), textAlign = TextAlign.Center)
         }
         Box(Modifier.size(48.dp))
     }

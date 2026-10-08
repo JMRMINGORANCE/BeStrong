@@ -9,6 +9,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.bestrong.core.io.Backup
 import com.bestrong.core.io.WorkoutCsv
 import com.bestrong.mobile.di.WorkerEntryPoint
 import dagger.hilt.android.EntryPointAccessors
@@ -28,12 +29,11 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         val folder = settingsStore.settings.value.backupFolderUri ?: return Result.success()
         val repo = deps.repository()
         return runCatching {
-            val history = repo.historyOnce()
-            val routines = repo.routinesOnce()
+            val data = repo.backupData()
             val tree = Uri.parse(folder)
             val date = LocalDate.now()
-            write(tree, "bestrong-$date.csv", "text/csv", WorkoutCsv.export(history).toByteArray())
-            write(tree, "bestrong-$date.json", "application/json", BackupFile.encode(history, routines).toByteArray())
+            write(tree, "bestrong-$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
+            write(tree, "bestrong-$date.json", "application/json", Backup.encode(data).toByteArray())
             settingsStore.update { it.copy(lastBackupEpochMs = System.currentTimeMillis()) }
         }.fold(
             { Result.success() },

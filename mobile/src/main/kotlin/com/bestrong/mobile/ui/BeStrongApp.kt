@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -121,7 +122,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         selected = dest == topLevel,
                         onClick = { nav.navigateTopLevel(dest.route) },
                         icon = { Icon(dest.icon, contentDescription = stringResource(dest.label)) },
-                        label = { Text(stringResource(dest.label)) },
+                        label = { Text(stringResource(dest.label), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     )
                 }
             },

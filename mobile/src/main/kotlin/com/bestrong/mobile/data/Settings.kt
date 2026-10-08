@@ -24,6 +24,8 @@ data class UserSettings(
     /** Carpeta (SAF) para la copia de seguridad semanal; null = desactivada. */
     val backupFolderUri: String? = null,
     val lastBackupEpochMs: Long = 0,
+    /** Sesiones por semana que el usuario se propone (si no sigue un programa). */
+    val weeklyGoal: Int = 3,
 )
 
 @Singleton
@@ -44,6 +46,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         reminderMinute = prefs.getInt("reminder_minute", 0),
         backupFolderUri = prefs.getString("backup_folder", null),
         lastBackupEpochMs = prefs.getLong("backup_last", 0),
+        weeklyGoal = prefs.getInt("weekly_goal", 3),
     )
 
     @Synchronized
@@ -61,6 +64,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("reminder_minute", s.reminderMinute)
             putString("backup_folder", s.backupFolderUri)
             putLong("backup_last", s.lastBackupEpochMs)
+            putInt("weekly_goal", s.weeklyGoal)
         }
         _settings.value = s
     }

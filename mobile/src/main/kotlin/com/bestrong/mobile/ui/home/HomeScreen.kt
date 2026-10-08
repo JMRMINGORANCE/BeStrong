@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.library.TrainingProgram
 import com.bestrong.core.model.Routine
+import com.bestrong.core.training.PeriodizedProgram
 import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.SectionHeader
@@ -62,7 +65,7 @@ import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.rememberNow
 import com.bestrong.mobile.ui.components.uiLanguage
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
     vm: HomeViewModel,
@@ -72,11 +75,24 @@ fun HomeScreen(
     val routines by vm.routines.collectAsStateWithLifecycle()
     val active by vm.active.collectAsStateWithLifecycle()
     val history by vm.history.collectAsStateWithLifecycle()
+    val today by vm.today.collectAsStateWithLifecycle()
+    val suggested by vm.suggestedRoutine.collectAsStateWithLifecycle()
+    val week by vm.week.collectAsStateWithLifecycle()
+    var setupProgram by remember { mutableStateOf<PeriodizedProgram?>(null) }
+    setupProgram?.let { p ->
+        ProgramSetupDialog(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgram = null }, onDismiss = { setupProgram = null })
+    }
     val snackbar = remember { SnackbarHostState() }
     var showPrograms by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
     if (showPrograms) {
-        ProgramsDialog(vm.programs, onPick = { vm.addProgram(it); showPrograms = false }, onDismiss = { showPrograms = false })
+        ProgramsDialog(
+            periodized = vm.periodizedPrograms,
+            programs = vm.programs,
+            onPickPeriodized = { setupProgram = it; showPrograms = false },
+            onPick = { vm.addProgram(it); showPrograms = false },
+            onDismiss = { showPrograms = false },
+        )
     }
 
     Scaffold(
@@ -109,9 +125,17 @@ fun HomeScreen(
                     }
                 }
             }
+            if (active == null) {
+                today?.let { s ->
+                    item(span = { GridItemSpan(maxLineSpan) }) { TodayCard(s, onStart = { vm.startProgramSession(s, onOpenWorkout) }, onStopProgram = vm::stopProgram) }
+                } ?: suggested?.let { r ->
+                    item(span = { GridItemSpan(maxLineSpan) }) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }) }
+                }
+            }
+            item(span = { GridItemSpan(maxLineSpan) }) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) }
             item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(stringResource(R.string.home_start)) }
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { vm.startEmpty(onOpenWorkout) }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Default.Add, null)
                         Text(stringResource(R.string.home_empty_workout), Modifier.padding(start = 8.dp))
@@ -123,10 +147,13 @@ fun HomeScreen(
                 }
             }
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SectionHeader(stringResource(R.string.home_my_routines, routines.size), Modifier.weight(1f))
-                    TextButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_programs)) }
-                    OutlinedButton(onClick = { onEditRoutine(null) }) { Text(stringResource(R.string.home_new_routine)) }
+                // Título y acciones en líneas separadas: con letra grande los botones bajan de línea
+                Column {
+                    SectionHeader(stringResource(R.string.home_my_routines, routines.size))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { onEditRoutine(null) }) { Text(stringResource(R.string.home_new_routine)) }
+                        TextButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_programs)) }
+                    }
                 }
             }
             if (routines.isEmpty()) {
@@ -204,13 +231,34 @@ private fun RoutineCard(
 
 /** Programas predefinidos: al elegir uno se crean todas sus rutinas. */
 @Composable
-private fun ProgramsDialog(programs: List<TrainingProgram>, onPick: (TrainingProgram) -> Unit, onDismiss: () -> Unit) {
+private fun ProgramsDialog(
+    periodized: List<PeriodizedProgram>,
+    programs: List<TrainingProgram>,
+    onPickPeriodized: (PeriodizedProgram) -> Unit,
+    onPick: (TrainingProgram) -> Unit,
+    onDismiss: () -> Unit,
+) {
     val lang = uiLanguage()
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.programs_title)) },
         text = {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                item { Text(stringResource(R.string.programs_periodized), style = MaterialTheme.typography.titleSmall) }
+                items(periodized, key = { "p-" + it.id }) { p ->
+                    Card(onClick = { onPickPeriodized(p) }, modifier = Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(12.dp)) {
+                            Text(p.name(lang), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                stringResource(R.string.program_meta_periodized, p.daysPerWeek),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                            Text(p.description(lang), style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+                item { Text(stringResource(R.string.programs_templates), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp)) }
                 items(programs, key = { it.id }) { p ->
                     Card(onClick = { onPick(p) }, modifier = Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(12.dp)) {

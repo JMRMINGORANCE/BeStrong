@@ -17,6 +17,7 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.WorkoutMerge
+import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
 import com.bestrong.wear.ApplicationScope
 import com.bestrong.wear.data.PhoneSync
@@ -142,7 +143,9 @@ class WorkoutSession @Inject constructor(
 
     fun startRoutine(routine: Routine) {
         if (_workout.value != null) return
-        begin(routine.toWorkout(System.currentTimeMillis(), ::prefill, WorkoutSource.WATCH))
+        // Las sesiones de un programa llevan las cargas calculadas: no se sustituyen por la última vez
+        val lookup: (String) -> List<WorkoutSet> = if (routine.id.startsWith(Periodization.ROUTINE_PREFIX)) ({ emptyList() }) else ::prefill
+        begin(routine.toWorkout(System.currentTimeMillis(), lookup, WorkoutSource.WATCH))
     }
 
     private fun begin(w: Workout) {

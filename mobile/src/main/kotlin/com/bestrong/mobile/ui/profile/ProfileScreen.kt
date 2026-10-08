@@ -82,6 +82,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     val snackbar = remember { SnackbarHostState() }
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri -> uri?.let(vm::exportCsv) }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::importCsv) }
+    val restoreLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::restoreBackup) }
     val folderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let(vm::setBackupFolder) }
     val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     var showReminders by rememberSaveable { mutableStateOf(false) }
@@ -255,6 +256,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                     TextButton(onClick = { vm.setBackupFolder(null) }) { Text(stringResource(R.string.action_disable)) }
                                 }
                             },
+                        )
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.restore_backup)) },
+                            supportingContent = { Text(stringResource(R.string.restore_backup_body)) },
+                            trailingContent = { TextButton(onClick = { restoreLauncher.launch(arrayOf("application/json", "application/octet-stream", "text/*")) }) { Text(stringResource(R.string.action_restore)) } },
                         )
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.csv_export)) },

@@ -18,6 +18,7 @@
     <string name="action_move_down">Move down</string>
     <string name="action_move_up">Move up</string>
     <string name="action_rename">Rename</string>
+    <string name="action_restore">Restore</string>
     <string name="action_save">Save</string>
     <string name="action_sync">Sync</string>
     <string name="add_exercises">Add exercises</string>
@@ -48,6 +49,8 @@
     <string name="csv_import">Import CSV</string>
     <string name="csv_import_body">From BeStrong, Hevy or Strong (Strong uses the unit chosen above)</string>
     <string name="custom">Custom</string>
+    <string name="day_not_trained">not trained</string>
+    <string name="day_trained">trained</string>
     <string name="delete_exercise">Delete exercise</string>
     <string name="equip_band">Band</string>
     <string name="equip_barbell">Barbell</string>
@@ -121,6 +124,7 @@
     <string name="msg_no_watch">No connected watch found</string>
     <string name="msg_opening_on_watch">Opening BeStrong on your Galaxy Watch</string>
     <string name="msg_program_added">%1$s: %2$d routines added</string>
+    <string name="msg_program_started">Program “%1$s” active: see it under “Today”</string>
     <string name="msg_routine_missing">That routine no longer exists</string>
     <string name="msg_workout_already_active">You already have a workout in progress</string>
     <string name="muscle_abs">Abs</string>
@@ -201,6 +205,13 @@
     <string name="prog_increase">You completed every set: add weight</string>
     <string name="prog_repeat">High RPE: repeat and consolidate</string>
     <string name="program_meta">%1$d days/week · %2$d routines</string>
+    <string name="program_meta_periodized">%1$d days/week · loads calculated</string>
+    <string name="program_start">Start program</string>
+    <string name="program_stop">Leave program</string>
+    <string name="program_tm_help">Training max (TM): 90% of your 1RM. Pre-filled from your history; adjust if needed.</string>
+    <string name="program_tm_label">TM %1$s (%2$s)</string>
+    <string name="programs_periodized">With automatic progression</string>
+    <string name="programs_templates">Routine templates</string>
     <string name="programs_title">Training programs</string>
     <string name="progression_setting">Automatic progressive overload</string>
     <string name="progression_setting_body">Suggests weight and reps from your last session and proposes deloads when you stall</string>
@@ -225,6 +236,10 @@
     <string name="rest_time">Rest time</string>
     <string name="rest_title">Rest %1$s</string>
     <string name="rest_value">Rest %1$s</string>
+    <string name="restore_backup">Restore backup</string>
+    <string name="restore_backup_body">From a bestrong-*.json file. Adds what\'s missing; deletes nothing.</string>
+    <string name="restore_done">Backup with %1$d workouts and %2$d routines: %3$d items added</string>
+    <string name="restore_error">Couldn\'t restore: %1$s</string>
     <string name="routine_copy_name">%1$s (copy)</string>
     <string name="routine_delete">Delete routine</string>
     <string name="routine_edit">Edit routine</string>
@@ -286,6 +301,11 @@
     <string name="superset_label">Superset %1$s</string>
     <string name="superset_remove">Remove from superset</string>
     <string name="superset_with_next">Superset with next</string>
+    <string name="today_cycle_week">Cycle %1$d · week %2$d of %3$d</string>
+    <string name="today_session_n">Session %1$d</string>
+    <string name="today_start">Start session</string>
+    <string name="today_suggested">Up next</string>
+    <string name="today_title">Today</string>
     <string name="track">Track</string>
     <string name="track_reps">Reps only</string>
     <string name="track_time">Time</string>
@@ -298,6 +318,10 @@
     <string name="watch_metrics">Galaxy Watch · ♥ %1$s bpm · avg %2$s · %3$s kcal</string>
     <string name="watch_sync">Sync with Galaxy Watch</string>
     <string name="watch_sync_body">Send routines and history to the watch now</string>
+    <string name="week_adherence">Consistency over recent weeks: %1$d%%</string>
+    <string name="week_goal_less">Lower weekly goal</string>
+    <string name="week_goal_more">Raise weekly goal</string>
+    <string name="week_sessions">This week: %1$d of %2$d sessions</string>
     <string name="weekly_volume">Weekly volume (%1$s)</string>
     <string name="weight_unit">Weight unit</string>
     <string name="widget_description">Streak, weekly workouts and quick access to your routines</string>

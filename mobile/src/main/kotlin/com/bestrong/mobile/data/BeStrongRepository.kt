@@ -1,5 +1,6 @@
 package com.bestrong.mobile.data
 
+import com.bestrong.core.io.BackupData
 import com.bestrong.core.io.Persistence
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.BodyMeasurement
@@ -10,6 +11,7 @@ import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SyncContract.json
 import com.bestrong.core.sync.WorkoutMerge
+import com.bestrong.core.training.ActiveProgram
 import com.bestrong.mobile.data.db.BeStrongDao
 import com.bestrong.mobile.data.db.CustomExerciseEntity
 import com.bestrong.mobile.data.db.KeyValueEntity
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.sync.Mutex
@@ -55,6 +58,19 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     val activeWorkout: StateFlow<Workout?> = dao.value(KEY_ACTIVE)
         .map { s -> s?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
         .stateIn(scope, SharingStarted.Eagerly, null)
+
+    /** Programa con progresión que sigue el usuario (null = ninguno). */
+    val activeProgram: StateFlow<ActiveProgram?> = dao.value(KEY_PROGRAM)
+        .map { s -> s?.let { runCatching { json.decodeFromString(ActiveProgram.serializer(), it) }.getOrNull() } }
+        .stateIn(scope, SharingStarted.Eagerly, null)
+
+    suspend fun setActiveProgram(program: ActiveProgram?) {
+        if (program == null) {
+            dao.deleteValue(KEY_PROGRAM)
+        } else {
+            dao.putValue(KeyValueEntity(KEY_PROGRAM, json.encodeToString(ActiveProgram.serializer(), program)))
+        }
+    }
 
     /** Últimas series de cada ejercicio, para la columna "Anterior". */
     val previousSetsLookup: StateFlow<(String) -> List<WorkoutSet>> = history
@@ -115,6 +131,29 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         return fresh.size
     }
 
+    // --- Copia de seguridad ------------------------------------------------------------------
+
+    suspend fun backupData(): BackupData = BackupData(
+        history = historyOnce(),
+        routines = routinesOnce(),
+        customExercises = customExercises.first(),
+        measurements = measurements.first(),
+    )
+
+    /** Restaura una copia sin borrar nada: añade lo que no exista (por id). Devuelve cuántos elementos se añadieron. */
+    suspend fun restore(data: BackupData): Int {
+        val customIds = customExercises.first().map { it.id }.toSet()
+        val newExercises = data.customExercises.filter { it.id !in customIds }
+        val workouts = importWorkouts(data.history, newExercises)
+        val routineIds = routinesOnce().map { it.id }.toSet()
+        val newRoutines = data.routines.filter { it.id !in routineIds }
+        addRoutines(newRoutines)
+        val measurementIds = measurements.value.map { it.id }.toSet()
+        val newMeasurements = data.measurements.filter { it.id !in measurementIds }
+        newMeasurements.forEach { saveMeasurement(it) }
+        return workouts + newRoutines.size + newExercises.size + newMeasurements.size
+    }
+
     // --- Historial ---------------------------------------------------------------------------
 
     suspend fun saveWorkout(workout: Workout) =
@@ -165,5 +204,6 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     private companion object {
         const val KEY_ACTIVE = "active_workout"
+        const val KEY_PROGRAM = "active_program"
     }
 }
