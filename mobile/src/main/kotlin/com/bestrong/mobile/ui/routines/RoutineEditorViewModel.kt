@@ -22,6 +22,28 @@ class RoutineEditorViewModel(private val container: AppContainer, routineId: Str
     val routine: StateFlow<Routine> = _routine.asStateFlow()
     val isNew = routineId == null
 
+    init {
+        // Si la app se reabrió desde cero, las rutinas aún no estaban cargadas: las leemos de la BD
+        if (routineId != null && _routine.value.id != routineId) {
+            viewModelScope.launch { repo.routine(routineId)?.let { _routine.value = it } }
+        }
+    }
+
+    /** Une el ejercicio con el siguiente en superserie (o lo saca si ya lo está). */
+    fun toggleSupersetWithNext(id: String) = _routine.update { r ->
+        val i = r.exercises.indexOfFirst { it.id == id }
+        if (i < 0 || i >= r.exercises.lastIndex) return@update r
+        val a = r.exercises[i]
+        val b = r.exercises[i + 1]
+        if (a.supersetId != null && a.supersetId == b.supersetId) {
+            r.copy(exercises = r.exercises.map { if (it.id == b.id) it.copy(supersetId = null) else it })
+                .let { nr -> if (nr.exercises.count { it.supersetId == a.supersetId } <= 1) nr.copy(exercises = nr.exercises.map { if (it.supersetId == a.supersetId) it.copy(supersetId = null) else it }) else nr }
+        } else {
+            val group = a.supersetId ?: b.supersetId ?: com.bestrong.core.util.newId()
+            r.copy(exercises = r.exercises.map { if (it.id == a.id || it.id == b.id) it.copy(supersetId = group) else it })
+        }
+    }
+
     fun rename(name: String) = _routine.update { it.copy(name = name) }
     fun setNotes(notes: String) = _routine.update { it.copy(notes = notes) }
 

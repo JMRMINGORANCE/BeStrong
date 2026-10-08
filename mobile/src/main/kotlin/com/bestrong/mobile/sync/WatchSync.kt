@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.wear.remote.interactions.RemoteActivityHelper
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
+import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.sync.SyncContract
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
@@ -24,10 +25,24 @@ class WatchSync(private val context: Context) {
     suspend fun pushHistory(history: List<Workout>) =
         put(SyncContract.PATH_RECENT_HISTORY, SyncContract.encodeWorkouts(SyncContract.compactHistory(history)))
 
-    private suspend fun put(path: String, payload: ByteArray) {
+    suspend fun pushSettings(settings: SharedSettings) =
+        put(SyncContract.PATH_SETTINGS, SyncContract.encodeSettings(settings))
+
+    /** Publica el entreno en curso (o lo borra) para que el reloj lo muestre en vivo. */
+    suspend fun pushActive(workout: Workout?) {
+        if (workout == null) {
+            runCatching {
+                dataClient.deleteDataItems(Uri.Builder().scheme("wear").path(SyncContract.PATH_ACTIVE_WORKOUT).build()).await()
+            }
+        } else {
+            put(SyncContract.PATH_ACTIVE_WORKOUT, SyncContract.encodeWorkout(workout), urgent = true)
+        }
+    }
+
+    private suspend fun put(path: String, payload: ByteArray, urgent: Boolean = false) {
         val request = PutDataMapRequest.create(path).apply {
             dataMap.putByteArray(SyncContract.KEY_PAYLOAD, payload)
-        }.asPutDataRequest()
+        }.asPutDataRequest().apply { if (urgent) setUrgent() }
         runCatching { dataClient.putDataItem(request).await() }
             .onFailure { Log.w(TAG, "No se pudo sincronizar $path (¿sin Wear OS / Play Services?)", it) }
     }

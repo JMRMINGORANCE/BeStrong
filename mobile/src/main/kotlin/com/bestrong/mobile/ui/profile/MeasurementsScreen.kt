@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.profile
 
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,6 +47,7 @@ import com.bestrong.mobile.ui.components.formatShortDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
+    val unit = LocalWeightUnit.current
     val list by vm.measurements.collectAsStateWithLifecycle()
     var adding by remember { mutableStateOf(false) }
     Scaffold(
@@ -63,8 +65,8 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                 item {
                     Card {
                         Column(Modifier.padding(16.dp)) {
-                            SectionHeader("Peso corporal (kg)")
-                            LineChart(weights.map { ChartPoint(formatShortDate(it.dateEpochMs), it.weightKg!!) }, valueFormatter = { formatWeight(it) })
+                            SectionHeader("Peso corporal (${unit.label})")
+                            LineChart(weights.map { ChartPoint(formatShortDate(it.dateEpochMs), it.weightKg!!) }, valueFormatter = { unit.format(it) })
                         }
                     }
                 }
@@ -76,7 +78,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                         supportingContent = {
                             Text(
                                 listOfNotNull(
-                                    m.weightKg?.let { "Peso ${formatWeight(it)} kg" },
+                                    m.weightKg?.let { "Peso ${unit.format(it, withUnit = true)}" },
                                     m.bodyFatPct?.let { "Grasa ${formatWeight(it)} %" },
                                     m.waistCm?.let { "Cintura ${formatWeight(it)} cm" },
                                     m.chestCm?.let { "Pecho ${formatWeight(it)} cm" },
@@ -93,7 +95,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     }
     if (adding) {
         val fields = remember { List(6) { mutableStateOf("") } }
-        val labels = listOf("Peso (kg)", "Grasa corporal (%)", "Cintura (cm)", "Pecho (cm)", "Brazo (cm)", "Muslo (cm)")
+        val labels = listOf("Peso (${unit.label})", "Grasa corporal (%)", "Cintura (cm)", "Pecho (cm)", "Brazo (cm)", "Muslo (cm)")
         fun v(i: Int) = fields[i].value.replace(',', '.').toDoubleOrNull()
         AlertDialog(
             onDismissRequest = { adding = false },
@@ -113,7 +115,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             },
             confirmButton = {
                 Button(onClick = {
-                    vm.saveMeasurement(BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = v(0), bodyFatPct = v(1), waistCm = v(2), chestCm = v(3), armCm = v(4), thighCm = v(5)))
+                    vm.saveMeasurement(BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = v(0)?.let(unit::toKg), bodyFatPct = v(1), waistCm = v(2), chestCm = v(3), armCm = v(4), thighCm = v(5)))
                     adding = false
                 }) { Text("Guardar") }
             },

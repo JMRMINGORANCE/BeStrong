@@ -1,0 +1,74 @@
+package com.bestrong.mobile.ui.workout
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.bestrong.core.training.PlateCalculator
+import com.bestrong.core.util.WeightUnit
+import com.bestrong.core.util.formatWeight
+import com.bestrong.mobile.ui.components.LocalWeightUnit
+
+/** Qué discos poner en cada lado de la barra para un peso objetivo. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun PlateCalculatorDialog(initialKg: Double, onDismiss: () -> Unit) {
+    val unit = LocalWeightUnit.current
+    var text by remember { mutableStateOf(unit.format(initialKg).takeIf { initialKg > 0 } ?: "") }
+    val bars = if (unit == WeightUnit.KG) listOf(20.0, 15.0, 10.0) else listOf(45.0, 35.0, 25.0)
+    var bar by remember { mutableDoubleStateOf(bars.first()) }
+    val target = text.replace(',', '.').toDoubleOrNull() ?: 0.0
+    val load = PlateCalculator.calculate(target, unit, bar)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Calculadora de discos") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    text,
+                    { text = it.filter { c -> c.isDigit() || c == ',' || c == '.' }.take(6) },
+                    label = { Text("Peso objetivo (${unit.label})") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                )
+                Text("Barra", style = MaterialTheme.typography.labelLarge)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    bars.forEach { b -> FilterChip(selected = bar == b, onClick = { bar = b }, label = { Text("${formatWeight(b)} ${unit.label}") }) }
+                }
+                Text("Por cada lado", style = MaterialTheme.typography.labelLarge)
+                if (load.perSide.isEmpty()) Text("Solo la barra")
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    load.perSide.forEach { p -> SuggestionChip(onClick = {}, label = { Text(formatWeight(p), fontWeight = FontWeight.Bold) }) }
+                }
+                Text("Total: ${formatWeight(load.achieved)} ${unit.label}", fontWeight = FontWeight.SemiBold)
+                if (load.remainder > 0) {
+                    Text(
+                        "Faltan ${formatWeight(load.remainder)} ${unit.label}: no se puede cargar exactamente con discos estándar.",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar") } },
+    )
+}

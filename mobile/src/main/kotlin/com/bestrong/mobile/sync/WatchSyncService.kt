@@ -6,36 +6,63 @@ import com.bestrong.mobile.BeStrongApplication
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
+import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.Wearable
 import com.google.android.gms.wearable.WearableListenerService
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
-/** Recibe los entrenamientos terminados en el Galaxy Watch y los guarda en el historial. */
+/**
+ * Recibe del Galaxy Watch:
+ * - entrenamientos terminados (se guardan en el historial),
+ * - el entreno en curso (sincronización en vivo),
+ * - métricas de pulso/calorías en directo.
+ */
 class WatchSyncService : WearableListenerService() {
 
-    override fun onDataChanged(events: DataEventBuffer) {
-        val container = (application as BeStrongApplication).container
-        val received = events
-            .filter { it.type == DataEvent.TYPE_CHANGED && it.dataItem.uri.path.orEmpty().startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) }
-            .mapNotNull { event ->
-                val bytes = DataMapItem.fromDataItem(event.dataItem).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
-                bytes?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }?.let { it to event.dataItem.uri }
-            }
-        if (received.isEmpty()) return
+    private val container get() = (application as BeStrongApplication).container
 
-        // El servicio se destruye al volver de onDataChanged: guardamos de forma síncrona.
+    override fun onDataChanged(events: DataEventBuffer) {
+        val container = container
+        // El servicio se destruye al volver de onDataChanged: procesamos de forma síncrona.
         runBlocking {
-            received.forEach { (workout, uri) ->
-                container.repository.saveWorkout(workout)
-                Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.name}")
-                runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(uri).await() }
+            events.forEach { event ->
+                val item = event.dataItem
+                val path = item.uri.path.orEmpty()
+                when {
+                    path.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
+                        val workout = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                            ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
+                        container.repository.saveWorkout(workout)
+                        container.repository.clearRemoteActive(workout.id)
+                        Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.name}")
+                        runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
+                        container.appScope.launch { container.exportToHealthConnectIfEnabled(workout) }
+                    }
+                    path == SyncContract.PATH_ACTIVE_WORKOUT && isFromOtherNode(item.uri.host) -> {
+                        if (event.type == DataEvent.TYPE_DELETED) {
+                            container.repository.clearRemoteActive(null)
+                        } else {
+                            DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                                ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }
+                                ?.let { container.repository.applyRemoteActive(it) }
+                        }
+                    }
+                }
             }
         }
-        container.appScope.launch {
-            received.forEach { (workout, _) -> container.exportToHealthConnectIfEnabled(workout) }
+    }
+
+    override fun onMessageReceived(event: MessageEvent) {
+        if (event.path == SyncContract.PATH_METRICS) {
+            runCatching { SyncContract.decodeMetrics(event.data) }.onSuccess { container.watchMetrics.value = it }
         }
+    }
+
+    private fun isFromOtherNode(host: String?): Boolean {
+        val local = runCatching { runBlocking { Wearable.getNodeClient(this@WatchSyncService).localNode.await().id } }.getOrNull()
+        return host != null && host != local
     }
 
     private companion object {

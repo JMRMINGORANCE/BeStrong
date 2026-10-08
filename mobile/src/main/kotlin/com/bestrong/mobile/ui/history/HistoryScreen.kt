@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.history
 
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -98,6 +99,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
 
 @Composable
 private fun WorkoutCard(w: Workout, modifier: Modifier = Modifier) {
+    val unit = LocalWeightUnit.current
     Card(modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -106,7 +108,7 @@ private fun WorkoutCard(w: Workout, modifier: Modifier = Modifier) {
             }
             Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
             Text(
-                "${formatDuration(w.durationSeconds())} · ${formatVolume(w.totalVolume)} kg · ${w.completedSetCount} series",
+                "${formatDuration(w.durationSeconds())} · ${unit.formatVolume(w.totalVolume)} · ${w.completedSetCount} series",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -121,6 +123,7 @@ private fun WorkoutCard(w: Workout, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)?, onWorkoutStarted: () -> Unit) {
+    val unit = LocalWeightUnit.current
     var menu by remember { mutableStateOf(false) }
     val records = remember(w.id) { vm.recordsIn(w) }
     Column(Modifier.fillMaxSize()) {
@@ -143,7 +146,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatTile("Duración", formatDuration(w.durationSeconds()), Modifier.weight(1f))
-                    StatTile("Volumen", "${formatVolume(w.totalVolume)} kg", Modifier.weight(1f))
+                    StatTile("Volumen", unit.formatVolume(w.totalVolume), Modifier.weight(1f))
                     StatTile("Series", "${w.completedSetCount}", Modifier.weight(1f))
                 }
             }
@@ -161,7 +164,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                     Card(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(12.dp)) {
                             Text("🏆 ${records.size} récords", fontWeight = FontWeight.Bold)
-                            records.forEach { Text("${it.exerciseName}: ${it.type.label} ${formatWeight(it.value)}", style = MaterialTheme.typography.bodySmall) }
+                            records.forEach { Text("${it.exerciseName}: ${it.type.label} ${unit.format(it.value)}", style = MaterialTheme.typography.bodySmall) }
                         }
                     }
                 }
@@ -174,8 +177,8 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                         we.sets.forEachIndexed { i, set ->
                             Row {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
-                                Text(describeSet(set, we.exercise.tracking), Modifier.weight(1f))
-                                if (set.estimatedOneRepMax > 0) Text("1RM ${formatWeight(set.estimatedOneRepMax)}", style = MaterialTheme.typography.bodySmall)
+                                Text(describeSet(set, we.exercise.tracking, unit), Modifier.weight(1f))
+                                if (set.estimatedOneRepMax > 0) Text("1RM ${unit.format(set.estimatedOneRepMax)}", style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }

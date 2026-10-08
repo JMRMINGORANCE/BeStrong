@@ -1,0 +1,65 @@
+package com.bestrong.mobile.workout
+
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import com.bestrong.mobile.ui.components.RestState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+/**
+ * Temporizador de descanso a nivel de proceso (no de pantalla): sigue funcionando con la app
+ * en segundo plano gracias a [WorkoutForegroundService], que además lo muestra en la notificación.
+ */
+class RestTimerController(private val context: Context, private val scope: CoroutineScope, private val vibrateEnabled: () -> Boolean) {
+    private val _rest = MutableStateFlow<RestState?>(null)
+    val rest: StateFlow<RestState?> = _rest.asStateFlow()
+    private var job: Job? = null
+
+    fun start(seconds: Int) {
+        if (seconds <= 0) return skip()
+        _rest.value = RestState(System.currentTimeMillis() + seconds * 1000L, seconds)
+        schedule()
+    }
+
+    fun adjust(deltaSeconds: Int) {
+        val r = _rest.value ?: return
+        _rest.value = RestState(
+            (r.endsAtEpochMs + deltaSeconds * 1000L).coerceAtLeast(System.currentTimeMillis()),
+            (r.totalSeconds + deltaSeconds).coerceAtLeast(1),
+        )
+        schedule()
+    }
+
+    fun skip() {
+        job?.cancel()
+        _rest.value = null
+    }
+
+    private fun schedule() {
+        job?.cancel()
+        job = scope.launch {
+            val r = _rest.value ?: return@launch
+            delay((r.endsAtEpochMs - System.currentTimeMillis()).coerceAtLeast(0))
+            _rest.value = null
+            if (vibrateEnabled()) vibrate()
+        }
+    }
+
+    private fun vibrate() {
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            context.getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Vibrator::class.java)
+        }
+        vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 250, 150, 250), -1))
+    }
+}

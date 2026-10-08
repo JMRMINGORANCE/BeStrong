@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.routines
 
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +50,7 @@ import com.bestrong.core.util.formatWeight
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, onClose: () -> Unit) {
+    val unit = LocalWeightUnit.current
     val routine by vm.routine.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
@@ -84,7 +87,15 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                             }
                             IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, "Subir") }
                             IconButton(onClick = { vm.moveExercise(index, index + 1) }, enabled = index < routine.exercises.lastIndex) { Icon(Icons.Default.KeyboardArrowDown, "Bajar") }
-                            IconButton(onClick = { vm.removeExercise(re.id) }) { Icon(Icons.Default.Close, "Quitar") }
+                            IconButton(onClick = { vm.removeExercise(re.id) }) { Icon(Icons.Default.Close, "Quitar ${re.exercise.name}") }
+                        }
+                        if (index < routine.exercises.lastIndex) {
+                            val linked = re.supersetId != null && re.supersetId == routine.exercises[index + 1].supersetId
+                            FilterChip(
+                                selected = linked,
+                                onClick = { vm.toggleSupersetWithNext(re.id) },
+                                label = { Text(if (linked) "En superserie con el siguiente" else "Superserie con el siguiente") },
+                            )
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             listOf(60, 90, 120, 180).forEach { s ->
@@ -99,8 +110,8 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                                 if (re.exercise.tracking == TrackingType.DURATION) {
                                     SmallNumberField("Seg", set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
                                 } else {
-                                    SmallNumberField("kg", formatWeight(set.weightKg), Modifier.weight(1f), decimal = true) { v ->
-                                        vm.updateSet(re.id, i) { it.copy(weightKg = v.replace(',', '.').toDoubleOrNull() ?: 0.0) }
+                                    SmallNumberField(unit.label, unit.format(set.weightKg), Modifier.weight(1f), decimal = true) { v ->
+                                        vm.updateSet(re.id, i) { it.copy(weightKg = unit.parseToKg(v) ?: 0.0) }
                                     }
                                     SmallNumberField("reps", set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
                                 }

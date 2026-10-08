@@ -63,15 +63,46 @@ class BeStrongRepository(private val dao: BeStrongDao, scope: CoroutineScope) {
 
     private val activeMutex = Mutex()
 
-    suspend fun setActive(workout: Workout?) {
+    /** Cambio local: marca la hora de modificación para la sincronización con el reloj. */
+    suspend fun setActive(workout: Workout?) = activeMutex.withLock { write(workout?.copy(updatedAtEpochMs = System.currentTimeMillis())) }
+
+    private suspend fun write(workout: Workout?) {
         if (workout == null) dao.deleteValue(KEY_ACTIVE)
         else dao.putValue(KeyValueEntity(KEY_ACTIVE, json.encodeToString(Workout.serializer(), workout)))
     }
 
     /** Aplica un cambio sobre el último estado guardado (evita perder ediciones rápidas). */
     suspend fun updateActive(block: (Workout) -> Workout) = activeMutex.withLock {
-        val current = dao.valueOnce(KEY_ACTIVE)?.let { json.decodeFromString(Workout.serializer(), it) } ?: return@withLock
-        setActive(block(current))
+        val current = currentActive() ?: return@withLock
+        write(block(current).copy(updatedAtEpochMs = System.currentTimeMillis()))
+    }
+
+    private suspend fun currentActive(): Workout? =
+        dao.valueOnce(KEY_ACTIVE)?.let { runCatching { json.decodeFromString(Workout.serializer(), it) }.getOrNull() }
+
+    /** Estado que llega del reloj: solo se aplica si es más reciente que el local. */
+    suspend fun applyRemoteActive(remote: Workout) = activeMutex.withLock {
+        val local = currentActive()
+        if (local == null || remote.updatedAtEpochMs > local.updatedAtEpochMs) write(remote)
+    }
+
+    /** El reloj terminó o descartó el entreno: lo quitamos sin guardarlo (el terminado llega aparte). */
+    suspend fun clearRemoteActive(workoutId: String?) = activeMutex.withLock {
+        val local = currentActive() ?: return@withLock
+        if (workoutId == null || local.id == workoutId) write(null)
+    }
+
+    // --- Importación ---------------------------------------------------------------------------
+
+    /** Importa entrenamientos (p. ej. desde CSV) evitando duplicados. Devuelve cuántos se añadieron. */
+    suspend fun importWorkouts(workouts: List<Workout>, newExercises: List<Exercise>): Int {
+        newExercises.forEach { saveCustomExercise(it) }
+        val existing = historyOnce()
+        val ids = existing.map { it.id }.toSet()
+        val keys = existing.map { it.startedAtEpochMs to it.name }.toSet()
+        val fresh = workouts.filter { it.id !in ids && (it.startedAtEpochMs to it.name) !in keys }
+        fresh.forEach { saveWorkout(it) }
+        return fresh.size
     }
 
     // --- Historial ---------------------------------------------------------------------------
@@ -93,6 +124,8 @@ class BeStrongRepository(private val dao: BeStrongDao, scope: CoroutineScope) {
     }
 
     suspend fun deleteRoutine(id: String) = dao.deleteRoutine(id)
+
+    suspend fun routine(id: String): Routine? = routinesOnce().firstOrNull { it.id == id }
 
     suspend fun routinesOnce(): List<Routine> =
         dao.routinesOnce().mapNotNull { runCatching { json.decodeFromString(Routine.serializer(), it.json) }.getOrNull() }

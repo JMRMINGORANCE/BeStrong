@@ -9,3 +9,5 @@ build/
 .cxx
 *.keystore
 local.properties
+keystore.properties
+mobile/build/outputs/roborazzi/

@@ -30,6 +30,18 @@ jobs:
       - name: Compilar móvil y reloj
         run: ./gradlew --continue :mobile:assembleDebug :wear:assembleDebug
 
+      - name: Tests de interfaz y capturas (Robolectric + Roborazzi)
+        run: ./gradlew :mobile:testDebugUnitTest -Proborazzi.test.record=true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: capturas
+          path: |
+            mobile/build/outputs/roborazzi/
+            mobile/build/reports/tests/
+          retention-days: 14
+
       - name: Lint
         run: ./gradlew --continue :mobile:lintDebug :wear:lintDebug
 

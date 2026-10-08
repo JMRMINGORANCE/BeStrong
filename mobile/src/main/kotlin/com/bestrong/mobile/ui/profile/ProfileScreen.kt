@@ -1,6 +1,18 @@
 package com.bestrong.mobile.ui.profile
 
+import com.bestrong.mobile.ui.components.LocalWeightUnit
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.bestrong.core.util.WeightUnit
+import com.bestrong.mobile.PrivacyPolicyActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,6 +57,7 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenExercise: (String) -> Unit) {
+    val unit = LocalWeightUnit.current
     val stats by vm.stats.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
     val measurements by vm.measurements.collectAsStateWithLifecycle()
@@ -54,9 +67,14 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
         vm.updateSettings { it.copy(healthConnectExport = ok) }
         vm.refreshHealthConnect()
     }
+    val context = LocalContext.current
+    val snackbar = remember { SnackbarHostState() }
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri -> uri?.let(vm::exportCsv) }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::importCsv) }
     LaunchedEffect(Unit) { vm.refreshHealthConnect() }
+    LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
 
-    Scaffold(topBar = { TopAppBar(title = { Text("Perfil") }) }) { padding ->
+    Scaffold(topBar = { TopAppBar(title = { Text("Perfil") }) }, snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 340.dp),
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -68,16 +86,16 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatTile("Entrenamientos", "${stats.totalWorkouts}", Modifier.weight(1f))
                     StatTile("Racha semanal", "🔥 ${stats.weeklyStreak}", Modifier.weight(1f))
-                    StatTile("Volumen total", "${formatVolume(stats.totalVolume / 1000)} t", Modifier.weight(1f))
+                    StatTile("Volumen total", unit.formatVolume(stats.totalVolume), Modifier.weight(1f))
                     StatTile("Tiempo", formatDuration(stats.totalDurationSec), Modifier.weight(1f))
                 }
             }
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {
-                        SectionHeader("Volumen semanal (kg)")
+                        SectionHeader("Volumen semanal (${unit.label})")
                         val f = DateTimeFormatter.ofPattern("d/M")
-                        BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), it.volume) })
+                        BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), unit.fromKg(it.volume)) })
                     }
                 }
             }
@@ -114,7 +132,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         stats.topOneRepMax.forEach { pr ->
                             ListItem(
                                 headlineContent = { Text(pr.exerciseName) },
-                                trailingContent = { Text("${formatWeight(pr.value)} kg", fontWeight = FontWeight.Bold) },
+                                trailingContent = { Text(unit.format(pr.value, withUnit = true), fontWeight = FontWeight.Bold) },
                                 modifier = Modifier.clickable { onOpenExercise(pr.exerciseId) },
                             )
                         }
@@ -126,7 +144,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                     ListItem(
                         headlineContent = { Text("Medidas corporales") },
                         supportingContent = {
-                            Text(measurements.firstOrNull()?.weightKg?.let { "Último peso: ${formatWeight(it)} kg" } ?: "Registra tu peso y medidas")
+                            Text(measurements.firstOrNull()?.weightKg?.let { "Último peso: ${unit.format(it, withUnit = true)}" } ?: "Registra tu peso y medidas")
                         },
                         trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
                     )
@@ -136,6 +154,25 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                 Card {
                     Column(Modifier.padding(vertical = 8.dp)) {
                         SectionHeader("Ajustes", Modifier.padding(horizontal = 16.dp))
+                        ListItem(
+                            headlineContent = { Text("Unidad de peso") },
+                            trailingContent = {
+                                SingleChoiceSegmentedButtonRow {
+                                    WeightUnit.entries.forEachIndexed { i, u ->
+                                        SegmentedButton(
+                                            selected = settings.unit == u,
+                                            onClick = { vm.updateSettings { it.copy(unit = u) } },
+                                            shape = SegmentedButtonDefaults.itemShape(i, WeightUnit.entries.size),
+                                        ) { Text(u.label) }
+                                    }
+                                }
+                            },
+                        )
+                        ListItem(
+                            headlineContent = { Text("Sobrecarga progresiva automática") },
+                            supportingContent = { Text("Sugiere peso y reps según tu última sesión y propone descargas si te estancas") },
+                            trailingContent = { Switch(settings.progressionEnabled, { v -> vm.updateSettings { it.copy(progressionEnabled = v) } }) },
+                        )
                         ListItem(
                             headlineContent = { Text("Vibrar al terminar el descanso") },
                             trailingContent = { Switch(settings.vibrateOnRestEnd, { v -> vm.updateSettings { it.copy(vibrateOnRestEnd = v) } }) },
@@ -165,6 +202,21 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                     },
                                 )
                             },
+                        )
+                        ListItem(
+                            headlineContent = { Text("Exportar historial (CSV)") },
+                            supportingContent = { Text("Copia de seguridad o para usar en una hoja de cálculo") },
+                            trailingContent = { TextButton(onClick = { exportLauncher.launch("bestrong-${java.time.LocalDate.now()}.csv") }) { Text("Exportar") } },
+                        )
+                        ListItem(
+                            headlineContent = { Text("Importar CSV") },
+                            supportingContent = { Text("Desde BeStrong, Hevy o Strong (Strong usa la unidad elegida arriba)") },
+                            trailingContent = { TextButton(onClick = { importLauncher.launch(arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) }) { Text("Importar") } },
+                        )
+                        ListItem(
+                            headlineContent = { Text("Privacidad") },
+                            supportingContent = { Text("Tus datos no salen de tus dispositivos") },
+                            modifier = Modifier.clickable { context.startActivity(Intent(context, PrivacyPolicyActivity::class.java)) },
                         )
                         ListItem(
                             headlineContent = { Text("Sincronizar con Galaxy Watch") },

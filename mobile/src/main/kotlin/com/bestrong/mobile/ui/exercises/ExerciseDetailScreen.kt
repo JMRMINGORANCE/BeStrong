@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.exercises
 
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,6 +47,7 @@ import com.bestrong.mobile.ui.workout.describeSet
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (() -> Unit)?) {
+    val unit = LocalWeightUnit.current
     val flow = remember(exerciseId) { vm.detail(exerciseId) }
     val state by flow.collectAsStateWithLifecycle()
     val s = state ?: return
@@ -88,7 +90,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         when (metric) { 0 -> p.bestOneRepMax; 1 -> p.heaviestWeight; 2 -> p.volume; else -> p.bestReps.toDouble() },
                     )
                 }
-                LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { formatWeight(it) })
+                LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { unit.format(it) })
             }
             item { SectionHeader("Récords personales") }
             item {
@@ -101,8 +103,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                                 Text(
                                     when (type) {
                                         RecordType.MOST_REPS -> "${pr.value.toInt()} reps"
-                                        RecordType.BEST_SET_VOLUME -> "${formatVolume(pr.value)} kg"
-                                        else -> "${formatWeight(pr.value)} kg"
+                                        RecordType.BEST_SET_VOLUME -> unit.formatVolume(pr.value)
+                                        else -> unit.format(pr.value, withUnit = true)
                                     },
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -118,7 +120,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         Text(w.name, fontWeight = FontWeight.SemiBold)
                         Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
                         w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
-                            Text("${i + 1}. ${describeSet(set, s.exercise.tracking)}" + if (set.estimatedOneRepMax > 0) "  (1RM ≈ ${formatWeight(set.estimatedOneRepMax)})" else "")
+                            Text("${i + 1}. ${describeSet(set, s.exercise.tracking, unit)}" + if (set.estimatedOneRepMax > 0) "  (1RM ≈ ${unit.format(set.estimatedOneRepMax)})" else "")
                         }
                     }
                 }

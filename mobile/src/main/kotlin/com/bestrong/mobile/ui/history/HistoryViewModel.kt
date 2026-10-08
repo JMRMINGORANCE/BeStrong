@@ -32,8 +32,7 @@ class HistoryViewModel(private val container: AppContainer) : ViewModel() {
     /** Repite un entrenamiento pasado como entrenamiento activo. */
     fun repeat(workout: Workout, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeWorkout.value == null) {
-            val lookup = repo.previousSetsLookup.value
-            val again = Routine.fromWorkout(workout).toWorkout(System.currentTimeMillis(), lookup)
+            val again = Routine.fromWorkout(workout).toWorkout(System.currentTimeMillis(), container.prefillLookup())
             repo.setActive(again.copy(routineId = workout.routineId))
         }
         onStarted()

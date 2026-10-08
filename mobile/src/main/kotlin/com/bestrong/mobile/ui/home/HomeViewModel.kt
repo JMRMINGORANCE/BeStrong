@@ -32,9 +32,18 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
             onStarted()
             return@launch
         }
-        val lookup = repo.previousSetsLookup.value
-        repo.setActive(routine.toWorkout(System.currentTimeMillis(), lookup))
+        repo.setActive(routine.toWorkout(System.currentTimeMillis(), container.prefillLookup()))
         onStarted()
+    }
+
+    /** Desde el widget: empezar una rutina por id. */
+    fun startRoutineById(id: String, onStarted: () -> Unit) = viewModelScope.launch {
+        val routine = repo.routine(id)
+        if (routine == null) {
+            _messages.tryEmit("La rutina ya no existe")
+            return@launch
+        }
+        startRoutine(routine, onStarted)
     }
 
     fun startOnWatch(routine: Routine?) = viewModelScope.launch {

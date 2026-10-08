@@ -1,6 +1,11 @@
 package com.bestrong.mobile.ui
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.CompositionLocalProvider
+import com.bestrong.mobile.BeStrongApplication
+import com.bestrong.mobile.LaunchRequest
+import com.bestrong.mobile.ui.components.LocalWeightUnit
+import kotlinx.coroutines.flow.StateFlow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -66,97 +71,113 @@ private object Routes {
  * desplegado. Se oculta en pantallas de foco (entrenamiento, editor, selector).
  */
 @Composable
-fun BeStrongApp(startWorkoutFromIntent: Boolean = false) {
+fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () -> Unit) {
     val nav = rememberNavController()
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
     val topLevel = TopLevel.entries.firstOrNull { it.route == route }
+    val home = appViewModel { HomeViewModel(it) }
+    val settingsStore = (LocalContext.current.applicationContext as BeStrongApplication).container.settings
+    val settings by settingsStore.settings.collectAsStateWithLifecycle()
+    val request by launchRequest.collectAsStateWithLifecycle()
 
-    LaunchedEffect(startWorkoutFromIntent) { if (startWorkoutFromIntent) nav.navigate(Routes.WORKOUT) }
+    // Peticiones desde la notificación del entreno o el widget
+    LaunchedEffect(request) {
+        val openWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } }
+        when (val r = request) {
+            LaunchRequest.OpenWorkout -> openWorkout()
+            LaunchRequest.StartEmpty -> home.startEmpty(openWorkout)
+            is LaunchRequest.StartRoutine -> home.startRoutineById(r.routineId, openWorkout)
+            null -> return@LaunchedEffect
+        }
+        onLaunchHandled()
+    }
 
     val layoutType = if (topLevel == null) NavigationSuiteType.None
     else NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
 
-    NavigationSuiteScaffold(
-        layoutType = layoutType,
-        navigationSuiteItems = {
-            TopLevel.entries.forEach { dest ->
-                item(
-                    selected = dest == topLevel,
-                    onClick = { nav.navigateTopLevel(dest.route) },
-                    icon = { Icon(dest.icon, contentDescription = dest.label) },
-                    label = { Text(dest.label) },
-                )
-            }
-        },
-    ) {
-        NavHost(nav, startDestination = TopLevel.TRAIN.route) {
-            composable(TopLevel.TRAIN.route) {
-                HomeScreen(
-                    vm = appViewModel { HomeViewModel(it) },
-                    onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
-                    onEditRoutine = { nav.navigate(Routes.routine(it)) },
-                )
-            }
-            composable(TopLevel.HISTORY.route) {
-                HistoryScreen(appViewModel { HistoryViewModel(it) }, onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } })
-            }
-            composable(TopLevel.EXERCISES.route) {
-                ExerciseLibraryScreen(appViewModel { ExercisesViewModel(it) })
-            }
-            composable(TopLevel.PROFILE.route) {
-                ProfileScreen(
-                    vm = appViewModel { ProfileViewModel(it) },
-                    onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) },
-                    onOpenExercise = { nav.navigate(Routes.exercise(it)) },
-                )
-            }
-            composable(Routes.WORKOUT) { backStackEntry ->
-                // Ligado a la Activity: el temporizador de descanso sigue al minimizar el entrenamiento
-                val activity = LocalContext.current as ComponentActivity
-                val vm = appViewModel(owner = activity) { ActiveWorkoutViewModel(it) }
-                val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
-                LaunchedEffect(picked) {
-                    picked?.let {
-                        vm.addExercises(it)
-                        backStackEntry.savedStateHandle[Routes.PICKED] = null
-                    }
+    CompositionLocalProvider(LocalWeightUnit provides settings.unit) {
+        NavigationSuiteScaffold(
+            layoutType = layoutType,
+            navigationSuiteItems = {
+                TopLevel.entries.forEach { dest ->
+                    item(
+                        selected = dest == topLevel,
+                        onClick = { nav.navigateTopLevel(dest.route) },
+                        icon = { Icon(dest.icon, contentDescription = dest.label) },
+                        label = { Text(dest.label) },
+                    )
                 }
-                ActiveWorkoutScreen(
-                    vm = vm,
-                    onAddExercises = { nav.navigate(Routes.PICKER) },
-                    onBack = { nav.popBackStack() },
-                    onFinished = { nav.navigateTopLevel(TopLevel.HISTORY.route) },
-                )
-            }
-            composable(Routes.PICKER) {
-                ExercisePickerScreen(
-                    vm = appViewModel { ExercisesViewModel(it) },
-                    onBack = { nav.popBackStack() },
-                    onPicked = { ids ->
-                        nav.previousBackStackEntry?.savedStateHandle?.set(Routes.PICKED, ArrayList(ids))
-                        nav.popBackStack()
-                    },
-                )
-            }
-            composable(Routes.ROUTINE, arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })) { backStackEntry ->
-                val id = backStackEntry.arguments?.getString("id")
-                val vm = appViewModel(key = "routine-$id") { RoutineEditorViewModel(it, id) }
-                val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
-                LaunchedEffect(picked) {
-                    picked?.let {
-                        vm.addExercises(it)
-                        backStackEntry.savedStateHandle[Routes.PICKED] = null
-                    }
+            },
+        ) {
+            NavHost(nav, startDestination = TopLevel.TRAIN.route) {
+                composable(TopLevel.TRAIN.route) {
+                    HomeScreen(
+                        vm = home,
+                        onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
+                        onEditRoutine = { nav.navigate(Routes.routine(it)) },
+                    )
                 }
-                RoutineEditorScreen(vm, onAddExercises = { nav.navigate(Routes.PICKER) }, onClose = { nav.popBackStack() })
-            }
-            composable(Routes.EXERCISE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStackEntry ->
-                val id = backStackEntry.arguments?.getString("id").orEmpty()
-                ExerciseDetailScreen(appViewModel { ExercisesViewModel(it) }, id, onBack = { nav.popBackStack() })
-            }
-            composable(Routes.MEASUREMENTS) {
-                MeasurementsScreen(appViewModel { ProfileViewModel(it) }, onBack = { nav.popBackStack() })
+                composable(TopLevel.HISTORY.route) {
+                    HistoryScreen(appViewModel { HistoryViewModel(it) }, onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } })
+                }
+                composable(TopLevel.EXERCISES.route) {
+                    ExerciseLibraryScreen(appViewModel { ExercisesViewModel(it) })
+                }
+                composable(TopLevel.PROFILE.route) {
+                    ProfileScreen(
+                        vm = appViewModel { ProfileViewModel(it) },
+                        onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) },
+                        onOpenExercise = { nav.navigate(Routes.exercise(it)) },
+                    )
+                }
+                composable(Routes.WORKOUT) { backStackEntry ->
+                    // Ligado a la Activity: el temporizador de descanso sigue al minimizar el entrenamiento
+                    val activity = LocalContext.current as ComponentActivity
+                    val vm = appViewModel(owner = activity) { ActiveWorkoutViewModel(it) }
+                    val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
+                    LaunchedEffect(picked) {
+                        picked?.let {
+                            vm.addExercises(it)
+                            backStackEntry.savedStateHandle[Routes.PICKED] = null
+                        }
+                    }
+                    ActiveWorkoutScreen(
+                        vm = vm,
+                        onAddExercises = { nav.navigate(Routes.PICKER) },
+                        onBack = { nav.popBackStack() },
+                        onFinished = { nav.navigateTopLevel(TopLevel.HISTORY.route) },
+                    )
+                }
+                composable(Routes.PICKER) {
+                    ExercisePickerScreen(
+                        vm = appViewModel { ExercisesViewModel(it) },
+                        onBack = { nav.popBackStack() },
+                        onPicked = { ids ->
+                            nav.previousBackStackEntry?.savedStateHandle?.set(Routes.PICKED, ArrayList(ids))
+                            nav.popBackStack()
+                        },
+                    )
+                }
+                composable(Routes.ROUTINE, arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })) { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("id")
+                    val vm = appViewModel(key = "routine-$id") { RoutineEditorViewModel(it, id) }
+                    val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
+                    LaunchedEffect(picked) {
+                        picked?.let {
+                            vm.addExercises(it)
+                            backStackEntry.savedStateHandle[Routes.PICKED] = null
+                        }
+                    }
+                    RoutineEditorScreen(vm, onAddExercises = { nav.navigate(Routes.PICKER) }, onClose = { nav.popBackStack() })
+                }
+                composable(Routes.EXERCISE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("id").orEmpty()
+                    ExerciseDetailScreen(appViewModel { ExercisesViewModel(it) }, id, onBack = { nav.popBackStack() })
+                }
+                composable(Routes.MEASUREMENTS) {
+                    MeasurementsScreen(appViewModel { ProfileViewModel(it) }, onBack = { nav.popBackStack() })
+                }
             }
         }
     }

@@ -1,6 +1,12 @@
 package com.bestrong.mobile.ui.profile
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
+import com.bestrong.core.io.WorkoutCsv
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.withContext
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.MuscleGroup
@@ -64,6 +70,44 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
 
     fun saveMeasurement(m: BodyMeasurement) = viewModelScope.launch { repo.saveMeasurement(m) }
     fun deleteMeasurement(id: String) = viewModelScope.launch { repo.deleteMeasurement(id) }
+
+    private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
+    val messages: SharedFlow<String> = _messages
+
+    /** Exporta todo el historial al archivo elegido (SAF). */
+    fun exportCsv(uri: Uri) = viewModelScope.launch {
+        val result = runCatching {
+            val csv = WorkoutCsv.export(repo.historyOnce())
+            withContext(Dispatchers.IO) {
+                container.context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error("No se pudo abrir el archivo")
+            }
+        }
+        _messages.tryEmit(result.fold({ "Historial exportado" }, { "Error al exportar: ${it.message}" }))
+    }
+
+    /** Importa un CSV de BeStrong, Hevy o Strong. */
+    fun importCsv(uri: Uri) = viewModelScope.launch {
+        val result = runCatching {
+            val text = withContext(Dispatchers.IO) {
+                container.context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error("No se pudo abrir el archivo")
+            }
+            val parsed = withContext(Dispatchers.Default) {
+                WorkoutCsv.import(text, repo.exercises.value, strongUnit = settings.value.unit)
+            }
+            parsed to repo.importWorkouts(parsed.workouts, parsed.newExercises)
+        }
+        _messages.tryEmit(
+            result.fold(
+                { (r, added) ->
+                    "${r.format.label}: $added entrenamientos importados" +
+                        (if (r.workouts.size > added) " (${r.workouts.size - added} ya existían)" else "") +
+                        (if (r.newExercises.isNotEmpty()) " · ${r.newExercises.size} ejercicios nuevos" else "") +
+                        (if (r.skippedRows > 0) " · ${r.skippedRows} filas ignoradas" else "")
+                },
+                { "Error al importar: ${it.message}" },
+            ),
+        )
+    }
 
     fun syncWatchNow() = viewModelScope.launch {
         container.watchSync.pushRoutines(repo.routines.value)

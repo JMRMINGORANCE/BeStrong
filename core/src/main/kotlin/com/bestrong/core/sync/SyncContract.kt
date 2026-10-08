@@ -2,6 +2,8 @@ package com.bestrong.core.sync
 
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
+import com.bestrong.core.util.WeightUnit
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
@@ -15,6 +17,12 @@ object SyncContract {
     const val PATH_FINISHED_WORKOUT_PREFIX = "/bestrong/finished-workout/"
     /** DataItem con el historial reciente (móvil → reloj) para "anterior", tile y complicación. */
     const val PATH_RECENT_HISTORY = "/bestrong/recent-history"
+    /** DataItem con el entrenamiento en curso, compartido en vivo entre móvil y reloj. */
+    const val PATH_ACTIVE_WORKOUT = "/bestrong/active-workout"
+    /** DataItem con los ajustes que el reloj necesita (unidad de peso). */
+    const val PATH_SETTINGS = "/bestrong/settings"
+    /** Mensaje reloj → móvil con las métricas de salud en directo. */
+    const val PATH_METRICS = "/bestrong/metrics"
     const val KEY_PAYLOAD = "payload"
     const val KEY_TIMESTAMP = "ts"
 
@@ -37,6 +45,12 @@ object SyncContract {
     fun encodeRoutines(routines: List<Routine>): ByteArray = json.encodeToString(routineList, routines).encodeToByteArray()
     fun decodeRoutines(bytes: ByteArray): List<Routine> = json.decodeFromString(routineList, bytes.decodeToString())
 
+    fun encodeMetrics(m: LiveMetrics): ByteArray = json.encodeToString(LiveMetrics.serializer(), m).encodeToByteArray()
+    fun decodeMetrics(bytes: ByteArray): LiveMetrics = json.decodeFromString(LiveMetrics.serializer(), bytes.decodeToString())
+
+    fun encodeSettings(s: SharedSettings): ByteArray = json.encodeToString(SharedSettings.serializer(), s).encodeToByteArray()
+    fun decodeSettings(bytes: ByteArray): SharedSettings = json.decodeFromString(SharedSettings.serializer(), bytes.decodeToString())
+
     /**
      * Versión ligera del historial para el reloj: solo las series completadas de los
      * últimos [limit] entrenamientos, para no superar el límite de 100 KB de un DataItem.
@@ -45,3 +59,17 @@ object SyncContract {
         history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.take(limit)
             .map { w -> w.copy(notes = "", exercises = w.exercises.map { it.copy(notes = "", sets = it.completedSets) }) }
 }
+
+/** Métricas del reloj durante un entreno (para mostrarlas en el móvil). */
+@Serializable
+data class LiveMetrics(
+    val workoutId: String,
+    val heartRate: Int? = null,
+    val avgHeartRate: Int? = null,
+    val maxHeartRate: Int? = null,
+    val calories: Int? = null,
+    val timestampEpochMs: Long,
+)
+
+@Serializable
+data class SharedSettings(val unit: WeightUnit = WeightUnit.KG, val progressionEnabled: Boolean = true)

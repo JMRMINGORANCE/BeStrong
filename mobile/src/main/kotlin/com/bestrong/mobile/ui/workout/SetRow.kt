@@ -2,11 +2,12 @@ package com.bestrong.mobile.ui.workout
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,7 +16,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconToggleButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
@@ -33,6 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -42,22 +49,24 @@ import androidx.compose.ui.unit.dp
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.WorkoutSet
-import com.bestrong.core.util.formatWeight
+import com.bestrong.core.util.WeightUnit
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 
 /** Cabecera de la tabla de series: SERIE | ANTERIOR | KG | REPS | ✓ */
 @Composable
 fun SetHeader(tracking: TrackingType) {
+    val unit = LocalWeightUnit.current.label.uppercase()
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         val style = MaterialTheme.typography.labelSmall
         Text("SERIE", style = style, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
         Text("ANTERIOR", style = style, modifier = Modifier.weight(1.4f), textAlign = TextAlign.Center)
         when (tracking) {
             TrackingType.WEIGHT_REPS -> {
-                Text("KG", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(unit, style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                 Text("REPS", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
             TrackingType.REPS_ONLY -> {
-                Text("+KG", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text("+$unit", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                 Text("REPS", style = style, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
             TrackingType.DURATION -> Text("SEG", style = style, modifier = Modifier.weight(2f), textAlign = TextAlign.Center)
@@ -66,11 +75,13 @@ fun SetHeader(tracking: TrackingType) {
     }
 }
 
-fun describeSet(set: WorkoutSet, tracking: TrackingType): String = when (tracking) {
-    TrackingType.WEIGHT_REPS -> "${formatWeight(set.weightKg)} kg × ${set.reps}"
-    TrackingType.REPS_ONLY -> if (set.weightKg > 0) "+${formatWeight(set.weightKg)} kg × ${set.reps}" else "${set.reps} reps"
+fun describeSet(set: WorkoutSet, tracking: TrackingType, unit: WeightUnit): String = when (tracking) {
+    TrackingType.WEIGHT_REPS -> "${unit.format(set.weightKg)} ${unit.label} × ${set.reps}"
+    TrackingType.REPS_ONLY -> if (set.weightKg > 0) "+${unit.format(set.weightKg)} ${unit.label} × ${set.reps}" else "${set.reps} reps"
     TrackingType.DURATION -> "${set.durationSec} s"
-}
+} + (set.rpe?.let { " @${it.toString().removeSuffix(".0")}" } ?: "")
+
+private val RPE_VALUES = listOf(6.0, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0)
 
 @Composable
 fun SetRow(
@@ -78,13 +89,15 @@ fun SetRow(
     set: WorkoutSet,
     previous: WorkoutSet?,
     tracking: TrackingType,
-    onWeight: (Double) -> Unit,
+    onWeightKg: (Double) -> Unit,
     onReps: (Int) -> Unit,
     onDuration: (Int) -> Unit,
     onToggle: () -> Unit,
-    onCycleType: () -> Unit,
+    onType: (SetType) -> Unit,
+    onRpe: (Double?) -> Unit,
     onDelete: () -> Unit,
 ) {
+    val unit = LocalWeightUnit.current
     val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
         if (it == SwipeToDismissBoxValue.EndToStart) onDelete()
         false
@@ -100,49 +113,68 @@ fun SetRow(
         },
     ) {
         val bg = if (set.completed) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surface
+        val label = if (set.type == SetType.NORMAL) "${index + 1}" else set.type.short
         Row(
-            Modifier.fillMaxWidth().background(bg).padding(horizontal = 4.dp, vertical = 2.dp),
+            Modifier.fillMaxWidth().background(bg).padding(horizontal = 4.dp, vertical = 2.dp).heightIn(min = 48.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val label = if (set.type == SetType.NORMAL) "${index + 1}" else set.type.short
+            var menu by remember { mutableStateOf(false) }
             val labelColor = when (set.type) {
                 SetType.WARMUP -> MaterialTheme.colorScheme.tertiary
                 SetType.DROP -> MaterialTheme.colorScheme.secondary
                 SetType.FAILURE -> MaterialTheme.colorScheme.error
                 SetType.NORMAL -> MaterialTheme.colorScheme.onSurface
             }
+            Box(Modifier.weight(0.6f)) {
+                Column(
+                    Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)).clickable { menu = true }.padding(vertical = 6.dp)
+                        .semantics { contentDescription = "Serie $label, tipo y RPE" },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(label, fontWeight = FontWeight.Bold, color = labelColor, textAlign = TextAlign.Center)
+                    set.rpe?.let { Text("@${it.toString().removeSuffix(".0")}", style = MaterialTheme.typography.labelSmall) }
+                }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    listOf(SetType.NORMAL to "Normal", SetType.WARMUP to "Calentamiento", SetType.DROP to "Drop set", SetType.FAILURE to "Al fallo")
+                        .forEach { (t, l) -> DropdownMenuItem(text = { Text(if (t == set.type) "✓ $l" else l) }, onClick = { onType(t); menu = false }) }
+                    HorizontalDivider()
+                    Text("RPE", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                    RPE_VALUES.forEach { v ->
+                        val t = v.toString().removeSuffix(".0")
+                        DropdownMenuItem(text = { Text(if (set.rpe == v) "✓ RPE $t" else "RPE $t") }, onClick = { onRpe(v); menu = false })
+                    }
+                    if (set.rpe != null) DropdownMenuItem(text = { Text("Quitar RPE") }, onClick = { onRpe(null); menu = false })
+                }
+            }
             Text(
-                label,
-                fontWeight = FontWeight.Bold,
-                color = labelColor,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(0.6f).clip(RoundedCornerShape(6.dp)).clickable(onClick = onCycleType).padding(vertical = 10.dp),
-            )
-            Text(
-                previous?.let { describeSet(it, tracking) } ?: "—",
+                previous?.let { describeSet(it, tracking, unit) } ?: "—",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
-                modifier = Modifier.weight(1.4f).clickable(enabled = previous != null) {
-                    previous?.let { onWeight(it.weightKg); onReps(it.reps); onDuration(it.durationSec) }
+                modifier = Modifier.weight(1.4f).clickable(enabled = previous != null, onClickLabel = "Copiar serie anterior") {
+                    previous?.let { onWeightKg(it.weightKg); onReps(it.reps); onDuration(it.durationSec) }
                 },
             )
             when (tracking) {
                 TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY -> {
-                    NumberField(formatWeight(set.weightKg).takeIf { set.weightKg > 0 } ?: "", Modifier.weight(1f), decimal = true) {
-                        it.replace(',', '.').toDoubleOrNull()?.let(onWeight) ?: if (it.isEmpty()) onWeight(0.0) else Unit
+                    NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", "Peso en ${unit.label}", Modifier.weight(1f), decimal = true) {
+                        if (it.isEmpty()) onWeightKg(0.0) else unit.parseToKg(it)?.let(onWeightKg)
                     }
-                    NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", Modifier.weight(1f)) {
-                        it.toIntOrNull()?.let(onReps) ?: if (it.isEmpty()) onReps(0) else Unit
+                    NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", "Repeticiones", Modifier.weight(1f)) {
+                        if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
                     }
                 }
-                TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", Modifier.weight(2f)) {
-                    it.toIntOrNull()?.let(onDuration) ?: if (it.isEmpty()) onDuration(0) else Unit
+                TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", "Segundos", Modifier.weight(2f)) {
+                    if (it.isEmpty()) onDuration(0) else it.toIntOrNull()?.let(onDuration)
                 }
             }
-            FilledIconToggleButton(checked = set.completed, onCheckedChange = { onToggle() }) {
-                Icon(Icons.Default.Check, "Completar serie")
+            FilledIconToggleButton(
+                checked = set.completed,
+                onCheckedChange = { onToggle() },
+                modifier = Modifier.semantics { stateDescription = if (set.completed) "Completada" else "Pendiente" },
+            ) {
+                Icon(Icons.Default.Check, "Completar serie $label")
             }
         }
     }
@@ -153,7 +185,7 @@ fun SetRow(
  * el valor viaja a la base de datos y vuelve.
  */
 @Composable
-private fun NumberField(value: String, modifier: Modifier, decimal: Boolean = false, onChange: (String) -> Unit) {
+private fun NumberField(value: String, description: String, modifier: Modifier, decimal: Boolean = false, onChange: (String) -> Unit) {
     var text by remember { mutableStateOf(value) }
     var focused by remember { mutableStateOf(false) }
     LaunchedEffect(value) { if (!focused) text = value }
@@ -162,7 +194,8 @@ private fun NumberField(value: String, modifier: Modifier, decimal: Boolean = fa
         onValueChange = { new ->
             val filtered = new.filter { it.isDigit() || (decimal && (it == '.' || it == ',')) }.take(6)
             text = filtered
-            onChange(filtered)
+            // "82," aún no es un número completo: se guarda al escribir el decimal
+            if (!filtered.endsWith(',') && !filtered.endsWith('.')) onChange(filtered)
         },
         singleLine = true,
         textStyle = TextStyle(
@@ -181,7 +214,8 @@ private fun NumberField(value: String, modifier: Modifier, decimal: Boolean = fa
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .padding(vertical = 10.dp)
-            .onFocusChanged { focused = it.isFocused },
+            .onFocusChanged { focused = it.isFocused }
+            .semantics { contentDescription = description },
         decorationBox = { inner ->
             Box(contentAlignment = Alignment.Center) {
                 if (text.isEmpty()) Text("0", color = MaterialTheme.colorScheme.outline, textAlign = TextAlign.Center)

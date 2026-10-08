@@ -1,24 +1,31 @@
 package com.bestrong.mobile.ui.workout
 
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
+import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
+import com.bestrong.core.sync.LiveMetrics
+import com.bestrong.core.training.Progression
+import com.bestrong.core.training.ProgressionSuggestion
+import com.bestrong.core.training.WarmupGenerator
 import com.bestrong.mobile.AppContainer
+import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.ui.components.RestState
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class FinishedSummary(val workout: Workout, val records: List<PersonalRecord>)
@@ -28,26 +35,36 @@ class ActiveWorkoutViewModel(private val container: AppContainer) : ViewModel() 
 
     val workout: StateFlow<Workout?> = repo.activeWorkout
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = repo.previousSetsLookup
-    val settings = container.settings.settings
+    val settings: StateFlow<UserSettings> = container.settings.settings
+    val rest: StateFlow<RestState?> = container.restTimer.rest
+    val watchMetrics: StateFlow<LiveMetrics?> = container.watchMetrics
 
-    private val _rest = MutableStateFlow<RestState?>(null)
-    val rest: StateFlow<RestState?> = _rest.asStateFlow()
+    /** Sugerencia de progresión por ejercicio (id de ejercicio → sugerencia). */
+    val suggestions: StateFlow<Map<String, ProgressionSuggestion>> = combine(
+        workout.map { w -> w?.exercises?.map { it.exercise }.orEmpty() }.distinctUntilChanged(),
+        repo.history,
+        settings,
+    ) { exercises, history, s ->
+        if (!s.progressionEnabled) emptyMap()
+        else exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.unit.stepKg())?.let { ex.id to it } }.toMap()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     private val _summary = MutableStateFlow<FinishedSummary?>(null)
     val summary: StateFlow<FinishedSummary?> = _summary.asStateFlow()
 
-    private var restJob: Job? = null
+    /** Índice del ejercicio al que desplazar la lista (siguiente de la superserie, etc.). */
+    private val _focusExercise = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+    val focusExercise: SharedFlow<Int> = _focusExercise
 
     private fun edit(block: (Workout) -> Workout) {
         viewModelScope.launch { repo.updateActive(block) }
     }
 
     fun rename(name: String) = edit { it.copy(name = name.ifBlank { it.name }) }
-    fun setNotes(notes: String) = edit { it.copy(notes = notes) }
 
     fun addExercises(ids: List<String>) {
         val exercises = ids.mapNotNull { repo.exercise(it) }
-        val lookup = previousSets.value
+        val lookup = container.prefillLookup()
         edit { WorkoutEditor.addExercises(it, exercises, lookup) }
     }
 
@@ -57,64 +74,64 @@ class ActiveWorkoutViewModel(private val container: AppContainer) : ViewModel() 
     fun setExerciseNotes(weId: String, notes: String) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(notes = notes) } }
     fun addSet(weId: String) = edit { WorkoutEditor.addSet(it, weId) }
     fun removeSet(weId: String, setId: String) = edit { WorkoutEditor.removeSet(it, weId, setId) }
-    fun cycleSetType(weId: String, setId: String) = edit { WorkoutEditor.cycleSetType(it, weId, setId) }
+    fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
+    fun setRpe(weId: String, setId: String, rpe: Double?) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(rpe = rpe) } }
+    fun linkWithNext(weId: String) = edit { WorkoutEditor.linkWithNext(it, weId) }
+    fun unlinkSuperset(weId: String) = edit { WorkoutEditor.unlinkSuperset(it, weId) }
 
-    fun updateSet(weId: String, setId: String, weight: Double? = null, reps: Int? = null, duration: Int? = null) = edit { w ->
+    fun updateSet(weId: String, setId: String, weightKg: Double? = null, reps: Int? = null, duration: Int? = null) = edit { w ->
         WorkoutEditor.updateSet(w, weId, setId) { s ->
-            s.copy(weightKg = weight ?: s.weightKg, reps = reps ?: s.reps, durationSec = duration ?: s.durationSec)
+            s.copy(weightKg = weightKg ?: s.weightKg, reps = reps ?: s.reps, durationSec = duration ?: s.durationSec)
+        }
+    }
+
+    /** Añade series de aproximación antes de la primera serie de trabajo. */
+    fun addWarmup(weId: String) = edit { w ->
+        WorkoutEditor.updateExercise(w, weId) { we ->
+            val working = we.sets.firstOrNull { it.type != SetType.WARMUP }?.weightKg ?: return@updateExercise we
+            val warmups = WarmupGenerator.generate(working, settings.value.unit)
+            we.copy(sets = warmups + we.sets.filter { it.type != SetType.WARMUP || it.completed })
+        }
+    }
+
+    /** Aplica la sugerencia de progresión a las series pendientes. */
+    fun applySuggestion(weId: String, suggestion: ProgressionSuggestion) = edit { w ->
+        WorkoutEditor.updateExercise(w, weId) { we ->
+            var i = 0
+            we.copy(sets = we.sets.map { s ->
+                if (s.completed || s.type == SetType.WARMUP) s
+                else suggestion.sets.getOrNull(i++)?.let { sug -> s.copy(weightKg = sug.weightKg, reps = sug.reps, durationSec = sug.durationSec) } ?: s
+            })
         }
     }
 
     fun toggleSet(weId: String, setId: String) {
         val current = workout.value ?: return
-        val we = current.exercises.firstOrNull { it.id == weId } ?: return
-        val set = we.sets.firstOrNull { it.id == setId } ?: return
+        val index = current.exercises.indexOfFirst { it.id == weId }
+        val set = current.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId } ?: return
+        val completing = !set.completed
+        val updated = WorkoutEditor.toggleSetCompleted(current, weId, setId)
         edit { WorkoutEditor.toggleSetCompleted(it, weId, setId) }
-        if (!set.completed && we.restSeconds > 0) startRest(we.restSeconds)
-    }
-
-    fun startRest(seconds: Int) {
-        _rest.value = RestState(System.currentTimeMillis() + seconds * 1000L, seconds)
-        scheduleRestEnd()
-    }
-
-    fun adjustRest(deltaSeconds: Int) {
-        val r = _rest.value ?: return
-        val endsAt = (r.endsAtEpochMs + deltaSeconds * 1000L).coerceAtLeast(System.currentTimeMillis())
-        _rest.value = RestState(endsAt, (r.totalSeconds + deltaSeconds).coerceAtLeast(1))
-        scheduleRestEnd()
-    }
-
-    fun skipRest() {
-        restJob?.cancel()
-        _rest.value = null
-    }
-
-    private fun scheduleRestEnd() {
-        restJob?.cancel()
-        restJob = viewModelScope.launch {
-            val r = _rest.value ?: return@launch
-            delay((r.endsAtEpochMs - System.currentTimeMillis()).coerceAtLeast(0))
-            _rest.value = null
-            if (settings.value.vibrateOnRestEnd) vibrate()
+        if (completing) {
+            val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
+            if (restSeconds > 0) container.restTimer.start(restSeconds) else container.restTimer.skip()
+            if (next != null && next != index) _focusExercise.tryEmit(next)
         }
     }
 
-    private fun vibrate() {
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            container.context.getSystemService(VibratorManager::class.java)?.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            container.context.getSystemService(Vibrator::class.java)
-        }
-        vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 250, 150, 250), -1))
-    }
+    fun adjustRest(deltaSeconds: Int) = container.restTimer.adjust(deltaSeconds)
+    fun skipRest() = container.restTimer.skip()
 
     fun finish() {
         val current = workout.value ?: return
         viewModelScope.launch {
-            val finished = WorkoutEditor.finish(current, System.currentTimeMillis())
-            skipRest()
+            val metrics = container.watchMetrics.value?.takeIf { it.workoutId == current.id }
+            val finished = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
+                avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
+                maxHeartRate = metrics?.maxHeartRate ?: current.maxHeartRate,
+                calories = metrics?.calories ?: current.calories,
+            )
+            container.restTimer.skip()
             repo.setActive(null)
             if (finished.exercises.isEmpty()) return@launch
             repo.saveWorkout(finished)
@@ -125,7 +142,7 @@ class ActiveWorkoutViewModel(private val container: AppContainer) : ViewModel() 
     }
 
     fun discard() = viewModelScope.launch {
-        skipRest()
+        container.restTimer.skip()
         repo.setActive(null)
     }
 
