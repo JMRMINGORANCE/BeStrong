@@ -20,7 +20,7 @@ enum class WeightUnit(val label: String, val kgPerUnit: Double, val defaultIncre
     }
 
     /** Volumen total (kg·reps) en esta unidad: "12.345 kg". */
-    fun formatVolume(kg: Double): String = formatVolume(fromKg(kg)) + " " + label
+    fun formatVolume(kg: Double): String = com.bestrong.core.util.formatVolume(fromKg(kg)) + " " + label
 
     /** Convierte texto introducido por el usuario ("82,5") a kg. */
     fun parseToKg(text: String): Double? = text.replace(',', '.').toDoubleOrNull()?.let(::toKg)
