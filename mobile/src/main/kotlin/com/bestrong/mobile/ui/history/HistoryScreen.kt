@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +58,7 @@ import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.workout.describeSet
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +66,8 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     val history by vm.history.collectAsStateWithLifecycle()
     val days by vm.trainingDays.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
+    // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
+    val scope = rememberCoroutineScope()
 
     NavigableListDetailPaneScaffold(
         navigator = navigator,
@@ -78,7 +82,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                     LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         item { CalendarMonth(days, Modifier.padding(bottom = 8.dp)) }
                         items(history, key = { it.id }) { w ->
-                            WorkoutCard(w, Modifier.clickable { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) })
+                            WorkoutCard(w, Modifier.clickable { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } })
                         }
                     }
                 }
@@ -86,7 +90,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
         },
         detailPane = {
             AnimatedPane {
-                val id = (navigator.currentDestination?.content as? String)
+                val id = (navigator.currentDestination?.contentKey as? String)
                 val w = history.firstOrNull { it.id == id }
                 if (w == null) {
                     EmptyState(Icons.Default.FitnessCenter, stringResource(R.string.history_pick_title), stringResource(R.string.history_pick_body))
@@ -94,7 +98,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                     WorkoutDetail(
                         w = w,
                         vm = vm,
-                        onBack = if (navigator.canNavigateBack()) ({ navigator.navigateBack() }) else null,
+                        onBack = if (navigator.canNavigateBack()) ({ scope.launch { navigator.navigateBack() } }) else null,
                         onWorkoutStarted = onWorkoutStarted,
                     )
                 }

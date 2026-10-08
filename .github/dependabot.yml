@@ -7,6 +7,10 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    # Los saltos de versión mayor (AGP 9, Spotless 8…) se hacen a mano: suelen requerir cambios de código
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       androidx:
         patterns: ["androidx.*"]

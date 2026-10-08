@@ -44,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -59,12 +60,15 @@ import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.EmptyState
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.label
+import kotlinx.coroutines.launch
 
 /** Pestaña "Ejercicios": lista y detalle lado a lado en el Fold desplegado. */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
+    // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
+    val scope = rememberCoroutineScope()
     NavigableListDetailPaneScaffold(
         navigator = navigator,
         listPane = {
@@ -72,19 +76,19 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
                 ExerciseSearchList(
                     vm = vm,
                     title = stringResource(R.string.nav_exercises),
-                    selected = setOfNotNull((navigator.currentDestination?.content as? String)),
+                    selected = setOfNotNull((navigator.currentDestination?.contentKey as? String)),
                     multiSelect = false,
-                    onClick = { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, it.id) },
+                    onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, it.id) } },
                 )
             }
         },
         detailPane = {
             AnimatedPane {
-                val id = (navigator.currentDestination?.content as? String)
+                val id = (navigator.currentDestination?.contentKey as? String)
                 if (id == null) {
                     EmptyState(Icons.Default.Search, stringResource(R.string.exercise_pick_title), stringResource(R.string.exercise_pick_body))
                 } else {
-                    ExerciseDetailScreen(vm, id, onBack = if (navigator.canNavigateBack()) ({ navigator.navigateBack() }) else null)
+                    ExerciseDetailScreen(vm, id, onBack = if (navigator.canNavigateBack()) ({ scope.launch { navigator.navigateBack() } }) else null)
                 }
             }
         },
