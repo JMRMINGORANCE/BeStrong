@@ -26,7 +26,9 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
-import com.bestrong.wear.BeStrongWearApp
+import com.bestrong.wear.session.WorkoutSession
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import com.bestrong.wear.MainActivity
 import com.bestrong.wear.R
 import kotlinx.coroutines.launch
@@ -37,10 +39,12 @@ import kotlinx.coroutines.launch
  * - Ongoing Activity: el entreno aparece en la esfera y en el lanzador mientras dura.
  * - Mantiene vivo el proceso con la pantalla apagada.
  */
+@AndroidEntryPoint
 class ExerciseService : LifecycleService() {
 
+    @Inject lateinit var session: WorkoutSession
+
     private val exerciseClient by lazy { HealthServices.getClient(this).exerciseClient }
-    private val session get() = (application as BeStrongWearApp).container.session
     private var exerciseStarted = false
 
     private val callback = object : ExerciseUpdateCallback {

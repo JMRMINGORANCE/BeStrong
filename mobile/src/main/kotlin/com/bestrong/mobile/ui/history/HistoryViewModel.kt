@@ -6,7 +6,10 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.mobile.AppContainer
+import com.bestrong.mobile.WorkoutActions
+import com.bestrong.mobile.data.BeStrongRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -15,8 +18,11 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 
-class HistoryViewModel(private val container: AppContainer) : ViewModel() {
-    private val repo = container.repository
+@HiltViewModel
+class HistoryViewModel @Inject constructor(
+    private val repo: BeStrongRepository,
+    private val actions: WorkoutActions,
+) : ViewModel() {
     val history: StateFlow<List<Workout>> = repo.history
 
     val trainingDays: StateFlow<Set<LocalDate>> = repo.history
@@ -32,7 +38,7 @@ class HistoryViewModel(private val container: AppContainer) : ViewModel() {
     /** Repite un entrenamiento pasado como entrenamiento activo. */
     fun repeat(workout: Workout, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeWorkout.value == null) {
-            val again = Routine.fromWorkout(workout).toWorkout(System.currentTimeMillis(), container.prefillLookup())
+            val again = Routine.fromWorkout(workout).toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             repo.setActive(again.copy(routineId = workout.routineId))
         }
         onStarted()

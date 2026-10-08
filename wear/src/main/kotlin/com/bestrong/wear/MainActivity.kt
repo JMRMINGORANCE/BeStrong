@@ -11,10 +11,15 @@ import androidx.wear.ambient.AmbientLifecycleObserver
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.wear.health.ExerciseService
 import com.bestrong.wear.ui.WearApp
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var container: WearContainer
 
     /** Petición pendiente desde el móvil: "" = entrenamiento vacío, id = rutina. */
     private val startRequest = MutableStateFlow<String?>(null)
@@ -34,7 +39,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val container = (application as BeStrongWearApp).container
         lifecycle.addObserver(AmbientLifecycleObserver(this, ambientCallback))
 
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {}
@@ -56,7 +60,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         // Entreno empezado en el móvil con la app del reloj cerrada: arrancamos la medición ahora
-        if ((application as BeStrongWearApp).container.session.workout.value != null) ExerciseService.start(this)
+        if (container.session.workout.value != null) ExerciseService.start(this)
     }
 
     override fun onNewIntent(intent: Intent) {

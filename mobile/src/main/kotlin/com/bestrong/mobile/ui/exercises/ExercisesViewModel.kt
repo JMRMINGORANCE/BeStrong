@@ -13,7 +13,9 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.util.newId
-import com.bestrong.mobile.AppContainer
+import com.bestrong.mobile.data.BeStrongRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,8 +32,8 @@ data class ExerciseDetailState(
     val recentSessions: List<Workout>,
 )
 
-class ExercisesViewModel(private val container: AppContainer) : ViewModel() {
-    private val repo = container.repository
+@HiltViewModel
+class ExercisesViewModel @Inject constructor(private val repo: BeStrongRepository) : ViewModel() {
 
     val filter = MutableStateFlow(ExerciseFilter())
 

@@ -12,17 +12,21 @@ import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.wear.BeStrongWearApp
+import com.bestrong.wear.data.WearStore
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import com.bestrong.wear.MainActivity
 import com.bestrong.wear.R
 import java.time.LocalDate
 import java.time.ZoneId
 
 /** Complicación para la esfera: entrenos de esta semana (objetivo: 4). */
+@AndroidEntryPoint
 class WeeklyComplicationService : SuspendingComplicationDataSourceService() {
+    @Inject lateinit var store: WearStore
 
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
-        val history = (application as BeStrongWearApp).container.store.history.value
+        val history = store.history.value
         val zone = ZoneId.systemDefault()
         val count = WorkoutStats.weeklySummary(history, 1, LocalDate.now(zone), zone).first().workouts
         return build(request.complicationType, count)

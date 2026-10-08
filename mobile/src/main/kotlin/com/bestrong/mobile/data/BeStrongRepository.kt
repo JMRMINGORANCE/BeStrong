@@ -14,6 +14,9 @@ import com.bestrong.mobile.data.db.KeyValueEntity
 import com.bestrong.mobile.data.db.MeasurementEntity
 import com.bestrong.mobile.data.db.RoutineEntity
 import com.bestrong.mobile.data.db.WorkoutEntity
+import com.bestrong.mobile.di.ApplicationScope
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,7 +27,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
-class BeStrongRepository(private val dao: BeStrongDao, scope: CoroutineScope) {
+@Singleton
+class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @ApplicationScope scope: CoroutineScope) {
 
     val history: StateFlow<List<Workout>> = dao.workouts()
         .map { list -> list.mapNotNull { runCatching { json.decodeFromString(Workout.serializer(), it.json) }.getOrNull() } }

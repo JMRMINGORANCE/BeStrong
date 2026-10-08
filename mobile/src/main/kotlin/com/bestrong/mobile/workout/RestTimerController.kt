@@ -5,7 +5,12 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.di.ApplicationScope
 import com.bestrong.mobile.ui.components.RestState
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -18,7 +23,13 @@ import kotlinx.coroutines.launch
  * Temporizador de descanso a nivel de proceso (no de pantalla): sigue funcionando con la app
  * en segundo plano gracias a [WorkoutForegroundService], que además lo muestra en la notificación.
  */
-class RestTimerController(private val context: Context, private val scope: CoroutineScope, private val vibrateEnabled: () -> Boolean) {
+@Singleton
+class RestTimerController @Inject constructor(
+    @ApplicationContext private val context: Context,
+    @ApplicationScope private val scope: CoroutineScope,
+    private val settings: SettingsStore,
+) {
+    private val vibrateEnabled: () -> Boolean = { settings.settings.value.vibrateOnRestEnd }
     private val _rest = MutableStateFlow<RestState?>(null)
     val rest: StateFlow<RestState?> = _rest.asStateFlow()
     private var job: Job? = null

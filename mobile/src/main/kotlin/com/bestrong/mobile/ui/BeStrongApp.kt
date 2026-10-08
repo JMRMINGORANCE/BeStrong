@@ -2,10 +2,14 @@ package com.bestrong.mobile.ui
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
-import com.bestrong.mobile.BeStrongApplication
 import com.bestrong.mobile.LaunchRequest
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import kotlinx.coroutines.flow.StateFlow
+import androidx.lifecycle.ViewModel
+import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.data.UserSettings
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -31,7 +35,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import com.bestrong.mobile.ui.components.appViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.bestrong.mobile.ui.exercises.ExerciseDetailScreen
 import com.bestrong.mobile.ui.exercises.ExerciseLibraryScreen
 import com.bestrong.mobile.ui.exercises.ExercisePickerScreen
@@ -66,6 +70,12 @@ private object Routes {
     fun exercise(id: String) = "exercise/$id"
 }
 
+/** Estado global de la app que necesita la raíz de la UI (unidad de peso). */
+@HiltViewModel
+class AppViewModel @Inject constructor(settingsStore: SettingsStore) : ViewModel() {
+    val settings: StateFlow<UserSettings> = settingsStore.settings
+}
+
 /**
  * NavigationSuiteScaffold muestra barra inferior con el Fold plegado y navigation rail
  * desplegado. Se oculta en pantallas de foco (entrenamiento, editor, selector).
@@ -76,9 +86,9 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
     val topLevel = TopLevel.entries.firstOrNull { it.route == route }
-    val home = appViewModel { HomeViewModel(it) }
-    val settingsStore = (LocalContext.current.applicationContext as BeStrongApplication).container.settings
-    val settings by settingsStore.settings.collectAsStateWithLifecycle()
+    val home: HomeViewModel = hiltViewModel()
+    val appVm: AppViewModel = hiltViewModel()
+    val settings by appVm.settings.collectAsStateWithLifecycle()
     val request by launchRequest.collectAsStateWithLifecycle()
 
     // Peticiones desde la notificación del entreno o el widget
@@ -119,14 +129,14 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                     )
                 }
                 composable(TopLevel.HISTORY.route) {
-                    HistoryScreen(appViewModel { HistoryViewModel(it) }, onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } })
+                    HistoryScreen(hiltViewModel<HistoryViewModel>(), onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } })
                 }
                 composable(TopLevel.EXERCISES.route) {
-                    ExerciseLibraryScreen(appViewModel { ExercisesViewModel(it) })
+                    ExerciseLibraryScreen(hiltViewModel<ExercisesViewModel>())
                 }
                 composable(TopLevel.PROFILE.route) {
                     ProfileScreen(
-                        vm = appViewModel { ProfileViewModel(it) },
+                        vm = hiltViewModel<ProfileViewModel>(),
                         onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) },
                         onOpenExercise = { nav.navigate(Routes.exercise(it)) },
                     )
@@ -134,7 +144,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 composable(Routes.WORKOUT) { backStackEntry ->
                     // Ligado a la Activity: el temporizador de descanso sigue al minimizar el entrenamiento
                     val activity = LocalContext.current as ComponentActivity
-                    val vm = appViewModel(owner = activity) { ActiveWorkoutViewModel(it) }
+                    val vm = hiltViewModel<ActiveWorkoutViewModel>(viewModelStoreOwner = activity)
                     val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
                     LaunchedEffect(picked) {
                         picked?.let {
@@ -151,7 +161,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 }
                 composable(Routes.PICKER) {
                     ExercisePickerScreen(
-                        vm = appViewModel { ExercisesViewModel(it) },
+                        vm = hiltViewModel<ExercisesViewModel>(),
                         onBack = { nav.popBackStack() },
                         onPicked = { ids ->
                             nav.previousBackStackEntry?.savedStateHandle?.set(Routes.PICKED, ArrayList(ids))
@@ -161,7 +171,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 }
                 composable(Routes.ROUTINE, arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })) { backStackEntry ->
                     val id = backStackEntry.arguments?.getString("id")
-                    val vm = appViewModel(key = "routine-$id") { RoutineEditorViewModel(it, id) }
+                    val vm = hiltViewModel<RoutineEditorViewModel>()
                     val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
                     LaunchedEffect(picked) {
                         picked?.let {
@@ -173,10 +183,10 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 }
                 composable(Routes.EXERCISE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStackEntry ->
                     val id = backStackEntry.arguments?.getString("id").orEmpty()
-                    ExerciseDetailScreen(appViewModel { ExercisesViewModel(it) }, id, onBack = { nav.popBackStack() })
+                    ExerciseDetailScreen(hiltViewModel<ExercisesViewModel>(), id, onBack = { nav.popBackStack() })
                 }
                 composable(Routes.MEASUREMENTS) {
-                    MeasurementsScreen(appViewModel { ProfileViewModel(it) }, onBack = { nav.popBackStack() })
+                    MeasurementsScreen(hiltViewModel<ProfileViewModel>(), onBack = { nav.popBackStack() })
                 }
             }
         }

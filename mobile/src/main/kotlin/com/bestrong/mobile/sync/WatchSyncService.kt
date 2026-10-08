@@ -2,7 +2,13 @@ package com.bestrong.mobile.sync
 
 import android.util.Log
 import com.bestrong.core.sync.SyncContract
-import com.bestrong.mobile.BeStrongApplication
+import com.bestrong.mobile.WatchMetricsStore
+import com.bestrong.mobile.WorkoutActions
+import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.di.ApplicationScope
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
@@ -19,12 +25,15 @@ import kotlinx.coroutines.tasks.await
  * - el entreno en curso (sincronización en vivo),
  * - métricas de pulso/calorías en directo.
  */
+@AndroidEntryPoint
 class WatchSyncService : WearableListenerService() {
 
-    private val container get() = (application as BeStrongApplication).container
+    @Inject lateinit var repository: BeStrongRepository
+    @Inject lateinit var actions: WorkoutActions
+    @Inject lateinit var watchMetrics: WatchMetricsStore
+    @Inject @ApplicationScope lateinit var appScope: CoroutineScope
 
     override fun onDataChanged(events: DataEventBuffer) {
-        val container = container
         // El servicio se destruye al volver de onDataChanged: procesamos de forma síncrona.
         runBlocking {
             events.forEach { event ->
@@ -34,19 +43,19 @@ class WatchSyncService : WearableListenerService() {
                     path.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
                         val workout = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
-                        container.repository.saveWorkout(workout)
-                        container.repository.clearRemoteActive(workout.id)
+                        repository.saveWorkout(workout)
+                        repository.clearRemoteActive(workout.id)
                         Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.name}")
                         runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
-                        container.appScope.launch { container.exportToHealthConnectIfEnabled(workout) }
+                        appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }
                     }
                     path == SyncContract.PATH_ACTIVE_WORKOUT && isFromOtherNode(item.uri.host) -> {
                         if (event.type == DataEvent.TYPE_DELETED) {
-                            container.repository.clearRemoteActive(null)
+                            repository.clearRemoteActive(null)
                         } else {
                             DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                                 ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }
-                                ?.let { container.repository.applyRemoteActive(it) }
+                                ?.let { repository.applyRemoteActive(it) }
                         }
                     }
                 }
@@ -56,7 +65,7 @@ class WatchSyncService : WearableListenerService() {
 
     override fun onMessageReceived(event: MessageEvent) {
         if (event.path == SyncContract.PATH_METRICS) {
-            runCatching { SyncContract.decodeMetrics(event.data) }.onSuccess { container.watchMetrics.value = it }
+            runCatching { SyncContract.decodeMetrics(event.data) }.onSuccess { watchMetrics.metrics.value = it }
         }
     }
 

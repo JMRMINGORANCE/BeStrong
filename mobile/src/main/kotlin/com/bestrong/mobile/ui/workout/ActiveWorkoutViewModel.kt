@@ -13,7 +13,13 @@ import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.training.WarmupGenerator
-import com.bestrong.mobile.AppContainer
+import com.bestrong.mobile.WatchMetricsStore
+import com.bestrong.mobile.WorkoutActions
+import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.workout.RestTimerController
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.ui.components.RestState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,14 +36,20 @@ import kotlinx.coroutines.launch
 
 data class FinishedSummary(val workout: Workout, val records: List<PersonalRecord>)
 
-class ActiveWorkoutViewModel(private val container: AppContainer) : ViewModel() {
-    private val repo = container.repository
+@HiltViewModel
+class ActiveWorkoutViewModel @Inject constructor(
+    private val repo: BeStrongRepository,
+    settingsStore: SettingsStore,
+    private val restTimer: RestTimerController,
+    private val metricsStore: WatchMetricsStore,
+    private val actions: WorkoutActions,
+) : ViewModel() {
 
     val workout: StateFlow<Workout?> = repo.activeWorkout
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = repo.previousSetsLookup
-    val settings: StateFlow<UserSettings> = container.settings.settings
-    val rest: StateFlow<RestState?> = container.restTimer.rest
-    val watchMetrics: StateFlow<LiveMetrics?> = container.watchMetrics
+    val settings: StateFlow<UserSettings> = settingsStore.settings
+    val rest: StateFlow<RestState?> = restTimer.rest
+    val watchMetrics: StateFlow<LiveMetrics?> = metricsStore.metrics
 
     /** Sugerencia de progresión por ejercicio (id de ejercicio → sugerencia). */
     val suggestions: StateFlow<Map<String, ProgressionSuggestion>> = combine(
@@ -64,7 +76,7 @@ class ActiveWorkoutViewModel(private val container: AppContainer) : ViewModel() 
 
     fun addExercises(ids: List<String>) {
         val exercises = ids.mapNotNull { repo.exercise(it) }
-        val lookup = container.prefillLookup()
+        val lookup = actions.prefillLookup()
         edit { WorkoutEditor.addExercises(it, exercises, lookup) }
     }
 
@@ -114,35 +126,35 @@ class ActiveWorkoutViewModel(private val container: AppContainer) : ViewModel() 
         edit { WorkoutEditor.toggleSetCompleted(it, weId, setId) }
         if (completing) {
             val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
-            if (restSeconds > 0) container.restTimer.start(restSeconds) else container.restTimer.skip()
+            if (restSeconds > 0) restTimer.start(restSeconds) else restTimer.skip()
             if (next != null && next != index) _focusExercise.tryEmit(next)
         }
     }
 
-    fun adjustRest(deltaSeconds: Int) = container.restTimer.adjust(deltaSeconds)
-    fun skipRest() = container.restTimer.skip()
+    fun adjustRest(deltaSeconds: Int) = restTimer.adjust(deltaSeconds)
+    fun skipRest() = restTimer.skip()
 
     fun finish() {
         val current = workout.value ?: return
         viewModelScope.launch {
-            val metrics = container.watchMetrics.value?.takeIf { it.workoutId == current.id }
+            val metrics = metricsStore.metrics.value?.takeIf { it.workoutId == current.id }
             val finished = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
                 avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
                 maxHeartRate = metrics?.maxHeartRate ?: current.maxHeartRate,
                 calories = metrics?.calories ?: current.calories,
             )
-            container.restTimer.skip()
+            restTimer.skip()
             repo.setActive(null)
             if (finished.exercises.isEmpty()) return@launch
             repo.saveWorkout(finished)
             val history = repo.historyOnce()
             _summary.value = FinishedSummary(finished, WorkoutStats.newRecordsIn(finished, history))
-            container.exportToHealthConnectIfEnabled(finished)
+            actions.exportToHealthConnectIfEnabled(finished)
         }
     }
 
     fun discard() = viewModelScope.launch {
-        container.restTimer.skip()
+        restTimer.skip()
         repo.setActive(null)
     }
 

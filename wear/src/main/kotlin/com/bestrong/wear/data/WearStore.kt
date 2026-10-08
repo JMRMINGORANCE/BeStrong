@@ -2,6 +2,9 @@ package com.bestrong.wear.data
 
 import android.content.Context
 import androidx.core.content.edit
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.SharedSettings
@@ -14,7 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
  * Almacenamiento local del reloj (SharedPreferences + JSON): rutinas e historial que llegan
  * del móvil, entrenamientos hechos en el reloj y el entrenamiento activo.
  */
-class WearStore(context: Context) {
+@Singleton
+class WearStore @Inject constructor(@ApplicationContext context: Context) {
     private val prefs = context.getSharedPreferences("bestrong_wear", Context.MODE_PRIVATE)
     private val json = SyncContract.json
 

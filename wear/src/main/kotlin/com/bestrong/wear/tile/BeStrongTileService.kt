@@ -15,7 +15,9 @@ import androidx.wear.tiles.RequestBuilders
 import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.TileService
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.wear.BeStrongWearApp
+import com.bestrong.wear.WearContainer
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import com.bestrong.wear.MainActivity
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
@@ -23,7 +25,9 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 /** Tile: entrenos de la semana, racha y botón para empezar a entrenar. */
+@AndroidEntryPoint
 class BeStrongTileService : TileService() {
+    @Inject lateinit var container: WearContainer
 
     override fun onTileRequest(requestParams: RequestBuilders.TileRequest): ListenableFuture<TileBuilders.Tile> {
         val layout = layout(requestParams.deviceConfiguration)
@@ -40,7 +44,6 @@ class BeStrongTileService : TileService() {
         Futures.immediateFuture(ResourceBuilders.Resources.Builder().setVersion(RESOURCES_VERSION).build())
 
     private fun layout(device: DeviceParameters): LayoutElementBuilders.LayoutElement {
-        val container = (application as BeStrongWearApp).container
         val history = container.store.history.value
         val active = container.session.workout.value
         val zone = ZoneId.systemDefault()

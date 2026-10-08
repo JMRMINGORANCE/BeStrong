@@ -6,15 +6,23 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.RoutineExercise
 import com.bestrong.core.model.RoutineSet
 import com.bestrong.core.model.TrackingType
-import com.bestrong.mobile.AppContainer
+import androidx.lifecycle.SavedStateHandle
+import com.bestrong.mobile.data.BeStrongRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class RoutineEditorViewModel(private val container: AppContainer, routineId: String?) : ViewModel() {
-    private val repo = container.repository
+@HiltViewModel
+class RoutineEditorViewModel @Inject constructor(
+    private val repo: BeStrongRepository,
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+    /** Argumento de navegación "id" (null = rutina nueva). */
+    private val routineId: String? = savedStateHandle.get<String>("id")
 
     private val _routine = MutableStateFlow(
         routineId?.let { id -> repo.routines.value.firstOrNull { it.id == id } } ?: Routine(name = ""),

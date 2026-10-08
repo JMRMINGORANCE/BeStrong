@@ -2,6 +2,9 @@ package com.bestrong.mobile.data
 
 import android.content.Context
 import androidx.core.content.edit
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import com.bestrong.core.util.WeightUnit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +19,8 @@ data class UserSettings(
     val progressionEnabled: Boolean = true,
 )
 
-class SettingsStore(context: Context) {
+@Singleton
+class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
     private val _settings = MutableStateFlow(read())
     val settings: StateFlow<UserSettings> = _settings

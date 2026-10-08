@@ -10,12 +10,16 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.sync.SyncContract
 import com.google.android.gms.wearable.PutDataMapRequest
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.guava.await
 import kotlinx.coroutines.tasks.await
 
 /** Envía datos al Galaxy Watch por la Wearable Data Layer. */
-class WatchSync(private val context: Context) {
+@Singleton
+class WatchSync @Inject constructor(@ApplicationContext private val context: Context) {
     private val dataClient by lazy { Wearable.getDataClient(context) }
     private val nodeClient by lazy { Wearable.getNodeClient(context) }
 

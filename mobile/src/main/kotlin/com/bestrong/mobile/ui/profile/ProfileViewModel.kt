@@ -14,7 +14,14 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WeekBucket
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.mobile.AppContainer
+import android.content.Context
+import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.health.HealthConnectExporter
+import com.bestrong.mobile.sync.WatchSync
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import com.bestrong.mobile.data.UserSettings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,8 +42,14 @@ data class ProfileStats(
     val topOneRepMax: List<PersonalRecord> = emptyList(),
 )
 
-class ProfileViewModel(private val container: AppContainer) : ViewModel() {
-    private val repo = container.repository
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val repo: BeStrongRepository,
+    private val settingsStore: SettingsStore,
+    private val healthConnect: HealthConnectExporter,
+    private val watchSync: WatchSync,
+) : ViewModel() {
 
     val stats: StateFlow<ProfileStats> = repo.history.map { history ->
         val zone = ZoneId.systemDefault()
@@ -56,17 +69,17 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
     val measurements: StateFlow<List<BodyMeasurement>> = repo.measurements
-    val settings: StateFlow<UserSettings> = container.settings.settings
+    val settings: StateFlow<UserSettings> = settingsStore.settings
 
-    val healthConnectAvailable = container.healthConnect.isAvailable()
-    val healthConnectPermissions = container.healthConnect.permissions
+    val healthConnectAvailable = healthConnect.isAvailable()
+    val healthConnectPermissions = healthConnect.permissions
     val healthConnectGranted = MutableStateFlow(false)
 
     fun refreshHealthConnect() = viewModelScope.launch {
-        healthConnectGranted.value = runCatching { container.healthConnect.hasPermissions() }.getOrDefault(false)
+        healthConnectGranted.value = runCatching { healthConnect.hasPermissions() }.getOrDefault(false)
     }
 
-    fun updateSettings(block: (UserSettings) -> UserSettings) = container.settings.update(block)
+    fun updateSettings(block: (UserSettings) -> UserSettings) = settingsStore.update(block)
 
     fun saveMeasurement(m: BodyMeasurement) = viewModelScope.launch { repo.saveMeasurement(m) }
     fun deleteMeasurement(id: String) = viewModelScope.launch { repo.deleteMeasurement(id) }
@@ -79,7 +92,7 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
         val result = runCatching {
             val csv = WorkoutCsv.export(repo.historyOnce())
             withContext(Dispatchers.IO) {
-                container.context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error("No se pudo abrir el archivo")
+                context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error("No se pudo abrir el archivo")
             }
         }
         _messages.tryEmit(result.fold({ "Historial exportado" }, { "Error al exportar: ${it.message}" }))
@@ -89,7 +102,7 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     fun importCsv(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
             val text = withContext(Dispatchers.IO) {
-                container.context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error("No se pudo abrir el archivo")
+                context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error("No se pudo abrir el archivo")
             }
             val parsed = withContext(Dispatchers.Default) {
                 WorkoutCsv.import(text, repo.exercises.value, strongUnit = settings.value.unit)
@@ -110,7 +123,7 @@ class ProfileViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun syncWatchNow() = viewModelScope.launch {
-        container.watchSync.pushRoutines(repo.routines.value)
-        container.watchSync.pushHistory(repo.history.value)
+        watchSync.pushRoutines(repo.routines.value)
+        watchSync.pushHistory(repo.history.value)
     }
 }

@@ -14,7 +14,9 @@ import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.bestrong.core.model.Workout
-import com.bestrong.mobile.BeStrongApplication
+import com.bestrong.mobile.data.BeStrongRepository
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import com.bestrong.mobile.MainActivity
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.RestState
@@ -26,22 +28,24 @@ import kotlinx.coroutines.launch
  * Mantiene vivo el temporizador de descanso con la pantalla apagada y lo muestra en la
  * notificación (cuenta atrás, saltar, +15 s). En One UI aparece también en la pantalla de bloqueo.
  */
+@AndroidEntryPoint
 class WorkoutForegroundService : LifecycleService() {
 
-    private val container get() = (application as BeStrongApplication).container
+    @Inject lateinit var repository: BeStrongRepository
+    @Inject lateinit var restTimer: RestTimerController
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         when (intent?.action) {
-            ACTION_SKIP -> container.restTimer.skip()
-            ACTION_PLUS_15 -> container.restTimer.adjust(15)
+            ACTION_SKIP -> restTimer.skip()
+            ACTION_PLUS_15 -> restTimer.adjust(15)
             ACTION_STOP -> {
                 ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
                 stopSelf()
                 return START_NOT_STICKY
             }
         }
-        val workout = container.repository.activeWorkout.value
+        val workout = repository.activeWorkout.value
         if (workout == null) {
             stopSelf()
             return START_NOT_STICKY
@@ -50,14 +54,14 @@ class WorkoutForegroundService : LifecycleService() {
             started = true
             createChannel()
             try {
-                ServiceCompat.startForeground(this, NOTIFICATION_ID, build(workout, container.restTimer.rest.value), fgsType())
+                ServiceCompat.startForeground(this, NOTIFICATION_ID, build(workout, restTimer.rest.value), fgsType())
             } catch (e: Exception) {
                 Log.w(TAG, "No se pudo pasar a primer plano", e)
                 stopSelf()
                 return START_NOT_STICKY
             }
             lifecycleScope.launch {
-                combine(container.repository.activeWorkout, container.restTimer.rest) { w, r -> w to r }.collect { (w, r) ->
+                combine(repository.activeWorkout, restTimer.rest) { w, r -> w to r }.collect { (w, r) ->
                     if (w == null) {
                         ServiceCompat.stopForeground(this@WorkoutForegroundService, ServiceCompat.STOP_FOREGROUND_REMOVE)
                         stopSelf()

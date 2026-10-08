@@ -20,7 +20,11 @@ import com.bestrong.core.training.Progression
 import com.bestrong.wear.data.PhoneSync
 import com.bestrong.wear.data.WearStore
 import com.bestrong.wear.health.ExerciseService
+import com.bestrong.wear.ApplicationScope
 import com.bestrong.wear.health.RepCounter
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -49,11 +53,12 @@ enum class RotaryTarget { WEIGHT, REPS }
  * [ExerciseService] en primer plano), se persiste en [WearStore] tras cada cambio y se
  * comparte en vivo con el móvil (el cambio más reciente gana).
  */
-class WorkoutSession(
-    private val context: Context,
+@Singleton
+class WorkoutSession @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val store: WearStore,
     private val phoneSync: PhoneSync,
-    private val scope: CoroutineScope,
+    @ApplicationScope private val scope: CoroutineScope,
 ) {
     private val _workout = MutableStateFlow(store.activeWorkout)
     val workout: StateFlow<Workout?> = _workout.asStateFlow()

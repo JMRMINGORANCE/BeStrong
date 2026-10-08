@@ -5,14 +5,22 @@ import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.session.WorkoutEditor
-import com.bestrong.mobile.AppContainer
+import com.bestrong.mobile.WorkoutActions
+import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.sync.WatchSync
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class HomeViewModel(private val container: AppContainer) : ViewModel() {
-    private val repo = container.repository
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val repo: BeStrongRepository,
+    private val actions: WorkoutActions,
+    private val watchSync: WatchSync,
+) : ViewModel() {
 
     val routines: StateFlow<List<Routine>> = repo.routines
     val active: StateFlow<Workout?> = repo.activeWorkout
@@ -32,7 +40,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
             onStarted()
             return@launch
         }
-        repo.setActive(routine.toWorkout(System.currentTimeMillis(), container.prefillLookup()))
+        repo.setActive(routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup()))
         onStarted()
     }
 
@@ -47,8 +55,8 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun startOnWatch(routine: Routine?) = viewModelScope.launch {
-        container.watchSync.pushRoutines(repo.routines.value)
-        val ok = container.watchSync.startOnWatch(routine?.id)
+        watchSync.pushRoutines(repo.routines.value)
+        val ok = watchSync.startOnWatch(routine?.id)
         _messages.tryEmit(if (ok) "Abriendo BeStrong en tu Galaxy Watch" else "No se encontró ningún reloj conectado")
     }
 

@@ -33,7 +33,11 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.bestrong.core.model.Routine
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.mobile.BeStrongApplication
+import com.bestrong.mobile.data.BeStrongRepository
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import com.bestrong.mobile.MainActivity
 import java.time.LocalDate
 import java.time.ZoneId
@@ -42,7 +46,7 @@ import java.time.ZoneId
 class BeStrongWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val repo = (context.applicationContext as BeStrongApplication).container.repository
+        val repo = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java).repository()
         val history = repo.historyOnce()
         val routines = repo.routinesOnce().take(2)
         val zone = ZoneId.systemDefault()
@@ -99,6 +103,13 @@ class BeStrongWidget : GlanceAppWidget() {
             runCatching { BeStrongWidget().updateAll(context) }
         }
     }
+}
+
+/** Los widgets no admiten @AndroidEntryPoint: se accede al grafo de Hilt por un EntryPoint. */
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface WidgetEntryPoint {
+    fun repository(): BeStrongRepository
 }
 
 class BeStrongWidgetReceiver : GlanceAppWidgetReceiver() {

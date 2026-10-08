@@ -8,13 +8,17 @@ import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.units.Energy
 import com.bestrong.core.model.Workout
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import java.time.Instant
 
 /**
  * Exporta entrenamientos a Health Connect. Samsung Health los lee desde ahí,
  * así que también aparecen en la app de Samsung.
  */
-class HealthConnectExporter(private val context: Context) {
+@Singleton
+class HealthConnectExporter @Inject constructor(@ApplicationContext private val context: Context) {
 
     val permissions: Set<String> = setOf(
         HealthPermission.getWritePermission(ExerciseSessionRecord::class),

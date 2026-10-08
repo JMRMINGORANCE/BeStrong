@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bestrong.mobile.ui.BeStrongApp
 import com.bestrong.mobile.ui.theme.BeStrongTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Acción pedida desde fuera de la app (notificación, widget). */
@@ -19,6 +20,7 @@ sealed interface LaunchRequest {
     data class StartRoutine(val routineId: String) : LaunchRequest
 }
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val launchRequest = MutableStateFlow<LaunchRequest?>(null)

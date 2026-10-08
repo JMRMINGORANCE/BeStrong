@@ -9,10 +9,14 @@ import com.bestrong.core.sync.SyncContract
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.tasks.await
 
 /** Comunicación reloj ↔ móvil por la Data Layer. */
-class PhoneSync(private val context: Context, private val store: WearStore) {
+@Singleton
+class PhoneSync @Inject constructor(@ApplicationContext private val context: Context, private val store: WearStore) {
     private val dataClient by lazy { Wearable.getDataClient(context) }
     private val messageClient by lazy { Wearable.getMessageClient(context) }
     private val nodeClient by lazy { Wearable.getNodeClient(context) }
