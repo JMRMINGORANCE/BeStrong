@@ -22,7 +22,22 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
 - **Medidas corporales** (peso, % grasa, cintura, pecho, brazo, muslo) con gráfica de peso.
 - **Health Connect** (opcional): cada entreno se guarda como sesión de pesas → aparece en **Samsung Health**.
 
+### Entrenar mejor
+- **Sobrecarga progresiva automática** (doble progresión): si completaste todas las series, propone +2,5 kg / +5 lb;
+  si te quedaste corto, mismas cargas buscando las reps; con RPE ≥ 9,5 propone repetir.
+- **Descarga automática** al 90 % cuando llevas 3 sesiones sin mejorar el 1RM estimado.
+- **Superseries y circuitos**: el descanso salta entre ejercicios del grupo y llega al cerrar la ronda.
+- **Calentamiento automático** (barra × 10, 40 % × 5, 60 % × 3, 80 % × 2) y **calculadora de discos** (kg o lb, barra de 20/15/10 kg o 45/35/25 lb).
+- **RPE** por serie, **kg o lb**, e **instrucciones de técnica** para los ~70 ejercicios.
+- **Descanso en la notificación** (cuenta atrás, +15 s, saltar) que sigue funcionando con la pantalla apagada; aparece en la pantalla de bloqueo.
+- **Widget** con racha, entrenos de la semana, "Entrenar" y tus dos primeras rutinas.
+- **CSV**: exporta tu historial e importa desde **Hevy**, **Strong** o BeStrong.
+
 ### Galaxy Watch (Wear OS)
+- **Entreno compartido en vivo con el móvil**: empieza en uno y sigue en el otro; las series aparecen en ambos y el pulso del reloj se ve en el Fold.
+- **Botón rápido** del Watch Ultra (y botones físicos) para completar la serie sin tocar la pantalla.
+- **Modo siempre activo**: pantalla de bajo consumo con la serie actual y la hora de fin del descanso.
+- **Contador de repeticiones (beta)** con el acelerómetro.
 - **Standalone**: rutinas sincronizadas desde el móvil, entrenamiento vacío y selector de ejercicios en el reloj.
 - **Bisel/corona** para ajustar peso (±2,5 kg) o reps; toca el número para cambiar de campo.
 - **Health Services** (`ExerciseType.WEIGHTLIFTING`): pulso en directo, media/máximo y calorías.
@@ -66,8 +81,23 @@ Requisitos: Android Studio Ladybug o posterior, JDK 17, Android SDK 35.
 
 GitHub Actions compila los dos APK en cada push (`.github/workflows/android.yml`) y los deja como artefacto.
 
-## Pendiente (necesita backend)
-- Cuenta y copia en la nube.
-- Parte social (feed, seguir a amigos, compartir rutinas).
+## Calidad
+- `core`: tests unitarios de estadísticas, editor, progresión, superseries, discos, calentamiento y CSV.
+- `mobile`: tests de interfaz en JVM (Robolectric) con **capturas Roborazzi** del Fold plegado, desplegado y en modo mesa;
+  la CI las publica como artefacto `capturas`.
+- Lint en ambos módulos.
 
-Para ambas hay que elegir backend (p. ej. Firebase o Supabase) y crear el proyecto correspondiente.
+## Publicar
+Crea `keystore.properties` en la raíz (no se sube a git):
+```
+storeFile=ruta/al/keystore.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+y ejecuta `./gradlew :mobile:bundleRelease :wear:bundleRelease`. La política de privacidad está en la app
+(Perfil › Privacidad), requisito de Health Connect.
+
+## Pendiente (necesita cuentas o servicios externos)
+- Cuenta, copia en la nube y parte social: hay que elegir backend (Firebase o Supabase).
+- Informes de errores (Crashlytics): necesita un proyecto de Firebase con `google-services.json`.
