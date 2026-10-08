@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.health.services)
     implementation(libs.play.services.wearable)
     implementation(libs.guava)
+    // play-services-wearable arrastra un Fragment antiguo; la API de ActivityResult necesita >= 1.3
+    implementation(libs.androidx.fragment)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.kotlinx.coroutines.guava)
     debugImplementation(libs.compose.ui.tooling)

@@ -20,6 +20,7 @@ complications = "1.2.1"
 healthServices = "1.1.0-alpha05"
 playServicesWearable = "19.0.0"
 guava = "33.3.1-android"
+fragment = "1.8.5"
 coroutines = "1.9.0"
 serialization = "1.7.3"
 junit = "4.13.2"
@@ -57,6 +58,7 @@ wear-remote-interactions = { module = "androidx.wear:wear-remote-interactions", 
 wear-complications-data-source-ktx = { module = "androidx.wear.watchface:watchface-complications-data-source-ktx", version.ref = "complications" }
 health-services = { module = "androidx.health:health-services-client", version.ref = "healthServices" }
 play-services-wearable = { module = "com.google.android.gms:play-services-wearable", version.ref = "playServicesWearable" }
+androidx-fragment = { module = "androidx.fragment:fragment-ktx", version.ref = "fragment" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
