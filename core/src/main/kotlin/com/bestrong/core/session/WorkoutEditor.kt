@@ -82,6 +82,66 @@ object WorkoutEditor {
             it.copy(type = next)
         }
 
+    // --- Superseries ------------------------------------------------------------------------
+
+    /** Une el ejercicio con el siguiente en una superserie (o lo añade a la del anterior). */
+    fun linkWithNext(workout: Workout, workoutExerciseId: String): Workout {
+        val i = workout.exercises.indexOfFirst { it.id == workoutExerciseId }
+        if (i < 0 || i >= workout.exercises.lastIndex) return workout
+        val a = workout.exercises[i]
+        val b = workout.exercises[i + 1]
+        val group = a.supersetId ?: b.supersetId ?: com.bestrong.core.util.newId()
+        val oldB = b.supersetId
+        return workout.copy(exercises = workout.exercises.map {
+            when {
+                it.id == a.id || it.id == b.id -> it.copy(supersetId = group)
+                oldB != null && it.supersetId == oldB -> it.copy(supersetId = group)
+                else -> it
+            }
+        })
+    }
+
+    /** Saca el ejercicio de su superserie; si queda uno solo en el grupo, el grupo desaparece. */
+    fun unlinkSuperset(workout: Workout, workoutExerciseId: String): Workout {
+        val group = workout.exercises.firstOrNull { it.id == workoutExerciseId }?.supersetId ?: return workout
+        val cleared = workout.exercises.map { if (it.id == workoutExerciseId) it.copy(supersetId = null) else it }
+        val remaining = cleared.count { it.supersetId == group }
+        return workout.copy(exercises = if (remaining <= 1) cleared.map { if (it.supersetId == group) it.copy(supersetId = null) else it } else cleared)
+    }
+
+    /** Índices de los ejercicios de la superserie de [index] (solo él mismo si no tiene). */
+    fun supersetGroup(workout: Workout, index: Int): List<Int> {
+        val group = workout.exercises.getOrNull(index)?.supersetId ?: return listOf(index)
+        return workout.exercises.indices.filter { workout.exercises[it].supersetId == group }
+    }
+
+    /**
+     * Qué hacer tras completar una serie del ejercicio [index]:
+     * - en superserie, pasar al siguiente ejercicio del grupo con series pendientes sin descanso;
+     * - al cerrar la ronda (o fuera de superserie), descansar el tiempo del ejercicio.
+     * Devuelve (índice del siguiente ejercicio o null si se terminó todo, segundos de descanso).
+     */
+    fun afterSetCompleted(workout: Workout, index: Int): Pair<Int?, Int> {
+        val group = supersetGroup(workout, index)
+        val current = workout.exercises.getOrNull(index) ?: return null to 0
+        if (group.size > 1) {
+            val pos = group.indexOf(index)
+            val doneHere = current.sets.count { it.completed }
+            // Siguiente del grupo que aún no ha hecho la serie de esta ronda
+            val nextInRound = (group.drop(pos + 1)).firstOrNull { i ->
+                val ex = workout.exercises[i]
+                ex.sets.count { it.completed } < doneHere && ex.sets.any { !it.completed }
+            }
+            if (nextInRound != null) return nextInRound to 0
+            val firstPending = group.firstOrNull { i -> workout.exercises[i].sets.any { !it.completed } }
+            if (firstPending != null) return firstPending to workout.exercises[group.last()].restSeconds
+        } else if (current.sets.any { !it.completed }) {
+            return index to current.restSeconds
+        }
+        val next = nextPendingSet(workout)?.first
+        return next to if (next == null) 0 else current.restSeconds
+    }
+
     /** Siguiente serie pendiente: (índice de ejercicio, serie) o null si está todo hecho. */
     fun nextPendingSet(workout: Workout): Pair<Int, WorkoutSet>? {
         workout.exercises.forEachIndexed { i, we ->

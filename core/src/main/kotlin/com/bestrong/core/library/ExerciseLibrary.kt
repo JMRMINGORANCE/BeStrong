@@ -120,6 +120,47 @@ object ExerciseLibrary {
 
     private val byId = all.associateBy { it.id }
 
+    /** Nombres en inglés (Hevy/Strong) → id de la biblioteca, para importar CSV. */
+    val englishAliases: Map<String, String> = mapOf(
+        "Bench Press" to "bench_press", "Bench Press (Barbell)" to "bench_press",
+        "Incline Bench Press" to "incline_bench_press", "Incline Bench Press (Barbell)" to "incline_bench_press",
+        "Decline Bench Press" to "decline_bench_press", "Decline Bench Press (Barbell)" to "decline_bench_press",
+        "Bench Press (Dumbbell)" to "db_bench_press", "Incline Bench Press (Dumbbell)" to "db_incline_press",
+        "Chest Fly (Dumbbell)" to "db_fly", "Dumbbell Fly" to "db_fly", "Cable Crossover" to "cable_crossover", "Cable Fly Crossovers" to "cable_crossover",
+        "Butterfly (Pec Deck)" to "pec_deck", "Pec Deck" to "pec_deck", "Chest Press (Machine)" to "machine_chest_press",
+        "Push Up" to "push_up", "Push Ups" to "push_up", "Chest Dip" to "dips", "Dip" to "dips", "Triceps Dip" to "dips",
+        "Deadlift" to "deadlift", "Deadlift (Barbell)" to "deadlift", "Bent Over Row" to "barbell_row", "Bent Over Row (Barbell)" to "barbell_row",
+        "Dumbbell Row" to "db_row", "Bent Over One Arm Row (Dumbbell)" to "db_row", "Pendlay Row (Barbell)" to "pendlay_row",
+        "T Bar Row" to "t_bar_row", "Seated Cable Row" to "seated_cable_row", "Seated Row (Cable)" to "seated_cable_row",
+        "Lat Pulldown" to "lat_pulldown", "Lat Pulldown (Cable)" to "lat_pulldown", "Pull Up" to "pull_up", "Chin Up" to "chin_up",
+        "Straight Arm Pulldown" to "straight_arm_pulldown", "Back Extension" to "hyperextension", "Hyperextension" to "hyperextension",
+        "Overhead Press" to "overhead_press", "Overhead Press (Barbell)" to "overhead_press", "Strict Military Press (Barbell)" to "overhead_press",
+        "Shoulder Press (Dumbbell)" to "db_shoulder_press", "Seated Overhead Press (Dumbbell)" to "db_shoulder_press", "Arnold Press (Dumbbell)" to "arnold_press",
+        "Lateral Raise" to "lateral_raise", "Lateral Raise (Dumbbell)" to "lateral_raise", "Lateral Raise (Cable)" to "cable_lateral_raise",
+        "Front Raise (Dumbbell)" to "front_raise", "Rear Delt Reverse Fly (Dumbbell)" to "rear_delt_fly", "Reverse Fly (Dumbbell)" to "rear_delt_fly",
+        "Face Pull" to "face_pull", "Face Pull (Cable)" to "face_pull", "Upright Row (Barbell)" to "upright_row",
+        "Shrug (Dumbbell)" to "shrug", "Shrug (Barbell)" to "shrug",
+        "Bicep Curl (Barbell)" to "barbell_curl", "Curl (Barbell)" to "barbell_curl", "Bicep Curl (Dumbbell)" to "db_curl", "Curl (Dumbbell)" to "db_curl",
+        "Hammer Curl (Dumbbell)" to "hammer_curl", "Preacher Curl (Barbell)" to "preacher_curl", "Bicep Curl (Cable)" to "cable_curl",
+        "Incline Curl (Dumbbell)" to "incline_db_curl", "Bench Press - Close Grip (Barbell)" to "close_grip_bench", "Close Grip Bench Press" to "close_grip_bench",
+        "Skullcrusher (Barbell)" to "skull_crusher", "Lying Triceps Extension (Barbell)" to "skull_crusher",
+        "Triceps Pushdown" to "triceps_pushdown", "Triceps Pushdown (Cable - Straight Bar)" to "triceps_pushdown", "Triceps Rope Pushdown" to "triceps_pushdown",
+        "Overhead Triceps Extension (Dumbbell)" to "overhead_triceps_ext", "Triceps Extension (Dumbbell)" to "overhead_triceps_ext", "Wrist Curl (Dumbbell)" to "wrist_curl",
+        "Squat" to "squat", "Squat (Barbell)" to "squat", "Full Squat" to "squat", "Front Squat" to "front_squat", "Front Squat (Barbell)" to "front_squat",
+        "Squat (Smith Machine)" to "smith_squat", "Goblet Squat" to "goblet_squat", "Goblet Squat (Kettlebell)" to "goblet_squat",
+        "Hack Squat" to "hack_squat", "Hack Squat (Machine)" to "hack_squat", "Leg Press" to "leg_press", "Leg Press (Machine)" to "leg_press",
+        "Bulgarian Split Squat" to "bulgarian_split_squat", "Lunge (Dumbbell)" to "lunge", "Lunge" to "lunge", "Walking Lunge (Dumbbell)" to "lunge",
+        "Leg Extension (Machine)" to "leg_extension", "Leg Extension" to "leg_extension",
+        "Romanian Deadlift" to "romanian_deadlift", "Romanian Deadlift (Barbell)" to "romanian_deadlift",
+        "Lying Leg Curl (Machine)" to "leg_curl", "Leg Curl" to "leg_curl", "Seated Leg Curl (Machine)" to "seated_leg_curl",
+        "Hip Thrust" to "hip_thrust", "Hip Thrust (Barbell)" to "hip_thrust", "Glute Kickback (Cable)" to "glute_kickback",
+        "Hip Abduction (Machine)" to "hip_abduction", "Standing Calf Raise" to "standing_calf_raise", "Standing Calf Raise (Machine)" to "standing_calf_raise",
+        "Seated Calf Raise" to "seated_calf_raise", "Seated Calf Raise (Machine)" to "seated_calf_raise",
+        "Plank" to "plank", "Crunch" to "crunch", "Hanging Leg Raise" to "hanging_leg_raise", "Cable Crunch" to "cable_crunch",
+        "Ab Wheel" to "ab_wheel", "Russian Twist" to "russian_twist", "Kettlebell Swing" to "kb_swing",
+        "Clean and Press" to "clean_and_press", "Farmers Walk" to "farmers_walk", "Burpee" to "burpee",
+    )
+
     fun byId(id: String): Exercise? = byId[id]
 
     /** Búsqueda sin tildes ni mayúsculas, filtrando por músculo y equipo. */

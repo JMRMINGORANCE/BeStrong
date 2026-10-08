@@ -37,6 +37,8 @@ data class WorkoutExercise(
     val sets: List<WorkoutSet> = listOf(WorkoutSet()),
     val restSeconds: Int = DEFAULT_REST_SECONDS,
     val notes: String = "",
+    /** Ejercicios con el mismo id forman una superserie (se alternan sin descanso). */
+    val supersetId: String? = null,
 ) {
     val completedSets: List<WorkoutSet> get() = sets.filter { it.completed }
 
@@ -58,6 +60,8 @@ data class Workout(
     val avgHeartRate: Int? = null,
     val maxHeartRate: Int? = null,
     val calories: Int? = null,
+    /** Última modificación: resuelve conflictos al sincronizar móvil ↔ reloj en vivo. */
+    val updatedAtEpochMs: Long = startedAtEpochMs,
 ) {
     val isFinished: Boolean get() = finishedAtEpochMs != null
 

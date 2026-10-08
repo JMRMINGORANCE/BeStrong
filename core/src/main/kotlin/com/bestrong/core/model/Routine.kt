@@ -18,6 +18,7 @@ data class RoutineExercise(
     val sets: List<RoutineSet> = List(3) { RoutineSet() },
     val restSeconds: Int = WorkoutExercise.DEFAULT_REST_SECONDS,
     val notes: String = "",
+    val supersetId: String? = null,
 )
 
 @Serializable
@@ -47,6 +48,7 @@ data class Routine(
                 exercise = re.exercise,
                 restSeconds = re.restSeconds,
                 notes = re.notes,
+                supersetId = re.supersetId,
                 sets = re.sets.mapIndexed { i, rs ->
                     val prev = previous.getOrNull(i)
                     WorkoutSet(
@@ -68,6 +70,7 @@ data class Routine(
                 RoutineExercise(
                     exercise = we.exercise,
                     restSeconds = we.restSeconds,
+                    supersetId = we.supersetId,
                     sets = we.sets.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) },
                 )
             },
