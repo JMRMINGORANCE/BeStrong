@@ -61,6 +61,7 @@
     <string name="equip_machine">Máquina</string>
     <string name="equip_other">Otro</string>
     <string name="equip_smith">Multipower</string>
+    <string name="exercise_gif_credit">Animación: ExerciseDB por AscendAPI · exercisedb.dev</string>
     <string name="exercise_how_to">Cómo se hace %1$s</string>
     <string name="exercise_image_credit">Imagen: %1$s · %2$s · wger.de</string>
     <string name="exercise_image_desc">Imagen del ejercicio %1$s</string>
@@ -194,13 +195,15 @@
     <string name="primary_muscle">Principal: %1$s</string>
     <string name="privacy">Privacidad</string>
     <string name="privacy_body">Tus datos no salen de tus dispositivos</string>
+    <string name="privacy_credits">Animaciones de ejercicios: ExerciseDB por AscendAPI (dataset gratuito v1, uso no comercial). Imágenes: wger.de (CC-BY-SA 4.0, autor indicado en cada imagen).</string>
+    <string name="privacy_credits_title">Créditos</string>
     <string name="privacy_csv">Los archivos CSV que exportas se guardan donde tú elijas. BeStrong solo lee los CSV que tú seleccionas para importar.</string>
     <string name="privacy_csv_title">Exportar e importar</string>
     <string name="privacy_delete">Desinstalar la app o borrar sus datos desde Ajustes de Android elimina toda la información de BeStrong del dispositivo.</string>
     <string name="privacy_delete_title">Borrar tus datos</string>
     <string name="privacy_hc">Si activas la exportación, BeStrong escribe en Health Connect cada entrenamiento terminado como sesión de pesas (hora de inicio, fin, nombre y notas) y las calorías estimadas por el reloj. BeStrong no lee ningún dato de Health Connect. Puedes retirar el permiso en cualquier momento desde Ajustes › Health Connect.</string>
     <string name="privacy_hc_title">Health Connect</string>
-    <string name="privacy_images">Las imágenes de los ejercicios se descargan de wger.de (contenido abierto con licencia CC-BY-SA). En esa descarga no se envía ningún dato tuyo. Tus fotos y vídeos de técnica se guardan solo en la memoria privada de la app.</string>
+    <string name="privacy_images">Las animaciones e imágenes de los ejercicios se descargan de exercisedb.dev (AscendAPI) y wger.de. En esas descargas no se envía ningún dato tuyo. Tus fotos y vídeos de técnica se guardan solo en la memoria privada de la app.</string>
     <string name="privacy_images_title">Imágenes de ejercicios</string>
     <string name="privacy_intro">Todos tus datos (entrenamientos, rutinas, medidas y ajustes) se guardan solo en tu móvil y en tu reloj. BeStrong no tiene servidores, no crea cuentas y no envía datos a terceros.</string>
     <string name="privacy_title">Política de privacidad de BeStrong</string>

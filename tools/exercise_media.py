@@ -4,7 +4,7 @@ Genera mobile/src/main/assets/exercise_media.json cruzando la biblioteca de BeSt
 imágenes de wger (https://wger.de), que son contenido abierto con licencia por imagen
 (normalmente CC-BY-SA 4.0). Guarda autor, licencia y enlaces para mostrar la atribución.
 
-Uso: python3 tools/wger_media.py  (necesita acceso a wger.de; lo ejecuta el workflow «Exercise media»)
+Uso: python3 tools/exercise_media.py  (necesita acceso a wger.de; lo ejecuta el workflow «Exercise media»)
 """
 import difflib
 import json
@@ -86,6 +86,106 @@ def fetch(url):
     raise SystemExit("No se pudo descargar " + url)
 
 
+EDB_API = "https://oss.exercisedb.dev/api/v1/exercises?offset={}&limit=100"
+
+# Cómo suele llamar ExerciseDB a nuestros ejercicios (nombres en minúsculas, con el material delante)
+EDB_ALIASES = {
+    "bench_press": ["barbell bench press"],
+    "incline_bench_press": ["barbell incline bench press"],
+    "decline_bench_press": ["barbell decline bench press"],
+    "db_bench_press": ["dumbbell bench press"],
+    "db_incline_press": ["dumbbell incline bench press"],
+    "db_fly": ["dumbbell fly"],
+    "squat": ["barbell full squat", "barbell squat"],
+    "front_squat": ["barbell front squat"],
+    "deadlift": ["barbell deadlift"],
+    "romanian_deadlift": ["barbell romanian deadlift"],
+    "overhead_press": ["barbell standing military press", "barbell seated overhead press"],
+    "barbell_row": ["barbell bent over row"],
+    "db_row": ["dumbbell one arm bent-over row", "dumbbell bent over row"],
+    "lat_pulldown": ["cable pulldown", "cable lat pulldown full range of motion"],
+    "pull_up": ["pull-up"],
+    "chin_up": ["chin-up"],
+    "push_up": ["push-up"],
+    "dips": ["chest dip", "triceps dip"],
+    "barbell_curl": ["barbell curl"],
+    "db_curl": ["dumbbell biceps curl"],
+    "hammer_curl": ["dumbbell hammer curl"],
+    "preacher_curl": ["ez barbell preacher curl", "barbell preacher curl"],
+    "triceps_pushdown": ["cable pushdown"],
+    "skull_crusher": ["ez barbell lying triceps extension", "barbell lying triceps extension skull crusher"],
+    "lateral_raise": ["dumbbell lateral raise"],
+    "face_pull": ["cable rear delt row (with rope)", "cable face pull"],
+    "shrug": ["barbell shrug"],
+    "leg_press": ["sled 45° leg press", "lever leg press"],
+    "leg_extension": ["lever leg extension"],
+    "leg_curl": ["lever lying leg curl"],
+    "seated_leg_curl": ["lever seated leg curl"],
+    "hip_thrust": ["barbell glute bridge", "barbell hip thrust"],
+    "standing_calf_raise": ["lever standing calf raise", "barbell standing calf raise"],
+    "seated_calf_raise": ["lever seated calf raise"],
+    "plank": ["front plank", "weighted front plank"],
+    "crunch": ["crunch floor"],
+    "hanging_leg_raise": ["hanging leg raise"],
+    "ab_wheel": ["wheel rollout", "wheel run"],
+    "lunge": ["dumbbell lunge", "barbell lunge"],
+    "bulgarian_split_squat": ["dumbbell single leg split squat"],
+    "goblet_squat": ["dumbbell goblet squat"],
+    "kb_swing": ["kettlebell swing"],
+    "pec_deck": ["lever pec deck fly"],
+    "cable_crossover": ["cable cross-over variation", "cable standing fly"],
+    "seated_cable_row": ["cable seated row"],
+    "t_bar_row": ["lever t bar row", "barbell lever t bar row"],
+    "arnold_press": ["dumbbell arnold press"],
+    "upright_row": ["barbell upright row"],
+    "rear_delt_fly": ["dumbbell rear fly", "dumbbell rear lateral raise"],
+}
+
+
+def exercisedb(ours):
+    """GIF animados del dataset gratuito v1 de ExerciseDB (AscendAPI): uso no comercial con atribución."""
+    items, offset = [], 0
+    while True:
+        page = fetch(EDB_API.format(offset))
+        data = page.get("data", page) if isinstance(page, dict) else page
+        if offset == 0:
+            print("Ejemplo ExerciseDB:", json.dumps(data[:1], ensure_ascii=False)[:800])
+        items += data
+        if len(data) < 100 or offset > 3000:
+            break
+        offset += 100
+    by_name = {}
+    for it in items:
+        if it.get("gifUrl") and it.get("name"):
+            by_name.setdefault(norm(it["name"]), it)
+    keys = list(by_name)
+    out, report = {}, []
+    for eid, name in sorted(ours.items()):
+        tried = EDB_ALIASES.get(eid, []) + [name]
+        hit = next((by_name[norm(n)] for n in tried if norm(n) in by_name), None)
+        how = "exacto"
+        if hit is None:
+            close = difflib.get_close_matches(norm(name), keys, n=1, cutoff=0.9)
+            if close:
+                hit, how = by_name[close[0]], "parecido"
+        if hit is None:
+            report.append(f"EDB SIN GIF  {eid:28} {name}")
+            continue
+        report.append(f"EDB {how:9} {eid:28} {name}  ->  {hit['name']}")
+        out[eid] = {
+            "url": hit["gifUrl"],
+            "source": "exercisedb",
+            "isGif": True,
+            "wgerName": hit["name"],
+            "author": "AscendAPI (ExerciseDB)",
+            "license": "ExerciseDB v1 · uso no comercial",
+            "licenseUrl": "https://oss.exercisedb.dev/docs",
+            "wgerUrl": "https://exercisedb.dev",
+        }
+    print(f"ExerciseDB: {len(out)} de {len(ours)} con GIF ({len(items)} ejercicios en el dataset)")
+    return out, report
+
+
 def main():
     src = open(NAMES_KT, encoding="utf-8").read()
     # Solo el mapa de nombres (el archivo también tiene las instrucciones en inglés)
@@ -143,6 +243,16 @@ def main():
             "licenseUrl": licenses[img["license"]]["url"],
             "sourceUrl": img.get("license_object_url") or "",
         }
+    # ExerciseDB primero (GIF animado); wger como respaldo para los que no tenga
+    try:
+        edb, edb_report = exercisedb(ours)
+    except SystemExit as e:
+        print("ExerciseDB no disponible:", e)
+        edb, edb_report = {}, ["ExerciseDB no disponible"]
+    for eid, v in out.items():
+        v.setdefault("source", "wger")
+    out = {**out, **edb}
+    report = edb_report + report
     import os
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     os.makedirs(os.path.dirname(REPORT), exist_ok=True)

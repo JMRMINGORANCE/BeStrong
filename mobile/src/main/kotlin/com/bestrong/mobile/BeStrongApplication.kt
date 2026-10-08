@@ -3,6 +3,9 @@ package com.bestrong.mobile
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.decode.ImageDecoderDecoder
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
@@ -135,7 +138,15 @@ class AppSync @Inject constructor(
 }
 
 @HiltAndroidApp
-class BeStrongApplication : Application() {
+class BeStrongApplication :
+    Application(),
+    ImageLoaderFactory {
+    /** Coil con soporte de GIF animados (animaciones de ExerciseDB). */
+    override fun newImageLoader(): ImageLoader = ImageLoader.Builder(this)
+        .components { add(ImageDecoderDecoder.Factory()) }
+        .crossfade(true)
+        .build()
+
     @Inject lateinit var appSync: AppSync
 
     override fun onCreate() {

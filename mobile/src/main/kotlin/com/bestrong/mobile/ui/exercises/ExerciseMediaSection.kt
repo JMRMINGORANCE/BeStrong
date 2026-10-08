@@ -72,9 +72,13 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise) {
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxWidth().height(200.dp).background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 )
-                // Atribución obligatoria de la licencia CC-BY-SA
+                // Atribución obligatoria: AscendAPI (ExerciseDB) o autor + licencia CC-BY-SA (wger)
                 Text(
-                    stringResource(R.string.exercise_image_credit, img.author.ifBlank { "wger.de" }, img.license),
+                    if (img.source == "exercisedb") {
+                        stringResource(R.string.exercise_gif_credit)
+                    } else {
+                        stringResource(R.string.exercise_image_credit, img.author.ifBlank { "wger.de" }, img.license)
+                    },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.fillMaxWidth().clickable { uriHandler.openUri(img.wgerUrl.ifBlank { img.licenseUrl }) }.padding(8.dp),

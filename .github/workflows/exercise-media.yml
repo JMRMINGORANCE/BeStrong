@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Generar exercise_media.json
-        run: python3 tools/wger_media.py | tee media.log
+        run: python3 tools/exercise_media.py | tee media.log
       - name: Publicar en la rama "exercise-media"
         run: |
           mkdir -p out

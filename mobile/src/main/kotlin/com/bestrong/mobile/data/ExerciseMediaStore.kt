@@ -17,10 +17,15 @@ import kotlinx.serialization.json.Json
 /** Foto o vídeo de técnica guardado en la app. */
 data class MediaItem(val file: File, val isVideo: Boolean)
 
-/** Imagen de un ejercicio de wger.de con su atribución (licencia abierta, normalmente CC-BY-SA 4.0). */
+/**
+ * Imagen o animación de un ejercicio con su atribución: GIF de ExerciseDB (AscendAPI, dataset
+ * gratuito v1 para uso no comercial) o imagen de wger.de (licencia abierta, normalmente CC-BY-SA 4.0).
+ */
 @Serializable
 data class ExerciseImage(
     val url: String,
+    val source: String = "wger",
+    val isGif: Boolean = false,
     val wgerName: String = "",
     val wgerUrl: String = "",
     val author: String = "",

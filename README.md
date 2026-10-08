@@ -117,7 +117,7 @@ GitHub Actions compila los dos APK en cada push (`.github/workflows/android.yml`
 - Tests de **Room** (en memoria) y de los **Workers** (recordatorios y copias) en Robolectric.
 - **Tiempo de arranque** medido con Macrobenchmark en el workflow *Baseline Profile*; falla si empeora más de un 25 %.
 - Lint en ambos módulos y **Dependabot** (versiones menores y parches) para dependencias y acciones.
-- `tools/wger_media.py` + workflow *Exercise media*: cruza la biblioteca con wger y publica el resultado para revisarlo.
+- `tools/exercise_media.py` + workflow *Exercise media*: cruza la biblioteca con wger y publica el resultado para revisarlo.
 
 ## Publicar
 Crea `keystore.properties` en la raíz (no se sube a git):
