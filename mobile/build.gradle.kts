@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.baselineprofile)
 }
 
 // Firma de release: crea keystore.properties (no se sube a git) con storeFile, storePassword, keyAlias y keyPassword
@@ -90,6 +91,8 @@ dependencies {
     implementation(libs.androidx.fragment)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.kotlinx.coroutines.guava)
+    implementation(libs.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
     debugImplementation(libs.compose.ui.tooling)

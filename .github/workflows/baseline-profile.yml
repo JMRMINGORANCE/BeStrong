@@ -1,0 +1,54 @@
+name: Baseline Profile
+
+# Genera el Baseline Profile del móvil en un emulador y lo publica en la rama "baseline-profile".
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Habilitar KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Generar perfil
+        run: >
+          ./gradlew :mobile:generateReleaseBaselineProfile
+          -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+          -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=20
+
+      - name: Publicar en la rama baseline-profile
+        run: |
+          OUT=$(find mobile/src -path '*generated/baselineProfiles*' -name '*.txt' | head -n 5)
+          echo "$OUT"
+          mkdir -p /tmp/bp && cp $OUT /tmp/bp/
+          cd /tmp/bp
+          git init -q -b baseline-profile
+          git add -A
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Baseline profile de ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" baseline-profile
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: baseline-profile
+          path: |
+            mobile/src/**/generated/baselineProfiles/
+            baselineprofile/build/outputs/
+          retention-days: 14
