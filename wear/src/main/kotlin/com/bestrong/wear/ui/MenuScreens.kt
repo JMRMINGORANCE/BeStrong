@@ -20,13 +20,13 @@ import androidx.wear.compose.material.ListHeader
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.Switch
 import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.ToggleChip
 import androidx.wear.compose.material.TimeText
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.util.formatDuration
-import com.bestrong.core.util.formatVolume
-import com.bestrong.core.util.formatWeight
 import com.bestrong.wear.WearContainer
 import com.bestrong.wear.session.WorkoutSession
 
@@ -36,6 +36,8 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
     val index by session.exerciseIndex.collectAsStateWithLifecycle()
     val listState = rememberScalingLazyListState()
     var confirmDiscard by remember { mutableStateOf(false) }
+    val repCounting by session.repCounting.collectAsStateWithLifecycle()
+    val unit = LocalWeightUnit.current
     val w = workout ?: return
 
     Scaffold(timeText = { TimeText() }, positionIndicator = { PositionIndicator(scalingLazyListState = listState) }) {
@@ -45,7 +47,7 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
                 Chip(
                     onClick = session::finish,
                     label = { Text("Terminar entreno") },
-                    secondaryLabel = { Text("${w.completedSetCount} series · ${formatVolume(w.totalVolume)} kg") },
+                    secondaryLabel = { Text("${w.completedSetCount} series · ${unit.formatVolume(w.totalVolume)}") },
                     colors = ChipDefaults.primaryChipColors(),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -66,6 +68,18 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
             }
             item {
                 Chip(onClick = onAddExercise, label = { Text("Añadir ejercicio") }, colors = ChipDefaults.secondaryChipColors(), modifier = Modifier.fillMaxWidth())
+            }
+            if (session.repCounter.isAvailable) {
+                item {
+                    ToggleChip(
+                        checked = repCounting,
+                        onCheckedChange = session::setRepCounting,
+                        label = { Text("Contar reps (beta)") },
+                        secondaryLabel = { Text("Con el acelerómetro") },
+                        toggleControl = { Switch(checked = repCounting) },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
             item {
                 Chip(
@@ -127,6 +141,7 @@ fun ExercisePickerScreen(container: WearContainer, onPick: (com.bestrong.core.mo
 @Composable
 fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
     val summary by session.summary.collectAsStateWithLifecycle()
+    val unit = LocalWeightUnit.current
     val s = summary ?: return
     val w = s.workout
     val listState = rememberScalingLazyListState()
@@ -135,14 +150,14 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
             item { ListHeader { Text("¡Completado! 💪", color = Brand) } }
             item { Text(w.name, style = MaterialTheme.typography.title3, textAlign = TextAlign.Center) }
             item { Text("⏱ ${formatDuration(w.durationSeconds())}") }
-            item { Text("🏋 ${formatVolume(w.totalVolume)} kg · ${w.completedSetCount} series") }
+            item { Text("🏋 ${unit.formatVolume(w.totalVolume)} · ${w.completedSetCount} series") }
             w.avgHeartRate?.let { item { Text("♥ media $it · máx ${w.maxHeartRate ?: "--"}", color = HeartRed) } }
             w.calories?.let { item { Text("🔥 $it kcal") } }
             if (s.records.isNotEmpty()) {
                 item { ListHeader { Text("🏆 ${s.records.size} récords") } }
                 items(s.records) { pr ->
                     Text(
-                        "${pr.exerciseName}: ${formatWeight(pr.value)}",
+                        "${pr.exerciseName}: ${unit.format(pr.value)}",
                         style = MaterialTheme.typography.caption2,
                         textAlign = TextAlign.Center,
                     )

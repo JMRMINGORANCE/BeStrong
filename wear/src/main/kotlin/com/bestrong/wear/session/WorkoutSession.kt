@@ -15,9 +15,12 @@ import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
+import com.bestrong.core.sync.LiveMetrics
+import com.bestrong.core.training.Progression
 import com.bestrong.wear.data.PhoneSync
 import com.bestrong.wear.data.WearStore
 import com.bestrong.wear.health.ExerciseService
+import com.bestrong.wear.health.RepCounter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -43,7 +46,8 @@ enum class RotaryTarget { WEIGHT, REPS }
 
 /**
  * Estado del entrenamiento en el reloj. Vive en el proceso (lo mantiene vivo el
- * [ExerciseService] en primer plano) y se persiste en [WearStore] tras cada cambio.
+ * [ExerciseService] en primer plano), se persiste en [WearStore] tras cada cambio y se
+ * comparte en vivo con el móvil (el cambio más reciente gana).
  */
 class WorkoutSession(
     private val context: Context,
@@ -69,18 +73,34 @@ class WorkoutSession(
     private val _summary = MutableStateFlow<Summary?>(null)
     val summary: StateFlow<Summary?> = _summary.asStateFlow()
 
+    val repCounter = RepCounter(context)
+    private val _repCounting = MutableStateFlow(store.repCounterEnabled && repCounter.isAvailable)
+    val repCounting: StateFlow<Boolean> = _repCounting.asStateFlow()
+
     private var restJob: Job? = null
+    private var pushJob: Job? = null
+    private var lastMetricsSentAt = 0L
     private val hrSamples = mutableListOf<Int>()
 
     init {
         // Si el proceso murió con un entrenamiento activo, retomamos el servicio
-        if (_workout.value != null) ExerciseService.start(context)
+        if (_workout.value != null) {
+            ExerciseService.start(context)
+            if (_repCounting.value) repCounter.start()
+        }
         _exerciseIndex.value = _workout.value?.let { w -> WorkoutEditor.nextPendingSet(w)?.first } ?: 0
     }
 
+    /** Cambio local: guarda, marca la hora y lo publica al móvil (agrupando cambios rápidos). */
     private fun set(w: Workout?) {
-        _workout.value = w
-        store.activeWorkout = w
+        val stamped = w?.copy(updatedAtEpochMs = System.currentTimeMillis())
+        _workout.value = stamped
+        store.activeWorkout = stamped
+        pushJob?.cancel()
+        pushJob = scope.launch {
+            delay(300)
+            phoneSync.pushActive(stamped)
+        }
     }
 
     private fun edit(block: (Workout) -> Workout) {
@@ -88,6 +108,21 @@ class WorkoutSession(
     }
 
     private fun previous(exerciseId: String): List<WorkoutSet> = WorkoutStats.previousSets(exerciseId, store.history.value)
+
+    /** Rellena con la sugerencia de progresión (si está activada en el móvil) o con la última sesión. */
+    private fun prefill(exerciseId: String): List<WorkoutSet> {
+        val s = store.settings.value
+        if (s.progressionEnabled) {
+            val ex = exerciseFor(exerciseId)
+            if (ex != null) Progression.suggest(ex, store.history.value, s.unit.stepKg())?.let { return it.sets }
+        }
+        return previous(exerciseId)
+    }
+
+    private fun exerciseFor(id: String): Exercise? =
+        com.bestrong.core.library.ExerciseLibrary.byId(id)
+            ?: store.routines.value.flatMap { r -> r.exercises.map { it.exercise } }.firstOrNull { it.id == id }
+            ?: store.history.value.flatMap { w -> w.exercises.map { it.exercise } }.firstOrNull { it.id == id }
 
     fun previousFor(exerciseId: String): List<WorkoutSet> = previous(exerciseId)
 
@@ -100,7 +135,7 @@ class WorkoutSession(
 
     fun startRoutine(routine: Routine) {
         if (_workout.value != null) return
-        begin(routine.toWorkout(System.currentTimeMillis(), ::previous, WorkoutSource.WATCH))
+        begin(routine.toWorkout(System.currentTimeMillis(), ::prefill, WorkoutSource.WATCH))
     }
 
     private fun begin(w: Workout) {
@@ -110,6 +145,7 @@ class WorkoutSession(
         hrSamples.clear()
         set(w)
         ExerciseService.start(context)
+        if (_repCounting.value) repCounter.start()
     }
 
     fun finish() {
@@ -120,9 +156,7 @@ class WorkoutSession(
             maxHeartRate = m.maxHeartRate,
             calories = m.calories,
         )
-        stopRest()
-        set(null)
-        ExerciseService.stop(context)
+        end()
         if (finished.exercises.isEmpty()) return
         val records = WorkoutStats.newRecordsIn(finished, store.history.value + finished)
         store.addLocalWorkout(finished)
@@ -130,14 +164,47 @@ class WorkoutSession(
         scope.launch { phoneSync.sendFinishedWorkout(finished) }
     }
 
-    fun discard() {
+    fun discard() = end()
+
+    private fun end() {
         stopRest()
+        repCounter.stop()
         set(null)
         ExerciseService.stop(context)
     }
 
     fun dismissSummary() {
         _summary.value = null
+    }
+
+    // --- Sincronización en vivo con el móvil ------------------------------------------------
+
+    /** Llega el entreno desde el móvil: lo adoptamos si es nuevo o más reciente. */
+    fun applyRemote(remote: Workout) {
+        val local = _workout.value
+        if (local != null && remote.updatedAtEpochMs <= local.updatedAtEpochMs) return
+        val isNew = local == null || local.id != remote.id
+        _workout.value = remote
+        store.activeWorkout = remote
+        if (isNew) {
+            _summary.value = null
+            _metrics.value = HealthMetrics()
+            hrSamples.clear()
+            _exerciseIndex.value = WorkoutEditor.nextPendingSet(remote)?.first ?: 0
+            // Empezado en el móvil: el reloj mide el pulso automáticamente
+            ExerciseService.start(context)
+            if (_repCounting.value) repCounter.start()
+        }
+    }
+
+    /** El móvil terminó o descartó el entreno. */
+    fun clearFromRemote() {
+        if (_workout.value == null) return
+        stopRest()
+        repCounter.stop()
+        _workout.value = null
+        store.activeWorkout = null
+        ExerciseService.stop(context)
     }
 
     // --- Edición -----------------------------------------------------------------------------
@@ -151,7 +218,7 @@ class WorkoutSession(
     fun previousExercise() = selectExercise(_exerciseIndex.value - 1)
 
     fun addExercise(exercise: Exercise) {
-        edit { WorkoutEditor.addExercises(it, listOf(exercise), ::previous) }
+        edit { WorkoutEditor.addExercises(it, listOf(exercise), ::prefill) }
         _workout.value?.let { _exerciseIndex.value = it.exercises.lastIndex }
     }
 
@@ -164,20 +231,28 @@ class WorkoutSession(
         _rotaryTarget.value = target
     }
 
+    fun setRepCounting(enabled: Boolean) {
+        val on = enabled && repCounter.isAvailable
+        _repCounting.value = on
+        store.repCounterEnabled = on
+        if (on && _workout.value != null) repCounter.start() else repCounter.stop()
+    }
+
     fun currentExercise() = _workout.value?.exercises?.getOrNull(_exerciseIndex.value)
 
     /** Serie que se está editando: la primera pendiente del ejercicio actual. */
     fun currentSet(): WorkoutSet? = currentExercise()?.sets?.firstOrNull { !it.completed }
 
-    /** Bisel: un paso = 2,5 kg (o 1 rep / 5 s según el campo y el tipo de ejercicio). */
+    /** Bisel: un paso = 2,5 kg / 5 lb (o 1 rep / 5 s según el campo y el tipo de ejercicio). */
     fun rotaryStep(direction: Int) {
         val we = currentExercise() ?: return
         val s = currentSet() ?: return
+        val step = store.settings.value.unit.stepKg()
         edit { w ->
             WorkoutEditor.updateSet(w, we.id, s.id) { set ->
                 when {
                     we.exercise.tracking == TrackingType.DURATION -> set.copy(durationSec = (set.durationSec + 5 * direction).coerceAtLeast(0))
-                    _rotaryTarget.value == RotaryTarget.WEIGHT -> set.copy(weightKg = (set.weightKg + 2.5 * direction).coerceAtLeast(0.0))
+                    _rotaryTarget.value == RotaryTarget.WEIGHT -> set.copy(weightKg = (set.weightKg + step * direction).coerceAtLeast(0.0))
                     else -> set.copy(reps = (set.reps + direction).coerceAtLeast(0))
                 }
             }
@@ -190,19 +265,29 @@ class WorkoutSession(
         edit { w -> WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = (it.reps + delta).coerceAtLeast(0)) } }
     }
 
-    /** Completa la serie actual y arranca el descanso. Devuelve true si empieza un descanso. */
+    /**
+     * Completa la serie actual. En superserie pasa al siguiente ejercicio del grupo sin descanso;
+     * al cerrar la ronda arranca el descanso. Devuelve true si empieza un descanso.
+     */
     fun completeSet(): Boolean {
+        val w0 = _workout.value ?: return false
+        val index = _exerciseIndex.value
         val we = currentExercise() ?: return false
         val s = currentSet() ?: return false
-        edit { WorkoutEditor.toggleSetCompleted(it, we.id, s.id) }
-        haptic(longArrayOf(0, 60))
-        // Si el ejercicio está terminado, pasa al siguiente con series pendientes
-        val updated = currentExercise()
-        if (updated != null && updated.sets.all { it.completed }) {
-            _workout.value?.let { w -> WorkoutEditor.nextPendingSet(w)?.let { (i, _) -> _exerciseIndex.value = i } }
+        val counted = repCounter.reps.value
+        edit { w ->
+            val withReps = if (_repCounting.value && counted > 0 && we.exercise.tracking != TrackingType.DURATION) {
+                WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = counted) }
+            } else w
+            WorkoutEditor.toggleSetCompleted(withReps, we.id, s.id)
         }
-        return if (we.restSeconds > 0 && WorkoutEditor.nextPendingSet(_workout.value ?: return false) != null) {
-            startRest(we.restSeconds)
+        repCounter.reset()
+        haptic(longArrayOf(0, 60))
+        val updated = _workout.value ?: w0
+        val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
+        next?.let { _exerciseIndex.value = it }
+        return if (next != null && restSeconds > 0) {
+            startRest(restSeconds)
             true
         } else false
     }
@@ -223,6 +308,7 @@ class WorkoutSession(
     fun stopRest() {
         restJob?.cancel()
         _rest.value = null
+        repCounter.reset()
     }
 
     private fun scheduleRestEnd() {
@@ -238,6 +324,7 @@ class WorkoutSession(
                 delay(remaining.coerceAtLeast(0))
             }
             _rest.value = null
+            repCounter.reset()
             haptic(longArrayOf(0, 300, 150, 300, 150, 300))
         }
     }
@@ -259,9 +346,20 @@ class WorkoutSession(
         _metrics.update {
             it.copy(heartRate = bpm, avgHeartRate = hrSamples.average().toInt(), maxHeartRate = hrSamples.max())
         }
+        maybeSendMetrics()
     }
 
     fun onCalories(kcal: Double) {
         _metrics.update { it.copy(calories = kcal.toInt()) }
+    }
+
+    /** Envía las métricas al móvil como mucho cada 5 s. */
+    private fun maybeSendMetrics() {
+        val w = _workout.value ?: return
+        val now = System.currentTimeMillis()
+        if (now - lastMetricsSentAt < 5_000) return
+        lastMetricsSentAt = now
+        val m = _metrics.value
+        scope.launch { phoneSync.sendMetrics(LiveMetrics(w.id, m.heartRate, m.avgHeartRate, m.maxHeartRate, m.calories, now)) }
     }
 }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,7 +7,7 @@ plugins {
 }
 
 // Firma de release: crea keystore.properties (no se sube a git) con storeFile, storePassword, keyAlias y keyPassword
-val keystoreProps = java.util.Properties().apply {
+val keystoreProps = Properties().apply {
     rootProject.file("keystore.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
 }
 
@@ -63,6 +65,7 @@ dependencies {
     implementation(libs.wear.protolayout)
     implementation(libs.wear.protolayout.material)
     implementation(libs.wear.ongoing)
+    implementation(libs.wear.ambient)
     implementation(libs.wear.complications.data.source.ktx)
     implementation(libs.health.services)
     implementation(libs.play.services.wearable)

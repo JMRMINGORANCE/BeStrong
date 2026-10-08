@@ -26,7 +26,6 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.bestrong.core.util.formatDuration
-import com.bestrong.core.util.formatWeight
 import com.bestrong.wear.session.WorkoutSession
 import kotlinx.coroutines.delay
 
@@ -39,6 +38,7 @@ fun RestScreen(session: WorkoutSession) {
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(200) } }
 
+    val unit = LocalWeightUnit.current
     val r = rest ?: return
     val remaining = ((r.endsAtEpochMs - now) / 1000).coerceAtLeast(0)
     val progress = (remaining.toFloat() / r.totalSeconds).coerceIn(0f, 1f)
@@ -57,7 +57,7 @@ fun RestScreen(session: WorkoutSession) {
             Text("♥ ${metrics.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.caption2)
             next?.let { (we, s) ->
                 Text(
-                    "Sig.: ${we.exercise.name} ${formatWeight(s.weightKg)}×${s.reps}",
+                    "Sig.: ${we.exercise.name} ${unit.format(s.weightKg)}×${s.reps}",
                     style = MaterialTheme.typography.caption3,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

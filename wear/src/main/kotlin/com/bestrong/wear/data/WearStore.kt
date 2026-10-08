@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
+import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.sync.SyncContract
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -59,6 +60,21 @@ class WearStore(context: Context) {
         _localHistory.value = list
     }
 
+    private val _settings = MutableStateFlow(
+        prefs.getString(KEY_SETTINGS, null)?.let { runCatching { SyncContract.decodeSettings(it.encodeToByteArray()) }.getOrNull() } ?: SharedSettings(),
+    )
+    /** Unidad de peso y progresión, elegidas en el móvil. */
+    val settings: StateFlow<SharedSettings> = _settings.asStateFlow()
+
+    fun setSettings(s: SharedSettings) {
+        prefs.edit { putString(KEY_SETTINGS, SyncContract.encodeSettings(s).decodeToString()) }
+        _settings.value = s
+    }
+
+    var repCounterEnabled: Boolean
+        get() = prefs.getBoolean(KEY_REP_COUNTER, false)
+        set(value) = prefs.edit { putBoolean(KEY_REP_COUNTER, value) }
+
     var activeWorkout: Workout?
         get() = prefs.getString(KEY_ACTIVE, null)?.let { runCatching { SyncContract.decodeWorkout(it.encodeToByteArray()) }.getOrNull() }
         set(value) = prefs.edit {
@@ -70,6 +86,8 @@ class WearStore(context: Context) {
         const val KEY_PHONE_HISTORY = "phone_history"
         const val KEY_LOCAL_HISTORY = "local_history"
         const val KEY_ACTIVE = "active"
+        const val KEY_SETTINGS = "settings"
+        const val KEY_REP_COUNTER = "rep_counter"
         const val MAX_LOCAL = 50
     }
 }

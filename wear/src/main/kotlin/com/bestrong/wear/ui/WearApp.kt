@@ -1,6 +1,7 @@
 package com.bestrong.wear.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -20,13 +21,15 @@ object WearRoutes {
 }
 
 @Composable
-fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, onStartRequestHandled: () -> Unit) {
+fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient: StateFlow<Boolean>, onStartRequestHandled: () -> Unit) {
     val nav = rememberSwipeDismissableNavController()
     val session = container.session
     val request by startRequest.collectAsStateWithLifecycle()
     val active by session.workout.collectAsStateWithLifecycle()
     val rest by session.rest.collectAsStateWithLifecycle()
     val summary by session.summary.collectAsStateWithLifecycle()
+    val isAmbient by ambient.collectAsStateWithLifecycle()
+    val settings by container.store.settings.collectAsStateWithLifecycle()
 
     // Abierto desde el móvil: empezar rutina o entrenamiento vacío
     LaunchedEffect(request) {
@@ -47,6 +50,11 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, onStartR
     }
 
     BeStrongWearTheme {
+      CompositionLocalProvider(LocalWeightUnit provides settings.unit) {
+        if (isAmbient && active != null) {
+            AmbientWorkoutScreen(session)
+            return@CompositionLocalProvider
+        }
         SwipeDismissableNavHost(navController = nav, startDestination = if (active != null) WearRoutes.WORKOUT else WearRoutes.HOME) {
             composable(WearRoutes.HOME) {
                 HomeScreen(
@@ -85,5 +93,6 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, onStartR
                 }
             }
         }
+      }
     }
 }

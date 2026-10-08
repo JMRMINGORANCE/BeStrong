@@ -22,7 +22,6 @@ import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.util.formatDuration
-import com.bestrong.core.util.formatVolume
 import com.bestrong.wear.WearContainer
 import java.time.LocalDate
 import java.time.ZoneId
@@ -99,7 +98,7 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
                         onClick = {},
                         enabled = false,
                         label = { Text(last.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        secondaryLabel = { Text("${formatDuration(last.durationSeconds())} · ${formatVolume(last.totalVolume)} kg") },
+                        secondaryLabel = { Text("${formatDuration(last.durationSeconds())} · ${LocalWeightUnit.current.formatVolume(last.totalVolume)}") },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

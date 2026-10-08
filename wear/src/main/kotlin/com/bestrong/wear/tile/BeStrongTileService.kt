@@ -15,7 +15,6 @@ import androidx.wear.tiles.RequestBuilders
 import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.TileService
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.core.util.formatVolume
 import com.bestrong.wear.BeStrongWearApp
 import com.bestrong.wear.MainActivity
 import com.google.common.util.concurrent.Futures
@@ -77,7 +76,7 @@ class BeStrongTileService : TileService() {
                     .build(),
             )
             .addContent(
-                Text.Builder(this, "🔥 $streak sem · ${formatVolume(week.volume)} kg")
+                Text.Builder(this, "🔥 $streak sem · ${container.store.settings.value.unit.formatVolume(week.volume)}")
                     .setTypography(Typography.TYPOGRAPHY_CAPTION2)
                     .setColor(argb(0xFFBDBDBD.toInt()))
                     .build(),

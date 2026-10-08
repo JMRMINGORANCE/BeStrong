@@ -25,6 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.nativeKeyCode
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,7 +46,6 @@ import androidx.wear.compose.material.Text
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.util.formatDuration
-import com.bestrong.core.util.formatWeight
 import com.bestrong.wear.session.RotaryTarget
 import com.bestrong.wear.session.WorkoutSession
 import kotlinx.coroutines.delay
@@ -62,6 +66,9 @@ fun WorkoutScreen(
     val index by session.exerciseIndex.collectAsStateWithLifecycle()
     val metrics by session.metrics.collectAsStateWithLifecycle()
     val target by session.rotaryTarget.collectAsStateWithLifecycle()
+    val repCounting by session.repCounting.collectAsStateWithLifecycle()
+    val countedReps by session.repCounter.reps.collectAsStateWithLifecycle()
+    val unit = LocalWeightUnit.current
     val focus = remember { FocusRequester() }
     var accumulated by remember { mutableFloatStateOf(0f) }
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -90,6 +97,13 @@ fun WorkoutScreen(
                 }
                 true
             }
+            // Botón rápido / botones físicos del Galaxy Watch Ultra: completar serie
+            .onPreviewKeyEvent { e ->
+                if (e.key.nativeKeyCode in STEM_KEYS) {
+                    if (e.type == KeyEventType.KeyUp && session.currentSet() != null && session.completeSet()) onRest()
+                    true
+                } else false
+            }
             .focusRequester(focus)
             .focusable(),
     ) {
@@ -112,6 +126,7 @@ fun WorkoutScreen(
                 CompactButton(onClick = onMenu, colors = ButtonDefaults.secondaryButtonColors()) { Text("⋯") }
                 return@Column
             }
+            if (we.supersetId != null) Text("Superserie", style = MaterialTheme.typography.caption3, color = MaterialTheme.colors.secondary)
             Text(
                 we.exercise.name,
                 style = MaterialTheme.typography.title3,
@@ -142,7 +157,7 @@ fun WorkoutScreen(
                 TrackingType.DURATION -> BigValue("${set.durationSec}", "s", selected = true) {}
                 else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (we.exercise.tracking == TrackingType.WEIGHT_REPS || set.weightKg > 0) {
-                        BigValue(formatWeight(set.weightKg), "kg", selected = target == RotaryTarget.WEIGHT) {
+                        BigValue(unit.format(set.weightKg), unit.label, selected = target == RotaryTarget.WEIGHT) {
                             session.setRotaryTarget(RotaryTarget.WEIGHT)
                         }
                         Text("×", style = MaterialTheme.typography.title2)
@@ -152,9 +167,12 @@ fun WorkoutScreen(
                     }
                 }
             }
+            if (repCounting) {
+                Text("Contadas: $countedReps reps (beta)", style = MaterialTheme.typography.caption3, color = MaterialTheme.colors.secondary)
+            }
             previous?.let {
                 Text(
-                    "Anterior: ${formatWeight(it.weightKg)}×${it.reps}",
+                    "Anterior: ${unit.format(it.weightKg)}×${it.reps}",
                     style = MaterialTheme.typography.caption3,
                     color = MaterialTheme.colors.onSurfaceVariant,
                 )
@@ -195,3 +213,11 @@ private fun BigValue(value: String, unit: String, selected: Boolean, onClick: ()
 }
 
 private const val ROTARY_STEP_PX = 48f
+
+/** Botones físicos: en el Watch Ultra el botón rápido se puede asignar a la app en Ajustes › Funciones avanzadas. */
+private val STEM_KEYS = setOf(
+    android.view.KeyEvent.KEYCODE_STEM_PRIMARY,
+    android.view.KeyEvent.KEYCODE_STEM_1,
+    android.view.KeyEvent.KEYCODE_STEM_2,
+    android.view.KeyEvent.KEYCODE_STEM_3,
+)

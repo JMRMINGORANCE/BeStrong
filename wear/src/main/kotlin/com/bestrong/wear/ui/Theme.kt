@@ -16,3 +16,6 @@ fun BeStrongWearTheme(content: @Composable () -> Unit) {
         content = content,
     )
 }
+
+/** Unidad de peso elegida en el móvil. */
+val LocalWeightUnit = androidx.compose.runtime.staticCompositionLocalOf { com.bestrong.core.util.WeightUnit.KG }
