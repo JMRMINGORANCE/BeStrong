@@ -34,7 +34,7 @@ jobs:
         run: ./gradlew --continue :mobile:assembleDebug :wear:assembleDebug
 
       - name: Tests de interfaz y capturas (Robolectric + Roborazzi)
-        run: ./gradlew :mobile:testDebugUnitTest -Proborazzi.test.record=true
+        run: ./gradlew --continue :mobile:testDebugUnitTest :wear:testDebugUnitTest -Proborazzi.test.record=true
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -43,6 +43,7 @@ jobs:
           path: |
             mobile/build/outputs/roborazzi/
             mobile/build/reports/tests/
+            wear/build/outputs/roborazzi/
           retention-days: 14
 
       - name: Publicar capturas en la rama "capturas"
@@ -50,6 +51,8 @@ jobs:
         run: |
           mkdir -p mobile/build/outputs/roborazzi/test-results
           cp mobile/build/test-results/testDebugUnitTest/*.xml mobile/build/outputs/roborazzi/test-results/ 2>/dev/null || true
+          cp wear/build/test-results/testDebugUnitTest/*.xml mobile/build/outputs/roborazzi/test-results/ 2>/dev/null || true
+          cp wear/build/outputs/roborazzi/*.png mobile/build/outputs/roborazzi/ 2>/dev/null || true
           if [ -n "$(ls -A mobile/build/outputs/roborazzi)" ]; then
             cd mobile/build/outputs/roborazzi
             git init -q -b capturas
@@ -58,6 +61,9 @@ jobs:
             git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Capturas de ${GITHUB_SHA::7}"
             git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" capturas
           fi
+
+      - name: Compilar release (R8)
+        run: ./gradlew --continue :mobile:assembleRelease :wear:assembleRelease
 
       - name: Lint
         run: ./gradlew --continue :mobile:lintDebug :wear:lintDebug

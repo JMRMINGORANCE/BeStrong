@@ -39,7 +39,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycle.addObserver(AmbientLifecycleObserver(this, ambientCallback))
+        // En dispositivos sin la librería de Wear (tests, emuladores no-Wear) el modo ambiente no existe
+        runCatching { lifecycle.addObserver(AmbientLifecycleObserver(this, ambientCallback)) }
 
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {}
             .launch(arrayOf(Manifest.permission.BODY_SENSORS, Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.POST_NOTIFICATIONS))

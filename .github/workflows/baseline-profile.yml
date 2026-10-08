@@ -42,11 +42,24 @@ jobs:
             -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=20 \
             --stacktrace 2>&1 | tee bp.log
 
+      - name: Prueba de humo de la build minificada (R8)
+        id: smoke
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ./gradlew :baselineprofile:pixel6Api34BenchmarkReleaseAndroidTest \
+            -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect \
+            -Pandroid.testInstrumentationRunnerArguments.class=com.bestrong.baselineprofile.ReleaseSmokeTest \
+            -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR,DEBUGGABLE \
+            2>&1 | tee smoke.log
+
       - name: Publicar resultado en la rama baseline-profile
         if: always()
         run: |
           mkdir -p /tmp/bp
           tail -n 400 bp.log > /tmp/bp/log.txt || true
+          tail -n 300 smoke.log > /tmp/bp/smoke-log.txt || true
+          echo "${{ steps.smoke.outcome }}" > /tmp/bp/smoke-outcome.txt
           find mobile/src -path '*generated/baselineProfiles*' -name '*.txt' -exec cp {} /tmp/bp/ \; || true
           find baselineprofile/build -name '*.txt' -path '*managed_device*' -exec cp {} /tmp/bp/ \; 2>/dev/null || true
           echo "${{ steps.generate.outcome }}" > /tmp/bp/outcome.txt
@@ -57,7 +70,7 @@ jobs:
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" baseline-profile
 
       - name: Fallar si no se generó
-        if: steps.generate.outcome != 'success'
+        if: steps.generate.outcome != 'success' || steps.smoke.outcome != 'success'
         run: exit 1
 
       - uses: actions/upload-artifact@v4
