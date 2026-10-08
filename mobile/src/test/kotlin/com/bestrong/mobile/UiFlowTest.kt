@@ -61,7 +61,7 @@ class UiFlowTest {
         settle()
         compose.onNodeWithText("Press banca").performClick()
         settle(3)
-        compose.onNode(hasText("Añadir 1")).performClick()
+        compose.onNode(hasText("Añadir 1"), useUnmergedTree = true).performClick()
         settle()
     }
 
