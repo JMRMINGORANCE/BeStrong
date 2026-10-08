@@ -18,6 +18,13 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
 - **Historial** con calendario mensual, detalle de cada sesión, repetir entrenamiento.
 - **Progreso por ejercicio**: gráficas de 1RM estimado (Epley), peso máximo, volumen y reps,
   y **récords personales** (se celebran al terminar el entreno).
+- **Programas predefinidos** (Full Body 3 días, Push / Pull / Legs, Torso / Pierna 4 días, 5×5 Fuerza,
+  Glúteo y pierna): un toque crea todas sus rutinas.
+- **Mapa muscular semanal**: series efectivas por músculo frente a la recomendación de 10–20 por semana (bajo / óptimo / alto).
+- **Compartir entreno como imagen** (tarjeta 4:5 con cifras, ejercicios y récords) desde el resumen o el historial.
+- **Recordatorios** los días elegidos a la hora elegida (solo si ese día no has entrenado; sugiere la rutina que toca).
+- **Notificación de récords** cuando terminas un entreno en el reloj.
+- **Copias de seguridad**: semanal (CSV + JSON) en la carpeta que elijas (p. ej. Google Drive) y Android Auto Backup de la base de datos.
 - **Perfil**: racha semanal, volumen semanal, entrenos por semana, series por músculo (30 días), mejores 1RM.
 - **Medidas corporales** (peso, % grasa, cintura, pecho, brazo, muslo) con gráfica de peso.
 - **Health Connect** (opcional): cada entreno se guarda como sesión de pesas → aparece en **Samsung Health**.
@@ -29,7 +36,8 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
 - **Superseries y circuitos**: el descanso salta entre ejercicios del grupo y llega al cerrar la ronda.
 - **Calentamiento automático** (barra × 10, 40 % × 5, 60 % × 3, 80 % × 2) y **calculadora de discos** (kg o lb, barra de 20/15/10 kg o 45/35/25 lb).
 - **RPE** por serie, **kg o lb**, e **instrucciones de técnica** para los ~70 ejercicios.
-- **Descanso en la notificación** (cuenta atrás, +15 s, saltar) que sigue funcionando con la pantalla apagada; aparece en la pantalla de bloqueo.
+- **Descanso en la notificación** (cuenta atrás, +15 s, saltar) que sigue funcionando con la pantalla apagada; en Android 16
+  es un **Live Update** (chip en la barra de estado y **Now Bar** de One UI 8) con barra de progreso por ejercicio.
 - **Widget** con racha, entrenos de la semana, "Entrenar" y tus dos primeras rutinas.
 - **CSV**: exporta tu historial e importa desde **Hevy**, **Strong** o BeStrong.
 
@@ -67,11 +75,13 @@ el estado al plegar/desplegar.
 - **Hilt** para la inyección de dependencias en móvil y reloj (ViewModels `@HiltViewModel`, servicios `@AndroidEntryPoint`, widget vía `EntryPoint`).
 - **Wear Compose Material 3** en el reloj (`AppScaffold`, `ScreenScaffold`, `EdgeButton`, `SwitchButton`).
 - **Idiomas**: español e inglés (`values/` y `values-en/`), incluidos nombres y técnica de los ejercicios.
+- **Sincronización en vivo móvil ↔ reloj** con fusión serie a serie (`WorkoutMerge`): si editas en los dos a la vez no se pierde ninguna serie completada.
+- **Formato persistente versionado** (`Persistence`, `schemaVersion` + migraciones) en Room y en el reloj.
 - **Baseline Profiles** (`:baselineprofile`): el workflow *Baseline Profile* los genera en un emulador y los publica en la rama `baseline-profile`.
 
 ## Compilar
 
-Requisitos: Android Studio Ladybug o posterior, JDK 17, Android SDK 35.
+Requisitos: Android Studio Narwhal o posterior, JDK 17, Android SDK 36.
 
 ```bash
 ./gradlew :core:test                 # tests de lógica
@@ -88,7 +98,11 @@ GitHub Actions compila los dos APK en cada push (`.github/workflows/android.yml`
 - `core`: tests unitarios de estadísticas, editor, progresión, superseries, discos, calentamiento y CSV.
 - `mobile`: tests de interfaz en JVM (Robolectric) con **capturas Roborazzi** del Fold plegado, desplegado y en modo mesa;
   la CI las publica como artefacto `capturas`.
-- Lint en ambos módulos.
+- Accesibilidad: capturas con el texto al 200 % y comprobación de que todo lo pulsable tiene etiqueta para TalkBack.
+- Reloj: capturas de la esfera redonda (inicio, entreno, serie, descanso).
+- Build release con R8 en cada push y prueba de humo minificada en emulador (workflow *Baseline Profile*).
+- Estilo: **ktlint** vía Spotless (`./gradlew spotlessCheck` / `spotlessApply`), reglas en `.editorconfig`.
+- Lint en ambos módulos y **Dependabot** para dependencias y acciones.
 
 ## Publicar
 Crea `keystore.properties` en la raíz (no se sube a git):
@@ -103,3 +117,5 @@ y ejecuta `./gradlew :mobile:bundleRelease :wear:bundleRelease`. La política de
 
 ## Pendiente
 - Firebase: cuenta, copia en la nube, parte social e informes de errores (Crashlytics).
+- Imágenes/animaciones de ejercicios: requieren contenido con licencia (propio o comprado).
+- Publicación en Play Store: icono definitivo, onboarding, capturas de la ficha y formulario de seguridad de datos.

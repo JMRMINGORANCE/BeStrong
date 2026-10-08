@@ -119,7 +119,7 @@ fun WorkoutScreen(
                 .focusable(),
         ) {
             Column(
-                Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, top = 28.dp, bottom = 56.dp),
+                Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, top = 24.dp, bottom = 62.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -204,7 +204,7 @@ fun WorkoutScreen(
             if (set != null) {
                 EdgeButton(
                     onClick = { if (session.completeSet()) onRest() },
-                    buttonSize = EdgeButtonSize.Medium,
+                    buttonSize = EdgeButtonSize.Small,
                     colors = ButtonDefaults.buttonColors(containerColor = Done, contentColor = Color.Black),
                     modifier = Modifier.align(Alignment.BottomCenter).semantics { contentDescription = completeDescription },
                 ) { Text("✓", fontSize = 24.sp, fontWeight = FontWeight.Bold) }

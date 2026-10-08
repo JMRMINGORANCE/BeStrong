@@ -1,10 +1,10 @@
 package com.bestrong.wear
 
 import android.os.Looper
-import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -59,7 +59,8 @@ class WearUiTest {
         settle()
         shot("workout_set")
 
-        compose.onNode(hasText("✓") and hasClickAction(), useUnmergedTree = true).performClick()
+        // El botón ✓ se anuncia a TalkBack como «Completar serie»
+        compose.onNodeWithContentDescription("Completar serie").performClick()
         settle()
         shot("rest")
     }
