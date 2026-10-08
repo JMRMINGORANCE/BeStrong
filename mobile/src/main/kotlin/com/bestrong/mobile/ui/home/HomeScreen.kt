@@ -173,7 +173,7 @@ private fun RoutineCard(
                 }
             }
             Text(
-                routine.exercises.joinToString { it.exercise.displayName() }.ifBlank { stringResource(R.string.routine_no_exercises) },
+                routine.exercises.map { it.exercise.displayName() }.joinToString().ifBlank { stringResource(R.string.routine_no_exercises) },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,

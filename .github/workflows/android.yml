@@ -54,6 +54,7 @@ jobs:
             cd mobile/build/outputs/roborazzi
             git init -q -b capturas
             git add -A
+            if git diff --cached --quiet; then echo "Sin capturas"; exit 0; fi
             git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Capturas de ${GITHUB_SHA::7}"
             git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" capturas
           fi
