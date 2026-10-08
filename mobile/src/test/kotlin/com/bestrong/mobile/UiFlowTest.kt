@@ -137,5 +137,51 @@ class UiFlowTest {
     }
 }
 
+/** Misma app en inglés: comprueba que la traducción se aplica. */
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [34])
+class UiEnglishTest {
+    @get:Rule
+    val compose = createAndroidComposeRule<MainActivity>()
+
+    private fun settle(rounds: Int = 15) {
+        repeat(rounds) {
+            compose.mainClock.advanceTimeBy(100)
+            Thread.sleep(30)
+            shadowOf(Looper.getMainLooper()).idle()
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "en-w411dp-h891dp-xxhdpi")
+    fun workout_folded_en() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNodeWithText("Empty workout").performClick()
+        settle()
+        compose.onNodeWithText("Add exercises").performClick()
+        settle()
+        compose.onNode(hasSetTextAction()).performTextInput("bench")
+        settle()
+        compose.onNodeWithText("Bench Press").performClick()
+        settle(3)
+        compose.onNode(hasText("Add 1"), useUnmergedTree = true).performClick()
+        settle()
+        assertNotNull(compose.onNodeWithText("Bench Press").fetchSemanticsNode())
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/workout_folded_en.png")
+    }
+
+    @Test
+    @Config(qualifiers = "en-w884dp-h1104dp-xhdpi")
+    fun profile_unfolded_en() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNodeWithText("Profile").performClick()
+        settle()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/profile_unfolded_en.png")
+    }
+}
+
 /** La barra de navegación se oculta durante el entreno. */
 private fun androidx.compose.ui.test.SemanticsNodeInteraction.assertDoesNotExistCompat() = assertDoesNotExist()
