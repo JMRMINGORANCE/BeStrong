@@ -1,6 +1,7 @@
 package com.bestrong.mobile.ui.exercises
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.library.ExerciseLibrary
@@ -15,6 +16,9 @@ import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.util.newId
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.ExerciseImage
+import com.bestrong.mobile.data.ExerciseMediaStore
+import com.bestrong.mobile.data.MediaItem
 import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,7 +43,18 @@ data class ExerciseDetailState(
 class ExercisesViewModel @Inject constructor(
     private val repo: BeStrongRepository,
     @ApplicationContext private val context: Context,
+    private val media: ExerciseMediaStore,
 ) : ViewModel() {
+
+    // --- Imagen de wger y notas de técnica (foto/vídeo) -------------------------------------
+
+    val mediaVersion: StateFlow<Int> = media.version
+    fun image(exerciseId: String): ExerciseImage? = media.images[exerciseId]
+    fun mediaItems(exerciseId: String): List<MediaItem> = media.items(exerciseId)
+    fun note(exerciseId: String): String = media.note(exerciseId)
+    fun saveNote(exerciseId: String, text: String) = viewModelScope.launch { media.saveNote(exerciseId, text) }
+    fun addMedia(exerciseId: String, uri: Uri) = viewModelScope.launch { runCatching { media.add(exerciseId, uri) } }
+    fun deleteMedia(item: MediaItem) = media.delete(item)
 
     val filter = MutableStateFlow(ExerciseFilter())
 

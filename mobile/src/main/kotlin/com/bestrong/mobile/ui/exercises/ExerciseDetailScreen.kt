@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -28,6 +29,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +39,6 @@ import com.bestrong.core.stats.RecordType
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.ChartPoint
-import com.bestrong.mobile.ui.components.EmptyState
 import com.bestrong.mobile.ui.components.LineChart
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
@@ -68,11 +69,18 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                 }
             },
         )
-        if (s.progress.isEmpty()) {
-            EmptyState(Icons.AutoMirrored.Filled.ShowChart, stringResource(R.string.no_data_title), stringResource(R.string.no_data_body))
-            return
-        }
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            item { ExerciseMediaSection(vm, s.exercise) }
+            if (s.progress.isEmpty()) {
+                item {
+                    Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.AutoMirrored.Filled.ShowChart, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.no_data_title), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.no_data_body), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                return@LazyColumn
+            }
             item {
                 Text(
                     "${s.exercise.primaryMuscle.label()} · ${s.exercise.equipment.label()}" +

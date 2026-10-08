@@ -23,7 +23,24 @@ ENGLISH = 2
 ALIASES = {
     "bench_press": ["Bench Press", "Barbell Bench Press"],
     "overhead_press": ["Overhead Press", "Shoulder Press, Barbell", "Military Press"],
-    "squat": ["Squats", "Barbell Squat", "Squat"],
+    "squat": ["Squats", "Barbell Squat", "Squat", "Back Squat"],
+    "front_squat": ["Front Squats", "Front Squat"],
+    "incline_bench_press": ["Incline Bench Press", "Bench Press Incline", "Incline Barbell Bench Press"],
+    "decline_bench_press": ["Decline Bench Press", "Bench Press Decline"],
+    "db_bench_press": ["Dumbbell Bench Press", "Bench Press Dumbbells", "Dumbbell Press"],
+    "db_incline_press": ["Incline Dumbbell Press", "Incline Dumbbell Bench Press", "Dumbbell Incline Bench Press"],
+    "db_fly": ["Dumbbell Fly", "Fly With Dumbbells", "Flys"],
+    "db_row": ["Dumbbell Row", "One Arm Dumbbell Row", "Bent Over Dumbbell Rows"],
+    "db_shoulder_press": ["Dumbbell Shoulder Press", "Shoulder Press, Dumbbells"],
+    "hammer_curl": ["Hammer Curls", "Hammercurls", "Hammer Curl"],
+    "skull_crusher": ["Skull Crusher", "French Press (skullcrusher) SZ-bar", "Skullcrusher"],
+    "seated_cable_row": ["Seated Cable Row", "Seated Cable Rows", "Cable Row"],
+    "goblet_squat": ["Goblet Squat"],
+    "lunge": ["Lunges", "Dumbbell Lunges", "Lunge"],
+    "bulgarian_split_squat": ["Bulgarian Split Squat", "Split Squat"],
+    "hanging_leg_raise": ["Hanging Leg Raises", "Leg Raises, Hanging"],
+    "preacher_curl": ["Preacher Curls", "Biceps Curl on Preacher Bench"],
+    "close_grip_bench": ["Close-grip Bench Press", "Bench Press Narrow Grip"],
     "deadlift": ["Deadlifts", "Deadlift"],
     "barbell_row": ["Bent Over Rowing", "Barbell Row", "Bent Over Barbell Row"],
     "pull_up": ["Pull-ups", "Pull Ups", "Pull-up"],
@@ -70,7 +87,10 @@ def fetch(url):
 
 
 def main():
-    ours = dict(re.findall(r'"([a-z0-9_]+)" to "([^"]+)"', open(NAMES_KT, encoding="utf-8").read()))
+    src = open(NAMES_KT, encoding="utf-8").read()
+    # Solo el mapa de nombres (el archivo también tiene las instrucciones en inglés)
+    block = src.split("englishNames", 1)[1].split("\n)", 1)[0]
+    ours = dict(re.findall(r'"([a-z0-9_]+)" to "([^"]+)"', block))
     candidates = {}  # nombre normalizado -> (nombre, imagen)
     offset = 0
     while True:

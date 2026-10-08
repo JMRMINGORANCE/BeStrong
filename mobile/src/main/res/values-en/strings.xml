@@ -62,6 +62,8 @@
     <string name="equip_other">Other</string>
     <string name="equip_smith">Smith machine</string>
     <string name="exercise_how_to">How to do %1$s</string>
+    <string name="exercise_image_credit">Image: %1$s · %2$s · wger.de</string>
+    <string name="exercise_image_desc">Image of %1$s</string>
     <string name="exercise_options">%1$s options</string>
     <string name="exercise_pick_body">You\'ll see your progress, records and history.</string>
     <string name="exercise_pick_title">Pick an exercise</string>
@@ -114,6 +116,10 @@
     <string name="m_waist">Waist %1$s cm</string>
     <string name="m_weight">Weight %1$s</string>
     <string name="measurements">Body measurements</string>
+    <string name="media_add">Photo or video</string>
+    <string name="media_delete">Delete</string>
+    <string name="media_open_photo">Open photo</string>
+    <string name="media_open_video">Play video</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Max weight</string>
     <string name="metric_reps">Reps</string>
@@ -194,6 +200,8 @@
     <string name="privacy_delete_title">Deleting your data</string>
     <string name="privacy_hc">If you turn on export, BeStrong writes each finished workout to Health Connect as a weightlifting session (start, end, name and notes) plus the calories estimated by the watch. BeStrong never reads data from Health Connect. You can revoke the permission at any time from Settings › Health Connect.</string>
     <string name="privacy_hc_title">Health Connect</string>
+    <string name="privacy_images">Exercise images are downloaded from wger.de (open content under CC-BY-SA). No personal data is sent with that download. Your technique photos and videos are stored only in the app’s private storage.</string>
+    <string name="privacy_images_title">Exercise images</string>
     <string name="privacy_intro">All your data (workouts, routines, measurements and settings) is stored only on your phone and watch. BeStrong has no servers, creates no accounts and shares no data with third parties.</string>
     <string name="privacy_title">BeStrong privacy policy</string>
     <string name="privacy_watch">The watch measures your heart rate and calories with Health Services only while a workout is in progress. Data travels between phone and watch over the Wear OS Bluetooth/Wi-Fi connection and never leaves your devices.</string>
@@ -301,6 +309,8 @@
     <string name="superset_label">Superset %1$s</string>
     <string name="superset_remove">Remove from superset</string>
     <string name="superset_with_next">Superset with next</string>
+    <string name="technique_notes">My technique notes</string>
+    <string name="technique_notes_hint">Grip, setup, cues… (stored on this phone only)</string>
     <string name="tempo">Tempo</string>
     <string name="tempo_help">Seconds of lowering-pause-lifting-pause, e.g. 3-1-1-0 (X = explosive). The watch guides you with vibrations.</string>
     <string name="tempo_invalid">Format: 3-1-1 or 3-1-1-0 (0 to 10 s)</string>

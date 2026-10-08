@@ -62,6 +62,8 @@
     <string name="equip_other">Otro</string>
     <string name="equip_smith">Multipower</string>
     <string name="exercise_how_to">Cómo se hace %1$s</string>
+    <string name="exercise_image_credit">Imagen: %1$s · %2$s · wger.de</string>
+    <string name="exercise_image_desc">Imagen del ejercicio %1$s</string>
     <string name="exercise_options">Opciones de %1$s</string>
     <string name="exercise_pick_body">Verás tu progreso, récords e historial.</string>
     <string name="exercise_pick_title">Elige un ejercicio</string>
@@ -114,6 +116,10 @@
     <string name="m_waist">Cintura %1$s cm</string>
     <string name="m_weight">Peso %1$s</string>
     <string name="measurements">Medidas corporales</string>
+    <string name="media_add">Foto o vídeo</string>
+    <string name="media_delete">Borrar</string>
+    <string name="media_open_photo">Abrir foto</string>
+    <string name="media_open_video">Reproducir vídeo</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Peso máx.</string>
     <string name="metric_reps">Reps</string>
@@ -194,6 +200,8 @@
     <string name="privacy_delete_title">Borrar tus datos</string>
     <string name="privacy_hc">Si activas la exportación, BeStrong escribe en Health Connect cada entrenamiento terminado como sesión de pesas (hora de inicio, fin, nombre y notas) y las calorías estimadas por el reloj. BeStrong no lee ningún dato de Health Connect. Puedes retirar el permiso en cualquier momento desde Ajustes › Health Connect.</string>
     <string name="privacy_hc_title">Health Connect</string>
+    <string name="privacy_images">Las imágenes de los ejercicios se descargan de wger.de (contenido abierto con licencia CC-BY-SA). En esa descarga no se envía ningún dato tuyo. Tus fotos y vídeos de técnica se guardan solo en la memoria privada de la app.</string>
+    <string name="privacy_images_title">Imágenes de ejercicios</string>
     <string name="privacy_intro">Todos tus datos (entrenamientos, rutinas, medidas y ajustes) se guardan solo en tu móvil y en tu reloj. BeStrong no tiene servidores, no crea cuentas y no envía datos a terceros.</string>
     <string name="privacy_title">Política de privacidad de BeStrong</string>
     <string name="privacy_watch">El reloj mide tu pulso y calorías con Health Services solo mientras hay un entrenamiento en curso. Los datos viajan entre el móvil y el reloj mediante la conexión Bluetooth/Wi-Fi de Wear OS y no salen de tus dispositivos.</string>
@@ -301,6 +309,8 @@
     <string name="superset_label">Superserie %1$s</string>
     <string name="superset_remove">Quitar de la superserie</string>
     <string name="superset_with_next">Superserie con el siguiente</string>
+    <string name="technique_notes">Mis notas de técnica</string>
+    <string name="technique_notes_hint">Agarre, apoyo, sensaciones… (solo en este móvil)</string>
     <string name="tempo">Tempo</string>
     <string name="tempo_help">Segundos de bajada-pausa-subida-pausa, p. ej. 3-1-1-0 (X = explosivo). El reloj te guía con vibraciones.</string>
     <string name="tempo_invalid">Formato: 3-1-1 o 3-1-1-0 (0 a 10 s)</string>
