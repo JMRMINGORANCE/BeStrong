@@ -66,7 +66,7 @@ class UiFlowTest {
     }
 
     @Test
-    @Config(qualifiers = "w411dp-h891dp-xxhdpi")
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun home_folded() {
         compose.mainClock.autoAdvance = false
         settle()
@@ -75,7 +75,7 @@ class UiFlowTest {
     }
 
     @Test
-    @Config(qualifiers = "w884dp-h1104dp-xhdpi")
+    @Config(qualifiers = "es-w884dp-h1104dp-xhdpi")
     fun home_unfolded() {
         compose.mainClock.autoAdvance = false
         settle()
@@ -83,7 +83,7 @@ class UiFlowTest {
     }
 
     @Test
-    @Config(qualifiers = "w411dp-h891dp-xxhdpi")
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun workout_flow_folded() {
         startEmptyWorkoutWithBench()
         assertNotNull(compose.onNodeWithText("Press banca").fetchSemanticsNode())
@@ -92,14 +92,14 @@ class UiFlowTest {
     }
 
     @Test
-    @Config(qualifiers = "w884dp-h1104dp-xhdpi")
+    @Config(qualifiers = "es-w884dp-h1104dp-xhdpi")
     fun workout_unfolded() {
         startEmptyWorkoutWithBench()
         shot("workout_unfolded")
     }
 
     @Test
-    @Config(qualifiers = "w884dp-h1104dp-xhdpi")
+    @Config(qualifiers = "es-w884dp-h1104dp-xhdpi")
     fun workout_tabletop() {
         startEmptyWorkoutWithBench()
         val fold = FoldingFeature(
@@ -113,7 +113,7 @@ class UiFlowTest {
     }
 
     @Test
-    @Config(qualifiers = "w884dp-h1104dp-xhdpi")
+    @Config(qualifiers = "es-w884dp-h1104dp-xhdpi")
     fun exercises_unfolded() {
         compose.mainClock.autoAdvance = false
         settle()
@@ -127,7 +127,7 @@ class UiFlowTest {
     }
 
     @Test
-    @Config(qualifiers = "w411dp-h891dp-xxhdpi")
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun profile_folded() {
         compose.mainClock.autoAdvance = false
         settle()

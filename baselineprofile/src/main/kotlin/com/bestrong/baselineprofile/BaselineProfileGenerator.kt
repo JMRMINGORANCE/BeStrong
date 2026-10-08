@@ -3,7 +3,9 @@ package com.bestrong.baselineprofile
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.Until
+import java.util.regex.Pattern
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -11,6 +13,7 @@ import org.junit.runner.RunWith
 /**
  * Genera el Baseline Profile del móvil recorriendo los flujos críticos (arranque, entreno,
  * biblioteca, historial y perfil) para que se precompilen y la app arranque y haga scroll más fluido.
+ * Los textos se buscan en español o inglés, según el idioma del emulador.
  *
  * ./gradlew :mobile:generateReleaseBaselineProfile
  */
@@ -20,33 +23,43 @@ class BaselineProfileGenerator {
     @get:Rule
     val rule = BaselineProfileRule()
 
+    private fun text(es: String, en: String) = By.text(Pattern.compile("$es|$en"))
+
     @Test
     fun generate() = rule.collect(packageName = "com.bestrong", includeInStartupProfile = true) {
         pressHome()
         startActivityAndWait()
-        device.wait(Until.hasObject(By.text("Entrenamiento vacío")), 10_000)
+        val empty = text("Entrenamiento vacío", "Empty workout")
+        device.wait(Until.hasObject(empty), 10_000)
 
         // Entreno: vacío → añadir ejercicio
-        device.findObject(By.text("Entrenamiento vacío"))?.click()
-        device.wait(Until.hasObject(By.text("Añadir ejercicios")), 5_000)
-        device.findObject(By.text("Añadir ejercicios"))?.click()
-        device.wait(Until.hasObject(By.text("Press banca")), 5_000)
-        device.findObject(By.text("Press banca"))?.click()
-        device.findObject(By.textStartsWith("Añadir 1"))?.click()
+        device.findObject(empty)?.click()
+        val addExercises = text("Añadir ejercicios", "Add exercises")
+        device.wait(Until.hasObject(addExercises), 5_000)
+        device.findObject(addExercises)?.click()
+        val bench = text("Press banca", "Bench Press")
+        device.wait(Until.hasObject(bench), 5_000)
+        device.findObject(bench)?.click()
+        device.findObject(By.text(Pattern.compile("(Añadir|Add) 1")))?.click()
         device.waitForIdle()
         device.pressBack()
         device.waitForIdle()
 
         // Pestañas principales
-        listOf("Historial", "Ejercicios", "Perfil", "Entrenar").forEach { tab ->
-            device.findObject(By.text(tab))?.click()
+        listOf(
+            text("Historial", "History"),
+            text("Ejercicios", "Exercises"),
+            text("Perfil", "Profile"),
+            text("Entrenar", "Train"),
+        ).forEach { tab ->
+            device.findObject(tab)?.click()
             device.waitForIdle()
         }
-        device.findObject(By.text("Ejercicios"))?.click()
+        device.findObject(text("Ejercicios", "Exercises"))?.click()
         device.waitForIdle()
         device.findObject(By.scrollable(true))?.let { list ->
             list.setGestureMargin(device.displayWidth / 5)
-            list.fling(androidx.test.uiautomator.Direction.DOWN)
+            list.fling(Direction.DOWN)
             device.waitForIdle()
         }
     }
