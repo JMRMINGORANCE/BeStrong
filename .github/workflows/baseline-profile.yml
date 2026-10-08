@@ -27,22 +27,38 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Generar perfil
-        run: >
-          ./gradlew :mobile:generateReleaseBaselineProfile
-          -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
-          -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=20
-
-      - name: Publicar en la rama baseline-profile
+      - name: Liberar espacio en disco
         run: |
-          OUT=$(find mobile/src -path '*generated/baselineProfiles*' -name '*.txt' | head -n 5)
-          echo "$OUT"
-          mkdir -p /tmp/bp && cp $OUT /tmp/bp/
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk/ndk /opt/ghc /usr/local/share/boost || true
+          df -h /
+
+      - name: Generar perfil
+        id: generate
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ./gradlew :mobile:generateReleaseBaselineProfile \
+            -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect \
+            -Pandroid.experimental.testOptions.managedDevices.setupTimeoutMinutes=20 \
+            --stacktrace 2>&1 | tee bp.log
+
+      - name: Publicar resultado en la rama baseline-profile
+        if: always()
+        run: |
+          mkdir -p /tmp/bp
+          tail -n 400 bp.log > /tmp/bp/log.txt || true
+          find mobile/src -path '*generated/baselineProfiles*' -name '*.txt' -exec cp {} /tmp/bp/ \; || true
+          find baselineprofile/build -name '*.txt' -path '*managed_device*' -exec cp {} /tmp/bp/ \; 2>/dev/null || true
+          echo "${{ steps.generate.outcome }}" > /tmp/bp/outcome.txt
           cd /tmp/bp
           git init -q -b baseline-profile
           git add -A
-          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Baseline profile de ${GITHUB_SHA::7}"
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Baseline profile de ${GITHUB_SHA::7} (${{ steps.generate.outcome }})"
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" baseline-profile
+
+      - name: Fallar si no se generó
+        if: steps.generate.outcome != 'success'
+        run: exit 1
 
       - uses: actions/upload-artifact@v4
         if: always()
