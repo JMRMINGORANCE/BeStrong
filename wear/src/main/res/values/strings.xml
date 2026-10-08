@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">BeStrong</string>
+    <string name="complication_label">Entrenos esta semana</string>
+</resources>
