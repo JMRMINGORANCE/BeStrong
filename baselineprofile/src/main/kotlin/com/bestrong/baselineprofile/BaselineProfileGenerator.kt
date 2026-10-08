@@ -1,9 +1,12 @@
 package com.bestrong.baselineprofile
 
+import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
+import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.Until
 import java.util.regex.Pattern
 import org.junit.Rule
@@ -25,42 +28,47 @@ class BaselineProfileGenerator {
 
     private fun text(es: String, en: String) = By.text(Pattern.compile("$es|$en"))
 
+    /** Espera a que aparezca y pulsa; reintenta si la vista se recompone entre medias. */
+    private fun MacrobenchmarkScope.tap(selector: BySelector, timeoutMs: Long = 5_000) {
+        repeat(3) {
+            try {
+                device.wait(Until.findObject(selector), timeoutMs)?.click() ?: return
+                device.waitForIdle()
+                return
+            } catch (_: StaleObjectException) {
+                device.waitForIdle()
+            }
+        }
+    }
+
     @Test
     fun generate() = rule.collect(packageName = "com.bestrong", includeInStartupProfile = true) {
         pressHome()
         startActivityAndWait()
-        val empty = text("Entrenamiento vacío", "Empty workout")
-        device.wait(Until.hasObject(empty), 10_000)
 
         // Entreno: vacío → añadir ejercicio
-        device.findObject(empty)?.click()
-        val addExercises = text("Añadir ejercicios", "Add exercises")
-        device.wait(Until.hasObject(addExercises), 5_000)
-        device.findObject(addExercises)?.click()
-        val bench = text("Press banca", "Bench Press")
-        device.wait(Until.hasObject(bench), 5_000)
-        device.findObject(bench)?.click()
-        device.findObject(By.text(Pattern.compile("(Añadir|Add) 1")))?.click()
-        device.waitForIdle()
+        tap(text("Entrenamiento vacío", "Empty workout"), 10_000)
+        tap(text("Añadir ejercicios", "Add exercises"))
+        tap(text("Press banca", "Bench Press"))
+        tap(By.text(Pattern.compile("(Añadir|Add) 1")))
         device.pressBack()
         device.waitForIdle()
 
         // Pestañas principales
-        listOf(
-            text("Historial", "History"),
-            text("Ejercicios", "Exercises"),
-            text("Perfil", "Profile"),
-            text("Entrenar", "Train"),
-        ).forEach { tab ->
-            device.findObject(tab)?.click()
-            device.waitForIdle()
+        tap(text("Historial", "History"))
+        tap(text("Ejercicios", "Exercises"))
+        repeat(2) {
+            try {
+                device.findObject(By.scrollable(true))?.let { list ->
+                    list.setGestureMargin(device.displayWidth / 5)
+                    list.fling(Direction.DOWN)
+                }
+                device.waitForIdle()
+            } catch (_: StaleObjectException) {
+                device.waitForIdle()
+            }
         }
-        device.findObject(text("Ejercicios", "Exercises"))?.click()
-        device.waitForIdle()
-        device.findObject(By.scrollable(true))?.let { list ->
-            list.setGestureMargin(device.displayWidth / 5)
-            list.fling(Direction.DOWN)
-            device.waitForIdle()
-        }
+        tap(text("Perfil", "Profile"))
+        tap(text("Entrenar", "Train"))
     }
 }
