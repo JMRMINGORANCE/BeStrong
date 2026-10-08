@@ -1,0 +1,27 @@
+name: Exercise media
+
+# Cruza la biblioteca con las imágenes abiertas de wger.de y publica el resultado
+# (exercise_media.json + informe) en la rama "exercise-media" para revisarlo antes de usarlo.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  media:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generar exercise_media.json
+        run: python3 tools/wger_media.py | tee media.log
+      - name: Publicar en la rama "exercise-media"
+        run: |
+          mkdir -p out
+          cp mobile/src/main/assets/exercise_media.json build/exercise_media_report.txt media.log out/
+          cd out
+          git init -q -b exercise-media
+          git add -A
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Imágenes de wger para ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" exercise-media
