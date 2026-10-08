@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -41,6 +44,17 @@ jobs:
             mobile/build/outputs/roborazzi/
             mobile/build/reports/tests/
           retention-days: 14
+
+      - name: Publicar capturas en la rama "capturas"
+        if: always() && github.ref == 'refs/heads/main'
+        run: |
+          if [ -d mobile/build/outputs/roborazzi ] && [ -n "$(ls -A mobile/build/outputs/roborazzi)" ]; then
+            cd mobile/build/outputs/roborazzi
+            git init -q -b capturas
+            git add -A
+            git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -q -m "Capturas de ${GITHUB_SHA::7}"
+            git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" capturas
+          fi
 
       - name: Lint
         run: ./gradlew --continue :mobile:lintDebug :wear:lintDebug
