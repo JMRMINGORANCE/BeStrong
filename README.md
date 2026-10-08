@@ -64,7 +64,10 @@ el estado al plegar/desplegar.
 | `mobile` | Jetpack Compose + Material 3 adaptativo, Room, Navigation, Health Connect, Data Layer. |
 | `wear` | Compose for Wear OS, Health Services, Tiles (ProtoLayout), Complications, Ongoing Activity, Data Layer. |
 
-Sin frameworks de DI: un `AppContainer` / `WearContainer` manual.
+- **Hilt** para la inyección de dependencias en móvil y reloj (ViewModels `@HiltViewModel`, servicios `@AndroidEntryPoint`, widget vía `EntryPoint`).
+- **Wear Compose Material 3** en el reloj (`AppScaffold`, `ScreenScaffold`, `EdgeButton`, `SwitchButton`).
+- **Idiomas**: español e inglés (`values/` y `values-en/`), incluidos nombres y técnica de los ejercicios.
+- **Baseline Profiles** (`:baselineprofile`): el workflow *Baseline Profile* los genera en un emulador y los publica en la rama `baseline-profile`.
 
 ## Compilar
 
@@ -98,6 +101,5 @@ keyPassword=...
 y ejecuta `./gradlew :mobile:bundleRelease :wear:bundleRelease`. La política de privacidad está en la app
 (Perfil › Privacidad), requisito de Health Connect.
 
-## Pendiente (necesita cuentas o servicios externos)
-- Cuenta, copia en la nube y parte social: hay que elegir backend (Firebase o Supabase).
-- Informes de errores (Crashlytics): necesita un proyecto de Firebase con `google-services.json`.
+## Pendiente
+- Firebase: cuenta, copia en la nube, parte social e informes de errores (Crashlytics).
