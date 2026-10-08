@@ -53,13 +53,36 @@ jobs:
             -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR,DEBUGGABLE \
             2>&1 | tee smoke.log
 
+      - name: Medir arranque (Macrobenchmark)
+        id: startup
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          git fetch -q origin baseline-profile && git show origin/baseline-profile:startup.json > /tmp/previous-startup.json 2>/dev/null || true
+          ./gradlew :baselineprofile:pixel6Api34BenchmarkReleaseAndroidTest \
+            -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect \
+            -Pandroid.testInstrumentationRunnerArguments.class=com.bestrong.baselineprofile.StartupBenchmark \
+            -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR,DEBUGGABLE \
+            2>&1 | tee startup.log
+          mkdir -p /tmp/bp
+          python3 tools/startup_check.py /tmp/previous-startup.json | tee -a startup.log
+
       - name: Publicar resultado en la rama baseline-profile
         if: always()
         run: |
           mkdir -p /tmp/bp
           tail -n 400 bp.log > /tmp/bp/log.txt || true
           tail -n 300 smoke.log > /tmp/bp/smoke-log.txt || true
+          tail -n 120 startup.log > /tmp/bp/startup-log.txt || true
+          echo "${{ steps.startup.outcome }}" > /tmp/bp/startup-outcome.txt
+          [ -f /tmp/bp/startup.json ] || cp /tmp/previous-startup.json /tmp/bp/startup.json 2>/dev/null || true
           echo "${{ steps.smoke.outcome }}" > /tmp/bp/smoke-outcome.txt
+          # Errores de la app en el emulador (crashes por R8, etc.)
+          find baselineprofile/build mobile/build -name 'logcat*.txt' -path '*managedDevice*' 2>/dev/null | while read f; do
+            grep -n -A40 "FATAL EXCEPTION\|AndroidRuntime" "$f" | head -200 >> /tmp/bp/crashes.txt || true
+          done
+          grep -h "No apareció\|no apareció\|paquete=" smoke.log >> /tmp/bp/smoke-screen.txt 2>/dev/null || true
+          find baselineprofile/build -name '*.xml' -path '*test-results*' -exec cp {} /tmp/bp/ \; 2>/dev/null || true
           find mobile/src -path '*generated/baselineProfiles*' -name '*.txt' -exec cp {} /tmp/bp/ \; || true
           find baselineprofile/build -name '*.txt' -path '*managed_device*' -exec cp {} /tmp/bp/ \; 2>/dev/null || true
           echo "${{ steps.generate.outcome }}" > /tmp/bp/outcome.txt
@@ -70,7 +93,7 @@ jobs:
           git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" baseline-profile
 
       - name: Fallar si no se generó
-        if: steps.generate.outcome != 'success' || steps.smoke.outcome != 'success'
+        if: steps.generate.outcome != 'success' || steps.smoke.outcome != 'success' || steps.startup.outcome != 'success'
         run: exit 1
 
       - uses: actions/upload-artifact@v4

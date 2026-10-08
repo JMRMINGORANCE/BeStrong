@@ -95,4 +95,10 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
 }
 
-kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        // Anotaciones de Hilt en parámetros del constructor: aplicarlas también a la propiedad (KT-73255)
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+}

@@ -56,6 +56,8 @@ jobs:
           cp mobile/build/test-results/testDebugUnitTest/*.xml mobile/build/outputs/roborazzi/test-results/ 2>/dev/null || true
           cp wear/build/test-results/testDebugUnitTest/*.xml mobile/build/outputs/roborazzi/test-results/ 2>/dev/null || true
           cp wear/build/outputs/roborazzi/*.png mobile/build/outputs/roborazzi/ 2>/dev/null || true
+          # Esquema de Room exportado (hay que versionarlo para probar futuras migraciones)
+          cp -r mobile/schemas mobile/build/outputs/roborazzi/schemas 2>/dev/null || true
           if [ -n "$(ls -A mobile/build/outputs/roborazzi)" ]; then
             cd mobile/build/outputs/roborazzi
             git init -q -b capturas

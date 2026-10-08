@@ -35,10 +35,17 @@ class ReleaseSmokeTest {
     ) {
         pressHome()
         startActivityAndWait()
-        fun tap(selector: androidx.test.uiautomator.BySelector) {
+        // Qué hay en pantalla (para saber si la app se cerró o si falta un botón)
+        fun screen(): String {
+            val texts = runCatching { device.findObjects(By.text(Pattern.compile(".+"))).mapNotNull { it.text } }.getOrDefault(emptyList())
+            return "paquete=${device.currentPackageName} textos=$texts"
+        }
+        fun tap(selector: androidx.test.uiautomator.BySelector, what: String) {
             repeat(3) {
                 try {
-                    device.wait(Until.findObject(selector), 10_000)?.click()
+                    val obj = device.wait(Until.findObject(selector), 10_000)
+                        ?: throw AssertionError("No apareció «$what». ${screen()}")
+                    obj.click()
                     device.waitForIdle()
                     return
                 } catch (_: StaleObjectException) {
@@ -46,11 +53,11 @@ class ReleaseSmokeTest {
                 }
             }
         }
-        tap(text("Entrenamiento vacío", "Empty workout"))
-        tap(text("Añadir ejercicios", "Add exercises"))
-        tap(text("Press banca", "Bench Press"))
-        tap(By.text(Pattern.compile("(Añadir|Add) 1")))
+        tap(text("Entrenamiento vacío", "Empty workout"), "Entrenamiento vacío")
+        tap(text("Añadir ejercicios", "Add exercises"), "Añadir ejercicios")
+        tap(text("Press banca", "Bench Press"), "Press banca")
+        tap(By.text(Pattern.compile("(Añadir|Add) 1")), "Añadir 1")
         val ok = device.wait(Until.hasObject(text("Terminar", "Finish")), 10_000)
-        assertTrue("La pantalla de entreno no apareció en la build minificada", ok)
+        assertTrue("La pantalla de entreno no apareció en la build minificada. ${screen()}", ok)
     }
 }
