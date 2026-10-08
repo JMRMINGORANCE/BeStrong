@@ -58,7 +58,7 @@ import com.bestrong.mobile.ui.components.EmptyState
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
-    val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     NavigableListDetailPaneScaffold(
         navigator = navigator,
         listPane = {
@@ -66,7 +66,7 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
                 ExerciseSearchList(
                     vm = vm,
                     title = "Ejercicios",
-                    selected = setOfNotNull(navigator.currentDestination?.contentKey),
+                    selected = setOfNotNull((navigator.currentDestination?.content as? String)),
                     multiSelect = false,
                     onClick = { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, it.id) },
                 )
@@ -74,7 +74,7 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
         },
         detailPane = {
             AnimatedPane {
-                val id = navigator.currentDestination?.contentKey
+                val id = (navigator.currentDestination?.content as? String)
                 if (id == null) EmptyState(Icons.Default.Search, "Elige un ejercicio", "Verás tu progreso, récords e historial.")
                 else ExerciseDetailScreen(vm, id, onBack = if (navigator.canNavigateBack()) ({ navigator.navigateBack() }) else null)
             }

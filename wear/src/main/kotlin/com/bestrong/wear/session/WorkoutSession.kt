@@ -1,7 +1,9 @@
 package com.bestrong.wear.session
 
 import android.content.Context
+import android.os.Build
 import android.os.VibrationEffect
+import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.content.ContextCompat
 import com.bestrong.core.model.Exercise
@@ -241,8 +243,12 @@ class WorkoutSession(
     }
 
     private fun haptic(pattern: LongArray) {
-        val vm = ContextCompat.getSystemService(context, VibratorManager::class.java) ?: return
-        vm.defaultVibrator.vibrate(VibrationEffect.createWaveform(pattern, -1))
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ContextCompat.getSystemService(context, VibratorManager::class.java)?.defaultVibrator
+        } else {
+            ContextCompat.getSystemService(context, Vibrator::class.java)
+        }
+        vibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
     }
 
     // --- Métricas (llamado desde ExerciseService) --------------------------------------------

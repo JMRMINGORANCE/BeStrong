@@ -56,7 +56,7 @@ import com.bestrong.mobile.ui.workout.describeSet
 fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     val history by vm.history.collectAsStateWithLifecycle()
     val days by vm.trainingDays.collectAsStateWithLifecycle()
-    val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
 
     NavigableListDetailPaneScaffold(
         navigator = navigator,
@@ -79,7 +79,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
         },
         detailPane = {
             AnimatedPane {
-                val id = navigator.currentDestination?.contentKey
+                val id = (navigator.currentDestination?.content as? String)
                 val w = history.firstOrNull { it.id == id }
                 if (w == null) {
                     EmptyState(Icons.Default.FitnessCenter, "Elige un entrenamiento", "Verás todas las series, récords y estadísticas.")

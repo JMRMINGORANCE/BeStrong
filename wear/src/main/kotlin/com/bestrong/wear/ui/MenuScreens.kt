@@ -83,11 +83,12 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
 @Composable
 fun ExercisePickerScreen(container: WearContainer, onPick: (com.bestrong.core.model.Exercise) -> Unit) {
     val history by container.store.history.collectAsStateWithLifecycle()
+    val routines by container.store.routines.collectAsStateWithLifecycle()
     var muscle by remember { mutableStateOf<MuscleGroup?>(null) }
     val listState = rememberScalingLazyListState()
     // Ejercicios personalizados del móvil llegan dentro del historial/rutinas
     val known = (ExerciseLibrary.all +
-        container.store.routines.value.flatMap { r -> r.exercises.map { it.exercise } } +
+        routines.flatMap { r -> r.exercises.map { it.exercise } } +
         history.flatMap { w -> w.exercises.map { it.exercise } }).distinctBy { it.id }
     val recent = history.flatMap { w -> w.exercises.map { it.exercise } }.distinctBy { it.id }.take(6)
 

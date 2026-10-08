@@ -1,6 +1,8 @@
 package com.bestrong.mobile.ui.workout
 
+import android.os.Build
 import android.os.VibrationEffect
+import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -99,8 +101,13 @@ class ActiveWorkoutViewModel(private val container: AppContainer) : ViewModel() 
     }
 
     private fun vibrate() {
-        val vm = container.context.getSystemService(VibratorManager::class.java) ?: return
-        vm.defaultVibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 250, 150, 250), -1))
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            container.context.getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            container.context.getSystemService(Vibrator::class.java)
+        }
+        vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 250, 150, 250), -1))
     }
 
     fun finish() {
