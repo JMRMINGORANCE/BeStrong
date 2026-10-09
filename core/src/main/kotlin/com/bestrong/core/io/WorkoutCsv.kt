@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
 
-enum class CsvFormat(val label: String) { BESTRONG("BeStrong"), HEVY("Hevy"), STRONG("Strong") }
+enum class CsvFormat(val label: String) { BESTRONG("BeStrong"), HEVY("Hevy"), STRONG("Strong"), FITNOTES("FitNotes"), JEFIT("JEFIT") }
 
 data class ImportResult(
     val format: CsvFormat,
@@ -76,12 +76,16 @@ object WorkoutCsv {
     ): ImportResult {
         val rows = Csv.parse(text)
         if (rows.isEmpty()) throw CsvImportException("El archivo está vacío")
+        // JEFIT exporta varias tablas; la de registros tiene las columnas «ename» y «logs»
+        val jefitHeader = rows.indexOfFirst { r -> r.map { it.trim().lowercase() }.let { "ename" in it && "logs" in it } }
+        if (jefitHeader >= 0) return importJefit(rows.drop(jefitHeader), known, zone, strongUnit)
         val header = rows.first().map { it.trim().lowercase() }
         val format = when {
             "workout_id" in header && "exercise_id" in header -> CsvFormat.BESTRONG
             "exercise_title" in header && "start_time" in header -> CsvFormat.HEVY
             "exercise name" in header && "workout name" in header -> CsvFormat.STRONG
-            else -> throw CsvImportException("Formato no reconocido. Se admiten CSV de BeStrong, Hevy y Strong.")
+            "exercise" in header && "category" in header && "date" in header -> CsvFormat.FITNOTES
+            else -> throw CsvImportException("Formato no reconocido. Se admiten CSV de BeStrong, Hevy, Strong, FitNotes y JEFIT.")
         }
         val col = header.withIndex().associate { (i, h) -> h to i }
         fun List<String>.get(name: String): String = col[name]?.let { getOrNull(it) }?.trim().orEmpty()
@@ -137,6 +141,26 @@ object WorkoutCsv {
                             ),
                         )
                     }
+                    CsvFormat.FITNOTES -> {
+                        // FitNotes: una fila por serie; el entreno es el día
+                        val date = r.get("date")
+                        val start = parseDay(date, zone)
+                        val ex = resolver.resolve(r.get("exercise"))
+                        val lbs = r.get("weight unit").lowercase().startsWith("lb") || col.containsKey("weight (lbs)")
+                        val w = (r.get("weight").ifBlank { r.get("weight (kgs)") }.ifBlank { r.get("weight (lbs)") }).replace(',', '.').toDoubleOrNull() ?: 0.0
+                        Row(
+                            key = date, name = "FitNotes $date", start = start, end = null,
+                            notes = "", exercise = ex, exNotes = r.get("comment"), superset = null,
+                            set = WorkoutSet(
+                                weightKg = if (lbs) WeightUnit.LB.toKg(w) else w,
+                                reps = r.get("reps").toDoubleOrNull()?.toInt() ?: 0,
+                                durationSec = parseClock(r.get("time")),
+                                distanceM = r.get("distance").replace(',', '.').toDoubleOrNull()?.let { d -> if (r.get("distance unit").lowercase().startsWith("km")) d * 1000 else d } ?: 0.0,
+                                completed = true,
+                            ),
+                        )
+                    }
+                    CsvFormat.JEFIT -> error("JEFIT se importa aparte")
                     CsvFormat.STRONG -> {
                         val start = parseStrong(r.get("date"), zone)
                         val ex = resolver.resolve(r.get("exercise name"))
@@ -188,6 +212,56 @@ object WorkoutCsv {
         }.sortedByDescending { it.startedAtEpochMs }
 
         return ImportResult(format, workouts, resolver.created, skipped)
+    }
+
+    /** JEFIT: cada fila es un ejercicio de un día con «logs» = «100x5,100x5,90x8». */
+    private fun importJefit(rows: List<List<String>>, known: List<Exercise>, zone: ZoneId, unit: WeightUnit): ImportResult {
+        val header = rows.first().map { it.trim().lowercase() }
+        val col = header.withIndex().associate { (i, h) -> h to i }
+        fun List<String>.get(name: String): String = col[name]?.let { getOrNull(it) }?.trim().orEmpty()
+        val resolver = ExerciseResolver(known)
+        var skipped = 0
+        val byDay = linkedMapOf<String, MutableList<WorkoutExercise>>()
+        rows.drop(1).forEach { r ->
+            // Fin de la tabla de registros: empieza otra sección
+            if (r.firstOrNull()?.startsWith("#") == true) return@forEach
+            val date = r.get("mydate")
+            val name = r.get("ename")
+            val logs = r.get("logs")
+            if (date.isBlank() || name.isBlank() || logs.isBlank()) {
+                skipped++
+                return@forEach
+            }
+            val sets = logs.split(',').mapNotNull { entry ->
+                val parts = entry.trim().lowercase().split('x')
+                val w = parts.getOrNull(0)?.toDoubleOrNull() ?: return@mapNotNull null
+                val reps = parts.getOrNull(1)?.toDoubleOrNull()?.toInt() ?: return@mapNotNull null
+                WorkoutSet(weightKg = unit.toKg(w), reps = reps, completed = true)
+            }
+            if (sets.isEmpty()) {
+                skipped++
+                return@forEach
+            }
+            byDay.getOrPut(date) { mutableListOf() } += WorkoutExercise(exercise = resolver.resolve(name), sets = sets)
+        }
+        val workouts = byDay.mapNotNull { (date, exercises) ->
+            val start = runCatching { parseDay(date, zone) }.getOrNull() ?: return@mapNotNull null
+            Workout(name = "JEFIT $date", startedAtEpochMs = start, finishedAtEpochMs = start + 3_600_000L, updatedAtEpochMs = start + 3_600_000L, exercises = exercises)
+        }.sortedByDescending { it.startedAtEpochMs }
+        return ImportResult(CsvFormat.JEFIT, workouts, resolver.created, skipped)
+    }
+
+    private fun parseDay(s: String, zone: ZoneId): Long {
+        val d = s.trim().take(10)
+        return java.time.LocalDate.parse(d).atTime(18, 0).atZone(zone).toInstant().toEpochMilli()
+    }
+
+    /** «0:01:30» o «90» → segundos. */
+    private fun parseClock(s: String): Int {
+        if (s.isBlank()) return 0
+        s.toIntOrNull()?.let { return it }
+        val p = s.split(':').mapNotNull { it.trim().toIntOrNull() }
+        return p.fold(0) { acc, v -> acc * 60 + v }
     }
 
     private fun parseIso(s: String, zone: ZoneId): Long =

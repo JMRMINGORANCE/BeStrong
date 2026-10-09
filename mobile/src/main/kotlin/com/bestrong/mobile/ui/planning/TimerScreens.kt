@@ -56,11 +56,16 @@ object IntervalRoute {
         is IntervalPlan.Hiit -> "hiit:${p.workSec}:${p.restSec}:${p.rounds}"
         is IntervalPlan.Emom -> "emom:${p.minutes}"
         is IntervalPlan.Amrap -> "amrap:${p.minutes}"
+        is IntervalPlan.Circuit -> "circuit:${p.workSec}:${p.restSec}:${p.rounds}:" + android.net.Uri.encode(p.stations.joinToString("|"))
     }
 
     fun decode(s: String): IntervalPlan {
         val parts = s.split(":")
         val n = parts.drop(1).map { it.toIntOrNull() ?: 1 }
+        if (parts.firstOrNull() == "circuit") {
+            val stations = android.net.Uri.decode(parts.getOrNull(4).orEmpty()).split('|').filter { it.isNotBlank() }
+            return IntervalPlan.Circuit(stations.ifEmpty { listOf("1") }, n.getOrElse(0) { 40 }, n.getOrElse(1) { 20 }, n.getOrElse(2) { 3 })
+        }
         return when (parts.firstOrNull()) {
             "emom" -> IntervalPlan.Emom(n.getOrElse(0) { 10 })
             "amrap" -> IntervalPlan.Amrap(n.getOrElse(0) { 10 })
@@ -136,6 +141,11 @@ fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -> Unit) {
                 }
                 val (phase, left) = current
                 Text(stringResource(if (phase.work) R.string.timer_work else R.string.timer_rest), style = MaterialTheme.typography.headlineMedium)
+                // Circuito: estación actual (y la siguiente durante el cambio)
+                (plan as? IntervalPlan.Circuit)?.let { c ->
+                    val station = if (phase.work) c.stations[phase.station] else c.stations.getOrElse(phase.station + 1) { c.stations.first() }
+                    Text(station, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                }
                 Text(formatDuration(left.toLong()), fontSize = 96.sp, fontWeight = FontWeight.Bold)
                 val rounds = phases.maxOf { it.round }
                 if (rounds > 1) Text(stringResource(R.string.timer_round, phase.round, rounds), style = MaterialTheme.typography.titleMedium)

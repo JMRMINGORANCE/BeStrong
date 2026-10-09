@@ -293,7 +293,7 @@ object Calisthenics {
 // --- Temporizadores de intervalos y sesiones guiadas ------------------------------------------
 
 /** Fase de un temporizador: trabajo o descanso con su duración. */
-data class TimerPhase(val work: Boolean, val seconds: Int, val round: Int)
+data class TimerPhase(val work: Boolean, val seconds: Int, val round: Int, val station: Int = 0)
 
 sealed interface IntervalPlan {
     /** HIIT / Tabata: [rounds] × ([workSec] trabajo + [restSec] descanso). */
@@ -304,6 +304,9 @@ sealed interface IntervalPlan {
 
     /** AMRAP: tantas rondas como puedas en [minutes] minutos. */
     data class Amrap(val minutes: Int) : IntervalPlan
+
+    /** Circuito (modo clase): cada estación [workSec] con [restSec] de cambio, [rounds] vueltas. */
+    data class Circuit(val stations: List<String>, val workSec: Int, val restSec: Int, val rounds: Int) : IntervalPlan
 }
 
 object IntervalTimer {
@@ -315,6 +318,12 @@ object IntervalTimer {
         }
         is IntervalPlan.Emom -> (1..plan.minutes).map { TimerPhase(true, 60, it) }
         is IntervalPlan.Amrap -> listOf(TimerPhase(true, plan.minutes * 60, 1))
+        is IntervalPlan.Circuit -> (1..plan.rounds).flatMap { r ->
+            plan.stations.indices.flatMap { i ->
+                val last = r == plan.rounds && i == plan.stations.lastIndex
+                listOfNotNull(TimerPhase(true, plan.workSec, r, i), TimerPhase(false, plan.restSec, r, i).takeIf { !last && plan.restSec > 0 })
+            }
+        }
     }
 
     fun totalSeconds(plan: IntervalPlan): Int = phases(plan).sumOf { it.seconds }
