@@ -1,0 +1,140 @@
+EDB exacto    ab_wheel                     Ab Wheel Rollout  ->  wheel rollout
+EDB exacto    arnold_press                 Arnold Press  ->  dumbbell arnold press
+EDB exacto    barbell_curl                 Barbell Curl  ->  barbell curl
+EDB exacto    barbell_row                  Barbell Row  ->  barbell bent over row
+EDB exacto    bench_press                  Bench Press  ->  barbell bench press
+EDB exacto    bulgarian_split_squat        Bulgarian Split Squat  ->  dumbbell single leg split squat
+EDB exacto    burpee                       Burpee  ->  burpee
+EDB exacto    cable_crossover              Cable Crossover  ->  cable standing fly
+EDB SIN GIF  cable_crunch                 Cable Crunch
+EDB exacto    cable_curl                   Cable Curl  ->  cable curl
+EDB exacto    cable_lateral_raise          Cable Lateral Raise  ->  cable lateral raise
+EDB exacto    chin_up                      Chin-Up  ->  chin-up
+EDB SIN GIF  clean_and_press              Clean and Press
+EDB SIN GIF  close_grip_bench             Close-Grip Bench Press
+EDB exacto    crunch                       Crunch  ->  crunch floor
+EDB exacto    db_bench_press               Dumbbell Bench Press  ->  dumbbell bench press
+EDB exacto    db_curl                      Dumbbell Curl  ->  dumbbell biceps curl
+EDB exacto    db_fly                       Dumbbell Fly  ->  dumbbell fly
+EDB exacto    db_incline_press             Incline Dumbbell Press  ->  Dumbbell Incline Bench Press
+EDB exacto    db_row                       Dumbbell Row  ->  dumbbell bent over row
+EDB SIN GIF  db_shoulder_press            Dumbbell Shoulder Press
+EDB exacto    deadlift                     Deadlift  ->  barbell deadlift
+EDB exacto    decline_bench_press          Decline Bench Press  ->  barbell decline bench press
+EDB exacto    dips                         Dips  ->  chest dip
+EDB exacto    face_pull                    Face Pull  ->  cable rear delt row (with rope)
+EDB exacto    farmers_walk                 Farmer's Walk  ->  farmers walk
+EDB SIN GIF  front_raise                  Front Raise
+EDB exacto    front_squat                  Front Squat  ->  barbell front squat
+EDB SIN GIF  glute_kickback               Cable Glute Kickback
+EDB exacto    goblet_squat                 Goblet Squat  ->  dumbbell goblet squat
+EDB SIN GIF  hack_squat                   Hack Squat
+EDB exacto    hammer_curl                  Hammer Curl  ->  dumbbell hammer curl
+EDB exacto    hanging_leg_raise            Hanging Leg Raise  ->  hanging leg raise
+EDB SIN GIF  hip_abduction                Hip Abduction
+EDB exacto    hip_thrust                   Hip Thrust  ->  barbell glute bridge
+EDB SIN GIF  hyperextension               Back Extension
+EDB exacto    incline_bench_press          Incline Bench Press  ->  barbell incline bench press
+EDB SIN GIF  incline_db_curl              Incline Dumbbell Curl
+EDB exacto    kb_swing                     Kettlebell Swing  ->  kettlebell swing
+EDB exacto    lat_pulldown                 Lat Pulldown  ->  cable pulldown
+EDB exacto    lateral_raise                Lateral Raise  ->  dumbbell lateral raise
+EDB SIN GIF  leg_curl                     Lying Leg Curl
+EDB SIN GIF  leg_extension                Leg Extension
+EDB exacto    leg_press                    Leg Press  ->  sled 45° leg press
+EDB exacto    lunge                        Lunge  ->  dumbbell lunge
+EDB exacto    machine_chest_press          Machine Chest Press  ->  Machine Chest Press
+EDB exacto    overhead_press               Overhead Press  ->  barbell seated overhead press
+EDB SIN GIF  overhead_triceps_ext         Overhead Triceps Extension
+EDB SIN GIF  pec_deck                     Pec Deck
+EDB SIN GIF  pendlay_row                  Pendlay Row
+EDB SIN GIF  plank                        Plank
+EDB exacto    preacher_curl                Preacher Curl  ->  barbell preacher curl
+EDB exacto    pull_up                      Pull-Up  ->  pull-up
+EDB exacto    push_up                      Push-Up  ->  push-up
+EDB exacto    rear_delt_fly                Rear Delt Fly  ->  dumbbell rear fly
+EDB exacto    romanian_deadlift            Romanian Deadlift  ->  barbell romanian deadlift
+EDB exacto    russian_twist                Russian Twist  ->  russian twist
+EDB exacto    seated_cable_row             Seated Cable Row  ->  cable seated row
+EDB SIN GIF  seated_calf_raise            Seated Calf Raise
+EDB SIN GIF  seated_leg_curl              Seated Leg Curl
+EDB exacto    shrug                        Shrug  ->  barbell shrug
+EDB exacto    skull_crusher                Skull Crusher  ->  barbell lying triceps extension skull crusher
+EDB SIN GIF  smith_squat                  Smith Machine Squat
+EDB exacto    squat                        Squat  ->  Barbell Full Squat
+EDB exacto    standing_calf_raise          Standing Calf Raise  ->  barbell standing calf raise
+EDB SIN GIF  straight_arm_pulldown        Straight-Arm Pulldown
+EDB SIN GIF  t_bar_row                    T-Bar Row
+EDB exacto    triceps_pushdown             Triceps Pushdown  ->  cable pushdown
+EDB exacto    upright_row                  Upright Row  ->  barbell upright row
+EDB SIN GIF  wrist_curl                   Wrist Curl
+SIN IMAGEN  ab_wheel                     Ab Wheel Rollout
+SIN IMAGEN  arnold_press                 Arnold Press
+exacto      barbell_curl                 Barbell Curl  ->  Biceps Curls With Barbell
+exacto      barbell_row                  Barbell Row  ->  Bent Over Rowing
+exacto      bench_press                  Bench Press  ->  Bench Press
+parecido    bulgarian_split_squat        Bulgarian Split Squat  ->  Bulgarian split squats left
+SIN IMAGEN  burpee                       Burpee
+parecido    cable_crossover              Cable Crossover  ->  Cable Cross-over
+SIN IMAGEN  cable_crunch                 Cable Crunch
+SIN IMAGEN  cable_curl                   Cable Curl
+exacto      cable_lateral_raise          Cable Lateral Raise  ->  Cable Lateral Raises (Single Arm)
+exacto      chin_up                      Chin-Up  ->  Chin Up
+exacto      clean_and_press              Clean and Press  ->  Clean and Press
+exacto      close_grip_bench             Close-Grip Bench Press  ->  Bench Press Narrow Grip
+exacto      crunch                       Crunch  ->  Crunches
+SIN IMAGEN  db_bench_press               Dumbbell Bench Press
+exacto      db_curl                      Dumbbell Curl  ->  Biceps Curls With Dumbbell
+exacto      db_fly                       Dumbbell Fly  ->  Fly With Dumbbells
+SIN IMAGEN  db_incline_press             Incline Dumbbell Press
+exacto      db_row                       Dumbbell Row  ->  Bent Over Dumbbell Rows (Single Arm)
+exacto      db_shoulder_press            Dumbbell Shoulder Press  ->  Shoulder Press, Dumbbells
+exacto      deadlift                     Deadlift  ->  Deadlifts
+SIN IMAGEN  decline_bench_press          Decline Bench Press
+exacto      dips                         Dips  ->  Dips
+SIN IMAGEN  face_pull                    Face Pull
+SIN IMAGEN  farmers_walk                 Farmer's Walk
+exacto      front_raise                  Front Raise  ->  Front Raises
+exacto      front_squat                  Front Squat  ->  Front Squats
+SIN IMAGEN  glute_kickback               Cable Glute Kickback
+SIN IMAGEN  goblet_squat                 Goblet Squat
+SIN IMAGEN  hack_squat                   Hack Squat
+exacto      hammer_curl                  Hammer Curl  ->  Hammer Curls
+SIN IMAGEN  hanging_leg_raise            Hanging Leg Raise
+SIN IMAGEN  hip_abduction                Hip Abduction
+SIN IMAGEN  hip_thrust                   Hip Thrust
+parecido    hyperextension               Back Extension  ->  Back extensión
+parecido    incline_bench_press          Incline Bench Press  ->  Incline Bench Press - MP
+SIN IMAGEN  incline_db_curl              Incline Dumbbell Curl
+exacto      kb_swing                     Kettlebell Swing  ->  Kettlebell Swing
+SIN IMAGEN  lat_pulldown                 Lat Pulldown
+exacto      lateral_raise                Lateral Raise  ->  Lateral Raises
+exacto      leg_curl                     Lying Leg Curl  ->  Leg Curl
+exacto      leg_extension                Leg Extension  ->  Leg Extension
+exacto      leg_press                    Leg Press  ->  Leg Press
+exacto      lunge                        Lunge  ->  Lunges
+SIN IMAGEN  machine_chest_press          Machine Chest Press
+exacto      overhead_press               Overhead Press  ->  Shoulder Press, Barbell
+exacto      overhead_triceps_ext         Overhead Triceps Extension  ->  Overhead Triceps Extension
+SIN IMAGEN  pec_deck                     Pec Deck
+SIN IMAGEN  pendlay_row                  Pendlay Row
+exacto      plank                        Plank  ->  Plank
+exacto      preacher_curl                Preacher Curl  ->  Preacher Curls
+exacto      pull_up                      Pull-Up  ->  Pull-ups
+exacto      push_up                      Push-Up  ->  Push-Up
+SIN IMAGEN  rear_delt_fly                Rear Delt Fly
+exacto      romanian_deadlift            Romanian Deadlift  ->  Romanian Deadlift
+exacto      russian_twist                Russian Twist  ->  Russian Twist
+exacto      seated_cable_row             Seated Cable Row  ->  Seated Cable Row
+SIN IMAGEN  seated_calf_raise            Seated Calf Raise
+SIN IMAGEN  seated_leg_curl              Seated Leg Curl
+exacto      shrug                        Shrug  ->  Shrugs, Barbells
+SIN IMAGEN  skull_crusher                Skull Crusher
+exacto      smith_squat                  Smith Machine Squat  ->  Smith machine squat
+SIN IMAGEN  squat                        Squat
+exacto      standing_calf_raise          Standing Calf Raise  ->  Standing Calf Raises
+exacto      straight_arm_pulldown        Straight-Arm Pulldown  ->  Straight-Arm Pulldown (Cable)
+SIN IMAGEN  t_bar_row                    T-Bar Row
+exacto      triceps_pushdown             Triceps Pushdown  ->  Triceps Pushdown
+SIN IMAGEN  upright_row                  Upright Row
+SIN IMAGEN  wrist_curl                   Wrist Curl
