@@ -1,5 +1,6 @@
 package com.bestrong.baselineprofile
 
+import androidx.benchmark.Outputs
 import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.StartupTimingMetric
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
@@ -7,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.Until
+import java.io.File
 import java.util.regex.Pattern
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -41,6 +43,12 @@ class ReleaseSmokeTest {
         device.wait(Until.findObject(By.text(Pattern.compile("(?i)allow|permitir"))), 2_000)?.click()
         // Qué hay en pantalla (para saber si la app se cerró o si falta un botón)
         fun screen(): String {
+            // Captura y árbol de accesibilidad (con estado de casillas) para la CI
+            runCatching {
+                val dir = Outputs.outputDirectory
+                device.takeScreenshot(File(dir, "smoke-failure.png"))
+                device.dumpWindowHierarchy(File(dir, "smoke-failure.xml"))
+            }
             val texts = runCatching { device.findObjects(By.text(Pattern.compile(".+"))).mapNotNull { it.text } }.getOrDefault(emptyList())
             return "paquete=${device.currentPackageName} textos=$texts"
         }

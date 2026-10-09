@@ -83,6 +83,7 @@ jobs:
           done
           grep -h "No apareció\|no apareció\|paquete=" smoke.log >> /tmp/bp/smoke-screen.txt 2>/dev/null || true
           find baselineprofile/build -name '*.xml' -path '*test-results*' -exec cp {} /tmp/bp/ \; 2>/dev/null || true
+          find baselineprofile/build -name 'smoke-failure*' -exec cp {} /tmp/bp/ \; 2>/dev/null || true
           find mobile/src -path '*generated/baselineProfiles*' -name '*.txt' -exec cp {} /tmp/bp/ \; || true
           find baselineprofile/build -name '*.txt' -path '*managed_device*' -exec cp {} /tmp/bp/ \; 2>/dev/null || true
           echo "${{ steps.generate.outcome }}" > /tmp/bp/outcome.txt
