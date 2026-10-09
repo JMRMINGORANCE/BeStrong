@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -7,26 +8,33 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -164,39 +172,51 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
     }
 }
 
-/** Preparar un programa con progresión: training max de los ejercicios principales. */
+/**
+ * Preparar un programa con progresión: training max de los ejercicios principales.
+ * Pantalla completa (no diálogo): con el teclado abierto en la pantalla exterior del Fold
+ * un diálogo con cuatro campos no cabe.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProgramSetupDialog(program: PeriodizedProgram, suggested: (String) -> Double?, onConfirm: (Map<String, Double>) -> Unit, onDismiss: () -> Unit) {
+fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double?, onConfirm: (Map<String, Double>) -> Unit, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
     val values = remember(program.id) {
         mutableStateMapOf<String, String>().apply { program.mainLifts.forEach { id -> put(id, suggested(id)?.let { unit.format(it) }.orEmpty()) } }
     }
     val lang = uiLanguage()
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(program.name(lang)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(program.description(lang), style = MaterialTheme.typography.bodySmall)
-                Text(stringResource(R.string.program_tm_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                program.mainLifts.forEach { id ->
-                    val ex = ExerciseLibrary.byId(id) ?: return@forEach
-                    OutlinedTextField(
-                        value = values[id].orEmpty(),
-                        onValueChange = { values[id] = it },
-                        label = { Text(stringResource(R.string.program_tm_label, ex.displayName(), unit.label)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
-            }
+    BackHandler(onBack = onDismiss)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(program.name(lang), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                navigationIcon = { IconButton(onClick = onDismiss) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
+            )
         },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(values.mapNotNull { (id, v) -> unit.parseToKg(v)?.let { id to it } }.toMap()) }) {
-                Text(stringResource(R.string.program_start))
-            }
+        bottomBar = {
+            Button(
+                onClick = { onConfirm(values.mapNotNull { (id, v) -> unit.parseToKg(v)?.let { id to it } }.toMap()) },
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(16.dp),
+            ) { Text(stringResource(R.string.program_start)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
-    )
+    ) { padding ->
+        Column(
+            Modifier.padding(padding).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(program.description(lang), style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.program_tm_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            program.mainLifts.forEach { id ->
+                val ex = ExerciseLibrary.byId(id) ?: return@forEach
+                OutlinedTextField(
+                    value = values[id].orEmpty(),
+                    onValueChange = { values[id] = it },
+                    label = { Text(stringResource(R.string.program_tm_label, ex.displayName(), unit.label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+    }
 }

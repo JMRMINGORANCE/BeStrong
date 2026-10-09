@@ -80,7 +80,8 @@ fun HomeScreen(
     val week by vm.week.collectAsStateWithLifecycle()
     var setupProgram by remember { mutableStateOf<PeriodizedProgram?>(null) }
     setupProgram?.let { p ->
-        ProgramSetupDialog(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgram = null }, onDismiss = { setupProgram = null })
+        ProgramSetupScreen(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgram = null }, onDismiss = { setupProgram = null })
+        return
     }
     val snackbar = remember { SnackbarHostState() }
     var showPrograms by rememberSaveable { mutableStateOf(false) }

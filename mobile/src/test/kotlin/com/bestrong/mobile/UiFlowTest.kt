@@ -170,13 +170,10 @@ class UiFlowTest {
         settle()
         compose.onNodeWithText("5/3/1 Boring But Big").performClick()
         settle()
-        // Con un campo de texto enfocado el cursor parpadea sin fin: el reloj de pruebas debe avanzar solo
-        compose.mainClock.autoAdvance = true
         // TM del press militar; el resto se queda vacío
         compose.onNode(hasSetTextAction() and hasText("TM Press militar", substring = true)).performTextReplacement("60")
-        compose.mainClock.autoAdvance = false
         settle()
-        captureScreenRoboImage("build/outputs/roborazzi/program_setup_folded.png")
+        shot("program_setup_folded")
         compose.onNodeWithText("Empezar programa").performClick()
         settle(25)
         assertNotNull(compose.onNodeWithText("Hoy toca").fetchSemanticsNode())
