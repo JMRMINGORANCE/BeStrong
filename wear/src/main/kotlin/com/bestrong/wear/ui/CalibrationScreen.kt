@@ -34,13 +34,7 @@ fun CalibrationScreen(session: WorkoutSession, onDone: () -> Unit) {
         session.startCalibration()
         onDispose { if (result == null) session.finishCalibration() }
     }
-    ScreenScaffold(
-        edgeButton = {
-            EdgeButton(onClick = { if (result == null) result = session.finishCalibration() else onDone() }) {
-                Text(stringResource(if (result == null) R.string.calibrate_finish else R.string.done))
-            }
-        },
-    ) {
+    ScreenScaffold {
         Box(Modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, bottom = 48.dp), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(stringResource(R.string.calibrate), color = Brand, style = MaterialTheme.typography.titleMedium)
@@ -52,6 +46,12 @@ fun CalibrationScreen(session: WorkoutSession, onDone: () -> Unit) {
                     Text(stringResource(R.string.calibrate_done, "%.2f".format(r)), textAlign = TextAlign.Center)
                 }
             }
+        }
+        EdgeButton(
+            onClick = { if (result == null) result = session.finishCalibration() else onDone() },
+            modifier = Modifier.align(Alignment.BottomCenter),
+        ) {
+            Text(stringResource(if (result == null) R.string.calibrate_finish else R.string.done))
         }
     }
 }

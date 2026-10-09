@@ -25,6 +25,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -185,12 +188,12 @@ fun TouchLockOverlay(onUnlock: () -> Unit) {
 @Composable
 fun PartnerSwitch(vm: ActiveWorkoutViewModel, partnerName: String) {
     val partner by vm.partnerMode.collectAsStateWithLifecycle()
-    androidx.compose.material3.SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
         listOf(false to stringResource(R.string.partner_me), true to partnerName).forEachIndexed { i, (isPartner, label) ->
-            androidx.compose.material3.SegmentedButton(
+            SegmentedButton(
                 selected = partner == isPartner,
                 onClick = { vm.switchAthlete(isPartner) },
-                shape = androidx.compose.material3.SegmentedButtonDefaults.itemShape(i, 2),
+                shape = SegmentedButtonDefaults.itemShape(i, 2),
             ) { Text(label) }
         }
     }

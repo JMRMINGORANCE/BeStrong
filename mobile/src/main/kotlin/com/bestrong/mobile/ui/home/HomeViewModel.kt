@@ -21,6 +21,7 @@ import com.bestrong.mobile.AppSync
 import com.bestrong.mobile.R
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.Intake
 import com.bestrong.mobile.data.IntakeStore
 import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore

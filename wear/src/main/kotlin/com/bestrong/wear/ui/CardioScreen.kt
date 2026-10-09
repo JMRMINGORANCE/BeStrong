@@ -94,7 +94,7 @@ fun CardioScreen(cardio: CardioSession, onDone: () -> Unit) {
         else -> {
             var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
             LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(1_000) } }
-            ScreenScaffold(edgeButton = { EdgeButton(onClick = cardio::finish) { Text(stringResource(R.string.finish)) } }) {
+            ScreenScaffold {
                 Box(Modifier.fillMaxSize().padding(bottom = 48.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(cardioLabel(s.type), color = Brand, style = MaterialTheme.typography.labelMedium)
@@ -110,6 +110,7 @@ fun CardioScreen(cardio: CardioSession, onDone: () -> Unit) {
                         if (noGps) Text(stringResource(R.string.cardio_no_gps), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
                     }
                 }
+                EdgeButton(onClick = cardio::finish, modifier = Modifier.align(Alignment.BottomCenter)) { Text(stringResource(R.string.finish)) }
             }
         }
     }
