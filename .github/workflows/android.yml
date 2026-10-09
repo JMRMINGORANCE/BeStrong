@@ -73,7 +73,12 @@ jobs:
 
       - name: Lint
         if: success() || failure()
-        run: ./gradlew --continue :mobile:lintDebug :wear:lintDebug
+        run: |
+          ./gradlew --continue :mobile:lintDebug :wear:lintDebug || {
+            # Todos los errores en el registro (Gradle solo muestra el primero)
+            grep -h -A4 "Error:" */build/intermediates/lint_intermediate_text_report/debug/lintReportDebug/lint-results-debug.txt || true
+            exit 1
+          }
 
       - uses: actions/upload-artifact@v4
         with:

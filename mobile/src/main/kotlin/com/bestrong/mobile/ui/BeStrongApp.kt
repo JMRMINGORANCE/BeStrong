@@ -1,6 +1,7 @@
 package com.bestrong.mobile.ui
 
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -18,7 +19,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -150,7 +150,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 }
                 composable(Routes.WORKOUT) { backStackEntry ->
                     // Ligado a la Activity: el temporizador de descanso sigue al minimizar el entrenamiento
-                    val activity = LocalContext.current as ComponentActivity
+                    val activity = LocalActivity.current as ComponentActivity
                     val vm = hiltViewModel<ActiveWorkoutViewModel>(viewModelStoreOwner = activity)
                     val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
                     LaunchedEffect(picked) {
