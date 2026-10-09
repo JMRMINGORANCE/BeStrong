@@ -88,6 +88,32 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         get() = prefs.getBoolean(KEY_REP_COUNTER, false)
         set(value) = prefs.edit { putBoolean(KEY_REP_COUNTER, value) }
 
+    /** Modo bajo consumo: menos envíos al móvil y sin acelerómetro. */
+    var lowPower: Boolean
+        get() = prefs.getBoolean(KEY_LOW_POWER, false)
+        set(value) = prefs.edit { putBoolean(KEY_LOW_POWER, value) }
+
+    /** Pulso máximo para zonas y recuperación (por defecto 190; se ajusta en el menú). */
+    var maxHeartRate: Int
+        get() = prefs.getInt(KEY_MAX_HR, 190)
+        set(value) = prefs.edit { putInt(KEY_MAX_HR, value) }
+
+    /** Umbral calibrado del contador de repeticiones (m/s²). */
+    var repThreshold: Float
+        get() = prefs.getFloat(KEY_REP_THRESHOLD, 1.2f)
+        set(value) = prefs.edit { putFloat(KEY_REP_THRESHOLD, value) }
+
+    /** «Hoy toca»: la sesión del programa activo o la rutina que más tiempo lleva sin hacerse. */
+    fun todayRoutine(): Routine? {
+        val routines = _routines.value.filter { it.exercises.isNotEmpty() }
+        routines.firstOrNull { it.id.startsWith(com.bestrong.core.training.Periodization.ROUTINE_PREFIX) }?.let { return it }
+        val last = _history.value.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
+        return routines.minByOrNull { last[it.id] ?: 0L }
+    }
+
+    /** Rutina creada en el reloj: se guarda aquí y se envía al móvil. */
+    fun addRoutine(routine: Routine) = setRoutines(_routines.value.filterNot { it.id == routine.id } + routine)
+
     var activeWorkout: Workout?
         get() = prefs.getString(KEY_ACTIVE, null)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
         set(value) = prefs.edit {
@@ -102,6 +128,9 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_SETTINGS = "settings"
         const val KEY_REP_COUNTER = "rep_counter"
         const val KEY_STEM = "stem_action"
+        const val KEY_LOW_POWER = "low_power"
+        const val KEY_MAX_HR = "max_hr"
+        const val KEY_REP_THRESHOLD = "rep_threshold"
         const val MAX_LOCAL = 50
     }
 }

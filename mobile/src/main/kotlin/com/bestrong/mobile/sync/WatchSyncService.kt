@@ -26,6 +26,7 @@ import kotlinx.coroutines.tasks.await
  * Recibe del Galaxy Watch:
  * - entrenamientos terminados (se guardan en el historial),
  * - el entreno en curso (sincronización en vivo),
+ * - rutinas creadas en el reloj,
  * - métricas de pulso/calorías en directo.
  */
 @AndroidEntryPoint
@@ -61,6 +62,13 @@ class WatchSyncService : WearableListenerService() {
                         Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.name}")
                         runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
                         appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }
+                    }
+                    // Rutina creada en el reloj: se guarda y se borra el DataItem
+                    path.startsWith(SyncContract.PATH_WATCH_ROUTINE_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
+                        DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                            ?.let { runCatching { SyncContract.decodeRoutines(it) }.getOrNull() }
+                            ?.forEach { routine -> repository.saveRoutine(routine) }
+                        runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
                     }
                     path == SyncContract.PATH_ACTIVE_WORKOUT && isFromOtherNode(item.uri.host) -> {
                         if (event.type == DataEvent.TYPE_DELETED) {

@@ -74,6 +74,8 @@ fun WorkoutScreen(
     val target by session.rotaryTarget.collectAsStateWithLifecycle()
     val repCounting by session.repCounting.collectAsStateWithLifecycle()
     val countedReps by session.repCounter.reps.collectAsStateWithLifecycle()
+    val velocity by session.velocityInfo.collectAsStateWithLifecycle()
+    val voice = rememberVoiceInput(stringResource(R.string.voice_prompt)) { session.applySpoken(it) }
     val unit = LocalWeightUnit.current
     val focus = remember { FocusRequester() }
     var accumulated by remember { mutableFloatStateOf(0f) }
@@ -126,6 +128,9 @@ fun WorkoutScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(formatDuration(w.durationSeconds(now)), style = MaterialTheme.typography.labelSmall)
                     Text("♥ ${metrics.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.labelSmall)
+                    session.heartRateZone(metrics.heartRate).takeIf { it > 0 }?.let { z ->
+                        Text(stringResource(R.string.hr_zone, z), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    }
                     metrics.calories?.let { Text(stringResource(R.string.kcal, it), style = MaterialTheme.typography.labelSmall) }
                 }
                 if (we == null) {
@@ -182,6 +187,12 @@ fun WorkoutScreen(
                 }
                 if (repCounting) {
                     Text(stringResource(R.string.counted_reps, countedReps), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    velocity?.let { v ->
+                        Text(
+                            stringResource(R.string.velocity_info, "%.2f".format(v.lastVelocity), v.rir?.toString() ?: "?"),
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
                 }
                 previous?.let {
                     Text(
@@ -194,6 +205,9 @@ fun WorkoutScreen(
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     TextButton(onClick = onMenu, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_menu))) { Text("⋯") }
+                    voice?.let { launch ->
+                        TextButton(onClick = launch, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_voice))) { Text("🎤") }
+                    }
                     TextButton(
                         onClick = session::nextExercise,
                         enabled = index < w.exercises.lastIndex,

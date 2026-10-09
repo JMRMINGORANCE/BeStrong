@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Esfera BeStrong (Watch Face Format v1) para el Galaxy Watch Ultra:
+  hora grande, día, aro de pasos y tres complicaciones por defecto:
+  «Hoy toca» y «entrenos de la semana» de la app BeStrong, y el pulso del sistema.
+  Todas se pueden cambiar desde el editor de esferas.
+-->
+<WatchFace width="450" height="450">
+    <Metadata key="CLOCK_TYPE" value="DIGITAL" />
+    <Metadata key="PREVIEW_TIME" value="10:08:32" />
+    <Scene backgroundColor="#ff000000">
+        <!-- Aro de progreso de pasos hacia el objetivo diario -->
+        <Arc centerX="225" centerY="225" height="440" width="440" startAngle="0" endAngle="360">
+            <Stroke color="#33ffffff" thickness="8" />
+        </Arc>
+        <Arc centerX="225" centerY="225" height="440" width="440" startAngle="0" endAngle="0">
+            <Transform target="endAngle" value="clamp([STEP_PERCENT], 0, 100) * 3.6" />
+            <Stroke color="#ffff7a1a" thickness="8" cap="ROUND" />
+        </Arc>
+
+        <PartText x="0" y="88" width="450" height="40">
+            <Text align="CENTER">
+                <Font family="SYNC_TO_DEVICE" size="28" color="#ffbbbbbb">
+                    <Template>%s %s<Parameter expression="[DAY_OF_WEEK_S]" /><Parameter expression="[DAY]" /></Template>
+                </Font>
+            </Text>
+        </PartText>
+
+        <DigitalClock x="0" y="130" width="450" height="130">
+            <TimeText format="HH:mm" align="CENTER" x="0" y="0" width="450" height="130">
+                <Font family="SYNC_TO_DEVICE" size="112" weight="BOLD" color="#ffffffff">
+                    <Variant mode="AMBIENT" target="color" value="#ffaaaaaa" />
+                </Font>
+            </TimeText>
+        </DigitalClock>
+
+        <!-- Hoy toca (BeStrong) -->
+        <ComplicationSlot slotId="0" displayName="slot_today" x="45" y="280" width="170" height="90"
+            supportedTypes="SHORT_TEXT LONG_TEXT" isCustomizable="TRUE">
+            <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY"
+                primaryProvider="com.bestrong/com.bestrong.wear.complication.TodayComplicationService"
+                primaryProviderType="SHORT_TEXT" />
+            <BoundingBox x="0" y="0" width="170" height="90" />
+            <Complication type="SHORT_TEXT">
+                <PartText x="0" y="8" width="170" height="30">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="22" color="#ffff7a1a">
+                            <Template>%s<Parameter expression="[COMPLICATION.TITLE]" /></Template>
+                        </Font>
+                    </Text>
+                </PartText>
+                <PartText x="0" y="40" width="170" height="40">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="30" color="#ffffffff">
+                            <Template>%s<Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Complication>
+            <Complication type="LONG_TEXT">
+                <PartText x="0" y="25" width="170" height="40">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="24" color="#ffffffff">
+                            <Template>%s<Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Complication>
+        </ComplicationSlot>
+
+        <!-- Entrenos de la semana / racha (BeStrong) -->
+        <ComplicationSlot slotId="1" displayName="slot_streak" x="235" y="280" width="170" height="90"
+            supportedTypes="SHORT_TEXT RANGED_VALUE" isCustomizable="TRUE">
+            <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY"
+                primaryProvider="com.bestrong/com.bestrong.wear.complication.WeeklyComplicationService"
+                primaryProviderType="SHORT_TEXT" />
+            <BoundingBox x="0" y="0" width="170" height="90" />
+            <Complication type="SHORT_TEXT">
+                <PartText x="0" y="8" width="170" height="30">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="22" color="#ffff7a1a">
+                            <Template>%s<Parameter expression="[COMPLICATION.TITLE]" /></Template>
+                        </Font>
+                    </Text>
+                </PartText>
+                <PartText x="0" y="40" width="170" height="40">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="30" color="#ffffffff">
+                            <Template>%s<Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Complication>
+            <Complication type="RANGED_VALUE">
+                <PartText x="0" y="25" width="170" height="40">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="30" color="#ffffffff">
+                            <Template>%s<Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Complication>
+        </ComplicationSlot>
+
+        <!-- Pulso (proveedor del sistema) -->
+        <ComplicationSlot slotId="2" displayName="slot_heart" x="165" y="372" width="120" height="56"
+            supportedTypes="SHORT_TEXT" isCustomizable="TRUE">
+            <DefaultProviderPolicy defaultSystemProvider="HEART_RATE" defaultSystemProviderType="SHORT_TEXT" />
+            <BoundingBox x="0" y="0" width="120" height="56" />
+            <Complication type="SHORT_TEXT">
+                <PartText x="0" y="8" width="120" height="40">
+                    <Text align="CENTER">
+                        <Font family="SYNC_TO_DEVICE" size="28" color="#ffff5a5f">
+                            <Template>♥ %s<Parameter expression="[COMPLICATION.TEXT]" /></Template>
+                        </Font>
+                    </Text>
+                </PartText>
+            </Complication>
+        </ComplicationSlot>
+    </Scene>
+</WatchFace>

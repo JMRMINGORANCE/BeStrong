@@ -48,6 +48,7 @@ fun RestScreen(session: WorkoutSession) {
     val rest by session.rest.collectAsStateWithLifecycle()
     val metrics by session.metrics.collectAsStateWithLifecycle()
     val workout by session.workout.collectAsStateWithLifecycle()
+    val recovered by session.recovered.collectAsStateWithLifecycle()
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(200) } }
 
@@ -84,7 +85,9 @@ fun RestScreen(session: WorkoutSession) {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.rest), style = MaterialTheme.typography.labelMedium)
                 Text(formatDuration(remaining), fontSize = 40.sp, fontWeight = FontWeight.Bold)
-                Text("♥ ${metrics.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.labelSmall)
+                val zone = session.heartRateZone(metrics.heartRate)
+                Text("♥ ${metrics.heartRate ?: "--"}" + if (zone > 0) " · Z$zone" else "", color = HeartRed, style = MaterialTheme.typography.labelSmall)
+                if (recovered) Text(stringResource(R.string.recovered), color = Done, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
                 next?.let { (we, s) ->
                     Text(
                         stringResource(R.string.next_short, we.exercise.displayName(), unit.format(s.weightKg), s.reps),

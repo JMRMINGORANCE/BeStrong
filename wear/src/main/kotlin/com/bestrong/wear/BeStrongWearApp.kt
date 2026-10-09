@@ -8,6 +8,7 @@ import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUp
 import com.bestrong.wear.complication.WeeklyComplicationService
 import com.bestrong.wear.data.PhoneSync
 import com.bestrong.wear.data.WearStore
+import com.bestrong.wear.session.CardioSession
 import com.bestrong.wear.session.WorkoutSession
 import com.bestrong.wear.tile.BeStrongTileService
 import dagger.Module
@@ -47,6 +48,7 @@ class WearContainer @Inject constructor(
     val store: WearStore,
     val phoneSync: PhoneSync,
     val session: WorkoutSession,
+    val cardio: CardioSession,
 ) {
     /** Pide a la tile y a la complicación que se redibujen con los datos nuevos. */
     fun refreshSurfaces() {

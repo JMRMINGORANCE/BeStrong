@@ -44,7 +44,7 @@ jobs:
           fi
 
       - name: Compilar APK de release
-        run: ./gradlew :mobile:assembleRelease :wear:assembleRelease -PsignWithDebug=${{ steps.sign.outputs.debug }}
+        run: ./gradlew :mobile:assembleRelease :wear:assembleRelease :watchface:assembleRelease -PsignWithDebug=${{ steps.sign.outputs.debug }}
 
       - name: Changelog
         run: |
@@ -67,6 +67,7 @@ jobs:
           mkdir -p dist
           cp mobile/build/outputs/apk/release/*.apk "dist/BeStrong-${GITHUB_REF_NAME}-movil.apk"
           cp wear/build/outputs/apk/release/*.apk "dist/BeStrong-${GITHUB_REF_NAME}-reloj.apk"
+          cp watchface/build/outputs/apk/release/*.apk "dist/BeStrong-${GITHUB_REF_NAME}-esfera.apk"
           flags=""
           if [ "${{ steps.sign.outputs.debug }}" = "true" ]; then flags="--prerelease"; fi
           gh release create "$GITHUB_REF_NAME" dist/*.apk --title "BeStrong $GITHUB_REF_NAME" --notes-file CHANGELOG_RELEASE.md $flags

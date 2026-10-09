@@ -26,7 +26,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 @Composable
-fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
+fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Unit = {}, onCreateRoutine: () -> Unit = {}) {
     val routines by container.store.routines.collectAsStateWithLifecycle()
     val history by container.store.history.collectAsStateWithLifecycle()
     val active by container.session.workout.collectAsStateWithLifecycle()
@@ -65,6 +65,14 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
+                item {
+                    Button(
+                        onClick = onCardio,
+                        label = { Text(stringResource(R.string.cardio)) },
+                        colors = ButtonDefaults.filledTonalButtonColors(),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 item { ListHeader { Text(stringResource(R.string.routines)) } }
                 if (routines.isEmpty()) {
                     item {
@@ -74,6 +82,14 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit) {
                             textAlign = TextAlign.Center,
                         )
                     }
+                }
+                item {
+                    Button(
+                        onClick = onCreateRoutine,
+                        label = { Text(stringResource(R.string.create_routine)) },
+                        colors = ButtonDefaults.outlinedButtonColors(),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
                 items(routines, key = { it.id }) { routine ->
                     Button(

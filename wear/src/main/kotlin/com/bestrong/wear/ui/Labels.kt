@@ -10,6 +10,7 @@ import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.wear.R
+import com.bestrong.wear.session.CardioType
 import java.time.Instant
 import java.time.ZoneId
 
@@ -64,3 +65,12 @@ fun defaultWorkoutName(context: Context, nowEpochMs: Long): String {
         },
     )
 }
+
+/** Nombre de la sesión de cardio (también se usa fuera de Compose: servicio y guardado). */
+fun cardioName(context: Context, type: CardioType): String = context.getString(
+    when (type) {
+        CardioType.RUNNING -> R.string.cardio_running
+        CardioType.WALKING -> R.string.cardio_walking
+        CardioType.CYCLING -> R.string.cardio_cycling
+    },
+)

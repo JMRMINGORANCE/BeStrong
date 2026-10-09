@@ -3,6 +3,7 @@ package com.bestrong.wear.data
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.SyncContract
@@ -32,6 +33,16 @@ class PhoneSync @Inject constructor(@ApplicationContext private val context: Con
         }.asPutDataRequest().setUrgent()
         runCatching { dataClient.putDataItem(request).await() }
             .onFailure { Log.w(TAG, "No se pudo enviar el entrenamiento", it) }
+    }
+
+    /** Envía una rutina creada en el reloj (se guarda en el móvil al sincronizar). */
+    suspend fun sendWatchRoutine(routine: Routine) {
+        val request = PutDataMapRequest.create(SyncContract.PATH_WATCH_ROUTINE_PREFIX + routine.id).apply {
+            dataMap.putByteArray(SyncContract.KEY_PAYLOAD, SyncContract.encodeRoutines(listOf(routine)))
+            dataMap.putLong(SyncContract.KEY_TIMESTAMP, System.currentTimeMillis())
+        }.asPutDataRequest().setUrgent()
+        runCatching { dataClient.putDataItem(request).await() }
+            .onFailure { Log.w(TAG, "No se pudo enviar la rutina", it) }
     }
 
     /** Publica el entreno en curso para verlo y editarlo en vivo en el móvil (null = borrar). */

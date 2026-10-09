@@ -8,19 +8,23 @@ import android.os.VibratorManager
 import androidx.core.content.ContextCompat
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
+import com.bestrong.core.model.RoutineExercise
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
+import com.bestrong.core.sensors.BarVelocity
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.WorkoutMerge
+import com.bestrong.core.training.HeartRate
 import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.Tempo
+import com.bestrong.core.training.VoiceSetParser
 import com.bestrong.wear.ApplicationScope
 import com.bestrong.wear.data.PhoneSync
 import com.bestrong.wear.data.WearStore
@@ -47,7 +51,24 @@ data class HealthMetrics(
 
 data class Rest(val endsAtEpochMs: Long, val totalSeconds: Int)
 
-data class Summary(val workout: Workout, val records: List<PersonalRecord>)
+data class Summary(
+    val workout: Workout,
+    val records: List<PersonalRecord>,
+    val comparisons: List<WorkoutStats.ExerciseComparison> = emptyList(),
+)
+
+/** Velocidad de la última serie medida con el acelerómetro y RIR estimado. */
+data class VelocityInfo(val lastVelocity: Double, val rir: Int?)
+
+/** Vibraciones distintas por tipo de aviso (se reconocen sin mirar el reloj). */
+object Haptics {
+    val SET_DONE = longArrayOf(0, 60)
+    val REST_WARNING = longArrayOf(0, 40)
+    val REST_END = longArrayOf(0, 300, 150, 300, 150, 300)
+    val RECOVERED = longArrayOf(0, 120, 100, 120)
+    val RECORD = longArrayOf(0, 80, 60, 80, 60, 80, 60, 400)
+    val VOICE_OK = longArrayOf(0, 30, 60, 30)
+}
 
 /** Campo que ajusta el bisel/corona. */
 enum class RotaryTarget { WEIGHT, REPS }
@@ -82,8 +103,10 @@ class WorkoutSession @Inject constructor(
     private val _summary = MutableStateFlow<Summary?>(null)
     val summary: StateFlow<Summary?> = _summary.asStateFlow()
 
-    val repCounter = RepCounter(context)
-    private val _repCounting = MutableStateFlow(store.repCounterEnabled && repCounter.isAvailable)
+    val repCounter = RepCounter(context, store.repThreshold)
+    private val _lowPower = MutableStateFlow(store.lowPower)
+    val lowPower: StateFlow<Boolean> = _lowPower.asStateFlow()
+    private val _repCounting = MutableStateFlow(store.repCounterEnabled && repCounter.isAvailable && !store.lowPower)
     val repCounting: StateFlow<Boolean> = _repCounting.asStateFlow()
 
     private var restJob: Job? = null
@@ -171,8 +194,10 @@ class WorkoutSession @Inject constructor(
         end()
         if (finished.exercises.isEmpty()) return
         val records = WorkoutStats.newRecordsIn(finished, store.history.value + finished)
+        val comparisons = WorkoutStats.compareWithPrevious(finished, store.history.value)
         store.addLocalWorkout(finished)
-        _summary.value = Summary(finished, records)
+        _summary.value = Summary(finished, records, comparisons)
+        if (records.isNotEmpty()) haptic(Haptics.RECORD)
         scope.launch { phoneSync.sendFinishedWorkout(finished) }
     }
 
@@ -275,7 +300,7 @@ class WorkoutSession @Inject constructor(
     }
 
     fun setRepCounting(enabled: Boolean) {
-        val on = enabled && repCounter.isAvailable
+        val on = enabled && repCounter.isAvailable && !_lowPower.value
         _repCounting.value = on
         store.repCounterEnabled = on
         if (on && _workout.value != null) repCounter.start() else repCounter.stop()
@@ -319,16 +344,19 @@ class WorkoutSession @Inject constructor(
         val we = currentExercise() ?: return false
         val s = currentSet() ?: return false
         val counted = repCounter.reps.value
+        val velocities = repCounter.velocities.value
+        val rir = if (_repCounting.value) BarVelocity.estimatedRir(velocities) else null
+        _velocityInfo.value = velocities.lastOrNull()?.let { VelocityInfo(it, rir) }
         edit { w ->
             val withReps = if (_repCounting.value && counted > 0 && we.exercise.tracking != TrackingType.DURATION) {
-                WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = counted) }
+                WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = counted, rpe = it.rpe ?: rir?.let(BarVelocity::rpeFromRir)) }
             } else {
                 w
             }
             WorkoutEditor.toggleSetCompleted(withReps, we.id, s.id)
         }
         repCounter.reset()
-        haptic(longArrayOf(0, 60))
+        haptic(Haptics.SET_DONE)
         val updated = _workout.value ?: w0
         val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
         next?.let { _exerciseIndex.value = it }
@@ -344,6 +372,9 @@ class WorkoutSession @Inject constructor(
 
     private fun startRest(seconds: Int) {
         _rest.value = Rest(System.currentTimeMillis() + seconds * 1000L, seconds)
+        _recovered.value = false
+        restPeakBpm = setPeakBpm
+        setPeakBpm = 0
         scheduleRestEnd()
     }
 
@@ -366,14 +397,14 @@ class WorkoutSession @Inject constructor(
             val remaining = r.endsAtEpochMs - System.currentTimeMillis()
             if (remaining > 10_000) {
                 delay(remaining - 10_000)
-                haptic(longArrayOf(0, 40)) // aviso: quedan 10 s
+                haptic(Haptics.REST_WARNING) // aviso: quedan 10 s
                 delay(10_000)
             } else {
                 delay(remaining.coerceAtLeast(0))
             }
             _rest.value = null
             repCounter.reset()
-            haptic(longArrayOf(0, 300, 150, 300, 150, 300))
+            haptic(Haptics.REST_END)
         }
     }
 
@@ -440,11 +471,117 @@ class WorkoutSession @Inject constructor(
         vibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
     }
 
+    // --- Pulso: zonas y recuperación, bajo consumo --------------------------------------------
+
+    private var setPeakBpm = 0
+    private var restPeakBpm = 0
+    private val _recovered = MutableStateFlow(false)
+
+    /** El pulso ya bajó lo suficiente durante el descanso. */
+    val recovered: StateFlow<Boolean> = _recovered.asStateFlow()
+
+    fun heartRateZone(bpm: Int?): Int = bpm?.let { HeartRate.zone(it, store.maxHeartRate) } ?: 0
+
+    val maxHeartRate: Int get() = store.maxHeartRate
+
+    /** Ajusta el pulso máximo en pasos de 5 (170–210). */
+    fun cycleMaxHeartRate(): Int {
+        val next = store.maxHeartRate.let { if (it >= 210) 170 else it + 5 }
+        store.maxHeartRate = next
+        return next
+    }
+
+    fun setLowPower(on: Boolean) {
+        _lowPower.value = on
+        store.lowPower = on
+        if (on) setRepCounting(false)
+    }
+
+    // --- Velocidad y calibración ------------------------------------------------------------
+
+    private val _velocityInfo = MutableStateFlow<VelocityInfo?>(null)
+    val velocityInfo: StateFlow<VelocityInfo?> = _velocityInfo.asStateFlow()
+
+    fun startCalibration() = repCounter.startCalibration()
+
+    fun finishCalibration(): Float {
+        val t = repCounter.finishCalibration()
+        store.repThreshold = t
+        if (!_repCounting.value) repCounter.stop()
+        return t
+    }
+
+    // --- Voz y pesos recientes ---------------------------------------------------------------
+
+    /** Aplica una serie dictada («80 kilos 8 repeticiones») a la serie actual. Devuelve false si no entendió nada. */
+    fun applySpoken(text: String): Boolean {
+        val spoken = VoiceSetParser.parse(text)
+        if (spoken.weight == null && spoken.reps == null) return false
+        val we = currentExercise() ?: return false
+        val s = currentSet() ?: return false
+        val unit = store.settings.value.unit
+        val kg = spoken.weight?.let { w -> if (spoken.pounds) w * 0.45359237 else unit.toKg(w) }
+        edit { w ->
+            WorkoutEditor.updateSet(w, we.id, s.id) {
+                it.copy(
+                    weightKg = kg ?: it.weightKg,
+                    reps = spoken.reps ?: it.reps,
+                    rpe = spoken.rpe ?: it.rpe,
+                )
+            }
+        }
+        haptic(Haptics.VOICE_OK)
+        return true
+    }
+
+    /** Últimos 3 pesos distintos usados en el ejercicio (accesos rápidos). */
+    fun recentWeights(exerciseId: String): List<Double> =
+        store.history.value.asSequence()
+            .flatMap { w -> w.exercises.asSequence().filter { it.exercise.id == exerciseId } }
+            .flatMap { it.completedSets.asSequence() }
+            .filter { it.weightKg > 0 && it.type != com.bestrong.core.model.SetType.WARMUP }
+            .map { it.weightKg }
+            .distinct()
+            .take(3)
+            .toList()
+
+    fun setCurrentWeight(kg: Double) {
+        val we = currentExercise() ?: return
+        val s = currentSet() ?: return
+        edit { w -> WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(weightKg = kg) } }
+    }
+
+    // --- Rutinas creadas en el reloj ---------------------------------------------------------
+
+    /** Guarda una rutina hecha en el reloj (3 series por ejercicio) y la envía al móvil. */
+    fun createRoutine(name: String, exercises: List<Exercise>): Routine {
+        val routine = Routine(
+            name = name,
+            exercises = exercises.map { ex ->
+                RoutineExercise(exercise = ex, restSeconds = com.bestrong.core.training.RestPolicy.defaultFor(ex))
+            },
+        )
+        store.addRoutine(routine)
+        scope.launch { phoneSync.sendWatchRoutine(routine) }
+        return routine
+    }
+
     // --- Métricas (llamado desde ExerciseService) --------------------------------------------
 
     fun onHeartRate(bpm: Int) {
         if (bpm <= 0) return
         hrSamples += bpm
+        val rest = _rest.value
+        if (rest == null) {
+            if (bpm > setPeakBpm) setPeakBpm = bpm
+        } else if (!_recovered.value && restPeakBpm > 0) {
+            // Pulso de vuelta a la zona de recuperación: ya se puede hacer la siguiente serie
+            val restedSec = ((System.currentTimeMillis() - (rest.endsAtEpochMs - rest.totalSeconds * 1000L)) / 1000).toInt()
+            if (HeartRate.isRecovered(bpm, restPeakBpm, restedSec, maxHr = store.maxHeartRate)) {
+                _recovered.value = true
+                haptic(Haptics.RECOVERED)
+            }
+        }
         _metrics.update {
             it.copy(heartRate = bpm, avgHeartRate = hrSamples.average().toInt(), maxHeartRate = hrSamples.max())
         }
@@ -459,7 +596,7 @@ class WorkoutSession @Inject constructor(
     private fun maybeSendMetrics() {
         val w = _workout.value ?: return
         val now = System.currentTimeMillis()
-        if (now - lastMetricsSentAt < 5_000) return
+        if (now - lastMetricsSentAt < if (_lowPower.value) 30_000 else 5_000) return
         lastMetricsSentAt = now
         val m = _metrics.value
         scope.launch { phoneSync.sendMetrics(LiveMetrics(w.id, m.heartRate, m.avgHeartRate, m.maxHeartRate, m.calories, now)) }

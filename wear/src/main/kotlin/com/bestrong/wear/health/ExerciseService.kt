@@ -28,6 +28,8 @@ import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
 import com.bestrong.wear.MainActivity
 import com.bestrong.wear.R
+import com.bestrong.wear.session.CardioSession
+import com.bestrong.wear.session.CardioType
 import com.bestrong.wear.session.WorkoutSession
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -44,13 +46,23 @@ class ExerciseService : LifecycleService() {
 
     @Inject lateinit var session: WorkoutSession
 
+    @Inject lateinit var cardio: CardioSession
+
     private val exerciseClient by lazy { HealthServices.getClient(this).exerciseClient }
     private var exerciseStarted = false
 
     private val callback = object : ExerciseUpdateCallback {
         override fun onExerciseUpdateReceived(update: ExerciseUpdate) {
-            update.latestMetrics.getData(DataType.HEART_RATE_BPM).lastOrNull()?.let { session.onHeartRate(it.value.toInt()) }
-            update.latestMetrics.getData(DataType.CALORIES_TOTAL)?.let { session.onCalories(it.total) }
+            val m = update.latestMetrics
+            if (cardio.isActive) {
+                m.getData(DataType.HEART_RATE_BPM).lastOrNull()?.let { cardio.onHeartRate(it.value.toInt()) }
+                m.getData(DataType.CALORIES_TOTAL)?.let { cardio.onCalories(it.total) }
+                m.getData(DataType.DISTANCE_TOTAL)?.let { cardio.onDistance(it.total) }
+                m.getData(DataType.SPEED).lastOrNull()?.let { cardio.onSpeed(it.value) }
+                return
+            }
+            m.getData(DataType.HEART_RATE_BPM).lastOrNull()?.let { session.onHeartRate(it.value.toInt()) }
+            m.getData(DataType.CALORIES_TOTAL)?.let { session.onCalories(it.total) }
         }
         override fun onLapSummaryReceived(lapSummary: ExerciseLapSummary) = Unit
         override fun onRegistered() = Unit
@@ -94,7 +106,7 @@ class ExerciseService : LifecycleService() {
             .setSilent(true)
             .setContentIntent(openApp)
 
-        val startedAt = session.workout.value?.startedAtEpochMs ?: System.currentTimeMillis()
+        val startedAt = cardio.state.value?.startedAtEpochMs ?: session.workout.value?.startedAtEpochMs ?: System.currentTimeMillis()
         val elapsedBase = SystemClock.elapsedRealtime() - (System.currentTimeMillis() - startedAt)
         OngoingActivity.Builder(applicationContext, NOTIFICATION_ID, builder)
             .setStaticIcon(R.drawable.ic_dumbbell)
@@ -102,15 +114,18 @@ class ExerciseService : LifecycleService() {
             .setStatus(
                 Status.Builder()
                     .addTemplate("#name# · #time#")
-                    .addPart("name", Status.TextPart(session.workout.value?.name ?: getString(R.string.training)))
+                    .addPart("name", Status.TextPart(cardio.state.value?.let { com.bestrong.wear.ui.cardioName(this, it.type) } ?: session.workout.value?.name ?: getString(R.string.training)))
                     .addPart("time", Status.StopwatchPart(elapsedBase))
                     .build(),
             )
             .build()
             .apply(applicationContext)
 
+        // Con GPS (cardio y permiso concedido) el servicio también es de ubicación
+        val gps = cardio.isActive && checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val type = if (gps) ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION else ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
         return try {
-            ServiceCompat.startForeground(this, NOTIFICATION_ID, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH)
+            ServiceCompat.startForeground(this, NOTIFICATION_ID, builder.build(), type)
             true
         } catch (e: Exception) {
             // Sin permiso de sensores no se puede usar el tipo "health"
@@ -120,6 +135,7 @@ class ExerciseService : LifecycleService() {
     }
 
     private suspend fun startExercise() {
+        if (cardio.isActive) return startCardio()
         try {
             val capabilities = exerciseClient.getCapabilities()
             val type = ExerciseType.WEIGHTLIFTING
@@ -139,6 +155,32 @@ class ExerciseService : LifecycleService() {
             )
         } catch (e: Exception) {
             Log.w(TAG, "No se pudo iniciar la sesión de Health Services", e)
+        }
+    }
+
+    /** Carrera, caminata o bici con GPS: distancia, velocidad, pulso y calorías. */
+    private suspend fun startCardio() {
+        try {
+            val capabilities = exerciseClient.getCapabilities()
+            val type = when (cardio.state.value?.type) {
+                CardioType.WALKING -> ExerciseType.WALKING
+                CardioType.CYCLING -> ExerciseType.BIKING
+                else -> ExerciseType.RUNNING
+            }
+            if (type !in capabilities.supportedExerciseTypes) return
+            val supported = capabilities.getExerciseTypeCapabilities(type).supportedDataTypes
+            val wanted = setOf(DataType.HEART_RATE_BPM, DataType.CALORIES_TOTAL, DataType.DISTANCE_TOTAL, DataType.SPEED)
+            val gps = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            exerciseClient.setUpdateCallback(callback)
+            exerciseClient.startExercise(
+                ExerciseConfig.builder(type)
+                    .setDataTypes(wanted.filter { it in supported }.toSet())
+                    .setIsAutoPauseAndResumeEnabled(false)
+                    .setIsGpsEnabled(gps)
+                    .build(),
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "No se pudo iniciar el cardio", e)
         }
     }
 

@@ -34,7 +34,7 @@ jobs:
         run: ./gradlew :core:test
 
       - name: Compilar móvil y reloj
-        run: ./gradlew --continue :mobile:assembleDebug :wear:assembleDebug
+        run: ./gradlew --continue :mobile:assembleDebug :wear:assembleDebug :watchface:assembleDebug
 
       - name: Tests de interfaz y capturas (Robolectric + Roborazzi)
         run: ./gradlew --continue :mobile:testDebugUnitTest :wear:testDebugUnitTest -Proborazzi.test.record=true
@@ -69,7 +69,7 @@ jobs:
 
       - name: Compilar release (R8)
         if: success() || failure()
-        run: ./gradlew --continue :mobile:assembleRelease :wear:assembleRelease
+        run: ./gradlew --continue :mobile:assembleRelease :wear:assembleRelease :watchface:assembleRelease
 
       - name: Lint
         if: success() || failure()

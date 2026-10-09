@@ -34,6 +34,8 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
     val workout by session.workout.collectAsStateWithLifecycle()
     val index by session.exerciseIndex.collectAsStateWithLifecycle()
     val rest by session.rest.collectAsStateWithLifecycle()
+    val metrics by session.metrics.collectAsStateWithLifecycle()
+    val lowPower by session.lowPower.collectAsStateWithLifecycle()
     val unit = LocalWeightUnit.current
     val w = workout ?: return
     val we = w.exercises.getOrNull(index)
@@ -50,10 +52,32 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
                     fontWeight = FontWeight.Light,
                 )
             }
+            // AOD más completo: pulso y series hechas (en bajo consumo, solo lo esencial)
+            if (!lowPower) {
+                Text(
+                    "♥ ${metrics.heartRate ?: "--"} · ${w.completedSetCount}/${w.totalSetCount}",
+                    color = Color.Gray,
+                    fontSize = 13.sp,
+                )
+            }
             rest?.let { r ->
                 val end = DateTimeFormatter.ofPattern("HH:mm:ss").format(Instant.ofEpochMilli(r.endsAtEpochMs).atZone(ZoneId.systemDefault()))
                 Text(stringResource(R.string.rest_until, end), color = Color.Gray, fontSize = 13.sp)
             }
+        }
+    }
+}
+
+/** AOD de la sesión de cardio: tiempo de inicio, distancia y pulso. */
+@Composable
+fun AmbientCardioScreen(cardio: com.bestrong.wear.session.CardioSession) {
+    val state by cardio.state.collectAsStateWithLifecycle()
+    val s = state ?: return
+    Box(Modifier.fillMaxSize().background(Color.Black).padding(24.dp), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(cardioLabel(s.type), color = Color.Gray, fontSize = 13.sp)
+            Text("%.2f km".format(s.distanceM / 1000), color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Light)
+            Text("♥ ${s.heartRate ?: "--"}", color = Color.Gray, fontSize = 13.sp)
         }
     }
 }

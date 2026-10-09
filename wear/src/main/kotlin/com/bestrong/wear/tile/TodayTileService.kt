@@ -15,7 +15,6 @@ import androidx.wear.tiles.RequestBuilders
 import androidx.wear.tiles.TileBuilders
 import androidx.wear.tiles.TileService
 import com.bestrong.core.model.Routine
-import com.bestrong.core.training.Periodization
 import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.wear.MainActivity
 import com.bestrong.wear.R
@@ -46,12 +45,7 @@ class TodayTileService : TileService() {
         Futures.immediateFuture(ResourceBuilders.Resources.Builder().setVersion(RESOURCES_VERSION).build())
 
     /** Rutina que toca: la del programa si la hay; si no, la que lleva más tiempo sin hacerse. */
-    private fun todayRoutine(): Routine? {
-        val routines = container.store.routines.value.filter { it.exercises.isNotEmpty() }
-        routines.firstOrNull { it.id.startsWith(Periodization.ROUTINE_PREFIX) }?.let { return it }
-        val last = container.store.history.value.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
-        return routines.minByOrNull { last[it.id] ?: 0L }
-    }
+    private fun todayRoutine(): Routine? = container.store.todayRoutine()
 
     private fun layout(device: DeviceParameters): LayoutElementBuilders.LayoutElement {
         val routine = todayRoutine()

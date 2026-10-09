@@ -20,6 +20,9 @@ object WearRoutes {
     const val PICKER = "picker"
     const val SUMMARY = "summary"
     const val INFO = "info"
+    const val CARDIO = "cardio"
+    const val ROUTINE_NEW = "routine_new"
+    const val CALIBRATE = "calibrate"
 }
 
 @Composable
@@ -32,6 +35,7 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
     val summary by session.summary.collectAsStateWithLifecycle()
     val isAmbient by ambient.collectAsStateWithLifecycle()
     val settings by container.store.settings.collectAsStateWithLifecycle()
+    val cardioState by container.cardio.state.collectAsStateWithLifecycle()
 
     // Abierto desde el móvil: empezar rutina o entrenamiento vacío
     LaunchedEffect(request) {
@@ -57,12 +61,23 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
                 AmbientWorkoutScreen(session)
                 return@CompositionLocalProvider
             }
+            if (isAmbient && cardioState != null) {
+                AmbientCardioScreen(container.cardio)
+                return@CompositionLocalProvider
+            }
             AppScaffold {
-                SwipeDismissableNavHost(navController = nav, startDestination = if (active != null) WearRoutes.WORKOUT else WearRoutes.HOME) {
+                val start = when {
+                    active != null -> WearRoutes.WORKOUT
+                    cardioState != null -> WearRoutes.CARDIO
+                    else -> WearRoutes.HOME
+                }
+                SwipeDismissableNavHost(navController = nav, startDestination = start) {
                     composable(WearRoutes.HOME) {
                         HomeScreen(
                             container = container,
                             onStart = { nav.navigate(WearRoutes.WORKOUT) { launchSingleTop = true } },
+                            onCardio = { nav.navigate(WearRoutes.CARDIO) { launchSingleTop = true } },
+                            onCreateRoutine = { nav.navigate(WearRoutes.ROUTINE_NEW) },
                         )
                     }
                     composable(WearRoutes.WORKOUT) {
@@ -81,10 +96,16 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
                             onBack = { nav.popBackStack() },
                             onAddExercise = { nav.navigate(WearRoutes.PICKER) },
                             onInfo = { nav.navigate(WearRoutes.INFO) },
+                            onCalibrate = { nav.navigate(WearRoutes.CALIBRATE) },
                             onDiscarded = { nav.navigate(WearRoutes.HOME) { popUpTo(0) } },
                         )
                     }
                     composable(WearRoutes.INFO) { ExerciseInfoScreen(session) }
+                    composable(WearRoutes.CARDIO) {
+                        CardioScreen(container.cardio) { nav.navigate(WearRoutes.HOME) { popUpTo(0) } }
+                    }
+                    composable(WearRoutes.ROUTINE_NEW) { RoutineCreateScreen(container) { nav.popBackStack() } }
+                    composable(WearRoutes.CALIBRATE) { CalibrationScreen(session) { nav.popBackStack() } }
                     composable(WearRoutes.PICKER) {
                         ExercisePickerScreen(container) { exercise ->
                             session.addExercise(exercise)

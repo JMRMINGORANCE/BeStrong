@@ -3,6 +3,7 @@ package com.bestrong.wear.ui
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,13 +34,23 @@ import com.bestrong.wear.session.StemAction
 import com.bestrong.wear.session.WorkoutSession
 
 @Composable
-fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () -> Unit, onInfo: () -> Unit, onDiscarded: () -> Unit) {
+fun MenuScreen(
+    session: WorkoutSession,
+    onBack: () -> Unit,
+    onAddExercise: () -> Unit,
+    onInfo: () -> Unit,
+    onDiscarded: () -> Unit,
+    onCalibrate: () -> Unit = {},
+) {
     val workout by session.workout.collectAsStateWithLifecycle()
     val index by session.exerciseIndex.collectAsStateWithLifecycle()
     val repCounting by session.repCounting.collectAsStateWithLifecycle()
     val unit = LocalWeightUnit.current
     val listState = rememberScalingLazyListState()
     var confirmDiscard by remember { mutableStateOf(false) }
+    val lowPower by session.lowPower.collectAsStateWithLifecycle()
+    var maxHr by remember { mutableIntStateOf(session.maxHeartRate) }
+    val voice = rememberVoiceInput(stringResource(R.string.voice_prompt)) { text -> if (session.applySpoken(text)) onBack() }
     val w = workout ?: return
 
     ScreenScaffold(
@@ -76,6 +87,11 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
                     colors = ButtonDefaults.filledTonalButtonColors(),
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+            voice?.let { launch ->
+                item {
+                    Button(onClick = launch, label = { Text(stringResource(R.string.voice_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                }
             }
             item {
                 Button(onClick = { session.addWarmup(); onBack() }, label = { Text(stringResource(R.string.menu_warmup)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
@@ -116,6 +132,29 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
+            }
+            if (session.repCounter.isAvailable) {
+                item {
+                    Button(onClick = onCalibrate, label = { Text(stringResource(R.string.calibrate)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                }
+            }
+            item {
+                Button(
+                    onClick = { maxHr = session.cycleMaxHeartRate() },
+                    label = { Text(stringResource(R.string.max_hr)) },
+                    secondaryLabel = { Text(stringResource(R.string.max_hr_value, maxHr)) },
+                    colors = ButtonDefaults.filledTonalButtonColors(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            item {
+                SwitchButton(
+                    checked = lowPower,
+                    onCheckedChange = session::setLowPower,
+                    label = { Text(stringResource(R.string.low_power)) },
+                    secondaryLabel = { Text(stringResource(R.string.low_power_sub)) },
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
             item {
                 Button(
@@ -194,6 +233,18 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
             item { Text(stringResource(R.string.summary_volume, unit.formatVolume(w.totalVolume), w.completedSetCount)) }
             w.avgHeartRate?.let { item { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--"), color = HeartRed) } }
             w.calories?.let { item { Text(stringResource(R.string.summary_kcal, it)) } }
+            if (s.comparisons.isNotEmpty()) {
+                item { ListHeader { Text(stringResource(R.string.vs_last)) } }
+                items(s.comparisons.take(5)) { c ->
+                    val name = ExerciseLibrary.byId(c.exerciseId)?.displayName() ?: c.exerciseName
+                    Text(
+                        stringResource(R.string.vs_line, name, (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta))),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (c.volumeDelta >= 0) Done else MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
             if (s.records.isNotEmpty()) {
                 item { ListHeader { Text(stringResource(R.string.n_records, s.records.size)) } }
                 items(s.records) { pr ->

@@ -91,4 +91,26 @@ class WearUiTest {
         settle()
         shot("info")
     }
+
+    @Test
+    fun cardio_and_new_routine() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Cardio con GPS"))
+        compose.onNodeWithText("Cardio con GPS").performClick()
+        settle()
+        compose.onNodeWithText("Carrera").assertExists()
+        shot("cardio_pick")
+    }
+
+    @Test
+    fun create_routine_on_watch() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Crear rutina"))
+        compose.onNodeWithText("Crear rutina").performClick()
+        settle()
+        compose.onNodeWithText("Añadir ejercicio").assertExists()
+        shot("routine_new")
+    }
 }
