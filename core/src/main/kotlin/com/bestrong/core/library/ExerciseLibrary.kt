@@ -7,6 +7,7 @@ import com.bestrong.core.model.Equipment.CABLE
 import com.bestrong.core.model.Equipment.DUMBBELL
 import com.bestrong.core.model.Equipment.KETTLEBELL
 import com.bestrong.core.model.Equipment.MACHINE
+import com.bestrong.core.model.Equipment.OTHER
 import com.bestrong.core.model.Equipment.SMITH
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
@@ -14,6 +15,7 @@ import com.bestrong.core.model.MuscleGroup.ABS
 import com.bestrong.core.model.MuscleGroup.BACK
 import com.bestrong.core.model.MuscleGroup.BICEPS
 import com.bestrong.core.model.MuscleGroup.CALVES
+import com.bestrong.core.model.MuscleGroup.CARDIO
 import com.bestrong.core.model.MuscleGroup.CHEST
 import com.bestrong.core.model.MuscleGroup.FOREARMS
 import com.bestrong.core.model.MuscleGroup.FULL_BODY
@@ -155,6 +157,10 @@ object ExerciseLibrary {
         ex("clean_and_press", "Cargada y press", FULL_BODY, BARBELL, SHOULDERS),
         ex("farmers_walk", "Paseo del granjero", FULL_BODY, DUMBBELL, FOREARMS, TRAPS, tracking = TrackingType.DISTANCE),
         ex("burpee", "Burpees", FULL_BODY, BODYWEIGHT, tracking = TrackingType.REPS_ONLY),
+        // Cardio (sesión libre con GPS en el reloj)
+        ex("running", "Carrera", CARDIO, OTHER, tracking = TrackingType.DISTANCE),
+        ex("walking", "Caminar", CARDIO, OTHER, tracking = TrackingType.DISTANCE),
+        ex("cycling", "Bicicleta", CARDIO, OTHER, tracking = TrackingType.DISTANCE),
     ).map { if (it.id in UNILATERAL) it.copy(unilateral = true) else it }
 
     private val byId = all.associateBy { it.id }
@@ -198,6 +204,7 @@ object ExerciseLibrary {
         "Plank" to "plank", "Crunch" to "crunch", "Hanging Leg Raise" to "hanging_leg_raise", "Cable Crunch" to "cable_crunch",
         "Ab Wheel" to "ab_wheel", "Russian Twist" to "russian_twist", "Kettlebell Swing" to "kb_swing",
         "Clean and Press" to "clean_and_press", "Farmers Walk" to "farmers_walk", "Burpee" to "burpee",
+        "Running" to "running", "Walking" to "walking", "Cycling" to "cycling",
     )
 
     fun byId(id: String): Exercise? = byId[id]

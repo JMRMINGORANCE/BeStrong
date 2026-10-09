@@ -56,6 +56,14 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     val list by vm.measurements.collectAsStateWithLifecycle()
     val relative by vm.relativeStrength.collectAsStateWithLifecycle()
     var adding by remember { mutableStateOf(false) }
+    // Resto de medidas: una gráfica por cada una con al menos dos datos
+    val others: List<Pair<String, (BodyMeasurement) -> Double?>> = listOf(
+        stringResource(R.string.f_fat) to { m: BodyMeasurement -> m.bodyFatPct },
+        stringResource(R.string.f_waist) to { m: BodyMeasurement -> m.waistCm },
+        stringResource(R.string.f_chest) to { m: BodyMeasurement -> m.chestCm },
+        stringResource(R.string.f_arm) to { m: BodyMeasurement -> m.armCm },
+        stringResource(R.string.f_thigh) to { m: BodyMeasurement -> m.thighCm },
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -77,14 +85,6 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                     }
                 }
             }
-            // Resto de medidas: una gráfica por cada una con al menos dos datos
-            val others: List<Pair<String, (BodyMeasurement) -> Double?>> = listOf(
-                stringResource(R.string.f_fat) to { it.bodyFatPct },
-                stringResource(R.string.f_waist) to { it.waistCm },
-                stringResource(R.string.f_chest) to { it.chestCm },
-                stringResource(R.string.f_arm) to { it.armCm },
-                stringResource(R.string.f_thigh) to { it.thighCm },
-            )
             others.forEach { (label, value) ->
                 val points = list.filter { value(it) != null }.sortedBy { it.dateEpochMs }
                 if (points.size >= 2) {

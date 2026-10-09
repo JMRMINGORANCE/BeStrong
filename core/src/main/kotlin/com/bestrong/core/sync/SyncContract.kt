@@ -26,6 +26,9 @@ object SyncContract {
     /** DataItem con los ajustes que el reloj necesita (unidad de peso). */
     const val PATH_SETTINGS = "/bestrong/settings"
 
+    /** Prefijo de DataItems con rutinas creadas en el reloj (reloj → móvil); se añade el id. */
+    const val PATH_WATCH_ROUTINE_PREFIX = "/bestrong/watch-routine/"
+
     /** Mensaje reloj → móvil con las métricas de salud en directo. */
     const val PATH_METRICS = "/bestrong/metrics"
     const val KEY_PAYLOAD = "payload"

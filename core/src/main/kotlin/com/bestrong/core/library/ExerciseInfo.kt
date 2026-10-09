@@ -72,6 +72,9 @@ object ExerciseInfo {
         "kb_swing" to "Bisagra de cadera, no sentadilla. Proyecta la kettlebell con un golpe de cadera hasta la altura del pecho.",
         "clean_and_press" to "Saca la barra del suelo a los hombros de forma explosiva y empújala por encima de la cabeza.",
         "farmers_walk" to "Peso pesado en cada mano, hombros atrás, pasos cortos y rápidos.",
+        "running" to "Carrera libre con el GPS del reloj: distancia, ritmo y pulso.",
+        "walking" to "Caminata a buen ritmo con el GPS del reloj: distancia, ritmo y pulso.",
+        "cycling" to "Salida en bici con el GPS del reloj: distancia, velocidad y pulso.",
         "burpee" to "Sentadilla, manos al suelo, salto atrás a plancha, flexión, recoger y saltar arriba.",
     )
 

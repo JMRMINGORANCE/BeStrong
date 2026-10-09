@@ -24,6 +24,7 @@ internal val englishNames: Map<String, String> = mapOf(
     "plank" to "Plank", "crunch" to "Crunch", "hanging_leg_raise" to "Hanging Leg Raise", "cable_crunch" to "Cable Crunch",
     "ab_wheel" to "Ab Wheel Rollout", "russian_twist" to "Russian Twist",
     "kb_swing" to "Kettlebell Swing", "clean_and_press" to "Clean and Press", "farmers_walk" to "Farmer's Walk", "burpee" to "Burpee",
+    "running" to "Running", "walking" to "Walking", "cycling" to "Cycling",
 )
 
 internal val englishInstructions: Map<String, String> = mapOf(
@@ -96,5 +97,8 @@ internal val englishInstructions: Map<String, String> = mapOf(
     "kb_swing" to "Hip hinge, not a squat. Drive the kettlebell to chest height with a powerful hip snap.",
     "clean_and_press" to "Explosively bring the bar from the floor to your shoulders and press it overhead.",
     "farmers_walk" to "Heavy weight in each hand, shoulders back, short quick steps.",
+    "running" to "Free run with the watch GPS: distance, pace and heart rate.",
+    "walking" to "Brisk walk with the watch GPS: distance, pace and heart rate.",
+    "cycling" to "Ride with the watch GPS: distance, speed and heart rate.",
     "burpee" to "Squat, hands down, jump back to a plank, push-up, jump in and jump up.",
 )
