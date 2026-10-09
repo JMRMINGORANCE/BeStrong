@@ -71,19 +71,19 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
   - Burbuja flotante descartada: Android solo permite burbujas para conversaciones; el PiP cubre ese uso
 - [x] Bloqueo de toques durante el entreno; control con botones de volumen
 
-## Fase 5 — Planificación avanzada (siguiente)
-- [ ] Editor de programas propios (semanas, porcentajes, progresión)
-- [ ] Mesociclos con descarga automática por fatiga
-- [ ] Periodización ondulante (DUP)
-- [ ] Más programas: Texas Method, Madcow 5×5, nSuns, PHUL, PHAT, calistenia, powerlifting
-- [ ] Preparación para una fecha (pico y descarga)
-- [ ] Generador de rutinas por días, material y objetivo
-- [ ] Calendario arrastrable; duplicar semana; tiempo estimado y aviso si no da tiempo
-- [ ] Progresiones de calistenia e isométricos por tiempo
-- [ ] Bloques de cardio, HIIT/EMOM/AMRAP, calentamiento y estiramientos guiados
-- [ ] Avisos de lesión (ocultar ejercicios que cargan una zona) y límite de progresión semanal
+## Fase 5 — Planificación avanzada ✅
+- [x] Editor de programas propios (días, ejercicios, progresión lineal, % fijo del TM o 5/3/1)
+- [x] Mesociclos con descarga automática y detector de fatiga (estancamiento, RPE, energía y dolor)
+- [x] Periodización ondulante (DUP)
+- [x] Más programas: Texas Method, Madcow 5×5, nSuns, PHUL, PHAT, calistenia, powerlifting
+- [x] Preparación para una fecha (pico y descarga, con pesos para tus básicos)
+- [x] Generador de rutinas por días, material y objetivo
+- [x] Calendario arrastrable; duplicar semana; tiempo estimado y aviso si no da tiempo
+- [x] Progresiones de calistenia e isométricos por tiempo
+- [x] Temporizadores HIIT/Tabata/EMOM/AMRAP, calentamiento y estiramientos guiados (cardio libre con GPS en el reloj)
+- [x] Avisos de lesión (oculta ejercicios que cargan una zona) y límite de progresión semanal
 
-## Fase 6 — Salud, datos e integraciones
+## Fase 6 — Salud, datos e integraciones (siguiente)
 - [ ] Peso corporal desde Health Connect
 - [ ] Preparación del día con sueño y pulso en reposo (Health Connect)
 - [ ] Proteína diaria y agua durante el entreno

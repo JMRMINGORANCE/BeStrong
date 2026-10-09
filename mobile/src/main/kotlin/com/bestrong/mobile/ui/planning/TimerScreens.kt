@@ -1,0 +1,194 @@
+package com.bestrong.mobile.ui.planning
+
+import android.os.VibrationEffect
+import android.os.VibratorManager
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.bestrong.core.training.BodyFocus
+import com.bestrong.core.training.GuidedRoutines
+import com.bestrong.core.training.IntervalPlan
+import com.bestrong.core.training.IntervalTimer
+import com.bestrong.core.util.formatDuration
+import com.bestrong.designsystem.BeStrongPalette
+import com.bestrong.mobile.R
+import kotlinx.coroutines.delay
+
+/** Codifica un plan de intervalos para la ruta de navegación: «hiit:40:20:8», «emom:10», «amrap:12». */
+object IntervalRoute {
+    fun encode(p: IntervalPlan): String = when (p) {
+        is IntervalPlan.Hiit -> "hiit:${p.workSec}:${p.restSec}:${p.rounds}"
+        is IntervalPlan.Emom -> "emom:${p.minutes}"
+        is IntervalPlan.Amrap -> "amrap:${p.minutes}"
+    }
+
+    fun decode(s: String): IntervalPlan {
+        val parts = s.split(":")
+        val n = parts.drop(1).map { it.toIntOrNull() ?: 1 }
+        return when (parts.firstOrNull()) {
+            "emom" -> IntervalPlan.Emom(n.getOrElse(0) { 10 })
+            "amrap" -> IntervalPlan.Amrap(n.getOrElse(0) { 10 })
+            else -> IntervalPlan.Hiit(n.getOrElse(0) { 20 }, n.getOrElse(1) { 10 }, n.getOrElse(2) { 8 })
+        }
+    }
+}
+
+private fun vibrate(context: android.content.Context, long: Boolean) {
+    val v = context.getSystemService(VibratorManager::class.java)?.defaultVibrator ?: return
+    v.vibrate(VibrationEffect.createWaveform(if (long) longArrayOf(0, 400) else longArrayOf(0, 120, 80, 120), -1))
+}
+
+/** Temporizador HIIT / Tabata / EMOM / AMRAP a pantalla completa con vibración en cada cambio. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -> Unit) {
+    val context = LocalContext.current
+    val view = LocalView.current
+    DisposableEffect(Unit) {
+        view.keepScreenOn = true
+        onDispose { view.keepScreenOn = false }
+    }
+    var elapsedMs by rememberSaveable { mutableLongStateOf(0L) }
+    var running by rememberSaveable { mutableStateOf(true) }
+    var lastPhase by remember { mutableIntStateOf(-1) }
+    val total = IntervalTimer.totalSeconds(plan)
+    LaunchedEffect(running) {
+        var last = System.currentTimeMillis()
+        while (running) {
+            delay(200)
+            val now = System.currentTimeMillis()
+            elapsedMs += now - last
+            last = now
+        }
+    }
+    val current = IntervalTimer.at(plan, (elapsedMs / 1000).toInt())
+    val phases = IntervalTimer.phases(plan)
+    val phaseIndex = current?.let { phases.indexOf(it.first) } ?: phases.size
+    LaunchedEffect(phaseIndex) {
+        if (phaseIndex != lastPhase) {
+            if (lastPhase >= 0) vibrate(context, long = phaseIndex >= phases.size)
+            lastPhase = phaseIndex
+        }
+        if (phaseIndex >= phases.size) running = false
+    }
+    val work = current?.first?.work == true
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(IntervalRoute.encode(plan).substringBefore(':').uppercase()) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
+            )
+        },
+    ) { padding ->
+        Box(
+            Modifier.padding(padding).fillMaxSize().background(
+                if (current == null) {
+                    MaterialTheme.colorScheme.surface
+                } else if (work) {
+                    BeStrongPalette.Orange.copy(alpha = 0.25f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
+            ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (current == null) {
+                    Text(stringResource(R.string.timer_done), style = MaterialTheme.typography.displayMedium, fontWeight = FontWeight.Bold)
+                    Button(onClick = onBack) { Text(stringResource(R.string.action_done)) }
+                    return@Column
+                }
+                val (phase, left) = current
+                Text(stringResource(if (phase.work) R.string.timer_work else R.string.timer_rest), style = MaterialTheme.typography.headlineMedium)
+                Text(formatDuration(left.toLong()), fontSize = 96.sp, fontWeight = FontWeight.Bold)
+                val rounds = phases.maxOf { it.round }
+                if (rounds > 1) Text(stringResource(R.string.timer_round, phase.round, rounds), style = MaterialTheme.typography.titleMedium)
+                LinearProgressIndicator(progress = { (elapsedMs / 1000f) / total }, modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp))
+                OutlinedButton(onClick = { running = !running }) { Text(stringResource(if (running) R.string.timer_pause else R.string.timer_resume)) }
+            }
+        }
+    }
+}
+
+/** Calentamiento o estiramientos guiados: un paso tras otro con cuenta atrás. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GuidedSessionScreen(warmup: Boolean, focus: BodyFocus, onBack: () -> Unit) {
+    val context = LocalContext.current
+    val lang = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
+    val steps = remember(warmup, focus) { if (warmup) GuidedRoutines.warmup(focus) else GuidedRoutines.stretching(focus) }
+    var index by rememberSaveable { mutableIntStateOf(0) }
+    var left by rememberSaveable(index) { mutableIntStateOf(steps.getOrNull(index)?.seconds ?: 0) }
+    LaunchedEffect(index) {
+        while (left > 0) {
+            delay(1_000)
+            left--
+        }
+        if (index < steps.size) {
+            vibrate(context, long = index == steps.lastIndex)
+            index++
+        }
+    }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.guided_title)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
+            )
+        },
+    ) { padding ->
+        Box(Modifier.padding(padding).fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            val step = steps.getOrNull(index)
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (step == null) {
+                    Text(stringResource(R.string.timer_done), style = MaterialTheme.typography.displayMedium)
+                    Button(onClick = onBack) { Text(stringResource(R.string.action_done)) }
+                    return@Column
+                }
+                Text("${index + 1} / ${steps.size}", style = MaterialTheme.typography.labelLarge)
+                Text(step.name(lang), style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
+                Text(formatDuration(left.toLong()), fontSize = 72.sp, fontWeight = FontWeight.Bold)
+                steps.getOrNull(index + 1)?.let { Text(stringResource(R.string.guided_next, it.name(lang)), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = { index++ }) { Text(stringResource(R.string.guided_skip)) }
+                }
+            }
+        }
+    }
+}

@@ -16,9 +16,11 @@ import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.training.ActiveProgram
 import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
+import com.bestrong.core.training.ProgressionCap
 import com.bestrong.mobile.backup.AutoBackupWorker
 import com.bestrong.mobile.backup.ImagePrefetchWorker
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.di.ApplicationScope
 import com.bestrong.mobile.health.HealthConnectExporter
@@ -56,6 +58,7 @@ class WorkoutActions @Inject constructor(
     private val settings: SettingsStore,
     private val healthConnect: HealthConnectExporter,
     private val restTimer: RestTimerController,
+    private val planning: PlanningStore,
 ) {
     /**
      * Completa la siguiente serie pendiente y arranca su descanso (botón de la notificación,
@@ -80,12 +83,21 @@ class WorkoutActions @Inject constructor(
         val history = repository.history.value
         val s = settings.settings.value
         val gym = s.activeGym
+        val weekAgo = System.currentTimeMillis() - 7 * 86_400_000L
         return { id ->
             val ex = repository.exercise(id)
             val sets = (if (s.progressionEnabled && ex != null) Progression.suggest(ex, history, s.unit.stepKg())?.sets else null)
                 ?: WorkoutStats.previousSets(id, history)
+            // Límite de subida semanal (Planificación): no más de un x % sobre lo mejor de la semana pasada
+            val cap = planning.state.value.weeklyCap
+            val capped = if (cap == null) {
+                sets
+            } else {
+                val lastWeekBest = WorkoutStats.bestWeightBetween(id, history, weekAgo, Long.MAX_VALUE)
+                sets.map { it.copy(weightKg = ProgressionCap.limit(it.weightKg, lastWeekBest, cap)) }
+            }
             // Solo pesos que se pueden montar con la barra, discos y mancuernas del gimnasio activo
-            if (ex == null || s.unit != com.bestrong.core.util.WeightUnit.KG) sets else sets.map { it.copy(weightKg = if (it.weightKg > 0) gym.nearestLoad(it.weightKg, ex.equipment) else 0.0) }
+            if (ex == null || s.unit != com.bestrong.core.util.WeightUnit.KG) capped else capped.map { it.copy(weightKg = if (it.weightKg > 0) gym.nearestLoad(it.weightKg, ex.equipment) else 0.0) }
         }
     }
 
@@ -105,9 +117,10 @@ class AppSync @Inject constructor(
     private val watchSync: WatchSync,
     private val restTimer: RestTimerController,
     private val watchMetrics: WatchMetricsStore,
+    private val planning: PlanningStore,
 ) {
     private fun routinesForWatch(routines: List<Routine>, program: ActiveProgram?, history: List<Workout>): List<Routine> {
-        val today = program?.let { Periodization.nextSession(it, history, context.uiLanguage())?.routine }
+        val today = program?.let { Periodization.nextSession(it, history, context.uiLanguage(), planning.state.value.customPrograms)?.routine }
         return listOfNotNull(today) + routines
     }
 

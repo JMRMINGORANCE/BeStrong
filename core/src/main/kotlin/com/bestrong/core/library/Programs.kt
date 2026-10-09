@@ -103,5 +103,53 @@ object Programs {
                 RoutineTemplate("Torso", "Upper", listOf(i("db_bench_press", 3, 10), i("lat_pulldown", 3, 10), i("db_shoulder_press", 3, 10), i("seated_cable_row", 3, 12), i("plank", 3, 45, 60))),
             ),
         ),
+        TrainingProgram(
+            "phul_4", "PHUL", "PHUL",
+            "Power Hypertrophy Upper Lower: dos días de fuerza (torso y pierna) y dos de hipertrofia.",
+            "Power Hypertrophy Upper Lower: two power days (upper and lower) and two hypertrophy days.",
+            4,
+            listOf(
+                RoutineTemplate("Torso potencia", "Upper power", listOf(i("bench_press", 4, 4, 180, true), i("incline_bench_press", 3, 8, 150), i("barbell_row", 4, 4, 180), i("lat_pulldown", 3, 8), i("overhead_press", 3, 6, 150), i("barbell_curl", 3, 8, 60), i("skull_crusher", 3, 8, 60)), supersetPairs = listOf(5 to 6)),
+                RoutineTemplate("Pierna potencia", "Lower power", listOf(i("squat", 4, 4, 180, true), i("deadlift", 3, 4, 180, true), i("leg_press", 3, 12), i("leg_curl", 3, 8, 60), i("standing_calf_raise", 4, 8, 60))),
+                RoutineTemplate("Torso hipertrofia", "Upper hypertrophy", listOf(i("db_incline_press", 4, 10), i("db_fly", 3, 12, 60), i("seated_cable_row", 4, 10), i("db_row", 3, 12), i("lateral_raise", 3, 12, 60), i("incline_db_curl", 3, 12, 60), i("triceps_pushdown", 3, 12, 60)), supersetPairs = listOf(5 to 6)),
+                RoutineTemplate("Pierna hipertrofia", "Lower hypertrophy", listOf(i("front_squat", 3, 10, 150), i("lunge", 3, 12), i("leg_extension", 3, 15, 60), i("leg_curl", 3, 15, 60), i("seated_calf_raise", 4, 12, 60))),
+            ),
+        ),
+        TrainingProgram(
+            "phat_5", "PHAT", "PHAT",
+            "Power Hypertrophy Adaptive Training: dos días de potencia y tres de hipertrofia por grupos.",
+            "Power Hypertrophy Adaptive Training: two power days and three hypertrophy days by body part.",
+            5,
+            listOf(
+                RoutineTemplate("Torso potencia", "Upper power", listOf(i("pendlay_row", 3, 5, 180, true), i("pull_up", 2, 8, 150), i("bench_press", 3, 5, 180, true), i("dips", 2, 8, 120), i("db_shoulder_press", 3, 8), i("barbell_curl", 2, 8, 60), i("skull_crusher", 2, 8, 60))),
+                RoutineTemplate("Pierna potencia", "Lower power", listOf(i("squat", 3, 5, 180, true), i("hack_squat", 2, 8, 150), i("leg_extension", 2, 10, 60), i("romanian_deadlift", 3, 6, 150), i("leg_curl", 2, 8, 60), i("standing_calf_raise", 3, 8, 60))),
+                RoutineTemplate("Espalda y hombro", "Back & shoulders", listOf(i("barbell_row", 6, 3, 90), i("lat_pulldown", 3, 10), i("seated_cable_row", 3, 12), i("db_shoulder_press", 3, 10), i("lateral_raise", 3, 15, 60), i("shrug", 2, 15, 60))),
+                RoutineTemplate("Pierna hipertrofia", "Lower hypertrophy", listOf(i("squat", 6, 3, 90), i("hack_squat", 3, 10), i("leg_press", 2, 15), i("leg_extension", 3, 15, 60), i("leg_curl", 3, 15, 60), i("seated_calf_raise", 4, 12, 60))),
+                RoutineTemplate("Pecho y brazos", "Chest & arms", listOf(i("db_bench_press", 6, 3, 90), i("db_incline_press", 3, 10), i("cable_crossover", 2, 15, 60), i("preacher_curl", 3, 10, 60), i("hammer_curl", 2, 12, 60), i("overhead_triceps_ext", 3, 10, 60), i("triceps_pushdown", 2, 15, 60)), supersetPairs = listOf(3 to 5)),
+            ),
+        ),
+        TrainingProgram(
+            "calisthenics_3", "Calistenia 3 días", "Calisthenics 3 days",
+            "Solo peso corporal. Empieza por el nivel que puedas y avanza con las progresiones de Planificación.",
+            "Bodyweight only. Start at your level and move up with the progressions in Planning.",
+            3,
+            listOf(
+                RoutineTemplate("Empuje y pierna", "Push & legs", listOf(i("push_up", 4, 10, 90), i("dips", 3, 8, 90), i("air_squat", 4, 15, 60), i("bulgarian_split_squat", 3, 10, 90), i("hollow_hold", 3, 30, 60))),
+                RoutineTemplate("Tirón y core", "Pull & core", listOf(i("negative_pull_up", 4, 5, 120), i("chin_up", 3, 6, 120), i("scapular_pull_up", 3, 10, 60), i("hanging_leg_raise", 3, 10, 60), i("side_plank", 3, 30, 45))),
+                RoutineTemplate("Cuerpo completo", "Full body", listOf(i("diamond_push_up", 3, 10, 90), i("pull_up", 3, 6, 120), i("pistol_squat", 3, 5, 90), i("burpee", 3, 10, 60), i("plank", 3, 60, 60))),
+            ),
+        ),
+        TrainingProgram(
+            "powerlifting_4", "Powerlifting 4 días", "Powerlifting 4 days",
+            "Sentadilla, banca y peso muerto con variantes y accesorios para el press. Combínalo con el pico de Planificación antes de competir.",
+            "Squat, bench and deadlift with variations and accessories. Combine it with the peaking plan in Planning before a meet.",
+            4,
+            listOf(
+                RoutineTemplate("Sentadilla", "Squat", listOf(i("squat", 5, 3, 240, true), i("front_squat", 3, 6, 180), i("leg_curl", 3, 10, 60), i("ab_wheel", 3, 10, 60))),
+                RoutineTemplate("Banca", "Bench", listOf(i("bench_press", 5, 3, 240, true), i("close_grip_bench", 3, 6, 180), i("barbell_row", 4, 8, 120), i("triceps_pushdown", 3, 12, 60))),
+                RoutineTemplate("Peso muerto", "Deadlift", listOf(i("deadlift", 4, 3, 240, true), i("romanian_deadlift", 3, 8, 150), i("pull_up", 3, 8, 120), i("hyperextension", 3, 12, 60))),
+                RoutineTemplate("Banca volumen", "Bench volume", listOf(i("bench_press", 4, 8, 150, true), i("overhead_press", 3, 6, 150), i("db_row", 3, 10), i("face_pull", 3, 15, 60))),
+            ),
+        ),
     )
 }

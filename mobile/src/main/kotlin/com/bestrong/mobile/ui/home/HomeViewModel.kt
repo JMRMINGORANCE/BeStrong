@@ -9,6 +9,7 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.training.ActiveProgram
+import com.bestrong.core.training.Fatigue
 import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.PeriodizedProgram
 import com.bestrong.core.training.PeriodizedPrograms
@@ -17,6 +18,7 @@ import com.bestrong.mobile.AppSync
 import com.bestrong.mobile.R
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.sync.WatchSync
 import com.bestrong.mobile.ui.components.defaultWorkoutName
@@ -43,12 +45,15 @@ class HomeViewModel @Inject constructor(
     private val watchSync: WatchSync,
     private val settingsStore: SettingsStore,
     private val appSync: AppSync,
+    private val planning: PlanningStore,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     /** Sesión que toca hoy del programa activo (con las cargas ya calculadas). */
-    val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history) { active, history ->
-        active?.let { Periodization.nextSession(it, history, context.uiLanguage()) }
+    val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state) { active, history, plan ->
+        val session = active?.let { Periodization.nextSession(it, history, context.uiLanguage(), plan.customPrograms) }
+        // Semana de descarga del mesociclo: la sesión se aligera sola
+        if (session != null && plan.mesocycle?.isDeloadWeek(LocalDate.now()) == true) session.copy(routine = Fatigue.deload(session.routine)) else session
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Si no hay programa: la rutina que lleva más tiempo sin hacerse. */
@@ -73,7 +78,8 @@ class HomeViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 
-    val periodizedPrograms: List<PeriodizedProgram> = PeriodizedPrograms.all
+    /** Programas predefinidos más los creados por el usuario. */
+    val periodizedPrograms: List<PeriodizedProgram> get() = PeriodizedPrograms.all + planning.state.value.customPrograms
 
     /** Entreno abierto sin cambios desde hace más de 3 h (se olvidó terminar). */
     fun forgottenWorkout(now: Long = System.currentTimeMillis()): Workout? =

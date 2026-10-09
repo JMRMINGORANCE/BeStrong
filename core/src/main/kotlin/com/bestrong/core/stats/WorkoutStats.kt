@@ -87,6 +87,13 @@ object WorkoutStats {
         }
     }
 
+    /** Mayor peso de trabajo de un ejercicio entre dos instantes (null si no se hizo). */
+    fun bestWeightBetween(exerciseId: String, history: List<Workout>, fromEpochMs: Long, toEpochMs: Long): Double? =
+        history.filter { it.isFinished && it.startedAtEpochMs in fromEpochMs until toEpochMs }
+            .flatMap { w -> w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.completedSets } }
+            .filter { it.type != SetType.WARMUP && it.weightKg > 0 }
+            .maxOfOrNull { it.weightKg }
+
     /** Mejores marcas por ejercicio y tipo. */
     fun personalRecords(history: List<Workout>): Map<String, Map<RecordType, PersonalRecord>> {
         val result = mutableMapOf<String, MutableMap<RecordType, PersonalRecord>>()

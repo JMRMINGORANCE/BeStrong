@@ -72,6 +72,7 @@ fun HomeScreen(
     vm: HomeViewModel,
     onOpenWorkout: () -> Unit,
     onEditRoutine: (String?) -> Unit,
+    onOpenPlanning: () -> Unit = {},
 ) {
     val routines by vm.routines.collectAsStateWithLifecycle()
     val active by vm.active.collectAsStateWithLifecycle()
@@ -171,6 +172,7 @@ fun HomeScreen(
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = { onEditRoutine(null) }) { Text(stringResource(R.string.home_new_routine)) }
                         TextButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_programs)) }
+                        TextButton(onClick = onOpenPlanning) { Text(stringResource(R.string.planning_open)) }
                     }
                 }
             }

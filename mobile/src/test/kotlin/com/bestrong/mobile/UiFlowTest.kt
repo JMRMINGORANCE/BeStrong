@@ -206,6 +206,20 @@ class UiFlowTest {
         assertEquals(3, compose.onAllNodes(hasContentDescription("Peso en kg") and hasText("5")).fetchSemanticsNodes().size)
     }
 
+    @Test
+    @Config(qualifiers = "es-w884dp-h1104dp-xhdpi")
+    fun planning_unfolded() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Planificar"))
+        compose.onNodeWithText("Planificar").performClick()
+        settle()
+        assertNotNull(compose.onNodeWithText("Calendario de la semana").fetchSemanticsNode())
+        compose.onNodeWithText("Generar").performClick()
+        settle()
+        shot("planning_unfolded")
+    }
+
     /** Lista del diálogo de programas (la rejilla de Inicio también es desplazable). */
     private fun programsList() = compose.onNode(hasScrollToNodeAction() and hasAnyDescendant(hasText("GZCLP")))
 

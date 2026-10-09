@@ -15,11 +15,13 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.WorkoutStats
+import com.bestrong.core.training.Injuries
 import com.bestrong.core.util.newId
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.ExerciseImage
 import com.bestrong.mobile.data.ExerciseMediaStore
 import com.bestrong.mobile.data.MediaItem
+import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -60,6 +62,7 @@ class ExercisesViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val media: ExerciseMediaStore,
     private val settingsStore: SettingsStore,
+    private val planning: PlanningStore,
 ) : ViewModel() {
 
     val favorites: StateFlow<Set<String>> = settingsStore.settings.map { it.favoriteExercises }
@@ -82,9 +85,11 @@ class ExercisesViewModel @Inject constructor(
     val filter = MutableStateFlow(ExerciseFilter())
 
     /** Ejercicios usados recientemente, primero (como Hevy). */
-    val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, favorites) { all, f, history, favs ->
+    val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, favorites, planning.state) { all, f, history, favs, plan ->
         val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }
             .filter { !f.favoritesOnly || it.id in favs }
+            // Lesiones marcadas en Planificación: fuera los ejercicios que cargan esas zonas
+            .filter { Injuries.isSafe(it, plan.injuries) }
             .filter { !f.noEquipment || it.equipment == Equipment.BODYWEIGHT || it.equipment == Equipment.BAND }
         if (f.query.isBlank() && f.muscle == null && f.equipment == null) {
             val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)

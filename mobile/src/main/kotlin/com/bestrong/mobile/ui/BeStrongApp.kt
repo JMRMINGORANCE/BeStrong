@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -32,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.bestrong.core.training.BodyFocus
 import com.bestrong.mobile.LaunchRequest
 import com.bestrong.mobile.R
 import com.bestrong.mobile.data.SettingsStore
@@ -45,6 +47,12 @@ import com.bestrong.mobile.ui.history.HistoryScreen
 import com.bestrong.mobile.ui.history.HistoryViewModel
 import com.bestrong.mobile.ui.home.HomeScreen
 import com.bestrong.mobile.ui.home.HomeViewModel
+import com.bestrong.mobile.ui.planning.GuidedSessionScreen
+import com.bestrong.mobile.ui.planning.IntervalRoute
+import com.bestrong.mobile.ui.planning.IntervalTimerScreen
+import com.bestrong.mobile.ui.planning.PlanningScreen
+import com.bestrong.mobile.ui.planning.PlanningViewModel
+import com.bestrong.mobile.ui.planning.ProgramEditorScreen
 import com.bestrong.mobile.ui.profile.MeasurementsScreen
 import com.bestrong.mobile.ui.profile.ProfileScreen
 import com.bestrong.mobile.ui.profile.ProfileViewModel
@@ -70,6 +78,13 @@ private object Routes {
     const val EXERCISE = "exercise/{id}"
     const val MEASUREMENTS = "measurements"
     const val PICKED = "picked_exercises"
+    const val PLANNING = "planning"
+    const val PROGRAM_EDITOR = "program_editor?id={id}"
+    const val TIMER = "timer/{plan}"
+    const val GUIDED = "guided/{warmup}/{focus}"
+    fun programEditor(id: String?) = if (id == null) "program_editor" else "program_editor?id=$id"
+    fun timer(plan: String) = "timer/$plan"
+    fun guided(warmup: Boolean, focus: String) = "guided/$warmup/$focus"
     fun routine(id: String?) = if (id == null) "routine" else "routine?id=$id"
     fun exercise(id: String) = "exercise/$id"
 }
@@ -133,6 +148,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         vm = home,
                         onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
                         onEditRoutine = { nav.navigate(Routes.routine(it)) },
+                        onOpenPlanning = { nav.navigate(Routes.PLANNING) },
                     )
                 }
                 composable(TopLevel.HISTORY.route) {
@@ -194,6 +210,29 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 }
                 composable(Routes.MEASUREMENTS) {
                     MeasurementsScreen(hiltViewModel<ProfileViewModel>(), onBack = { nav.popBackStack() })
+                }
+                composable(Routes.PLANNING) {
+                    PlanningScreen(
+                        vm = hiltViewModel<PlanningViewModel>(),
+                        onBack = { nav.popBackStack() },
+                        onEditProgram = { nav.navigate(Routes.programEditor(it)) },
+                        onTimer = { nav.navigate(Routes.timer(IntervalRoute.encode(it))) },
+                        onGuided = { warmup, focus -> nav.navigate(Routes.guided(warmup, focus.name)) },
+                    )
+                }
+                composable(Routes.PROGRAM_EDITOR, arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })) { backStackEntry ->
+                    val parent = remember(backStackEntry) { nav.getBackStackEntry(Routes.PLANNING) }
+                    ProgramEditorScreen(hiltViewModel<PlanningViewModel>(parent), backStackEntry.arguments?.getString("id"), onClose = { nav.popBackStack() })
+                }
+                composable(Routes.TIMER, arguments = listOf(navArgument("plan") { type = NavType.StringType })) { backStackEntry ->
+                    IntervalTimerScreen(IntervalRoute.decode(backStackEntry.arguments?.getString("plan").orEmpty()), onBack = { nav.popBackStack() })
+                }
+                composable(
+                    Routes.GUIDED,
+                    arguments = listOf(navArgument("warmup") { type = NavType.BoolType }, navArgument("focus") { type = NavType.StringType }),
+                ) { backStackEntry ->
+                    val focus = runCatching { BodyFocus.valueOf(backStackEntry.arguments?.getString("focus").orEmpty()) }.getOrDefault(BodyFocus.FULL)
+                    GuidedSessionScreen(backStackEntry.arguments?.getBoolean("warmup") ?: true, focus, onBack = { nav.popBackStack() })
                 }
             }
         }
