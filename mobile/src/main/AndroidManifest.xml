@@ -13,6 +13,10 @@
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <uses-permission android:name="android.health.permission.WRITE_EXERCISE" />
     <uses-permission android:name="android.health.permission.WRITE_TOTAL_CALORIES_BURNED" />
+    <!-- Peso corporal y preparación del día (sueño y pulso en reposo) -->
+    <uses-permission android:name="android.health.permission.READ_WEIGHT" />
+    <uses-permission android:name="android.health.permission.READ_SLEEP" />
+    <uses-permission android:name="android.health.permission.READ_RESTING_HEART_RATE" />
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />

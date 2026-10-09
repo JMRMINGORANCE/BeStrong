@@ -1,0 +1,78 @@
+package com.bestrong.mobile.health
+
+import android.content.Context
+import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.RestingHeartRateRecord
+import androidx.health.connect.client.records.SleepSessionRecord
+import androidx.health.connect.client.records.WeightRecord
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
+import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.Duration
+import java.time.Instant
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/** Datos de salud que BeStrong lee de Health Connect (Samsung Health los publica ahí). */
+data class HealthSnapshot(
+    /** (fecha, kg) de los últimos 90 días. */
+    val weights: List<Pair<Long, Double>> = emptyList(),
+    /** Horas dormidas en las últimas 24 h. */
+    val sleepHours: Double? = null,
+    /** Pulso en reposo más reciente y media de 30 días. */
+    val restingHr: Int? = null,
+    val baselineRestingHr: Int? = null,
+)
+
+@Singleton
+class HealthConnectReader @Inject constructor(@ApplicationContext private val context: Context) {
+
+    val permissions: Set<String> = setOf(
+        HealthPermission.getReadPermission(WeightRecord::class),
+        HealthPermission.getReadPermission(SleepSessionRecord::class),
+        HealthPermission.getReadPermission(RestingHeartRateRecord::class),
+    )
+
+    private fun available() = HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE
+    private val client by lazy { HealthConnectClient.getOrCreate(context) }
+
+    suspend fun granted(): Set<String> =
+        if (!available()) emptySet() else runCatching { client.permissionController.getGrantedPermissions() }.getOrDefault(emptySet())
+
+    /** Lee lo que esté permitido; lo que no, queda a null o vacío. */
+    suspend fun read(now: Instant = Instant.now()): HealthSnapshot {
+        val ok = granted()
+        if (ok.isEmpty()) return HealthSnapshot()
+        val weights = if (HealthPermission.getReadPermission(WeightRecord::class) in ok) {
+            runCatching {
+                client.readRecords(ReadRecordsRequest(WeightRecord::class, TimeRangeFilter.between(now.minus(Duration.ofDays(90)), now)))
+                    .records.map { it.time.toEpochMilli() to it.weight.inKilograms }
+            }.getOrDefault(emptyList())
+        } else {
+            emptyList()
+        }
+        val sleep = if (HealthPermission.getReadPermission(SleepSessionRecord::class) in ok) {
+            runCatching {
+                client.readRecords(ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(now.minus(Duration.ofHours(24)), now)))
+                    .records.sumOf { Duration.between(it.startTime, it.endTime).toMinutes() } / 60.0
+            }.getOrNull()?.takeIf { it > 0 }
+        } else {
+            null
+        }
+        val resting = if (HealthPermission.getReadPermission(RestingHeartRateRecord::class) in ok) {
+            runCatching {
+                client.readRecords(ReadRecordsRequest(RestingHeartRateRecord::class, TimeRangeFilter.between(now.minus(Duration.ofDays(30)), now)))
+                    .records.sortedBy { it.time }.map { it.beatsPerMinute.toInt() }
+            }.getOrDefault(emptyList())
+        } else {
+            emptyList()
+        }
+        return HealthSnapshot(
+            weights = weights,
+            sleepHours = sleep,
+            restingHr = resting.lastOrNull(),
+            baselineRestingHr = resting.takeIf { it.size >= 3 }?.average()?.toInt(),
+        )
+    }
+}
