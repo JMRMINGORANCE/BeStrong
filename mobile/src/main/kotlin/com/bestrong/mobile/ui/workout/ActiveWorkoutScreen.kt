@@ -77,6 +77,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.bestrong.core.library.ExerciseInfo
 import com.bestrong.core.library.ExerciseLibrary
+import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.SessionRating
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
@@ -122,6 +123,7 @@ fun ActiveWorkoutScreen(
     val workout by vm.workout.collectAsStateWithLifecycle()
     val previous by vm.previousSets.collectAsStateWithLifecycle()
     val rest by vm.rest.collectAsStateWithLifecycle()
+    val restEndedAt by vm.restEndedAt.collectAsStateWithLifecycle()
     val summary by vm.summary.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
     val suggestions by vm.suggestions.collectAsStateWithLifecycle()
@@ -240,12 +242,14 @@ fun ActiveWorkoutScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true) }
+                    RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                     SummaryPanel(w, previous, liveMetrics)
                 }
                 listContent(Modifier.weight(0.62f))
             }
             else -> Column(content) {
                 if (w.isPaused) PausedBanner(vm::togglePause)
+                RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                 StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                 listContent(Modifier.weight(1f))
             }
@@ -500,7 +504,10 @@ private fun ExerciseCard(
                 }
             }
             Spacer(Modifier.height(4.dp))
-            SetHeader(we.exercise.tracking)
+            val prefs by vm.settings.collectAsStateWithLifecycle()
+            val dumbbell = we.exercise.equipment == Equipment.DUMBBELL && we.exercise.tracking == TrackingType.WEIGHT_REPS
+            val weightFactor = if (dumbbell && prefs.dumbbellTotal) 2 else 1
+            SetHeader(we.exercise.tracking, dumbbell, prefs.dumbbellTotal)
             var normalIndex = 0
             we.sets.forEachIndexed { i, set ->
                 val displayIndex = if (set.type == SetType.NORMAL) normalIndex++ else -1
@@ -522,6 +529,9 @@ private fun ExerciseCard(
                         onDistance = { vm.updateSetFields(we.id, set.id) { s -> s.copy(distanceM = it) } },
                         onNote = { vm.updateSetFields(we.id, set.id) { s -> s.copy(note = it) } },
                         onAssisted = { vm.updateSetFields(we.id, set.id) { s -> s.copy(assisted = it) } },
+                        onStepWeight = { vm.stepWeight(we.id, set.id, it) },
+                        onStepReps = { vm.stepReps(we.id, set.id, it) },
+                        weightFactor = weightFactor,
                     )
                 }
             }
@@ -646,6 +656,22 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                     )
+                }
+                // Doble progresión: qué peso usar la próxima vez
+                if (summary.nextTime.isNotEmpty()) {
+                    Text(stringResource(R.string.summary_next_time), fontWeight = FontWeight.Bold)
+                    summary.nextTime.take(6).forEach { n ->
+                        val arrow = when {
+                            n.direction > 0 -> "↑"
+                            n.direction < 0 -> "↓"
+                            else -> "="
+                        }
+                        Text(
+                            stringResource(R.string.summary_next_line, arrow, ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName, unit.format(n.weightKg, withUnit = true), n.reps),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (n.direction > 0) BeStrongPalette.VolumeOptimal else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
                 SessionRatingPicker(onRate)
                 if (summary.records.isNotEmpty()) {

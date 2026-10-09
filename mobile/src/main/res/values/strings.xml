@@ -51,6 +51,8 @@
     <string name="chart_max">Máx %1$s</string>
     <string name="chart_min">Mín %1$s</string>
     <string name="chart_no_weeks">Aún no hay entrenamientos en estas semanas</string>
+    <string name="col_each">c/u</string>
+    <string name="col_total">total</string>
     <string name="complete_sets_for_records">Completa series para ver tus récords</string>
     <string name="create_exercise">Crear ejercicio</string>
     <string name="create_short">+ Crear</string>
@@ -62,6 +64,8 @@
     <string name="day_not_trained">sin entrenar</string>
     <string name="day_trained">entrenado</string>
     <string name="delete_exercise">Eliminar ejercicio</string>
+    <string name="dumbbell_total">Mancuernas: anotar el peso total</string>
+    <string name="dumbbell_total_body">Escribe la suma de las dos mancuernas en vez del peso de cada una</string>
     <string name="equip_band">Banda elástica</string>
     <string name="equip_barbell">Barra</string>
     <string name="equip_bodyweight">Peso corporal</string>
@@ -118,11 +122,18 @@
     <string name="heatmap_desc">Mapa de calor: %1$d entrenos en %2$d</string>
     <string name="heatmap_title">%1$d · %2$d entrenos</string>
     <string name="history_card_detail">%1$s · %2$s · %3$d series</string>
+    <string name="history_edit">Editar entreno</string>
+    <string name="history_edit_done">Terminar edición</string>
+    <string name="history_edit_hint">Toca una serie para corregirla o borrarla. Los récords se recalculan.</string>
+    <string name="history_edit_info">Nombre y notas</string>
+    <string name="history_edit_set">Editar serie</string>
     <string name="history_empty_body">Cuando termines un entrenamiento aparecerá aquí.</string>
     <string name="history_empty_title">Sin entrenamientos todavía</string>
     <string name="history_pick_body">Verás todas las series, récords y estadísticas.</string>
     <string name="history_pick_title">Elige un entrenamiento</string>
     <string name="history_search">Buscar por ejercicio, nombre o nota</string>
+    <string name="history_workout_name">Nombre</string>
+    <string name="history_workout_notes">Notas</string>
     <string name="home_browse_programs">Ver programas predefinidos</string>
     <string name="home_empty_workout">Entrenamiento vacío</string>
     <string name="home_in_progress">Entrenamiento en curso</string>
@@ -139,6 +150,8 @@
     <string name="import_new_exercises"> · %1$d ejercicios nuevos</string>
     <string name="import_skipped"> · %1$d filas ignoradas</string>
     <string name="in_superset_with_next">En superserie con el siguiente</string>
+    <string name="include_variants">Incluir variantes (%1$d)</string>
+    <string name="include_variants_desc">Junta historial y récords de: %1$s</string>
     <string name="kcal_value">%1$d kcal</string>
     <string name="keep_screen_on">Mantener pantalla encendida al entrenar</string>
     <string name="last_weight">Último peso: %1$s</string>
@@ -285,6 +298,8 @@
     <string name="reps_short">reps</string>
     <string name="rest">Descanso</string>
     <string name="rest_minus_15">-15 s</string>
+    <string name="rest_overrun">Descanso terminado hace %1$s</string>
+    <string name="rest_overrun_action">Toca para seguir</string>
     <string name="rest_plus_15">+15 s</string>
     <string name="rest_skip">Saltar</string>
     <string name="rest_time">Tiempo de descanso</string>
@@ -361,6 +376,10 @@
     <string name="stat_volume">Volumen</string>
     <string name="stat_watch_hr">♥ Reloj</string>
     <string name="stat_workouts">Entrenamientos</string>
+    <string name="step_decrease">Restar %1$s</string>
+    <string name="step_increase">Sumar %1$s</string>
+    <string name="step_reps">Ajustar reps</string>
+    <string name="step_weight">Ajustar peso</string>
     <string name="substitute_body">Mismo músculo. Si ya lo hiciste, se usan tus pesos; si no, se convierten los actuales.</string>
     <string name="substitute_title">Cambiar por otro ejercicio</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -368,6 +387,8 @@
     <string name="summary_hr">♥ media %1$d ppm · máx %2$s</string>
     <string name="summary_imbalance">⚠ %1$s: un lado hizo un %2$d %% menos de reps</string>
     <string name="summary_kcal"> · %1$d kcal</string>
+    <string name="summary_next_line">%1$s %2$s: %3$s × %4$d</string>
+    <string name="summary_next_time">La próxima vez</string>
     <string name="summary_sets_exercises">%1$d series · %2$d ejercicios</string>
     <string name="summary_vs_last">Frente a la última vez</string>
     <string name="summary_vs_line">%1$s: %2$s</string>
@@ -393,6 +414,8 @@
     <string name="undo_set_deleted">Serie borrada</string>
     <string name="undo_workout_deleted">Entreno borrado</string>
     <string name="vibrate_rest">Vibrar al terminar el descanso</string>
+    <string name="voice_search">Buscar por voz</string>
+    <string name="voice_search_prompt">Di el nombre del ejercicio</string>
     <string name="volume_high">Alto</string>
     <string name="volume_low">Bajo</string>
     <string name="volume_none">Sin trabajo</string>

@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSource
+import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.R
@@ -170,17 +172,43 @@ private fun WorkoutCard(w: Workout, modifier: Modifier = Modifier) {
 private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)?, onWorkoutStarted: () -> Unit) {
     val unit = LocalWeightUnit.current
     var menu by remember { mutableStateOf(false) }
-    val records = remember(w.id) { vm.recordsIn(w) }
+    var editing by remember(w.id) { mutableStateOf(false) }
+    var editInfo by remember { mutableStateOf(false) }
+    var editSet by remember { mutableStateOf<Pair<String, String>?>(null) }
+    val records = remember(w) { vm.recordsIn(w) }
+    if (editInfo) {
+        EditPastWorkoutInfoDialog(w.name, w.notes, onSave = { n, t -> vm.editWorkout(w) { it.copy(name = n, notes = t) }; editInfo = false }, onDismiss = { editInfo = false })
+    }
+    editSet?.let { (weId, setId) ->
+        val we = w.exercises.firstOrNull { it.id == weId }
+        val set = we?.sets?.firstOrNull { it.id == setId }
+        if (we == null || set == null) {
+            editSet = null
+        } else {
+            EditPastSetDialog(
+                set = set,
+                tracking = we.exercise.tracking,
+                onSave = { s -> vm.editWorkout(w) { WorkoutEditor.updateSet(it, weId, setId) { s } }; editSet = null },
+                onDelete = { vm.editWorkout(w) { WorkoutEditor.removeSet(it, weId, setId) }; editSet = null },
+                onDismiss = { editSet = null },
+            )
+        }
+    }
     val context = LocalContext.current
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(w.name) },
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
+                if (editing) {
+                    IconButton(onClick = { editing = false }) { Icon(Icons.Default.Check, stringResource(R.string.history_edit_done)) }
+                }
                 Box {
                     IconButton(onClick = { WorkoutShareCard.share(context, w, records, unit) }) { Icon(Icons.Default.Share, stringResource(R.string.share_workout)) }
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.history_edit)) }, onClick = { menu = false; editing = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.history_edit_info)) }, onClick = { menu = false; editInfo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.repeat_workout)) }, onClick = { menu = false; vm.repeat(w, onWorkoutStarted) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.save_as_routine)) }, onClick = { menu = false; vm.saveAsRoutine(w) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; vm.delete(w.id); onBack?.invoke() })
@@ -190,6 +218,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
         )
         LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item { Text(formatDate(w.startedAtEpochMs), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            if (editing) item { Text(stringResource(R.string.history_edit_hint), color = MaterialTheme.colorScheme.primary) }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f))
@@ -222,7 +251,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                     Column(Modifier.padding(12.dp)) {
                         Text(we.exercise.displayName(), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
                         we.sets.forEachIndexed { i, set ->
-                            Row {
+                            Row(if (editing) Modifier.clickable { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
                                 Text(describeSet(set, we.exercise.tracking, unit), Modifier.weight(1f))
                                 if (set.estimatedOneRepMax > 0) Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax)), style = MaterialTheme.typography.bodySmall)

@@ -23,7 +23,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,9 +36,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.bestrong.core.model.Workout
 import com.bestrong.core.session.WorkoutEditor
+import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.workout.RestTimerController
+import kotlinx.coroutines.delay
 
 /**
  * Modo una mano (pantalla exterior del Fold): completar la siguiente serie y terminar,
@@ -79,6 +86,27 @@ fun PausedBanner(onResume: () -> Unit) {
             Text(stringResource(R.string.workout_paused), Modifier.weight(1f), fontWeight = FontWeight.Bold)
             Icon(Icons.Default.PlayArrow, null)
             Text(stringResource(R.string.workout_resume), Modifier.padding(start = 4.dp))
+        }
+    }
+}
+
+/** Aviso de descanso excesivo: aparece cuando ha pasado más de un minuto desde que acabó el descanso. */
+@Composable
+fun RestOverrunBanner(endedAt: Long?, onDismiss: () -> Unit) {
+    if (endedAt == null) return
+    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(endedAt) {
+        while (true) {
+            now = System.currentTimeMillis()
+            delay(1_000)
+        }
+    }
+    val elapsed = ((now - endedAt) / 1000).coerceAtLeast(0)
+    if (elapsed * 1000 < RestTimerController.OVERRUN_ALERT_MS) return
+    Surface(color = MaterialTheme.colorScheme.errorContainer, modifier = Modifier.fillMaxWidth().clickable(onClick = onDismiss)) {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.rest_overrun, formatDuration(elapsed)), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.rest_overrun_action), style = MaterialTheme.typography.labelMedium)
         }
     }
 }

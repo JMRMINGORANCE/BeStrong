@@ -46,6 +46,9 @@ data class ExerciseDetailState(
     val records: Map<RecordType, PersonalRecord>,
     val progress: List<ExerciseProgressPoint>,
     val recentSessions: List<Workout>,
+    /** Variantes enlazadas (incluido el propio ejercicio). */
+    val variants: List<Exercise> = emptyList(),
+    val includeVariants: Boolean = false,
 )
 
 @HiltViewModel
@@ -93,9 +96,13 @@ class ExercisesViewModel @Inject constructor(
         h.flatMap { w -> w.exercises.map { it.exercise.id } }.groupingBy { it }.eachCount()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    fun detail(exerciseId: String): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history) { all, history ->
+    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history) { all, fullHistory ->
         val ex = all.firstOrNull { it.id == exerciseId } ?: return@combine null
+        val family = ExerciseLibrary.familyOf(exerciseId)
+        val history = if (includeVariants) WorkoutStats.mergeVariants(fullHistory, exerciseId, family) else fullHistory
         ExerciseDetailState(
+            variants = family.mapNotNull { id -> all.firstOrNull { it.id == id } },
+            includeVariants = includeVariants,
             exercise = ex,
             records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),

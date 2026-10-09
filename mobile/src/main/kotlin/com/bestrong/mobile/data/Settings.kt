@@ -36,6 +36,8 @@ data class UserSettings(
     val activeGymId: String? = null,
     /** Ejercicios marcados como favoritos. */
     val favoriteExercises: Set<String> = emptySet(),
+    /** En ejercicios con mancuernas se anota la suma de las dos (se guarda por mancuerna). */
+    val dumbbellTotal: Boolean = false,
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
 }
@@ -66,6 +68,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             ?: listOf(GymProfile.gym(), GymProfile.home()),
         activeGymId = prefs.getString("active_gym", null),
         favoriteExercises = prefs.getStringSet("favorites", emptySet()).orEmpty().toSet(),
+        dumbbellTotal = prefs.getBoolean("dumbbell_total", false),
     )
 
     @Synchronized
@@ -88,6 +91,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))
             putString("active_gym", s.activeGymId)
             putStringSet("favorites", s.favoriteExercises)
+            putBoolean("dumbbell_total", s.dumbbellTotal)
         }
         _settings.value = s
     }

@@ -2,6 +2,7 @@ package com.bestrong.mobile
 
 import android.os.Looper
 import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -28,6 +29,7 @@ import com.bestrong.mobile.share.WorkoutShareCard
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.github.takahirom.roborazzi.captureScreenRoboImage
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -187,6 +189,21 @@ class UiFlowTest {
         compose.onNodeWithText("Deshacer").performClick()
         settle(20)
         assertTrue(compose.onAllNodesWithText("Press banca con mancuernas").fetchSemanticsNodes().isNotEmpty())
+    }
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
+    fun step_bar_autofills_following_sets() {
+        startEmptyWorkoutWithBench()
+        // Al tocar el peso aparece la barra ±; sumar en la primera serie rellena las siguientes
+        compose.onAllNodes(hasContentDescription("Peso en kg"))[0].performClick()
+        settle()
+        compose.onNodeWithContentDescription("Sumar 2,5 kg").performClick()
+        settle()
+        compose.onNodeWithContentDescription("Sumar 2,5 kg").performClick()
+        settle()
+        shot("step_bar_folded")
+        assertEquals(3, compose.onAllNodes(hasContentDescription("Peso en kg") and hasText("5")).fetchSemanticsNodes().size)
     }
 
     /** Lista del diálogo de programas (la rejilla de Inicio también es desplazable). */

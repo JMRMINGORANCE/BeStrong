@@ -72,6 +72,21 @@ object WorkoutStats {
         RecordType.MOST_REPS -> set.reps.toDouble()
     }
 
+    /**
+     * Variantes enlazadas: trata todas las variantes de [family] (p. ej. press banca, inclinado,
+     * con mancuernas) como si fueran [asExerciseId], para ver historial y récords juntos.
+     */
+    fun mergeVariants(history: List<Workout>, asExerciseId: String, family: Collection<String>): List<Workout> {
+        if (family.size <= 1) return history
+        return history.map { w ->
+            if (w.exercises.none { it.exercise.id in family && it.exercise.id != asExerciseId }) {
+                w
+            } else {
+                w.copy(exercises = w.exercises.map { we -> if (we.exercise.id in family) we.copy(exercise = we.exercise.copy(id = asExerciseId)) else we })
+            }
+        }
+    }
+
     /** Mejores marcas por ejercicio y tipo. */
     fun personalRecords(history: List<Workout>): Map<String, Map<RecordType, PersonalRecord>> {
         val result = mutableMapOf<String, MutableMap<RecordType, PersonalRecord>>()

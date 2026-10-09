@@ -135,6 +135,42 @@ object WorkoutEditor {
     fun updateSet(workout: Workout, workoutExerciseId: String, setId: String, block: (WorkoutSet) -> WorkoutSet): Workout =
         updateExercise(workout, workoutExerciseId) { we -> we.copy(sets = we.sets.map { if (it.id == setId) block(it) else it }) }
 
+    /**
+     * Cambia peso y/o reps de una serie y lo propaga a las series siguientes pendientes del mismo tipo
+     * que aún tenían el valor antiguo (autocompletar: cambias la primera y se ajustan las demás).
+     */
+    fun updateSetPropagating(workout: Workout, workoutExerciseId: String, setId: String, weightKg: Double? = null, reps: Int? = null): Workout =
+        updateExercise(workout, workoutExerciseId) { we ->
+            val i = we.sets.indexOfFirst { it.id == setId }
+            if (i < 0) return@updateExercise we
+            val old = we.sets[i]
+            we.copy(
+                sets = we.sets.mapIndexed { j, s ->
+                    when {
+                        j == i -> s.copy(weightKg = weightKg ?: s.weightKg, reps = reps ?: s.reps)
+                        j > i && !s.completed && s.type == old.type -> s.copy(
+                            weightKg = if (weightKg != null && s.weightKg == old.weightKg) weightKg else s.weightKg,
+                            reps = if (reps != null && s.reps == old.reps) reps else s.reps,
+                        )
+                        else -> s
+                    }
+                },
+            )
+        }
+
+    /** Suma [deltaKg] al peso de la serie (botones ±); en ejercicios de carga no baja de 0. */
+    fun stepWeight(workout: Workout, workoutExerciseId: String, setId: String, deltaKg: Double, allowNegative: Boolean = false): Workout =
+        updateSet(workout, workoutExerciseId, setId) { s ->
+            val v = Math.round((s.weightKg + deltaKg) * 1000) / 1000.0
+            s.copy(weightKg = if (allowNegative) v else v.coerceAtLeast(0.0))
+        }
+
+    fun stepReps(workout: Workout, workoutExerciseId: String, setId: String, delta: Int): Workout =
+        updateSet(workout, workoutExerciseId, setId) { it.copy(reps = (it.reps + delta).coerceAtLeast(0)) }
+
+    /** Edición de un entreno ya terminado: quita ejercicios que se quedan sin series. */
+    fun cleanupFinished(workout: Workout): Workout = workout.copy(exercises = workout.exercises.filter { it.sets.isNotEmpty() })
+
     fun toggleSetCompleted(workout: Workout, workoutExerciseId: String, setId: String): Workout =
         updateSet(workout, workoutExerciseId, setId) { it.copy(completed = !it.completed) }
 

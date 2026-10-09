@@ -244,6 +244,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             body = stringResource(R.string.one_handed_body),
                             checked = settings.oneHanded,
                         ) { v -> vm.updateSettings { it.copy(oneHanded = v) } }
+                        SwitchItem(
+                            title = stringResource(R.string.dumbbell_total),
+                            body = stringResource(R.string.dumbbell_total_body),
+                            checked = settings.dumbbellTotal,
+                        ) { v -> vm.updateSettings { it.copy(dumbbellTotal = v) } }
                         GymProfilesSection(
                             settings = settings,
                             onSelect = { id -> vm.updateSettings { s -> s.copy(gyms = s.gyms, activeGymId = id) } },

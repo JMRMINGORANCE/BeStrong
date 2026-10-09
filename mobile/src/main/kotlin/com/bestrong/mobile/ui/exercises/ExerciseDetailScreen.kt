@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,12 +27,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -52,7 +56,8 @@ import com.bestrong.mobile.ui.workout.describeSet
 @Composable
 fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (() -> Unit)?) {
     val unit = LocalWeightUnit.current
-    val flow = remember(exerciseId) { vm.detail(exerciseId) }
+    var includeVariants by rememberSaveable(exerciseId) { mutableStateOf(false) }
+    val flow = remember(exerciseId, includeVariants) { vm.detail(exerciseId, includeVariants) }
     val state by flow.collectAsStateWithLifecycle()
     val s = state ?: return
     var metric by rememberSaveable { mutableIntStateOf(0) }
@@ -71,6 +76,19 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
         )
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item { ExerciseMediaSection(vm, s.exercise) }
+            if (s.variants.size > 1) {
+                item {
+                    // Variantes enlazadas: historial y récords juntos o por separado
+                    val names = s.variants.filter { it.id != s.exercise.id }.map { it.displayName() }.joinToString()
+                    val desc = stringResource(R.string.include_variants_desc, names)
+                    FilterChip(
+                        selected = includeVariants,
+                        onClick = { includeVariants = !includeVariants },
+                        label = { Text(stringResource(R.string.include_variants, s.variants.size - 1)) },
+                        modifier = Modifier.semantics { stateDescription = desc },
+                    )
+                }
+            }
             if (s.progress.isEmpty()) {
                 item {
                     Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {

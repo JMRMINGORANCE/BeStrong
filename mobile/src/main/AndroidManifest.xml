@@ -14,6 +14,10 @@
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
+        <!-- Búsqueda de ejercicios por voz -->
+        <intent>
+            <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+        </intent>
     </queries>
 
     <application

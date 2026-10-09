@@ -21,6 +21,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconToggleButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -63,8 +65,9 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 
 /** Cabecera de la tabla de series: SERIE | ANTERIOR | KG | REPS | ✓ */
 @Composable
-fun SetHeader(tracking: TrackingType) {
-    val unit = LocalWeightUnit.current.label.uppercase()
+fun SetHeader(tracking: TrackingType, dumbbell: Boolean = false, dumbbellTotal: Boolean = false) {
+    val unit = LocalWeightUnit.current.label.uppercase() +
+        (if (dumbbell) " " + stringResource(if (dumbbellTotal) R.string.col_total else R.string.col_each) else "")
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         val style = MaterialTheme.typography.labelSmall
         Text(stringResource(R.string.set_col_set), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
@@ -88,8 +91,8 @@ fun SetHeader(tracking: TrackingType) {
     }
 }
 
-fun describeSet(set: WorkoutSet, tracking: TrackingType, unit: WeightUnit): String = when (tracking) {
-    TrackingType.WEIGHT_REPS -> "${unit.format(set.weightKg)} ${unit.label} × ${set.reps}"
+fun describeSet(set: WorkoutSet, tracking: TrackingType, unit: WeightUnit, weightFactor: Int = 1): String = when (tracking) {
+    TrackingType.WEIGHT_REPS -> "${unit.format(set.weightKg * weightFactor)} ${unit.label} × ${set.reps}"
     TrackingType.REPS_ONLY -> if (set.weightKg > 0) "+${unit.format(set.weightKg)} ${unit.label} × ${set.reps}" else "${set.reps} reps"
     TrackingType.DURATION -> "${set.durationSec} s"
     TrackingType.DISTANCE -> (if (set.weightKg > 0) "${unit.format(set.weightKg)} ${unit.label} · " else "") + "${set.distanceM.toInt()} m"
@@ -112,172 +115,232 @@ fun SetRow(
     onDistance: (Double) -> Unit = {},
     onNote: (String) -> Unit = {},
     onAssisted: (Boolean) -> Unit = {},
+    onStepWeight: (Int) -> Unit = {},
+    onStepReps: (Int) -> Unit = {},
+    /** 2 = se muestra y escribe el total de las dos mancuernas (se guarda por mancuerna). */
+    weightFactor: Int = 1,
     onType: (SetType) -> Unit,
     onRpe: (Double?) -> Unit,
     onDelete: () -> Unit,
 ) {
     val unit = LocalWeightUnit.current
     val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
-        if (it == SwipeToDismissBoxValue.EndToStart) onDelete()
+        // Deslizar a la izquierda borra; a la derecha completa (o desmarca) la serie
+        when (it) {
+            SwipeToDismissBoxValue.EndToStart -> onDelete()
+            SwipeToDismissBoxValue.StartToEnd -> onToggle()
+            else -> Unit
+        }
         false
     })
-    SwipeToDismissBox(
-        state = dismissState,
-        enableDismissFromStartToEnd = false,
-        backgroundContent = {
-            Box(
-                Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(end = 16.dp),
-                contentAlignment = Alignment.CenterEnd,
-            ) { Icon(Icons.Default.Delete, stringResource(R.string.set_delete), tint = MaterialTheme.colorScheme.onErrorContainer) }
-        },
-    ) {
-        val bg = if (set.completed) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surface
-        val label = if (set.type == SetType.NORMAL) "${index + 1}" else set.type.short
-        Row(
-            Modifier.fillMaxWidth().background(bg).padding(horizontal = 4.dp, vertical = 2.dp).heightIn(min = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
+    // Campo con el foco: muestra la barra de ajuste rápido (±) debajo de la fila
+    var focusedField by remember { mutableStateOf<StepField?>(null) }
+    var stepSync by remember { mutableIntStateOf(0) }
+    Column {
+        SwipeToDismissBox(
+            state = dismissState,
+            backgroundContent = {
+                if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
+                    Box(
+                        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.tertiaryContainer).padding(start = 16.dp),
+                        contentAlignment = Alignment.CenterStart,
+                    ) { Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.onTertiaryContainer) }
+                } else {
+                    Box(
+                        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(end = 16.dp),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) { Icon(Icons.Default.Delete, stringResource(R.string.set_delete), tint = MaterialTheme.colorScheme.onErrorContainer) }
+                }
+            },
         ) {
-            var menu by remember { mutableStateOf(false) }
-            var editingNote by remember { mutableStateOf(false) }
-            if (editingNote) {
-                var text by remember { mutableStateOf(set.note) }
-                AlertDialog(
-                    onDismissRequest = { editingNote = false },
-                    title = { Text(stringResource(R.string.set_note)) },
-                    text = { OutlinedTextField(text, { text = it }, placeholder = { Text(stringResource(R.string.set_note_hint)) }, minLines = 2) },
-                    confirmButton = { TextButton(onClick = { onNote(text.trim()); editingNote = false }) { Text(stringResource(R.string.action_save)) } },
-                    dismissButton = { TextButton(onClick = { editingNote = false }) { Text(stringResource(R.string.action_cancel)) } },
-                )
-            }
-            val typeDescription = stringResource(R.string.set_type_and_rpe, label)
-            val stateText = stringResource(if (set.completed) R.string.set_done else R.string.set_pending)
-            val labelColor = when (set.type) {
-                SetType.WARMUP -> MaterialTheme.colorScheme.tertiary
-                SetType.DROP -> MaterialTheme.colorScheme.secondary
-                SetType.FAILURE -> MaterialTheme.colorScheme.error
-                else -> MaterialTheme.colorScheme.onSurface
-            }
-            Box(Modifier.weight(0.6f)) {
+            val bg = if (set.completed) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surface
+            val label = if (set.type == SetType.NORMAL) "${index + 1}" else set.type.short
+            Row(
+                Modifier.fillMaxWidth().background(bg).padding(horizontal = 4.dp, vertical = 2.dp).heightIn(min = 48.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                var menu by remember { mutableStateOf(false) }
+                var editingNote by remember { mutableStateOf(false) }
+                if (editingNote) {
+                    var text by remember { mutableStateOf(set.note) }
+                    AlertDialog(
+                        onDismissRequest = { editingNote = false },
+                        title = { Text(stringResource(R.string.set_note)) },
+                        text = { OutlinedTextField(text, { text = it }, placeholder = { Text(stringResource(R.string.set_note_hint)) }, minLines = 2) },
+                        confirmButton = { TextButton(onClick = { onNote(text.trim()); editingNote = false }) { Text(stringResource(R.string.action_save)) } },
+                        dismissButton = { TextButton(onClick = { editingNote = false }) { Text(stringResource(R.string.action_cancel)) } },
+                    )
+                }
+                val typeDescription = stringResource(R.string.set_type_and_rpe, label)
+                val stateText = stringResource(if (set.completed) R.string.set_done else R.string.set_pending)
+                val labelColor = when (set.type) {
+                    SetType.WARMUP -> MaterialTheme.colorScheme.tertiary
+                    SetType.DROP -> MaterialTheme.colorScheme.secondary
+                    SetType.FAILURE -> MaterialTheme.colorScheme.error
+                    else -> MaterialTheme.colorScheme.onSurface
+                }
+                Box(Modifier.weight(0.6f)) {
+                    Column(
+                        Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)).clickable { menu = true }.padding(vertical = 6.dp)
+                            .semantics { contentDescription = typeDescription },
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(label + (if (set.note.isNotBlank()) " ✎" else "") + (if (set.assisted) " ⚑" else ""), fontWeight = FontWeight.Bold, color = labelColor, textAlign = TextAlign.Center)
+                        set.rpe?.let { Text("@${it.toString().removeSuffix(".0")}", style = MaterialTheme.typography.labelSmall) }
+                    }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        listOf(
+                            SetType.NORMAL to stringResource(R.string.set_type_normal),
+                            SetType.WARMUP to stringResource(R.string.set_type_warmup),
+                            SetType.DROP to stringResource(R.string.set_type_drop),
+                            SetType.FAILURE to stringResource(R.string.set_type_failure),
+                            SetType.CLUSTER to stringResource(R.string.set_type_cluster),
+                            SetType.PARTIAL to stringResource(R.string.set_type_partial),
+                            SetType.NEGATIVE to stringResource(R.string.set_type_negative),
+                        )
+                            .forEach { (t, l) -> DropdownMenuItem(text = { Text(if (t == set.type) "✓ $l" else l) }, onClick = { onType(t); menu = false }) }
+                        HorizontalDivider()
+                        Text(stringResource(R.string.rpe), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                        RPE_VALUES.forEach { v ->
+                            val t = v.toString().removeSuffix(".0")
+                            DropdownMenuItem(text = { Text((if (set.rpe == v) "✓ " else "") + stringResource(R.string.rpe_value, t)) }, onClick = { onRpe(v); menu = false })
+                        }
+                        if (set.rpe != null) DropdownMenuItem(text = { Text(stringResource(R.string.rpe_remove)) }, onClick = { onRpe(null); menu = false })
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { Text((if (set.assisted) "✓ " else "") + stringResource(R.string.set_assisted)) },
+                            onClick = { onAssisted(!set.assisted); menu = false },
+                        )
+                        DropdownMenuItem(text = { Text(stringResource(R.string.set_note)) }, onClick = { editingNote = true; menu = false })
+                    }
+                }
                 Column(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(6.dp)).clickable { menu = true }.padding(vertical = 6.dp)
-                        .semantics { contentDescription = typeDescription },
+                    Modifier.weight(1.4f).clickable(enabled = previous != null, onClickLabel = stringResource(R.string.set_copy_previous)) {
+                        previous?.let { onWeightKg(it.weightKg); onReps(it.reps); onDuration(it.durationSec) }
+                    },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(label + (if (set.note.isNotBlank()) " ✎" else "") + (if (set.assisted) " ⚑" else ""), fontWeight = FontWeight.Bold, color = labelColor, textAlign = TextAlign.Center)
-                    set.rpe?.let { Text("@${it.toString().removeSuffix(".0")}", style = MaterialTheme.typography.labelSmall) }
-                }
-                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                    listOf(
-                        SetType.NORMAL to stringResource(R.string.set_type_normal),
-                        SetType.WARMUP to stringResource(R.string.set_type_warmup),
-                        SetType.DROP to stringResource(R.string.set_type_drop),
-                        SetType.FAILURE to stringResource(R.string.set_type_failure),
-                        SetType.CLUSTER to stringResource(R.string.set_type_cluster),
-                        SetType.PARTIAL to stringResource(R.string.set_type_partial),
-                        SetType.NEGATIVE to stringResource(R.string.set_type_negative),
-                    )
-                        .forEach { (t, l) -> DropdownMenuItem(text = { Text(if (t == set.type) "✓ $l" else l) }, onClick = { onType(t); menu = false }) }
-                    HorizontalDivider()
-                    Text(stringResource(R.string.rpe), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-                    RPE_VALUES.forEach { v ->
-                        val t = v.toString().removeSuffix(".0")
-                        DropdownMenuItem(text = { Text((if (set.rpe == v) "✓ " else "") + stringResource(R.string.rpe_value, t)) }, onClick = { onRpe(v); menu = false })
-                    }
-                    if (set.rpe != null) DropdownMenuItem(text = { Text(stringResource(R.string.rpe_remove)) }, onClick = { onRpe(null); menu = false })
-                    HorizontalDivider()
-                    DropdownMenuItem(
-                        text = { Text((if (set.assisted) "✓ " else "") + stringResource(R.string.set_assisted)) },
-                        onClick = { onAssisted(!set.assisted); menu = false },
-                    )
-                    DropdownMenuItem(text = { Text(stringResource(R.string.set_note)) }, onClick = { editingNote = true; menu = false })
-                }
-            }
-            Column(
-                Modifier.weight(1.4f).clickable(enabled = previous != null, onClickLabel = stringResource(R.string.set_copy_previous)) {
-                    previous?.let { onWeightKg(it.weightKg); onReps(it.reps); onDuration(it.durationSec) }
-                },
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    previous?.let { describeSet(it, tracking, unit) } ?: "—",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                )
-                // Comparación en vivo con la misma serie de la vez anterior (+2,5 kg · +1)
-                val hasValues = set.weightKg > 0 || set.reps > 0 || set.durationSec > 0
-                val delta = if (hasValues) SetComparison.delta(set, previous)?.takeIf { !it.isZero } else null
-                if (delta != null) {
-                    val beats = SetComparison.beats(set, previous) == true
-                    val text = buildList {
-                        if (delta.weightKg != 0.0) add((if (delta.weightKg > 0) "+" else "−") + unit.format(kotlin.math.abs(delta.weightKg), withUnit = true))
-                        if (delta.reps != 0) add((if (delta.reps > 0) "+" else "−") + kotlin.math.abs(delta.reps))
-                        if (delta.durationSec != 0) add((if (delta.durationSec > 0) "+" else "−") + kotlin.math.abs(delta.durationSec) + " s")
-                    }.joinToString(" · ")
                     Text(
-                        text,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = if (beats) BeStrongPalette.VolumeOptimal else MaterialTheme.colorScheme.error,
+                        previous?.let { describeSet(it, tracking, unit, weightFactor) } ?: "—",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
                         maxLines = 1,
-                        modifier = Modifier.semantics { contentDescription = text },
                     )
-                }
-            }
-            when (tracking) {
-                TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY -> {
-                    // Peso corporal: + lastre, − asistencia (dominadas con banda o máquina asistida)
-                    val signed = tracking == TrackingType.REPS_ONLY
-                    NumberField(
-                        (if (set.weightKg < 0) "-" else "") + (unit.format(kotlin.math.abs(set.weightKg)).takeIf { set.weightKg != 0.0 } ?: ""),
-                        stringResource(if (signed) R.string.set_weight_signed else R.string.set_weight_in, unit.label),
-                        Modifier.weight(1f),
-                        decimal = true,
-                        signed = signed,
-                    ) {
-                        when {
-                            it.isEmpty() || it == "-" -> onWeightKg(0.0)
-                            it.startsWith("-") -> unit.parseToKg(it.drop(1))?.let { kg -> onWeightKg(-kg) }
-                            else -> unit.parseToKg(it)?.let(onWeightKg)
-                        }
+                    // Comparación en vivo con la misma serie de la vez anterior (+2,5 kg · +1)
+                    val hasValues = set.weightKg > 0 || set.reps > 0 || set.durationSec > 0
+                    val delta = if (hasValues) SetComparison.delta(set, previous)?.takeIf { !it.isZero } else null
+                    if (delta != null) {
+                        val beats = SetComparison.beats(set, previous) == true
+                        val text = buildList {
+                            if (delta.weightKg != 0.0) add((if (delta.weightKg > 0) "+" else "−") + unit.format(kotlin.math.abs(delta.weightKg), withUnit = true))
+                            if (delta.reps != 0) add((if (delta.reps > 0) "+" else "−") + kotlin.math.abs(delta.reps))
+                            if (delta.durationSec != 0) add((if (delta.durationSec > 0) "+" else "−") + kotlin.math.abs(delta.durationSec) + " s")
+                        }.joinToString(" · ")
+                        Text(
+                            text,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (beats) BeStrongPalette.VolumeOptimal else MaterialTheme.colorScheme.error,
+                            maxLines = 1,
+                            modifier = Modifier.semantics { contentDescription = text },
+                        )
                     }
-                    if (unilateral) {
-                        // Unilateral: izquierdo | derecho
-                        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                            NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_left), Modifier.weight(1f)) {
+                }
+                when (tracking) {
+                    TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY -> {
+                        // Peso corporal: + lastre, − asistencia (dominadas con banda o máquina asistida)
+                        val signed = tracking == TrackingType.REPS_ONLY
+                        NumberField(
+                            (if (set.weightKg < 0) "-" else "") + (unit.format(kotlin.math.abs(set.weightKg) * weightFactor).takeIf { set.weightKg != 0.0 } ?: ""),
+                            stringResource(if (signed) R.string.set_weight_signed else R.string.set_weight_in, unit.label),
+                            Modifier.weight(1f),
+                            decimal = true,
+                            signed = signed,
+                            syncKey = stepSync,
+                            onFocus = { f -> focusedField = if (f) StepField.WEIGHT else focusedField.takeIf { it != StepField.WEIGHT } },
+                        ) {
+                            when {
+                                it.isEmpty() || it == "-" -> onWeightKg(0.0)
+                                it.startsWith("-") -> unit.parseToKg(it.drop(1))?.let { kg -> onWeightKg(-kg / weightFactor) }
+                                else -> unit.parseToKg(it)?.let { kg -> onWeightKg(kg / weightFactor) }
+                            }
+                        }
+                        if (unilateral) {
+                            // Unilateral: izquierdo | derecho
+                            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_left), Modifier.weight(1f)) {
+                                    if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
+                                }
+                                NumberField(set.repsRight?.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_right), Modifier.weight(1f)) {
+                                    onRepsRight(it.toIntOrNull() ?: 0)
+                                }
+                            }
+                        } else {
+                            NumberField(
+                                set.reps.takeIf { it > 0 }?.toString() ?: "",
+                                stringResource(R.string.set_reps),
+                                Modifier.weight(1f),
+                                syncKey = stepSync,
+                                onFocus = { f -> focusedField = if (f) StepField.REPS else focusedField.takeIf { it != StepField.REPS } },
+                            ) {
                                 if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
                             }
-                            NumberField(set.repsRight?.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_right), Modifier.weight(1f)) {
-                                onRepsRight(it.toIntOrNull() ?: 0)
-                            }
-                        }
-                    } else {
-                        NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps), Modifier.weight(1f)) {
-                            if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
                         }
                     }
-                }
-                TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_seconds), Modifier.weight(2f)) {
-                    if (it.isEmpty()) onDuration(0) else it.toIntOrNull()?.let(onDuration)
-                }
-                TrackingType.DISTANCE -> {
-                    NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", stringResource(R.string.set_weight_in, unit.label), Modifier.weight(1f), decimal = true) {
-                        if (it.isEmpty()) onWeightKg(0.0) else unit.parseToKg(it)?.let(onWeightKg)
+                    TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_seconds), Modifier.weight(2f)) {
+                        if (it.isEmpty()) onDuration(0) else it.toIntOrNull()?.let(onDuration)
                     }
-                    NumberField(set.distanceM.takeIf { it > 0 }?.toInt()?.toString() ?: "", stringResource(R.string.set_meters), Modifier.weight(1f)) {
-                        onDistance(it.toDoubleOrNull() ?: 0.0)
+                    TrackingType.DISTANCE -> {
+                        NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", stringResource(R.string.set_weight_in, unit.label), Modifier.weight(1f), decimal = true) {
+                            if (it.isEmpty()) onWeightKg(0.0) else unit.parseToKg(it)?.let(onWeightKg)
+                        }
+                        NumberField(set.distanceM.takeIf { it > 0 }?.toInt()?.toString() ?: "", stringResource(R.string.set_meters), Modifier.weight(1f)) {
+                            onDistance(it.toDoubleOrNull() ?: 0.0)
+                        }
                     }
                 }
-            }
-            FilledIconToggleButton(
-                checked = set.completed,
-                onCheckedChange = { onToggle() },
-                modifier = Modifier.semantics { stateDescription = stateText },
-            ) {
-                Icon(Icons.Default.Check, stringResource(R.string.set_complete, label))
+                FilledIconToggleButton(
+                    checked = set.completed,
+                    onCheckedChange = { onToggle() },
+                    modifier = Modifier.semantics { stateDescription = stateText },
+                ) {
+                    Icon(Icons.Default.Check, stringResource(R.string.set_complete, label))
+                }
             }
         }
+        focusedField?.let { field ->
+            StepBar(
+                field = field,
+                stepLabel = if (field == StepField.WEIGHT) unit.format(unit.stepKg() * weightFactor, withUnit = true) else "1",
+                onStep = { sign ->
+                    if (field == StepField.WEIGHT) onStepWeight(sign) else onStepReps(sign)
+                    stepSync++
+                },
+            )
+        }
+    }
+}
+
+private enum class StepField { WEIGHT, REPS }
+
+/** Teclado de ajuste rápido: ±2,5 kg (o el incremento de la unidad) y ±1 rep sin abrir el teclado. */
+@Composable
+private fun StepBar(field: StepField, stepLabel: String, onStep: (Int) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceContainer).padding(horizontal = 8.dp, vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            stringResource(if (field == StepField.WEIGHT) R.string.step_weight else R.string.step_reps),
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.weight(1f),
+        )
+        val minus = stringResource(R.string.step_decrease, stepLabel)
+        val plus = stringResource(R.string.step_increase, stepLabel)
+        FilledTonalButton(onClick = { onStep(-1) }, modifier = Modifier.semantics { contentDescription = minus }) { Text("−$stepLabel") }
+        FilledTonalButton(onClick = { onStep(1) }, modifier = Modifier.semantics { contentDescription = plus }) { Text("+$stepLabel") }
     }
 }
 
@@ -286,10 +349,28 @@ fun SetRow(
  * el valor viaja a la base de datos y vuelve.
  */
 @Composable
-private fun NumberField(value: String, description: String, modifier: Modifier, decimal: Boolean = false, signed: Boolean = false, onChange: (String) -> Unit) {
+private fun NumberField(
+    value: String,
+    description: String,
+    modifier: Modifier,
+    decimal: Boolean = false,
+    signed: Boolean = false,
+    syncKey: Int = 0,
+    onFocus: (Boolean) -> Unit = {},
+    onChange: (String) -> Unit,
+) {
     var text by remember { mutableStateOf(value) }
     var focused by remember { mutableStateOf(false) }
-    LaunchedEffect(value) { if (!focused) text = value }
+    // Tras pulsar ± el valor llega de vuelta aunque el campo tenga el foco
+    val initialSync = remember { syncKey }
+    var pending by remember { mutableStateOf(false) }
+    LaunchedEffect(syncKey) { if (syncKey != initialSync) pending = true }
+    LaunchedEffect(value) {
+        if (!focused || pending) {
+            text = value
+            pending = false
+        }
+    }
     BasicTextField(
         value = text,
         onValueChange = { new ->
@@ -315,7 +396,10 @@ private fun NumberField(value: String, description: String, modifier: Modifier, 
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .padding(vertical = 10.dp)
-            .onFocusChanged { focused = it.isFocused }
+            .onFocusChanged {
+                if (focused != it.isFocused) onFocus(it.isFocused)
+                focused = it.isFocused
+            }
             .semantics { contentDescription = description },
         decorationBox = { inner ->
             Box(contentAlignment = Alignment.Center) {

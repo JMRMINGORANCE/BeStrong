@@ -1,5 +1,9 @@
 package com.bestrong.mobile.ui.exercises
 
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -51,6 +56,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -163,6 +169,7 @@ fun ExerciseSearchList(
             value = filter.query,
             onValueChange = { q -> vm.filter.value = filter.copy(query = q) },
             leadingIcon = { Icon(Icons.Default.Search, null) },
+            trailingIcon = { VoiceSearchButton { q -> vm.filter.value = vm.filter.value.copy(query = q) } },
             placeholder = { Text(stringResource(R.string.search_exercise)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
@@ -274,4 +281,23 @@ private fun CreateExerciseDialog(onDismiss: () -> Unit, onCreate: (String, Muscl
         confirmButton = { Button(enabled = name.isNotBlank(), onClick = { onCreate(name, muscle, equipment, tracking) }) { Text(stringResource(R.string.action_create)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
+}
+
+/** Micrófono para buscar por voz (solo si el móvil tiene reconocimiento de voz). */
+@Composable
+private fun VoiceSearchButton(onResult: (String) -> Unit) {
+    val context = LocalContext.current
+    val prompt = stringResource(R.string.voice_search_prompt)
+    val intent = remember(prompt) {
+        Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            .putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            .putExtra(RecognizerIntent.EXTRA_PROMPT, prompt)
+            .putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
+    }
+    val available = remember { intent.resolveActivity(context.packageManager) != null }
+    if (!available) return
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let(onResult)
+    }
+    IconButton(onClick = { runCatching { launcher.launch(intent) } }) { Icon(Icons.Default.Mic, stringResource(R.string.voice_search)) }
 }

@@ -37,6 +37,10 @@ class RestTimerController @Inject constructor(
     val rest: StateFlow<RestState?> = _rest.asStateFlow()
     private var job: Job? = null
 
+    /** Cuándo terminó el último descanso sin que se haya empezado la siguiente serie (aviso de descanso excesivo). */
+    private val _restEndedAt = MutableStateFlow<Long?>(null)
+    val restEndedAt: StateFlow<Long?> = _restEndedAt.asStateFlow()
+
     init {
         if (_rest.value != null) schedule()
     }
@@ -53,6 +57,7 @@ class RestTimerController @Inject constructor(
 
     fun start(seconds: Int) {
         if (seconds <= 0) return skip()
+        _restEndedAt.value = null
         _rest.value = RestState(System.currentTimeMillis() + seconds * 1000L, seconds)
         persist(_rest.value)
         schedule()
@@ -70,6 +75,7 @@ class RestTimerController @Inject constructor(
 
     fun skip() {
         job?.cancel()
+        _restEndedAt.value = null
         _rest.value = null
         persist(null)
     }
@@ -82,16 +88,32 @@ class RestTimerController @Inject constructor(
             _rest.value = null
             persist(null)
             if (vibrateEnabled()) vibrate()
+            // Si pasa un buen rato sin empezar la serie, un toque suave de recordatorio
+            val ended = System.currentTimeMillis()
+            _restEndedAt.value = ended
+            delay(OVERRUN_ALERT_MS)
+            if (_restEndedAt.value == ended && vibrateEnabled()) vibrate(short = true)
         }
     }
 
-    private fun vibrate() {
+    /** Ya no hace falta el aviso (serie empezada o entreno terminado). */
+    fun clearOverrun() {
+        _restEndedAt.value = null
+    }
+
+    private fun vibrate(short: Boolean = false) {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             context.getSystemService(VibratorManager::class.java)?.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
             context.getSystemService(Vibrator::class.java)
         }
-        vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 250, 150, 250), -1))
+        val pattern = if (short) longArrayOf(0, 120) else longArrayOf(0, 250, 150, 250)
+        vibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
+    }
+
+    companion object {
+        /** Margen tras el descanso antes de avisar de que se está alargando. */
+        const val OVERRUN_ALERT_MS = 60_000L
     }
 }

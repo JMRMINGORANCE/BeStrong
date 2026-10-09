@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
+import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.mobile.WorkoutActions
@@ -63,6 +64,17 @@ class HistoryViewModel @Inject constructor(
 
     fun clearDeleted() {
         _deleted.value = null
+    }
+
+    /** Corrige un entreno pasado; si se queda sin series, se borra (con deshacer). */
+    fun editWorkout(workout: Workout, block: (Workout) -> Workout) = viewModelScope.launch {
+        val edited = WorkoutEditor.cleanupFinished(block(workout)).copy(updatedAtEpochMs = System.currentTimeMillis())
+        if (edited.exercises.isEmpty()) {
+            _deleted.value = workout
+            repo.deleteWorkout(workout.id)
+        } else {
+            repo.saveWorkout(edited)
+        }
     }
 
     fun saveAsRoutine(workout: Workout) = viewModelScope.launch { repo.saveRoutine(Routine.fromWorkout(workout)) }

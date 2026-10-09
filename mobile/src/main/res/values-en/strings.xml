@@ -51,6 +51,8 @@
     <string name="chart_max">Max %1$s</string>
     <string name="chart_min">Min %1$s</string>
     <string name="chart_no_weeks">No workouts in these weeks yet</string>
+    <string name="col_each">each</string>
+    <string name="col_total">total</string>
     <string name="complete_sets_for_records">Complete sets to see your records</string>
     <string name="create_exercise">Create exercise</string>
     <string name="create_short">+ Create</string>
@@ -62,6 +64,8 @@
     <string name="day_not_trained">not trained</string>
     <string name="day_trained">trained</string>
     <string name="delete_exercise">Delete exercise</string>
+    <string name="dumbbell_total">Dumbbells: log total weight</string>
+    <string name="dumbbell_total_body">Enter the sum of both dumbbells instead of each one</string>
     <string name="equip_band">Band</string>
     <string name="equip_barbell">Barbell</string>
     <string name="equip_bodyweight">Bodyweight</string>
@@ -118,11 +122,18 @@
     <string name="heatmap_desc">Heatmap: %1$d workouts in %2$d</string>
     <string name="heatmap_title">%1$d · %2$d workouts</string>
     <string name="history_card_detail">%1$s · %2$s · %3$d sets</string>
+    <string name="history_edit">Edit workout</string>
+    <string name="history_edit_done">Finish editing</string>
+    <string name="history_edit_hint">Tap a set to fix or delete it. Records are recalculated.</string>
+    <string name="history_edit_info">Name and notes</string>
+    <string name="history_edit_set">Edit set</string>
     <string name="history_empty_body">Finished workouts will show up here.</string>
     <string name="history_empty_title">No workouts yet</string>
     <string name="history_pick_body">You\'ll see every set, record and stat.</string>
     <string name="history_pick_title">Pick a workout</string>
     <string name="history_search">Search by exercise, name or note</string>
+    <string name="history_workout_name">Name</string>
+    <string name="history_workout_notes">Notes</string>
     <string name="home_browse_programs">Browse ready-made programs</string>
     <string name="home_empty_workout">Empty workout</string>
     <string name="home_in_progress">Workout in progress</string>
@@ -139,6 +150,8 @@
     <string name="import_new_exercises"> · %1$d new exercises</string>
     <string name="import_skipped"> · %1$d rows skipped</string>
     <string name="in_superset_with_next">In superset with next</string>
+    <string name="include_variants">Include variants (%1$d)</string>
+    <string name="include_variants_desc">Combines history and records of: %1$s</string>
     <string name="kcal_value">%1$d kcal</string>
     <string name="keep_screen_on">Keep screen on while training</string>
     <string name="last_weight">Last weight: %1$s</string>
@@ -285,6 +298,8 @@
     <string name="reps_short">reps</string>
     <string name="rest">Rest</string>
     <string name="rest_minus_15">-15 s</string>
+    <string name="rest_overrun">Rest ended %1$s ago</string>
+    <string name="rest_overrun_action">Tap to continue</string>
     <string name="rest_plus_15">+15 s</string>
     <string name="rest_skip">Skip</string>
     <string name="rest_time">Rest time</string>
@@ -361,6 +376,10 @@
     <string name="stat_volume">Volume</string>
     <string name="stat_watch_hr">♥ Watch</string>
     <string name="stat_workouts">Workouts</string>
+    <string name="step_decrease">Subtract %1$s</string>
+    <string name="step_increase">Add %1$s</string>
+    <string name="step_reps">Adjust reps</string>
+    <string name="step_weight">Adjust weight</string>
     <string name="substitute_body">Same muscle. If you have done it before your weights are used; otherwise the current ones are converted.</string>
     <string name="substitute_title">Swap exercise</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -368,6 +387,8 @@
     <string name="summary_hr">♥ avg %1$d bpm · max %2$s</string>
     <string name="summary_imbalance">⚠ %1$s: one side did %2$d%% fewer reps</string>
     <string name="summary_kcal"> · %1$d kcal</string>
+    <string name="summary_next_line">%1$s %2$s: %3$s × %4$d</string>
+    <string name="summary_next_time">Next time</string>
     <string name="summary_sets_exercises">%1$d sets · %2$d exercises</string>
     <string name="summary_vs_last">Compared with last time</string>
     <string name="summary_vs_line">%1$s: %2$s</string>
@@ -393,6 +414,8 @@
     <string name="undo_set_deleted">Set deleted</string>
     <string name="undo_workout_deleted">Workout deleted</string>
     <string name="vibrate_rest">Vibrate when rest ends</string>
+    <string name="voice_search">Search by voice</string>
+    <string name="voice_search_prompt">Say the exercise name</string>
     <string name="volume_high">High</string>
     <string name="volume_low">Low</string>
     <string name="volume_none">None</string>

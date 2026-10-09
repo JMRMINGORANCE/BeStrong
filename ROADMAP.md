@@ -9,40 +9,40 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 
 ---
 
-## Fase 1 — Entrenar con menos toques (en curso)
-- [ ] Descanso automático según el tipo de ejercicio (básicos pesados 3 min, aislamiento 90 s), aprendiendo de tus ajustes
-- [ ] Comparación en vivo con la vez anterior en cada serie (+2,5 kg / +1 rep)
-- [ ] Autorregulación por RPE (RPE 10 → baja carga; RPE 7 → sube)
-- [ ] Tile de «Hoy toca» en el reloj
-- [ ] Botón de acción del Galaxy Watch Ultra configurable (completar serie / saltar descanso / siguiente ejercicio)
-- [ ] Recuperar exactamente el entreno y el descanso si Android cierra la app
-- [ ] Aviso de entreno olvidado (más de 3 h abierto)
-- [ ] Deshacer al borrar series, ejercicios o entrenos
-- [ ] Modo una mano en la pantalla exterior del Fold
-- [ ] Pausar el entreno
-- [ ] Cambiar de ejercicio sin perder la progresión (alternativa equivalente)
-- [ ] Perfiles de gimnasio (casa / gimnasio / hotel) con su material, discos y mancuernas disponibles
-- [ ] Botón «Invítame a un café» 🔑 (enlace de Ko-fi/PayPal) y pantalla «Acerca de» con créditos y licencias
-- [ ] Releases en GitHub con APK y changelog automáticos al crear una etiqueta de versión
+## Fase 1 — Entrenar con menos toques ✅
+- [x] Descanso automático según el tipo de ejercicio (básicos pesados 3 min, aislamiento 90 s), aprendiendo de tus ajustes
+- [x] Comparación en vivo con la vez anterior en cada serie (+2,5 kg / +1 rep)
+- [x] Autorregulación por RPE (RPE 10 → baja carga; RPE 7 → sube)
+- [x] Tile de «Hoy toca» en el reloj
+- [x] Botón de acción del Galaxy Watch Ultra configurable (completar serie / saltar descanso / siguiente ejercicio)
+- [x] Recuperar exactamente el entreno y el descanso si Android cierra la app
+- [x] Aviso de entreno olvidado (más de 3 h abierto)
+- [x] Deshacer al borrar series, ejercicios o entrenos
+- [x] Modo una mano en la pantalla exterior del Fold
+- [x] Pausar el entreno
+- [x] Cambiar de ejercicio sin perder la progresión (alternativa equivalente)
+- [x] Perfiles de gimnasio (casa / gimnasio / hotel) con su material, discos y mancuernas disponibles
+- [x] Botón «Invítame a un café» 🔑 (listo; falta tu enlace de Ko-fi/PayPal en `donationUrl`) y pantalla «Acerca de» con créditos y licencias
+- [x] Releases en GitHub con APK y changelog automáticos al crear una etiqueta de versión
 
-## Fase 2 — Registro más rico e historial
-- [ ] Notas por serie
-- [ ] Ejercicios unilaterales (registro por lado y aviso de descompensación)
-- [ ] Ejercicios asistidos o lastrados (peso negativo/positivo)
-- [ ] Ejercicios por distancia o tiempo + distancia
-- [ ] Tipos de serie: clusters / rest-pause, parciales, negativas; marcar series con ayuda
-- [ ] Peso por mancuerna o total
-- [ ] Saltar un ejercicio y volver; lista «pendiente» con tiempo estimado; aviso de descanso excesivo
-- [ ] Valoración de la sesión (energía, dolor, motivación) y comparativa con la sesión anterior
-- [ ] Sugerencia para la próxima vez al terminar
-- [ ] Buscar y filtrar el historial; editar entrenos pasados con recálculo
-- [ ] Mapa de calor anual de días entrenados
-- [ ] Caché de imágenes y GIF para el gimnasio sin cobertura
-- [ ] Teclado numérico propio con ±2,5 / ±1, autocompletar pesos, gestos de deslizar
-- [ ] Búsqueda de ejercicios por sinónimos y por voz; ejercicios favoritos; filtro «sin material»
-- [ ] Variantes enlazadas (historial y récords juntos o separados)
+## Fase 2 — Registro más rico e historial ✅
+- [x] Notas por serie
+- [x] Ejercicios unilaterales (registro por lado y aviso de descompensación)
+- [x] Ejercicios asistidos o lastrados (peso negativo/positivo)
+- [x] Ejercicios por distancia o tiempo + distancia
+- [x] Tipos de serie: clusters / rest-pause, parciales, negativas; marcar series con ayuda
+- [x] Peso por mancuerna o total
+- [x] Saltar un ejercicio y volver; lista «pendiente» con tiempo estimado; aviso de descanso excesivo
+- [x] Valoración de la sesión (energía, dolor, motivación) y comparativa con la sesión anterior
+- [x] Sugerencia para la próxima vez al terminar
+- [x] Buscar y filtrar el historial; editar entrenos pasados con recálculo
+- [x] Mapa de calor anual de días entrenados
+- [x] Caché de imágenes y GIF para el gimnasio sin cobertura
+- [x] Teclado numérico propio con ±2,5 / ±1, autocompletar pesos, gestos de deslizar
+- [x] Búsqueda de ejercicios por sinónimos y por voz; ejercicios favoritos; filtro «sin material»
+- [x] Variantes enlazadas (historial y récords juntos o separados)
 
-## Fase 3 — Estadísticas y motivación
+## Fase 3 — Estadísticas y motivación (en curso)
 - [ ] Niveles de fuerza (1RM relativo al peso corporal)
 - [ ] Equilibrio empuje/tirón y pierna/torso con aviso de descompensación
 - [ ] Resumen semanal el domingo (notificación + tarjeta)

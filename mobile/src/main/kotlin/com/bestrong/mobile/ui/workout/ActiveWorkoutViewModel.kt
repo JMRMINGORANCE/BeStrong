@@ -14,6 +14,8 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Autoregulation
+import com.bestrong.core.training.NextTime
+import com.bestrong.core.training.NextTimeSuggestion
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.training.RestPolicy
@@ -45,6 +47,7 @@ data class FinishedSummary(
     val records: List<PersonalRecord>,
     val comparisons: List<WorkoutStats.ExerciseComparison> = emptyList(),
     val imbalances: List<Pair<String, Double>> = emptyList(),
+    val nextTime: List<NextTimeSuggestion> = emptyList(),
 )
 
 @HiltViewModel
@@ -60,6 +63,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = repo.previousSetsLookup
     val settings: StateFlow<UserSettings> = settingsStore.settings
     val rest: StateFlow<RestState?> = restTimer.rest
+    val restEndedAt: StateFlow<Long?> = restTimer.restEndedAt
+    fun dismissOverrun() = restTimer.clearOverrun()
     val watchMetrics: StateFlow<LiveMetrics?> = metricsStore.metrics
 
     /** Sugerencia de progresión por ejercicio (id de ejercicio → sugerencia). */
@@ -169,10 +174,25 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun linkWithNext(weId: String) = edit { WorkoutEditor.linkWithNext(it, weId) }
     fun unlinkSuperset(weId: String) = edit { WorkoutEditor.unlinkSuperset(it, weId) }
 
+    /** Peso y reps se propagan a las series pendientes siguientes que tenían el mismo valor. */
     fun updateSet(weId: String, setId: String, weightKg: Double? = null, reps: Int? = null, duration: Int? = null) = edit { w ->
-        WorkoutEditor.updateSet(w, weId, setId) { s ->
-            s.copy(weightKg = weightKg ?: s.weightKg, reps = reps ?: s.reps, durationSec = duration ?: s.durationSec)
-        }
+        val propagated = if (weightKg != null || reps != null) WorkoutEditor.updateSetPropagating(w, weId, setId, weightKg, reps) else w
+        if (duration == null) propagated else WorkoutEditor.updateSet(propagated, weId, setId) { s -> s.copy(durationSec = duration) }
+    }
+
+    /** Botones ±: el incremento de la unidad (2,5 kg / 5 lb) o 1 rep. */
+    fun stepWeight(weId: String, setId: String, sign: Int) = edit { w ->
+        val we = w.exercises.firstOrNull { it.id == weId }
+        val old = we?.sets?.firstOrNull { it.id == setId } ?: return@edit w
+        val allowNegative = we.exercise.tracking == com.bestrong.core.model.TrackingType.REPS_ONLY
+        val stepped = WorkoutEditor.stepWeight(w, weId, setId, sign * settings.value.unit.stepKg(), allowNegative)
+        val newKg = stepped.exercises.first { it.id == weId }.sets.first { it.id == setId }.weightKg
+        WorkoutEditor.updateSetPropagating(w, weId, old.id, weightKg = newKg)
+    }
+
+    fun stepReps(weId: String, setId: String, sign: Int) = edit { w ->
+        val old = w.exercises.firstOrNull { it.id == weId }?.sets?.firstOrNull { it.id == setId } ?: return@edit w
+        WorkoutEditor.updateSetPropagating(w, weId, setId, reps = (old.reps + sign).coerceAtLeast(0))
     }
 
     /** Cambios de otros campos de la serie (nota, lado derecho, distancia, con ayuda). */
@@ -240,6 +260,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 WorkoutStats.newRecordsIn(finished, history),
                 WorkoutStats.compareWithPrevious(finished, history),
                 WorkoutStats.imbalances(finished),
+                NextTime.forWorkout(finished, settings.value.unit.stepKg()),
             )
             actions.exportToHealthConnectIfEnabled(finished)
         }
