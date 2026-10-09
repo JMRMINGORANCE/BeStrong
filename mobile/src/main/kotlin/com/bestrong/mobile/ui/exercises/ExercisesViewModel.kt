@@ -13,6 +13,7 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
+import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.util.newId
 import com.bestrong.mobile.data.BeStrongRepository
@@ -49,6 +50,8 @@ data class ExerciseDetailState(
     /** Variantes enlazadas (incluido el propio ejercicio). */
     val variants: List<Exercise> = emptyList(),
     val includeVariants: Boolean = false,
+    /** Mejor peso por número de reps (curva de fuerza). */
+    val strengthCurve: Map<Int, Double> = emptyMap(),
 )
 
 @HiltViewModel
@@ -103,6 +106,7 @@ class ExercisesViewModel @Inject constructor(
         ExerciseDetailState(
             variants = family.mapNotNull { id -> all.firstOrNull { it.id == id } },
             includeVariants = includeVariants,
+            strengthCurve = Strength.strengthCurve(exerciseId, history),
             exercise = ex,
             records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),

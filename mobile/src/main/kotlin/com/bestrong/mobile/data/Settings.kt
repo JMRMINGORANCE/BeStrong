@@ -2,6 +2,7 @@ package com.bestrong.mobile.data
 
 import android.content.Context
 import androidx.core.content.edit
+import com.bestrong.core.stats.Sex
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.core.training.GymProfile
 import com.bestrong.core.util.WeightUnit
@@ -38,6 +39,8 @@ data class UserSettings(
     val favoriteExercises: Set<String> = emptySet(),
     /** En ejercicios con mancuernas se anota la suma de las dos (se guarda por mancuerna). */
     val dumbbellTotal: Boolean = false,
+    /** Para niveles de fuerza y puntuaciones (DOTS, Wilks, IPF GL). */
+    val sex: Sex = Sex.MALE,
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
 }
@@ -69,6 +72,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         activeGymId = prefs.getString("active_gym", null),
         favoriteExercises = prefs.getStringSet("favorites", emptySet()).orEmpty().toSet(),
         dumbbellTotal = prefs.getBoolean("dumbbell_total", false),
+        sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
     )
 
     @Synchronized
@@ -92,6 +96,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("active_gym", s.activeGymId)
             putStringSet("favorites", s.favoriteExercises)
             putBoolean("dumbbell_total", s.dumbbellTotal)
+            putString("sex", s.sex.name)
         }
         _settings.value = s
     }

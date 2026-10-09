@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.R
+import com.bestrong.mobile.ui.components.BarChart
 import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.LineChart
 import com.bestrong.mobile.ui.components.LocalWeightUnit
@@ -145,6 +146,17 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                                     fontWeight = FontWeight.Bold,
                                 )
                             }
+                        }
+                    }
+                }
+            }
+            if (s.strengthCurve.size >= 2) {
+                item {
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp)) {
+                            SectionHeader(stringResource(R.string.strength_curve))
+                            Text(stringResource(R.string.strength_curve_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            BarChart(s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps", unit.fromKg(kg)) })
                         }
                     }
                 }

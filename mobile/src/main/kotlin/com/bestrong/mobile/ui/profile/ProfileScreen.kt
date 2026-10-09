@@ -73,6 +73,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     val stats by vm.stats.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
     val measurements by vm.measurements.collectAsStateWithLifecycle()
+    val advanced by vm.advanced.collectAsStateWithLifecycle()
+    var showOneRm by rememberSaveable { mutableStateOf(false) }
+    var showScores by rememberSaveable { mutableStateOf(false) }
+    if (showOneRm) OneRepMaxDialog { showOneRm = false }
+    if (showScores) ScoresDialog(advanced.bodyWeightKg, settings.sex) { showScores = false }
     val hcGranted by vm.healthConnectGranted.collectAsStateWithLifecycle()
     val hcLauncher = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
         val ok = granted.containsAll(vm.healthConnectPermissions)
@@ -184,6 +189,13 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                 }
             }
             item { WeeklyMuscleMap(stats.weeklyMuscles) }
+            item { WeekSummaryCard(advanced) }
+            item { StrengthLevelsCard(advanced, settings.sex) { sex -> vm.updateSettings { it.copy(sex = sex) } } }
+            item { BalanceCard(advanced) }
+            item { MuscleRecoveryCard(advanced) }
+            item { AchievementsCard(advanced) }
+            item { RecordTimelineCard(advanced) }
+            item { ToolsCard(onOneRm = { showOneRm = true }, onScores = { showScores = true }) }
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {

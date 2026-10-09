@@ -22,6 +22,7 @@ import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.di.ApplicationScope
 import com.bestrong.mobile.health.HealthConnectExporter
 import com.bestrong.mobile.notify.ReminderWorker
+import com.bestrong.mobile.notify.WeeklySummaryWorker
 import com.bestrong.mobile.sync.WatchSync
 import com.bestrong.mobile.ui.components.uiLanguage
 import com.bestrong.mobile.widget.BeStrongWidget
@@ -131,6 +132,8 @@ class AppSync @Inject constructor(
         }
         // Animaciones de ejercicios en caché para el gimnasio sin cobertura (solo con Wi-Fi)
         runCatching { ImagePrefetchWorker.schedule(context) }
+        // Resumen de la semana el domingo por la tarde
+        runCatching { WeeklySummaryWorker.schedule(context) }
         // Recordatorios y copia de seguridad semanal (WorkManager)
         scope.launch {
             settings.settings.map { Triple(it.reminderDays, it.reminderHour, it.reminderMinute) }.distinctUntilChanged()

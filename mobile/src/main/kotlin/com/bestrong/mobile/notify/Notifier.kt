@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.bestrong.core.model.Workout
+import com.bestrong.core.stats.PeriodSummary
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.MainActivity
@@ -22,6 +23,7 @@ object Notifier {
     private const val CHANNEL_RECORDS = "records"
     private const val CHANNEL_REMINDERS = "reminders"
     private const val ID_REMINDER = 20
+    private const val ID_WEEKLY = 21
     private const val ID_RECORDS_BASE = 100
 
     private fun ensureChannels(context: Context) {
@@ -80,5 +82,28 @@ object Notifier {
             .setContentIntent(openApp(context))
             .build()
         NotificationManagerCompat.from(context).notify(ID_REMINDER, n)
+    }
+
+    /** Resumen semanal (domingo por la tarde). */
+    @Suppress("MissingPermission")
+    fun weeklySummary(context: Context, week: PeriodSummary, unit: WeightUnit) {
+        if (!canPost(context)) return
+        ensureChannels(context)
+        val text = context.getString(R.string.notif_weekly_text, week.workouts, unit.formatVolume(week.volume), week.sets)
+        val lines = listOfNotNull(
+            text,
+            week.records.takeIf { it.isNotEmpty() }?.let { context.getString(R.string.notif_weekly_records, it.size) },
+            week.volumeChange?.let { c -> context.getString(R.string.notif_weekly_change, (if (c >= 0) "+" else "−") + "${(kotlin.math.abs(c) * 100).toInt()} %") },
+        )
+        val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
+            .setSmallIcon(R.drawable.ic_stat_dumbbell)
+            .setContentTitle(context.getString(R.string.notif_weekly_title))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(lines.joinToString("\n")))
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setAutoCancel(true)
+            .setContentIntent(openApp(context))
+            .build()
+        NotificationManagerCompat.from(context).notify(ID_WEEKLY, n)
     }
 }
