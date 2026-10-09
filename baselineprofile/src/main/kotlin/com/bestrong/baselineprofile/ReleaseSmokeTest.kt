@@ -32,9 +32,13 @@ class ReleaseSmokeTest {
         metrics = listOf(StartupTimingMetric()),
         iterations = 1,
         startupMode = StartupMode.COLD,
+        // El diálogo de permiso de notificaciones (Android 13+) taparía la app: se concede antes
+        setupBlock = { device.executeShellCommand("pm grant com.bestrong android.permission.POST_NOTIFICATIONS") },
     ) {
         pressHome()
         startActivityAndWait()
+        // Por si aun así aparece algún diálogo de permisos
+        device.wait(Until.findObject(By.text(Pattern.compile("(?i)allow|permitir"))), 2_000)?.click()
         // Qué hay en pantalla (para saber si la app se cerró o si falta un botón)
         fun screen(): String {
             val texts = runCatching { device.findObjects(By.text(Pattern.compile(".+"))).mapNotNull { it.text } }.getOrDefault(emptyList())
