@@ -43,18 +43,18 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Variantes enlazadas (historial y récords juntos o separados)
 
 ## Fase 3 — Estadísticas y motivación (en curso)
-- [ ] Niveles de fuerza (1RM relativo al peso corporal)
-- [ ] Equilibrio empuje/tirón y pierna/torso con aviso de descompensación
-- [ ] Resumen semanal el domingo (notificación + tarjeta)
-- [ ] Línea de tiempo de récords
-- [ ] Logros y retos personales con predicción de fecha
-- [ ] Curva de fuerza por rango de reps; calculadora de 1RM con varias fórmulas y tabla de porcentajes
-- [ ] Volumen efectivo según RPE/RIR
-- [ ] Puntuación DOTS / Wilks / IPF GL; intentos de competición
+- [x] Niveles de fuerza (1RM relativo al peso corporal)
+- [x] Equilibrio empuje/tirón y pierna/torso con aviso de descompensación
+- [x] Resumen semanal el domingo (notificación + tarjeta)
+- [x] Línea de tiempo de récords
+- [x] Logros y retos personales con predicción de fecha
+- [x] Curva de fuerza por rango de reps; calculadora de 1RM con varias fórmulas y tabla de porcentajes
+- [x] Volumen efectivo según RPE/RIR
+- [x] Puntuación DOTS / Wilks / IPF GL; intentos de competición
 - [ ] Informe mensual (PDF/imagen)
 - [ ] Comparar fotos de progreso (locales, con bloqueo por huella)
 - [ ] Gráficas de todas las medidas corporales y relación peso/fuerza
-- [ ] Días desde el último entreno por músculo y agujetas en el mapa muscular
+- [x] Días desde el último entreno por músculo y agujetas en el mapa muscular
 
 ## Fase 4 — Reloj y Fold
 - [ ] Registrar series por voz en el reloj
