@@ -2,6 +2,8 @@ package com.bestrong.mobile.ui.workout
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bestrong.core.library.Alternatives
+import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
@@ -10,8 +12,11 @@ import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
+import com.bestrong.core.training.Autoregulation
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
+import com.bestrong.core.training.RestPolicy
+import com.bestrong.core.training.RpeAdjustment
 import com.bestrong.core.training.Tempo
 import com.bestrong.mobile.WatchMetricsStore
 import com.bestrong.mobile.WorkoutActions
@@ -80,17 +85,81 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun addExercises(ids: List<String>) {
         val exercises = ids.mapNotNull { repo.exercise(it) }
         val lookup = actions.prefillLookup()
-        edit { WorkoutEditor.addExercises(it, exercises, lookup) }
+        val history = repo.history.value
+        // Descanso automático según el tipo de ejercicio (o el que usaste la última vez)
+        edit { WorkoutEditor.addExercises(it, exercises, lookup, restFor = { ex -> RestPolicy.restFor(ex, history) }) }
     }
 
-    fun removeExercise(weId: String) = edit { WorkoutEditor.removeExercise(it, weId) }
+    // --- Deshacer --------------------------------------------------------------------------
+
+    /** Avisos con acción: deshacer un borrado o aplicar un ajuste por RPE. */
+    sealed interface WorkoutEvent {
+        data class Undoable(val kind: UndoKind) : WorkoutEvent
+        data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
+    }
+    enum class UndoKind { SET, EXERCISE }
+
+    private val _events = MutableSharedFlow<WorkoutEvent>(extraBufferCapacity = 4)
+    val events: SharedFlow<WorkoutEvent> = _events
+    private var undoSnapshot: Workout? = null
+
+    private fun editUndoable(kind: UndoKind, block: (Workout) -> Workout) {
+        undoSnapshot = workout.value
+        edit(block)
+        _events.tryEmit(WorkoutEvent.Undoable(kind))
+    }
+
+    fun undo() {
+        val snapshot = undoSnapshot ?: return
+        undoSnapshot = null
+        // Se recupera lo borrado sin perder lo que haya cambiado después en otras series
+        edit { current -> if (current.id == snapshot.id) snapshot.copy(updatedAtEpochMs = current.updatedAtEpochMs) else current }
+    }
+
+    fun removeExercise(weId: String) = editUndoable(UndoKind.EXERCISE) { WorkoutEditor.removeExercise(it, weId) }
     fun moveExercise(from: Int, to: Int) = edit { WorkoutEditor.moveExercise(it, from, to) }
     fun setRestSeconds(weId: String, seconds: Int) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(restSeconds = seconds) } }
     fun setExerciseNotes(weId: String, notes: String) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(notes = notes) } }
     fun addSet(weId: String) = edit { WorkoutEditor.addSet(it, weId) }
-    fun removeSet(weId: String, setId: String) = edit { WorkoutEditor.removeSet(it, weId, setId) }
+    fun removeSet(weId: String, setId: String) = editUndoable(UndoKind.SET) { WorkoutEditor.removeSet(it, weId, setId) }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
-    fun setRpe(weId: String, setId: String, rpe: Double?) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(rpe = rpe) } }
+    fun setRpe(weId: String, setId: String, rpe: Double?) {
+        val current = workout.value ?: return
+        val updated = WorkoutEditor.updateSet(current, weId, setId) { s -> s.copy(rpe = rpe) }
+        edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(rpe = rpe) } }
+        // Autorregulación: con RPE muy alto o muy bajo, proponer ajustar las series que quedan
+        val we = updated.exercises.firstOrNull { it.id == weId } ?: return
+        Autoregulation.suggest(we, setId, settings.value.unit.stepKg())?.let {
+            _events.tryEmit(WorkoutEvent.RpeSuggestion(weId, we.exercise, it))
+        }
+    }
+
+    fun applyRpeAdjustment(weId: String, adjustment: RpeAdjustment) = edit { w ->
+        WorkoutEditor.updateExercise(w, weId) { Autoregulation.apply(it, adjustment) }
+    }
+
+    // --- Pausa y sustituciones -------------------------------------------------------------
+
+    fun togglePause() {
+        val now = System.currentTimeMillis()
+        val paused = workout.value?.isPaused == true
+        if (!paused) restTimer.skip()
+        edit { if (it.isPaused) WorkoutEditor.resume(it, now) else WorkoutEditor.pause(it, now) }
+    }
+
+    /** Alternativas al ejercicio (mismo músculo), con el material del gimnasio activo primero. */
+    fun alternatives(weId: String): List<Exercise> {
+        val we = workout.value?.exercises?.firstOrNull { it.id == weId } ?: return emptyList()
+        val available = settings.value.activeGym.equipment
+        return Alternatives.forExercise(we.exercise, repo.exercises.value).sortedBy { if (it.equipment in available) 0 else 1 }
+    }
+
+    fun substitute(weId: String, exerciseId: String) {
+        val to = repo.exercise(exerciseId) ?: return
+        val previousOfNew = WorkoutStats.previousSets(exerciseId, repo.history.value)
+        val step = settings.value.unit.stepKg()
+        edit { WorkoutEditor.substitute(it, weId, to, previousOfNew, step) }
+    }
     fun linkWithNext(weId: String) = edit { WorkoutEditor.linkWithNext(it, weId) }
     fun unlinkSuperset(weId: String) = edit { WorkoutEditor.unlinkSuperset(it, weId) }
 
@@ -101,7 +170,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /** Añade series de aproximación antes de la primera serie de trabajo. */
-    fun addWarmup(weId: String) = edit { w -> WorkoutEditor.addWarmup(w, weId, settings.value.unit) }
+    fun addWarmup(weId: String) = edit { w -> WorkoutEditor.addWarmup(w, weId, settings.value.unit, settings.value.activeGym.barKg) }
 
     /** Tempo de la repetición (p. ej. "3-1-1-0"); vacío lo quita. */
     fun setTempo(weId: String, tempo: String) = edit { w ->

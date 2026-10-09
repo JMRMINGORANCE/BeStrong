@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="about_body">Free strength-training app for phone and Galaxy Watch. No ads, no accounts and no paid features; your data stays on your devices.</string>
+    <string name="about_coffee">☕ Buy me a coffee</string>
+    <string name="about_coffee_note">Completely optional: it doesn’t unlock anything, it just helps keep improving the app.</string>
+    <string name="about_licenses">Open source</string>
+    <string name="about_source">View the source on GitHub</string>
+    <string name="about_subtitle">Version, credits, licences and support</string>
+    <string name="about_title">About BeStrong</string>
+    <string name="about_version">Version %1$s (%2$d)</string>
+    <string name="action_apply">Apply</string>
     <string name="action_back">Back</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_choose_folder">Choose folder</string>
@@ -21,6 +30,7 @@
     <string name="action_restore">Restore</string>
     <string name="action_save">Save</string>
     <string name="action_sync">Sync</string>
+    <string name="action_undo">Undo</string>
     <string name="add_exercises">Add exercises</string>
     <string name="add_measurement">Add measurement</string>
     <string name="add_n">Add %1$d</string>
@@ -80,6 +90,23 @@
     <string name="file_open_error">Couldn\'t open the file</string>
     <string name="filter_equipment">Equipment</string>
     <string name="filter_muscle">Muscle</string>
+    <string name="forgotten_body">“%1$s” has had no changes since %2$s. You can finish it at that time (not counting the time after), discard it or keep going.</string>
+    <string name="forgotten_continue">Keep going</string>
+    <string name="forgotten_finish">Finish at that time</string>
+    <string name="forgotten_title">Did you leave this workout open?</string>
+    <string name="gym_add">Add gym</string>
+    <string name="gym_any_dumbbell">Dumbbells of any weight</string>
+    <string name="gym_bar">Bar (%1$s)</string>
+    <string name="gym_db_from">From</string>
+    <string name="gym_db_step">Step</string>
+    <string name="gym_db_to">To</string>
+    <string name="gym_edit">Edit gym</string>
+    <string name="gym_equipment">Available equipment</string>
+    <string name="gym_name">Name</string>
+    <string name="gym_plates">Available plates</string>
+    <string name="gym_summary">%1$d equipment types · %2$d plates</string>
+    <string name="gyms">Gyms</string>
+    <string name="gyms_body">The active gym’s equipment adjusts plates, dumbbells, warm-ups and alternatives.</string>
     <string name="hc_body">Saves each workout as a weightlifting session</string>
     <string name="hc_export">Export to Health Connect / Samsung Health</string>
     <string name="hc_missing_perms">Missing permissions</string>
@@ -128,6 +155,7 @@
     <string name="month_next">Next month</string>
     <string name="month_previous">Previous month</string>
     <string name="more_options">More options</string>
+    <string name="msg_forgotten_saved">Workout saved with the time of the last set</string>
     <string name="msg_no_watch">No connected watch found</string>
     <string name="msg_opening_on_watch">Opening BeStrong on your Galaxy Watch</string>
     <string name="msg_program_added">%1$s: %2$d routines added</string>
@@ -181,6 +209,9 @@
     <string name="notif_reminder_title">Time to train today 💪</string>
     <string name="notif_rest_text">Next set when the countdown ends</string>
     <string name="notif_rest_title">Rest · %1$s</string>
+    <string name="one_hand_complete">%1$s · set %2$d</string>
+    <string name="one_handed">One-handed mode</string>
+    <string name="one_handed_body">On the Fold cover screen, “complete set” and “finish” move to the bottom, within thumb reach.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Options</string>
     <string name="personal_records">Personal records</string>
@@ -264,6 +295,8 @@
     <string name="routine_untitled">Untitled routine</string>
     <string name="rpe">RPE</string>
     <string name="rpe_remove">Clear RPE</string>
+    <string name="rpe_suggest_down">Very high RPE on %1$s: lower the remaining sets to %2$s?</string>
+    <string name="rpe_suggest_up">Low RPE on %1$s: raise the remaining sets to %2$s?</string>
     <string name="rpe_value">RPE %1$s</string>
     <string name="save_as_routine">Save as routine</string>
     <string name="search_exercise">Search exercise</string>
@@ -304,6 +337,8 @@
     <string name="stat_volume">Volume</string>
     <string name="stat_watch_hr">♥ Watch</string>
     <string name="stat_workouts">Workouts</string>
+    <string name="substitute_body">Same muscle. If you have done it before your weights are used; otherwise the current ones are converted.</string>
+    <string name="substitute_title">Swap exercise</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
     <string name="suggestion_apply">%1$s %2$s · %3$s · Apply</string>
     <string name="summary_hr">♥ avg %1$d bpm · max %2$s</string>
@@ -327,6 +362,9 @@
     <string name="track_reps">Reps only</string>
     <string name="track_time">Time</string>
     <string name="track_weight_reps">Weight &amp; reps</string>
+    <string name="undo_exercise_deleted">Exercise removed</string>
+    <string name="undo_set_deleted">Set deleted</string>
+    <string name="undo_workout_deleted">Workout deleted</string>
     <string name="vibrate_rest">Vibrate when rest ends</string>
     <string name="volume_high">High</string>
     <string name="volume_low">Low</string>
@@ -361,5 +399,8 @@
     <string name="workout_name">Workout name</string>
     <string name="workout_night">Night workout</string>
     <string name="workout_none">There is no workout in progress</string>
+    <string name="workout_pause">Pause workout</string>
+    <string name="workout_paused">Workout paused</string>
+    <string name="workout_resume">Resume</string>
     <string name="workouts_per_week">Workouts per week</string>
 </resources>

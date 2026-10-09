@@ -109,7 +109,7 @@ fun WorkoutScreen(
                 // Botón rápido / botones físicos del Galaxy Watch Ultra: completar serie
                 .onPreviewKeyEvent { e ->
                     if (e.key.nativeKeyCode in STEM_KEYS) {
-                        if (e.type == KeyEventType.KeyUp && session.currentSet() != null && session.completeSet()) onRest()
+                        if (e.type == KeyEventType.KeyUp && session.onStemInWorkout()) onRest()
                         true
                     } else {
                         false
@@ -234,7 +234,7 @@ private fun BigValue(value: String, unit: String, selected: Boolean, onClick: ()
 private const val ROTARY_STEP_PX = 48f
 
 /** Botones físicos: en el Watch Ultra el botón rápido se puede asignar a la app en Ajustes › Funciones avanzadas. */
-private val STEM_KEYS = setOf(
+internal val STEM_KEYS = setOf(
     android.view.KeyEvent.KEYCODE_STEM_PRIMARY,
     android.view.KeyEvent.KEYCODE_STEM_1,
     android.view.KeyEvent.KEYCODE_STEM_2,

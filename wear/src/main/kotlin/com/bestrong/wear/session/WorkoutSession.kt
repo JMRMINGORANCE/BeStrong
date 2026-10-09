@@ -244,6 +244,36 @@ class WorkoutSession @Inject constructor(
         _rotaryTarget.value = target
     }
 
+    private val _stemAction = MutableStateFlow(store.stemAction)
+    val stemAction: StateFlow<StemAction> = _stemAction.asStateFlow()
+
+    /** Cambia la función del botón rápido (completar serie → saltar descanso → siguiente ejercicio). */
+    fun cycleStemAction() {
+        val next = StemAction.entries[(_stemAction.value.ordinal + 1) % StemAction.entries.size]
+        _stemAction.value = next
+        store.stemAction = next
+    }
+
+    /** Botón rápido pulsado en la pantalla de la serie. Devuelve true si hay que ir al descanso. */
+    fun onStemInWorkout(): Boolean = when (_stemAction.value) {
+        StemAction.NEXT_EXERCISE -> {
+            nextExercise()
+            false
+        }
+        else -> currentSet() != null && completeSet()
+    }
+
+    /** Botón rápido pulsado durante el descanso. */
+    fun onStemInRest() {
+        when (_stemAction.value) {
+            StemAction.NEXT_EXERCISE -> {
+                stopRest()
+                nextExercise()
+            }
+            else -> stopRest()
+        }
+    }
+
     fun setRepCounting(enabled: Boolean) {
         val on = enabled && repCounter.isAvailable
         _repCounting.value = on
@@ -435,3 +465,6 @@ class WorkoutSession @Inject constructor(
         scope.launch { phoneSync.sendMetrics(LiveMetrics(w.id, m.heartRate, m.avgHeartRate, m.maxHeartRate, m.calories, now)) }
     }
 }
+
+/** Función del botón rápido del Galaxy Watch Ultra (y botones físicos asignables). */
+enum class StemAction { COMPLETE_SET, SKIP_REST, NEXT_EXERCISE }

@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bestrong.core.training.GymProfile
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
@@ -86,6 +87,27 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     val folderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let(vm::setBackupFolder) }
     val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     var showReminders by rememberSaveable { mutableStateOf(false) }
+    var editingGym by remember { mutableStateOf<GymProfile?>(null) }
+    var showAbout by rememberSaveable { mutableStateOf(false) }
+    if (showAbout) AboutDialog { showAbout = false }
+    editingGym?.let { g ->
+        GymEditorDialog(
+            gym = g,
+            canDelete = settings.gyms.size > 1 && settings.gyms.any { it.id == g.id },
+            onSave = { updated ->
+                vm.updateSettings { s ->
+                    val exists = s.gyms.any { it.id == updated.id }
+                    s.copy(gyms = if (exists) s.gyms.map { if (it.id == updated.id) updated else it } else s.gyms + updated)
+                }
+                editingGym = null
+            },
+            onDelete = {
+                vm.updateSettings { s -> s.copy(gyms = s.gyms.filterNot { it.id == g.id }) }
+                editingGym = null
+            },
+            onDismiss = { editingGym = null },
+        )
+    }
     if (showReminders) {
         RemindersDialog(
             settings = settings,
@@ -218,6 +240,17 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             vm.updateSettings { it.copy(keepScreenOn = v) }
                         }
                         SwitchItem(
+                            title = stringResource(R.string.one_handed),
+                            body = stringResource(R.string.one_handed_body),
+                            checked = settings.oneHanded,
+                        ) { v -> vm.updateSettings { it.copy(oneHanded = v) } }
+                        GymProfilesSection(
+                            settings = settings,
+                            onSelect = { id -> vm.updateSettings { s -> s.copy(gyms = s.gyms, activeGymId = id) } },
+                            onEdit = { editingGym = it },
+                            onAdd = { editingGym = GymProfile(name = "") },
+                        )
+                        SwitchItem(
                             title = stringResource(R.string.hc_export),
                             body = when {
                                 !vm.healthConnectAvailable -> stringResource(R.string.hc_unavailable)
@@ -271,6 +304,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             headlineContent = { Text(stringResource(R.string.csv_import)) },
                             supportingContent = { Text(stringResource(R.string.csv_import_body)) },
                             trailingContent = { TextButton(onClick = { importLauncher.launch(arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) }) { Text(stringResource(R.string.action_import)) } },
+                        )
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.about_title)) },
+                            supportingContent = { Text(stringResource(R.string.about_subtitle)) },
+                            modifier = Modifier.clickable { showAbout = true },
                         )
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.privacy)) },

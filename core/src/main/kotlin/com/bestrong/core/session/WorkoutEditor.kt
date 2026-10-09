@@ -103,9 +103,9 @@ object WorkoutEditor {
     }
 
     /** Añade series de aproximación antes de la primera serie de trabajo (sustituye calentamientos pendientes). */
-    fun addWarmup(workout: Workout, workoutExerciseId: String, unit: WeightUnit): Workout = updateExercise(workout, workoutExerciseId) { we ->
+    fun addWarmup(workout: Workout, workoutExerciseId: String, unit: WeightUnit, barKg: Double? = null): Workout = updateExercise(workout, workoutExerciseId) { we ->
         val working = we.sets.firstOrNull { it.type != SetType.WARMUP }?.weightKg ?: return@updateExercise we
-        val warmups = WarmupGenerator.generate(working, unit)
+        val warmups = if (barKg != null) WarmupGenerator.generate(working, unit, barKg) else WarmupGenerator.generate(working, unit)
         if (warmups.isEmpty()) return@updateExercise we
         we.copy(sets = we.sets.filter { it.type == SetType.WARMUP && it.completed } + warmups + we.sets.filter { it.type != SetType.WARMUP })
     }

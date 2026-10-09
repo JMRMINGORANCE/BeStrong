@@ -25,6 +25,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -33,6 +37,7 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,43 +73,55 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
     val scope = rememberCoroutineScope()
+    val snackbar = remember { SnackbarHostState() }
+    val deleted by vm.deleted.collectAsStateWithLifecycle()
+    val deletedMsg = stringResource(R.string.undo_workout_deleted)
+    val undoLabel = stringResource(R.string.action_undo)
+    LaunchedEffect(deleted) {
+        if (deleted != null) {
+            if (snackbar.showSnackbar(deletedMsg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undoDelete() else vm.clearDeleted()
+        }
+    }
 
-    NavigableListDetailPaneScaffold(
-        navigator = navigator,
-        listPane = {
-            AnimatedPane {
-                Column(Modifier.fillMaxSize()) {
-                    TopAppBar(title = { Text(stringResource(R.string.nav_history)) })
-                    if (history.isEmpty()) {
-                        EmptyState(Icons.Default.History, stringResource(R.string.history_empty_title), stringResource(R.string.history_empty_body))
-                        return@Column
-                    }
-                    LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        item { CalendarMonth(days, Modifier.padding(bottom = 8.dp)) }
-                        items(history, key = { it.id }) { w ->
-                            WorkoutCard(w, Modifier.clickable { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } })
+    Box(Modifier.fillMaxSize()) {
+        NavigableListDetailPaneScaffold(
+            navigator = navigator,
+            listPane = {
+                AnimatedPane {
+                    Column(Modifier.fillMaxSize()) {
+                        TopAppBar(title = { Text(stringResource(R.string.nav_history)) })
+                        if (history.isEmpty()) {
+                            EmptyState(Icons.Default.History, stringResource(R.string.history_empty_title), stringResource(R.string.history_empty_body))
+                            return@Column
+                        }
+                        LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item { CalendarMonth(days, Modifier.padding(bottom = 8.dp)) }
+                            items(history, key = { it.id }) { w ->
+                                WorkoutCard(w, Modifier.clickable { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } })
+                            }
                         }
                     }
                 }
-            }
-        },
-        detailPane = {
-            AnimatedPane {
-                val id = (navigator.currentDestination?.contentKey as? String)
-                val w = history.firstOrNull { it.id == id }
-                if (w == null) {
-                    EmptyState(Icons.Default.FitnessCenter, stringResource(R.string.history_pick_title), stringResource(R.string.history_pick_body))
-                } else {
-                    WorkoutDetail(
-                        w = w,
-                        vm = vm,
-                        onBack = if (navigator.canNavigateBack()) ({ scope.launch { navigator.navigateBack() } }) else null,
-                        onWorkoutStarted = onWorkoutStarted,
-                    )
+            },
+            detailPane = {
+                AnimatedPane {
+                    val id = (navigator.currentDestination?.contentKey as? String)
+                    val w = history.firstOrNull { it.id == id }
+                    if (w == null) {
+                        EmptyState(Icons.Default.FitnessCenter, stringResource(R.string.history_pick_title), stringResource(R.string.history_pick_body))
+                    } else {
+                        WorkoutDetail(
+                            w = w,
+                            vm = vm,
+                            onBack = if (navigator.canNavigateBack()) ({ scope.launch { navigator.navigateBack() } }) else null,
+                            onWorkoutStarted = onWorkoutStarted,
+                        )
+                    }
                 }
-            }
-        },
-    )
+            },
+        )
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
+    }
 }
 
 @Composable

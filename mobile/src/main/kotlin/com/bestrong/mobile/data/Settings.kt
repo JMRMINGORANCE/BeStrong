@@ -2,12 +2,15 @@ package com.bestrong.mobile.data
 
 import android.content.Context
 import androidx.core.content.edit
+import com.bestrong.core.sync.SyncContract
+import com.bestrong.core.training.GymProfile
 import com.bestrong.core.util.WeightUnit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.serialization.builtins.ListSerializer
 
 data class UserSettings(
     val defaultRestSeconds: Int = 120,
@@ -26,7 +29,14 @@ data class UserSettings(
     val lastBackupEpochMs: Long = 0,
     /** Sesiones por semana que el usuario se propone (si no sigue un programa). */
     val weeklyGoal: Int = 3,
-)
+    /** Botones principales abajo en la pantalla exterior del Fold (uso con una mano). */
+    val oneHanded: Boolean = false,
+    /** Perfiles de gimnasio con su material; el activo condiciona pesos, discos y alternativas. */
+    val gyms: List<GymProfile> = listOf(GymProfile.gym(), GymProfile.home()),
+    val activeGymId: String? = null,
+) {
+    val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
+}
 
 @Singleton
 class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
@@ -47,6 +57,12 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         backupFolderUri = prefs.getString("backup_folder", null),
         lastBackupEpochMs = prefs.getLong("backup_last", 0),
         weeklyGoal = prefs.getInt("weekly_goal", 3),
+        oneHanded = prefs.getBoolean("one_handed", false),
+        gyms = prefs.getString("gyms", null)
+            ?.let { runCatching { SyncContract.json.decodeFromString(ListSerializer(GymProfile.serializer()), it) }.getOrNull() }
+            ?.takeIf { it.isNotEmpty() }
+            ?: listOf(GymProfile.gym(), GymProfile.home()),
+        activeGymId = prefs.getString("active_gym", null),
     )
 
     @Synchronized
@@ -65,6 +81,9 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("backup_folder", s.backupFolderUri)
             putLong("backup_last", s.lastBackupEpochMs)
             putInt("weekly_goal", s.weeklyGoal)
+            putBoolean("one_handed", s.oneHanded)
+            putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))
+            putString("active_gym", s.activeGymId)
         }
         _settings.value = s
     }

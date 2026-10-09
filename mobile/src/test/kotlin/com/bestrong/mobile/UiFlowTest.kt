@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -156,6 +157,36 @@ class UiFlowTest {
         // Aparece en «Te toca» y en la lista de rutinas
         assertTrue(compose.onAllNodesWithText("Full Body 3 días · A").fetchSemanticsNodes().isNotEmpty())
         shot("programs_added_folded")
+    }
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
+    fun pause_substitute_undo() {
+        startEmptyWorkoutWithBench()
+        // Pausa: el cronómetro se detiene y aparece el aviso
+        compose.onNodeWithContentDescription("Pausar entreno").performClick()
+        settle()
+        assertNotNull(compose.onNodeWithText("Entreno en pausa").fetchSemanticsNode())
+        shot("workout_paused_folded")
+        compose.onNodeWithText("Entreno en pausa").performClick()
+        settle()
+        // Cambiar de ejercicio por una alternativa del mismo músculo
+        compose.onNodeWithContentDescription("Opciones de Press banca").performClick()
+        settle()
+        compose.onNodeWithText("Cambiar por otro ejercicio").performClick()
+        settle()
+        captureScreenRoboImage("build/outputs/roborazzi/substitute_folded.png")
+        compose.onNodeWithText("Press banca con mancuernas").performClick()
+        settle()
+        assertTrue(compose.onAllNodesWithText("Press banca con mancuernas").fetchSemanticsNodes().isNotEmpty())
+        // Quitar el ejercicio y deshacer
+        compose.onNodeWithContentDescription("Opciones de Press banca con mancuernas").performClick()
+        settle()
+        compose.onNodeWithText("Quitar ejercicio").performClick()
+        settle()
+        compose.onNodeWithText("Deshacer").performClick()
+        settle(20)
+        assertTrue(compose.onAllNodesWithText("Press banca con mancuernas").fetchSemanticsNodes().isNotEmpty())
     }
 
     /** Lista del diálogo de programas (la rejilla de Inicio también es desplazable). */

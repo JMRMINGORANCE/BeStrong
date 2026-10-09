@@ -76,6 +76,10 @@
     <string name="routines">Rutinas</string>
     <string name="set_of">Serie %1$d/%2$d%3$s</string>
     <string name="sets_volume">%1$d series · %2$s</string>
+    <string name="stem_button">Botón rápido</string>
+    <string name="stem_complete">Completar serie</string>
+    <string name="stem_next">Siguiente ejercicio</string>
+    <string name="stem_skip_rest">Saltar descanso</string>
     <string name="summary_duration">⏱ %1$s</string>
     <string name="summary_hr">♥ media %1$d · máx %2$s</string>
     <string name="summary_kcal">🔥 %1$d kcal</string>
@@ -83,7 +87,11 @@
     <string name="superset">Superserie</string>
     <string name="syncs_with_phone">Se sincroniza con el móvil</string>
     <string name="tap_again_discard">Toca otra vez para descartar</string>
+    <string name="tile_start">Empezar</string>
     <string name="tile_streak">🔥 %1$d sem · %2$s</string>
+    <string name="tile_today">Hoy toca</string>
+    <string name="tile_today_detail">%1$d ejercicios</string>
+    <string name="tile_today_none">Sin rutinas: créalas en el móvil</string>
     <string name="tile_week">entrenos esta semana</string>
     <string name="train">Entrenar</string>
     <string name="training">Entrenando</string>

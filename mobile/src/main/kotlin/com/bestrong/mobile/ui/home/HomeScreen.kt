@@ -62,6 +62,7 @@ import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
+import com.bestrong.mobile.ui.components.formatTime
 import com.bestrong.mobile.ui.components.rememberNow
 import com.bestrong.mobile.ui.components.uiLanguage
 
@@ -86,6 +87,22 @@ fun HomeScreen(
     val snackbar = remember { SnackbarHostState() }
     var showPrograms by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
+    // ¿Se quedó un entreno abierto sin querer? Ofrecer terminarlo a la hora de la última serie
+    var forgotten by remember { mutableStateOf(vm.forgottenWorkout()) }
+    forgotten?.let { fw ->
+        AlertDialog(
+            onDismissRequest = { forgotten = null },
+            title = { Text(stringResource(R.string.forgotten_title)) },
+            text = { Text(stringResource(R.string.forgotten_body, fw.name, formatTime(fw.updatedAtEpochMs))) },
+            confirmButton = { Button(onClick = { vm.finishForgotten(); forgotten = null }) { Text(stringResource(R.string.forgotten_finish)) } },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = { vm.discardActive(); forgotten = null }) { Text(stringResource(R.string.action_discard)) }
+                    TextButton(onClick = { forgotten = null }) { Text(stringResource(R.string.forgotten_continue)) }
+                }
+            },
+        )
+    }
     if (showPrograms) {
         ProgramsDialog(
             periodized = vm.periodizedPrograms,

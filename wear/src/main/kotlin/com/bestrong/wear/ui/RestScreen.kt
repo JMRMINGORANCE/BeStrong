@@ -1,5 +1,6 @@
 package com.bestrong.wear.ui
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.nativeKeyCode
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,8 +57,24 @@ fun RestScreen(session: WorkoutSession) {
     val progress = (remaining.toFloat() / r.totalSeconds).coerceIn(0f, 1f)
     val next = workout?.let { w -> WorkoutEditor.nextPendingSet(w)?.let { (i, s) -> w.exercises[i] to s } }
 
+    val focus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     ScreenScaffold(timeText = {}) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.fillMaxSize()
+                // Botón rápido del Ultra durante el descanso: saltarlo (o pasar al siguiente ejercicio)
+                .onPreviewKeyEvent { e ->
+                    if (e.key.nativeKeyCode in STEM_KEYS) {
+                        if (e.type == KeyEventType.KeyUp) session.onStemInRest()
+                        true
+                    } else {
+                        false
+                    }
+                }
+                .focusRequester(focus)
+                .focusable(),
+            contentAlignment = Alignment.Center,
+        ) {
             CircularProgressIndicator(
                 progress = { progress },
                 modifier = Modifier.fillMaxSize().padding(4.dp),

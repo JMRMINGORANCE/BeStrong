@@ -26,7 +26,10 @@ android {
         minSdk = 30
         targetSdk = 36
         versionCode = 1
-        versionName = "0.2.0"
+        versionName = "0.3.0"
+        // Enlace de «Invítame a un café» (Ko-fi, PayPal…): propiedad donationUrl en gradle.properties o -PdonationUrl=…
+        buildConfigField("String", "DONATION_URL", "\"${providers.gradleProperty("donationUrl").getOrElse("")}\"")
+        buildConfigField("String", "REPO_URL", "\"https://github.com/JMRMINGORANCE/BeStrong\"")
     }
     signingConfigs {
         if (keystoreProps.isNotEmpty()) {
@@ -40,12 +43,17 @@ android {
     }
     buildTypes {
         release {
-            signingConfigs.findByName("release")?.let { signingConfig = it }
+            // Sin keystore: firma de depuración solo si se pide (-PsignWithDebug=true), para releases de prueba en GitHub
+            signingConfig = signingConfigs.findByName("release")
+                ?: if (providers.gradleProperty("signWithDebug").orNull == "true") signingConfigs.getByName("debug") else null
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
     testOptions {
         unitTests {
             isIncludeAndroidResources = true

@@ -70,9 +70,18 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
+        // Desde el tile «Hoy toca»: empezar esa rutina
+        intent?.getStringExtra(EXTRA_ROUTINE)?.let {
+            startRequest.value = it
+            return
+        }
         val data = intent?.data ?: return
         if (data.scheme == SyncContract.DEEP_LINK_SCHEME && data.host == SyncContract.DEEP_LINK_HOST) {
             startRequest.value = data.getQueryParameter(SyncContract.DEEP_LINK_PARAM_ROUTINE).orEmpty()
         }
+    }
+
+    companion object {
+        const val EXTRA_ROUTINE = "com.bestrong.wear.ROUTINE"
     }
 }

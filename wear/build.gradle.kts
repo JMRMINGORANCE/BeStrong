@@ -38,7 +38,9 @@ android {
     }
     buildTypes {
         release {
-            signingConfigs.findByName("release")?.let { signingConfig = it }
+            // Sin keystore: firma de depuración solo si se pide (-PsignWithDebug=true), para releases de prueba en GitHub
+            signingConfig = signingConfigs.findByName("release")
+                ?: if (providers.gradleProperty("signWithDebug").orNull == "true") signingConfigs.getByName("debug") else null
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

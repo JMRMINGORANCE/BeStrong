@@ -60,10 +60,13 @@ class WorkoutActions @Inject constructor(
     fun prefillLookup(): (String) -> List<WorkoutSet> {
         val history = repository.history.value
         val s = settings.settings.value
+        val gym = s.activeGym
         return { id ->
             val ex = repository.exercise(id)
-            (if (s.progressionEnabled && ex != null) Progression.suggest(ex, history, s.unit.stepKg())?.sets else null)
+            val sets = (if (s.progressionEnabled && ex != null) Progression.suggest(ex, history, s.unit.stepKg())?.sets else null)
                 ?: WorkoutStats.previousSets(id, history)
+            // Solo pesos que se pueden montar con la barra, discos y mancuernas del gimnasio activo
+            if (ex == null || s.unit != com.bestrong.core.util.WeightUnit.KG) sets else sets.map { it.copy(weightKg = if (it.weightKg > 0) gym.nearestLoad(it.weightKg, ex.equipment) else 0.0) }
         }
     }
 

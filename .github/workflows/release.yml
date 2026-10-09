@@ -1,0 +1,72 @@
+name: Release
+
+# Al crear una etiqueta vX.Y.Z: compila móvil y reloj en release (R8) y publica una release de
+# GitHub con los APK y el changelog desde la etiqueta anterior.
+# Firma: si existen los secretos KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS y KEY_PASSWORD se
+# firma con tu clave; si no, con la de depuración y la release se marca como prerelease de prueba.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Preparar firma
+        id: sign
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > release.jks
+            printf "storeFile=release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n" "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > keystore.properties
+            echo "debug=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "debug=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compilar APK de release
+        run: ./gradlew :mobile:assembleRelease :wear:assembleRelease -PsignWithDebug=${{ steps.sign.outputs.debug }}
+
+      - name: Changelog
+        run: |
+          prev=$(git describe --tags --abbrev=0 "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          range=${prev:+$prev..}${GITHUB_REF_NAME}
+          {
+            echo "## Cambios"
+            git log --no-merges --pretty='- %s' "$range" | grep -v '^- Merge' || true
+            echo
+            if [ "${{ steps.sign.outputs.debug }}" = "true" ]; then
+              echo "> ⚠️ Firmada con la clave de depuración (versión de prueba). Para releases definitivas añade los secretos KEYSTORE_* al repositorio."
+            fi
+          } > CHANGELOG_RELEASE.md
+          cat CHANGELOG_RELEASE.md
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p dist
+          cp mobile/build/outputs/apk/release/*.apk "dist/BeStrong-${GITHUB_REF_NAME}-movil.apk"
+          cp wear/build/outputs/apk/release/*.apk "dist/BeStrong-${GITHUB_REF_NAME}-reloj.apk"
+          flags=""
+          if [ "${{ steps.sign.outputs.debug }}" = "true" ]; then flags="--prerelease"; fi
+          gh release create "$GITHUB_REF_NAME" dist/*.apk --title "BeStrong $GITHUB_REF_NAME" --notes-file CHANGELOG_RELEASE.md $flags

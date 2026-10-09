@@ -7,6 +7,7 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.sync.SyncContract
+import com.bestrong.wear.session.StemAction
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -78,6 +79,11 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         _settings.value = s
     }
 
+    /** Qué hace el botón rápido del Galaxy Watch Ultra. */
+    var stemAction: StemAction
+        get() = runCatching { StemAction.valueOf(prefs.getString(KEY_STEM, null) ?: "") }.getOrDefault(StemAction.COMPLETE_SET)
+        set(value) = prefs.edit { putString(KEY_STEM, value.name) }
+
     var repCounterEnabled: Boolean
         get() = prefs.getBoolean(KEY_REP_COUNTER, false)
         set(value) = prefs.edit { putBoolean(KEY_REP_COUNTER, value) }
@@ -95,6 +101,7 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_ACTIVE = "active"
         const val KEY_SETTINGS = "settings"
         const val KEY_REP_COUNTER = "rep_counter"
+        const val KEY_STEM = "stem_action"
         const val MAX_LOCAL = 50
     }
 }

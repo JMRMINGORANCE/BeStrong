@@ -30,13 +30,31 @@ class RestTimerController @Inject constructor(
     private val settings: SettingsStore,
 ) {
     private val vibrateEnabled: () -> Boolean = { settings.settings.value.vibrateOnRestEnd }
-    private val _rest = MutableStateFlow<RestState?>(null)
+
+    /** El descanso se guarda: si Android cierra la app, al volver sigue donde estaba. */
+    private val prefs = context.getSharedPreferences("rest_timer", Context.MODE_PRIVATE)
+    private val _rest = MutableStateFlow(restore())
     val rest: StateFlow<RestState?> = _rest.asStateFlow()
     private var job: Job? = null
+
+    init {
+        if (_rest.value != null) schedule()
+    }
+
+    private fun restore(): RestState? {
+        val ends = prefs.getLong("ends", 0)
+        val total = prefs.getInt("total", 0)
+        return if (ends > System.currentTimeMillis() && total > 0) RestState(ends, total) else null
+    }
+
+    private fun persist(r: RestState?) {
+        prefs.edit().apply { if (r == null) clear() else putLong("ends", r.endsAtEpochMs).putInt("total", r.totalSeconds) }.apply()
+    }
 
     fun start(seconds: Int) {
         if (seconds <= 0) return skip()
         _rest.value = RestState(System.currentTimeMillis() + seconds * 1000L, seconds)
+        persist(_rest.value)
         schedule()
     }
 
@@ -46,12 +64,14 @@ class RestTimerController @Inject constructor(
             (r.endsAtEpochMs + deltaSeconds * 1000L).coerceAtLeast(System.currentTimeMillis()),
             (r.totalSeconds + deltaSeconds).coerceAtLeast(1),
         )
+        persist(_rest.value)
         schedule()
     }
 
     fun skip() {
         job?.cancel()
         _rest.value = null
+        persist(null)
     }
 
     private fun schedule() {
@@ -60,6 +80,7 @@ class RestTimerController @Inject constructor(
             val r = _rest.value ?: return@launch
             delay((r.endsAtEpochMs - System.currentTimeMillis()).coerceAtLeast(0))
             _rest.value = null
+            persist(null)
             if (vibrateEnabled()) vibrate()
         }
     }

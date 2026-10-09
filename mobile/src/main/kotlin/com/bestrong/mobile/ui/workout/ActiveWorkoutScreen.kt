@@ -29,6 +29,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
@@ -45,6 +47,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -144,6 +150,34 @@ fun ActiveWorkoutScreen(
     val widthClass = currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass
     val posture = rememberFoldPosture()
     val expanded = widthClass != WindowWidthSizeClass.COMPACT && posture != FoldPosture.TABLETOP
+    // Avisos con acción: deshacer un borrado y ajustar por RPE
+    val snackbar = remember { SnackbarHostState() }
+    val undoSet = stringResource(R.string.undo_set_deleted)
+    val undoExercise = stringResource(R.string.undo_exercise_deleted)
+    val undoLabel = stringResource(R.string.action_undo)
+    val applyLabel = stringResource(R.string.action_apply)
+    val rpeDown = stringResource(R.string.rpe_suggest_down)
+    val rpeUp = stringResource(R.string.rpe_suggest_up)
+    val appContext = LocalContext.current
+    LaunchedEffect(Unit) {
+        vm.events.collect { e ->
+            when (e) {
+                is ActiveWorkoutViewModel.WorkoutEvent.Undoable -> {
+                    val msg = if (e.kind == ActiveWorkoutViewModel.UndoKind.SET) undoSet else undoExercise
+                    if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo()
+                }
+                is ActiveWorkoutViewModel.WorkoutEvent.RpeSuggestion -> {
+                    val template = if (e.adjustment.direction < 0) rpeDown else rpeUp
+                    val msg = template.format(e.exercise.displayName(appContext), unitForShare.format(e.adjustment.newWeightKg, withUnit = true))
+                    if (snackbar.showSnackbar(msg, applyLabel, duration = SnackbarDuration.Long) == SnackbarResult.ActionPerformed) {
+                        vm.applyRpeAdjustment(e.weId, e.adjustment)
+                    }
+                }
+            }
+        }
+    }
+    val oneHanded = settings.oneHanded && widthClass == WindowWidthSizeClass.COMPACT && posture != FoldPosture.TABLETOP
+
     val listContent: @Composable (Modifier) -> Unit = { m ->
         ExerciseList(w, previous, suggestions, vm, onAddExercises, listState, m)
     }
@@ -159,7 +193,14 @@ fun ActiveWorkoutScreen(
                 },
                 actions = {
                     var menu by remember { mutableStateOf(false) }
-                    Button(onClick = { confirmFinish = true }) { Text(stringResource(R.string.workout_finish)) }
+                    IconButton(onClick = vm::togglePause) {
+                        if (w.isPaused) {
+                            Icon(Icons.Default.PlayArrow, stringResource(R.string.workout_resume))
+                        } else {
+                            Icon(Icons.Default.Pause, stringResource(R.string.workout_pause))
+                        }
+                    }
+                    if (!oneHanded) Button(onClick = { confirmFinish = true }) { Text(stringResource(R.string.workout_finish)) }
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })
@@ -168,8 +209,13 @@ fun ActiveWorkoutScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
-            if (!expanded && posture != FoldPosture.TABLETOP) rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest) }
+            Column {
+                if (!expanded && posture != FoldPosture.TABLETOP) rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest) }
+                // Modo una mano: lo importante abajo, al alcance del pulgar
+                if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
+            }
         },
     ) { padding ->
         val content = Modifier.padding(padding).fillMaxSize()
@@ -194,6 +240,7 @@ fun ActiveWorkoutScreen(
                 listContent(Modifier.weight(0.62f))
             }
             else -> Column(content) {
+                if (w.isPaused) PausedBanner(vm::togglePause)
                 StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                 listContent(Modifier.weight(1f))
             }
@@ -357,6 +404,8 @@ private fun ExerciseCard(
     var editRest by remember { mutableStateOf(false) }
     var editNotes by remember { mutableStateOf(false) }
     var editTempo by remember { mutableStateOf(false) }
+    var substituting by remember { mutableStateOf(false) }
+    if (substituting) SubstituteDialog(vm, we.id) { substituting = false }
     var showInfo by remember { mutableStateOf(false) }
     var showPlates by remember { mutableStateOf(false) }
 
@@ -395,6 +444,7 @@ private fun ExerciseCard(
                         DropdownMenuItem(text = { Text(stringResource(R.string.rest_time)) }, onClick = { menu = false; editRest = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.notes)) }, onClick = { menu = false; editNotes = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.substitute_title)) }, onClick = { menu = false; substituting = true })
                         if (index > 0) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; vm.moveExercise(index, index - 1) })
                         if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; vm.moveExercise(index, index + 1) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.remove_exercise)) }, onClick = { menu = false; vm.removeExercise(we.id) })
@@ -532,7 +582,7 @@ private fun ExerciseCard(
     }
     if (showPlates) {
         val target = we.sets.firstOrNull { !it.completed }?.weightKg ?: we.sets.lastOrNull()?.weightKg ?: 0.0
-        PlateCalculatorDialog(initialKg = target, onDismiss = { showPlates = false })
+        PlateCalculatorDialog(initialKg = target, gym = vm.settings.value.activeGym, onDismiss = { showPlates = false })
     }
 }
 

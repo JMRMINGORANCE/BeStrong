@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.bestrong.core.training.GymProfile
 import com.bestrong.core.training.PlateCalculator
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatWeight
@@ -32,13 +33,16 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 /** Qué discos poner en cada lado de la barra para un peso objetivo. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PlateCalculatorDialog(initialKg: Double, onDismiss: () -> Unit) {
+fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
     var text by remember { mutableStateOf(unit.format(initialKg).takeIf { initialKg > 0 } ?: "") }
-    val bars = if (unit == WeightUnit.KG) listOf(20.0, 15.0, 10.0) else listOf(45.0, 35.0, 25.0)
+    // La barra y los discos del gimnasio activo van primero
+    val gymBar = gym?.let { unit.fromKg(it.barKg) }
+    val bars = (listOfNotNull(gymBar) + if (unit == WeightUnit.KG) listOf(20.0, 15.0, 10.0) else listOf(45.0, 35.0, 25.0)).distinct()
     var bar by remember { mutableDoubleStateOf(bars.first()) }
     val target = text.replace(',', '.').toDoubleOrNull() ?: 0.0
-    val load = PlateCalculator.calculate(target, unit, bar)
+    val plates = gym?.platesKg?.map { unit.fromKg(it) }?.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
+    val load = PlateCalculator.calculate(target, unit, bar, plates)
 
     AlertDialog(
         onDismissRequest = onDismiss,

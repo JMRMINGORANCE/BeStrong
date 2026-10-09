@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -31,7 +32,23 @@ class HistoryViewModel @Inject constructor(
 
     fun recordsIn(workout: Workout): List<PersonalRecord> = WorkoutStats.newRecordsIn(workout, history.value)
 
-    fun delete(id: String) = viewModelScope.launch { repo.deleteWorkout(id) }
+    /** Último entreno borrado, para poder deshacer. */
+    private val _deleted = MutableStateFlow<Workout?>(null)
+    val deleted: StateFlow<Workout?> = _deleted
+
+    fun delete(id: String) = viewModelScope.launch {
+        _deleted.value = repo.history.value.firstOrNull { it.id == id }
+        repo.deleteWorkout(id)
+    }
+
+    fun undoDelete() = viewModelScope.launch {
+        _deleted.value?.let { repo.saveWorkout(it) }
+        _deleted.value = null
+    }
+
+    fun clearDeleted() {
+        _deleted.value = null
+    }
 
     fun saveAsRoutine(workout: Workout) = viewModelScope.launch { repo.saveRoutine(Routine.fromWorkout(workout)) }
 

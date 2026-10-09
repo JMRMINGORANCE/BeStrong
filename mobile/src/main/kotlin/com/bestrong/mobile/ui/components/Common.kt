@@ -32,6 +32,10 @@ private fun shortDateFormatter() = DateTimeFormatter.ofPattern("d MMM", Locale.g
 fun formatDate(epochMs: Long): String =
     dateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault())).replaceFirstChar { it.uppercase() }
 
+/** Hora (HH:mm) y fecha corta, p. ej. «18:42 · 9 oct». */
+fun formatTime(epochMs: Long): String =
+    DateTimeFormatter.ofPattern("HH:mm · d MMM", Locale.getDefault()).format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
+
 fun formatShortDate(epochMs: Long): String =
     shortDateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
 

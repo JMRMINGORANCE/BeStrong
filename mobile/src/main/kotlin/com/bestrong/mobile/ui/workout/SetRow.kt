@@ -51,7 +51,9 @@ import androidx.compose.ui.unit.dp
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.WorkoutSet
+import com.bestrong.core.training.SetComparison
 import com.bestrong.core.util.WeightUnit
+import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 
@@ -156,16 +158,39 @@ fun SetRow(
                     if (set.rpe != null) DropdownMenuItem(text = { Text(stringResource(R.string.rpe_remove)) }, onClick = { onRpe(null); menu = false })
                 }
             }
-            Text(
-                previous?.let { describeSet(it, tracking, unit) } ?: "—",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                modifier = Modifier.weight(1.4f).clickable(enabled = previous != null, onClickLabel = stringResource(R.string.set_copy_previous)) {
+            Column(
+                Modifier.weight(1.4f).clickable(enabled = previous != null, onClickLabel = stringResource(R.string.set_copy_previous)) {
                     previous?.let { onWeightKg(it.weightKg); onReps(it.reps); onDuration(it.durationSec) }
                 },
-            )
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    previous?.let { describeSet(it, tracking, unit) } ?: "—",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                )
+                // Comparación en vivo con la misma serie de la vez anterior (+2,5 kg · +1)
+                val hasValues = set.weightKg > 0 || set.reps > 0 || set.durationSec > 0
+                val delta = if (hasValues) SetComparison.delta(set, previous)?.takeIf { !it.isZero } else null
+                if (delta != null) {
+                    val beats = SetComparison.beats(set, previous) == true
+                    val text = buildList {
+                        if (delta.weightKg != 0.0) add((if (delta.weightKg > 0) "+" else "−") + unit.format(kotlin.math.abs(delta.weightKg), withUnit = true))
+                        if (delta.reps != 0) add((if (delta.reps > 0) "+" else "−") + kotlin.math.abs(delta.reps))
+                        if (delta.durationSec != 0) add((if (delta.durationSec > 0) "+" else "−") + kotlin.math.abs(delta.durationSec) + " s")
+                    }.joinToString(" · ")
+                    Text(
+                        text,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (beats) BeStrongPalette.VolumeOptimal else MaterialTheme.colorScheme.error,
+                        maxLines = 1,
+                        modifier = Modifier.semantics { contentDescription = text },
+                    )
+                }
+            }
             when (tracking) {
                 TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY -> {
                     NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", stringResource(R.string.set_weight_in, unit.label), Modifier.weight(1f), decimal = true) {

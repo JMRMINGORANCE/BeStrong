@@ -75,6 +75,21 @@ class HomeViewModel @Inject constructor(
 
     val periodizedPrograms: List<PeriodizedProgram> = PeriodizedPrograms.all
 
+    /** Entreno abierto sin cambios desde hace más de 3 h (se olvidó terminar). */
+    fun forgottenWorkout(now: Long = System.currentTimeMillis()): Workout? =
+        repo.activeWorkout.value?.takeIf { WorkoutEditor.isForgotten(it, now) }
+
+    /** Lo termina a la hora del último cambio y lo guarda en el historial. */
+    fun finishForgotten() = viewModelScope.launch {
+        val w = repo.activeWorkout.value ?: return@launch
+        val finished = WorkoutEditor.finishAtLastActivity(w)
+        repo.setActive(null)
+        if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
+        _messages.tryEmit(context.getString(R.string.msg_forgotten_saved))
+    }
+
+    fun discardActive() = viewModelScope.launch { repo.setActive(null) }
+
     /** Training max sugerido (90 % del mejor 1RM estimado) para preparar un programa. */
     fun suggestedTrainingMax(exerciseId: String): Double? = Periodization.suggestedTrainingMax(exerciseId, repo.history.value)
 

@@ -29,6 +29,7 @@ import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.util.formatDuration
 import com.bestrong.wear.R
 import com.bestrong.wear.WearContainer
+import com.bestrong.wear.session.StemAction
 import com.bestrong.wear.session.WorkoutSession
 
 @Composable
@@ -84,6 +85,26 @@ fun MenuScreen(session: WorkoutSession, onBack: () -> Unit, onAddExercise: () ->
             }
             item {
                 Button(onClick = onAddExercise, label = { Text(stringResource(R.string.add_exercise)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+            }
+            item {
+                val stem by session.stemAction.collectAsStateWithLifecycle()
+                Button(
+                    onClick = session::cycleStemAction,
+                    label = { Text(stringResource(R.string.stem_button)) },
+                    secondaryLabel = {
+                        Text(
+                            stringResource(
+                                when (stem) {
+                                    StemAction.COMPLETE_SET -> R.string.stem_complete
+                                    StemAction.SKIP_REST -> R.string.stem_skip_rest
+                                    StemAction.NEXT_EXERCISE -> R.string.stem_next
+                                },
+                            ),
+                        )
+                    },
+                    colors = ButtonDefaults.filledTonalButtonColors(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
             if (session.repCounter.isAvailable) {
                 item {
