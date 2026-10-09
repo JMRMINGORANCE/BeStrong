@@ -33,6 +33,9 @@
     <string name="completed">Done! 💪</string>
     <string name="complication_desc">%1$d workouts this week</string>
     <string name="complication_label">Workouts this week</string>
+    <string name="complication_today_desc">Today: %1$s</string>
+    <string name="complication_today_label">Today</string>
+    <string name="complication_today_none">Free</string>
     <string name="continue_">Continue</string>
     <string name="count_reps">Count reps (beta)</string>
     <string name="counted_reps">Counted: %1$d reps (beta)</string>
