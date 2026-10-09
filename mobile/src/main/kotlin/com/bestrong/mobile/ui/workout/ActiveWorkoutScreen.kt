@@ -4,6 +4,7 @@ import android.view.WindowManager
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,19 +61,27 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.bestrong.core.library.ExerciseInfo
@@ -105,6 +114,7 @@ import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.rememberNow
 import com.bestrong.mobile.ui.components.uiLanguage
 import com.bestrong.mobile.ui.rememberFoldPosture
+import kotlin.math.roundToInt
 
 /**
  * Entrenamiento en curso.
@@ -189,6 +199,10 @@ fun ActiveWorkoutScreen(
         ExerciseList(w, previous, suggestions, vm, onAddExercises, listState, m)
     }
 
+    // Bloqueo de toques (bolsillo, sudor): solo se quita con una pulsación larga
+    var touchLocked by rememberSaveable { mutableStateOf(false) }
+    if (touchLocked) TouchLockOverlay { touchLocked = false }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -211,6 +225,7 @@ fun ActiveWorkoutScreen(
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.touch_lock)) }, onClick = { menu = false; touchLocked = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.workout_discard)) }, onClick = { menu = false; confirmDiscard = true })
                     }
                 },
@@ -230,7 +245,7 @@ fun ActiveWorkoutScreen(
             posture == FoldPosture.TABLETOP -> Column(content) {
                 // Mitad superior: lo que se mira desde el banco
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true) }
+                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true) }
                         ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp))
                 }
                 HorizontalDivider()
@@ -428,8 +443,17 @@ private fun ExerciseCard(
     if (substituting) SubstituteDialog(vm, we.id) { substituting = false }
     var showInfo by remember { mutableStateOf(false) }
     var showPlates by remember { mutableStateOf(false) }
+    // Arrastrar para reordenar: pulsación larga en el nombre y mover arriba/abajo
+    var dragY by remember { mutableFloatStateOf(0f) }
+    var cardHeight by remember { mutableIntStateOf(1) }
+    val dragHint = stringResource(R.string.drag_to_reorder)
 
-    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+    Row(
+        Modifier.fillMaxWidth().height(IntrinsicSize.Min)
+            .onSizeChanged { cardHeight = it.height.coerceAtLeast(1) }
+            .graphicsLayer { translationY = dragY }
+            .zIndex(if (dragY != 0f) 1f else 0f),
+    ) {
         // Barra lateral de color para las superseries
         Box(Modifier.width(4.dp).fillMaxHeight().background(supersetColor ?: Color.Transparent))
         Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
@@ -441,7 +465,23 @@ private fun ExerciseCard(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.semantics { heading() },
+                        modifier = Modifier
+                            .semantics { heading(); stateDescription = dragHint }
+                            .pointerInput(index, count) {
+                                detectDragGesturesAfterLongPress(
+                                    onDrag = { change, amount ->
+                                        change.consume()
+                                        dragY += amount.y
+                                    },
+                                    onDragEnd = {
+                                        val steps = (dragY / cardHeight).roundToInt()
+                                        val target = (index + steps).coerceIn(0, count - 1)
+                                        dragY = 0f
+                                        if (target != index) vm.moveExercise(index, target)
+                                    },
+                                    onDragCancel = { dragY = 0f },
+                                )
+                            },
                     )
                     Text(
                         stringResource(R.string.exercise_subtitle_rest, we.exercise.primaryMuscle.label(), we.exercise.equipment.label(), formatDuration(we.restSeconds.toLong())),

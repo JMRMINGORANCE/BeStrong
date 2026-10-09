@@ -1,6 +1,7 @@
 package com.bestrong.mobile.ui.history
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -59,6 +61,7 @@ import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.R
+import com.bestrong.mobile.share.DragShare
 import com.bestrong.mobile.share.WorkoutShareCard
 import com.bestrong.mobile.ui.components.EmptyState
 import com.bestrong.mobile.ui.components.LocalWeightUnit
@@ -78,6 +81,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     val filtered by vm.filtered.collectAsStateWithLifecycle()
     val heatmap by vm.heatmap.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
+    val view = LocalView.current
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -117,7 +121,15 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                                 item { CalendarMonth(days, Modifier.padding(bottom = 8.dp)) }
                             }
                             items(filtered, key = { it.id }) { w ->
-                                WorkoutCard(w, Modifier.clickable { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } })
+                                // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
+                                val dragText = workoutText(w)
+                                WorkoutCard(
+                                    w,
+                                    Modifier.combinedClickable(
+                                        onLongClick = { DragShare.start(view, w.name, dragText) },
+                                        onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } },
+                                    ),
+                                )
                             }
                         }
                     }
@@ -262,4 +274,16 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             }
         }
     }
+}
+
+/** Texto del entreno para compartir o arrastrar: nombre, fecha y la mejor serie de cada ejercicio. */
+@Composable
+private fun workoutText(w: Workout): String {
+    val unit = LocalWeightUnit.current
+    val header = stringResource(R.string.share_workout_text, w.name, formatDate(w.startedAtEpochMs), w.completedSetCount)
+    val lines = w.exercises.map { we ->
+        val best = we.sets.filter { it.completed }.maxByOrNull { it.estimatedOneRepMax }
+        "• " + we.exercise.displayName() + (best?.let { " — " + describeSet(it, we.exercise.tracking, unit) } ?: "")
+    }
+    return (listOf(header) + lines).joinToString("\n")
 }

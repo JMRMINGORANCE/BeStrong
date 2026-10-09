@@ -96,6 +96,7 @@
     <string name="day_not_trained">sin entrenar</string>
     <string name="day_trained">entrenado</string>
     <string name="delete_exercise">Eliminar ejercicio</string>
+    <string name="drag_to_reorder">Mantén pulsado el nombre y arrastra para reordenar</string>
     <string name="dumbbell_total">Mancuernas: anotar el peso total</string>
     <string name="dumbbell_total_body">Escribe la suma de las dos mancuernas en vez del peso de cada una</string>
     <string name="equip_band">Banda elástica</string>
@@ -266,6 +267,7 @@
     <string name="notif_channel_desc">Cronómetro del entreno y temporizador de descanso</string>
     <string name="notif_channel_records">Récords personales</string>
     <string name="notif_channel_reminders">Recordatorios de entreno</string>
+    <string name="notif_complete_set">Completar serie</string>
     <string name="notif_progress">%1$d/%2$d series completadas</string>
     <string name="notif_records_title">🏆 ¡%1$d récords nuevos!</string>
     <string name="notif_reminder_routine">Siguiente rutina: %1$s</string>
@@ -283,6 +285,7 @@
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Opciones</string>
     <string name="personal_records">Récords personales</string>
+    <string name="pip_next">Siguiente: %1$s</string>
     <string name="plates_bar">Barra</string>
     <string name="plates_only_bar">Solo la barra</string>
     <string name="plates_per_side">Por cada lado</string>
@@ -434,6 +437,7 @@
     <string name="share_more_exercises">+ %1$d ejercicios más</string>
     <string name="share_text">%1$s · entrenado con BeStrong 💪</string>
     <string name="share_workout">Compartir imagen</string>
+    <string name="share_workout_text">%1$s · %2$s · %3$d series</string>
     <string name="skip_exercise">Saltar y volver después</string>
     <string name="stat_avg_hr">FC media</string>
     <string name="stat_calories">Calorías</string>
@@ -487,6 +491,9 @@
     <string name="tool_monthly_report">Informe mensual</string>
     <string name="tool_scores">DOTS, Wilks e IPF GL</string>
     <string name="tools">Herramientas</string>
+    <string name="touch_lock">Bloquear la pantalla táctil</string>
+    <string name="touch_locked">Pantalla bloqueada</string>
+    <string name="touch_unlock_hint">Mantén pulsado para desbloquear</string>
     <string name="track">Registrar</string>
     <string name="track_reps">Solo reps</string>
     <string name="track_time">Tiempo</string>
@@ -498,6 +505,8 @@
     <string name="voice_search">Buscar por voz</string>
     <string name="voice_search_prompt">Di el nombre del ejercicio</string>
     <string name="volume_high">Alto</string>
+    <string name="volume_keys">Botones de volumen en el entreno</string>
+    <string name="volume_keys_body">Subir: completar la siguiente serie · Bajar: saltar el descanso</string>
     <string name="volume_low">Bajo</string>
     <string name="volume_none">Sin trabajo</string>
     <string name="volume_optimal">Óptimo</string>

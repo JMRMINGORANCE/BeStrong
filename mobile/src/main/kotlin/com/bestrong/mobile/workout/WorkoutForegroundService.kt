@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.bestrong.core.model.Workout
 import com.bestrong.mobile.MainActivity
 import com.bestrong.mobile.R
+import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.ui.components.RestState
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,11 +36,14 @@ class WorkoutForegroundService : LifecycleService() {
 
     @Inject lateinit var restTimer: RestTimerController
 
+    @Inject lateinit var actions: WorkoutActions
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         when (intent?.action) {
             ACTION_SKIP -> restTimer.skip()
             ACTION_PLUS_15 -> restTimer.adjust(15)
+            ACTION_COMPLETE -> lifecycleScope.launch { actions.completeNextSet() }
             ACTION_STOP -> {
                 ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
                 stopSelf()
@@ -126,6 +130,8 @@ class WorkoutForegroundService : LifecycleService() {
                 .setChronometerCountDown(false)
                 // Texto corto del chip (en descanso se muestra la cuenta atrás)
                 .setShortCriticalText("${w.completedSetCount}/${w.totalSetCount}")
+            // Desde la pantalla de bloqueo: completar la siguiente serie sin abrir la app
+            if (w.completedSetCount < w.totalSetCount) b.addAction(0, getString(R.string.notif_complete_set), action(ACTION_COMPLETE, 3))
         }
         return b.build()
     }
@@ -147,6 +153,7 @@ class WorkoutForegroundService : LifecycleService() {
         private const val ACTION_SKIP = "com.bestrong.REST_SKIP"
         private const val ACTION_PLUS_15 = "com.bestrong.REST_PLUS_15"
         private const val ACTION_STOP = "com.bestrong.WORKOUT_STOP"
+        private const val ACTION_COMPLETE = "com.bestrong.SET_COMPLETE"
 
         fun start(context: Context) {
             runCatching { context.startForegroundService(Intent(context, WorkoutForegroundService::class.java)) }

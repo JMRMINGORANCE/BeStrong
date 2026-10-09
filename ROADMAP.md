@@ -56,21 +56,22 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Gráficas de todas las medidas corporales y relación peso/fuerza
 - [x] Días desde el último entreno por músculo y agujetas en el mapa muscular
 
-## Fase 4 — Reloj y Fold (en curso)
-- [ ] Registrar series por voz en el reloj
-- [ ] Resumen al acabar con comparación (reloj)
-- [ ] Esfera propia (Watch Face Format) con racha, «Hoy toca» y pulso
-- [ ] Vibraciones distintas por tipo de aviso; AOD más rico; modo bajo consumo
-- [ ] Zonas de pulso: sugerir la siguiente serie cuando baja el pulso
-- [ ] Gráfica del ejercicio recorrida con la corona; últimos 3 pesos como accesos rápidos
-- [ ] Crear y editar rutinas en el reloj (modo sin móvil completo)
-- [ ] Sesión de cardio libre con GPS del Ultra
-- [ ] Velocidad de la barra y RIR estimado con el acelerómetro; contador de reps calibrable
-- [ ] Fold: modo mesa con temporizador gigante, vista de dos columnas en el entreno, arrastrar y soltar, ventanas múltiples
-- [ ] Notificación de bloqueo con botones, burbuja flotante y picture-in-picture del descanso
-- [ ] Bloqueo de toques durante el entreno; control con botones de volumen
+## Fase 4 — Reloj y Fold ✅
+- [x] Registrar series por voz en el reloj (español e inglés: «80 kilos 8», «ochenta por ocho», «82 y medio por 5 RPE 8»)
+- [x] Resumen al acabar con comparación (reloj)
+- [x] Esfera propia (Watch Face Format, módulo `:watchface`) con «Hoy toca», entrenos de la semana, pulso y aro de pasos
+- [x] Vibraciones distintas por tipo de aviso; AOD con pulso y series; modo bajo consumo
+- [x] Zonas de pulso: aviso cuando el pulso baja lo suficiente para la siguiente serie
+- [x] Gráfica del ejercicio recorrida con la corona; últimos 3 pesos como accesos rápidos
+- [x] Crear rutinas en el reloj (se envían al móvil)
+- [x] Sesión de cardio libre con GPS del Ultra (carrera, caminata, bici)
+- [x] Velocidad de la barra y RIR estimado con el acelerómetro; contador de reps calibrable
+- [x] Fold: cuenta atrás gigante en modo mesa, vista de dos paneles al desplegar, arrastrar para reordenar, arrastrar un entreno a otra app en pantalla dividida
+- [x] Notificación de bloqueo con botones (completar serie, +15 s, saltar) y descanso en ventana flotante (picture-in-picture)
+  - Burbuja flotante descartada: Android solo permite burbujas para conversaciones; el PiP cubre ese uso
+- [x] Bloqueo de toques durante el entreno; control con botones de volumen
 
-## Fase 5 — Planificación avanzada
+## Fase 5 — Planificación avanzada (siguiente)
 - [ ] Editor de programas propios (semanas, porcentajes, progresión)
 - [ ] Mesociclos con descarga automática por fatiga
 - [ ] Periodización ondulante (DUP)

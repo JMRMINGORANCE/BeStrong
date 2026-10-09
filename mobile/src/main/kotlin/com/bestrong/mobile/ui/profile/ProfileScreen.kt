@@ -258,6 +258,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             body = stringResource(R.string.one_handed_body),
                             checked = settings.oneHanded,
                         ) { v -> vm.updateSettings { it.copy(oneHanded = v) } }
+                        SwitchItem(
+                            title = stringResource(R.string.volume_keys),
+                            body = stringResource(R.string.volume_keys_body),
+                            checked = settings.volumeKeys,
+                        ) { v -> vm.updateSettings { it.copy(volumeKeys = v) } }
                         SwitchItem(stringResource(R.string.progress_lock_setting), checked = settings.lockProgressPhotos) { v ->
                             vm.updateSettings { it.copy(lockProgressPhotos = v) }
                         }

@@ -9,6 +9,7 @@ import coil.decode.ImageDecoderDecoder
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
+import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.SharedSettings
@@ -54,7 +55,23 @@ class WorkoutActions @Inject constructor(
     private val repository: BeStrongRepository,
     private val settings: SettingsStore,
     private val healthConnect: HealthConnectExporter,
+    private val restTimer: RestTimerController,
 ) {
+    /**
+     * Completa la siguiente serie pendiente y arranca su descanso (botón de la notificación,
+     * botones de volumen). Devuelve false si no queda ninguna.
+     */
+    suspend fun completeNextSet(): Boolean {
+        val w = repository.activeWorkout.value ?: return false
+        val (index, set) = WorkoutEditor.nextPendingSet(w) ?: return false
+        val we = w.exercises[index]
+        val updated = WorkoutEditor.toggleSetCompleted(w, we.id, set.id)
+        repository.updateActive { WorkoutEditor.toggleSetCompleted(it, we.id, set.id) }
+        val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index)
+        if (rest > 0) restTimer.start(rest) else restTimer.skip()
+        return true
+    }
+
     /**
      * Series con las que rellenar un ejercicio al empezar: sugerencia de sobrecarga progresiva
      * si está activada; si no, lo que se hizo la última vez.

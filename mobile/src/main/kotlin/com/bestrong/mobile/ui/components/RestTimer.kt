@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.R
 import kotlinx.coroutines.delay
@@ -48,6 +49,8 @@ fun RestTimerBar(
     onSkip: () -> Unit,
     modifier: Modifier = Modifier,
     large: Boolean = false,
+    /** Modo mesa del Fold: cuenta atrás gigante para verla desde el banco. */
+    giant: Boolean = false,
 ) {
     val now = rememberNow(250)
     val remaining = ((rest.endsAtEpochMs - now) / 1000).coerceAtLeast(0)
@@ -56,7 +59,11 @@ fun RestTimerBar(
         Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 stringResource(R.string.rest_title, formatDuration(remaining)),
-                style = if (large) MaterialTheme.typography.displayMedium else MaterialTheme.typography.titleMedium,
+                style = when {
+                    giant -> MaterialTheme.typography.displayLarge.copy(fontSize = 96.sp, lineHeight = 104.sp)
+                    large -> MaterialTheme.typography.displayMedium
+                    else -> MaterialTheme.typography.titleMedium
+                },
                 fontWeight = FontWeight.Bold,
             )
             LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp))

@@ -96,6 +96,7 @@
     <string name="day_not_trained">not trained</string>
     <string name="day_trained">trained</string>
     <string name="delete_exercise">Delete exercise</string>
+    <string name="drag_to_reorder">Long-press the name and drag to reorder</string>
     <string name="dumbbell_total">Dumbbells: log total weight</string>
     <string name="dumbbell_total_body">Enter the sum of both dumbbells instead of each one</string>
     <string name="equip_band">Band</string>
@@ -266,6 +267,7 @@
     <string name="notif_channel_desc">Workout stopwatch and rest timer</string>
     <string name="notif_channel_records">Personal records</string>
     <string name="notif_channel_reminders">Workout reminders</string>
+    <string name="notif_complete_set">Complete set</string>
     <string name="notif_progress">%1$d/%2$d sets completed</string>
     <string name="notif_records_title">🏆 %1$d new records!</string>
     <string name="notif_reminder_routine">Next routine: %1$s</string>
@@ -283,6 +285,7 @@
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Options</string>
     <string name="personal_records">Personal records</string>
+    <string name="pip_next">Next: %1$s</string>
     <string name="plates_bar">Bar</string>
     <string name="plates_only_bar">Just the bar</string>
     <string name="plates_per_side">Per side</string>
@@ -434,6 +437,7 @@
     <string name="share_more_exercises">+ %1$d more exercises</string>
     <string name="share_text">%1$s · trained with BeStrong 💪</string>
     <string name="share_workout">Share image</string>
+    <string name="share_workout_text">%1$s · %2$s · %3$d sets</string>
     <string name="skip_exercise">Skip and come back later</string>
     <string name="stat_avg_hr">Avg HR</string>
     <string name="stat_calories">Calories</string>
@@ -487,6 +491,9 @@
     <string name="tool_monthly_report">Monthly report</string>
     <string name="tool_scores">DOTS, Wilks and IPF GL</string>
     <string name="tools">Tools</string>
+    <string name="touch_lock">Lock the touch screen</string>
+    <string name="touch_locked">Screen locked</string>
+    <string name="touch_unlock_hint">Long-press to unlock</string>
     <string name="track">Track</string>
     <string name="track_reps">Reps only</string>
     <string name="track_time">Time</string>
@@ -498,6 +505,8 @@
     <string name="voice_search">Search by voice</string>
     <string name="voice_search_prompt">Say the exercise name</string>
     <string name="volume_high">High</string>
+    <string name="volume_keys">Volume buttons during workouts</string>
+    <string name="volume_keys_body">Up: complete the next set · Down: skip rest</string>
     <string name="volume_low">Low</string>
     <string name="volume_none">None</string>
     <string name="volume_optimal">Optimal</string>
