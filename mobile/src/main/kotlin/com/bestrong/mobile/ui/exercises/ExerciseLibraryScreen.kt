@@ -191,10 +191,10 @@ fun ExerciseSearchList(
                         )
                         Text(parts.joinToString(" · "))
                     },
-                    trailingContent = if (multiSelect) {
-                        { Checkbox(checked = ex.id in selected, onCheckedChange = null) }
-                    } else {
-                        {
+                    trailingContent = {
+                        if (multiSelect) {
+                            Checkbox(checked = ex.id in selected, onCheckedChange = null)
+                        } else {
                             val fav = ex.id in favorites
                             IconToggleButton(checked = fav, onCheckedChange = { vm.toggleFavorite(ex.id) }) {
                                 Icon(
