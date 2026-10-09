@@ -53,6 +53,13 @@ jobs:
             -Pandroid.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors=EMULATOR,DEBUGGABLE \
             2>&1 | tee smoke.log
 
+      - name: Guardar diagnóstico de la prueba de humo
+        if: always()
+        run: |
+          mkdir -p /tmp/bp
+          find baselineprofile/build -name 'smoke-failure*' -exec cp {} /tmp/bp/ \; 2>/dev/null || true
+          ls /tmp/bp
+
       - name: Medir arranque (Macrobenchmark)
         id: startup
         continue-on-error: true

@@ -4,6 +4,7 @@ import android.os.Looper
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -88,6 +89,10 @@ class UiAccessibilityTest {
         settle()
         compose.onNodeWithText("Press banca").performClick()
         settle(3)
+        // Selector con un ejercicio marcado: casillas y botón «Añadir 1» deben tener etiqueta
+        assertClickablesLabelled()
+        // El botón debe anunciarse como «Añadir 1» en el árbol que ve TalkBack (fusionado)
+        compose.onNode(hasContentDescription("Añadir 1") or hasText("Añadir 1")).assertExists()
         compose.onNode(hasText("Añadir 1"), useUnmergedTree = true).performClick()
         settle()
         shot("a11y_workout_font200")

@@ -68,7 +68,7 @@ class ReleaseSmokeTest {
         tap(text("Entrenamiento vacío", "Empty workout"), "Entrenamiento vacío")
         tap(text("Añadir ejercicios", "Add exercises"), "Añadir ejercicios")
         // El teclado de búsqueda puede abrirse y mover la lista justo al tocar: se reintenta hasta que se marca
-        val addOne = By.text(Pattern.compile("(Añadir|Add) 1"))
+        val addOne = By.desc(Pattern.compile("(Añadir|Add) 1"))
         repeat(3) {
             if (device.hasObject(addOne)) return@repeat
             device.waitForIdle()

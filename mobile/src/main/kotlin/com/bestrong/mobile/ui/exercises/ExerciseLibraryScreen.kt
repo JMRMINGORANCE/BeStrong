@@ -50,6 +50,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.model.Equipment
@@ -109,8 +111,11 @@ fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (
         },
         floatingActionButton = {
             if (picked.isNotEmpty()) {
+                val label = stringResource(R.string.add_n, picked.size)
                 ExtendedFloatingActionButton(
                     onClick = { onPicked(picked.toList()) },
+                    // Etiqueta explícita: TalkBack (y UiAutomator) leen el botón aunque el texto esté animado
+                    modifier = Modifier.semantics { contentDescription = label },
                     icon = { Icon(Icons.Default.Check, null) },
                     text = { Text(stringResource(R.string.add_n, picked.size)) },
                 )

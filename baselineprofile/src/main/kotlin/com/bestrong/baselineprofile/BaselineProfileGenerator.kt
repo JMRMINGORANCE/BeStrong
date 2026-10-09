@@ -50,7 +50,7 @@ class BaselineProfileGenerator {
         tap(text("Entrenamiento vacío", "Empty workout"), 10_000)
         tap(text("Añadir ejercicios", "Add exercises"))
         tap(text("Press banca", "Bench Press"))
-        tap(By.text(Pattern.compile("(Añadir|Add) 1")))
+        tap(By.desc(Pattern.compile("(Añadir|Add) 1")))
         device.pressBack()
         device.waitForIdle()
 
