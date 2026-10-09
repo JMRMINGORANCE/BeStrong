@@ -64,7 +64,13 @@ data class Workout(
     val calories: Int? = null,
     /** Última modificación: resuelve conflictos al sincronizar móvil ↔ reloj en vivo. */
     val updatedAtEpochMs: Long = startedAtEpochMs,
+    /** Pausado desde (null = en marcha). */
+    val pausedAtEpochMs: Long? = null,
+    /** Tiempo total en pausa ya acumulado (ms). */
+    val pausedTotalMs: Long = 0,
 ) {
+    val isPaused: Boolean get() = pausedAtEpochMs != null
+
     val isFinished: Boolean get() = finishedAtEpochMs != null
 
     val totalVolume: Double
@@ -76,6 +82,9 @@ data class Workout(
     val totalSetCount: Int
         get() = exercises.sumOf { it.sets.size }
 
-    fun durationSeconds(nowEpochMs: Long = System.currentTimeMillis()): Long =
-        ((finishedAtEpochMs ?: nowEpochMs) - startedAtEpochMs).coerceAtLeast(0) / 1000
+    /** Duración sin contar las pausas. */
+    fun durationSeconds(nowEpochMs: Long = System.currentTimeMillis()): Long {
+        val end = finishedAtEpochMs ?: pausedAtEpochMs ?: nowEpochMs
+        return (end - startedAtEpochMs - pausedTotalMs).coerceAtLeast(0) / 1000
+    }
 }

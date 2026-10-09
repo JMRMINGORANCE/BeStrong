@@ -16,7 +16,7 @@ import org.junit.Test
 class WorkoutEditorTest {
 
     @Test fun addExerciseUsesPreviousSets() {
-        val w = WorkoutEditor.addExercises(WorkoutEditor.empty(0), listOf(bench)) { listOf(done(80.0, 8)) }
+        val w = WorkoutEditor.addExercises(WorkoutEditor.empty(0), listOf(bench), previousSets = { listOf(done(80.0, 8)) })
         val set = w.exercises.single().sets.single()
         assertEquals(80.0, set.weightKg, 0.0)
         assertEquals(false, set.completed)

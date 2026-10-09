@@ -7,6 +7,7 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
+import com.bestrong.core.training.RestPolicy
 import com.bestrong.core.training.WarmupGenerator
 import com.bestrong.core.util.WeightUnit
 
@@ -28,7 +29,12 @@ object WorkoutEditor {
         }
     }
 
-    fun addExercises(workout: Workout, exercises: List<Exercise>, previousSets: (String) -> List<WorkoutSet> = { emptyList() }): Workout =
+    fun addExercises(
+        workout: Workout,
+        exercises: List<Exercise>,
+        previousSets: (String) -> List<WorkoutSet> = { emptyList() },
+        restFor: (Exercise) -> Int = { RestPolicy.defaultFor(it) },
+    ): Workout =
         workout.copy(
             exercises = workout.exercises + exercises.map { ex ->
                 val prev = previousSets(ex.id)
@@ -37,9 +43,35 @@ object WorkoutEditor {
                 } else {
                     List(3) { WorkoutSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
                 }
-                WorkoutExercise(exercise = ex, sets = sets)
+                WorkoutExercise(exercise = ex, sets = sets, restSeconds = restFor(ex))
             },
         )
+
+    // --- Pausa y entreno olvidado -----------------------------------------------------------
+
+    fun pause(workout: Workout, nowEpochMs: Long): Workout =
+        if (workout.isPaused) workout else workout.copy(pausedAtEpochMs = nowEpochMs)
+
+    fun resume(workout: Workout, nowEpochMs: Long): Workout {
+        val since = workout.pausedAtEpochMs ?: return workout
+        return workout.copy(pausedAtEpochMs = null, pausedTotalMs = workout.pausedTotalMs + (nowEpochMs - since).coerceAtLeast(0))
+    }
+
+    /** Lleva más de [limitMs] sin ningún cambio (se dejó abierto sin querer). */
+    fun isForgotten(workout: Workout, nowEpochMs: Long, limitMs: Long = 3 * 3_600_000L): Boolean =
+        !workout.isPaused && nowEpochMs - workout.updatedAtEpochMs > limitMs
+
+    /** Termina un entreno olvidado a la hora del último cambio, no a la de ahora. */
+    fun finishAtLastActivity(workout: Workout): Workout {
+        val resumed = resume(workout, workout.pausedAtEpochMs ?: workout.updatedAtEpochMs)
+        return finish(resumed, resumed.updatedAtEpochMs)
+    }
+
+    /** Sustituye un ejercicio por una alternativa conservando el descanso y adaptando los pesos. */
+    fun substitute(workout: Workout, workoutExerciseId: String, to: Exercise, previousOfNew: List<WorkoutSet>, stepKg: Double): Workout =
+        updateExercise(workout, workoutExerciseId) { we ->
+            we.copy(exercise = to, sets = com.bestrong.core.library.Alternatives.convertSets(we.exercise, to, we.sets, previousOfNew, stepKg))
+        }
 
     fun removeExercise(workout: Workout, workoutExerciseId: String): Workout =
         workout.copy(exercises = workout.exercises.filterNot { it.id == workoutExerciseId })
@@ -172,7 +204,7 @@ object WorkoutEditor {
     /**
      * Termina el entrenamiento: descarta las series no completadas y los ejercicios vacíos.
      */
-    fun finish(workout: Workout, nowEpochMs: Long): Workout = workout.copy(
+    fun finish(workout: Workout, nowEpochMs: Long): Workout = resume(workout, nowEpochMs).copy(
         finishedAtEpochMs = nowEpochMs,
         exercises = workout.exercises
             .map { it.copy(sets = it.completedSets) }

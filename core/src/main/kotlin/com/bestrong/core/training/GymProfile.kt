@@ -1,0 +1,56 @@
+package com.bestrong.core.training
+
+import com.bestrong.core.model.Equipment
+import com.bestrong.core.util.newId
+import kotlinx.serialization.Serializable
+
+/**
+ * Perfil de gimnasio: material disponible, barra, discos y mancuernas. Las sugerencias de peso,
+ * el calentamiento y la calculadora de discos usan solo lo que hay en el gimnasio activo.
+ * Pesos en kg.
+ */
+@Serializable
+data class GymProfile(
+    val id: String = newId(),
+    val name: String,
+    val equipment: Set<Equipment> = Equipment.entries.toSet(),
+    val barKg: Double = 20.0,
+    /** Discos por lado disponibles (kg). */
+    val platesKg: List<Double> = listOf(25.0, 20.0, 15.0, 10.0, 5.0, 2.5, 1.25),
+    /** Mancuernas disponibles (kg); vacío = cualquier peso. */
+    val dumbbellsKg: List<Double> = emptyList(),
+) {
+    /** Peso más cercano alcanzable con este material para el ejercicio dado. */
+    fun nearestLoad(targetKg: Double, equipment: Equipment): Double = when (equipment) {
+        Equipment.BARBELL, Equipment.SMITH -> nearestBarbell(targetKg)
+        Equipment.DUMBBELL, Equipment.KETTLEBELL -> if (dumbbellsKg.isEmpty()) targetKg else dumbbellsKg.minBy { kotlin.math.abs(it - targetKg) }
+        else -> targetKg
+    }
+
+    /** Peso alcanzable con la barra y los discos (combinación voraz, por lado). */
+    fun nearestBarbell(targetKg: Double): Double {
+        if (targetKg <= barKg) return barKg
+        var remaining = (targetKg - barKg) / 2
+        var side = 0.0
+        platesKg.sortedDescending().forEach { p ->
+            while (remaining + 1e-9 >= p) {
+                side += p
+                remaining -= p
+            }
+        }
+        val below = barKg + side * 2
+        // Si queda un hueco grande, probamos con el disco más pequeño de más
+        val smallest = platesKg.minOrNull() ?: return below
+        val above = below + smallest * 2
+        return if (targetKg - below <= above - targetKg) below else above
+    }
+
+    companion object {
+        fun home() = GymProfile(
+            name = "Casa",
+            equipment = setOf(Equipment.DUMBBELL, Equipment.BODYWEIGHT, Equipment.BAND, Equipment.KETTLEBELL),
+            dumbbellsKg = (1..15).map { it * 2.0 },
+        )
+        fun gym() = GymProfile(name = "Gimnasio")
+    }
+}
