@@ -76,11 +76,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.bestrong.core.library.ExerciseInfo
+import com.bestrong.core.library.ExerciseLibrary
+import com.bestrong.core.model.SessionRating
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
+import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.ProgressionSuggestion
@@ -88,6 +91,7 @@ import com.bestrong.core.training.SuggestionKind
 import com.bestrong.core.training.Tempo
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatWeight
+import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.R
 import com.bestrong.mobile.share.WorkoutShareCard
 import com.bestrong.mobile.ui.FoldPosture
@@ -135,6 +139,7 @@ fun ActiveWorkoutScreen(
     summary?.let { s ->
         WorkoutSummaryDialog(
             onShare = { WorkoutShareCard.share(context, s.workout, s.records, unitForShare) },
+            onRate = vm::rateWorkout,
             summary = s,
             onSaveRoutine = { vm.saveSummaryAsRoutine(); vm.dismissSummary(); onFinished() },
             onDone = { vm.dismissSummary(); onFinished() },
@@ -299,11 +304,22 @@ private fun KeepScreenOn(enabled: Boolean) {
 private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Modifier) {
     val now = rememberNow()
     val unit = LocalWeightUnit.current
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds(now)), Modifier.weight(1f))
-        StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
-        StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}/${w.totalSetCount}", Modifier.weight(1f))
-        metrics?.heartRate?.let { StatTile(stringResource(R.string.stat_watch_hr), "$it", Modifier.weight(0.8f)) }
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds(now)), Modifier.weight(1f))
+            StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
+            StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}/${w.totalSetCount}", Modifier.weight(1f))
+            metrics?.heartRate?.let { StatTile(stringResource(R.string.stat_watch_hr), "$it", Modifier.weight(0.8f)) }
+        }
+        // Tiempo aproximado para terminar (series pendientes + descansos)
+        val remaining = WorkoutEditor.estimatedRemainingSeconds(w)
+        if (remaining > 0) {
+            Text(
+                stringResource(R.string.remaining_time, (remaining + 59) / 60),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -445,6 +461,7 @@ private fun ExerciseCard(
                         DropdownMenuItem(text = { Text(stringResource(R.string.notes)) }, onClick = { menu = false; editNotes = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.substitute_title)) }, onClick = { menu = false; substituting = true })
+                        if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.skip_exercise)) }, onClick = { menu = false; vm.skipExercise(we.id) })
                         if (index > 0) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; vm.moveExercise(index, index - 1) })
                         if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; vm.moveExercise(index, index + 1) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.remove_exercise)) }, onClick = { menu = false; vm.removeExercise(we.id) })
@@ -592,7 +609,7 @@ private fun ExerciseCard(
 }
 
 @Composable
-fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, onDone: () -> Unit, onShare: () -> Unit = {}) {
+fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, onDone: () -> Unit, onShare: () -> Unit = {}, onRate: (SessionRating) -> Unit = {}) {
     val w = summary.workout
     val unit = LocalWeightUnit.current
     AlertDialog(
@@ -607,6 +624,30 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
                 }
                 Text(stringResource(R.string.summary_sets_exercises, w.completedSetCount, w.exercises.size))
                 w.avgHeartRate?.let { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") + (w.calories?.let { c -> stringResource(R.string.summary_kcal, c) } ?: "")) }
+                // Frente a la última vez que hiciste cada ejercicio
+                if (summary.comparisons.isNotEmpty()) {
+                    Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)
+                    summary.comparisons.take(5).forEach { c ->
+                        val up = c.best1rmDelta > 0.01 || (c.best1rmDelta >= -0.01 && c.volumeDelta > 0)
+                        Text(
+                            stringResource(
+                                R.string.summary_vs_line,
+                                ExerciseLibrary.byId(c.exerciseId)?.displayName() ?: c.exerciseName,
+                                (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta)),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (up) BeStrongPalette.VolumeOptimal else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                summary.imbalances.forEach { (id, ratio) ->
+                    Text(
+                        stringResource(R.string.summary_imbalance, ExerciseLibrary.byId(id)?.displayName() ?: id, (ratio * 100).toInt()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                SessionRatingPicker(onRate)
                 if (summary.records.isNotEmpty()) {
                     Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
                     summary.records.forEach { pr ->

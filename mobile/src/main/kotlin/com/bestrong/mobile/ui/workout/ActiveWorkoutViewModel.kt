@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.bestrong.core.library.Alternatives
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
+import com.bestrong.core.model.SessionRating
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
@@ -39,7 +40,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class FinishedSummary(val workout: Workout, val records: List<PersonalRecord>)
+data class FinishedSummary(
+    val workout: Workout,
+    val records: List<PersonalRecord>,
+    val comparisons: List<WorkoutStats.ExerciseComparison> = emptyList(),
+    val imbalances: List<Pair<String, Double>> = emptyList(),
+)
 
 @HiltViewModel
 class ActiveWorkoutViewModel @Inject constructor(
@@ -229,7 +235,12 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (finished.exercises.isEmpty()) return@launch
             repo.saveWorkout(finished)
             val history = repo.historyOnce()
-            _summary.value = FinishedSummary(finished, WorkoutStats.newRecordsIn(finished, history))
+            _summary.value = FinishedSummary(
+                finished,
+                WorkoutStats.newRecordsIn(finished, history),
+                WorkoutStats.compareWithPrevious(finished, history),
+                WorkoutStats.imbalances(finished),
+            )
             actions.exportToHealthConnectIfEnabled(finished)
         }
     }
@@ -243,6 +254,16 @@ class ActiveWorkoutViewModel @Inject constructor(
         val s = _summary.value ?: return
         viewModelScope.launch { repo.saveRoutine(Routine.fromWorkout(s.workout)) }
     }
+
+    /** Guarda la valoración de la sesión recién terminada. */
+    fun rateWorkout(rating: SessionRating) {
+        val s = _summary.value ?: return
+        val rated = s.workout.copy(rating = rating)
+        _summary.value = s.copy(workout = rated)
+        viewModelScope.launch { repo.saveWorkout(rated) }
+    }
+
+    fun skipExercise(weId: String) = edit { WorkoutEditor.skipExercise(it, weId) }
 
     fun dismissSummary() {
         _summary.value = null

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.Card
@@ -25,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -70,6 +72,9 @@ import kotlinx.coroutines.launch
 fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     val history by vm.history.collectAsStateWithLifecycle()
     val days by vm.trainingDays.collectAsStateWithLifecycle()
+    val query by vm.query.collectAsStateWithLifecycle()
+    val filtered by vm.filtered.collectAsStateWithLifecycle()
+    val heatmap by vm.heatmap.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
     val scope = rememberCoroutineScope()
@@ -95,8 +100,21 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                             return@Column
                         }
                         LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            item { CalendarMonth(days, Modifier.padding(bottom = 8.dp)) }
-                            items(history, key = { it.id }) { w ->
+                            item {
+                                OutlinedTextField(
+                                    value = query,
+                                    onValueChange = { vm.query.value = it },
+                                    placeholder = { Text(stringResource(R.string.history_search)) },
+                                    leadingIcon = { Icon(Icons.Default.Search, null) },
+                                    singleLine = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                            }
+                            if (query.isBlank()) {
+                                item { YearHeatmap(heatmap, Modifier.padding(vertical = 4.dp)) }
+                                item { CalendarMonth(days, Modifier.padding(bottom = 8.dp)) }
+                            }
+                            items(filtered, key = { it.id }) { w ->
                                 WorkoutCard(w, Modifier.clickable { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } })
                             }
                         }

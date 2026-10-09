@@ -42,4 +42,5 @@ object AppModule {
 interface WorkerEntryPoint {
     fun repository(): com.bestrong.mobile.data.BeStrongRepository
     fun settings(): com.bestrong.mobile.data.SettingsStore
+    fun media(): com.bestrong.mobile.data.ExerciseMediaStore
 }

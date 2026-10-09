@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.history
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
@@ -8,13 +9,16 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,12 +27,23 @@ import kotlinx.coroutines.launch
 class HistoryViewModel @Inject constructor(
     private val repo: BeStrongRepository,
     private val actions: WorkoutActions,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
     val history: StateFlow<List<Workout>> = repo.history
 
     val trainingDays: StateFlow<Set<LocalDate>> = repo.history
         .map { WorkoutStats.trainingDays(it, ZoneId.systemDefault()) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+
+    /** Búsqueda por entreno, ejercicio o nota. */
+    val query = MutableStateFlow("")
+    val filtered: StateFlow<List<Workout>> = combine(repo.history, query) { h, q -> WorkoutStats.search(h, q) { it.displayName(context) } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Entrenos por día del año actual (mapa de calor). */
+    val heatmap: StateFlow<Map<LocalDate, Int>> = repo.history
+        .map { WorkoutStats.dailyCounts(it, LocalDate.now().year, ZoneId.systemDefault()) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     fun recordsIn(workout: Workout): List<PersonalRecord> = WorkoutStats.newRecordsIn(workout, history.value)
 

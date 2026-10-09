@@ -19,6 +19,7 @@ import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.ExerciseImage
 import com.bestrong.mobile.data.ExerciseMediaStore
 import com.bestrong.mobile.data.MediaItem
+import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -27,10 +28,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class ExerciseFilter(val query: String = "", val muscle: MuscleGroup? = null, val equipment: Equipment? = null)
+data class ExerciseFilter(
+    val query: String = "",
+    val muscle: MuscleGroup? = null,
+    val equipment: Equipment? = null,
+    val favoritesOnly: Boolean = false,
+    /** Solo peso corporal o bandas (entrenar en casa sin material). */
+    val noEquipment: Boolean = false,
+)
 
 data class ExerciseDetailState(
     val exercise: Exercise,
@@ -44,7 +53,15 @@ class ExercisesViewModel @Inject constructor(
     private val repo: BeStrongRepository,
     @ApplicationContext private val context: Context,
     private val media: ExerciseMediaStore,
+    private val settingsStore: SettingsStore,
 ) : ViewModel() {
+
+    val favorites: StateFlow<Set<String>> = settingsStore.settings.map { it.favoriteExercises }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.favoriteExercises)
+
+    fun toggleFavorite(id: String) = settingsStore.update { s ->
+        s.copy(favoriteExercises = if (id in s.favoriteExercises) s.favoriteExercises - id else s.favoriteExercises + id)
+    }
 
     // --- Imagen de wger y notas de técnica (foto/vídeo) -------------------------------------
 
@@ -59,8 +76,10 @@ class ExercisesViewModel @Inject constructor(
     val filter = MutableStateFlow(ExerciseFilter())
 
     /** Ejercicios usados recientemente, primero (como Hevy). */
-    val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history) { all, f, history ->
+    val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, favorites) { all, f, history, favs ->
         val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }
+            .filter { !f.favoritesOnly || it.id in favs }
+            .filter { !f.noEquipment || it.equipment == Equipment.BODYWEIGHT || it.equipment == Equipment.BAND }
         if (f.query.isBlank() && f.muscle == null && f.equipment == null) {
             val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)
             val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id } }

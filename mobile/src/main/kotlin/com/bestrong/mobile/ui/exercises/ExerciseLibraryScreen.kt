@@ -17,6 +17,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -27,6 +29,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -145,6 +148,7 @@ fun ExerciseSearchList(
 ) {
     val filter by vm.filter.collectAsStateWithLifecycle()
     val results by vm.results.collectAsStateWithLifecycle()
+    val favorites by vm.favorites.collectAsStateWithLifecycle()
     val usage by vm.usageCount.collectAsStateWithLifecycle()
     var creating by rememberSaveable { mutableStateOf(false) }
 
@@ -169,6 +173,8 @@ fun ExerciseSearchList(
         ) {
             EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, filter.muscle, { it.label() }) { vm.filter.value = filter.copy(muscle = it) }
             EnumFilter(stringResource(R.string.filter_equipment), Equipment.entries, filter.equipment, { it.label() }) { vm.filter.value = filter.copy(equipment = it) }
+            FilterChip(selected = filter.favoritesOnly, onClick = { vm.filter.value = filter.copy(favoritesOnly = !filter.favoritesOnly) }, label = { Text(stringResource(R.string.filter_favorites)) })
+            FilterChip(selected = filter.noEquipment, onClick = { vm.filter.value = filter.copy(noEquipment = !filter.noEquipment) }, label = { Text(stringResource(R.string.filter_no_equipment)) })
             if (title == null) FilterChip(selected = false, onClick = { creating = true }, label = { Text(stringResource(R.string.create_short)) })
         }
         LazyColumn(Modifier.fillMaxSize()) {
@@ -185,7 +191,19 @@ fun ExerciseSearchList(
                         )
                         Text(parts.joinToString(" · "))
                     },
-                    trailingContent = if (multiSelect) ({ Checkbox(checked = ex.id in selected, onCheckedChange = null) }) else null,
+                    trailingContent = if (multiSelect) {
+                        { Checkbox(checked = ex.id in selected, onCheckedChange = null) }
+                    } else {
+                        {
+                            val fav = ex.id in favorites
+                            IconToggleButton(checked = fav, onCheckedChange = { vm.toggleFavorite(ex.id) }) {
+                                Icon(
+                                    if (fav) Icons.Default.Star else Icons.Default.StarBorder,
+                                    stringResource(if (fav) R.string.favorite_remove else R.string.favorite_add, ex.displayName()),
+                                )
+                            }
+                        }
+                    },
                     tonalElevation = if (!multiSelect && ex.id in selected) 4.dp else 0.dp,
                     // En selección múltiple toda la fila es la casilla (TalkBack: «Press banca, casilla, marcada»)
                     modifier = if (multiSelect) {

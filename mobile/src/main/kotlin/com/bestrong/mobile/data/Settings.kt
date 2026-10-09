@@ -34,6 +34,8 @@ data class UserSettings(
     /** Perfiles de gimnasio con su material; el activo condiciona pesos, discos y alternativas. */
     val gyms: List<GymProfile> = listOf(GymProfile.gym(), GymProfile.home()),
     val activeGymId: String? = null,
+    /** Ejercicios marcados como favoritos. */
+    val favoriteExercises: Set<String> = emptySet(),
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
 }
@@ -63,6 +65,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             ?.takeIf { it.isNotEmpty() }
             ?: listOf(GymProfile.gym(), GymProfile.home()),
         activeGymId = prefs.getString("active_gym", null),
+        favoriteExercises = prefs.getStringSet("favorites", emptySet()).orEmpty().toSet(),
     )
 
     @Synchronized
@@ -84,6 +87,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBoolean("one_handed", s.oneHanded)
             putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))
             putString("active_gym", s.activeGymId)
+            putStringSet("favorites", s.favoriteExercises)
         }
         _settings.value = s
     }
