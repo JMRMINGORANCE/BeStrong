@@ -1,6 +1,7 @@
 package com.bestrong.core.library
 
 import com.bestrong.core.model.Equipment
+import com.bestrong.core.model.Equipment.BAND
 import com.bestrong.core.model.Equipment.BARBELL
 import com.bestrong.core.model.Equipment.BODYWEIGHT
 import com.bestrong.core.model.Equipment.CABLE
@@ -41,7 +42,7 @@ object ExerciseLibrary {
     ) = Exercise(id, name, muscle, secondary.toList(), equipment, tracking)
 
     /** Se registran por lado (izquierdo | derecho). */
-    private val UNILATERAL = setOf("bulgarian_split_squat", "lunge", "db_row", "cable_lateral_raise", "glute_kickback")
+    private val UNILATERAL = setOf("bulgarian_split_squat", "lunge", "db_row", "cable_lateral_raise", "glute_kickback", "shrimp_squat", "pistol_squat", "archer_push_up", "one_arm_push_up")
 
     /**
      * Familias de variantes: el historial y los récords se pueden ver juntos (p. ej. toda la
@@ -157,6 +158,27 @@ object ExerciseLibrary {
         ex("clean_and_press", "Cargada y press", FULL_BODY, BARBELL, SHOULDERS),
         ex("farmers_walk", "Paseo del granjero", FULL_BODY, DUMBBELL, FOREARMS, TRAPS, tracking = TrackingType.DISTANCE),
         ex("burpee", "Burpees", FULL_BODY, BODYWEIGHT, tracking = TrackingType.REPS_ONLY),
+        // Calistenia e isométricos (progresiones)
+        ex("wall_push_up", "Flexiones en pared", CHEST, BODYWEIGHT, TRICEPS, tracking = TrackingType.REPS_ONLY),
+        ex("incline_push_up", "Flexiones inclinadas", CHEST, BODYWEIGHT, TRICEPS, tracking = TrackingType.REPS_ONLY),
+        ex("knee_push_up", "Flexiones de rodillas", CHEST, BODYWEIGHT, TRICEPS, tracking = TrackingType.REPS_ONLY),
+        ex("diamond_push_up", "Flexiones diamante", TRICEPS, BODYWEIGHT, CHEST, tracking = TrackingType.REPS_ONLY),
+        ex("archer_push_up", "Flexiones arquero", CHEST, BODYWEIGHT, TRICEPS, tracking = TrackingType.REPS_ONLY),
+        ex("one_arm_push_up", "Flexión a una mano", CHEST, BODYWEIGHT, TRICEPS, ABS, tracking = TrackingType.REPS_ONLY),
+        ex("dead_hang", "Colgarse de la barra", BACK, BODYWEIGHT, FOREARMS, tracking = TrackingType.DURATION),
+        ex("scapular_pull_up", "Dominadas escapulares", BACK, BODYWEIGHT, TRAPS, tracking = TrackingType.REPS_ONLY),
+        ex("negative_pull_up", "Dominadas negativas", BACK, BODYWEIGHT, BICEPS, tracking = TrackingType.REPS_ONLY),
+        ex("band_pull_up", "Dominadas con banda", BACK, BAND, BICEPS, tracking = TrackingType.REPS_ONLY),
+        ex("chest_to_bar", "Dominadas al pecho", BACK, BODYWEIGHT, BICEPS, tracking = TrackingType.REPS_ONLY),
+        ex("muscle_up", "Muscle-up", BACK, BODYWEIGHT, CHEST, TRICEPS, tracking = TrackingType.REPS_ONLY),
+        ex("assisted_squat", "Sentadilla asistida", QUADRICEPS, BODYWEIGHT, GLUTES, tracking = TrackingType.REPS_ONLY),
+        ex("air_squat", "Sentadilla sin peso", QUADRICEPS, BODYWEIGHT, GLUTES, tracking = TrackingType.REPS_ONLY),
+        ex("shrimp_squat", "Sentadilla shrimp", QUADRICEPS, BODYWEIGHT, GLUTES, tracking = TrackingType.REPS_ONLY),
+        ex("pistol_squat", "Sentadilla pistol", QUADRICEPS, BODYWEIGHT, GLUTES, ABS, tracking = TrackingType.REPS_ONLY),
+        ex("hollow_hold", "Hollow hold", ABS, BODYWEIGHT, tracking = TrackingType.DURATION),
+        ex("side_plank", "Plancha lateral", ABS, BODYWEIGHT, GLUTES, tracking = TrackingType.DURATION),
+        ex("l_sit", "L-sit", ABS, BODYWEIGHT, TRICEPS, tracking = TrackingType.DURATION),
+        ex("wall_sit", "Sentadilla isométrica en pared", QUADRICEPS, BODYWEIGHT, GLUTES, tracking = TrackingType.DURATION),
         // Cardio (sesión libre con GPS en el reloj)
         ex("running", "Carrera", CARDIO, OTHER, tracking = TrackingType.DISTANCE),
         ex("walking", "Caminar", CARDIO, OTHER, tracking = TrackingType.DISTANCE),

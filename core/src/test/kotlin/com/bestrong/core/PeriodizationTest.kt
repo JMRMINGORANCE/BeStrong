@@ -88,7 +88,7 @@ class PeriodizationTest {
     }
 
     @Test fun suggestedTrainingMaxIsNinetyPercent() {
-        assertEquals(PeriodizedPrograms.all.size, 2)
+        assertEquals(6, PeriodizedPrograms.all.size)
         val w = Workout(
             name = "x", startedAtEpochMs = 0, finishedAtEpochMs = 1,
             exercises = listOf(com.bestrong.core.model.WorkoutExercise(exercise = squat, sets = listOf(WorkoutSet(weightKg = 100.0, reps = 5, completed = true)))),

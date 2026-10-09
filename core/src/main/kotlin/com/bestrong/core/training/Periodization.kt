@@ -14,34 +14,47 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 import kotlin.math.floor
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /** Serie prescrita como % del training max (TM). [amrap] = «+»: tantas reps como puedas. */
+@Serializable
 data class PercentSet(val percent: Double, val reps: Int, val amrap: Boolean = false)
 
 /** Cómo se calcula la carga de un ejercicio del programa. */
+@Serializable
 sealed interface LoadScheme {
     /** Porcentajes del TM que cambian cada semana del ciclo (5/3/1). [weeks] = una lista de series por semana. */
+    @Serializable
+    @SerialName("weekly")
     data class Weekly(val weeks: List<List<PercentSet>>) : LoadScheme
 
     /** Mismo % del TM todas las semanas (p. ej. BBB 5 × 10 al 50 %). */
+    @Serializable
+    @SerialName("fixed")
     data class Fixed(val sets: List<PercentSet>) : LoadScheme
 
     /**
      * Progresión lineal (GZCLP): sube [incrementKg] cada vez que se completan todas las series;
      * dos fallos seguidos → descarga al 90 %. La primera vez se parte de [startPercent] del 1RM estimado.
      */
+    @Serializable
+    @SerialName("linear")
     data class Linear(val sets: Int, val reps: Int, val incrementKg: Double, val startPercent: Double, val lastSetAmrap: Boolean = false) : LoadScheme
 }
 
+@Serializable
 data class PeriodizedItem(val exerciseId: String, val scheme: LoadScheme, val restSeconds: Int = 120, val tier: String? = null)
 
+@Serializable
 data class ProgramDay(val nameEs: String, val nameEn: String, val items: List<PeriodizedItem>)
 
 /**
  * Programa con progresión: semanas con porcentajes del training max y subida automática
  * al acabar cada ciclo, o progresión lineal sesión a sesión.
+ * Con [weeksPerCycle] = 1 el training max sube cada semana (Texas Method, Madcow).
  */
+@Serializable
 data class PeriodizedProgram(
     val id: String,
     val nameEs: String,
@@ -55,6 +68,8 @@ data class PeriodizedProgram(
     val tmIncrementKg: Map<String, Double> = emptyMap(),
     /** Ejercicios que necesitan training max. */
     val mainLifts: List<String> = emptyList(),
+    /** Creado por el usuario en el editor de programas. */
+    val custom: Boolean = false,
 ) {
     val daysPerWeek: Int get() = days.size
     fun name(lang: String) = if (lang == "en") nameEn else nameEs
@@ -102,8 +117,8 @@ object Periodization {
     fun round(kg: Double, step: Double = PLATE_STEP): Double = floor(kg / step + 0.5) * step
 
     /** Siguiente sesión del programa (día, semana, ciclo y cargas calculadas). */
-    fun nextSession(active: ActiveProgram, history: List<Workout>, lang: String): ProgramSession? {
-        val program = PeriodizedPrograms.byId(active.programId) ?: return null
+    fun nextSession(active: ActiveProgram, history: List<Workout>, lang: String, custom: List<PeriodizedProgram> = emptyList()): ProgramSession? {
+        val program = PeriodizedPrograms.byId(active.programId) ?: custom.firstOrNull { it.id == active.programId } ?: return null
         val done = sessionsDone(active, history)
         val n = done.size
         val dayIndex = n % program.days.size
@@ -214,6 +229,19 @@ object PeriodizedPrograms {
     )
     private val bbb = LoadScheme.Fixed(List(5) { PercentSet(0.50, 10) })
 
+    private fun fixed(id: String, sets: Int, reps: Int, percent: Double, rest: Int) =
+        if (percent > 0) PeriodizedItem(id, LoadScheme.Fixed(List(sets) { PercentSet(percent, reps) }), rest) else PeriodizedItem(id, LoadScheme.Linear(sets, reps, 2.5, 0.0), rest)
+    private fun ramp(id: String, percents: List<Double>, reps: Int) = PeriodizedItem(id, LoadScheme.Fixed(percents.map { PercentSet(it, reps) }), 150)
+    private val nsunsT1 = LoadScheme.Fixed(
+        listOf(
+            PercentSet(0.75, 5), PercentSet(0.85, 3), PercentSet(0.95, 1, amrap = true), PercentSet(0.90, 3), PercentSet(0.85, 3),
+            PercentSet(0.80, 3), PercentSet(0.75, 5), PercentSet(0.70, 5), PercentSet(0.65, 5, amrap = true),
+        ),
+    )
+    private val nsunsT2 = LoadScheme.Fixed(
+        listOf(PercentSet(0.50, 6), PercentSet(0.60, 5), PercentSet(0.70, 3), PercentSet(0.70, 5), PercentSet(0.70, 7), PercentSet(0.70, 4), PercentSet(0.70, 6), PercentSet(0.70, 8)),
+    )
+
     private fun t1(id: String, lower: Boolean) = PeriodizedItem(id, LoadScheme.Linear(5, 3, if (lower) 5.0 else 2.5, 0.85, lastSetAmrap = true), 180, "T1")
     private fun t2(id: String, lower: Boolean) = PeriodizedItem(id, LoadScheme.Linear(3, 10, if (lower) 5.0 else 2.5, 0.65), 120, "T2")
     private fun t3(id: String) = PeriodizedItem(id, LoadScheme.Linear(3, 15, 2.5, 0.0, lastSetAmrap = true), 60, "T3")
@@ -249,6 +277,76 @@ object PeriodizedPrograms {
             ),
             weeksPerCycle = 1,
             mainLifts = listOf("squat", "bench_press", "deadlift", "overhead_press"),
+        ),
+        // Periodización ondulante diaria: el mismo básico pesado, medio y ligero en la semana
+        PeriodizedProgram(
+            id = "dup_3day",
+            nameEs = "Ondulante (DUP) 3 días",
+            nameEn = "Daily undulating (DUP) 3 days",
+            descriptionEs = "Sentadilla, banca y peso muerto cada semana en tres registros: fuerza (5 × 3 al 85 %), hipertrofia (4 × 8 al 70 %) y potencia/técnica (6 × 2 al 75 %). El TM sube cada 3 semanas.",
+            descriptionEn = "Squat, bench and deadlift every week in three flavours: strength (5 × 3 at 85%), hypertrophy (4 × 8 at 70%) and power/technique (6 × 2 at 75%). TM goes up every 3 weeks.",
+            days = listOf(
+                ProgramDay("Fuerza", "Strength", listOf(fixed("squat", 5, 3, 0.85, 180), fixed("bench_press", 5, 3, 0.85, 180), fixed("barbell_row", 4, 6, 0.0, 90))),
+                ProgramDay("Hipertrofia", "Hypertrophy", listOf(fixed("bench_press", 4, 8, 0.70, 120), fixed("deadlift", 4, 6, 0.70, 150), fixed("pull_up", 4, 8, 0.0, 90))),
+                ProgramDay("Potencia", "Power", listOf(fixed("squat", 6, 2, 0.75, 120), fixed("overhead_press", 4, 6, 0.70, 120), fixed("deadlift", 6, 2, 0.75, 150))),
+            ),
+            weeksPerCycle = 3,
+            tmIncrementKg = mapOf("squat" to 5.0, "bench_press" to 2.5, "deadlift" to 5.0, "overhead_press" to 2.5),
+            mainLifts = listOf("squat", "bench_press", "deadlift", "overhead_press"),
+        ),
+        PeriodizedProgram(
+            id = "texas_method",
+            nameEs = "Texas Method",
+            nameEn = "Texas Method",
+            descriptionEs = "Volumen el lunes (5 × 5), recuperación el miércoles (ligero) e intensidad el viernes (1 × 5 récord). El TM sube cada semana.",
+            descriptionEn = "Volume on Monday (5 × 5), recovery on Wednesday (light) and intensity on Friday (1 × 5 PR). TM goes up every week.",
+            days = listOf(
+                ProgramDay("Volumen", "Volume", listOf(fixed("squat", 5, 5, 0.80, 180), fixed("bench_press", 5, 5, 0.80, 180), fixed("deadlift", 1, 5, 0.85, 180))),
+                ProgramDay("Recuperación", "Recovery", listOf(fixed("squat", 2, 5, 0.64, 120), fixed("overhead_press", 3, 5, 0.80, 120), fixed("chin_up", 3, 8, 0.0, 90))),
+                ProgramDay("Intensidad", "Intensity", listOf(fixed("squat", 1, 5, 0.89, 240), fixed("bench_press", 1, 5, 0.89, 240), fixed("barbell_row", 3, 5, 0.0, 120))),
+            ),
+            weeksPerCycle = 1,
+            tmIncrementKg = mapOf("squat" to 2.5, "bench_press" to 1.25, "deadlift" to 2.5, "overhead_press" to 1.25),
+            mainLifts = listOf("squat", "bench_press", "deadlift", "overhead_press"),
+        ),
+        PeriodizedProgram(
+            id = "madcow_5x5",
+            nameEs = "Madcow 5 × 5",
+            nameEn = "Madcow 5 × 5",
+            descriptionEs = "Series en rampa: lunes pesado (5 × 5 hasta el 80 %), miércoles ligero y viernes récord de 5 con una de 3 y una de 8. Sube un 2,5 % cada semana.",
+            descriptionEn = "Ramping sets: heavy Monday (5 × 5 up to 80%), light Wednesday and a 5-rep PR on Friday plus a triple and a set of 8. Goes up ~2.5% every week.",
+            days = listOf(
+                ProgramDay("Pesado", "Heavy", listOf(ramp("squat", listOf(0.50, 0.60, 0.70, 0.75, 0.80), 5), ramp("bench_press", listOf(0.50, 0.60, 0.70, 0.75, 0.80), 5), ramp("barbell_row", listOf(0.50, 0.60, 0.70, 0.75, 0.80), 5))),
+                ProgramDay("Ligero", "Light", listOf(ramp("squat", listOf(0.50, 0.60, 0.70, 0.70), 5), ramp("overhead_press", listOf(0.55, 0.65, 0.75, 0.80), 5), ramp("deadlift", listOf(0.55, 0.65, 0.75, 0.80), 5))),
+                ProgramDay(
+                    "Récord",
+                    "PR day",
+                    listOf(
+                        PeriodizedItem("squat", LoadScheme.Fixed(listOf(PercentSet(0.50, 5), PercentSet(0.60, 5), PercentSet(0.70, 5), PercentSet(0.75, 5), PercentSet(0.84, 5), PercentSet(0.88, 3), PercentSet(0.70, 8))), 180),
+                        PeriodizedItem("bench_press", LoadScheme.Fixed(listOf(PercentSet(0.50, 5), PercentSet(0.60, 5), PercentSet(0.70, 5), PercentSet(0.75, 5), PercentSet(0.84, 5), PercentSet(0.88, 3), PercentSet(0.70, 8))), 180),
+                        PeriodizedItem("barbell_row", LoadScheme.Fixed(listOf(PercentSet(0.50, 5), PercentSet(0.60, 5), PercentSet(0.70, 5), PercentSet(0.75, 5), PercentSet(0.84, 5), PercentSet(0.88, 3), PercentSet(0.70, 8))), 120),
+                    ),
+                ),
+            ),
+            weeksPerCycle = 1,
+            tmIncrementKg = mapOf("squat" to 2.5, "bench_press" to 2.5, "barbell_row" to 2.5, "deadlift" to 2.5, "overhead_press" to 1.25),
+            mainLifts = listOf("squat", "bench_press", "deadlift", "overhead_press", "barbell_row"),
+        ),
+        PeriodizedProgram(
+            id = "nsuns_4day",
+            nameEs = "nSuns 5/3/1 LP (4 días)",
+            nameEn = "nSuns 5/3/1 LP (4 days)",
+            descriptionEs = "Mucho volumen con porcentajes: 9 series del básico (con una de 1+ y otra de máximas reps) y 8 de un secundario. El TM sube cada semana según tus AMRAP.",
+            descriptionEn = "High volume with percentages: 9 sets of the main lift (with a 1+ and a max-reps set) and 8 of a secondary. TM goes up every week based on your AMRAPs.",
+            days = listOf(
+                ProgramDay("Banca + press", "Bench + OHP", listOf(PeriodizedItem("bench_press", nsunsT1, 150, "T1"), PeriodizedItem("overhead_press", nsunsT2, 90, "T2"))),
+                ProgramDay("Sentadilla + muerto", "Squat + sumo", listOf(PeriodizedItem("squat", nsunsT1, 180, "T1"), PeriodizedItem("deadlift", nsunsT2, 120, "T2"))),
+                ProgramDay("Press + banca", "OHP + incline", listOf(PeriodizedItem("overhead_press", nsunsT1, 150, "T1"), PeriodizedItem("incline_bench_press", nsunsT2, 90, "T2"))),
+                ProgramDay("Muerto + frontal", "Deadlift + front squat", listOf(PeriodizedItem("deadlift", nsunsT1, 180, "T1"), PeriodizedItem("front_squat", nsunsT2, 120, "T2"))),
+            ),
+            weeksPerCycle = 1,
+            tmIncrementKg = mapOf("bench_press" to 2.5, "overhead_press" to 2.5, "squat" to 5.0, "deadlift" to 5.0, "incline_bench_press" to 2.5, "front_squat" to 2.5),
+            mainLifts = listOf("squat", "bench_press", "deadlift", "overhead_press", "incline_bench_press", "front_squat"),
         ),
     )
 
