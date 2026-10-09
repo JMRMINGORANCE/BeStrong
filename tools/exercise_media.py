@@ -75,14 +75,14 @@ def norm(s):
 
 
 def fetch(url):
-    for attempt in range(4):
+    for attempt in range(6):
         try:
             req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "BeStrong-media-script"})
             with urllib.request.urlopen(req, timeout=60) as r:
                 return json.load(r)
         except Exception as e:  # noqa: BLE001
             print("reintento", url, e, file=sys.stderr)
-            time.sleep(2 ** attempt)
+            time.sleep(5 * 2 ** attempt)
     raise SystemExit("No se pudo descargar " + url)
 
 
@@ -144,16 +144,20 @@ EDB_ALIASES = {
 
 def exercisedb(ours):
     """GIF animados del dataset gratuito v1 de ExerciseDB (AscendAPI): uso no comercial con atribución."""
-    items, offset = [], 0
-    while True:
+    items, offset, seen = [], 0, set()
+    while offset < 5000:
         page = fetch(EDB_API.format(offset))
         data = page.get("data", page) if isinstance(page, dict) else page
         if offset == 0:
-            print("Ejemplo ExerciseDB:", json.dumps(data[:1], ensure_ascii=False)[:800])
+            meta = {k: v for k, v in page.items() if k != "data"} if isinstance(page, dict) else {}
+            print("Metadatos ExerciseDB:", json.dumps(meta)[:300])
+            print("Ejemplo ExerciseDB:", json.dumps(data[:1], ensure_ascii=False)[:300])
+        if not data or any(d.get("exerciseId") in seen for d in data[:1]):
+            break  # sin más páginas (o la API ignora el desplazamiento)
+        seen.update(d.get("exerciseId") for d in data)
         items += data
-        if len(data) < 100 or offset > 3000:
-            break
-        offset += 100
+        offset += len(data)
+        time.sleep(1.2)  # el plan gratuito limita las peticiones
     by_name = {}
     for it in items:
         if it.get("gifUrl") and it.get("name"):

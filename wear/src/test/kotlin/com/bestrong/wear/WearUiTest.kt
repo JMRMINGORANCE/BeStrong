@@ -2,12 +2,14 @@ package com.bestrong.wear
 
 import android.os.Looper
 import androidx.compose.ui.test.hasScrollAction
+import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -82,7 +84,9 @@ class WearUiTest {
         compose.onNodeWithContentDescription("Más opciones").performClick()
         settle()
         shot("menu")
-        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Progreso y discos"))
+        // En la lista curva (ScalingLazyColumn) se desplaza por posición: cabecera, resumen, «Ejercicios», 1 ejercicio, «Progreso y discos»
+        compose.onNode(hasScrollToIndexAction()).performScrollToIndex(4)
+        settle()
         compose.onNodeWithText("Progreso y discos").performClick()
         settle()
         shot("info")

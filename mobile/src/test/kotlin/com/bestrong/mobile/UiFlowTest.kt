@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.window.layout.FoldingFeature
 import androidx.window.testing.layout.FoldingFeature
@@ -152,7 +153,8 @@ class UiFlowTest {
         programsList().performScrollToNode(hasText("Full Body 3 días"))
         compose.onNodeWithText("Full Body 3 días").performClick()
         settle(25)
-        assertNotNull(compose.onNodeWithText("Full Body 3 días · A").fetchSemanticsNode())
+        // Aparece en «Te toca» y en la lista de rutinas
+        assertTrue(compose.onAllNodesWithText("Full Body 3 días · A").fetchSemanticsNodes().isNotEmpty())
         shot("programs_added_folded")
     }
 
@@ -168,8 +170,11 @@ class UiFlowTest {
         settle()
         compose.onNodeWithText("5/3/1 Boring But Big").performClick()
         settle()
+        // Con un campo de texto enfocado el cursor parpadea sin fin: el reloj de pruebas debe avanzar solo
+        compose.mainClock.autoAdvance = true
         // TM del press militar; el resto se queda vacío
-        compose.onNode(hasSetTextAction() and hasText("TM Press militar", substring = true)).performTextInput("60")
+        compose.onNode(hasSetTextAction() and hasText("TM Press militar", substring = true)).performTextReplacement("60")
+        compose.mainClock.autoAdvance = false
         settle()
         captureScreenRoboImage("build/outputs/roborazzi/program_setup_folded.png")
         compose.onNodeWithText("Empezar programa").performClick()
