@@ -62,11 +62,13 @@ class HomeViewModel @Inject constructor(
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val goal = active?.weeklyGoal ?: s.weeklyGoal
-        val since = active?.let { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() }
+        // Solo cuentan las semanas desde que se usa la app (o desde que empezó el programa)
+        val firstWorkout = history.minOfOrNull { it.startedAtEpochMs }
+        val since = (active?.startedAtEpochMs ?: firstWorkout)?.let { Instant.ofEpochMilli(it).atZone(zone).toLocalDate() }
         WeekProgress(
             trainedDays = Periodization.trainedDaysOfWeek(history, today, zone),
             goal = goal,
-            adherence = Periodization.adherence(history, goal, today, zone, since = since),
+            adherence = if (history.isEmpty()) null else Periodization.adherence(history, goal, today, zone, since = since),
             today = today.dayOfWeek,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
