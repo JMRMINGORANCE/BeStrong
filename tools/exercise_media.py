@@ -121,10 +121,10 @@ EDB_ALIASES = {
     "leg_extension": ["lever leg extension"],
     "leg_curl": ["lever lying leg curl"],
     "seated_leg_curl": ["lever seated leg curl"],
-    "hip_thrust": ["barbell glute bridge", "barbell hip thrust"],
+    "hip_thrust": ["barbell hip thrust", "barbell glute bridge"],
     "standing_calf_raise": ["lever standing calf raise", "barbell standing calf raise"],
     "seated_calf_raise": ["lever seated calf raise"],
-    "plank": ["front plank", "weighted front plank"],
+    "plank": ["front plank"],
     "crunch": ["crunch floor"],
     "hanging_leg_raise": ["hanging leg raise"],
     "ab_wheel": ["wheel rollout", "wheel run"],
@@ -169,7 +169,11 @@ def exercisedb(ours):
     by_name = {}
     for it in items:
         if it.get("gifUrl") and it.get("name"):
-            by_name.setdefault(norm(it["name"]), it)
+            key = norm(it["name"])
+            prev = by_name.get(key)
+            # Preferimos la versión «básica» frente a variantes entre paréntesis (bosu, agarre neutro, vista trasera…)
+            if prev is None or ("(" in prev["name"] and "(" not in it["name"]):
+                by_name[key] = it
     keys = list(by_name)
     out, report = {}, []
     for eid, name in sorted(ours.items()):
