@@ -161,7 +161,7 @@ fun WorkoutScreen(
                     SetType.WARMUP -> stringResource(R.string.type_warmup)
                     SetType.DROP -> stringResource(R.string.type_drop)
                     SetType.FAILURE -> stringResource(R.string.type_failure)
-                    SetType.NORMAL -> ""
+                    else -> ""
                 }
                 Text(stringResource(R.string.set_of, setNumber, we.sets.size, typeLabel), style = MaterialTheme.typography.labelSmall)
 

@@ -169,6 +169,11 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
 
+    /** Cambios de otros campos de la serie (nota, lado derecho, distancia, con ayuda). */
+    fun updateSetFields(weId: String, setId: String, block: (WorkoutSet) -> WorkoutSet) = edit { w ->
+        WorkoutEditor.updateSet(w, weId, setId, block)
+    }
+
     /** Añade series de aproximación antes de la primera serie de trabajo. */
     fun addWarmup(weId: String) = edit { w -> WorkoutEditor.addWarmup(w, weId, settings.value.unit, settings.value.activeGym.barKg) }
 

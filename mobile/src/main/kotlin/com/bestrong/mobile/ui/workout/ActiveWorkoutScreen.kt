@@ -500,6 +500,11 @@ private fun ExerciseCard(
                         onType = { vm.setType(we.id, set.id, it) },
                         onRpe = { vm.setRpe(we.id, set.id, it) },
                         onDelete = { vm.removeSet(we.id, set.id) },
+                        unilateral = we.exercise.unilateral,
+                        onRepsRight = { vm.updateSetFields(we.id, set.id) { s -> s.copy(repsRight = it) } },
+                        onDistance = { vm.updateSetFields(we.id, set.id) { s -> s.copy(distanceM = it) } },
+                        onNote = { vm.updateSetFields(we.id, set.id) { s -> s.copy(note = it) } },
+                        onAssisted = { vm.updateSetFields(we.id, set.id) { s -> s.copy(assisted = it) } },
                     )
                 }
             }

@@ -47,6 +47,25 @@ object WorkoutEditor {
             },
         )
 
+    // --- Orden y tiempo restante ----------------------------------------------------------
+
+    /** Saltar un ejercicio y volver a él después: pasa al final (las superseries se mantienen juntas). */
+    fun skipExercise(workout: Workout, workoutExerciseId: String): Workout {
+        val we = workout.exercises.firstOrNull { it.id == workoutExerciseId } ?: return workout
+        val group = we.supersetId?.let { id -> workout.exercises.filter { it.supersetId == id } } ?: listOf(we)
+        return workout.copy(exercises = workout.exercises.filterNot { it in group } + group)
+    }
+
+    /**
+     * Tiempo estimado para terminar: cada serie pendiente ≈ [secondsPerSet] más el descanso
+     * de su ejercicio (salvo la última del entreno).
+     */
+    fun estimatedRemainingSeconds(workout: Workout, secondsPerSet: Int = 40): Int {
+        val pending = workout.exercises.flatMap { we -> we.sets.filter { !it.completed }.map { we.restSeconds } }
+        if (pending.isEmpty()) return 0
+        return pending.size * secondsPerSet + pending.dropLast(1).sum()
+    }
+
     // --- Pausa y entreno olvidado -----------------------------------------------------------
 
     fun pause(workout: Workout, nowEpochMs: Long): Workout =
@@ -127,6 +146,7 @@ object WorkoutEditor {
                 SetType.WARMUP -> SetType.DROP
                 SetType.DROP -> SetType.FAILURE
                 SetType.FAILURE -> SetType.NORMAL
+                else -> SetType.NORMAL
             }
             it.copy(type = next)
         }

@@ -16,15 +16,18 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,6 +78,10 @@ fun SetHeader(tracking: TrackingType) {
                 Text(stringResource(R.string.set_col_reps), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
             TrackingType.DURATION -> Text(stringResource(R.string.set_col_seconds), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(2f), textAlign = TextAlign.Center)
+            TrackingType.DISTANCE -> {
+                Text(unit, style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(stringResource(R.string.set_col_meters), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            }
         }
         Box(Modifier.size(48.dp))
     }
@@ -84,7 +91,8 @@ fun describeSet(set: WorkoutSet, tracking: TrackingType, unit: WeightUnit): Stri
     TrackingType.WEIGHT_REPS -> "${unit.format(set.weightKg)} ${unit.label} × ${set.reps}"
     TrackingType.REPS_ONLY -> if (set.weightKg > 0) "+${unit.format(set.weightKg)} ${unit.label} × ${set.reps}" else "${set.reps} reps"
     TrackingType.DURATION -> "${set.durationSec} s"
-} + (set.rpe?.let { " @${it.toString().removeSuffix(".0")}" } ?: "")
+    TrackingType.DISTANCE -> (if (set.weightKg > 0) "${unit.format(set.weightKg)} ${unit.label} · " else "") + "${set.distanceM.toInt()} m"
+} + (set.repsRight?.let { " | $it" } ?: "") + (set.rpe?.let { " @${it.toString().removeSuffix(".0")}" } ?: "")
 
 private val RPE_VALUES = listOf(6.0, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0)
 
@@ -98,6 +106,11 @@ fun SetRow(
     onReps: (Int) -> Unit,
     onDuration: (Int) -> Unit,
     onToggle: () -> Unit,
+    unilateral: Boolean = false,
+    onRepsRight: (Int) -> Unit = {},
+    onDistance: (Double) -> Unit = {},
+    onNote: (String) -> Unit = {},
+    onAssisted: (Boolean) -> Unit = {},
     onType: (SetType) -> Unit,
     onRpe: (Double?) -> Unit,
     onDelete: () -> Unit,
@@ -124,13 +137,24 @@ fun SetRow(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             var menu by remember { mutableStateOf(false) }
+            var editingNote by remember { mutableStateOf(false) }
+            if (editingNote) {
+                var text by remember { mutableStateOf(set.note) }
+                AlertDialog(
+                    onDismissRequest = { editingNote = false },
+                    title = { Text(stringResource(R.string.set_note)) },
+                    text = { OutlinedTextField(text, { text = it }, placeholder = { Text(stringResource(R.string.set_note_hint)) }, minLines = 2) },
+                    confirmButton = { TextButton(onClick = { onNote(text.trim()); editingNote = false }) { Text(stringResource(R.string.action_save)) } },
+                    dismissButton = { TextButton(onClick = { editingNote = false }) { Text(stringResource(R.string.action_cancel)) } },
+                )
+            }
             val typeDescription = stringResource(R.string.set_type_and_rpe, label)
             val stateText = stringResource(if (set.completed) R.string.set_done else R.string.set_pending)
             val labelColor = when (set.type) {
                 SetType.WARMUP -> MaterialTheme.colorScheme.tertiary
                 SetType.DROP -> MaterialTheme.colorScheme.secondary
                 SetType.FAILURE -> MaterialTheme.colorScheme.error
-                SetType.NORMAL -> MaterialTheme.colorScheme.onSurface
+                else -> MaterialTheme.colorScheme.onSurface
             }
             Box(Modifier.weight(0.6f)) {
                 Column(
@@ -138,7 +162,7 @@ fun SetRow(
                         .semantics { contentDescription = typeDescription },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(label, fontWeight = FontWeight.Bold, color = labelColor, textAlign = TextAlign.Center)
+                    Text(label + (if (set.note.isNotBlank()) " ✎" else "") + (if (set.assisted) " ⚑" else ""), fontWeight = FontWeight.Bold, color = labelColor, textAlign = TextAlign.Center)
                     set.rpe?.let { Text("@${it.toString().removeSuffix(".0")}", style = MaterialTheme.typography.labelSmall) }
                 }
                 DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
@@ -147,6 +171,9 @@ fun SetRow(
                         SetType.WARMUP to stringResource(R.string.set_type_warmup),
                         SetType.DROP to stringResource(R.string.set_type_drop),
                         SetType.FAILURE to stringResource(R.string.set_type_failure),
+                        SetType.CLUSTER to stringResource(R.string.set_type_cluster),
+                        SetType.PARTIAL to stringResource(R.string.set_type_partial),
+                        SetType.NEGATIVE to stringResource(R.string.set_type_negative),
                     )
                         .forEach { (t, l) -> DropdownMenuItem(text = { Text(if (t == set.type) "✓ $l" else l) }, onClick = { onType(t); menu = false }) }
                     HorizontalDivider()
@@ -156,6 +183,12 @@ fun SetRow(
                         DropdownMenuItem(text = { Text((if (set.rpe == v) "✓ " else "") + stringResource(R.string.rpe_value, t)) }, onClick = { onRpe(v); menu = false })
                     }
                     if (set.rpe != null) DropdownMenuItem(text = { Text(stringResource(R.string.rpe_remove)) }, onClick = { onRpe(null); menu = false })
+                    HorizontalDivider()
+                    DropdownMenuItem(
+                        text = { Text((if (set.assisted) "✓ " else "") + stringResource(R.string.set_assisted)) },
+                        onClick = { onAssisted(!set.assisted); menu = false },
+                    )
+                    DropdownMenuItem(text = { Text(stringResource(R.string.set_note)) }, onClick = { editingNote = true; menu = false })
                 }
             }
             Column(
@@ -193,15 +226,47 @@ fun SetRow(
             }
             when (tracking) {
                 TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY -> {
-                    NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", stringResource(R.string.set_weight_in, unit.label), Modifier.weight(1f), decimal = true) {
-                        if (it.isEmpty()) onWeightKg(0.0) else unit.parseToKg(it)?.let(onWeightKg)
+                    // Peso corporal: + lastre, − asistencia (dominadas con banda o máquina asistida)
+                    val signed = tracking == TrackingType.REPS_ONLY
+                    NumberField(
+                        (if (set.weightKg < 0) "-" else "") + (unit.format(kotlin.math.abs(set.weightKg)).takeIf { set.weightKg != 0.0 } ?: ""),
+                        stringResource(if (signed) R.string.set_weight_signed else R.string.set_weight_in, unit.label),
+                        Modifier.weight(1f),
+                        decimal = true,
+                        signed = signed,
+                    ) {
+                        when {
+                            it.isEmpty() || it == "-" -> onWeightKg(0.0)
+                            it.startsWith("-") -> unit.parseToKg(it.drop(1))?.let { kg -> onWeightKg(-kg) }
+                            else -> unit.parseToKg(it)?.let(onWeightKg)
+                        }
                     }
-                    NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps), Modifier.weight(1f)) {
-                        if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
+                    if (unilateral) {
+                        // Unilateral: izquierdo | derecho
+                        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                            NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_left), Modifier.weight(1f)) {
+                                if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
+                            }
+                            NumberField(set.repsRight?.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_right), Modifier.weight(1f)) {
+                                onRepsRight(it.toIntOrNull() ?: 0)
+                            }
+                        }
+                    } else {
+                        NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps), Modifier.weight(1f)) {
+                            if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
+                        }
                     }
                 }
                 TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_seconds), Modifier.weight(2f)) {
                     if (it.isEmpty()) onDuration(0) else it.toIntOrNull()?.let(onDuration)
+                }
+                TrackingType.DISTANCE -> {
+                    NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", stringResource(R.string.set_weight_in, unit.label), Modifier.weight(1f), decimal = true) {
+                        if (it.isEmpty()) onWeightKg(0.0) else unit.parseToKg(it)?.let(onWeightKg)
+                    }
+                    NumberField(set.distanceM.takeIf { it > 0 }?.toInt()?.toString() ?: "", stringResource(R.string.set_meters), Modifier.weight(1f)) {
+                        onDistance(it.toDoubleOrNull() ?: 0.0)
+                    }
                 }
             }
             FilledIconToggleButton(
@@ -220,14 +285,14 @@ fun SetRow(
  * el valor viaja a la base de datos y vuelve.
  */
 @Composable
-private fun NumberField(value: String, description: String, modifier: Modifier, decimal: Boolean = false, onChange: (String) -> Unit) {
+private fun NumberField(value: String, description: String, modifier: Modifier, decimal: Boolean = false, signed: Boolean = false, onChange: (String) -> Unit) {
     var text by remember { mutableStateOf(value) }
     var focused by remember { mutableStateOf(false) }
     LaunchedEffect(value) { if (!focused) text = value }
     BasicTextField(
         value = text,
         onValueChange = { new ->
-            val filtered = new.filter { it.isDigit() || (decimal && (it == '.' || it == ',')) }.take(6)
+            val filtered = new.filterIndexed { i, c -> c.isDigit() || (decimal && (c == '.' || c == ',')) || (signed && c == '-' && i == 0) }.take(6)
             text = filtered
             // "82," aún no es un número completo: se guarda al escribir el decimal
             if (!filtered.endsWith(',') && !filtered.endsWith('.')) onChange(filtered)

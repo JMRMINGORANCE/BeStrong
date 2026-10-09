@@ -38,6 +38,45 @@ object ExerciseLibrary {
         tracking: TrackingType = TrackingType.WEIGHT_REPS,
     ) = Exercise(id, name, muscle, secondary.toList(), equipment, tracking)
 
+    /** Se registran por lado (izquierdo | derecho). */
+    private val UNILATERAL = setOf("bulgarian_split_squat", "lunge", "db_row", "cable_lateral_raise", "glute_kickback")
+
+    /**
+     * Familias de variantes: el historial y los récords se pueden ver juntos (p. ej. toda la
+     * familia del press banca) o por separado.
+     */
+    val families: Map<String, List<String>> = mapOf(
+        "bench" to listOf("bench_press", "incline_bench_press", "decline_bench_press", "db_bench_press", "db_incline_press", "close_grip_bench", "machine_chest_press"),
+        "squat" to listOf("squat", "front_squat", "smith_squat", "goblet_squat", "hack_squat", "leg_press"),
+        "deadlift" to listOf("deadlift", "romanian_deadlift"),
+        "row" to listOf("barbell_row", "db_row", "pendlay_row", "t_bar_row", "seated_cable_row"),
+        "overhead" to listOf("overhead_press", "db_shoulder_press", "arnold_press"),
+        "pull" to listOf("pull_up", "chin_up", "lat_pulldown"),
+        "curl" to listOf("barbell_curl", "db_curl", "hammer_curl", "preacher_curl", "cable_curl", "incline_db_curl"),
+    )
+
+    fun familyOf(exerciseId: String): List<String> = families.values.firstOrNull { exerciseId in it } ?: listOf(exerciseId)
+
+    /** Sinónimos y nombres coloquiales (español e inglés) para la búsqueda. */
+    private val synonyms: Map<String, List<String>> = mapOf(
+        "overhead_press" to listOf("press de hombro", "press hombro", "militar", "ohp", "shoulder press"),
+        "bench_press" to listOf("banca", "press pecho", "bench"),
+        "squat" to listOf("sentadilla trasera", "back squat"),
+        "deadlift" to listOf("muerto", "dl"),
+        "romanian_deadlift" to listOf("rdl", "peso muerto rumano", "piernas rigidas"),
+        "pull_up" to listOf("dominadas", "pullup"),
+        "chin_up" to listOf("dominadas supinas", "chinup"),
+        "lat_pulldown" to listOf("jalon", "polea al pecho", "pulldown"),
+        "dips" to listOf("fondos", "paralelas"),
+        "hip_thrust" to listOf("puente de gluteo", "empuje de cadera"),
+        "triceps_pushdown" to listOf("extension de triceps en polea", "pushdown"),
+        "leg_press" to listOf("prensa"),
+        "plank" to listOf("plancha", "isometrico abdominal"),
+        "kb_swing" to listOf("swing", "kettlebell"),
+        "db_row" to listOf("remo a una mano"),
+        "lateral_raise" to listOf("elevaciones", "vuelos laterales"),
+    )
+
     val all: List<Exercise> = listOf(
         // Pecho
         ex("bench_press", "Press banca", CHEST, BARBELL, TRICEPS, SHOULDERS),
@@ -114,9 +153,9 @@ object ExerciseLibrary {
         // Cuerpo completo
         ex("kb_swing", "Swing con kettlebell", FULL_BODY, KETTLEBELL, GLUTES, HAMSTRINGS),
         ex("clean_and_press", "Cargada y press", FULL_BODY, BARBELL, SHOULDERS),
-        ex("farmers_walk", "Paseo del granjero", FULL_BODY, DUMBBELL, FOREARMS, TRAPS, tracking = TrackingType.DURATION),
+        ex("farmers_walk", "Paseo del granjero", FULL_BODY, DUMBBELL, FOREARMS, TRAPS, tracking = TrackingType.DISTANCE),
         ex("burpee", "Burpees", FULL_BODY, BODYWEIGHT, tracking = TrackingType.REPS_ONLY),
-    )
+    ).map { if (it.id in UNILATERAL) it.copy(unilateral = true) else it }
 
     private val byId = all.associateBy { it.id }
 
@@ -179,7 +218,11 @@ object ExerciseLibrary {
         return exercises
             .filter { muscle == null || it.primaryMuscle == muscle || muscle in it.secondaryMuscles }
             .filter { equipment == null || it.equipment == equipment }
-            .filter { q.isBlank() || q.split(' ').all { token -> nameOf(it).normalized().contains(token) } }
+            .filter { ex ->
+                q.isBlank() ||
+                    q.split(' ').all { token -> nameOf(ex).normalized().contains(token) } ||
+                    synonyms[ex.id].orEmpty().any { syn -> syn.normalized().contains(q) || q.contains(syn.normalized()) }
+            }
             .sortedWith(compareBy({ !nameOf(it).normalized().startsWith(q) }, { nameOf(it) }))
     }
 

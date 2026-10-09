@@ -35,7 +35,14 @@ enum class Equipment(val label: String) {
 
 /** Qué se registra en cada serie. */
 @Serializable
-enum class TrackingType { WEIGHT_REPS, REPS_ONLY, DURATION }
+enum class TrackingType {
+    WEIGHT_REPS,
+    REPS_ONLY,
+    DURATION,
+
+    /** Peso + distancia (paseo del granjero, trineo) o solo distancia (remo, carrera). */
+    DISTANCE,
+}
 
 @Serializable
 data class Exercise(
@@ -46,4 +53,6 @@ data class Exercise(
     val equipment: Equipment = Equipment.BARBELL,
     val tracking: TrackingType = TrackingType.WEIGHT_REPS,
     val isCustom: Boolean = false,
+    /** Se registra cada lado por separado (zancadas, remo a una mano…). */
+    val unilateral: Boolean = false,
 )
