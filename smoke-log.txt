@@ -1,0 +1,158 @@
+
+> Configure project :baselineprofile
+Passing custom test runner argument android.testInstrumentationRunnerArguments.androidx.benchmark.suppressErrors from gradle.properties or command line is not compatible with configuration caching. Please specify this argument using android gradle dsl.
+WARNING: The option setting 'android.testoptions.manageddevices.emulator.gpu=swiftshader_indirect' is experimental.
+
+> Task :baselineprofile:preBuild UP-TO-DATE
+> Task :baselineprofile:preBenchmarkReleaseBuild UP-TO-DATE
+> Task :baselineprofile:checkTestedAppObfuscationBenchmarkRelease
+> Task :baselineprofile:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :baselineprofile:generateBenchmarkReleaseResValues
+> Task :baselineprofile:mapBenchmarkReleaseSourceSetPaths
+> Task :baselineprofile:checkBenchmarkReleaseAarMetadata
+> Task :baselineprofile:generateBenchmarkReleaseResources
+> Task :baselineprofile:processBenchmarkReleaseManifest
+> Task :baselineprofile:javaPreCompileBenchmarkRelease
+> Task :baselineprofile:mergeBenchmarkReleaseShaders
+> Task :baselineprofile:compileBenchmarkReleaseShaders NO-SOURCE
+> Task :baselineprofile:generateBenchmarkReleaseAssets UP-TO-DATE
+> Task :baselineprofile:mergeBenchmarkReleaseAssets
+> Task :baselineprofile:mergeBenchmarkReleaseResources
+> Task :baselineprofile:compressBenchmarkReleaseAssets
+> Task :baselineprofile:desugarBenchmarkReleaseFileDependencies
+> Task :baselineprofile:checkBenchmarkReleaseDuplicateClasses
+> Task :baselineprofile:processBenchmarkReleaseResources
+> Task :baselineprofile:mergeExtDexBenchmarkRelease
+> Task :baselineprofile:mergeLibDexBenchmarkRelease
+> Task :baselineprofile:mergeBenchmarkReleaseJniLibFolders
+> Task :baselineprofile:mergeBenchmarkReleaseNativeLibs
+
+> Task :baselineprofile:stripBenchmarkReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libbenchmarkNative.so, libtracing_perfetto.so. Run with --info option to learn more.
+
+> Task :baselineprofile:validateSigningBenchmarkRelease
+> Task :baselineprofile:writeBenchmarkReleaseSigningConfigVersions
+
+> Task :baselineprofile:pixel6Api34Setup
+pixel6Api34 has an unspecified testedAbi. This presently defaults to
+"x86_64". However, in 9.0 this will change to "arm64-v8a"
+
+pixel6Api34 specifies a system image that that does not support NDK translation,
+and will no longer be able to run tests in this environment. This
+device will wtill be able to run on ARM machines.
+To continue running tests with the current configuration, and not use
+NDK translation set testedAbi = "x86_64"
+
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:compileKotlin UP-TO-DATE
+> Task :core:compileJava NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :designsystem:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :designsystem:preBuild UP-TO-DATE
+> Task :designsystem:preReleaseBuild UP-TO-DATE
+> Task :designsystem:generateReleaseResValues UP-TO-DATE
+> Task :designsystem:generateReleaseResources UP-TO-DATE
+> Task :designsystem:packageReleaseResources UP-TO-DATE
+> Task :designsystem:parseReleaseLocalResources UP-TO-DATE
+> Task :designsystem:generateReleaseRFile UP-TO-DATE
+> Task :designsystem:compileReleaseKotlin UP-TO-DATE
+> Task :designsystem:javaPreCompileRelease UP-TO-DATE
+> Task :designsystem:compileReleaseJavaWithJavac NO-SOURCE
+> Task :designsystem:mergeReleaseGeneratedProguardFiles
+> Task :designsystem:exportReleaseConsumerProguardFiles
+> Task :designsystem:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :designsystem:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :mobile:preBuild UP-TO-DATE
+> Task :mobile:preBenchmarkReleaseBuild UP-TO-DATE
+> Task :mobile:checkBenchmarkReleaseDuplicateClasses
+> Task :designsystem:prepareReleaseArtProfile UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseArtProfile
+> Task :mobile:buildKotlinToolingMetadata UP-TO-DATE
+> Task :mobile:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :designsystem:compileReleaseLibraryResources UP-TO-DATE
+> Task :designsystem:writeReleaseAarMetadata UP-TO-DATE
+> Task :mobile:checkBenchmarkReleaseAarMetadata
+> Task :mobile:generateBenchmarkReleaseResValues
+> Task :mobile:mapBenchmarkReleaseSourceSetPaths
+> Task :mobile:generateBenchmarkReleaseResources
+> Task :baselineprofile:compileBenchmarkReleaseKotlin
+> Task :baselineprofile:compileBenchmarkReleaseJavaWithJavac NO-SOURCE
+> Task :mobile:mergeBenchmarkReleaseResources
+> Task :baselineprofile:dexBuilderBenchmarkRelease
+> Task :baselineprofile:mergeBenchmarkReleaseGlobalSynthetics
+> Task :baselineprofile:processBenchmarkReleaseJavaRes
+> Task :baselineprofile:mergeProjectDexBenchmarkRelease
+> Task :mobile:packageBenchmarkReleaseResources
+> Task :mobile:parseBenchmarkReleaseLocalResources
+> Task :mobile:createBenchmarkReleaseCompatibleScreenManifests
+> Task :designsystem:extractDeepLinksRelease UP-TO-DATE
+> Task :designsystem:processReleaseManifest UP-TO-DATE
+> Task :mobile:extractDeepLinksBenchmarkRelease
+> Task :mobile:processBenchmarkReleaseMainManifest
+> Task :baselineprofile:mergeBenchmarkReleaseJavaResource
+> Task :mobile:processBenchmarkReleaseManifest
+> Task :mobile:processBenchmarkReleaseManifestForPackage
+> Task :baselineprofile:packageBenchmarkRelease
+> Task :baselineprofile:createBenchmarkReleaseApkListingFileRedirect
+> Task :mobile:javaPreCompileBenchmarkRelease
+> Task :mobile:extractProguardFiles
+> Task :designsystem:processReleaseJavaRes UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseStartupProfile
+> Task :designsystem:mergeReleaseShaders UP-TO-DATE
+> Task :designsystem:compileReleaseShaders NO-SOURCE
+> Task :designsystem:generateReleaseAssets UP-TO-DATE
+> Task :designsystem:mergeReleaseAssets UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseShaders
+> Task :mobile:compileBenchmarkReleaseShaders NO-SOURCE
+> Task :mobile:generateBenchmarkReleaseAssets UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseAssets
+> Task :mobile:compressBenchmarkReleaseAssets
+> Task :mobile:extractBenchmarkReleaseVersionControlInfo
+> Task :mobile:collectBenchmarkReleaseDependencies
+> Task :mobile:sdkBenchmarkReleaseDependencyData
+> Task :designsystem:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :designsystem:mergeReleaseNativeLibs NO-SOURCE
+> Task :designsystem:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseJniLibFolders
+> Task :mobile:mergeBenchmarkReleaseNativeLibs
+
+> Task :mobile:stripBenchmarkReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :mobile:validateSigningBenchmarkRelease
+> Task :mobile:writeBenchmarkReleaseAppMetadata
+> Task :mobile:writeBenchmarkReleaseSigningConfigVersions
+> Task :mobile:processBenchmarkReleaseResources
+> Task :mobile:optimizeBenchmarkReleaseResources
+> Task :mobile:kspBenchmarkReleaseKotlin
+> Task :mobile:compileBenchmarkReleaseKotlin
+> Task :mobile:compileBenchmarkReleaseJavaWithJavac
+> Task :mobile:hiltAggregateDepsBenchmarkRelease
+> Task :mobile:hiltJavaCompileBenchmarkRelease
+> Task :mobile:processBenchmarkReleaseJavaRes
+> Task :mobile:transformBenchmarkReleaseClassesWithAsm
+> Task :mobile:mergeBenchmarkReleaseJavaResource
+> Task :mobile:mergeBenchmarkReleaseGeneratedProguardFiles
+> Task :mobile:expandBenchmarkReleaseArtProfileWildcards
+
+> Task :mobile:minifyBenchmarkReleaseWithR8
+WARNING: /home/runner/.gradle/caches/8.14.3/transforms/2f49279dc7438c6c3537002c7b57fed0/transformed/rules/lib/META-INF/com.android.tools/r8/kotlinx-serialization-common.pro:5:12-27: R8: The type "<1>$*" is used in a field rule. The characters in this type are legal for the JVM, but unlikely to originate from a source language. Maybe this is not the rule you are looking for.
+
+> Task :mobile:compileBenchmarkReleaseArtProfile
+> Task :mobile:packageBenchmarkRelease
+> Task :mobile:createBenchmarkReleaseApkListingFileRedirect
+> Task :baselineprofile:pixel6Api34BenchmarkReleaseAndroidTest
+Starting 1 tests on pixel6Api34
+
+pixel6Api34 Tests 0/1 completed. (0 skipped) (0 failed)
+pixel6Api34 Tests 1/1 completed. (0 skipped) (0 failed)
+Finished 1 tests on pixel6Api34
+
+> Task :baselineprofile:mergeBenchmarkReleaseTestResultProtos
+Test execution completed. See the report at: file:///home/runner/work/BeStrong/BeStrong/baselineprofile/build/reports/androidTests/managedDevice/benchmarkrelease/allDevices/index.html
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/smoke-1791539975675.json
+
+BUILD SUCCESSFUL in 6m 1s
+101 actionable tasks: 79 executed, 22 up-to-date

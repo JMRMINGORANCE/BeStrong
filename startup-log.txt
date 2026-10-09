@@ -1,0 +1,120 @@
+> Task :baselineprofile:mergeExtDexBenchmarkRelease UP-TO-DATE
+> Task :baselineprofile:mergeLibDexBenchmarkRelease UP-TO-DATE
+> Task :baselineprofile:mergeProjectDexBenchmarkRelease UP-TO-DATE
+> Task :baselineprofile:mergeBenchmarkReleaseJniLibFolders UP-TO-DATE
+> Task :baselineprofile:mergeBenchmarkReleaseNativeLibs UP-TO-DATE
+> Task :baselineprofile:stripBenchmarkReleaseDebugSymbols UP-TO-DATE
+> Task :baselineprofile:validateSigningBenchmarkRelease UP-TO-DATE
+> Task :baselineprofile:writeBenchmarkReleaseSigningConfigVersions UP-TO-DATE
+> Task :baselineprofile:packageBenchmarkRelease UP-TO-DATE
+> Task :baselineprofile:createBenchmarkReleaseApkListingFileRedirect UP-TO-DATE
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :core:compileKotlin UP-TO-DATE
+> Task :core:compileJava NO-SOURCE
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar UP-TO-DATE
+> Task :designsystem:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :designsystem:preBuild UP-TO-DATE
+> Task :designsystem:preReleaseBuild UP-TO-DATE
+> Task :designsystem:generateReleaseResValues UP-TO-DATE
+> Task :designsystem:generateReleaseResources UP-TO-DATE
+> Task :designsystem:packageReleaseResources UP-TO-DATE
+> Task :designsystem:parseReleaseLocalResources UP-TO-DATE
+> Task :designsystem:generateReleaseRFile UP-TO-DATE
+> Task :designsystem:compileReleaseKotlin UP-TO-DATE
+> Task :designsystem:javaPreCompileRelease UP-TO-DATE
+> Task :designsystem:compileReleaseJavaWithJavac NO-SOURCE
+> Task :designsystem:mergeReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :designsystem:exportReleaseConsumerProguardFiles UP-TO-DATE
+> Task :designsystem:bundleLibCompileToJarRelease UP-TO-DATE
+> Task :designsystem:bundleLibRuntimeToJarRelease UP-TO-DATE
+> Task :mobile:preBuild UP-TO-DATE
+> Task :mobile:preBenchmarkReleaseBuild UP-TO-DATE
+> Task :mobile:checkBenchmarkReleaseDuplicateClasses UP-TO-DATE
+> Task :designsystem:prepareReleaseArtProfile UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseArtProfile UP-TO-DATE
+> Task :mobile:buildKotlinToolingMetadata UP-TO-DATE
+> Task :mobile:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :designsystem:compileReleaseLibraryResources UP-TO-DATE
+> Task :designsystem:writeReleaseAarMetadata UP-TO-DATE
+> Task :mobile:checkBenchmarkReleaseAarMetadata UP-TO-DATE
+> Task :mobile:generateBenchmarkReleaseResValues UP-TO-DATE
+> Task :mobile:mapBenchmarkReleaseSourceSetPaths UP-TO-DATE
+> Task :mobile:generateBenchmarkReleaseResources UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseResources UP-TO-DATE
+> Task :mobile:packageBenchmarkReleaseResources UP-TO-DATE
+> Task :mobile:parseBenchmarkReleaseLocalResources UP-TO-DATE
+> Task :mobile:createBenchmarkReleaseCompatibleScreenManifests UP-TO-DATE
+> Task :designsystem:extractDeepLinksRelease UP-TO-DATE
+> Task :designsystem:processReleaseManifest UP-TO-DATE
+> Task :mobile:extractDeepLinksBenchmarkRelease UP-TO-DATE
+> Task :mobile:processBenchmarkReleaseMainManifest UP-TO-DATE
+> Task :mobile:processBenchmarkReleaseManifest UP-TO-DATE
+> Task :mobile:processBenchmarkReleaseManifestForPackage UP-TO-DATE
+> Task :mobile:processBenchmarkReleaseResources UP-TO-DATE
+> Task :mobile:kspBenchmarkReleaseKotlin UP-TO-DATE
+> Task :mobile:compileBenchmarkReleaseKotlin UP-TO-DATE
+> Task :mobile:javaPreCompileBenchmarkRelease UP-TO-DATE
+> Task :mobile:compileBenchmarkReleaseJavaWithJavac UP-TO-DATE
+> Task :mobile:hiltAggregateDepsBenchmarkRelease UP-TO-DATE
+> Task :mobile:hiltJavaCompileBenchmarkRelease UP-TO-DATE
+> Task :mobile:transformBenchmarkReleaseClassesWithAsm UP-TO-DATE
+> Task :mobile:expandBenchmarkReleaseArtProfileWildcards UP-TO-DATE
+> Task :mobile:extractProguardFiles UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :designsystem:processReleaseJavaRes UP-TO-DATE
+> Task :mobile:processBenchmarkReleaseJavaRes UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseJavaResource UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseStartupProfile UP-TO-DATE
+> Task :mobile:minifyBenchmarkReleaseWithR8 UP-TO-DATE
+> Task :mobile:compileBenchmarkReleaseArtProfile UP-TO-DATE
+> Task :designsystem:mergeReleaseShaders UP-TO-DATE
+> Task :designsystem:compileReleaseShaders NO-SOURCE
+> Task :designsystem:generateReleaseAssets UP-TO-DATE
+> Task :designsystem:mergeReleaseAssets UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseShaders UP-TO-DATE
+> Task :mobile:compileBenchmarkReleaseShaders NO-SOURCE
+> Task :mobile:generateBenchmarkReleaseAssets UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseAssets UP-TO-DATE
+> Task :mobile:compressBenchmarkReleaseAssets UP-TO-DATE
+> Task :mobile:extractBenchmarkReleaseVersionControlInfo UP-TO-DATE
+> Task :mobile:optimizeBenchmarkReleaseResources UP-TO-DATE
+> Task :mobile:collectBenchmarkReleaseDependencies UP-TO-DATE
+> Task :mobile:sdkBenchmarkReleaseDependencyData UP-TO-DATE
+> Task :designsystem:mergeReleaseJniLibFolders UP-TO-DATE
+> Task :designsystem:mergeReleaseNativeLibs NO-SOURCE
+> Task :designsystem:copyReleaseJniLibsProjectOnly UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseJniLibFolders UP-TO-DATE
+> Task :mobile:mergeBenchmarkReleaseNativeLibs UP-TO-DATE
+> Task :mobile:stripBenchmarkReleaseDebugSymbols UP-TO-DATE
+> Task :mobile:validateSigningBenchmarkRelease UP-TO-DATE
+> Task :mobile:writeBenchmarkReleaseAppMetadata UP-TO-DATE
+> Task :mobile:writeBenchmarkReleaseSigningConfigVersions UP-TO-DATE
+> Task :mobile:packageBenchmarkRelease UP-TO-DATE
+> Task :mobile:createBenchmarkReleaseApkListingFileRedirect UP-TO-DATE
+
+> Task :baselineprofile:pixel6Api34Setup
+pixel6Api34 has an unspecified testedAbi. This presently defaults to
+"x86_64". However, in 9.0 this will change to "arm64-v8a"
+
+pixel6Api34 specifies a system image that that does not support NDK translation,
+and will no longer be able to run tests in this environment. This
+device will wtill be able to run on ARM machines.
+To continue running tests with the current configuration, and not use
+NDK translation set testedAbi = "x86_64"
+
+> Task :baselineprofile:pixel6Api34BenchmarkReleaseAndroidTest
+Starting 1 tests on pixel6Api34
+
+pixel6Api34 Tests 0/1 completed. (0 skipped) (0 failed)
+Finished 1 tests on pixel6Api34
+
+> Task :baselineprofile:mergeBenchmarkReleaseTestResultProtos
+Test execution completed. See the report at: file:///home/runner/work/BeStrong/BeStrong/baselineprofile/build/reports/androidTests/managedDevice/benchmarkrelease/allDevices/index.html
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/startup-1791540338587.json
+
+BUILD SUCCESSFUL in 2m 14s
+101 actionable tasks: 3 executed, 98 up-to-date
+Arranque en frío (mediana): 396 ms
+Anterior: 286 ms

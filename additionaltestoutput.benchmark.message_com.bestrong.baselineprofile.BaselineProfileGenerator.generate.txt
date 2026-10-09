@@ -1,0 +1,6 @@
+BaselineProfileGenerator_generate
+Total run time Ns: 428008901905.
+Baseline profile [results](file://BaselineProfileGenerator_generate-startup-prof-2026-10-09-09-59-21.txt)
+
+To copy the profile use:
+adb -e pull "/sdcard/Android/media/com.bestrong.baselineprofile/additional_test_output/BaselineProfileGenerator_generate-startup-prof.txt" .

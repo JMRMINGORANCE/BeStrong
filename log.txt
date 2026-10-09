@@ -1,0 +1,212 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+
+> Configure project :baselineprofile
+WARNING: The option setting 'android.experimental.testOptions.managedDevices.setupTimeoutMinutes=20' is experimental.
+WARNING: The option setting 'android.testoptions.manageddevices.emulator.gpu=swiftshader_indirect' is experimental.
+
+> Task :baselineprofile:preBuild UP-TO-DATE
+> Task :baselineprofile:preNonMinifiedReleaseBuild UP-TO-DATE
+> Task :baselineprofile:checkTestedAppObfuscationNonMinifiedRelease
+> Task :baselineprofile:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :baselineprofile:checkNonMinifiedReleaseAarMetadata
+> Task :baselineprofile:generateNonMinifiedReleaseResValues
+> Task :baselineprofile:mapNonMinifiedReleaseSourceSetPaths
+> Task :baselineprofile:generateNonMinifiedReleaseResources
+> Task :baselineprofile:mergeNonMinifiedReleaseResources
+> Task :baselineprofile:processNonMinifiedReleaseManifest
+> Task :baselineprofile:javaPreCompileNonMinifiedRelease
+> Task :baselineprofile:mergeNonMinifiedReleaseShaders
+> Task :baselineprofile:compileNonMinifiedReleaseShaders NO-SOURCE
+> Task :baselineprofile:generateNonMinifiedReleaseAssets UP-TO-DATE
+> Task :baselineprofile:mergeNonMinifiedReleaseAssets
+> Task :baselineprofile:processNonMinifiedReleaseResources
+> Task :baselineprofile:compressNonMinifiedReleaseAssets
+> Task :baselineprofile:checkNonMinifiedReleaseDuplicateClasses
+> Task :baselineprofile:desugarNonMinifiedReleaseFileDependencies
+> Task :baselineprofile:mergeExtDexNonMinifiedRelease
+> Task :baselineprofile:mergeLibDexNonMinifiedRelease
+> Task :baselineprofile:mergeNonMinifiedReleaseJniLibFolders
+> Task :baselineprofile:mergeNonMinifiedReleaseNativeLibs
+
+> Task :baselineprofile:stripNonMinifiedReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libbenchmarkNative.so, libtracing_perfetto.so. Run with --info option to learn more.
+
+> Task :baselineprofile:validateSigningNonMinifiedRelease
+> Task :baselineprofile:writeNonMinifiedReleaseSigningConfigVersions
+> Task :baselineprofile:compileNonMinifiedReleaseKotlin
+> Task :baselineprofile:compileNonMinifiedReleaseJavaWithJavac NO-SOURCE
+> Task :baselineprofile:dexBuilderNonMinifiedRelease
+> Task :baselineprofile:mergeNonMinifiedReleaseGlobalSynthetics
+> Task :baselineprofile:processNonMinifiedReleaseJavaRes
+
+> Task :baselineprofile:pixel6Api34Setup
+pixel6Api34 has an unspecified testedAbi. This presently defaults to
+"x86_64". However, in 9.0 this will change to "arm64-v8a"
+
+pixel6Api34 specifies a system image that that does not support NDK translation,
+and will no longer be able to run tests in this environment. This
+device will wtill be able to run on ARM machines.
+To continue running tests with the current configuration, and not use
+NDK translation set testedAbi = "x86_64"
+
+> Task :baselineprofile:mergeNonMinifiedReleaseJavaResource
+> Task :baselineprofile:mergeProjectDexNonMinifiedRelease
+> Task :baselineprofile:packageNonMinifiedRelease
+> Task :baselineprofile:createNonMinifiedReleaseApkListingFileRedirect
+> Task :core:checkKotlinGradlePluginConfigurationErrors SKIPPED
+
+> Task :baselineprofile:pixel6Api34Setup
+Checking the license for package Android Emulator in /usr/local/lib/android/sdk/licenses
+License for package Android Emulator accepted.
+Preparing "Install Android Emulator v.37.2.12".
+"Install Android Emulator v.37.2.12" ready.
+Installing Android Emulator in /usr/local/lib/android/sdk/emulator
+"Install Android Emulator v.37.2.12" complete.
+"Install Android Emulator v.37.2.12" finished.
+Checking the license for package AOSP ATD Intel x86_64 Atom System Image in /usr/local/lib/android/sdk/licenses
+License for package AOSP ATD Intel x86_64 Atom System Image accepted.
+Preparing "Install AOSP ATD Intel x86_64 Atom System Image API 34 (revision 2)".
+
+> Task :core:compileKotlin
+> Task :core:compileJava NO-SOURCE
+> Task :designsystem:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :designsystem:preBuild UP-TO-DATE
+> Task :designsystem:preReleaseBuild UP-TO-DATE
+> Task :designsystem:generateReleaseResValues
+> Task :designsystem:generateReleaseResources
+> Task :designsystem:packageReleaseResources
+> Task :designsystem:parseReleaseLocalResources
+> Task :designsystem:generateReleaseRFile
+> Task :designsystem:compileReleaseKotlin
+> Task :designsystem:javaPreCompileRelease
+> Task :designsystem:compileReleaseJavaWithJavac NO-SOURCE
+> Task :designsystem:bundleLibRuntimeToDirRelease
+> Task :mobile:preBuild UP-TO-DATE
+> Task :mobile:preNonMinifiedReleaseBuild UP-TO-DATE
+> Task :mobile:checkNonMinifiedReleaseDuplicateClasses
+> Task :core:processResources NO-SOURCE
+> Task :core:classes UP-TO-DATE
+> Task :core:jar
+> Task :designsystem:bundleLibCompileToJarRelease
+> Task :designsystem:bundleLibRuntimeToJarRelease
+> Task :mobile:buildKotlinToolingMetadata
+> Task :mobile:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :designsystem:compileReleaseLibraryResources
+> Task :designsystem:writeReleaseAarMetadata
+> Task :mobile:checkNonMinifiedReleaseAarMetadata
+> Task :mobile:generateNonMinifiedReleaseResValues
+> Task :mobile:mapNonMinifiedReleaseSourceSetPaths
+> Task :mobile:generateNonMinifiedReleaseResources
+
+> Task :baselineprofile:pixel6Api34Setup
+"Install AOSP ATD Intel x86_64 Atom System Image API 34 (revision 2)" ready.
+Installing AOSP ATD Intel x86_64 Atom System Image in /usr/local/lib/android/sdk/system-images/android-34/aosp_atd/x86_64
+"Install AOSP ATD Intel x86_64 Atom System Image API 34 (revision 2)" complete.
+"Install AOSP ATD Intel x86_64 Atom System Image API 34 (revision 2)" finished.
+
+> Task :mobile:mergeNonMinifiedReleaseResources
+> Task :mobile:packageNonMinifiedReleaseResources
+> Task :mobile:parseNonMinifiedReleaseLocalResources
+> Task :mobile:createNonMinifiedReleaseCompatibleScreenManifests
+> Task :designsystem:extractDeepLinksRelease
+> Task :designsystem:processReleaseManifest
+> Task :mobile:extractDeepLinksNonMinifiedRelease
+> Task :mobile:processNonMinifiedReleaseMainManifest
+> Task :mobile:processNonMinifiedReleaseManifest
+> Task :mobile:processNonMinifiedReleaseManifestForPackage
+> Task :mobile:processNonMinifiedReleaseResources
+> Task :mobile:kspNonMinifiedReleaseKotlin
+> Task :mobile:compileNonMinifiedReleaseKotlin
+> Task :mobile:javaPreCompileNonMinifiedRelease
+> Task :mobile:compileNonMinifiedReleaseJavaWithJavac
+> Task :mobile:hiltAggregateDepsNonMinifiedRelease
+> Task :mobile:hiltJavaCompileNonMinifiedRelease
+> Task :mobile:desugarNonMinifiedReleaseFileDependencies
+> Task :mobile:mergeNonMinifiedReleaseStartupProfile
+> Task :mobile:transformNonMinifiedReleaseClassesWithAsm
+> Task :mobile:dexBuilderNonMinifiedRelease
+> Task :designsystem:prepareReleaseArtProfile
+> Task :mobile:mergeNonMinifiedReleaseArtProfile
+> Task :mobile:mergeExtDexNonMinifiedRelease
+> Task :mobile:mergeNonMinifiedReleaseGlobalSynthetics
+> Task :designsystem:mergeReleaseShaders
+> Task :designsystem:compileReleaseShaders NO-SOURCE
+> Task :designsystem:generateReleaseAssets UP-TO-DATE
+> Task :designsystem:mergeReleaseAssets
+> Task :mobile:mergeNonMinifiedReleaseShaders
+> Task :mobile:compileNonMinifiedReleaseShaders NO-SOURCE
+> Task :mobile:generateNonMinifiedReleaseAssets UP-TO-DATE
+> Task :mobile:mergeDexNonMinifiedRelease
+> Task :mobile:mergeNonMinifiedReleaseAssets
+> Task :mobile:compressNonMinifiedReleaseAssets
+> Task :mobile:extractNonMinifiedReleaseVersionControlInfo
+> Task :designsystem:processReleaseJavaRes
+> Task :mobile:processNonMinifiedReleaseJavaRes
+> Task :mobile:compileNonMinifiedReleaseArtProfile
+> Task :mobile:optimizeNonMinifiedReleaseResources
+> Task :mobile:mergeNonMinifiedReleaseJavaResource
+> Task :mobile:collectNonMinifiedReleaseDependencies
+> Task :mobile:sdkNonMinifiedReleaseDependencyData
+> Task :designsystem:mergeReleaseJniLibFolders
+> Task :designsystem:mergeReleaseNativeLibs NO-SOURCE
+> Task :designsystem:copyReleaseJniLibsProjectOnly
+> Task :mobile:mergeNonMinifiedReleaseJniLibFolders
+> Task :mobile:mergeNonMinifiedReleaseNativeLibs
+> Task :mobile:validateSigningNonMinifiedRelease
+> Task :mobile:writeNonMinifiedReleaseAppMetadata
+> Task :mobile:writeNonMinifiedReleaseSigningConfigVersions
+
+> Task :mobile:stripNonMinifiedReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so. Run with --info option to learn more.
+
+> Task :mobile:packageNonMinifiedRelease
+> Task :mobile:createNonMinifiedReleaseApkListingFileRedirect
+> Task :baselineprofile:pixel6Api34NonMinifiedReleaseAndroidTest
+Starting 3 tests on pixel6Api34
+
+pixel6Api34 Tests 0/3 completed. (0 skipped) (0 failed)
+
+> Task :baselineprofile:pixel6Api34NonMinifiedReleaseAndroidTest
+
+com.bestrong.baselineprofile.ReleaseSmokeTest > coldStartAndWorkout[pixel6Api34] [33mSKIPPED [0m
+
+com.bestrong.baselineprofile.StartupBenchmark > coldStartup[pixel6Api34] [33mSKIPPED [0m
+
+pixel6Api34 Tests 5/3 completed. (2 skipped) (0 failed)
+Finished 5 tests on pixel6Api34
+
+> Task :baselineprofile:mergeNonMinifiedReleaseTestResultProtos
+Test execution completed. See the report at: file:///home/runner/work/BeStrong/BeStrong/baselineprofile/build/reports/androidTests/managedDevice/nonminifiedrelease/allDevices/index.html
+
+> Task :baselineprofile:collectNonMinifiedReleaseBaselineProfile
+> Task :mobile:mergeReleaseBaselineProfile
+
+> Task :mobile:copyReleaseBaselineProfileIntoSrc
+
+A baseline profile was generated for the variant `release`:
+file:///home/runner/work/BeStrong/BeStrong/mobile/src/release/generated/baselineProfiles/baseline-prof.txt
+
+Comparison with previous baseline profile:
+  24121 Old rules
+  25876 New rules
+  4775 Added rules (16.52%)
+  3020 Removed rules (10.45%)
+  21101 Unmodified rules (73.02%)
+
+
+A startup profile was generated for the variant `release`:
+file:///home/runner/work/BeStrong/BeStrong/mobile/src/release/generated/baselineProfiles/startup-prof.txt
+
+Comparison with previous startup profile:
+  24121 Old rules
+  25876 New rules
+  4775 Added rules (16.52%)
+  3020 Removed rules (10.45%)
+  21101 Unmodified rules (73.02%)
+
+
+> Task :mobile:generateReleaseBaselineProfile
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/generate-1791539216998.json
+
+BUILD SUCCESSFUL in 12m 41s
+104 actionable tasks: 104 executed
