@@ -117,6 +117,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             LaunchRequest.OpenWorkout -> openWorkout()
             LaunchRequest.StartEmpty -> home.startEmpty(openWorkout)
             is LaunchRequest.StartRoutine -> home.startRoutineById(r.routineId, openWorkout)
+            is LaunchRequest.ImportRoutine -> home.importRoutineLink(r.link)
             null -> return@LaunchedEffect
         }
         onLaunchHandled()

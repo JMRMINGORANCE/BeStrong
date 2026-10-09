@@ -2,7 +2,11 @@ package com.bestrong.mobile
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.util.Log
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.ImageDecoderDecoder
@@ -164,6 +168,26 @@ class AppSync @Inject constructor(
         runCatching { ImagePrefetchWorker.schedule(context) }
         // Resumen de la semana el domingo por la tarde
         runCatching { WeeklySummaryWorker.schedule(context) }
+        // Atajos dinámicos con las tres primeras rutinas (icono de la app, Bixby Routines)
+        scope.launch {
+            repository.routines.map { list -> list.filter { it.exercises.isNotEmpty() }.take(3) }.distinctUntilChanged().collect { list ->
+                runCatching {
+                    val shortcuts = list.map { r ->
+                        ShortcutInfoCompat.Builder(context, "routine_" + r.id)
+                            .setShortLabel(r.name.take(24))
+                            .setLongLabel(r.name)
+                            .setIcon(IconCompat.createWithResource(context, R.drawable.ic_stat_dumbbell))
+                            .setIntent(
+                                Intent(context, MainActivity::class.java)
+                                    .setAction(MainActivity.ACTION_START_ROUTINE)
+                                    .putExtra(MainActivity.EXTRA_ROUTINE_ID, r.id),
+                            )
+                            .build()
+                    }
+                    ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)
+                }
+            }
+        }
         // Recordatorios y copia de seguridad semanal (WorkManager)
         scope.launch {
             settings.settings.map { Triple(it.reminderDays, it.reminderHour, it.reminderMinute) }.distinctUntilChanged()

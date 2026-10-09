@@ -38,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -221,6 +222,7 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
                 FilterChip(selected = ui.state.minutesPerSession == m, onClick = { vm.setMinutesPerSession(m) }, label = { Text("$m") })
             }
             OutlinedButton(onClick = { vm.duplicateWeek(weekStart) }) { Text(stringResource(R.string.cal_duplicate)) }
+            OutlinedButton(onClick = { vm.exportWeekToCalendar(weekStart) }) { Text(stringResource(R.string.cal_export_ics)) }
         }
     }
 }
@@ -380,6 +382,8 @@ private fun TimersCard(onTimer: (IntervalPlan) -> Unit) {
     var rest by rememberSaveable { mutableIntStateOf(20) }
     var rounds by rememberSaveable { mutableIntStateOf(8) }
     var minutes by rememberSaveable { mutableIntStateOf(10) }
+    val defaultStations = stringResource(R.string.timer_circuit_default)
+    var stations by rememberSaveable { mutableStateOf(defaultStations) }
     PlanCard(stringResource(R.string.timers_title)) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Button(onClick = { onTimer(com.bestrong.core.training.IntervalTimer.TABATA) }) { Text(stringResource(R.string.timer_tabata)) }
@@ -391,6 +395,12 @@ private fun TimersCard(onTimer: (IntervalPlan) -> Unit) {
         Stepper(stringResource(R.string.timer_rest_s), rest, 0, 180, 5) { rest = it }
         Stepper(stringResource(R.string.timer_rounds), rounds, 1, 30, 1) { rounds = it }
         Stepper(stringResource(R.string.timer_minutes), minutes, 1, 60, 1) { minutes = it }
+        // Circuito / clase: estaciones con el trabajo y descanso de arriba, tantas vueltas como rondas
+        OutlinedTextField(stations, { stations = it }, label = { Text(stringResource(R.string.timer_circuit_stations)) }, modifier = Modifier.fillMaxWidth())
+        Button(onClick = {
+            val list = stations.split(',').map { it.trim() }.filter { it.isNotEmpty() }
+            if (list.isNotEmpty()) onTimer(IntervalPlan.Circuit(list, work, rest, rounds.coerceAtMost(10)))
+        }) { Text(stringResource(R.string.timer_circuit)) }
     }
 }
 

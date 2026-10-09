@@ -26,6 +26,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Routine
 import com.bestrong.core.training.PeriodizedProgram
@@ -216,6 +218,62 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                 )
+            }
+        }
+    }
+}
+
+/** Cómo llegas hoy: sueño y pulso en reposo (Health Connect) y la última valoración. */
+@Composable
+fun ReadinessCard(vm: HomeViewModel) {
+    val r by vm.readiness.collectAsStateWithLifecycle()
+    val connected by vm.healthConnected.collectAsStateWithLifecycle()
+    val report = r ?: return
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.readiness_title), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                Text("${report.score}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+            }
+            LinearProgressIndicator(progress = { report.score / 100f }, modifier = Modifier.fillMaxWidth())
+            Text(
+                stringResource(
+                    when (report.level) {
+                        com.bestrong.core.training.ReadinessReport.Level.HIGH -> R.string.readiness_high
+                        com.bestrong.core.training.ReadinessReport.Level.NORMAL -> R.string.readiness_normal
+                        com.bestrong.core.training.ReadinessReport.Level.LOW -> R.string.readiness_low
+                    },
+                ),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            if (connected) {
+                Text(
+                    stringResource(R.string.readiness_detail, report.sleepHours?.let { "%.1f".format(it) } ?: "--", report.restingHr?.toString() ?: "--", report.baselineRestingHr?.toString() ?: "--"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                Text(stringResource(R.string.readiness_connect), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+/** Proteína del día (objetivo según tu peso) y agua, con botones rápidos. */
+@Composable
+fun IntakeCard(vm: HomeViewModel) {
+    val intake by vm.intake.collectAsStateWithLifecycle()
+    val bw by vm.bodyWeightKg.collectAsStateWithLifecycle()
+    val range = bw?.let { com.bestrong.core.training.Nutrition.proteinRangeGrams(it) }
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.intake_title), fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.intake_protein, intake.proteinG, range?.let { "${it.first}–${it.last}" } ?: "?"))
+            range?.let { LinearProgressIndicator(progress = { (intake.proteinG.toFloat() / it.first).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
+            Text(stringResource(R.string.intake_water, intake.waterMl))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilledTonalButton(onClick = { vm.addIntake(proteinG = 20) }) { Text(stringResource(R.string.intake_add_protein)) }
+                FilledTonalButton(onClick = { vm.addIntake(waterMl = 250) }) { Text(stringResource(R.string.intake_add_water)) }
             }
         }
     }

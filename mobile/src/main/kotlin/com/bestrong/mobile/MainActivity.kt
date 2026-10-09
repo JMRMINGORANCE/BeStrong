@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.bestrong.core.io.RoutineLink
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.ui.BeStrongApp
@@ -33,6 +34,9 @@ sealed interface LaunchRequest {
     data object OpenWorkout : LaunchRequest
     data object StartEmpty : LaunchRequest
     data class StartRoutine(val routineId: String) : LaunchRequest
+
+    /** Rutina compartida por enlace o QR. */
+    data class ImportRoutine(val link: String) : LaunchRequest
 }
 
 @AndroidEntryPoint
@@ -121,6 +125,11 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
+        val data = intent?.data
+        if (intent?.action == Intent.ACTION_VIEW && data?.scheme == RoutineLink.SCHEME && data.host == RoutineLink.HOST) {
+            launchRequest.value = LaunchRequest.ImportRoutine(data.toString())
+            return
+        }
         launchRequest.value = when (intent?.action) {
             ACTION_OPEN_WORKOUT -> LaunchRequest.OpenWorkout
             ACTION_START_EMPTY -> LaunchRequest.StartEmpty

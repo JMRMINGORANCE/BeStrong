@@ -35,8 +35,16 @@ import kotlinx.coroutines.sync.withLock
 @Singleton
 class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @ApplicationScope scope: CoroutineScope) {
 
-    val history: StateFlow<List<Workout>> = dao.workouts()
+    private val allHistory: StateFlow<List<Workout>> = dao.workouts()
         .map { list -> list.mapNotNull { runCatching { Persistence.decodeWorkout(it.json) }.getOrNull() } }
+        .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    /** Tu historial (sin los entrenos de la pareja, que no cuentan para tus estadísticas). */
+    val history: StateFlow<List<Workout>> = allHistory.map { l -> l.filter { it.athlete == null } }
+        .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    /** Entrenos hechos en modo pareja. */
+    val partnerHistory: StateFlow<List<Workout>> = allHistory.map { l -> l.filter { it.athlete != null } }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     val routines: StateFlow<List<Routine>> = dao.routines()
@@ -105,6 +113,21 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     private suspend fun currentActive(): Workout? =
         dao.valueOnce(KEY_ACTIVE)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
 
+    // --- Modo pareja: segundo entreno activo en el mismo móvil -------------------------------
+
+    val partnerWorkout: StateFlow<Workout?> = dao.value(KEY_PARTNER)
+        .map { s -> s?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
+        .stateIn(scope, SharingStarted.Eagerly, null)
+
+    suspend fun setPartnerActive(workout: Workout?) = activeMutex.withLock {
+        if (workout == null) dao.deleteValue(KEY_PARTNER) else dao.putValue(KeyValueEntity(KEY_PARTNER, Persistence.encodeWorkout(workout)))
+    }
+
+    suspend fun updatePartnerActive(block: (Workout) -> Workout) = activeMutex.withLock {
+        val current = dao.valueOnce(KEY_PARTNER)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } ?: return@withLock
+        dao.putValue(KeyValueEntity(KEY_PARTNER, Persistence.encodeWorkout(block(current).copy(updatedAtEpochMs = System.currentTimeMillis()))))
+    }
+
     /** Estado que llega del reloj: se fusiona serie a serie con el local (no se pierde ninguna serie hecha). */
     suspend fun applyRemoteActive(remote: Workout) = activeMutex.withLock {
         val local = currentActive()
@@ -123,7 +146,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     /** Importa entrenamientos (p. ej. desde CSV) evitando duplicados. Devuelve cuántos se añadieron. */
     suspend fun importWorkouts(workouts: List<Workout>, newExercises: List<Exercise>): Int {
         newExercises.forEach { saveCustomExercise(it) }
-        val existing = historyOnce()
+        val existing = historyOnce(includePartner = true)
         val ids = existing.map { it.id }.toSet()
         val keys = existing.map { it.startedAtEpochMs to it.name }.toSet()
         val fresh = workouts.filter { it.id !in ids && (it.startedAtEpochMs to it.name) !in keys }
@@ -134,7 +157,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     // --- Copia de seguridad ------------------------------------------------------------------
 
     suspend fun backupData(): BackupData = BackupData(
-        history = historyOnce(),
+        history = historyOnce(includePartner = true),
         routines = routinesOnce(),
         customExercises = customExercises.first(),
         measurements = measurements.first(),
@@ -161,8 +184,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
-    suspend fun historyOnce(): List<Workout> =
+    suspend fun historyOnce(includePartner: Boolean = false): List<Workout> =
         dao.workoutsOnce().mapNotNull { runCatching { Persistence.decodeWorkout(it.json) }.getOrNull() }
+            .filter { includePartner || it.athlete == null }
 
     // --- Rutinas -----------------------------------------------------------------------------
 
@@ -204,6 +228,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     private companion object {
         const val KEY_ACTIVE = "active_workout"
+        const val KEY_PARTNER = "partner_workout"
         const val KEY_PROGRAM = "active_program"
     }
 }

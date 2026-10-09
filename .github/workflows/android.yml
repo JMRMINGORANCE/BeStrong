@@ -34,7 +34,14 @@ jobs:
         run: ./gradlew :core:test
 
       - name: Compilar móvil y reloj
-        run: ./gradlew --continue :mobile:assembleDebug :wear:assembleDebug :watchface:assembleDebug
+        id: compile
+        # Los errores de compilación y de recursos se publican también como anotaciones (visibles al momento)
+        run: |
+          set -o pipefail
+          ./gradlew --continue :mobile:assembleDebug :wear:assembleDebug :watchface:assembleDebug 2>&1 | tee build-debug.log || {
+            grep -E "^e: |AAPT: error|error: " build-debug.log | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          }
 
       - name: Tests de interfaz y capturas (Robolectric + Roborazzi)
         run: ./gradlew --continue :mobile:testDebugUnitTest :wear:testDebugUnitTest -Proborazzi.test.record=true
@@ -68,11 +75,11 @@ jobs:
           fi
 
       - name: Compilar release (R8)
-        if: success() || failure()
+        if: (success() || failure()) && steps.compile.outcome == 'success'
         run: ./gradlew --continue :mobile:assembleRelease :wear:assembleRelease :watchface:assembleRelease
 
       - name: Lint
-        if: success() || failure()
+        if: (success() || failure()) && steps.compile.outcome == 'success'
         run: |
           ./gradlew --continue :mobile:lintDebug :wear:lintDebug || {
             # Todos los errores en el registro (Gradle solo muestra el primero)

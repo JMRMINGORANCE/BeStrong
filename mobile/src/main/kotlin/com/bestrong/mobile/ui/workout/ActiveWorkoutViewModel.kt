@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.workout
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.library.Alternatives
@@ -21,14 +22,19 @@ import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.training.RestPolicy
 import com.bestrong.core.training.RpeAdjustment
 import com.bestrong.core.training.Tempo
+import com.bestrong.core.util.formatDuration
+import com.bestrong.mobile.R
 import com.bestrong.mobile.WatchMetricsStore
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.ui.components.RestState
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.workout.Announcer
 import com.bestrong.mobile.workout.RestTimerController
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,9 +63,38 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val restTimer: RestTimerController,
     private val metricsStore: WatchMetricsStore,
     private val actions: WorkoutActions,
+    private val announcer: Announcer,
+    @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
-    val workout: StateFlow<Workout?> = repo.activeWorkout
+    /** Modo pareja: true = se está viendo y editando el entreno de la otra persona. */
+    val partnerMode = MutableStateFlow(false)
+
+    val workout: StateFlow<Workout?> = combine(repo.activeWorkout, repo.partnerWorkout, partnerMode) { me, partner, isPartner ->
+        if (isPartner) partner else me
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, repo.activeWorkout.value)
+
+    /** Cambia entre tu entreno y el de tu pareja; la primera vez copia tus ejercicios con las series sin hacer. */
+    fun switchAthlete(partner: Boolean) = viewModelScope.launch {
+        if (partner && repo.partnerWorkout.value == null) {
+            val name = settings.value.partnerName.ifBlank { return@launch }
+            val mine = repo.activeWorkout.value
+            val now = System.currentTimeMillis()
+            val copy = (mine ?: WorkoutEditor.empty(now)).let { w ->
+                w.copy(
+                    id = com.bestrong.core.util.newId(),
+                    name = "$name · ${w.name}",
+                    startedAtEpochMs = now,
+                    athlete = name,
+                    exercises = w.exercises.map { we ->
+                        we.copy(id = com.bestrong.core.util.newId(), sets = we.sets.map { it.copy(id = com.bestrong.core.util.newId(), completed = false) })
+                    },
+                )
+            }
+            repo.setPartnerActive(copy)
+        }
+        partnerMode.value = partner
+    }
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = repo.previousSetsLookup
     val settings: StateFlow<UserSettings> = settingsStore.settings
     val rest: StateFlow<RestState?> = restTimer.rest
@@ -88,7 +123,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     val focusExercise: SharedFlow<Int> = _focusExercise
 
     private fun edit(block: (Workout) -> Workout) {
-        viewModelScope.launch { repo.updateActive(block) }
+        viewModelScope.launch { if (partnerMode.value) repo.updatePartnerActive(block) else repo.updateActive(block) }
     }
 
     fun rename(name: String) = edit { it.copy(name = name.ifBlank { it.name }) }
@@ -234,6 +269,18 @@ class ActiveWorkoutViewModel @Inject constructor(
         if (completing) {
             val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
             if (restSeconds > 0) restTimer.start(restSeconds) else restTimer.skip()
+            // Aviso por voz: cuánto descansar y qué viene
+            WorkoutEditor.nextPendingSet(updated)?.let { (i, s) ->
+                val we = updated.exercises[i]
+                announcer.say(
+                    appContext.getString(
+                        R.string.tts_next,
+                        formatDuration(restSeconds.toLong()),
+                        we.exercise.displayName(appContext),
+                        describeSet(s, we.exercise.tracking, settings.value.unit),
+                    ),
+                )
+            }
             if (next != null && next != index) _focusExercise.tryEmit(next)
         }
     }
@@ -243,6 +290,16 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     fun finish() {
         val current = workout.value ?: return
+        if (partnerMode.value) {
+            // Entreno de la pareja: se guarda aparte (no cuenta para tus récords ni estadísticas)
+            viewModelScope.launch {
+                val finished = WorkoutEditor.finish(current, System.currentTimeMillis())
+                repo.setPartnerActive(null)
+                partnerMode.value = false
+                if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
+            }
+            return
+        }
         viewModelScope.launch {
             val metrics = metricsStore.metrics.value?.takeIf { it.workoutId == current.id }
             val finished = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
@@ -267,6 +324,11 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     fun discard() = viewModelScope.launch {
+        if (partnerMode.value) {
+            repo.setPartnerActive(null)
+            partnerMode.value = false
+            return@launch
+        }
         restTimer.skip()
         repo.setActive(null)
     }

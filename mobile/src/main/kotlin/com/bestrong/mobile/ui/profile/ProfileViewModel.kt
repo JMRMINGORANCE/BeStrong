@@ -6,7 +6,9 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.io.Backup
+import com.bestrong.core.io.EncryptedBackup
 import com.bestrong.core.io.WorkoutCsv
+import com.bestrong.core.io.Xlsx
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.stats.Achievement
@@ -27,6 +29,7 @@ import com.bestrong.mobile.data.ProgressPhotoStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.health.HealthConnectExporter
+import com.bestrong.mobile.health.HealthConnectReader
 import com.bestrong.mobile.share.MonthlyReport
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -84,7 +87,23 @@ class ProfileViewModel @Inject constructor(
     private val healthConnect: HealthConnectExporter,
     private val appSync: AppSync,
     private val photoStore: ProgressPhotoStore,
+    private val healthReader: HealthConnectReader,
 ) : ViewModel() {
+
+    val healthReadPermissions: Set<String> = healthReader.permissions
+
+    /** Trae los pesos de Health Connect (Samsung Health, básculas) a Medidas, sin duplicar días. */
+    fun importHealthWeights() = viewModelScope.launch {
+        val snap = runCatching { healthReader.read() }.getOrNull() ?: return@launch
+        val zone = ZoneId.systemDefault()
+        val have = repo.measurements.value.filter { it.weightKg != null }
+            .map { java.time.Instant.ofEpochMilli(it.dateEpochMs).atZone(zone).toLocalDate() }.toSet()
+        val fresh = snap.weights.groupBy { (t, _) -> java.time.Instant.ofEpochMilli(t).atZone(zone).toLocalDate() }
+            .filterKeys { it !in have }
+            .map { (_, list) -> list.maxBy { it.first } }
+        fresh.forEach { (t, kg) -> repo.saveMeasurement(BodyMeasurement(dateEpochMs = t, weightKg = kg)) }
+        _messages.tryEmit(context.getString(R.string.hc_import_weight_done, fresh.size))
+    }
 
     val stats: StateFlow<ProfileStats> = repo.history.map { history ->
         val zone = ZoneId.systemDefault()
@@ -179,10 +198,88 @@ class ProfileViewModel @Inject constructor(
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
     val messages: SharedFlow<String> = _messages
 
+    /** Periodo de las exportaciones a CSV y Excel. */
+    val exportRange = MutableStateFlow(ExportRange.ALL)
+
+    private fun inRange(history: List<com.bestrong.core.model.Workout>): List<com.bestrong.core.model.Workout> {
+        val now = java.time.LocalDate.now()
+        val from = when (exportRange.value) {
+            ExportRange.ALL -> return history
+            ExportRange.YEAR -> now.withDayOfYear(1)
+            ExportRange.DAYS_90 -> now.minusDays(90)
+            ExportRange.DAYS_30 -> now.minusDays(30)
+        }.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        return history.filter { it.startedAtEpochMs >= from }
+    }
+
+    fun exportXlsx(uri: Uri) = viewModelScope.launch {
+        val result = runCatching {
+            val bytes = withContext(Dispatchers.Default) { Xlsx.workouts(inRange(repo.historyOnce())) }
+            withContext(Dispatchers.IO) {
+                context.contentResolver.openOutputStream(uri)?.use { it.write(bytes) } ?: error(context.getString(R.string.file_open_error))
+            }
+        }
+        _messages.tryEmit(result.fold({ context.getString(R.string.export_done) }, { context.getString(R.string.export_error, it.message.orEmpty()) }))
+    }
+
+    /** Copia completa cifrada con contraseña (AES-256-GCM). */
+    fun exportEncrypted(uri: Uri, password: CharArray) = viewModelScope.launch {
+        val result = runCatching {
+            val text = withContext(Dispatchers.Default) { EncryptedBackup.encrypt(Backup.encode(repo.backupData()), password) }
+            withContext(Dispatchers.IO) {
+                context.contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray()) } ?: error(context.getString(R.string.file_open_error))
+            }
+        }
+        password.fill(' ')
+        _messages.tryEmit(result.fold({ context.getString(R.string.export_done) }, { context.getString(R.string.export_error, it.message.orEmpty()) }))
+    }
+
+    /** Copia cifrada pendiente de contraseña al restaurar. */
+    val pendingEncrypted = MutableStateFlow<String?>(null)
+
+    fun restoreEncrypted(password: CharArray) = viewModelScope.launch {
+        val text = pendingEncrypted.value ?: return@launch
+        val plain = runCatching { withContext(Dispatchers.Default) { EncryptedBackup.decrypt(text, password) } }.getOrNull()
+        password.fill(' ')
+        if (plain == null) {
+            _messages.tryEmit(context.getString(R.string.wrong_password))
+            return@launch
+        }
+        pendingEncrypted.value = null
+        restoreText(plain)
+    }
+
+    private suspend fun restoreText(text: String) {
+        val result = runCatching {
+            val data = withContext(Dispatchers.Default) { Backup.decode(text) }
+            data to repo.restore(data)
+        }
+        _messages.tryEmit(
+            result.fold(
+                { (data, added) -> context.getString(R.string.restore_done, data.history.size, data.routines.size, added) },
+                { context.getString(R.string.restore_error, it.message.orEmpty()) },
+            ),
+        )
+    }
+
+    /** Borrado selectivo: entrenos antiguos, medidas, fotos o todo el historial. */
+    fun deleteData(kind: DeleteKind) = viewModelScope.launch {
+        val count = when (kind) {
+            DeleteKind.OLD_HISTORY -> {
+                val limit = System.currentTimeMillis() - 365L * 86_400_000L
+                repo.historyOnce().filter { it.startedAtEpochMs < limit }.onEach { repo.deleteWorkout(it.id) }.size
+            }
+            DeleteKind.ALL_HISTORY -> repo.historyOnce(includePartner = true).onEach { repo.deleteWorkout(it.id) }.size
+            DeleteKind.MEASUREMENTS -> repo.measurements.value.onEach { repo.deleteMeasurement(it.id) }.size
+            DeleteKind.PHOTOS -> photoStore.photos.value.onEach { photoStore.delete(it) }.size
+        }
+        _messages.tryEmit(context.getString(R.string.delete_done, count))
+    }
+
     /** Exporta todo el historial al archivo elegido (SAF). */
     fun exportCsv(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
-            val csv = WorkoutCsv.export(repo.historyOnce())
+            val csv = WorkoutCsv.export(inRange(repo.historyOnce()))
             withContext(Dispatchers.IO) {
                 context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error(context.getString(R.string.file_open_error))
             }
@@ -220,6 +317,11 @@ class ProfileViewModel @Inject constructor(
             val text = withContext(Dispatchers.IO) {
                 context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error(context.getString(R.string.file_open_error))
             }
+            // Copia cifrada: se pide la contraseña y se sigue en restoreEncrypted
+            if (EncryptedBackup.isEncrypted(text)) {
+                pendingEncrypted.value = text
+                return@launch
+            }
             val data = withContext(Dispatchers.Default) { Backup.decode(text) }
             data to repo.restore(data)
         }
@@ -253,3 +355,7 @@ class ProfileViewModel @Inject constructor(
         appSync.pushToWatchNow()
     }
 }
+
+enum class ExportRange { ALL, YEAR, DAYS_90, DAYS_30 }
+
+enum class DeleteKind { OLD_HISTORY, MEASUREMENTS, PHOTOS, ALL_HISTORY }

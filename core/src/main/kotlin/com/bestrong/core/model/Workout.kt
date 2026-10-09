@@ -112,6 +112,8 @@ data class Workout(
     val pausedTotalMs: Long = 0,
     /** Cómo te sentiste (se pregunta al terminar). */
     val rating: SessionRating? = null,
+    /** Modo pareja: entreno de otra persona en el mismo móvil (null = el tuyo). */
+    val athlete: String? = null,
 ) {
     val isPaused: Boolean get() = pausedAtEpochMs != null
 

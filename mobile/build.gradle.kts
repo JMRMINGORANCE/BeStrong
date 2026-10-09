@@ -82,6 +82,8 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
+    // Códigos QR para compartir rutinas
+    implementation(libs.zxing.core)
     implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

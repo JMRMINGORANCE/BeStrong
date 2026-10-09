@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.model.Workout
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.util.formatDuration
@@ -175,6 +176,22 @@ fun TouchLockOverlay(onUnlock: () -> Unit) {
                 Text(stringResource(R.string.touch_locked), color = Color.White, style = MaterialTheme.typography.titleLarge)
                 Text(hint, color = Color.White)
             }
+        }
+    }
+}
+
+/** Modo pareja: alterna entre tu entreno y el de la otra persona (comparten el temporizador). */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun PartnerSwitch(vm: ActiveWorkoutViewModel, partnerName: String) {
+    val partner by vm.partnerMode.collectAsStateWithLifecycle()
+    androidx.compose.material3.SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+        listOf(false to stringResource(R.string.partner_me), true to partnerName).forEachIndexed { i, (isPartner, label) ->
+            androidx.compose.material3.SegmentedButton(
+                selected = partner == isPartner,
+                onClick = { vm.switchAthlete(isPartner) },
+                shape = androidx.compose.material3.SegmentedButtonDefaults.itemShape(i, 2),
+            ) { Text(label) }
         }
     }
 }

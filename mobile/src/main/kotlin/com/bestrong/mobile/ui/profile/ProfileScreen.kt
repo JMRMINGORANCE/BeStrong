@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -81,6 +82,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     if (showOneRm) OneRepMaxDialog { showOneRm = false }
     if (showScores) ScoresDialog(advanced.bodyWeightKg, settings.sex) { showScores = false }
     val hcGranted by vm.healthConnectGranted.collectAsStateWithLifecycle()
+    // Lectura (peso, sueño, pulso en reposo): permiso aparte y luego se importa el peso
+    val hcReadLauncher = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { vm.importHealthWeights() }
     val hcLauncher = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
         val ok = granted.containsAll(vm.healthConnectPermissions)
         vm.updateSettings { it.copy(healthConnectExport = ok) }
@@ -258,6 +261,30 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             body = stringResource(R.string.one_handed_body),
                             checked = settings.oneHanded,
                         ) { v -> vm.updateSettings { it.copy(oneHanded = v) } }
+                        run {
+                            var partner by remember(settings.partnerName) { mutableStateOf(settings.partnerName) }
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.partner_name)) },
+                                supportingContent = {
+                                    OutlinedTextField(
+                                        partner,
+                                        { partner = it.take(20); vm.updateSettings { s -> s.copy(partnerName = partner.trim()) } },
+                                        placeholder = { Text(stringResource(R.string.partner_name_body)) },
+                                        singleLine = true,
+                                    )
+                                },
+                            )
+                        }
+                        SwitchItem(
+                            title = stringResource(R.string.media_controls),
+                            body = stringResource(R.string.media_controls_body),
+                            checked = settings.mediaControls,
+                        ) { v -> vm.updateSettings { it.copy(mediaControls = v) } }
+                        SwitchItem(
+                            title = stringResource(R.string.voice_announcements),
+                            body = stringResource(R.string.voice_announcements_body),
+                            checked = settings.voiceAnnouncements,
+                        ) { v -> vm.updateSettings { it.copy(voiceAnnouncements = v) } }
                         SwitchItem(
                             title = stringResource(R.string.volume_keys),
                             body = stringResource(R.string.volume_keys_body),
@@ -292,6 +319,13 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             } else {
                                 vm.updateSettings { it.copy(healthConnectExport = on) }
                             }
+                        }
+                        if (vm.healthConnectAvailable) {
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.hc_import_weight)) },
+                                supportingContent = { Text(stringResource(R.string.readiness_connect)) },
+                                modifier = Modifier.clickable { hcReadLauncher.launch(vm.healthReadPermissions) },
+                            )
                         }
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.reminders)) },
@@ -332,6 +366,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             supportingContent = { Text(stringResource(R.string.csv_import_body)) },
                             trailingContent = { TextButton(onClick = { importLauncher.launch(arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) }) { Text(stringResource(R.string.action_import)) } },
                         )
+                        DataToolsSection(vm)
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.about_title)) },
                             supportingContent = { Text(stringResource(R.string.about_subtitle)) },

@@ -3,6 +3,7 @@ package com.bestrong.mobile.ui.home
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bestrong.core.io.RoutineLink
 import com.bestrong.core.library.Programs
 import com.bestrong.core.library.TrainingProgram
 import com.bestrong.core.model.Routine
@@ -14,12 +15,16 @@ import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.PeriodizedProgram
 import com.bestrong.core.training.PeriodizedPrograms
 import com.bestrong.core.training.ProgramSession
+import com.bestrong.core.training.Readiness
+import com.bestrong.core.training.ReadinessReport
 import com.bestrong.mobile.AppSync
 import com.bestrong.mobile.R
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.IntakeStore
 import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.health.HealthConnectReader
 import com.bestrong.mobile.sync.WatchSync
 import com.bestrong.mobile.ui.components.defaultWorkoutName
 import com.bestrong.mobile.ui.components.uiLanguage
@@ -31,10 +36,12 @@ import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -46,8 +53,36 @@ class HomeViewModel @Inject constructor(
     private val settingsStore: SettingsStore,
     private val appSync: AppSync,
     private val planning: PlanningStore,
+    private val healthReader: HealthConnectReader,
+    private val intakeStore: IntakeStore,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
+
+    /** Preparación del día (sueño y pulso en reposo de Health Connect + última valoración). */
+    private val _readiness = MutableStateFlow<ReadinessReport?>(null)
+    val readiness: StateFlow<ReadinessReport?> = _readiness
+    val healthConnected = MutableStateFlow(false)
+
+    fun refreshReadiness() = viewModelScope.launch {
+        val snap = runCatching { healthReader.read() }.getOrNull()
+        healthConnected.value = snap != null && (snap.sleepHours != null || snap.restingHr != null)
+        val lastRating = repo.history.value.firstOrNull { it.rating != null }?.rating
+        _readiness.value = Readiness.score(snap?.sleepHours, snap?.restingHr, snap?.baselineRestingHr, lastRating)
+        intakeStore.refresh()
+    }
+
+    init {
+        refreshReadiness()
+    }
+
+    // --- Proteína y agua -----------------------------------------------------------------------
+
+    val intake: StateFlow<Intake> = intakeStore.today
+    fun addIntake(proteinG: Int = 0, waterMl: Int = 0) = intakeStore.add(proteinG, waterMl)
+
+    /** Peso corporal más reciente (para el objetivo de proteína). */
+    val bodyWeightKg: StateFlow<Double?> = repo.measurements.map { m -> m.sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Sesión que toca hoy del programa activo (con las cargas ya calculadas). */
     val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state) { active, history, plan ->
@@ -139,6 +174,13 @@ class HomeViewModel @Inject constructor(
         }
         repo.setActive(routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup()))
         onStarted()
+    }
+
+    /** Rutina recibida por enlace o QR: se añade a «Mis rutinas». */
+    fun importRoutineLink(link: String) = viewModelScope.launch {
+        val routine = RoutineLink.decode(link) ?: return@launch
+        repo.saveRoutine(routine)
+        _messages.tryEmit(context.getString(R.string.routine_imported, routine.name))
     }
 
     /** Desde el widget: empezar una rutina por id. */

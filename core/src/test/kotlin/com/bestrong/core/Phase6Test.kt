@@ -120,4 +120,16 @@ class Phase6Test {
         assertEquals(1, phase.station)
         assertTrue(phase.work)
     }
+
+    @Test fun icsCalendar() {
+        val ics = com.bestrong.core.io.Ics.generate(
+            listOf(com.bestrong.core.io.CalendarEvent(java.time.LocalDate.of(2026, 10, 12), "Torso, fuerza", 60)),
+            java.time.LocalTime.of(18, 0),
+            java.time.ZoneId.of("Europe/Madrid"),
+        )
+        assertTrue(ics.startsWith("BEGIN:VCALENDAR"))
+        assertTrue(ics.contains("DTSTART:20261012T160000Z"))
+        assertTrue(ics.contains("DTEND:20261012T170000Z"))
+        assertTrue(ics.contains("SUMMARY:Torso\\, fuerza"))
+    }
 }

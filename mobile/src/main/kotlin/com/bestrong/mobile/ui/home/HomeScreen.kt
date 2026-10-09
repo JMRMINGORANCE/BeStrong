@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -49,6 +51,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,6 +63,7 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.training.PeriodizedProgram
 import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.R
+import com.bestrong.mobile.share.RoutineShare
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
@@ -201,6 +206,9 @@ fun HomeScreen(
                     onMoveDown = { vm.move(routine, 1) },
                 )
             }
+            // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
+            item { ReadinessCard(vm) }
+            item { IntakeCard(vm) }
         }
     }
 }
@@ -218,6 +226,9 @@ private fun RoutineCard(
     onMoveDown: () -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
+    var sharing by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    if (sharing) ShareRoutineDialog(routine) { sharing = false }
     Card(Modifier.fillMaxWidth().clickable(onClick = onEdit)) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -228,6 +239,8 @@ private fun RoutineCard(
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_edit)) }, onClick = { menu = false; onEdit() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.routine_start_on_watch)) }, onClick = { menu = false; onStartWatch() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_duplicate)) }, onClick = { menu = false; onDuplicate() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.share_routine_link)) }, onClick = { menu = false; sharing = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.export_routine_pdf)) }, onClick = { menu = false; RoutineShare.sharePdf(context, listOf(routine), routine.name) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; onMoveUp() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; onMoveDown() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; onDelete() })
@@ -295,5 +308,25 @@ private fun ProgramsDialog(
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+/** QR y enlace de una rutina para pasarla a otro móvil con BeStrong. */
+@Composable
+private fun ShareRoutineDialog(routine: Routine, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val link = remember(routine) { RoutineShare.link(routine) }
+    val qr = remember(link) { RoutineShare.qr(link).asImageBitmap() }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.share_routine_title, routine.name)) },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Image(qr, contentDescription = stringResource(R.string.share_routine_link), modifier = Modifier.size(240.dp))
+                Text(stringResource(R.string.share_routine_hint), style = MaterialTheme.typography.bodySmall)
+            }
+        },
+        confirmButton = { TextButton(onClick = { RoutineShare.shareLink(context, routine); onDismiss() }) { Text(stringResource(R.string.share_routine_send)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
     )
 }

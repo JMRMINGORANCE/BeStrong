@@ -38,8 +38,15 @@ class HistoryViewModel @Inject constructor(
 
     /** Búsqueda por entreno, ejercicio o nota. */
     val query = MutableStateFlow("")
-    val filtered: StateFlow<List<Workout>> = combine(repo.history, query) { h, q -> WorkoutStats.search(h, q) { it.displayName(context) } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Modo pareja: mostrar también los entrenos de la otra persona. */
+    val showPartner = MutableStateFlow(false)
+    val partnerHistory: StateFlow<List<Workout>> = repo.partnerHistory
+
+    val filtered: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, query, showPartner) { h, p, q, sp ->
+        val all = if (sp) (h + p).sortedByDescending { it.startedAtEpochMs } else h
+        WorkoutStats.search(all, q) { it.displayName(context) }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Entrenos por día del año actual (mapa de calor). */
     val heatmap: StateFlow<Map<LocalDate, Int>> = repo.history

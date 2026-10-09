@@ -3,6 +3,8 @@ package com.bestrong.mobile.ui.planning
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.bestrong.core.io.CalendarEvent
+import com.bestrong.core.io.Ics
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.Routine
@@ -120,6 +122,26 @@ class PlanningViewModel @Inject constructor(
     }.also { _messages.tryEmit(context.getString(R.string.plan_week_duplicated)) }
 
     fun estimateMinutes(routine: Routine): Int = RoutineTime.estimateMinutes(routine)
+
+    /** Exporta la semana planificada como .ics y la abre con la app de calendario (sin permisos). */
+    fun exportWeekToCalendar(weekStart: LocalDate) {
+        val plan = store.state.value.planFor(weekStart)
+        val routines = ui.value.routines
+        val events = DayOfWeek.entries.mapNotNull { d ->
+            val r = plan.routineFor(d)?.let { id -> routines.firstOrNull { it.id == id } } ?: return@mapNotNull null
+            CalendarEvent(weekStart.plusDays((d.value - 1).toLong()), "BeStrong · ${r.name}", RoutineTime.estimateMinutes(r), r.exercises.joinToString { it.exercise.name })
+        }
+        if (events.isEmpty()) return
+        runCatching {
+            val text = Ics.generate(events, java.time.LocalTime.of(18, 0), ZoneId.systemDefault())
+            val dir = java.io.File(context.cacheDir, "share").apply { mkdirs() }
+            val file = java.io.File(dir, "bestrong-semana.ics").apply { writeText(text) }
+            val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.files", file)
+            val view = android.content.Intent(android.content.Intent.ACTION_VIEW).setDataAndType(uri, "text/calendar")
+                .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(android.content.Intent.createChooser(view, null).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+    }
 
     fun setMinutesPerSession(min: Int) = store.update { it.copy(minutesPerSession = min.coerceIn(15, 180)) }
 

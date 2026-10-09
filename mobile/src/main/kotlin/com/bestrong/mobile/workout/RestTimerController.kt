@@ -28,6 +28,7 @@ class RestTimerController @Inject constructor(
     @ApplicationContext private val context: Context,
     @ApplicationScope private val scope: CoroutineScope,
     private val settings: SettingsStore,
+    private val announcer: Announcer,
 ) {
     private val vibrateEnabled: () -> Boolean = { settings.settings.value.vibrateOnRestEnd }
 
@@ -88,6 +89,7 @@ class RestTimerController @Inject constructor(
             _rest.value = null
             persist(null)
             if (vibrateEnabled()) vibrate()
+            announcer.say(context.getString(com.bestrong.mobile.R.string.tts_go))
             // Si pasa un buen rato sin empezar la serie, un toque suave de recordatorio
             val ended = System.currentTimeMillis()
             _restEndedAt.value = ended

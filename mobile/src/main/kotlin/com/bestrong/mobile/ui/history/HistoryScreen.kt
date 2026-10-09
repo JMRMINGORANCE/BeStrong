@@ -25,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -80,6 +81,8 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     val query by vm.query.collectAsStateWithLifecycle()
     val filtered by vm.filtered.collectAsStateWithLifecycle()
     val heatmap by vm.heatmap.collectAsStateWithLifecycle()
+    val partnerWorkouts by vm.partnerHistory.collectAsStateWithLifecycle()
+    val showPartner by vm.showPartner.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val view = LocalView.current
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
@@ -115,6 +118,15 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                                     singleLine = true,
                                     modifier = Modifier.fillMaxWidth(),
                                 )
+                            }
+                            if (partnerWorkouts.isNotEmpty()) {
+                                item {
+                                    FilterChip(
+                                        selected = showPartner,
+                                        onClick = { vm.showPartner.value = !showPartner },
+                                        label = { Text(stringResource(R.string.partner_history, partnerWorkouts.first().athlete.orEmpty())) },
+                                    )
+                                }
                             }
                             if (query.isBlank()) {
                                 item { YearHeatmap(heatmap, Modifier.padding(vertical = 4.dp)) }

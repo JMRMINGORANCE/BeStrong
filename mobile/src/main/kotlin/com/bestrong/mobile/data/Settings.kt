@@ -45,6 +45,10 @@ data class UserSettings(
     val lockProgressPhotos: Boolean = true,
     /** Botones de volumen: subir completa serie, bajar salta el descanso. */
     val volumeKeys: Boolean = false,
+    val mediaControls: Boolean = true,
+    val voiceAnnouncements: Boolean = false,
+    /** Modo pareja: nombre de la otra persona (vacío = desactivado). */
+    val partnerName: String = "",
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
 }
@@ -78,6 +82,9 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         dumbbellTotal = prefs.getBoolean("dumbbell_total", false),
         lockProgressPhotos = prefs.getBoolean("lock_photos", true),
         volumeKeys = prefs.getBoolean("volume_keys", false),
+        mediaControls = prefs.getBoolean("media_controls", true),
+        voiceAnnouncements = prefs.getBoolean("voice_announcements", false),
+        partnerName = prefs.getString("partner_name", "").orEmpty(),
         sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
     )
 
@@ -105,6 +112,9 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("sex", s.sex.name)
             putBoolean("lock_photos", s.lockProgressPhotos)
             putBoolean("volume_keys", s.volumeKeys)
+            putBoolean("media_controls", s.mediaControls)
+            putBoolean("voice_announcements", s.voiceAnnouncements)
+            putString("partner_name", s.partnerName)
         }
         _settings.value = s
     }
