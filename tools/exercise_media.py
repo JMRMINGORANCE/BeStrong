@@ -86,7 +86,7 @@ def fetch(url):
     raise SystemExit("No se pudo descargar " + url)
 
 
-EDB_API = "https://oss.exercisedb.dev/api/v1/exercises?offset={}&limit=100"
+EDB_BASE = "https://oss.exercisedb.dev/api/v1/exercises"
 
 # Cómo suele llamar ExerciseDB a nuestros ejercicios (nombres en minúsculas, con el material delante)
 EDB_ALIASES = {
@@ -144,20 +144,28 @@ EDB_ALIASES = {
 
 def exercisedb(ours):
     """GIF animados del dataset gratuito v1 de ExerciseDB (AscendAPI): uso no comercial con atribución."""
-    items, offset, seen = [], 0, set()
-    while offset < 5000:
-        page = fetch(EDB_API.format(offset))
-        data = page.get("data", page) if isinstance(page, dict) else page
-        if offset == 0:
-            meta = {k: v for k, v in page.items() if k != "data"} if isinstance(page, dict) else {}
-            print("Metadatos ExerciseDB:", json.dumps(meta)[:300])
-            print("Ejemplo ExerciseDB:", json.dumps(data[:1], ensure_ascii=False)[:300])
-        if not data or any(d.get("exerciseId") in seen for d in data[:1]):
-            break  # sin más páginas (o la API ignora el desplazamiento)
+    # Paginación por cursor: meta.nextCursor / meta.hasNextPage (25 por página)
+    items, seen, cursor, param = [], set(), None, "cursor"
+    for _ in range(200):
+        url = EDB_BASE + (f"?limit=25&{param}={cursor}" if cursor else "?limit=25")
+        page = fetch(url)
+        data = page.get("data", []) if isinstance(page, dict) else page
+        meta = page.get("meta", {}) if isinstance(page, dict) else {}
+        if not data:
+            break
+        if any(d.get("exerciseId") in seen for d in data):
+            # El parámetro no se reconoce: probamos con el otro nombre habitual
+            if param == "cursor":
+                param = "after"
+                continue
+            break
         seen.update(d.get("exerciseId") for d in data)
         items += data
-        offset += len(data)
+        if not meta.get("hasNextPage") or not meta.get("nextCursor"):
+            break
+        cursor = meta["nextCursor"]
         time.sleep(1.2)  # el plan gratuito limita las peticiones
+    print(f"ExerciseDB: {len(items)} ejercicios descargados (total anunciado {meta.get('total')}, parámetro {param})")
     by_name = {}
     for it in items:
         if it.get("gifUrl") and it.get("name"):
