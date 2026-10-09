@@ -59,8 +59,15 @@ class ReleaseSmokeTest {
         }
         tap(text("Entrenamiento vacío", "Empty workout"), "Entrenamiento vacío")
         tap(text("Añadir ejercicios", "Add exercises"), "Añadir ejercicios")
-        tap(text("Press banca", "Bench Press"), "Press banca")
-        tap(By.text(Pattern.compile("(Añadir|Add) 1")), "Añadir 1")
+        // El teclado de búsqueda puede abrirse y mover la lista justo al tocar: se reintenta hasta que se marca
+        val addOne = By.text(Pattern.compile("(Añadir|Add) 1"))
+        repeat(3) {
+            if (device.hasObject(addOne)) return@repeat
+            device.waitForIdle()
+            device.wait(Until.findObject(text("Press banca", "Bench Press")), 5_000)?.click()
+            device.wait(Until.hasObject(addOne), 3_000)
+        }
+        tap(addOne, "Añadir 1")
         val ok = device.wait(Until.hasObject(text("Terminar", "Finish")), 10_000)
         assertTrue("La pantalla de entreno no apareció en la build minificada. ${screen()}", ok)
     }
