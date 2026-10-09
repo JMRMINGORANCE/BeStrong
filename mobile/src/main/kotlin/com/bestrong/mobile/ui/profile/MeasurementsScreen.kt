@@ -21,6 +21,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.R
@@ -43,6 +45,7 @@ import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.LineChart
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
+import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatShortDate
 
@@ -51,6 +54,7 @@ import com.bestrong.mobile.ui.components.formatShortDate
 fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     val unit = LocalWeightUnit.current
     val list by vm.measurements.collectAsStateWithLifecycle()
+    val relative by vm.relativeStrength.collectAsStateWithLifecycle()
     var adding by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
@@ -73,6 +77,39 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                     }
                 }
             }
+            // Resto de medidas: una gráfica por cada una con al menos dos datos
+            val others: List<Pair<String, (BodyMeasurement) -> Double?>> = listOf(
+                stringResource(R.string.f_fat) to { it.bodyFatPct },
+                stringResource(R.string.f_waist) to { it.waistCm },
+                stringResource(R.string.f_chest) to { it.chestCm },
+                stringResource(R.string.f_arm) to { it.armCm },
+                stringResource(R.string.f_thigh) to { it.thighCm },
+            )
+            others.forEach { (label, value) ->
+                val points = list.filter { value(it) != null }.sortedBy { it.dateEpochMs }
+                if (points.size >= 2) {
+                    item(key = "chart-$label") {
+                        Card {
+                            Column(Modifier.padding(16.dp)) {
+                                SectionHeader(label)
+                                LineChart(points.map { ChartPoint(formatShortDate(it.dateEpochMs), value(it)!!) }, valueFormatter = { formatWeight(it) })
+                            }
+                        }
+                    }
+                }
+            }
+            relative?.let { (lift, data) ->
+                item(key = "relative") {
+                    Card {
+                        Column(Modifier.padding(16.dp)) {
+                            SectionHeader(stringResource(R.string.relative_strength, ExerciseLibrary.byId(lift)?.displayName() ?: lift))
+                            Text(stringResource(R.string.relative_strength_hint), style = MaterialTheme.typography.bodySmall)
+                            LineChart(data.map { (d, bw, rm) -> ChartPoint(formatShortDate(d), rm / bw) }, valueFormatter = { "%.2f".format(it) })
+                        }
+                    }
+                }
+            }
+            item(key = "photos") { ProgressPhotosSection(vm) }
             items(list, key = { it.id }) { m ->
                 Card(Modifier.fillMaxWidth()) {
                     ListItem(

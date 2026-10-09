@@ -259,6 +259,26 @@ class UiFlowTest {
 
     @Test
     @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
+    fun monthly_report() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        val month = java.time.YearMonth.of(2026, 9)
+        val summary = com.bestrong.core.stats.PeriodSummary(
+            workouts = 13,
+            volume = 84_250.0,
+            sets = 260,
+            durationSec = 13 * 3_900L,
+            records = emptyList(),
+            volumeChange = 0.12,
+            topExercises = listOf("squat" to 21_000.0, "bench_press" to 15_500.0, "deadlift" to 12_000.0),
+        )
+        val days = setOf(1, 3, 5, 8, 10, 12, 15, 17, 19, 22, 24, 26, 29).map { month.atDay(it) }.toSet()
+        com.bestrong.mobile.share.MonthlyReport.render(compose.activity, month, summary, days, WeightUnit.KG)
+            .captureRoboImage("build/outputs/roborazzi/monthly_report.png")
+    }
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun profile_folded() {
         compose.mainClock.autoAdvance = false
         settle()

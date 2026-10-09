@@ -201,6 +201,7 @@
     <string name="m_thigh">Muslo %1$s cm</string>
     <string name="m_waist">Cintura %1$s cm</string>
     <string name="m_weight">Peso %1$s</string>
+    <string name="measure_chart">%1$s</string>
     <string name="measurements">Medidas corporales</string>
     <string name="media_add">Foto o vídeo</string>
     <string name="media_delete">Borrar</string>
@@ -322,6 +323,16 @@
     <string name="programs_periodized">Con progresión automática</string>
     <string name="programs_templates">Plantillas de rutinas</string>
     <string name="programs_title">Programas de entrenamiento</string>
+    <string name="progress_add">Añadir foto</string>
+    <string name="progress_compare">Comparar</string>
+    <string name="progress_compare_hint">Elige dos fotos para compararlas</string>
+    <string name="progress_delete">Borrar foto</string>
+    <string name="progress_lock_setting">Bloquear fotos de progreso</string>
+    <string name="progress_photo_of">Foto del %1$s</string>
+    <string name="progress_photos">Fotos de progreso</string>
+    <string name="progress_photos_locked">Protegidas con tu huella o PIN. Solo se guardan en este móvil.</string>
+    <string name="progress_unlock">Desbloquear</string>
+    <string name="progress_unlock_title">Ver fotos de progreso</string>
     <string name="progression_setting">Sobrecarga progresiva automática</string>
     <string name="progression_setting_body">Sugiere peso y reps según tu última sesión y propone descargas si te estancas</string>
     <string name="rating_energy">Energía</string>
@@ -335,6 +346,8 @@
     <string name="record_set_volume">Mejor volumen en una serie</string>
     <string name="record_timeline">Línea de tiempo de récords</string>
     <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
+    <string name="relative_strength">Fuerza relativa: %1$s</string>
+    <string name="relative_strength_hint">1RM estimado dividido por tu peso corporal</string>
     <string name="remaining_time">≈ %1$d min para terminar</string>
     <string name="reminders">Recordatorios</string>
     <string name="reminders_body">Te avisamos los días elegidos si aún no has entrenado.</string>
@@ -344,6 +357,12 @@
     <string name="remove_named">Quitar %1$s</string>
     <string name="remove_set">Quitar serie</string>
     <string name="repeat_workout">Repetir entrenamiento</string>
+    <string name="report_image">Imagen</string>
+    <string name="report_pdf">PDF</string>
+    <string name="report_share">Compartir informe</string>
+    <string name="report_title">Informe de %1$s %2$d</string>
+    <string name="report_top_exercises">Ejercicios con más volumen</string>
+    <string name="report_vs_last">%1$s de volumen frente al mes anterior</string>
     <string name="reps_short">reps</string>
     <string name="rest">Descanso</string>
     <string name="rest_minus_15">-15 s</string>
@@ -465,6 +484,7 @@
     <string name="today_suggested">Te toca</string>
     <string name="today_title">Hoy toca</string>
     <string name="tool_1rm">Calculadora de 1RM</string>
+    <string name="tool_monthly_report">Informe mensual</string>
     <string name="tool_scores">DOTS, Wilks e IPF GL</string>
     <string name="tools">Herramientas</string>
     <string name="track">Registrar</string>

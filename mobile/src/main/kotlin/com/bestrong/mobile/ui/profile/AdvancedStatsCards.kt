@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -218,12 +219,13 @@ fun MuscleRecoveryCard(stats: AdvancedStats) {
 }
 
 @Composable
-fun ToolsCard(onOneRm: () -> Unit, onScores: () -> Unit) {
+fun ToolsCard(onOneRm: () -> Unit, onScores: () -> Unit, onReport: () -> Unit = {}) {
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(stringResource(R.string.tools))
             OutlinedButton(onClick = onOneRm, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_1rm)) }
             OutlinedButton(onClick = onScores, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_scores)) }
+            OutlinedButton(onClick = onReport, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_monthly_report)) }
         }
     }
 }
@@ -318,5 +320,36 @@ fun ScoresDialog(initialBodyWeightKg: Double?, sex: Sex, onDismiss: () -> Unit) 
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
+    )
+}
+
+/** Informe mensual: este mes o los dos anteriores, como imagen o PDF. */
+@Composable
+fun MonthlyReportDialog(onShare: (monthsAgo: Int, pdf: Boolean) -> Unit, onDismiss: () -> Unit) {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    var monthsAgo by remember { mutableIntStateOf(0) }
+    val now = java.time.YearMonth.now()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.tool_monthly_report)) },
+        text = {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                (0..2).forEach { i ->
+                    val m = now.minusMonths(i.toLong())
+                    FilterChip(
+                        selected = monthsAgo == i,
+                        onClick = { monthsAgo = i },
+                        label = { Text(m.month.getDisplayName(java.time.format.TextStyle.SHORT_STANDALONE, locale)) },
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Row {
+                TextButton(onClick = { onShare(monthsAgo, false); onDismiss() }) { Text(stringResource(R.string.report_image)) }
+                TextButton(onClick = { onShare(monthsAgo, true); onDismiss() }) { Text(stringResource(R.string.report_pdf)) }
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }

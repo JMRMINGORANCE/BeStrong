@@ -22,13 +22,17 @@ import com.bestrong.mobile.AppSync
 import com.bestrong.mobile.R
 import com.bestrong.mobile.backup.AutoBackupWorker
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.ProgressPhoto
+import com.bestrong.mobile.data.ProgressPhotoStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.health.HealthConnectExporter
+import com.bestrong.mobile.share.MonthlyReport
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
@@ -79,6 +83,7 @@ class ProfileViewModel @Inject constructor(
     private val settingsStore: SettingsStore,
     private val healthConnect: HealthConnectExporter,
     private val appSync: AppSync,
+    private val photoStore: ProgressPhotoStore,
 ) : ViewModel() {
 
     val stats: StateFlow<ProfileStats> = repo.history.map { history ->
@@ -130,6 +135,32 @@ class ProfileViewModel @Inject constructor(
     }
 
     val measurements: StateFlow<List<BodyMeasurement>> = repo.measurements
+
+    // --- Fotos de progreso y fuerza relativa -------------------------------------------------
+
+    val photos: StateFlow<List<ProgressPhoto>> = photoStore.photos
+    fun addPhoto(uri: Uri) = viewModelScope.launch { runCatching { photoStore.add(uri) } }
+    fun deletePhoto(photo: ProgressPhoto) = photoStore.delete(photo)
+
+    /** Fuerza relativa (1RM / peso corporal) del básico con más datos: (ejercicio, [(fecha, peso, 1RM)]). */
+    val relativeStrength: StateFlow<Pair<String, List<Triple<Long, Double, Double>>>?> = combine(repo.history, repo.measurements) { history, measures ->
+        val weights = measures.mapNotNull { m -> m.weightKg?.let { m.dateEpochMs to it } }
+        if (weights.isEmpty()) return@combine null
+        Strength.STANDARD_LIFTS.map { id -> id to Strength.bodyWeightVsStrength(WorkoutStats.exerciseProgress(id, history), weights) }
+            .filter { it.second.size >= 2 }
+            .maxByOrNull { it.second.size }
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Informe del mes ([monthsAgo] = 0 el actual) como imagen o PDF. */
+    fun shareMonthlyReport(monthsAgo: Int, pdf: Boolean) = viewModelScope.launch {
+        val zone = ZoneId.systemDefault()
+        val month = YearMonth.now(zone).minusMonths(monthsAgo.toLong())
+        val history = repo.historyOnce()
+        val summary = withContext(Dispatchers.Default) { Strength.monthSummary(history, month, zone) }
+        val days = WorkoutStats.trainingDays(history, zone).filter { YearMonth.from(it) == month }.toSet()
+        runCatching { MonthlyReport.share(context, month, summary, days, settings.value.unit, pdf) }
+            .onFailure { _messages.tryEmit(context.getString(R.string.export_error, it.message.orEmpty())) }
+    }
     val settings: StateFlow<UserSettings> = settingsStore.settings
 
     val healthConnectAvailable = healthConnect.isAvailable()

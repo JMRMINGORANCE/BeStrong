@@ -76,6 +76,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     val advanced by vm.advanced.collectAsStateWithLifecycle()
     var showOneRm by rememberSaveable { mutableStateOf(false) }
     var showScores by rememberSaveable { mutableStateOf(false) }
+    var showReport by rememberSaveable { mutableStateOf(false) }
+    if (showReport) MonthlyReportDialog(onShare = { months, pdf -> vm.shareMonthlyReport(months, pdf) }) { showReport = false }
     if (showOneRm) OneRepMaxDialog { showOneRm = false }
     if (showScores) ScoresDialog(advanced.bodyWeightKg, settings.sex) { showScores = false }
     val hcGranted by vm.healthConnectGranted.collectAsStateWithLifecycle()
@@ -195,7 +197,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             item { MuscleRecoveryCard(advanced) }
             item { AchievementsCard(advanced) }
             item { RecordTimelineCard(advanced) }
-            item { ToolsCard(onOneRm = { showOneRm = true }, onScores = { showScores = true }) }
+            item { ToolsCard(onOneRm = { showOneRm = true }, onScores = { showScores = true }, onReport = { showReport = true }) }
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {
@@ -256,6 +258,9 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             body = stringResource(R.string.one_handed_body),
                             checked = settings.oneHanded,
                         ) { v -> vm.updateSettings { it.copy(oneHanded = v) } }
+                        SwitchItem(stringResource(R.string.progress_lock_setting), checked = settings.lockProgressPhotos) { v ->
+                            vm.updateSettings { it.copy(lockProgressPhotos = v) }
+                        }
                         SwitchItem(
                             title = stringResource(R.string.dumbbell_total),
                             body = stringResource(R.string.dumbbell_total_body),

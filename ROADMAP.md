@@ -42,7 +42,7 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Búsqueda de ejercicios por sinónimos y por voz; ejercicios favoritos; filtro «sin material»
 - [x] Variantes enlazadas (historial y récords juntos o separados)
 
-## Fase 3 — Estadísticas y motivación (en curso)
+## Fase 3 — Estadísticas y motivación ✅
 - [x] Niveles de fuerza (1RM relativo al peso corporal)
 - [x] Equilibrio empuje/tirón y pierna/torso con aviso de descompensación
 - [x] Resumen semanal el domingo (notificación + tarjeta)
@@ -51,12 +51,12 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Curva de fuerza por rango de reps; calculadora de 1RM con varias fórmulas y tabla de porcentajes
 - [x] Volumen efectivo según RPE/RIR
 - [x] Puntuación DOTS / Wilks / IPF GL; intentos de competición
-- [ ] Informe mensual (PDF/imagen)
-- [ ] Comparar fotos de progreso (locales, con bloqueo por huella)
-- [ ] Gráficas de todas las medidas corporales y relación peso/fuerza
+- [x] Informe mensual (PDF/imagen)
+- [x] Comparar fotos de progreso (locales, con bloqueo por huella)
+- [x] Gráficas de todas las medidas corporales y relación peso/fuerza
 - [x] Días desde el último entreno por músculo y agujetas en el mapa muscular
 
-## Fase 4 — Reloj y Fold
+## Fase 4 — Reloj y Fold (en curso)
 - [ ] Registrar series por voz en el reloj
 - [ ] Resumen al acabar con comparación (reloj)
 - [ ] Esfera propia (Watch Face Format) con racha, «Hoy toca» y pulso

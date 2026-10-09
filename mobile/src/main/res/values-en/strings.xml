@@ -201,6 +201,7 @@
     <string name="m_thigh">Thigh %1$s cm</string>
     <string name="m_waist">Waist %1$s cm</string>
     <string name="m_weight">Weight %1$s</string>
+    <string name="measure_chart">%1$s</string>
     <string name="measurements">Body measurements</string>
     <string name="media_add">Photo or video</string>
     <string name="media_delete">Delete</string>
@@ -322,6 +323,16 @@
     <string name="programs_periodized">With automatic progression</string>
     <string name="programs_templates">Routine templates</string>
     <string name="programs_title">Training programs</string>
+    <string name="progress_add">Add photo</string>
+    <string name="progress_compare">Compare</string>
+    <string name="progress_compare_hint">Pick two photos to compare</string>
+    <string name="progress_delete">Delete photo</string>
+    <string name="progress_lock_setting">Lock progress photos</string>
+    <string name="progress_photo_of">Photo from %1$s</string>
+    <string name="progress_photos">Progress photos</string>
+    <string name="progress_photos_locked">Protected with your fingerprint or PIN. Stored only on this phone.</string>
+    <string name="progress_unlock">Unlock</string>
+    <string name="progress_unlock_title">View progress photos</string>
     <string name="progression_setting">Automatic progressive overload</string>
     <string name="progression_setting_body">Suggests weight and reps from your last session and proposes deloads when you stall</string>
     <string name="rating_energy">Energy</string>
@@ -335,6 +346,8 @@
     <string name="record_set_volume">Best set volume</string>
     <string name="record_timeline">Records timeline</string>
     <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
+    <string name="relative_strength">Relative strength: %1$s</string>
+    <string name="relative_strength_hint">Estimated 1RM divided by your body weight</string>
     <string name="remaining_time">≈ %1$d min to finish</string>
     <string name="reminders">Reminders</string>
     <string name="reminders_body">We\'ll remind you on the chosen days if you haven\'t trained yet.</string>
@@ -344,6 +357,12 @@
     <string name="remove_named">Remove %1$s</string>
     <string name="remove_set">Remove set</string>
     <string name="repeat_workout">Repeat workout</string>
+    <string name="report_image">Image</string>
+    <string name="report_pdf">PDF</string>
+    <string name="report_share">Share report</string>
+    <string name="report_title">%1$s %2$d report</string>
+    <string name="report_top_exercises">Top exercises by volume</string>
+    <string name="report_vs_last">%1$s volume vs previous month</string>
     <string name="reps_short">reps</string>
     <string name="rest">Rest</string>
     <string name="rest_minus_15">-15 s</string>
@@ -465,6 +484,7 @@
     <string name="today_suggested">Up next</string>
     <string name="today_title">Today</string>
     <string name="tool_1rm">1RM calculator</string>
+    <string name="tool_monthly_report">Monthly report</string>
     <string name="tool_scores">DOTS, Wilks and IPF GL</string>
     <string name="tools">Tools</string>
     <string name="track">Track</string>

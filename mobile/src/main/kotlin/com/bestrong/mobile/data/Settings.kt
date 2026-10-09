@@ -41,6 +41,8 @@ data class UserSettings(
     val dumbbellTotal: Boolean = false,
     /** Para niveles de fuerza y puntuaciones (DOTS, Wilks, IPF GL). */
     val sex: Sex = Sex.MALE,
+    /** Pedir huella/PIN para ver las fotos de progreso. */
+    val lockProgressPhotos: Boolean = true,
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
 }
@@ -72,6 +74,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         activeGymId = prefs.getString("active_gym", null),
         favoriteExercises = prefs.getStringSet("favorites", emptySet()).orEmpty().toSet(),
         dumbbellTotal = prefs.getBoolean("dumbbell_total", false),
+        lockProgressPhotos = prefs.getBoolean("lock_photos", true),
         sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
     )
 
@@ -97,6 +100,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putStringSet("favorites", s.favoriteExercises)
             putBoolean("dumbbell_total", s.dumbbellTotal)
             putString("sex", s.sex.name)
+            putBoolean("lock_photos", s.lockProgressPhotos)
         }
         _settings.value = s
     }
