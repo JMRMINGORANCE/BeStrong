@@ -51,6 +51,8 @@ android {
             isIncludeAndroidResources = true
             all {
                 it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
+                // Robolectric + capturas a pantalla completa consumen mucha memoria
+                it.maxHeapSize = "3g"
                 // En la CI se ve qué prueba empieza y cuál falla (si una se cuelga, es la última «STARTED»)
                 it.testLogging {
                     events("started", "passed", "failed", "skipped")

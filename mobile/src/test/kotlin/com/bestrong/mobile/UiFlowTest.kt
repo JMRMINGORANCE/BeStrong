@@ -1,10 +1,10 @@
 package com.bestrong.mobile
 
 import android.os.Looper
-import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -224,7 +224,7 @@ class UiFlowTest {
     }
 
     /** Lista del diálogo de programas (la rejilla de Inicio también es desplazable). */
-    private fun programsList() = compose.onNode(hasScrollToNodeAction() and hasAnyDescendant(hasText("GZCLP")))
+    private fun programsList() = compose.onNode(hasTestTag("programs_list"))
 
     @Test
     @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
@@ -371,7 +371,7 @@ class UiDarkTest {
     }
 
     @Test
-    @Config(qualifiers = "night-w411dp-h891dp-xxhdpi")
+    @Config(qualifiers = "w411dp-h891dp-night-xxhdpi")
     fun home_folded_dark() {
         compose.mainClock.autoAdvance = false
         settle()
@@ -380,7 +380,7 @@ class UiDarkTest {
     }
 
     @Test
-    @Config(qualifiers = "night-w411dp-h891dp-xxhdpi")
+    @Config(qualifiers = "w411dp-h891dp-night-xxhdpi")
     fun profile_folded_dark() {
         compose.mainClock.autoAdvance = false
         settle()

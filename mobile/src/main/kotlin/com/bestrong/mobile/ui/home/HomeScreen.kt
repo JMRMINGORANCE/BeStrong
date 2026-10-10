@@ -53,6 +53,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -278,7 +279,7 @@ private fun ProgramsDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.programs_title)) },
         text = {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            LazyColumn(Modifier.testTag("programs_list"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 item { Text(stringResource(R.string.programs_periodized), style = MaterialTheme.typography.titleSmall) }
                 items(periodized, key = { "p-" + it.id }) { p ->
                     Card(onClick = { onPickPeriodized(p) }, modifier = Modifier.fillMaxWidth()) {
