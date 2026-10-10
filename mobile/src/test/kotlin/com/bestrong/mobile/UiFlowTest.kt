@@ -350,3 +350,39 @@ class UiEnglishTest {
 
 /** La barra de navegación se oculta durante el entreno. */
 private fun androidx.compose.ui.test.SemanticsNodeInteraction.assertDoesNotExistCompat() = assertDoesNotExist()
+
+/** Modo oscuro: capturas de referencia de Inicio y Perfil con el tema oscuro del sistema. */
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [34])
+class UiDarkTest {
+    @get:Rule
+    val compose = createAndroidComposeRule<MainActivity>()
+
+    private fun settle(rounds: Int = 15) {
+        repeat(rounds) {
+            compose.mainClock.advanceTimeBy(100)
+            Thread.sleep(30)
+            shadowOf(Looper.getMainLooper()).idle()
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "night-w411dp-h891dp-xxhdpi")
+    fun home_folded_dark() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        assertNotNull(compose.onNodeWithText("Entrenamiento vacío").fetchSemanticsNode())
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/home_folded_dark.png")
+    }
+
+    @Test
+    @Config(qualifiers = "night-w411dp-h891dp-xxhdpi")
+    fun profile_folded_dark() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNodeWithText("Perfil").performClick()
+        settle()
+        compose.onRoot().captureRoboImage("build/outputs/roborazzi/profile_folded_dark.png")
+    }
+}

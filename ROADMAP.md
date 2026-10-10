@@ -83,34 +83,37 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Temporizadores HIIT/Tabata/EMOM/AMRAP, calentamiento y estiramientos guiados (cardio libre con GPS en el reloj)
 - [x] Avisos de lesión (oculta ejercicios que cargan una zona) y límite de progresión semanal
 
-## Fase 6 — Salud, datos e integraciones (siguiente)
-- [ ] Peso corporal desde Health Connect
-- [ ] Preparación del día con sueño y pulso en reposo (Health Connect)
-- [ ] Proteína diaria y agua durante el entreno
-- [ ] Copia de seguridad cifrada con contraseña; borrar datos selectivamente; exportar por fechas
-- [ ] Exportar a Google Sheets/Excel; formato JSON documentado
-- [ ] Importar desde JEFIT y FitNotes
-- [ ] Calendario del sistema; atajos de la app; mosaico de ajustes rápidos
-- [ ] Rutina por enlace/QR, exportar programa a PDF, tarjeta de récord, Quick Share
-- [ ] Modo pareja en el mismo móvil; modo clase/circuito
-- [ ] Strava / Google Fit 🔑, controles de Spotify/YouTube Music 🔑, avisos por Galaxy Buds 🔑, Bixby Routines / geovalla 🔑
+## Fase 6 — Salud, datos e integraciones ✅
+- [x] Peso corporal desde Health Connect
+- [x] Preparación del día con sueño y pulso en reposo (Health Connect)
+- [x] Proteína diaria y agua durante el entreno
+- [x] Copia de seguridad cifrada con contraseña; borrar datos selectivamente; exportar por fechas
+- [x] Exportar a Excel (abre en Google Sheets); formato JSON documentado
+- [x] Importar desde JEFIT y FitNotes
+- [x] Calendario del sistema (.ics); atajos de la app (también para Bixby Routines); mosaico de ajustes rápidos
+- [x] Rutina por enlace/QR, exportar programa a PDF, tarjeta de récord, Quick Share
+- [x] Modo pareja en el mismo móvil; modo clase/circuito
+- [x] Controles de música (teclas multimedia, sin cuentas) y avisos por voz por los auriculares (Galaxy Buds)
+- [ ] Strava / Google Fit 🔑, API de Spotify 🔑, geovalla del gimnasio 🔑 — necesitan claves o cuentas del propietario
 
-## Fase 7 — Accesibilidad, idiomas y personalización
-- [ ] Más idiomas (catalán, gallego, portugués, francés, alemán)
-- [ ] Alto contraste, modo daltónico con patrones, fuente para dislexia, vibraciones personalizables
-- [ ] Leer en voz alta la siguiente serie
-- [ ] Temas de color y negro AMOLED; emoji por rutina; unidades mixtas; columnas visibles a elegir
-- [ ] Glosario, consejos contextuales, preguntas frecuentes, tutorial interactivo, novedades por versión
+## Fase 7 — Accesibilidad, idiomas y personalización ✅
+- [x] Más idiomas (catalán, gallego, portugués, francés, alemán) en móvil, reloj y esfera; idioma por app en Android 13+
+- [x] Alto contraste, modo daltónico con símbolos, letra muy legible (Atkinson Hyperlegible) y para dislexia (OpenDyslexic), vibraciones a elegir (también en el reloj)
+- [x] Leer en voz alta la siguiente serie
+- [x] Temas de color (acento o el del fondo de pantalla) y negro AMOLED; emoji por rutina; unidades mixtas (cuerpo y cargas); columnas visibles a elegir
+- [x] Glosario, consejos contextuales, preguntas frecuentes, tutorial inicial y novedades por versión
 
-## Fase 8 — Ingeniería
-- [ ] Capturas con comparación contra referencia (también inglés y modo oscuro)
-- [ ] Separar la prueba del emulador en su propia ejecución
-- [ ] Tests de sincronización con reloj simulado
-- [ ] Recuperación ante cierres y conflictos de sincronización visibles
-- [ ] Rendimiento: historial de 1000 entrenos, índices y paginación en Room, consumo de batería del reloj
-- [ ] Modularizar por funciones; configuration cache de Gradle; detekt; tamaño del APK
-- [ ] Firma y release automáticos; canal beta; web en GitHub Pages
-- [ ] Revisión de seguridad (permisos mínimos, FileProvider, exportaciones)
+## Fase 8 — Ingeniería (en curso)
+- [x] Capturas con comparación contra la referencia (resumen de la CI con imágenes de diferencias), en inglés y en modo oscuro
+- [x] Prueba del emulador en su propia ejecución (Baseline Profile, manual)
+- [x] Tests de sincronización con reloj simulado (200 secuencias aleatorias, sin perder series)
+- [x] Conflictos de sincronización visibles (aviso en el entreno)
+- [x] Rendimiento: historial de 1000 entrenos (prueba de tiempo), índices en Room
+- [ ] Modularizar por funciones; configuration cache de Gradle; detekt
+- [x] Tamaño del APK en cada CI y en cada release
+- [x] Release automática al etiquetar; canal beta (etiquetas -beta/-rc); web en GitHub Pages (activar «Source: GitHub Actions»)
+- [ ] Firma definitiva 🔑 (secretos KEYSTORE_*)
+- [x] Revisión de seguridad: enlaces de rutina con límites (evita bombas zip), FileProvider sin exportar, servicios protegidos por permiso
 - [ ] Pruebas en dispositivos reales con Firebase Test Lab 🔑
 
 ---

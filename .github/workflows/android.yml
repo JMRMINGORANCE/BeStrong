@@ -47,6 +47,30 @@ jobs:
         timeout-minutes: 20
         run: ./gradlew --continue :mobile:testDebugUnitTest :wear:testDebugUnitTest -Proborazzi.test.record=true
 
+      - name: Comparar capturas con las de referencia
+        # Referencia = últimas capturas publicadas en la rama «capturas». Informa de los cambios
+        # (con imagen de diferencias) en el resumen; no falla, porque los cambios pueden ser buscados.
+        if: always()
+        run: |
+          cp wear/build/outputs/roborazzi/*.png mobile/build/outputs/roborazzi/ 2>/dev/null || true
+          git fetch -q --depth=1 origin capturas:refs/remotes/origin/capturas 2>/dev/null || { echo "Sin referencia"; exit 0; }
+          mkdir -p ref mobile/build/outputs/roborazzi/diff
+          git archive origin/capturas | tar -x -C ref
+          {
+            echo "### Capturas frente a la referencia"
+            echo "| Captura | Píxeles distintos |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          changed=0
+          for new in mobile/build/outputs/roborazzi/*.png; do
+            name=$(basename "$new")
+            if [ ! -f "ref/$name" ]; then echo "| $name | nueva |" >> "$GITHUB_STEP_SUMMARY"; continue; fi
+            px=$(compare -metric AE -fuzz 2% "ref/$name" "$new" "mobile/build/outputs/roborazzi/diff/$name" 2>&1 >/dev/null || true)
+            px=${px%% *}
+            if [ "${px:-0}" != "0" ]; then echo "| $name | $px |" >> "$GITHUB_STEP_SUMMARY"; changed=$((changed+1)); else rm -f "mobile/build/outputs/roborazzi/diff/$name"; fi
+          done
+          echo "Capturas con cambios: $changed" >> "$GITHUB_STEP_SUMMARY"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
