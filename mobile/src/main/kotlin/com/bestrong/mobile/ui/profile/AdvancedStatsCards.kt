@@ -39,13 +39,13 @@ import com.bestrong.core.stats.Scores
 import com.bestrong.core.stats.Sex
 import com.bestrong.core.stats.StrengthLevel
 import com.bestrong.core.util.formatWeight
-import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.theme.statusColors
 import kotlin.math.abs
 
 @Composable
@@ -107,7 +107,7 @@ fun BalanceCard(stats: AdvancedStats) {
             if (b.pushPullImbalanced) Text(stringResource(R.string.balance_push_warning), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             if (b.upperLowerImbalanced) Text(stringResource(R.string.balance_leg_warning), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             if (!b.pushPullImbalanced && !b.upperLowerImbalanced && b.upper + b.lower > 0) {
-                Text(stringResource(R.string.balance_ok), color = BeStrongPalette.VolumeOptimal, style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.balance_ok), color = statusColors.good, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
@@ -124,7 +124,7 @@ fun WeekSummaryCard(stats: AdvancedStats) {
             w.volumeChange?.let { c ->
                 Text(
                     stringResource(R.string.week_vs_last, (if (c >= 0) "+" else "−") + "${(abs(c) * 100).toInt()} %"),
-                    color = if (c >= 0) BeStrongPalette.VolumeOptimal else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (c >= 0) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

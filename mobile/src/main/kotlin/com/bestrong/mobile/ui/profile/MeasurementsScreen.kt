@@ -43,7 +43,7 @@ import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.LineChart
-import com.bestrong.mobile.ui.components.LocalWeightUnit
+import com.bestrong.mobile.ui.components.LocalBodyUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
@@ -52,7 +52,7 @@ import com.bestrong.mobile.ui.components.formatShortDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
-    val unit = LocalWeightUnit.current
+    val unit = LocalBodyUnit.current
     val list by vm.measurements.collectAsStateWithLifecycle()
     val relative by vm.relativeStrength.collectAsStateWithLifecycle()
     var adding by remember { mutableStateOf(false) }

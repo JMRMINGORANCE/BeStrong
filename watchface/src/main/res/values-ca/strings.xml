@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watchface_name">BeStrong</string>
+    <string name="slot_today">Avui toca</string>
+    <string name="slot_streak">Setmana</string>
+    <string name="slot_heart">Pols</string>
+</resources>

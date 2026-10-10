@@ -77,6 +77,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                 Column(content, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(routine.name, vm::rename, label = { Text(stringResource(R.string.routine_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(routine.notes, vm::setNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.fillMaxWidth())
+                    EmojiPicker(routine.emoji, vm::setEmoji)
                 }
             }
             itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
@@ -151,4 +152,21 @@ private fun SmallNumberField(label: String, value: String, modifier: Modifier, d
         keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
         modifier = modifier,
     )
+}
+
+private val ROUTINE_EMOJIS = listOf("💪", "🦵", "🏋️", "🔥", "🏃", "🧘", "⚡", "🎯", "🍑", "🤸", "🥊", "🚴", "🏊", "❤️", "🧠", "⭐")
+
+/** Emoji opcional para reconocer la rutina en Inicio y en el reloj. */
+@Composable
+private fun EmojiPicker(selected: String?, onPick: (String?) -> Unit) {
+    Text(stringResource(R.string.routine_emoji), style = MaterialTheme.typography.labelLarge)
+    androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        item {
+            FilterChip(selected = selected == null, onClick = { onPick(null) }, label = { Text(stringResource(R.string.emoji_none)) })
+        }
+        items(ROUTINE_EMOJIS.size) { i ->
+            val e = ROUTINE_EMOJIS[i]
+            FilterChip(selected = selected == e, onClick = { onPick(e) }, label = { Text(e) })
+        }
+    }
 }

@@ -75,11 +75,11 @@ import com.bestrong.core.training.InjuryZone
 import com.bestrong.core.training.IntervalPlan
 import com.bestrong.core.training.Peaking
 import com.bestrong.core.training.RoutineTime
-import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.formatShortDate
+import com.bestrong.mobile.ui.theme.statusColors
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -234,7 +234,7 @@ private fun FatigueCard(vm: PlanningViewModel, ui: PlanningUi) {
     PlanCard(stringResource(R.string.fatigue_title)) {
         val f = ui.fatigue
         if (f == null || f.signals == 0) {
-            Text(stringResource(R.string.fatigue_ok), color = BeStrongPalette.VolumeOptimal)
+            Text(stringResource(R.string.fatigue_ok), color = statusColors.good)
         } else {
             val parts = buildList {
                 if (f.stalledLifts.isNotEmpty()) add(stringResource(R.string.fatigue_stalled, f.stalledLifts.joinToString { vm.exerciseName(it) }))
@@ -339,7 +339,7 @@ private fun PeakCard(vm: PlanningViewModel, ui: PlanningUi) {
             if (meet != null) TextButton(onClick = { vm.setMeetDate(null) }) { Text(stringResource(R.string.peak_clear)) }
         }
         if (ui.peak.isEmpty()) Text(stringResource(R.string.peak_none), style = MaterialTheme.typography.bodySmall)
-        val lang = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
+        val lang = com.bestrong.mobile.ui.components.uiLanguage()
         ui.peak.forEach { w ->
             Text(stringResource(R.string.peak_week, w.weeksOut, w.focus(lang), w.sets, w.reps, (w.percent * 100).roundToInt()), fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodySmall)
             val loads = ui.oneRepMaxes.entries.joinToString("  ") { (id, rm) -> vm.exerciseName(id) + " " + unit.format(Peaking.weight(w, rm)) }

@@ -51,7 +51,7 @@ fun Equipment.label(): String = stringResource(
 
 /** Nombre del ejercicio en el idioma del reloj. */
 @Composable @ReadOnlyComposable
-fun Exercise.displayName(): String = ExerciseLibrary.displayName(this, LocalConfiguration.current.locales[0].language)
+fun Exercise.displayName(): String = ExerciseLibrary.displayName(this, LocalConfiguration.current.locales[0].language.let { if (it in setOf("es", "ca", "gl", "eu")) "es" else "en" })
 
 /** Nombre por defecto según la hora del día. */
 fun defaultWorkoutName(context: Context, nowEpochMs: Long): String {

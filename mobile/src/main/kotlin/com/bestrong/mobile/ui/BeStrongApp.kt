@@ -34,15 +34,23 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.bestrong.core.training.BodyFocus
+import com.bestrong.mobile.BuildConfig
 import com.bestrong.mobile.LaunchRequest
 import com.bestrong.mobile.R
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.data.UserSettings
+import com.bestrong.mobile.ui.components.LocalBodyUnit
+import com.bestrong.mobile.ui.components.LocalSetColumns
 import com.bestrong.mobile.ui.components.LocalWeightUnit
+import com.bestrong.mobile.ui.components.SetColumns
 import com.bestrong.mobile.ui.exercises.ExerciseDetailScreen
 import com.bestrong.mobile.ui.exercises.ExerciseLibraryScreen
 import com.bestrong.mobile.ui.exercises.ExercisePickerScreen
 import com.bestrong.mobile.ui.exercises.ExercisesViewModel
+import com.bestrong.mobile.ui.help.LocalTips
+import com.bestrong.mobile.ui.help.Tips
+import com.bestrong.mobile.ui.help.TutorialDialog
+import com.bestrong.mobile.ui.help.WhatsNewDialog
 import com.bestrong.mobile.ui.history.HistoryScreen
 import com.bestrong.mobile.ui.history.HistoryViewModel
 import com.bestrong.mobile.ui.home.HomeScreen
@@ -91,9 +99,13 @@ private object Routes {
 
 /** Estado global de la app que necesita la raíz de la UI (unidad de peso). */
 @HiltViewModel
-class AppViewModel @Inject constructor(settingsStore: SettingsStore) : ViewModel() {
+class AppViewModel @Inject constructor(private val settingsStore: SettingsStore) : ViewModel() {
     val settings: StateFlow<UserSettings> = settingsStore.settings
+    fun update(block: (UserSettings) -> UserSettings) = settingsStore.update(block)
 }
+
+/** En las pruebas de interfaz (Robolectric) no se muestran tutorial ni novedades. */
+private val isRobolectric = android.os.Build.FINGERPRINT == "robolectric"
 
 /**
  * NavigationSuiteScaffold muestra barra inferior con el Fold plegado y navigation rail
@@ -109,6 +121,15 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
     val appVm: AppViewModel = hiltViewModel()
     val settings by appVm.settings.collectAsStateWithLifecycle()
     val request by launchRequest.collectAsStateWithLifecycle()
+
+    // Tutorial la primera vez; novedades una vez tras cada actualización
+    if (!isRobolectric) {
+        if (!settings.tutorialDone) {
+            TutorialDialog { appVm.update { it.copy(tutorialDone = true, lastSeenVersion = BuildConfig.VERSION_CODE) } }
+        } else if (settings.lastSeenVersion < BuildConfig.VERSION_CODE) {
+            WhatsNewDialog { appVm.update { it.copy(lastSeenVersion = BuildConfig.VERSION_CODE) } }
+        }
+    }
 
     // Peticiones desde la notificación del entreno o el widget
     LaunchedEffect(request) {
@@ -129,7 +150,12 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
     }
 
-    CompositionLocalProvider(LocalWeightUnit provides settings.unit) {
+    CompositionLocalProvider(
+        LocalWeightUnit provides settings.unit,
+        LocalBodyUnit provides (settings.bodyUnit ?: settings.unit),
+        LocalSetColumns provides SetColumns(settings.showPreviousColumn, settings.showComparison),
+        LocalTips provides Tips(settings.dismissedTips) { id -> appVm.update { it.copy(dismissedTips = it.dismissedTips + id) } },
+    ) {
         NavigationSuiteScaffold(
             layoutType = layoutType,
             navigationSuiteItems = {

@@ -29,7 +29,12 @@ data class Routine(
     val exercises: List<RoutineExercise> = emptyList(),
     val notes: String = "",
     val position: Int = 0,
+    /** Emoji para reconocer la rutina de un vistazo (💪, 🦵…). */
+    val emoji: String? = null,
 ) {
+    /** Nombre con su emoji delante, si tiene. */
+    val displayName: String get() = emoji?.let { "$it $name" } ?: name
+
     /**
      * Crea un entrenamiento a partir de la rutina. Si hay un historial previo del ejercicio,
      * los pesos/reps se rellenan con lo que se hizo la última vez (como hace Hevy).

@@ -149,7 +149,7 @@ class AppSync @Inject constructor(
             }
         }
         scope.launch {
-            settings.settings.map { SharedSettings(it.unit, it.progressionEnabled) }.distinctUntilChanged()
+            settings.settings.map { SharedSettings(it.unit, it.progressionEnabled, it.restVibration) }.distinctUntilChanged()
                 .collect { watchSync.pushSettings(it) }
         }
         // Entreno en curso compartido en vivo con el reloj + servicio en primer plano

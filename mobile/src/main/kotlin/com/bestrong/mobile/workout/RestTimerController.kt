@@ -110,7 +110,7 @@ class RestTimerController @Inject constructor(
             @Suppress("DEPRECATION")
             context.getSystemService(Vibrator::class.java)
         }
-        val pattern = if (short) longArrayOf(0, 120) else longArrayOf(0, 250, 150, 250)
+        val pattern = if (short) longArrayOf(0, 120) else settings.settings.value.restVibration.pattern
         vibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
     }
 

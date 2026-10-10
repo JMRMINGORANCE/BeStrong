@@ -101,7 +101,6 @@ import com.bestrong.core.training.SuggestionKind
 import com.bestrong.core.training.Tempo
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatWeight
-import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.R
 import com.bestrong.mobile.share.WorkoutShareCard
 import com.bestrong.mobile.ui.FoldPosture
@@ -113,7 +112,9 @@ import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.rememberNow
 import com.bestrong.mobile.ui.components.uiLanguage
+import com.bestrong.mobile.ui.help.TipCard
 import com.bestrong.mobile.ui.rememberFoldPosture
+import com.bestrong.mobile.ui.theme.statusColors
 import kotlin.math.roundToInt
 
 /**
@@ -423,6 +424,7 @@ private fun ExerciseList(
                 Text(stringResource(R.string.add_exercises), Modifier.padding(start = 8.dp))
             }
         }
+        item { TipCard("swipe_sets", R.string.tip_swipe, Modifier.fillMaxWidth().padding(horizontal = 16.dp)) }
     }
 }
 
@@ -690,7 +692,7 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
                                 (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta)),
                             ),
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (up) BeStrongPalette.VolumeOptimal else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (up) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -713,7 +715,7 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
                         Text(
                             stringResource(R.string.summary_next_line, arrow, ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName, unit.format(n.weightKg, withUnit = true), n.reps),
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (n.direction > 0) BeStrongPalette.VolumeOptimal else MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = if (n.direction > 0) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }

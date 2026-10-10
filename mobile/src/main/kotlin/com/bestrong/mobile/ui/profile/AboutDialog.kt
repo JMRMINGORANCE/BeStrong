@@ -27,6 +27,9 @@ private val OPEN_SOURCE = listOf(
     "Dagger / Hilt" to "Apache 2.0",
     "Coil" to "Apache 2.0",
     "Google Play services Wearable" to "Android SDK License",
+    "ZXing" to "Apache 2.0",
+    "Atkinson Hyperlegible (Braille Institute)" to "SIL Open Font License 1.1",
+    "OpenDyslexic (Abbie Gonzalez)" to "SIL Open Font License 1.1",
 )
 
 /** «Acerca de»: versión, créditos de contenido, licencias y apoyo opcional con un café. */

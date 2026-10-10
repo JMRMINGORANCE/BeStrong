@@ -70,7 +70,8 @@ class MainActivity : ComponentActivity() {
             repository.activeWorkout.map { it != null }.distinctUntilChanged().collect { active -> updatePipParams(active) }
         }
         setContent {
-            BeStrongTheme {
+            val userSettings by settings.settings.collectAsStateWithLifecycle()
+            BeStrongTheme(userSettings.appearance) {
                 val pip by inPip.collectAsStateWithLifecycle()
                 if (pip) {
                     RestPip(repository, restTimer)

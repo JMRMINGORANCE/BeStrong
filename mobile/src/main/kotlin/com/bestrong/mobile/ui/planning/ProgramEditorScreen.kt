@@ -228,7 +228,7 @@ private fun NumberBox(label: String, value: Int, modifier: Modifier, onChange: (
 @Composable
 fun ExercisePickDialog(onPick: (String) -> Unit, onDismiss: () -> Unit) {
     var query by remember { mutableStateOf("") }
-    val lang = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
+    val lang = com.bestrong.mobile.ui.components.uiLanguage()
     val results = remember(query) { ExerciseLibrary.search(ExerciseLibrary.all, query, nameOf = { ExerciseLibrary.displayName(it, lang) }).take(60) }
     AlertDialog(
         onDismissRequest = onDismiss,

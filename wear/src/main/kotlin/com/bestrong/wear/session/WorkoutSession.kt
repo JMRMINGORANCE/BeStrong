@@ -404,7 +404,7 @@ class WorkoutSession @Inject constructor(
             }
             _rest.value = null
             repCounter.reset()
-            haptic(Haptics.REST_END)
+            haptic(store.settings.value.restVibration.pattern)
         }
     }
 

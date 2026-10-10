@@ -42,11 +42,11 @@ import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.stats.MuscleTargets
 import com.bestrong.core.stats.VolumeStatus
 import com.bestrong.core.util.formatWeight
-import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.R
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.theme.statusColors
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 
@@ -55,13 +55,19 @@ private val MAP_MUSCLES = MuscleGroup.entries - MuscleGroup.FULL_BODY - MuscleGr
 @Composable
 private fun VolumeStatus.color(): Color = when (this) {
     VolumeStatus.NONE -> MaterialTheme.colorScheme.outlineVariant
-    VolumeStatus.LOW -> BeStrongPalette.VolumeLow
-    VolumeStatus.OPTIMAL -> BeStrongPalette.VolumeOptimal
-    VolumeStatus.HIGH -> BeStrongPalette.VolumeHigh
+    VolumeStatus.LOW -> statusColors.warn
+    VolumeStatus.OPTIMAL -> statusColors.good
+    VolumeStatus.HIGH -> statusColors.bad
 }
 
+/** Con modo daltónico, cada estado lleva además su símbolo (▲ ● ▼). */
 @Composable
-private fun VolumeStatus.label(): String = stringResource(
+private fun VolumeStatus.label(): String = when (this) {
+    VolumeStatus.NONE -> ""
+    VolumeStatus.LOW -> statusColors.warnMark
+    VolumeStatus.OPTIMAL -> statusColors.goodMark
+    VolumeStatus.HIGH -> statusColors.badMark
+} + stringResource(
     when (this) {
         VolumeStatus.NONE -> R.string.volume_none
         VolumeStatus.LOW -> R.string.volume_low

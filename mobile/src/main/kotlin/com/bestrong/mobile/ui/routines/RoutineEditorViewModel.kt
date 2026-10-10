@@ -58,6 +58,7 @@ class RoutineEditorViewModel @Inject constructor(
 
     fun rename(name: String) = _routine.update { it.copy(name = name) }
     fun setNotes(notes: String) = _routine.update { it.copy(notes = notes) }
+    fun setEmoji(emoji: String?) = _routine.update { it.copy(emoji = emoji) }
 
     fun addExercises(ids: List<String>) {
         val lookup = repo.previousSetsLookup.value

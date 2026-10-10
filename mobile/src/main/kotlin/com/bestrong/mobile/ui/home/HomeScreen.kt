@@ -70,6 +70,7 @@ import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatTime
 import com.bestrong.mobile.ui.components.rememberNow
 import com.bestrong.mobile.ui.components.uiLanguage
+import com.bestrong.mobile.ui.help.TipCard
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -209,6 +210,7 @@ fun HomeScreen(
             // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
             item { ReadinessCard(vm) }
             item { IntakeCard(vm) }
+            item { TipCard("home_reorder", R.string.tip_home) }
         }
     }
 }
@@ -232,7 +234,7 @@ private fun RoutineCard(
     Card(Modifier.fillMaxWidth().clickable(onClick = onEdit)) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(routine.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(routine.displayName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 Box {
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.routine_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {

@@ -8,6 +8,13 @@
     <string name="about_subtitle">Version, credits, licences and support</string>
     <string name="about_title">About BeStrong</string>
     <string name="about_version">Version %1$s (%2$d)</string>
+    <string name="accent">Accent colour</string>
+    <string name="accent_blue">Blue</string>
+    <string name="accent_dynamic">From wallpaper</string>
+    <string name="accent_green">Green</string>
+    <string name="accent_orange">Orange</string>
+    <string name="accent_pink">Pink</string>
+    <string name="accent_purple">Purple</string>
     <string name="ach_bench_bw">Bench your body weight</string>
     <string name="ach_deadlift_2bw">Deadlift 2 × body weight</string>
     <string name="ach_first_workout">First workout</string>
@@ -55,8 +62,11 @@
     <string name="add_set">+ Add set</string>
     <string name="add_warmup">Add warm-up sets</string>
     <string name="all">All</string>
+    <string name="amoled">AMOLED black</string>
+    <string name="amoled_body">Pure black background in dark mode: saves battery on the Fold</string>
     <string name="and_n_more">and %1$d more…</string>
     <string name="app_name">BeStrong</string>
+    <string name="appearance">Appearance and accessibility</string>
     <string name="auto_backup">Weekly backup</string>
     <string name="auto_backup_last">Last backup: %1$s</string>
     <string name="auto_backup_off">Pick a folder (e.g. Google Drive) to save CSV + JSON every week.</string>
@@ -69,6 +79,8 @@
     <string name="balance_title">Balance (4 weeks)</string>
     <string name="balance_upper_lower">Upper %1$s · Lower %2$s sets</string>
     <string name="best_1rm">Best estimated 1RMs</string>
+    <string name="body_unit">Body weight unit</string>
+    <string name="body_unit_same">Same as lifts</string>
     <string name="body_weight_unit">Body weight (%1$s)</string>
     <string name="bpm_value">%1$d bpm</string>
     <string name="cal_duplicate">Duplicate week</string>
@@ -103,8 +115,14 @@
     <string name="chart_max">Max %1$s</string>
     <string name="chart_min">Min %1$s</string>
     <string name="chart_no_weeks">No workouts in these weeks yet</string>
+    <string name="col_comparison_body">+2.5 kg · +1 under the previous set</string>
+    <string name="col_comparison_setting">Live comparison</string>
     <string name="col_each">each</string>
+    <string name="col_previous_body">What you did last time in each set</string>
+    <string name="col_previous_setting">“Previous” column</string>
     <string name="col_total">total</string>
+    <string name="colorblind">Colour-blind mode</string>
+    <string name="colorblind_body">Blue/orange colours plus ▲ ● ▼ symbols, not just colour</string>
     <string name="complete_sets_for_records">Complete sets to see your records</string>
     <string name="create_exercise">Create exercise</string>
     <string name="create_short">+ Create</string>
@@ -127,6 +145,7 @@
     <string name="drag_to_reorder">Long-press the name and drag to reorder</string>
     <string name="dumbbell_total">Dumbbells: log total weight</string>
     <string name="dumbbell_total_body">Enter the sum of both dumbbells instead of each one</string>
+    <string name="emoji_none">No emoji</string>
     <string name="equip_band">Band</string>
     <string name="equip_barbell">Barbell</string>
     <string name="equip_bodyweight">Bodyweight</string>
@@ -157,6 +176,19 @@
     <string name="f_thigh">Thigh (cm)</string>
     <string name="f_waist">Waist (cm)</string>
     <string name="f_weight">Weight (%1$s)</string>
+    <string name="faq">FAQ</string>
+    <string name="faq_backup_a">Only on your phone (and in your Google backup if enabled). You can export them or make an encrypted backup from Profile.</string>
+    <string name="faq_backup_q">Where is my data?</string>
+    <string name="faq_hc_a">To save workouts to Samsung Health and read your weight, sleep and resting heart rate (daily readiness). It is optional.</string>
+    <string name="faq_hc_q">What is Health Connect for?</string>
+    <string name="faq_progress_a">It looks at last time: if you hit all reps it adds a little; otherwise it repeats. You can turn it off in Settings.</string>
+    <string name="faq_progress_q">How does the app choose the weight?</string>
+    <string name="faq_rest_a">Yes: it keeps going in the notification, on the lock screen, in a floating window and on the watch.</string>
+    <string name="faq_rest_q">Does the rest timer keep running if I leave the app?</string>
+    <string name="faq_units_a">Yes: pick the unit for lifts and, under Appearance, another for body weight.</string>
+    <string name="faq_units_q">Can I mix kg and lb?</string>
+    <string name="faq_watch_a">Install BeStrong on the Galaxy Watch from the phone’s Play Store. Routines and the live workout sync automatically; start on one and continue on the other.</string>
+    <string name="faq_watch_q">How do I use the watch?</string>
     <string name="fatigue_deload">Recommendation: take a deload week (60% weight, half the sets).</string>
     <string name="fatigue_energy">low energy</string>
     <string name="fatigue_ok">No signs of accumulated fatigue.</string>
@@ -175,10 +207,40 @@
     <string name="focus_full">full body</string>
     <string name="focus_lower">lower body</string>
     <string name="focus_upper">upper body</string>
+    <string name="font">Font</string>
+    <string name="font_dyslexia">For dyslexia (OpenDyslexic)</string>
+    <string name="font_legible">Highly legible (Atkinson Hyperlegible)</string>
+    <string name="font_system">System</string>
     <string name="forgotten_body">“%1$s” has had no changes since %2$s. You can finish it at that time (not counting the time after), discard it or keep going.</string>
     <string name="forgotten_continue">Keep going</string>
     <string name="forgotten_finish">Finish at that time</string>
     <string name="forgotten_title">Did you leave this workout open?</string>
+    <string name="g_1rm">1RM</string>
+    <string name="g_1rm_d">The most you can lift for one rep. The app estimates it (e1RM) from your sets.</string>
+    <string name="g_amrap">AMRAP</string>
+    <string name="g_amrap_d">As many reps (or rounds) as possible.</string>
+    <string name="g_deload">Deload</string>
+    <string name="g_deload_d">A lighter week to recover and keep progressing.</string>
+    <string name="g_dots">DOTS / Wilks / IPF GL</string>
+    <string name="g_dots_d">Scores to compare strength across body weights.</string>
+    <string name="g_drop">Drop set</string>
+    <string name="g_drop_d">At failure, lower the weight and keep going without rest.</string>
+    <string name="g_emom">EMOM</string>
+    <string name="g_emom_d">Start a set every minute; rest for what is left of it.</string>
+    <string name="g_overload">Progressive overload</string>
+    <string name="g_overload_d">Gradually adding weight or reps; the app suggests it.</string>
+    <string name="g_rir">RIR</string>
+    <string name="g_rir_d">Reps in reserve: how many more you could have done.</string>
+    <string name="g_rpe">RPE</string>
+    <string name="g_rpe_d">Rate of perceived exertion, 1–10. RPE 8 = you had 2 reps left.</string>
+    <string name="g_superset">Superset</string>
+    <string name="g_superset_d">Two exercises back to back with no rest in between.</string>
+    <string name="g_tempo">Tempo</string>
+    <string name="g_tempo_d">Seconds per phase: lower-pause-lift-pause (e.g. 3-1-1-0).</string>
+    <string name="g_tm">Training max (TM)</string>
+    <string name="g_tm_d">About 90 percent of your 1RM; programs such as 5/3/1 use it for loads.</string>
+    <string name="g_volume">Volume</string>
+    <string name="g_volume_d">Weight × reps added up; per muscle we count hard sets (10–20 a week).</string>
     <string name="gen_days">Days per week</string>
     <string name="gen_equipment">With the equipment of “%1$s”</string>
     <string name="gen_generate">Generate</string>
@@ -187,9 +249,11 @@
     <string name="gen_preview">%1$s · %2$d exercises · ~%3$d min</string>
     <string name="gen_save">Save routines</string>
     <string name="gen_title">Routine generator</string>
+    <string name="glossary">Glossary</string>
     <string name="goal_endurance">Endurance</string>
     <string name="goal_hypertrophy">Hypertrophy</string>
     <string name="goal_strength">Strength</string>
+    <string name="got_it">Got it</string>
     <string name="guided_next">Next: %1$s</string>
     <string name="guided_skip">Skip</string>
     <string name="guided_stretch">Stretching %1$s</string>
@@ -216,6 +280,10 @@
     <string name="hc_unavailable">Health Connect isn\'t available on this device</string>
     <string name="heatmap_desc">Heatmap: %1$d workouts in %2$d</string>
     <string name="heatmap_title">%1$d · %2$d workouts</string>
+    <string name="help">Help</string>
+    <string name="help_body">Glossary, FAQ, tutorial and what’s new</string>
+    <string name="high_contrast">High contrast</string>
+    <string name="high_contrast_body">Stronger text and borders</string>
     <string name="history_card_detail">%1$s · %2$s · %3$d sets</string>
     <string name="history_edit">Edit workout</string>
     <string name="history_edit_done">Finish editing</string>
@@ -337,6 +405,7 @@
     <string name="new_exercise">New exercise</string>
     <string name="new_measurement">New measurement</string>
     <string name="new_records">🏆 New records</string>
+    <string name="next">Next</string>
     <string name="next_up">Up next</string>
     <string name="no_data_body">Complete sets of this exercise to see your progress.</string>
     <string name="no_data_title">No data yet</string>
@@ -506,6 +575,8 @@
     <string name="rest_time">Rest time</string>
     <string name="rest_title">Rest %1$s</string>
     <string name="rest_value">Rest %1$s</string>
+    <string name="rest_vibration">Vibration when rest ends</string>
+    <string name="rest_vibration_body">Also used on the watch</string>
     <string name="restore_backup">Restore backup</string>
     <string name="restore_backup_body">From a bestrong-*.json file. Adds what\'s missing; deletes nothing.</string>
     <string name="restore_done">Backup with %1$d workouts and %2$d routines: %3$d items added</string>
@@ -513,6 +584,7 @@
     <string name="routine_copy_name">%1$s (copy)</string>
     <string name="routine_delete">Delete routine</string>
     <string name="routine_edit">Edit routine</string>
+    <string name="routine_emoji">Routine emoji</string>
     <string name="routine_imported">Routine “%1$s” imported</string>
     <string name="routine_last_done">Last done: %1$s</string>
     <string name="routine_name">Routine name</string>
@@ -580,7 +652,9 @@
     <string name="shortcut_empty_short">Empty workout</string>
     <string name="shortcut_open_long">Open the current workout</string>
     <string name="shortcut_open_short">Current workout</string>
+    <string name="skip">Skip</string>
     <string name="skip_exercise">Skip and come back later</string>
+    <string name="start">Start</string>
     <string name="stat_avg_hr">Avg HR</string>
     <string name="stat_calories">Calories</string>
     <string name="stat_duration">Duration</string>
@@ -624,6 +698,10 @@
     <string name="tempo_help">Seconds of lowering-pause-lifting-pause, e.g. 3-1-1-0 (X = explosive). The watch guides you with vibrations.</string>
     <string name="tempo_invalid">Format: 3-1-1 or 3-1-1-0 (0 to 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s under tension per set</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_mode">Theme</string>
+    <string name="theme_system">System</string>
     <string name="timer_amrap">AMRAP %1$d min</string>
     <string name="timer_circuit">Circuit (class mode)</string>
     <string name="timer_circuit_default">Burpees, Squats, Push-ups, Plank, Lunges</string>
@@ -642,6 +720,8 @@
     <string name="timer_work">Work!</string>
     <string name="timer_work_s">Work (s)</string>
     <string name="timers_title">Timers</string>
+    <string name="tip_home">Tip: long-press an exercise during a workout to reorder it, and use “Plan” to generate routines for you.</string>
+    <string name="tip_swipe">Tip: swipe a set right to complete it and left to delete it. Long-press the number to change type or RPE.</string>
     <string name="today_cycle_week">Cycle %1$d · week %2$d of %3$d</string>
     <string name="today_session_n">Session %1$d</string>
     <string name="today_start">Start session</string>
@@ -660,9 +740,25 @@
     <string name="track_weight_reps">Weight &amp; reps</string>
     <string name="tts_go">Go for the set!</string>
     <string name="tts_next">Rest %1$s. Next: %2$s, %3$s</string>
+    <string name="tut1_d">Log your sets in seconds, on your phone or watch. Everything stays on your device.</string>
+    <string name="tut1_t">Welcome to BeStrong</string>
+    <string name="tut2_d">Create routines or pick a program (5/3/1, GZCLP, PPL…). “Today” tells you what to do each day.</string>
+    <string name="tut2_t">Routines and programs</string>
+    <string name="tut3_d">Tap ✓ or swipe a set right to complete it; rest starts automatically. Swipe left to delete it.</string>
+    <string name="tut3_t">During the workout</string>
+    <string name="tut4_d">Profile shows records, muscles worked, strength levels and charts. If you get lost, Profile → Help has a glossary.</string>
+    <string name="tut4_t">Your progress</string>
+    <string name="tutorial_replay">Show the tutorial</string>
     <string name="undo_exercise_deleted">Exercise removed</string>
     <string name="undo_set_deleted">Set deleted</string>
     <string name="undo_workout_deleted">Workout deleted</string>
+    <string name="vib_double">Double</string>
+    <string name="vib_heartbeat">Heartbeat</string>
+    <string name="vib_long">Long</string>
+    <string name="vib_short">Short</string>
+    <string name="vib_strong">Very strong</string>
+    <string name="vib_test">Try it</string>
+    <string name="vib_triple">Triple</string>
     <string name="vibrate_rest">Vibrate when rest ends</string>
     <string name="voice_announcements">Voice announcements</string>
     <string name="voice_announcements_body">Reads the next set and tells you when rest is over (through your headphones)</string>
@@ -687,6 +783,13 @@
     <string name="week_vs_last">%1$s volume vs last week</string>
     <string name="weekly_volume">Weekly volume (%1$s)</string>
     <string name="weight_unit">Weight unit</string>
+    <string name="whats_new">What’s new</string>
+    <string name="whats_new_body">• Languages: Catalan, Galician, Portuguese, French and German
+• Colour themes, AMOLED black, high contrast and colour-blind mode
+• Highly legible or dyslexia-friendly font
+• Choose your rest vibration (on the watch too)
+• Emoji per routine, mixed units and selectable columns
+• Glossary, FAQ and tutorial</string>
     <string name="widget_description">Streak, weekly workouts and quick access to your routines</string>
     <string name="widget_start">Start %1$s</string>
     <string name="widget_streak">🔥 %1$d wk</string>

@@ -94,7 +94,7 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
                 items(routines, key = { it.id }) { routine ->
                     Button(
                         onClick = { container.session.startRoutine(routine); onStart() },
-                        label = { Text(routine.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                        label = { Text(routine.displayName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                         secondaryLabel = { Text(stringResource(R.string.n_exercises, routine.exercises.size)) },
                         colors = ButtonDefaults.filledTonalButtonColors(),
                         modifier = Modifier.fillMaxWidth(),

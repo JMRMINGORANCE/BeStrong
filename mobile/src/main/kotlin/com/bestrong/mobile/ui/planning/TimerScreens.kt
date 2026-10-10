@@ -161,7 +161,7 @@ fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -> Unit) {
 @Composable
 fun GuidedSessionScreen(warmup: Boolean, focus: BodyFocus, onBack: () -> Unit) {
     val context = LocalContext.current
-    val lang = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
+    val lang = com.bestrong.mobile.ui.components.uiLanguage()
     val steps = remember(warmup, focus) { if (warmup) GuidedRoutines.warmup(focus) else GuidedRoutines.stretching(focus) }
     var index by rememberSaveable { mutableIntStateOf(0) }
     var left by rememberSaveable(index) { mutableIntStateOf(steps.getOrNull(index)?.seconds ?: 0) }

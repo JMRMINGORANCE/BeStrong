@@ -67,11 +67,16 @@ fun Equipment.label(): String = stringResource(labelRes())
 @Composable @ReadOnlyComposable
 fun RecordType.label(): String = stringResource(labelRes())
 
-/** Idioma de la interfaz ("en" o "es") para nombres e instrucciones de la biblioteca. */
-@Composable @ReadOnlyComposable
-fun uiLanguage(): String = LocalConfiguration.current.locales[0].language
+/**
+ * Idioma de los contenidos de la biblioteca ("en" o "es"): los ejercicios, programas e instrucciones
+ * solo están en esos dos, así que catalán y gallego usan español y el resto inglés.
+ */
+fun contentLanguage(language: String): String = if (language in setOf("es", "ca", "gl", "eu")) "es" else "en"
 
-fun Context.uiLanguage(): String = resources.configuration.locales[0].language
+@Composable @ReadOnlyComposable
+fun uiLanguage(): String = contentLanguage(LocalConfiguration.current.locales[0].language)
+
+fun Context.uiLanguage(): String = contentLanguage(resources.configuration.locales[0].language)
 
 /** Nombre del ejercicio en el idioma de la app (los personalizados se muestran tal cual). */
 @Composable @ReadOnlyComposable

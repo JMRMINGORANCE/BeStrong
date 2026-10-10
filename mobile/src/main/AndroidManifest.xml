@@ -28,6 +28,7 @@
 
     <application
         android:name=".BeStrongApplication"
+        android:localeConfig="@xml/locales_config"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"

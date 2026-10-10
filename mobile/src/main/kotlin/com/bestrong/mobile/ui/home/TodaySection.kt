@@ -118,7 +118,7 @@ fun SuggestedRoutineCard(routine: Routine, onStart: () -> Unit) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.today_suggested), style = MaterialTheme.typography.labelLarge)
-                Text(routine.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(routine.displayName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
             }
             Button(onClick = onStart) { Text(stringResource(R.string.routine_start)) }
         }

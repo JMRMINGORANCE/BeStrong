@@ -5,7 +5,12 @@ import androidx.core.content.edit
 import com.bestrong.core.stats.Sex
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.core.training.GymProfile
+import com.bestrong.core.util.VibrationStyle
 import com.bestrong.core.util.WeightUnit
+import com.bestrong.mobile.ui.theme.Accent
+import com.bestrong.mobile.ui.theme.AppFont
+import com.bestrong.mobile.ui.theme.Appearance
+import com.bestrong.mobile.ui.theme.ThemeMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,6 +54,19 @@ data class UserSettings(
     val voiceAnnouncements: Boolean = false,
     /** Modo pareja: nombre de la otra persona (vacío = desactivado). */
     val partnerName: String = "",
+    /** Tema, acento, AMOLED, alto contraste, modo daltónico y tipo de letra. */
+    val appearance: Appearance = Appearance(),
+    /** Vibración al acabar el descanso (también en el reloj). */
+    val restVibration: VibrationStyle = VibrationStyle.TRIPLE,
+    /** Unidades mixtas: peso corporal en otra unidad que las cargas (null = la misma). */
+    val bodyUnit: WeightUnit? = null,
+    /** Columnas visibles en la tabla de series. */
+    val showPreviousColumn: Boolean = true,
+    val showComparison: Boolean = true,
+    /** Tutorial inicial visto, última versión cuyas novedades se mostraron y consejos ya descartados. */
+    val tutorialDone: Boolean = false,
+    val lastSeenVersion: Int = 0,
+    val dismissedTips: Set<String> = emptySet(),
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
 }
@@ -86,7 +104,25 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         voiceAnnouncements = prefs.getBoolean("voice_announcements", false),
         partnerName = prefs.getString("partner_name", "").orEmpty(),
         sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
+        appearance = Appearance(
+            mode = enumOr("theme_mode", ThemeMode.SYSTEM),
+            accent = enumOr("accent", Accent.ORANGE),
+            amoled = prefs.getBoolean("amoled", false),
+            highContrast = prefs.getBoolean("high_contrast", false),
+            colorblind = prefs.getBoolean("colorblind", false),
+            font = enumOr("font", AppFont.SYSTEM),
+        ),
+        restVibration = enumOr("rest_vibration", VibrationStyle.TRIPLE),
+        bodyUnit = prefs.getString("body_unit", null)?.let { runCatching { WeightUnit.valueOf(it) }.getOrNull() },
+        showPreviousColumn = prefs.getBoolean("col_previous", true),
+        showComparison = prefs.getBoolean("col_comparison", true),
+        tutorialDone = prefs.getBoolean("tutorial_done", false),
+        lastSeenVersion = prefs.getInt("last_seen_version", 0),
+        dismissedTips = prefs.getStringSet("dismissed_tips", emptySet()).orEmpty().toSet(),
     )
+
+    private inline fun <reified E : Enum<E>> enumOr(key: String, default: E): E =
+        prefs.getString(key, null)?.let { v -> enumValues<E>().firstOrNull { it.name == v } } ?: default
 
     @Synchronized
     fun update(block: (UserSettings) -> UserSettings) {
@@ -115,6 +151,19 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBoolean("media_controls", s.mediaControls)
             putBoolean("voice_announcements", s.voiceAnnouncements)
             putString("partner_name", s.partnerName)
+            putString("theme_mode", s.appearance.mode.name)
+            putString("accent", s.appearance.accent.name)
+            putBoolean("amoled", s.appearance.amoled)
+            putBoolean("high_contrast", s.appearance.highContrast)
+            putBoolean("colorblind", s.appearance.colorblind)
+            putString("font", s.appearance.font.name)
+            putString("rest_vibration", s.restVibration.name)
+            putString("body_unit", s.bodyUnit?.name)
+            putBoolean("col_previous", s.showPreviousColumn)
+            putBoolean("col_comparison", s.showComparison)
+            putBoolean("tutorial_done", s.tutorialDone)
+            putInt("last_seen_version", s.lastSeenVersion)
+            putStringSet("dismissed_tips", s.dismissedTips)
         }
         _settings.value = s
     }

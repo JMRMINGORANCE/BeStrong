@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="watchface_name">BeStrong</string>
+    <string name="slot_today">Treino de hoje</string>
+    <string name="slot_streak">Semana</string>
+    <string name="slot_heart">Pulsação</string>
+</resources>

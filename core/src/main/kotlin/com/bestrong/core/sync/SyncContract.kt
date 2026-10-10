@@ -2,6 +2,7 @@ package com.bestrong.core.sync
 
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
+import com.bestrong.core.util.VibrationStyle
 import com.bestrong.core.util.WeightUnit
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -80,4 +81,9 @@ data class LiveMetrics(
 )
 
 @Serializable
-data class SharedSettings(val unit: WeightUnit = WeightUnit.KG, val progressionEnabled: Boolean = true)
+data class SharedSettings(
+    val unit: WeightUnit = WeightUnit.KG,
+    val progressionEnabled: Boolean = true,
+    /** Vibración al acabar el descanso, elegida en el móvil y usada también en el reloj. */
+    val restVibration: VibrationStyle = VibrationStyle.TRIPLE,
+)

@@ -65,6 +65,8 @@ import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.StatTile
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.help.HelpDialog
+import com.bestrong.mobile.ui.help.TutorialDialog
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +102,10 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     var editingGym by remember { mutableStateOf<GymProfile?>(null) }
     var showAbout by rememberSaveable { mutableStateOf(false) }
     if (showAbout) AboutDialog { showAbout = false }
+    var showHelp by rememberSaveable { mutableStateOf(false) }
+    var showTutorial by rememberSaveable { mutableStateOf(false) }
+    if (showHelp) HelpDialog(onDismiss = { showHelp = false }, onReplayTutorial = { showHelp = false; showTutorial = true })
+    if (showTutorial) TutorialDialog { showTutorial = false }
     editingGym?.let { g ->
         GymEditorDialog(
             gym = g,
@@ -227,6 +233,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                     )
                 }
             }
+            item(span = { GridItemSpan(maxLineSpan) }) { AppearanceCard(settings, vm::updateSettings) }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Card {
                     Column(Modifier.padding(vertical = 8.dp)) {
@@ -367,6 +374,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             trailingContent = { TextButton(onClick = { importLauncher.launch(arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) }) { Text(stringResource(R.string.action_import)) } },
                         )
                         DataToolsSection(vm)
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.help)) },
+                            supportingContent = { Text(stringResource(R.string.help_body)) },
+                            modifier = Modifier.clickable { showHelp = true },
+                        )
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.about_title)) },
                             supportingContent = { Text(stringResource(R.string.about_subtitle)) },
