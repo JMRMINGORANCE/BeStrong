@@ -153,8 +153,11 @@ class UiFlowTest {
         settle()
         // Con un diálogo hay dos raíces: se captura la pantalla entera
         captureScreenRoboImage("build/outputs/roborazzi/programs_folded.png")
+        // Con más programas el elegido queda abajo: el desplazamiento necesita que avance el reloj
+        compose.mainClock.autoAdvance = true
         programsList().performScrollToNode(hasText("Full Body 3 días"))
         compose.onNodeWithText("Full Body 3 días").performClick()
+        compose.mainClock.autoAdvance = false
         settle(25)
         // Aparece en «Te toca» y en la lista de rutinas
         assertTrue(compose.onAllNodesWithText("Full Body 3 días · A").fetchSemanticsNodes().isNotEmpty())
