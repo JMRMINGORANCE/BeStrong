@@ -371,7 +371,7 @@ class UiDarkTest {
     }
 
     @Test
-    @Config(qualifiers = "w411dp-h891dp-night-xxhdpi")
+    @Config(qualifiers = "es-w411dp-h891dp-night-xxhdpi")
     fun home_folded_dark() {
         compose.mainClock.autoAdvance = false
         settle()
@@ -380,7 +380,7 @@ class UiDarkTest {
     }
 
     @Test
-    @Config(qualifiers = "w411dp-h891dp-night-xxhdpi")
+    @Config(qualifiers = "es-w411dp-h891dp-night-xxhdpi")
     fun profile_folded_dark() {
         compose.mainClock.autoAdvance = false
         settle()

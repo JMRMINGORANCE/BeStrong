@@ -1,17 +1,19 @@
 package com.bestrong.wear
 
 import android.os.Looper
-import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.junit.Rule
@@ -108,11 +110,12 @@ class WearUiTest {
     fun create_routine_on_watch() {
         compose.mainClock.autoAdvance = false
         settle()
-        // «Crear rutina» es el último elemento (sin rutinas): se salta directamente al final
-        val list = compose.onNode(hasScrollToIndexAction())
-        val rows = list.fetchSemanticsNode().config[SemanticsProperties.CollectionInfo].rowCount
-        list.performScrollToIndex(rows - 1)
-        settle()
+        // «Crear rutina» está al final: se desliza hacia arriba hasta verlo (con límite, nunca se cuelga)
+        repeat(12) {
+            if (compose.onAllNodesWithText("Crear rutina").fetchSemanticsNodes().isNotEmpty()) return@repeat
+            compose.onNode(hasScrollToIndexAction()).performTouchInput { swipeUp() }
+            settle()
+        }
         compose.onNodeWithText("Crear rutina").performClick()
         settle()
         compose.onNodeWithText("Añadir ejercicio").assertExists()
