@@ -75,7 +75,12 @@ object IntervalRoute {
 }
 
 private fun vibrate(context: android.content.Context, long: Boolean) {
-    val v = context.getSystemService(VibratorManager::class.java)?.defaultVibrator ?: return
+    val v = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+        context.getSystemService(VibratorManager::class.java)?.defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        context.getSystemService(android.os.Vibrator::class.java)
+    } ?: return
     v.vibrate(VibrationEffect.createWaveform(if (long) longArrayOf(0, 400) else longArrayOf(0, 120, 80, 120), -1))
 }
 

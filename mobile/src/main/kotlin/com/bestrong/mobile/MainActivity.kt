@@ -104,13 +104,13 @@ class MainActivity : ComponentActivity() {
      * Botones de volumen durante el entreno (si se activan en Perfil):
      * subir = completar la siguiente serie, bajar = saltar el descanso.
      */
-    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val code = event.keyCode
-        val handled = settings.settings.value.volumeKeys && repository.activeWorkout.value != null &&
-            (code == KeyEvent.KEYCODE_VOLUME_UP || code == KeyEvent.KEYCODE_VOLUME_DOWN)
-        if (!handled) return super.dispatchKeyEvent(event)
-        if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
-            if (code == KeyEvent.KEYCODE_VOLUME_UP) {
+    private fun volumeKeyActive(code: Int) = settings.settings.value.volumeKeys && repository.activeWorkout.value != null &&
+        (code == KeyEvent.KEYCODE_VOLUME_UP || code == KeyEvent.KEYCODE_VOLUME_DOWN)
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (!volumeKeyActive(keyCode)) return super.onKeyDown(keyCode, event)
+        if (event.repeatCount == 0) {
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                 lifecycleScope.launch { actions.completeNextSet() }
             } else {
                 restTimer.skip()
@@ -118,6 +118,10 @@ class MainActivity : ComponentActivity() {
         }
         return true
     }
+
+    /** Se consume también al soltar para que no cambie el volumen. */
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean =
+        if (volumeKeyActive(keyCode)) true else super.onKeyUp(keyCode, event)
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
