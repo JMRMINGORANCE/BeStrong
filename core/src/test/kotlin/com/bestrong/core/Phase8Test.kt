@@ -1,5 +1,7 @@
 package com.bestrong.core
 
+import com.bestrong.core.io.RoutineLink
+import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
@@ -7,8 +9,12 @@ import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.core.sync.WorkoutMerge
 import java.time.LocalDate
+import java.util.Base64
+import java.util.zip.Deflater
 import kotlin.random.Random
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -129,5 +135,21 @@ class Phase8Test {
         assertTrue(records.isNotEmpty() && weeks.isNotEmpty())
         // Margen amplio para máquinas de CI lentas: en un móvil actual son unas decenas de ms
         assertTrue("1000 entrenos tardaron $ms ms", ms < 5_000)
+    }
+
+    @Test
+    fun routineLink_rejectsCompressionBombs() {
+        // 20 MB de espacios comprimidos caben en un enlace corto: no debe descomprimirse entero
+        val deflater = Deflater(Deflater.BEST_COMPRESSION)
+        deflater.setInput(ByteArray(20 * 1024 * 1024) { ' '.code.toByte() })
+        deflater.finish()
+        val buf = ByteArray(64 * 1024)
+        val n = deflater.deflate(buf)
+        deflater.end()
+        val link = "bestrong://routine?d=" + Base64.getUrlEncoder().withoutPadding().encodeToString(buf.copyOf(n))
+        assertNull(RoutineLink.decode(link))
+        assertNull(RoutineLink.decode("bestrong://routine?d=" + "A".repeat(20_000)))
+        // Una rutina normal sigue funcionando
+        assertNotNull(RoutineLink.decode(RoutineLink.encode(Routine(name = "Push"))))
     }
 }

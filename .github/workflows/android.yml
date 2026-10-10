@@ -79,6 +79,18 @@ jobs:
         if: (success() || failure()) && steps.compile.outcome == 'success'
         run: ./gradlew --continue :mobile:assembleRelease :wear:assembleRelease :watchface:assembleRelease
 
+      - name: Tamaño de los APK
+        if: steps.compile.outcome == 'success'
+        run: |
+          {
+            echo "### Tamaño de los APK"
+            echo "| APK | Tamaño |"
+            echo "|---|---|"
+            for f in mobile/build/outputs/apk/*/*.apk wear/build/outputs/apk/*/*.apk watchface/build/outputs/apk/*/*.apk; do
+              [ -f "$f" ] && echo "| $(basename "$f") | $(du -h "$f" | cut -f1) |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Lint
         if: (success() || failure()) && steps.compile.outcome == 'success'
         run: |

@@ -1,6 +1,6 @@
 name: Release
 
-# Al crear una etiqueta vX.Y.Z: compila móvil y reloj en release (R8) y publica una release de
+# Al crear una etiqueta vX.Y.Z (o vX.Y.Z-beta.N para el canal beta): compila móvil y reloj en release (R8) y publica una release de
 # GitHub con los APK y el changelog desde la etiqueta anterior.
 # Firma: si existen los secretos KEYSTORE_BASE64, KEYSTORE_PASSWORD, KEY_ALIAS y KEY_PASSWORD se
 # firma con tu clave; si no, con la de depuración y la release se marca como prerelease de prueba.
@@ -69,5 +69,12 @@ jobs:
           cp wear/build/outputs/apk/release/*.apk "dist/BeStrong-${GITHUB_REF_NAME}-reloj.apk"
           cp watchface/build/outputs/apk/release/*.apk "dist/BeStrong-${GITHUB_REF_NAME}-esfera.apk"
           flags=""
+          # Canal beta: las etiquetas con «-beta» o «-rc» se publican como prerelease
+          case "$GITHUB_REF_NAME" in *-beta*|*-rc*) flags="--prerelease" ;; esac
           if [ "${{ steps.sign.outputs.debug }}" = "true" ]; then flags="--prerelease"; fi
+          {
+            echo
+            echo "### Tamaño"
+            for f in dist/*.apk; do echo "- $(basename "$f"): $(du -h "$f" | cut -f1)"; done
+          } >> CHANGELOG_RELEASE.md
           gh release create "$GITHUB_REF_NAME" dist/*.apk --title "BeStrong $GITHUB_REF_NAME" --notes-file CHANGELOG_RELEASE.md $flags

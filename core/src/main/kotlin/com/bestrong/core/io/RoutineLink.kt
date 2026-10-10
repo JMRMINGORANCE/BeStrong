@@ -13,6 +13,11 @@ import java.util.zip.Inflater
  * dentro de «bestrong://routine?d=…». Al abrirlo, la rutina se importa con un id nuevo.
  */
 object RoutineLink {
+    private const val MAX_LINK_CHARS = 16_000
+    private const val MAX_JSON_BYTES = 256 * 1024
+    private const val MAX_EXERCISES = 50
+    private const val MAX_SETS = 30
+
     const val SCHEME = "bestrong"
     const val HOST = "routine"
     const val PARAM = "d"
@@ -32,6 +37,8 @@ object RoutineLink {
     /** Lee el parámetro «d» (o el enlace entero) y devuelve la rutina con un id nuevo. */
     fun decode(linkOrData: String): Routine? = runCatching {
         val data = linkOrData.substringAfter("$PARAM=", linkOrData).substringBefore('&')
+        // Enlaces de cualquier web: se limitan tamaño y descompresión (evita «bombas zip»)
+        require(data.length <= MAX_LINK_CHARS)
         val bytes = Base64.getUrlDecoder().decode(data)
         val inflater = Inflater()
         inflater.setInput(bytes)
@@ -41,8 +48,11 @@ object RoutineLink {
             val n = inflater.inflate(buf)
             if (n == 0 && (inflater.needsInput() || inflater.needsDictionary())) break
             out.write(buf, 0, n)
+            require(out.size() <= MAX_JSON_BYTES)
         }
         inflater.end()
-        SyncContract.json.decodeFromString(Routine.serializer(), out.toByteArray().decodeToString()).copy(id = newId())
+        SyncContract.json.decodeFromString(Routine.serializer(), out.toByteArray().decodeToString())
+            .also { require(it.exercises.size <= MAX_EXERCISES && it.exercises.all { e -> e.sets.size <= MAX_SETS }) }
+            .copy(id = newId())
     }.getOrNull()
 }
