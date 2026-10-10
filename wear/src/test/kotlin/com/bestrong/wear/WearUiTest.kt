@@ -1,6 +1,7 @@
 package com.bestrong.wear
 
 import android.os.Looper
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasScrollToIndexAction
 import androidx.compose.ui.test.hasText
@@ -107,7 +108,11 @@ class WearUiTest {
     fun create_routine_on_watch() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Crear rutina"))
+        // «Crear rutina» es el último elemento (sin rutinas): se salta directamente al final
+        val list = compose.onNode(hasScrollToIndexAction())
+        val rows = list.fetchSemanticsNode().config[SemanticsProperties.CollectionInfo].rowCount
+        list.performScrollToIndex(rows - 1)
+        settle()
         compose.onNodeWithText("Crear rutina").performClick()
         settle()
         compose.onNodeWithText("Añadir ejercicio").assertExists()
