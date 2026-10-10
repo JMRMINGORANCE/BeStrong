@@ -692,6 +692,7 @@
     <string name="superset_label">Superserie %1$s</string>
     <string name="superset_remove">Quitar de la superserie</string>
     <string name="superset_with_next">Superserie con el siguiente</string>
+    <string name="sync_conflict">Serie %1$d de %2$s editada en el móvil y en el reloj: se ha quedado la última versión (%3$d en total).</string>
     <string name="technique_notes">Mis notas de técnica</string>
     <string name="technique_notes_hint">Agarre, apoyo, sensaciones… (solo en este móvil)</string>
     <string name="tempo">Tempo</string>

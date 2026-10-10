@@ -692,6 +692,7 @@
     <string name="superset_label">Supersèrie %1$s</string>
     <string name="superset_remove">Treure de la supersèrie</string>
     <string name="superset_with_next">Supersèrie amb el següent</string>
+    <string name="sync_conflict">Sèrie %1$d de %2$s editada al mòbil i al rellotge: s’ha mantingut l’última versió (%3$d en total).</string>
     <string name="technique_notes">Les meves notes de tècnica</string>
     <string name="technique_notes_hint">Agafada, suport, sensacions… (només en aquest mòbil)</string>
     <string name="tempo">Tempo</string>

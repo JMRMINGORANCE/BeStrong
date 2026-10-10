@@ -147,6 +147,9 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     private val _events = MutableSharedFlow<WorkoutEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<WorkoutEvent> = _events
+
+    /** Conflictos de sincronización con el reloj (misma serie con valores distintos). */
+    val syncConflicts = repo.syncConflicts
     private var undoSnapshot: Workout? = null
 
     private fun editUndoable(kind: UndoKind, block: (Workout) -> Workout) {

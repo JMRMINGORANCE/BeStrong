@@ -177,6 +177,13 @@ fun ActiveWorkoutScreen(
     val rpeDown = stringResource(R.string.rpe_suggest_down)
     val rpeUp = stringResource(R.string.rpe_suggest_up)
     val appContext = LocalContext.current
+    val conflictMsg = stringResource(R.string.sync_conflict)
+    LaunchedEffect(Unit) {
+        vm.syncConflicts.collect { list ->
+            val c = list.first()
+            snackbar.showSnackbar(conflictMsg.format(c.setIndex + 1, c.exerciseName, list.size), duration = SnackbarDuration.Long)
+        }
+    }
     LaunchedEffect(Unit) {
         vm.events.collect { e ->
             when (e) {

@@ -692,6 +692,7 @@
     <string name="superset_label">Superset %1$s</string>
     <string name="superset_remove">Remove from superset</string>
     <string name="superset_with_next">Superset with next</string>
+    <string name="sync_conflict">Set %1$d of %2$s was edited on both phone and watch: the latest version was kept (%3$d in total).</string>
     <string name="technique_notes">My technique notes</string>
     <string name="technique_notes_hint">Grip, setup, cues… (stored on this phone only)</string>
     <string name="tempo">Tempo</string>

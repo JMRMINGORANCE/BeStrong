@@ -49,6 +49,26 @@ object WorkoutMerge {
         return newer.copy(sets = sets)
     }
 
+    /** Serie completada en los dos dispositivos con valores distintos (se quedó la más reciente). */
+    data class SetConflict(val exerciseName: String, val setIndex: Int, val kept: WorkoutSet, val discarded: WorkoutSet)
+
+    /**
+     * Conflictos que [merge] resolverá descartando datos: la misma serie completada en el móvil
+     * y en el reloj con peso, repeticiones o duración distintos. Sirve para avisar al usuario.
+     */
+    fun conflicts(a: Workout, b: Workout): List<SetConflict> {
+        if (a.id != b.id) return emptyList()
+        val (older, newer) = if (b.updatedAtEpochMs >= a.updatedAtEpochMs) a to b else b to a
+        val olderSets = older.exercises.flatMap { e -> e.sets.map { it.id to it } }.toMap()
+        return newer.exercises.flatMap { e ->
+            e.sets.mapIndexedNotNull { i, ns ->
+                val os = olderSets[ns.id] ?: return@mapIndexedNotNull null
+                val differs = os.weightKg != ns.weightKg || os.reps != ns.reps || os.durationSec != ns.durationSec
+                if (ns.completed && os.completed && differs) SetConflict(e.exercise.name, i, ns, os) else null
+            }
+        }
+    }
+
     private fun mergeSet(older: WorkoutSet, newer: WorkoutSet): WorkoutSet = when {
         newer.completed -> newer
         older.completed -> older

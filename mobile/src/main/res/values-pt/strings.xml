@@ -692,6 +692,7 @@
     <string name="superset_label">Superset %1$s</string>
     <string name="superset_remove">Retirar do superset</string>
     <string name="superset_with_next">Superset com o seguinte</string>
+    <string name="sync_conflict">Série %1$d de %2$s editada no telemóvel e no relógio: ficou a última versão (%3$d no total).</string>
     <string name="technique_notes">As minhas notas de técnica</string>
     <string name="technique_notes_hint">Pega, posição, dicas… (guardadas só neste telemóvel)</string>
     <string name="tempo">Tempo</string>

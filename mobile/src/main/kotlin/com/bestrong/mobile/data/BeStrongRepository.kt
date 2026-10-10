@@ -23,6 +23,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -128,9 +130,15 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         dao.putValue(KeyValueEntity(KEY_PARTNER, Persistence.encodeWorkout(block(current).copy(updatedAtEpochMs = System.currentTimeMillis()))))
     }
 
+    private val _syncConflicts = MutableSharedFlow<List<WorkoutMerge.SetConflict>>(extraBufferCapacity = 4)
+
+    /** Series editadas a la vez en móvil y reloj con valores distintos (se avisa en el entreno). */
+    val syncConflicts: SharedFlow<List<WorkoutMerge.SetConflict>> = _syncConflicts
+
     /** Estado que llega del reloj: se fusiona serie a serie con el local (no se pierde ninguna serie hecha). */
     suspend fun applyRemoteActive(remote: Workout) = activeMutex.withLock {
         val local = currentActive()
+        if (local != null) WorkoutMerge.conflicts(local, remote).takeIf { it.isNotEmpty() }?.let { _syncConflicts.tryEmit(it) }
         val merged = if (local == null) remote else WorkoutMerge.merge(local, remote)
         if (merged != local) write(merged)
     }
