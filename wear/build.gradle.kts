@@ -49,7 +49,14 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
-            all { it.systemProperty("robolectric.pixelCopyRenderMode", "hardware") }
+            all {
+                it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
+                // En la CI se ve qué prueba empieza y cuál falla (si una se cuelga, es la última «STARTED»)
+                it.testLogging {
+                    events("started", "passed", "failed", "skipped")
+                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                }
+            }
         }
     }
     compileOptions {
