@@ -1,5 +1,6 @@
 package com.bestrong.wear.health
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -163,8 +164,7 @@ class ExerciseService : LifecycleService() {
             exerciseClient.setUpdateCallback(callback)
             // Si Android reinició la app con el ejercicio aún en marcha, se sigue con él: empezar
             // otro pondría las calorías y las estadísticas de pulso a cero
-            val info = runCatching { exerciseClient.getCurrentExerciseInfo() }.getOrNull()
-            if (info?.exerciseTrackedStatus != ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS) {
+            if (!ownsExerciseInProgress()) {
                 exerciseClient.startExercise(
                     ExerciseConfig.builder(type)
                         .setDataTypes(dataTypes)
@@ -203,6 +203,15 @@ class ExerciseService : LifecycleService() {
             Log.w(TAG, "No se pudo iniciar el cardio", e)
         }
     }
+
+    /**
+     * ¿Sigue en marcha nuestro ejercicio (la app se reinició a mitad del entreno)? Es el uso
+     * documentado de Health Services; la versión alfa marca la constante como restringida.
+     */
+    @SuppressLint("RestrictedApi")
+    private suspend fun ownsExerciseInProgress(): Boolean =
+        runCatching { exerciseClient.getCurrentExerciseInfo().exerciseTrackedStatus }.getOrNull() ==
+            ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS
 
     /** La pausa del entreno (desde el móvil o el reloj) también pausa pulso y calorías. */
     private fun followPause() {
