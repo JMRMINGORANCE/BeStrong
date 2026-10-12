@@ -21,7 +21,7 @@ annotation class ApplicationScope
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
+object DataModule {
 
     @Provides
     @Singleton
@@ -34,13 +34,4 @@ object AppModule {
 
     @Provides
     fun provideDao(db: BeStrongDatabase): BeStrongDao = db.dao()
-}
-
-/** Acceso a dependencias desde los Workers de WorkManager (sin hilt-work). */
-@dagger.hilt.EntryPoint
-@InstallIn(SingletonComponent::class)
-interface WorkerEntryPoint {
-    fun repository(): com.bestrong.mobile.data.BeStrongRepository
-    fun settings(): com.bestrong.mobile.data.SettingsStore
-    fun media(): com.bestrong.mobile.data.ExerciseMediaStore
 }

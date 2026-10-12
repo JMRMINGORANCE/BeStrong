@@ -7,10 +7,6 @@ import com.bestrong.core.sync.SyncContract
 import com.bestrong.core.training.GymProfile
 import com.bestrong.core.util.VibrationStyle
 import com.bestrong.core.util.WeightUnit
-import com.bestrong.mobile.ui.theme.Accent
-import com.bestrong.mobile.ui.theme.AppFont
-import com.bestrong.mobile.ui.theme.Appearance
-import com.bestrong.mobile.ui.theme.ThemeMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton

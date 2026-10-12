@@ -6,4 +6,4 @@ dependencyResolutionManagement {
     repositories { google(); mavenCentral() }
 }
 rootProject.name = "BeStrong"
-include(":core", ":designsystem", ":mobile", ":wear", ":watchface", ":baselineprofile")
+include(":core", ":designsystem", ":data", ":mobile", ":wear", ":watchface", ":baselineprofile")

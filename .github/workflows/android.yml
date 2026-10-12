@@ -35,7 +35,7 @@ jobs:
         # existentes están en config/detekt/baseline.xml: solo fallan los problemas nuevos.
         run: |
           curl -sSL -o detekt.jar https://github.com/detekt/detekt/releases/download/v1.23.8/detekt-cli-1.23.8-all.jar
-          java -jar detekt.jar --input core/src/main,mobile/src/main,wear/src/main,designsystem/src/main \
+          java -jar detekt.jar --input core/src/main,data/src/main,mobile/src/main,wear/src/main,designsystem/src/main \
             --config config/detekt/detekt.yml --build-upon-default-config --baseline config/detekt/baseline.xml
 
       - name: Tests de core
@@ -97,7 +97,7 @@ jobs:
           cp wear/build/test-results/testDebugUnitTest/*.xml mobile/build/outputs/roborazzi/test-results/ 2>/dev/null || true
           cp wear/build/outputs/roborazzi/*.png mobile/build/outputs/roborazzi/ 2>/dev/null || true
           # Esquema de Room exportado (hay que versionarlo para probar futuras migraciones)
-          cp -r mobile/schemas mobile/build/outputs/roborazzi/schemas 2>/dev/null || true
+          cp -r data/schemas mobile/build/outputs/roborazzi/schemas 2>/dev/null || true
           if [ -n "$(ls -A mobile/build/outputs/roborazzi)" ]; then
             cd mobile/build/outputs/roborazzi
             git init -q -b capturas

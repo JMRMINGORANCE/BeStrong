@@ -21,32 +21,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.bestrong.designsystem.BeStrongPalette as P
 import com.bestrong.mobile.R
+import com.bestrong.mobile.data.Accent
+import com.bestrong.mobile.data.AppFont
+import com.bestrong.mobile.data.Appearance
+import com.bestrong.mobile.data.ThemeMode
 
-/** Modo claro/oscuro. */
-enum class ThemeMode { SYSTEM, LIGHT, DARK }
-
-/** Color de acento; DYNAMIC usa el del fondo de pantalla (Android 12+). */
-enum class Accent(val seed: Color) {
-    ORANGE(P.Orange),
-    BLUE(Color(0xFF2F7DF6)),
-    GREEN(Color(0xFF2E9D5B)),
-    PURPLE(Color(0xFF8E5BE8)),
-    PINK(Color(0xFFE5487D)),
-    DYNAMIC(P.Orange),
-}
-
-/** Tipo de letra: la del sistema, Atkinson Hyperlegible (baja visión) u OpenDyslexic (dislexia). */
-enum class AppFont { SYSTEM, LEGIBLE, DYSLEXIA }
-
-/** Opciones de apariencia y accesibilidad (Perfil → Apariencia). */
-data class Appearance(
-    val mode: ThemeMode = ThemeMode.SYSTEM,
-    val accent: Accent = Accent.ORANGE,
-    val amoled: Boolean = false,
-    val highContrast: Boolean = false,
-    val colorblind: Boolean = false,
-    val font: AppFont = AppFont.SYSTEM,
-)
+/** Color semilla de cada acento (el modelo [Accent] vive en la capa de datos, sin Compose). */
+private val Accent.seed: Color get() = Color(seedArgb)
 
 /**
  * Colores de estado (bien / regular / mal). En modo daltónico se usa la paleta Okabe-Ito

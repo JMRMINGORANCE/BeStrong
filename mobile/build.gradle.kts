@@ -75,11 +75,10 @@ android {
     }
 }
 
-ksp { arg("room.schemaLocation", "$projectDir/schemas") }
-
 dependencies {
     implementation(project(":core"))
     implementation(project(":designsystem"))
+    implementation(project(":data"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
@@ -104,9 +103,6 @@ dependencies {
     implementation(libs.material3.adaptive.navigation)
     implementation(libs.material3.adaptive.navigation.suite)
     implementation(libs.androidx.window)
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
     implementation(libs.health.connect)
     implementation(libs.play.services.wearable)
     implementation(libs.wear.remote.interactions)

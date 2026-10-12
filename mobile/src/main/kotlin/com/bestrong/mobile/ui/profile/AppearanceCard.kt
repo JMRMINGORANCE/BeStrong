@@ -25,12 +25,12 @@ import androidx.compose.ui.unit.dp
 import com.bestrong.core.util.VibrationStyle
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.R
+import com.bestrong.mobile.data.Accent
+import com.bestrong.mobile.data.AppFont
+import com.bestrong.mobile.data.Appearance
+import com.bestrong.mobile.data.ThemeMode
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.ui.components.SectionHeader
-import com.bestrong.mobile.ui.theme.Accent
-import com.bestrong.mobile.ui.theme.AppFont
-import com.bestrong.mobile.ui.theme.Appearance
-import com.bestrong.mobile.ui.theme.ThemeMode
 
 /** Tema, acento, AMOLED, contraste, daltonismo, letra, vibración, unidades mixtas y columnas. */
 @Composable
