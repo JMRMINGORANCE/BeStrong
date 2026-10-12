@@ -1,0 +1,27 @@
+# detekt: análisis estático complementario a ktlint (estilo) y Android Lint.
+# Se parte de la configuración por defecto; aquí solo se adaptan reglas a Jetpack Compose.
+# Los avisos que ya existían están en baseline.xml: la CI falla solo con problemas nuevos.
+naming:
+  FunctionNaming:
+    # Los @Composable empiezan por mayúscula
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+style:
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: false
+  WildcardImport:
+    active: false
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']
+complexity:
+  LongParameterList:
+    functionThreshold: 8
+    ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    active: false

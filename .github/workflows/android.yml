@@ -30,6 +30,14 @@ jobs:
       - name: Estilo de código (ktlint)
         run: ./gradlew spotlessCheck
 
+      - name: Análisis estático (detekt)
+        # CLI independiente de Gradle (sin conflictos con la versión de Kotlin). Los avisos
+        # existentes están en config/detekt/baseline.xml: solo fallan los problemas nuevos.
+        run: |
+          curl -sSL -o detekt.jar https://github.com/detekt/detekt/releases/download/v1.23.8/detekt-cli-1.23.8-all.jar
+          java -jar detekt.jar --input core/src/main,mobile/src/main,wear/src/main,designsystem/src/main \
+            --config config/detekt/detekt.yml --build-upon-default-config --baseline config/detekt/baseline.xml
+
       - name: Tests de core
         run: ./gradlew :core:test
 

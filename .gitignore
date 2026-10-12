@@ -12,3 +12,4 @@ local.properties
 keystore.properties
 mobile/build/outputs/roborazzi/
 *.jks
+detekt.jar
