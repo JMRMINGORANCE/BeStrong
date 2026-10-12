@@ -19,6 +19,7 @@ import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
+import com.bestrong.core.sync.WorkoutHealthData
 import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.training.HeartRate
 import com.bestrong.core.training.HeartRateTracker
@@ -246,7 +247,14 @@ class WorkoutSession @Inject constructor(
 
     /** El móvil terminó o descartó el entreno. */
     fun clearFromRemote() {
-        if (_workout.value == null) return
+        val w = _workout.value ?: return
+        // Lo medido por el reloj (pulso completo y calorías) se manda al móvil, que ya guardó el entreno
+        val m = _metrics.value
+        val samples = hr.samples()
+        if (samples.isNotEmpty() || m.calories != null) {
+            val data = WorkoutHealthData(w.id, m.avgHeartRate, m.maxHeartRate, m.calories, samples)
+            scope.launch { phoneSync.sendWorkoutHealth(data) }
+        }
         stopRest()
         repCounter.stop()
         _workout.value = null

@@ -18,6 +18,9 @@
     <uses-permission android:name="android.health.permission.READ_WEIGHT" />
     <uses-permission android:name="android.health.permission.READ_SLEEP" />
     <uses-permission android:name="android.health.permission.READ_RESTING_HEART_RATE" />
+    <uses-permission android:name="android.health.permission.READ_HEIGHT" />
+    <uses-permission android:name="android.health.permission.READ_HEART_RATE" />
+    <uses-permission android:name="android.health.permission.WRITE_ACTIVE_CALORIES_BURNED" />
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />

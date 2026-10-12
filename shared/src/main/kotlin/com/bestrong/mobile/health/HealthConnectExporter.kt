@@ -3,6 +3,7 @@ package com.bestrong.mobile.health
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
@@ -25,9 +26,10 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
     val sessionPermission = HealthPermission.getWritePermission(ExerciseSessionRecord::class)
     private val caloriesPermission = HealthPermission.getWritePermission(TotalCaloriesBurnedRecord::class)
     private val heartRatePermission = HealthPermission.getWritePermission(HeartRateRecord::class)
+    private val activeCaloriesPermission = HealthPermission.getWritePermission(ActiveCaloriesBurnedRecord::class)
 
     /** Lo que se pide al activar la exportación (sesión, calorías y pulso). */
-    val permissions: Set<String> = setOf(sessionPermission, caloriesPermission, heartRatePermission)
+    val permissions: Set<String> = setOf(sessionPermission, caloriesPermission, activeCaloriesPermission, heartRatePermission)
 
     fun isAvailable(): Boolean =
         HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE
@@ -68,21 +70,35 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
                 )
             }
         }
-        // Gráfica de pulso del entreno (una muestra cada ~10 s medida por el reloj)
-        if (heartRatePermission in granted && workout.heartRateSamples.isNotEmpty()) {
-            val samples = workout.heartRateSamples
-                .map { HeartRateRecord.Sample(start.plusSeconds(it.offsetSec.toLong()), it.bpm.toLong()) }
-                .filter { it.time in start..end }
-            if (samples.isNotEmpty()) {
-                records += HeartRateRecord(
+        // Activas (sin el gasto en reposo): lo que suma Samsung Health sin contar dos veces el basal
+        if (activeCaloriesPermission in granted) {
+            workout.activeCalories?.takeIf { it > 0 }?.let {
+                records += ActiveCaloriesBurnedRecord(
                     startTime = start,
                     startZoneOffset = null,
                     endTime = end,
                     endZoneOffset = null,
-                    samples = samples,
+                    energy = Energy.kilocalories(it.toDouble()),
                 )
             }
         }
+        if (heartRatePermission in granted) heartRateRecord(workout)?.let { records += it }
         client.insertRecords(records)
+    }
+
+    /** Solo la gráfica de pulso (llega del reloj después de exportar la sesión). */
+    suspend fun exportHeartRate(workout: Workout) {
+        if (heartRatePermission !in granted()) return
+        heartRateRecord(workout)?.let { client.insertRecords(listOf(it)) }
+    }
+
+    /** Gráfica de pulso del entreno (una muestra cada ~10 s medida por el reloj). */
+    private fun heartRateRecord(workout: Workout): HeartRateRecord? {
+        val start = Instant.ofEpochMilli(workout.startedAtEpochMs)
+        val end = workout.finishedAtEpochMs?.let(Instant::ofEpochMilli) ?: start
+        val samples = workout.heartRateSamples
+            .map { HeartRateRecord.Sample(start.plusSeconds(it.offsetSec.toLong()), it.bpm.toLong()) }
+            .filter { it.time in start..end }
+        return if (samples.isEmpty()) null else HeartRateRecord(startTime = start, startZoneOffset = null, endTime = end, endZoneOffset = null, samples = samples)
     }
 }

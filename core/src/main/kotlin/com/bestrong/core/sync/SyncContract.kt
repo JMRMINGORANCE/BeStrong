@@ -1,5 +1,6 @@
 package com.bestrong.core.sync
 
+import com.bestrong.core.model.HeartRateSample
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.util.VibrationStyle
@@ -32,6 +33,9 @@ object SyncContract {
 
     /** Mensaje reloj → móvil con las métricas de salud en directo. */
     const val PATH_METRICS = "/bestrong/metrics"
+
+    /** Datos de salud finales del reloj de un entreno terminado en el móvil (pulso y calorías exactos). */
+    const val PATH_WORKOUT_HEALTH_PREFIX = "/bestrong/workout-health/"
     const val KEY_PAYLOAD = "payload"
     const val KEY_TIMESTAMP = "ts"
 
@@ -56,6 +60,9 @@ object SyncContract {
 
     fun encodeMetrics(m: LiveMetrics): ByteArray = json.encodeToString(LiveMetrics.serializer(), m).encodeToByteArray()
     fun decodeMetrics(bytes: ByteArray): LiveMetrics = json.decodeFromString(LiveMetrics.serializer(), bytes.decodeToString())
+
+    fun encodeHealth(h: WorkoutHealthData): ByteArray = json.encodeToString(WorkoutHealthData.serializer(), h).encodeToByteArray()
+    fun decodeHealth(bytes: ByteArray): WorkoutHealthData = json.decodeFromString(WorkoutHealthData.serializer(), bytes.decodeToString())
 
     fun encodeSettings(s: SharedSettings): ByteArray = json.encodeToString(SharedSettings.serializer(), s).encodeToByteArray()
     fun decodeSettings(bytes: ByteArray): SharedSettings = json.decodeFromString(SharedSettings.serializer(), bytes.decodeToString())
@@ -86,4 +93,17 @@ data class SharedSettings(
     val progressionEnabled: Boolean = true,
     /** Vibración al acabar el descanso, elegida en el móvil y usada también en el reloj. */
     val restVibration: VibrationStyle = VibrationStyle.TRIPLE,
+)
+
+/**
+ * Lo que midió el reloj durante un entreno que se terminó en el móvil: el móvil solo tenía las
+ * métricas en vivo (cada 5–30 s), así que al acabar el reloj manda los valores finales y la serie.
+ */
+@Serializable
+data class WorkoutHealthData(
+    val workoutId: String,
+    val avgHeartRate: Int? = null,
+    val maxHeartRate: Int? = null,
+    val calories: Int? = null,
+    val heartRateSamples: List<HeartRateSample> = emptyList(),
 )

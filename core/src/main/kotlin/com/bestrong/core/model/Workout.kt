@@ -116,9 +116,14 @@ data class Workout(
     val athlete: String? = null,
     /** Pulso a lo largo del entreno (una muestra cada ~10 s, medido por el reloj). */
     val heartRateSamples: List<HeartRateSample> = emptyList(),
-    /** Calorías estimadas por duración y peso (entreno sin reloj), no medidas. */
-    val caloriesEstimated: Boolean = false,
+    /** De dónde salen las calorías (null = no hay). */
+    val caloriesSource: CaloriesSource? = null,
+    /** Calorías activas: las totales menos lo que habrías gastado en reposo en ese tiempo. */
+    val activeCalories: Int? = null,
 ) {
+    /** Calorías calculadas (pulso o MET), no medidas directamente por el reloj. */
+    val caloriesEstimated: Boolean get() = caloriesSource != null && caloriesSource != CaloriesSource.WATCH
+
     val isPaused: Boolean get() = pausedAtEpochMs != null
 
     val isFinished: Boolean get() = finishedAtEpochMs != null
@@ -137,6 +142,19 @@ data class Workout(
         val end = finishedAtEpochMs ?: pausedAtEpochMs ?: nowEpochMs
         return (end - startedAtEpochMs - pausedTotalMs).coerceAtLeast(0) / 1000
     }
+}
+
+/** Origen de las calorías, de más a menos fiable. */
+@Serializable
+enum class CaloriesSource {
+    /** Medidas por el reloj (Health Services, sensores y perfil del usuario). */
+    WATCH,
+
+    /** Calculadas con el pulso registrado durante el entreno (ecuación de Keytel). */
+    HEART_RATE,
+
+    /** Estimadas por MET, duración, intensidad y peso. */
+    ESTIMATE,
 }
 
 /** Pulso en un momento del entreno: segundos desde el inicio y pulsaciones por minuto. */

@@ -476,7 +476,7 @@
     <string name="privacy_csv_title">Export und Import</string>
     <string name="privacy_delete">Durch Deinstallieren der App oder Löschen ihrer Daten in den Android-Einstellungen werden alle BeStrong-Informationen vom Gerät entfernt.</string>
     <string name="privacy_delete_title">Deine Daten löschen</string>
-    <string name="privacy_hc">Wenn du den Export aktivierst, schreibt BeStrong jedes beendete Training als Krafttraining-Einheit in Health Connect (Start, Ende, Name und Notizen), dazu die Kalorien (von der Uhr gemessen oder bei Training ohne Uhr aus Dauer und Körpergewicht geschätzt) und die von der Uhr gemessene Herzfrequenzkurve. Wenn du es erlaubst, liest die App außerdem dein Gewicht, deinen Schlaf und deinen Ruhepuls, um deine Tagesform zu berechnen. Du kannst die Berechtigungen jederzeit unter Einstellungen › Health Connect widerrufen.</string>
+    <string name="privacy_hc">Wenn du den Export aktivierst, schreibt BeStrong jedes beendete Training als Krafttrainings-Sitzung (Beginn, Ende, Name und Notizen) in Health Connect, dazu die gesamten und aktiven Kalorien (von der Uhr gemessen oder ohne Uhr aus Herzfrequenz bzw. Dauer und Gewicht berechnet) und die von der Uhr gemessene Herzfrequenzkurve. Wenn du es erlaubst, liest es außerdem Gewicht, Größe, Schlaf und Ruhepuls, um die Tagesform und deinen Energieverbrauch zu berechnen, sowie die von anderen Geräten während deiner Trainings aufgezeichnete Herzfrequenz, um deren Intensität abzuschätzen. Du kannst die Berechtigungen jederzeit unter Einstellungen › Health Connect widerrufen.</string>
     <string name="privacy_hc_title">Health Connect</string>
     <string name="privacy_images">Übungsanimationen und -bilder werden von exercisedb.dev (AscendAPI) und wger.de geladen. Dabei werden keine persönlichen Daten gesendet. Deine Technikfotos und -videos liegen nur im privaten Speicher der App.</string>
     <string name="privacy_images_title">Übungsbilder</string>
@@ -826,4 +826,12 @@
     <string name="zone_neck">Nacken</string>
     <string name="zone_shoulder">Schulter</string>
     <string name="zone_wrist">Handgelenk</string>
+    <string name="body_data">Daten für Kalorien</string>
+    <string name="body_data_body">Mit Geburtsjahr, Größe und Geschlecht werden die Kalorien aus deinem eigenen Grundumsatz und deiner maximalen Herzfrequenz berechnet. Das Gewicht stammt aus deinen Messungen; lässt du die Größe leer, wird sie aus Health Connect gelesen.</string>
+    <string name="birth_year">Geburtsjahr</string>
+    <string name="height_cm">Größe (cm)</string>
+    <string name="calories_source_watch">Von der Uhr gemessene Kalorien</string>
+    <string name="calories_source_hr">Kalorien anhand deiner Herzfrequenz</string>
+    <string name="calories_source_estimate">Kalorien geschätzt aus Dauer und Tempo</string>
+    <string name="active_kcal">%1$d aktive kcal</string>
 </resources>

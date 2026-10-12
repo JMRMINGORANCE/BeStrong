@@ -476,7 +476,7 @@
     <string name="privacy_csv_title">Exportar i importar</string>
     <string name="privacy_delete">Desinstal·lar l’app o esborrar-ne les dades des de la Configuració d’Android elimina tota la informació de BeStrong del dispositiu.</string>
     <string name="privacy_delete_title">Esborrar les teves dades</string>
-    <string name="privacy_hc">Si actives l’exportació, BeStrong escriu a Health Connect cada entrenament acabat com a sessió de peses (hora d’inici, final, nom i notes), les seves calories (mesurades pel rellotge, o estimades per durada i pes si entrenes sense rellotge) i la gràfica de pols mesurada pel rellotge. Si ho permets, també llegeix el teu pes, la son i el pols en repòs per calcular la preparació del dia. Pots retirar els permisos en qualsevol moment des de Configuració › Health Connect.</string>
+    <string name="privacy_hc">Si actives l’exportació, BeStrong escriu a Health Connect cada entrenament acabat com a sessió de peses (hora d’inici, final, nom i notes), les seves calories totals i actives (mesurades pel rellotge, o calculades amb el teu pols o la durada i el pes si entrenes sense rellotge) i la gràfica de pols mesurada pel rellotge. Si ho permets, també llegeix el teu pes, alçada, son i pols en repòs per calcular la preparació del dia i la teva despesa, i el pols registrat per altres dispositius durant els entrenaments per estimar-ne la intensitat. Pots retirar els permisos en qualsevol moment des d’Ajustos › Health Connect.</string>
     <string name="privacy_hc_title">Health Connect</string>
     <string name="privacy_images">Les animacions i imatges dels exercicis es baixen d’exercisedb.dev (AscendAPI) i wger.de. En aquestes baixades no s’envia cap dada teva. Les teves fotos i vídeos de tècnica es desen només a la memòria privada de l’app.</string>
     <string name="privacy_images_title">Imatges d’exercicis</string>
@@ -826,4 +826,12 @@
     <string name="zone_neck">Coll</string>
     <string name="zone_shoulder">Espatlla</string>
     <string name="zone_wrist">Canell</string>
+    <string name="body_data">Dades per a les calories</string>
+    <string name="body_data_body">Amb el teu any de naixement, alçada i sexe, les calories es calculen amb el teu metabolisme basal i el teu pols màxim. El pes s’agafa de les teves mesures; si deixes l’alçada buida es llegeix de Health Connect.</string>
+    <string name="birth_year">Any de naixement</string>
+    <string name="height_cm">Alçada (cm)</string>
+    <string name="calories_source_watch">Calories mesurades pel rellotge</string>
+    <string name="calories_source_hr">Calories segons el teu pols</string>
+    <string name="calories_source_estimate">Calories estimades per durada i ritme</string>
+    <string name="active_kcal">%1$d kcal actives</string>
 </resources>

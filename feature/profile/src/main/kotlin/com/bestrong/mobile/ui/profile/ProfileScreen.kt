@@ -233,6 +233,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                     )
                 }
             }
+            item { BodyDataCard(settings, vm::updateSettings) }
             item(span = { GridItemSpan(maxLineSpan) }) { AppearanceCard(settings, vm::updateSettings) }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Card {

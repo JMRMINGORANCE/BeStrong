@@ -50,6 +50,9 @@ data class UserSettings(
     val voiceAnnouncements: Boolean = false,
     /** App de música que abre el botón del entreno (paquete; null = la primera instalada). */
     val musicApp: String? = null,
+    /** Para calcular calorías (metabolismo basal e intensidad): año de nacimiento y altura. */
+    val birthYear: Int? = null,
+    val heightCm: Int? = null,
     /** Modo pareja: nombre de la otra persona (vacío = desactivado). */
     val partnerName: String = "",
     /** Tema, acento, AMOLED, alto contraste, modo daltónico y tipo de letra. */
@@ -101,6 +104,8 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         mediaControls = prefs.getBoolean("media_controls", true),
         voiceAnnouncements = prefs.getBoolean("voice_announcements", false),
         musicApp = prefs.getString("music_app", null),
+        birthYear = prefs.getInt("birth_year", 0).takeIf { it > 0 },
+        heightCm = prefs.getInt("height_cm", 0).takeIf { it > 0 },
         partnerName = prefs.getString("partner_name", "").orEmpty(),
         sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
         appearance = Appearance(
@@ -150,6 +155,8 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBoolean("media_controls", s.mediaControls)
             putBoolean("voice_announcements", s.voiceAnnouncements)
             putString("music_app", s.musicApp)
+            putInt("birth_year", s.birthYear ?: 0)
+            putInt("height_cm", s.heightCm ?: 0)
             putString("partner_name", s.partnerName)
             putString("theme_mode", s.appearance.mode.name)
             putString("accent", s.appearance.accent.name)

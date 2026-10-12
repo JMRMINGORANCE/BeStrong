@@ -3,11 +3,15 @@ package com.bestrong.mobile.health
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
+import com.bestrong.core.model.HeartRateSample
+import com.bestrong.core.training.HeartRateTracker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.Duration
 import java.time.Instant
@@ -23,6 +27,8 @@ data class HealthSnapshot(
     /** Pulso en reposo más reciente y media de 30 días. */
     val restingHr: Int? = null,
     val baselineRestingHr: Int? = null,
+    /** Altura más reciente (cm). */
+    val heightCm: Double? = null,
 )
 
 @Singleton
@@ -32,6 +38,9 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
         HealthPermission.getReadPermission(WeightRecord::class),
         HealthPermission.getReadPermission(SleepSessionRecord::class),
         HealthPermission.getReadPermission(RestingHeartRateRecord::class),
+        // Para calcular calorías más precisas: altura (metabolismo basal) y pulso durante el entreno
+        HealthPermission.getReadPermission(HeightRecord::class),
+        HealthPermission.getReadPermission(HeartRateRecord::class),
     )
 
     private fun available() = HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE
@@ -68,11 +77,35 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
         } else {
             emptyList()
         }
+        val height = if (HealthPermission.getReadPermission(HeightRecord::class) in ok) {
+            runCatching {
+                client.readRecords(ReadRecordsRequest(HeightRecord::class, TimeRangeFilter.between(now.minus(Duration.ofDays(3650)), now)))
+                    .records.maxByOrNull { it.time }?.height?.inMeters?.times(100)
+            }.getOrNull()
+        } else {
+            null
+        }
         return HealthSnapshot(
+            heightCm = height,
             weights = weights,
             sleepHours = sleep,
             restingHr = resting.lastOrNull(),
             baselineRestingHr = resting.takeIf { it.size >= 3 }?.average()?.toInt(),
         )
+    }
+
+    /**
+     * Pulso registrado en Health Connect durante un entreno (por ejemplo, de un reloj que no usa
+     * BeStrong), agrupado en tramos de 10 s. Vacío si no hay permiso o lecturas.
+     */
+    suspend fun heartRateDuring(startEpochMs: Long, endEpochMs: Long): List<HeartRateSample> {
+        if (HealthPermission.getReadPermission(HeartRateRecord::class) !in granted()) return emptyList()
+        val range = TimeRangeFilter.between(Instant.ofEpochMilli(startEpochMs), Instant.ofEpochMilli(endEpochMs))
+        val records = runCatching { client.readRecords(ReadRecordsRequest(HeartRateRecord::class, range)).records }.getOrDefault(emptyList())
+        val tracker = HeartRateTracker(startEpochMs)
+        records.flatMap { it.samples }.sortedBy { it.time }
+            .filter { it.time.toEpochMilli() in startEpochMs..endEpochMs }
+            .forEach { tracker.add(it.beatsPerMinute.toInt(), it.time.toEpochMilli()) }
+        return tracker.samples()
     }
 }

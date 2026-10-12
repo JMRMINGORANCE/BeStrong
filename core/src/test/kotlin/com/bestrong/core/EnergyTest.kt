@@ -1,9 +1,12 @@
 package com.bestrong.core
 
+import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.model.HeartRateSample
 import com.bestrong.core.model.Workout
+import com.bestrong.core.stats.Sex
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.core.sync.WorkoutMerge
+import com.bestrong.core.training.BodyProfile
 import com.bestrong.core.training.Energy
 import com.bestrong.core.training.HeartRateTracker
 import org.junit.Assert.assertEquals
@@ -63,5 +66,52 @@ class EnergyTest {
         val merged = WorkoutMerge.merge(w, w.copy(heartRateSamples = emptyList(), updatedAtEpochMs = 10))
         assertEquals(samples, merged.heartRateSamples)
         assertTrue(SyncContract.compactHistory(listOf(w)).single().heartRateSamples.isEmpty())
+    }
+
+    private val me = BodyProfile(weightKg = 80.0, heightCm = 180.0, age = 30, sex = Sex.MALE, restingHr = 60)
+
+    @Test
+    fun bmr_mifflinStJeor() {
+        // 10×80 + 6,25×180 − 5×30 + 5 = 1780 kcal/día
+        assertEquals(1780.0, Energy.bmrKcalPerDay(me)!!, 0.01)
+        assertEquals(1780.0 - 166, Energy.bmrKcalPerDay(me.copy(sex = Sex.FEMALE))!!, 0.01)
+        assertNull(Energy.bmrKcalPerDay(me.copy(heightCm = null)))
+    }
+
+    @Test
+    fun watchCalories_areKept_andActiveSubtractsResting() {
+        val r = Energy.compute(activeSeconds = 3600, completedSets = 20, profile = me, watchKcal = 300)!!
+        assertEquals(CaloriesSource.WATCH, r.source)
+        assertEquals(300, r.totalKcal)
+        // 300 − 1780/24 ≈ 226
+        assertEquals(226, r.activeKcal)
+    }
+
+    @Test
+    fun metEstimate_isCorrectedWithOwnBmr_andDensity() {
+        // 20 series en 1 h (descansos largos): 3,5 MET × 1780/24 ≈ 260 kcal
+        val relaxed = Energy.compute(3600, 20, me)!!
+        assertEquals(CaloriesSource.ESTIMATE, relaxed.source)
+        assertEquals(260, relaxed.totalKcal)
+        assertEquals(186, relaxed.activeKcal)
+        // 40 series en 1 h (≈1 min de descanso): 5 MET ≈ 371 kcal
+        assertEquals(371, Energy.compute(3600, 40, me)!!.totalKcal)
+        // Sin altura ni edad: MET estándar (1 kcal/kg/h) → 3,5 × 80 = 280
+        assertEquals(280, Energy.compute(3600, 20, BodyProfile(weightKg = 80.0))!!.totalKcal)
+        assertNull(Energy.compute(3600, 20, BodyProfile()))
+    }
+
+    @Test
+    fun heartRate_setsTheIntensity_notAnAerobicFormula() {
+        // Pulso medio 150 con reposo 60 y máximo 187 (Tanaka): 71 % de reserva → 6 MET ≈ 445 kcal
+        val dense = List(360) { HeartRateSample(it * 10, 150) }
+        val r = Energy.compute(3600, 20, me, heartRate = dense)!!
+        assertEquals(CaloriesSource.HEART_RATE, r.source)
+        assertEquals(445, r.totalKcal)
+        // Pulso bajo (95): 28 % → 3,5 MET, igual que la estimación sin pulso
+        assertEquals(260, Energy.compute(3600, 20, me, heartRate = List(360) { HeartRateSample(it * 10, 95) })!!.totalKcal)
+        // Pocas lecturas (una cada 10 min): no representan el entreno → estimación por densidad
+        val sparse = List(6) { HeartRateSample(it * 600, 150) }
+        assertEquals(CaloriesSource.ESTIMATE, Energy.compute(3600, 20, me, heartRate = sparse)!!.source)
     }
 }

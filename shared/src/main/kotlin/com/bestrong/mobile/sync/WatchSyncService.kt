@@ -1,6 +1,7 @@
 package com.bestrong.mobile.sync
 
 import android.util.Log
+import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.mobile.WatchMetricsStore
@@ -8,6 +9,7 @@ import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.di.ApplicationScope
+import com.bestrong.mobile.health.EnergyCalculator
 import com.bestrong.mobile.notify.Notifier
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
@@ -40,6 +42,8 @@ class WatchSyncService : WearableListenerService() {
 
     @Inject lateinit var settings: SettingsStore
 
+    @Inject lateinit var energy: EnergyCalculator
+
     @Inject @ApplicationScope lateinit var appScope: CoroutineScope
 
     override fun onDataChanged(events: DataEventBuffer) {
@@ -50,8 +54,10 @@ class WatchSyncService : WearableListenerService() {
                 val path = item.uri.path.orEmpty()
                 when {
                     path.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
-                        val workout = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                        val received = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
+                        // Calorías del reloj + activas (sin el gasto en reposo) con tus datos corporales
+                        val workout = energy.complete(received, watchKcal = received.calories)
                         val isNew = repository.historyOnce().none { it.id == workout.id }
                         repository.saveWorkout(workout)
                         repository.clearRemoteActive(workout.id)
@@ -62,6 +68,26 @@ class WatchSyncService : WearableListenerService() {
                         Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.name}")
                         runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
                         appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }
+                    }
+                    // Entreno terminado en el móvil: el reloj manda el pulso y las calorías finales
+                    path.startsWith(SyncContract.PATH_WORKOUT_HEALTH_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
+                        val health = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                            ?.let { runCatching { SyncContract.decodeHealth(it) }.getOrNull() }
+                        val saved = health?.let { h -> repository.historyOnce().firstOrNull { it.id == h.workoutId } }
+                        if (health != null && saved != null) {
+                            val merged = energy.complete(
+                                saved.copy(
+                                    avgHeartRate = health.avgHeartRate ?: saved.avgHeartRate,
+                                    maxHeartRate = health.maxHeartRate ?: saved.maxHeartRate,
+                                    heartRateSamples = health.heartRateSamples.ifEmpty { saved.heartRateSamples },
+                                ),
+                                watchKcal = health.calories ?: saved.calories?.takeIf { saved.caloriesSource == CaloriesSource.WATCH },
+                            )
+                            repository.saveWorkout(merged)
+                            // La sesión ya se exportó al terminar: ahora solo se añade la gráfica de pulso
+                            if (saved.heartRateSamples.isEmpty()) appScope.launch { actions.exportHeartRateIfEnabled(merged) }
+                        }
+                        runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
                     }
                     // Rutina creada en el reloj: se guarda y se borra el DataItem
                     path.startsWith(SyncContract.PATH_WATCH_ROUTINE_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {

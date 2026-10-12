@@ -15,7 +15,6 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Autoregulation
-import com.bestrong.core.training.Energy
 import com.bestrong.core.training.NextTime
 import com.bestrong.core.training.NextTimeSuggestion
 import com.bestrong.core.training.Progression
@@ -29,6 +28,7 @@ import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.data.UserSettings
+import com.bestrong.mobile.health.EnergyCalculator
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.RestState
 import com.bestrong.mobile.ui.components.displayName
@@ -63,6 +63,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     settingsStore: SettingsStore,
     private val restTimer: RestTimerController,
     private val metricsStore: WatchMetricsStore,
+    private val energy: EnergyCalculator,
     private val actions: WorkoutActions,
     private val announcer: Announcer,
     @ApplicationContext private val appContext: Context,
@@ -306,17 +307,12 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val metrics = metricsStore.metrics.value?.takeIf { it.workoutId == current.id }
-            val ended = WorkoutEditor.finish(current, System.currentTimeMillis())
-            val measured = metrics?.calories ?: current.calories
-            // Sin reloj: estimación por MET con el peso más reciente y el tiempo activo (sin pausas)
-            val bodyWeight = repo.measurements.value.sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg }
-            val estimated = if (measured == null) Energy.estimateStrengthKcal(ended.durationSeconds(), bodyWeight) else null
-            val finished = ended.copy(
+            val ended = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
                 avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
                 maxHeartRate = metrics?.maxHeartRate ?: current.maxHeartRate,
-                calories = measured ?: estimated,
-                caloriesEstimated = estimated != null,
             )
+            // Calorías totales y activas: las del reloj si las hay; si no, pulso o estimación personalizada
+            val finished = energy.complete(ended, watchKcal = metrics?.calories ?: current.calories)
             restTimer.skip()
             repo.setActive(null)
             if (finished.exercises.isEmpty()) return@launch

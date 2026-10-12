@@ -476,7 +476,7 @@
     <string name="privacy_csv_title">Export et import</string>
     <string name="privacy_delete">Désinstaller l’app ou effacer ses données depuis les Paramètres d’Android supprime toutes les informations de BeStrong de l’appareil.</string>
     <string name="privacy_delete_title">Supprimer tes données</string>
-    <string name="privacy_hc">Si tu actives l’exportation, BeStrong enregistre dans Health Connect chaque séance terminée comme séance de musculation (début, fin, nom et notes), ses calories (mesurées par la montre, ou estimées d’après la durée et le poids si tu t’entraînes sans montre) et la courbe de fréquence cardiaque mesurée par la montre. Si tu l’autorises, l’app lit aussi ton poids, ton sommeil et ta fréquence cardiaque au repos pour calculer ta forme du jour. Tu peux retirer les autorisations à tout moment dans Paramètres › Health Connect.</string>
+    <string name="privacy_hc">Si tu actives l’exportation, BeStrong écrit dans Health Connect chaque séance terminée comme session de musculation (début, fin, nom et notes), ses calories totales et actives (mesurées par la montre, ou calculées à partir de ta fréquence cardiaque ou de la durée et du poids si tu t’entraînes sans montre) et le graphique de fréquence cardiaque mesuré par la montre. Si tu l’autorises, il lit aussi ton poids, ta taille, ton sommeil et ta fréquence cardiaque au repos pour calculer ta forme du jour et ta dépense, ainsi que la fréquence cardiaque enregistrée par d’autres appareils pendant tes séances pour en estimer l’intensité. Tu peux retirer les autorisations à tout moment dans Paramètres › Health Connect.</string>
     <string name="privacy_hc_title">Health Connect</string>
     <string name="privacy_images">Les animations et images des exercices sont téléchargées depuis exercisedb.dev (AscendAPI) et wger.de. Aucune donnée personnelle n’est envoyée lors de ces téléchargements. Tes photos et vidéos de technique sont stockées uniquement dans l’espace privé de l’app.</string>
     <string name="privacy_images_title">Images des exercices</string>
@@ -826,4 +826,12 @@
     <string name="zone_neck">Cou</string>
     <string name="zone_shoulder">Épaule</string>
     <string name="zone_wrist">Poignet</string>
+    <string name="body_data">Données pour les calories</string>
+    <string name="body_data_body">Avec ton année de naissance, ta taille et ton sexe, les calories sont calculées à partir de ton métabolisme de base et de ta fréquence cardiaque maximale. Le poids vient de tes mesures ; si tu laisses la taille vide, elle est lue dans Health Connect.</string>
+    <string name="birth_year">Année de naissance</string>
+    <string name="height_cm">Taille (cm)</string>
+    <string name="calories_source_watch">Calories mesurées par la montre</string>
+    <string name="calories_source_hr">Calories selon ta fréquence cardiaque</string>
+    <string name="calories_source_estimate">Calories estimées selon la durée et le rythme</string>
+    <string name="active_kcal">%1$d kcal actives</string>
 </resources>

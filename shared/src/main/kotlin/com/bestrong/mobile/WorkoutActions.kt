@@ -74,6 +74,11 @@ class WorkoutActions @Inject constructor(
         }
     }
 
+    suspend fun exportHeartRateIfEnabled(workout: Workout) {
+        if (!settings.settings.value.healthConnectExport) return
+        runCatching { healthConnect.exportHeartRate(workout) }.onFailure { Log.w("HealthConnect", "Exportación del pulso fallida", it) }
+    }
+
     suspend fun exportToHealthConnectIfEnabled(workout: Workout) {
         if (!settings.settings.value.healthConnectExport) return
         runCatching { healthConnect.export(workout) }.onFailure { Log.w("HealthConnect", "Exportación fallida", it) }

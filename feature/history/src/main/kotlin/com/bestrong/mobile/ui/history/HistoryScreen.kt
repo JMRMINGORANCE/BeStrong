@@ -56,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.session.WorkoutEditor
@@ -258,6 +259,9 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                         w.calories?.let { StatTile(stringResource(R.string.stat_calories), (if (w.caloriesEstimated) "≈" else "") + stringResource(R.string.kcal_value, it), Modifier.weight(1f)) }
                     }
                 }
+                if (w.caloriesSource != null || w.activeCalories != null) {
+                    item { caloriesSourceLine(w)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+                }
             }
             if (records.isNotEmpty()) {
                 item {
@@ -298,4 +302,17 @@ private fun workoutText(w: Workout): String {
         "• " + we.exercise.displayName() + (best?.let { " — " + describeSet(it, we.exercise.tracking, unit) } ?: "")
     }
     return (listOf(header) + lines).joinToString("\n")
+}
+
+/** De dónde salen las calorías y cuántas son activas (sin el gasto en reposo). */
+@Composable
+private fun caloriesSourceLine(w: Workout): String? {
+    val source = when (w.caloriesSource) {
+        CaloriesSource.WATCH -> stringResource(R.string.calories_source_watch)
+        CaloriesSource.HEART_RATE -> stringResource(R.string.calories_source_hr)
+        CaloriesSource.ESTIMATE -> stringResource(R.string.calories_source_estimate)
+        null -> null
+    }
+    val active = w.activeCalories?.let { stringResource(R.string.active_kcal, it) }
+    return listOfNotNull(source, active).joinToString(" · ").ifEmpty { null }
 }

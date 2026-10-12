@@ -7,6 +7,7 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.SyncContract
+import com.bestrong.core.sync.WorkoutHealthData
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
@@ -33,6 +34,19 @@ class PhoneSync @Inject constructor(@ApplicationContext private val context: Con
         }.asPutDataRequest().setUrgent()
         runCatching { dataClient.putDataItem(request).await() }
             .onFailure { Log.w(TAG, "No se pudo enviar el entrenamiento", it) }
+    }
+
+    /**
+     * Pulso y calorías medidos por el reloj de un entreno que terminó el móvil: el móvil los añade
+     * al entreno guardado y recalcula el gasto con ellos.
+     */
+    suspend fun sendWorkoutHealth(data: WorkoutHealthData) {
+        val request = PutDataMapRequest.create(SyncContract.PATH_WORKOUT_HEALTH_PREFIX + data.workoutId).apply {
+            dataMap.putByteArray(SyncContract.KEY_PAYLOAD, SyncContract.encodeHealth(data))
+            dataMap.putLong(SyncContract.KEY_TIMESTAMP, System.currentTimeMillis())
+        }.asPutDataRequest().setUrgent()
+        runCatching { dataClient.putDataItem(request).await() }
+            .onFailure { Log.w(TAG, "No se pudieron enviar el pulso y las calorías", it) }
     }
 
     /** Envía una rutina creada en el reloj (se guarda en el móvil al sincronizar). */
