@@ -103,14 +103,14 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Temas de color (acento o el del fondo de pantalla) y negro AMOLED; emoji por rutina; unidades mixtas (cuerpo y cargas); columnas visibles a elegir
 - [x] Glosario, consejos contextuales, preguntas frecuentes, tutorial inicial y novedades por versión
 
-## Fase 8 — Ingeniería (casi completa)
+## Fase 8 — Ingeniería ✅ (salvo lo que necesita cuentas 🔑)
 - [x] Capturas con comparación contra la referencia (resumen de la CI con imágenes de diferencias), en inglés y en modo oscuro
 - [x] Prueba del emulador en su propia ejecución (Baseline Profile, manual)
 - [x] Tests de sincronización con reloj simulado (200 secuencias aleatorias, sin perder series)
 - [x] Conflictos de sincronización visibles (aviso en el entreno)
 - [x] Rendimiento: historial de 1000 entrenos (prueba de tiempo), índices en Room
 - [x] Módulo `:data` (Room, repositorio y ajustes separados de la interfaz); configuration cache, caché de compilación y tareas en paralelo en Gradle; detekt en la CI con línea base
-- [ ] Separar las pantallas en módulos por función (entreno, historial, ejercicios, perfil, planificación)
+- [x] Pantallas en módulos por función (`:feature:workout`, `routines`, `history`, `exercises`, `home`, `planning`, `profile`) sobre `:shared` (componentes, tema, textos y servicios); lint revisa todos los módulos
 - [x] Tamaño del APK en cada CI y en cada release
 - [x] Release automática al etiquetar; canal beta (etiquetas -beta/-rc); web en GitHub Pages (activar «Source: GitHub Actions»)
 - [ ] Firma definitiva 🔑 (secretos KEYSTORE_*)
