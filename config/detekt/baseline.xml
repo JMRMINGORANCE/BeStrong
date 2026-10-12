@@ -37,10 +37,6 @@
     <ID>LongMethod:MonthlyReport.kt$MonthlyReport$private fun draw(c: Canvas, context: Context, month: YearMonth, s: PeriodSummary, trainedDays: Set&lt;LocalDate&gt;, unit: WeightUnit)</ID>
     <ID>LongMethod:WorkoutCsv.kt$WorkoutCsv$fun import( text: String, known: List&lt;Exercise&gt;, zone: ZoneId = ZoneId.systemDefault(), strongUnit: WeightUnit = WeightUnit.KG, ): ImportResult</ID>
     <ID>LongMethod:WorkoutShareCard.kt$WorkoutShareCard$fun render(context: Context, w: Workout, records: List&lt;PersonalRecord&gt;, unit: WeightUnit): Bitmap</ID>
-    <ID>LongParameterList:ActiveWorkoutViewModel.kt$ActiveWorkoutViewModel$( private val repo: BeStrongRepository, settingsStore: SettingsStore, private val restTimer: RestTimerController, private val metricsStore: WatchMetricsStore, private val actions: WorkoutActions, private val announcer: Announcer, @ApplicationContext private val appContext: Context, )</ID>
-    <ID>LongParameterList:BeStrongApplication.kt$AppSync$( @ApplicationContext private val context: Context, @ApplicationScope private val scope: CoroutineScope, private val repository: BeStrongRepository, private val settings: SettingsStore, private val watchSync: WatchSync, private val restTimer: RestTimerController, private val watchMetrics: WatchMetricsStore, private val planning: PlanningStore, )</ID>
-    <ID>LongParameterList:HomeViewModel.kt$HomeViewModel$( private val repo: BeStrongRepository, private val actions: WorkoutActions, private val watchSync: WatchSync, private val settingsStore: SettingsStore, private val appSync: AppSync, private val planning: PlanningStore, private val healthReader: HealthConnectReader, private val intakeStore: IntakeStore, @ApplicationContext private val context: Context, )</ID>
-    <ID>LongParameterList:ProfileViewModel.kt$ProfileViewModel$( @ApplicationContext private val context: Context, private val repo: BeStrongRepository, private val settingsStore: SettingsStore, private val healthConnect: HealthConnectExporter, private val appSync: AppSync, private val photoStore: ProgressPhotoStore, private val healthReader: HealthConnectReader, )</ID>
     <ID>LoopWithTooManyJumpStatements:VoiceSetParser.kt$VoiceSetParser$while</ID>
     <ID>MatchingDeclarationName:Charts.kt$ChartPoint</ID>
     <ID>MatchingDeclarationName:TimerScreens.kt$IntervalRoute</ID>
@@ -55,7 +51,6 @@
     <ID>ReturnCount:Alternatives.kt$Alternatives$fun convertSets(from: Exercise, to: Exercise, sets: List&lt;WorkoutSet&gt;, previousOfNew: List&lt;WorkoutSet&gt;, stepKg: Double): List&lt;WorkoutSet&gt;</ID>
     <ID>ReturnCount:Autoregulation.kt$Autoregulation$fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double): RpeAdjustment?</ID>
     <ID>ReturnCount:BarVelocity.kt$BarVelocity$fun velocityLoss(velocities: List&lt;Double&gt;): Double</ID>
-    <ID>ReturnCount:BeStrongApplication.kt$WorkoutActions$suspend fun completeNextSet(): Boolean</ID>
     <ID>ReturnCount:CardioSession.kt$CardioSession$fun finish()</ID>
     <ID>ReturnCount:ExerciseService.kt$ExerciseService$override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int</ID>
     <ID>ReturnCount:GymProfile.kt$GymProfile$fun nearestBarbell(targetKg: Double): Double</ID>
@@ -69,6 +64,7 @@
     <ID>ReturnCount:Strength.kt$Strength$fun predictDate(points: List&lt;Pair&lt;Long, Double&gt;&gt;, target: Double): Long?</ID>
     <ID>ReturnCount:Strength.kt$Strength$fun standing(exerciseId: String, oneRepMaxKg: Double, bodyWeightKg: Double, sex: Sex): StrengthStanding?</ID>
     <ID>ReturnCount:Tempo.kt$Tempo.Companion$fun parse(text: String?): Tempo?</ID>
+    <ID>ReturnCount:WorkoutActions.kt$WorkoutActions$suspend fun completeNextSet(): Boolean</ID>
     <ID>ReturnCount:WorkoutCsv.kt$WorkoutCsv$private fun parseClock(s: String): Int</ID>
     <ID>ReturnCount:WorkoutCsv.kt$WorkoutCsv$private fun parseStrongDuration(s: String): Long?</ID>
     <ID>ReturnCount:WorkoutCsv.kt$WorkoutCsv.ExerciseResolver$fun resolve(name: String, id: String = ""): Exercise</ID>

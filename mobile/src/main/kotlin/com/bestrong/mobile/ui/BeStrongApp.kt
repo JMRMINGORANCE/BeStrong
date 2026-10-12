@@ -36,9 +36,11 @@ import androidx.navigation.navArgument
 import com.bestrong.core.training.BodyFocus
 import com.bestrong.mobile.BuildConfig
 import com.bestrong.mobile.LaunchRequest
-import com.bestrong.mobile.R
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.data.UserSettings
+import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.AppInfo
+import com.bestrong.mobile.ui.components.LocalAppInfo
 import com.bestrong.mobile.ui.components.LocalBodyUnit
 import com.bestrong.mobile.ui.components.LocalSetColumns
 import com.bestrong.mobile.ui.components.LocalWeightUnit
@@ -154,6 +156,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
         LocalWeightUnit provides settings.unit,
         LocalBodyUnit provides (settings.bodyUnit ?: settings.unit),
         LocalSetColumns provides SetColumns(settings.showPreviousColumn, settings.showComparison),
+        LocalAppInfo provides AppInfo(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.REPO_URL, BuildConfig.DONATION_URL),
         LocalTips provides Tips(settings.dismissedTips) { id -> appVm.update { it.copy(dismissedTips = it.dismissedTips + id) } },
     ) {
         NavigationSuiteScaffold(

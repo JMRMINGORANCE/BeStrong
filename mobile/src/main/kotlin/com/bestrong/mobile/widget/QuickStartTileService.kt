@@ -7,8 +7,8 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.bestrong.mobile.MainActivity
-import com.bestrong.mobile.R
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.shared.R
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

@@ -19,6 +19,8 @@ style:
 complexity:
   LongParameterList:
     functionThreshold: 8
+    # Los constructores con inyección de dependencias (Hilt) reciben muchos servicios
+    constructorThreshold: 10
     ignoreDefaultParameters: true
     ignoreAnnotated: ['Composable']
   LongMethod:

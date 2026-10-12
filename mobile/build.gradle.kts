@@ -69,6 +69,8 @@ android {
             }
         }
     }
+    // Lint revisa también los módulos de los que depende la app
+    lint { checkDependencies = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -79,6 +81,14 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":designsystem"))
     implementation(project(":data"))
+    implementation(project(":shared"))
+    implementation(project(":feature:workout"))
+    implementation(project(":feature:routines"))
+    implementation(project(":feature:history"))
+    implementation(project(":feature:exercises"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:planning"))
+    implementation(project(":feature:profile"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)

@@ -1,0 +1,280 @@
+package com.bestrong.mobile.ui.home
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bestrong.core.library.ExerciseLibrary
+import com.bestrong.core.model.Routine
+import com.bestrong.core.training.PeriodizedProgram
+import com.bestrong.core.training.ProgramSession
+import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.LocalWeightUnit
+import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.uiLanguage
+import java.time.DayOfWeek
+import java.time.format.TextStyle
+
+/** «Hoy toca»: la sesión del programa activo con sus cargas. */
+@Composable
+fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () -> Unit) {
+    val unit = LocalWeightUnit.current
+    var menu by remember { mutableStateOf(false) }
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.today_title), style = MaterialTheme.typography.labelLarge)
+                    Text(session.routine.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    val label = if (session.program.weeksPerCycle > 1) {
+                        stringResource(R.string.today_cycle_week, session.cycle, session.week, session.program.weeksPerCycle)
+                    } else {
+                        stringResource(R.string.today_session_n, session.completedSessions + 1)
+                    }
+                    Text(label, style = MaterialTheme.typography.bodySmall)
+                }
+                Box {
+                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.options)) }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.program_stop)) }, onClick = { menu = false; onStopProgram() })
+                    }
+                }
+            }
+            session.routine.exercises.forEach { re ->
+                val weights = re.sets.map { it.weightKg }.distinct()
+                val reps = re.sets.map { it.reps }.distinct()
+                val load = when {
+                    weights.all { it == 0.0 } -> "${re.sets.size} × ${reps.joinToString("/")}"
+                    weights.size == 1 && reps.size == 1 -> "${re.sets.size} × ${reps[0]} · ${unit.format(weights[0], withUnit = true)}"
+                    else -> re.sets.joinToString("  ") { "${unit.format(it.weightKg)}×${it.reps}" } + " ${unit.label}"
+                }
+                Row {
+                    Text(re.exercise.displayName(), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(load, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                }
+                if (re.notes.isNotBlank()) Text(re.notes, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Button(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                Icon(Icons.Default.PlayArrow, null)
+                Text(stringResource(R.string.today_start), Modifier.padding(start = 8.dp))
+            }
+        }
+    }
+}
+
+/** Sin programa: sugerencia de la rutina que toca (la que lleva más tiempo sin hacerse). */
+@Composable
+fun SuggestedRoutineCard(routine: Routine, onStart: () -> Unit) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.today_suggested), style = MaterialTheme.typography.labelLarge)
+                Text(routine.displayName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+            Button(onClick = onStart) { Text(stringResource(R.string.routine_start)) }
+        }
+    }
+}
+
+/** Semana: días entrenados (L–D), sesiones frente al objetivo y adherencia. */
+@Composable
+fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) -> Unit) {
+    val locale = LocalConfiguration.current.locales[0]
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.week_sessions, week.trainedDays.size, week.goal),
+                    Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+                if (canChangeGoal) {
+                    val lessGoal = stringResource(R.string.week_goal_less)
+                    val moreGoal = stringResource(R.string.week_goal_more)
+                    TextButton(onClick = { onGoalChange(week.goal - 1) }, enabled = week.goal > 1, modifier = Modifier.semantics { contentDescription = lessGoal }) { Text("−") }
+                    TextButton(onClick = { onGoalChange(week.goal + 1) }, enabled = week.goal < 7, modifier = Modifier.semantics { contentDescription = moreGoal }) { Text("+") }
+                }
+            }
+            LinearProgressIndicator(progress = { (week.trainedDays.size.toFloat() / week.goal).coerceAtMost(1f) }, modifier = Modifier.fillMaxWidth())
+            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                DayOfWeek.entries.forEach { d ->
+                    val done = d in week.trainedDays
+                    val name = d.getDisplayName(TextStyle.FULL, locale)
+                    val state = stringResource(if (done) R.string.day_trained else R.string.day_not_trained)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .then(if (done) Modifier.background(MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
+                            .then(if (d == week.today) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
+                            .semantics { contentDescription = "$name: $state" },
+                    ) {
+                        Text(
+                            d.getDisplayName(TextStyle.NARROW, locale),
+                            color = if (done) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                }
+            }
+            week.adherence?.let {
+                Text(stringResource(R.string.week_adherence, (it * 100).toInt()), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+/**
+ * Preparar un programa con progresión: training max de los ejercicios principales.
+ * Pantalla completa (no diálogo): con el teclado abierto en la pantalla exterior del Fold
+ * un diálogo con cuatro campos no cabe.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double?, onConfirm: (Map<String, Double>) -> Unit, onDismiss: () -> Unit) {
+    val unit = LocalWeightUnit.current
+    val values = remember(program.id) {
+        mutableStateMapOf<String, String>().apply { program.mainLifts.forEach { id -> put(id, suggested(id)?.let { unit.format(it) }.orEmpty()) } }
+    }
+    val lang = uiLanguage()
+    BackHandler(onBack = onDismiss)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(program.name(lang), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                navigationIcon = { IconButton(onClick = onDismiss) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
+            )
+        },
+        bottomBar = {
+            Button(
+                onClick = { onConfirm(values.mapNotNull { (id, v) -> unit.parseToKg(v)?.let { id to it } }.toMap()) },
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(16.dp),
+            ) { Text(stringResource(R.string.program_start)) }
+        },
+    ) { padding ->
+        Column(
+            Modifier.padding(padding).fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(program.description(lang), style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.program_tm_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            program.mainLifts.forEach { id ->
+                val ex = ExerciseLibrary.byId(id) ?: return@forEach
+                OutlinedTextField(
+                    value = values[id].orEmpty(),
+                    onValueChange = { values[id] = it },
+                    label = { Text(stringResource(R.string.program_tm_label, ex.displayName(), unit.label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
+    }
+}
+
+/** Cómo llegas hoy: sueño y pulso en reposo (Health Connect) y la última valoración. */
+@Composable
+fun ReadinessCard(vm: HomeViewModel) {
+    val r by vm.readiness.collectAsStateWithLifecycle()
+    val connected by vm.healthConnected.collectAsStateWithLifecycle()
+    val report = r ?: return
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.readiness_title), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                Text("${report.score}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+            }
+            LinearProgressIndicator(progress = { report.score / 100f }, modifier = Modifier.fillMaxWidth())
+            Text(
+                stringResource(
+                    when (report.level) {
+                        com.bestrong.core.training.ReadinessReport.Level.HIGH -> R.string.readiness_high
+                        com.bestrong.core.training.ReadinessReport.Level.NORMAL -> R.string.readiness_normal
+                        com.bestrong.core.training.ReadinessReport.Level.LOW -> R.string.readiness_low
+                    },
+                ),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            if (connected) {
+                Text(
+                    stringResource(R.string.readiness_detail, report.sleepHours?.let { "%.1f".format(it) } ?: "--", report.restingHr?.toString() ?: "--", report.baselineRestingHr?.toString() ?: "--"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                Text(stringResource(R.string.readiness_connect), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+}
+
+/** Proteína del día (objetivo según tu peso) y agua, con botones rápidos. */
+@Composable
+fun IntakeCard(vm: HomeViewModel) {
+    val intake by vm.intake.collectAsStateWithLifecycle()
+    val bw by vm.bodyWeightKg.collectAsStateWithLifecycle()
+    val range = bw?.let { com.bestrong.core.training.Nutrition.proteinRangeGrams(it) }
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.intake_title), fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.intake_protein, intake.proteinG, range?.let { "${it.first}–${it.last}" } ?: "?"))
+            range?.let { LinearProgressIndicator(progress = { (intake.proteinG.toFloat() / it.first).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
+            Text(stringResource(R.string.intake_water, intake.waterMl))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilledTonalButton(onClick = { vm.addIntake(proteinG = 20) }) { Text(stringResource(R.string.intake_add_protein)) }
+                FilledTonalButton(onClick = { vm.addIntake(waterMl = 250) }) { Text(stringResource(R.string.intake_add_water)) }
+            }
+        }
+    }
+}

@@ -34,8 +34,8 @@ import androidx.glance.unit.ColorProvider
 import com.bestrong.core.model.Routine
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.mobile.MainActivity
-import com.bestrong.mobile.R
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.shared.R
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors

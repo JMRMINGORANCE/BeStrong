@@ -144,9 +144,9 @@ class MainActivity : ComponentActivity() {
     }
 
     companion object {
-        const val ACTION_OPEN_WORKOUT = "com.bestrong.OPEN_WORKOUT"
-        const val ACTION_START_EMPTY = "com.bestrong.START_EMPTY"
-        const val ACTION_START_ROUTINE = "com.bestrong.START_ROUTINE"
-        const val EXTRA_ROUTINE_ID = "routine_id"
+        const val ACTION_OPEN_WORKOUT = AppIntents.ACTION_OPEN_WORKOUT
+        const val ACTION_START_EMPTY = AppIntents.ACTION_START_EMPTY
+        const val ACTION_START_ROUTINE = AppIntents.ACTION_START_ROUTINE
+        const val EXTRA_ROUTINE_ID = AppIntents.EXTRA_ROUTINE_ID
     }
 }

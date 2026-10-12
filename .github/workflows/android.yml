@@ -35,7 +35,8 @@ jobs:
         # existentes están en config/detekt/baseline.xml: solo fallan los problemas nuevos.
         run: |
           curl -sSL -o detekt.jar https://github.com/detekt/detekt/releases/download/v1.23.8/detekt-cli-1.23.8-all.jar
-          java -jar detekt.jar --input core/src/main,data/src/main,mobile/src/main,wear/src/main,designsystem/src/main \
+          inputs=$(ls -d core/src/main data/src/main shared/src/main feature/*/src/main mobile/src/main wear/src/main designsystem/src/main | paste -sd, -)
+          java -jar detekt.jar --input "$inputs" \
             --config config/detekt/detekt.yml --build-upon-default-config --baseline config/detekt/baseline.xml
 
       - name: Tests de core
