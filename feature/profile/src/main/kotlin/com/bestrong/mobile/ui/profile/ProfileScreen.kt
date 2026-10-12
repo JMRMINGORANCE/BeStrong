@@ -1,7 +1,6 @@
 package com.bestrong.mobile.ui.profile
 
 import android.Manifest
-import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,7 +55,7 @@ import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.core.util.formatWeight
-import com.bestrong.mobile.PrivacyPolicyActivity
+import com.bestrong.mobile.AppIntents
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.BarChart
 import com.bestrong.mobile.ui.components.ChartPoint
@@ -387,7 +386,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.privacy)) },
                             supportingContent = { Text(stringResource(R.string.privacy_body)) },
-                            modifier = Modifier.clickable { context.startActivity(Intent(context, PrivacyPolicyActivity::class.java)) },
+                            modifier = Modifier.clickable { context.startActivity(AppIntents.privacy(context)) },
                         )
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.watch_sync)) },

@@ -9,10 +9,13 @@ import android.content.Intent
  */
 object AppIntents {
     const val MAIN_ACTIVITY = "com.bestrong.mobile.MainActivity"
+    const val PRIVACY_ACTIVITY = "com.bestrong.mobile.PrivacyPolicyActivity"
     const val ACTION_OPEN_WORKOUT = "com.bestrong.OPEN_WORKOUT"
     const val ACTION_START_EMPTY = "com.bestrong.START_EMPTY"
     const val ACTION_START_ROUTINE = "com.bestrong.START_ROUTINE"
     const val EXTRA_ROUTINE_ID = "routine_id"
 
     fun main(context: Context): Intent = Intent().setClassName(context, MAIN_ACTIVITY)
+
+    fun privacy(context: Context): Intent = Intent().setClassName(context, PRIVACY_ACTIVITY)
 }
