@@ -1,14 +1,18 @@
 package com.bestrong.core
 
+import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.model.HeartRateSample
 import com.bestrong.core.model.Workout
+import com.bestrong.core.model.WorkoutExercise
+import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.stats.Sex
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.training.BodyProfile
 import com.bestrong.core.training.Energy
 import com.bestrong.core.training.HeartRateTracker
+import kotlin.math.roundToInt
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -113,5 +117,63 @@ class EnergyTest {
         // Pocas lecturas (una cada 10 min): no representan el entreno → estimación por densidad
         val sparse = List(6) { HeartRateSample(it * 600, 150) }
         assertEquals(CaloriesSource.ESTIMATE, Energy.compute(3600, 20, me, heartRate = sparse)!!.source)
+    }
+
+    private fun cardio(id: String, durationSec: Int, distanceM: Double = 0.0, endOffsetSec: Int? = null) = WorkoutExercise(
+        exercise = ExerciseLibrary.byId(id)!!,
+        sets = listOf(
+            WorkoutSet(durationSec = durationSec, distanceM = distanceM, completed = true, completedAtEpochMs = endOffsetSec?.let { it * 1000L }),
+        ),
+    )
+
+    private fun workout(seconds: Int, vararg exercises: WorkoutExercise) =
+        Workout(name = "W", startedAtEpochMs = 0, finishedAtEpochMs = seconds * 1000L, exercises = exercises.toList())
+
+    @Test
+    fun treadmill_usesSpeed_acsm() {
+        // 5 km en 30 min = 166,7 m/min (corriendo): VO₂ = 3,5 + 0,2·v = 36,8 ml/kg/min → 442 kcal
+        val r = Energy.forWorkout(workout(1800, cardio("treadmill", 1800, 5000.0)), me)!!
+        assertEquals(CaloriesSource.ESTIMATE, r.source)
+        assertEquals(442, r.totalKcal)
+        // 3 km en 30 min (100 m/min, caminando): VO₂ = 3,5 + 0,1·v = 13,5 → 162 kcal
+        assertEquals(162, Energy.forWorkout(workout(1800, cardio("treadmill", 1800, 3000.0)), me)!!.totalKcal)
+    }
+
+    @Test
+    fun rower_usesPower() {
+        // 2000 m en 8 min (2:00/500 m) ≈ 202 W → ≈ 16 kcal/min
+        assertEquals(129, Energy.forWorkout(workout(480, cardio("rowing_machine", 480, 2000.0)), me)!!.totalKcal)
+    }
+
+    @Test
+    fun machineWithoutData_usesCompendium_andHeartRateWhenPresent() {
+        // Elíptica 20 min sin pulso: 5 MET × basal/h × 1/3 h ≈ 124
+        assertEquals(124, Energy.forWorkout(workout(1200, cardio("elliptical", 1200)), me)!!.totalKcal)
+        // Con pulso 150 en ese tramo: VO₂ por reserva de FC (VO₂máx de Uth ≈ 47,7) ≈ 34,8 → ≈ 278
+        val hr = List(120) { HeartRateSample(it * 10, 150) }
+        val r = Energy.forWorkout(workout(1200, cardio("elliptical", 1200, endOffsetSec = 1200)), me, heartRate = hr)!!
+        assertEquals(CaloriesSource.HEART_RATE, r.source)
+        assertEquals(278, r.totalKcal)
+    }
+
+    @Test
+    fun mixedRoutine_splitsCardioAndStrength() {
+        val bench = WorkoutExercise(
+            exercise = ExerciseLibrary.byId("bench_press")!!,
+            sets = List(20) { WorkoutSet(weightKg = 60.0, reps = 8, completed = true) },
+        )
+        // 60 min: 20 min de bici estática (7 MET) + 40 min de fuerza con 20 series (denso: 5 MET)
+        val r = Energy.forWorkout(workout(3600, cardio("stationary_bike", 1200), bench), me)!!
+        val bmrPerHour = 1780.0 / 24
+        assertEquals((7.0 * bmrPerHour / 3 + 5.0 * bmrPerHour * 2 / 3).roundToInt(), r.totalKcal)
+        // Con calorías del reloj, mandan esas
+        assertEquals(500, Energy.forWorkout(workout(3600, cardio("stationary_bike", 1200), bench), me, watchKcal = 500)!!.totalKcal)
+    }
+
+    @Test
+    fun implausibleDistance_isIgnored() {
+        // 50 km en 30 min en cinta: error de tecleo → MET de la cinta (8) en vez de la velocidad
+        val r = Energy.forWorkout(workout(1800, cardio("treadmill", 1800, 50_000.0)), me)!!
+        assertEquals((8.0 * 1780.0 / 24 / 2).roundToInt(), r.totalKcal)
     }
 }

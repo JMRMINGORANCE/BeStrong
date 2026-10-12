@@ -337,6 +337,7 @@ class WorkoutSession @Inject constructor(
             WorkoutEditor.updateSet(w, we.id, s.id) { set ->
                 when {
                     we.exercise.tracking == TrackingType.DURATION -> set.copy(durationSec = (set.durationSec + 5 * direction).coerceAtLeast(0))
+                    we.exercise.tracking == TrackingType.CARDIO -> set.copy(durationSec = (set.durationSec + 60 * direction).coerceAtLeast(0))
                     _rotaryTarget.value == RotaryTarget.WEIGHT -> set.copy(weightKg = (set.weightKg + step * direction).coerceAtLeast(0.0))
                     else -> set.copy(reps = (set.reps + direction).coerceAtLeast(0))
                 }
@@ -365,7 +366,7 @@ class WorkoutSession @Inject constructor(
         val rir = if (_repCounting.value) BarVelocity.estimatedRir(velocities) else null
         _velocityInfo.value = velocities.lastOrNull()?.let { VelocityInfo(it, rir) }
         edit { w ->
-            val withReps = if (_repCounting.value && counted > 0 && we.exercise.tracking != TrackingType.DURATION) {
+            val withReps = if (_repCounting.value && counted > 0 && we.exercise.tracking in REP_TRACKING) {
                 WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = counted, rpe = it.rpe ?: rir?.let(BarVelocity::rpeFromRir)) }
             } else {
                 w
@@ -642,3 +643,6 @@ class WorkoutSession @Inject constructor(
 
 /** Función del botón rápido del Galaxy Watch Ultra (y botones físicos asignables). */
 enum class StemAction { COMPLETE_SET, SKIP_REST, NEXT_EXERCISE }
+
+/** Ejercicios en los que el acelerómetro cuenta repeticiones (no los de tiempo ni el cardio). */
+private val REP_TRACKING = setOf(TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY, TrackingType.DISTANCE)

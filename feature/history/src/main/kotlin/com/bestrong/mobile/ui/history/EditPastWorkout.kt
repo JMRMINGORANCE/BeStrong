@@ -28,7 +28,9 @@ fun EditPastSetDialog(set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutS
     var reps by remember { mutableStateOf(set.reps.toString()) }
     var seconds by remember { mutableStateOf(set.durationSec.toString()) }
     var meters by remember { mutableStateOf(set.distanceM.toInt().toString()) }
-    val hasWeight = tracking != TrackingType.DURATION
+    var minutes by remember { mutableStateOf((set.durationSec / 60).toString()) }
+    var km by remember { mutableStateOf(if (set.distanceM > 0) "%.2f".format(set.distanceM / 1000) else "") }
+    val hasWeight = tracking != TrackingType.DURATION && tracking != TrackingType.CARDIO
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.history_edit_set)) },
@@ -65,6 +67,22 @@ fun EditPastSetDialog(set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutS
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     )
+                    TrackingType.CARDIO -> {
+                        OutlinedTextField(
+                            minutes,
+                            { minutes = it.filter(Char::isDigit).take(3) },
+                            label = { Text(stringResource(R.string.set_minutes)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        )
+                        OutlinedTextField(
+                            km,
+                            { km = it.filter { c -> c.isDigit() || c == '.' || c == ',' }.take(6) },
+                            label = { Text(stringResource(R.string.set_km)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        )
+                    }
                 }
             }
         },
@@ -79,8 +97,8 @@ fun EditPastSetDialog(set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutS
                     set.copy(
                         weightKg = kg,
                         reps = reps.toIntOrNull() ?: set.reps,
-                        durationSec = seconds.toIntOrNull() ?: set.durationSec,
-                        distanceM = meters.toDoubleOrNull() ?: set.distanceM,
+                        durationSec = if (tracking == TrackingType.CARDIO) minutes.toIntOrNull()?.times(60) ?: set.durationSec else seconds.toIntOrNull() ?: set.durationSec,
+                        distanceM = if (tracking == TrackingType.CARDIO) km.replace(',', '.').toDoubleOrNull()?.times(1000) ?: 0.0 else meters.toDoubleOrNull() ?: set.distanceM,
                     ),
                 )
             }) { Text(stringResource(R.string.action_save)) }

@@ -111,7 +111,11 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                             key(re.id, i, re.sets.size) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     Text("${i + 1}", Modifier.widthIn(min = 24.dp), fontWeight = FontWeight.Bold)
-                                    if (re.exercise.tracking == TrackingType.DURATION) {
+                                    if (re.exercise.tracking == TrackingType.CARDIO) {
+                                        SmallNumberField(stringResource(R.string.set_minutes), (set.durationSec / 60).toString(), Modifier.weight(1f)) { v ->
+                                            vm.updateSet(re.id, i) { it.copy(durationSec = (v.toIntOrNull() ?: 0) * 60) }
+                                        }
+                                    } else if (re.exercise.tracking == TrackingType.DURATION) {
                                         SmallNumberField(stringResource(R.string.seconds_short), set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
                                     } else {
                                         SmallNumberField(unit.label, unit.format(set.weightKg), Modifier.weight(1f), decimal = true) { v ->

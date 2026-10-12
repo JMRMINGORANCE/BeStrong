@@ -62,6 +62,12 @@ object ExerciseLibrary {
 
     /** Sinónimos y nombres coloquiales (español e inglés) para la búsqueda. */
     private val synonyms: Map<String, List<String>> = mapOf(
+        "treadmill" to listOf("cinta", "correr en cinta", "caminar en cinta", "treadmill"),
+        "elliptical" to listOf("eliptica", "elliptical", "cross trainer"),
+        "stationary_bike" to listOf("spinning", "bici estatica", "ciclo indoor", "bike", "spin"),
+        "rowing_machine" to listOf("remo", "concept2", "rower", "erg"),
+        "stair_climber" to listOf("escaleras", "stairmaster", "stepper", "step mill"),
+        "jump_rope" to listOf("saltar a la comba", "cuerda", "saltar cuerda", "skipping"),
         "overhead_press" to listOf("press de hombro", "press hombro", "militar", "ohp", "shoulder press"),
         "bench_press" to listOf("banca", "press pecho", "bench"),
         "squat" to listOf("sentadilla trasera", "back squat"),
@@ -179,10 +185,16 @@ object ExerciseLibrary {
         ex("side_plank", "Plancha lateral", ABS, BODYWEIGHT, GLUTES, tracking = TrackingType.DURATION),
         ex("l_sit", "L-sit", ABS, BODYWEIGHT, TRICEPS, tracking = TrackingType.DURATION),
         ex("wall_sit", "Sentadilla isométrica en pared", QUADRICEPS, BODYWEIGHT, GLUTES, tracking = TrackingType.DURATION),
-        // Cardio (sesión libre con GPS en el reloj)
-        ex("running", "Carrera", CARDIO, OTHER, tracking = TrackingType.DISTANCE),
-        ex("walking", "Caminar", CARDIO, OTHER, tracking = TrackingType.DISTANCE),
-        ex("cycling", "Bicicleta", CARDIO, OTHER, tracking = TrackingType.DISTANCE),
+        // Cardio: al aire libre (sesión con GPS en el reloj) y máquinas del gimnasio
+        ex("running", "Carrera", CARDIO, OTHER, tracking = TrackingType.CARDIO),
+        ex("walking", "Caminar", CARDIO, OTHER, tracking = TrackingType.CARDIO),
+        ex("cycling", "Bicicleta", CARDIO, OTHER, tracking = TrackingType.CARDIO),
+        ex("treadmill", "Cinta de correr", CARDIO, MACHINE, tracking = TrackingType.CARDIO),
+        ex("elliptical", "Elíptica", CARDIO, MACHINE, tracking = TrackingType.CARDIO),
+        ex("stationary_bike", "Bicicleta estática", CARDIO, MACHINE, tracking = TrackingType.CARDIO),
+        ex("rowing_machine", "Remo ergómetro", CARDIO, MACHINE, BACK, tracking = TrackingType.CARDIO),
+        ex("stair_climber", "Escaladora", CARDIO, MACHINE, GLUTES, tracking = TrackingType.CARDIO),
+        ex("jump_rope", "Comba", CARDIO, OTHER, CALVES, tracking = TrackingType.CARDIO),
     ).map { if (it.id in UNILATERAL) it.copy(unilateral = true) else it }
 
     private val byId = all.associateBy { it.id }
@@ -227,6 +239,10 @@ object ExerciseLibrary {
         "Ab Wheel" to "ab_wheel", "Russian Twist" to "russian_twist", "Kettlebell Swing" to "kb_swing",
         "Clean and Press" to "clean_and_press", "Farmers Walk" to "farmers_walk", "Burpee" to "burpee",
         "Running" to "running", "Walking" to "walking", "Cycling" to "cycling",
+        "Treadmill" to "treadmill", "Elliptical Trainer" to "elliptical", "Elliptical" to "elliptical",
+        "Spinning" to "stationary_bike", "Cycling (Indoor)" to "stationary_bike", "Stationary Bike" to "stationary_bike",
+        "Rowing Machine" to "rowing_machine", "Rowing (Machine)" to "rowing_machine", "Stair Machine" to "stair_climber",
+        "Stair Climber" to "stair_climber", "Jump Rope" to "jump_rope",
     )
 
     fun byId(id: String): Exercise? = byId[id]

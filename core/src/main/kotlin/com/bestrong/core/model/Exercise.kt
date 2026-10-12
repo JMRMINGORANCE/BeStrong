@@ -42,6 +42,15 @@ enum class TrackingType {
 
     /** Peso + distancia (paseo del granjero, trineo) o solo distancia (remo, carrera). */
     DISTANCE,
+
+    /** Cardio: tiempo y, si se conoce, distancia (cinta, elíptica, bici, remo…). */
+    CARDIO,
+    ;
+
+    companion object {
+        /** Bloque de cardio por defecto: 20 minutos. */
+        const val DEFAULT_CARDIO_SEC = 1200
+    }
 }
 
 @Serializable

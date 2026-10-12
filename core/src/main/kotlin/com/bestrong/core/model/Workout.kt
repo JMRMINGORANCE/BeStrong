@@ -40,6 +40,8 @@ data class WorkoutSet(
     val repsRight: Int? = null,
     /** Ejercicios por distancia (paseo del granjero, trineo, remo…), en metros. */
     val distanceM: Double = 0.0,
+    /** Cuándo se marcó como hecha: sitúa los bloques de cardio en la gráfica de pulso. */
+    val completedAtEpochMs: Long? = null,
 ) {
     /** Cuenta para récords: ni calentamiento, ni parciales/negativas, ni con ayuda. */
     val countsForRecords: Boolean

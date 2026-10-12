@@ -21,6 +21,7 @@
     <uses-permission android:name="android.health.permission.READ_HEIGHT" />
     <uses-permission android:name="android.health.permission.READ_HEART_RATE" />
     <uses-permission android:name="android.health.permission.WRITE_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.health.permission.WRITE_DISTANCE" />
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />

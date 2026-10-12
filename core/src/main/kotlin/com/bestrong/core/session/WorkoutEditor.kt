@@ -40,6 +40,8 @@ object WorkoutEditor {
                 val prev = previousSets(ex.id)
                 val sets = if (prev.isNotEmpty()) {
                     prev.map { it.copy(id = com.bestrong.core.util.newId(), completed = false, rpe = null) }
+                } else if (ex.tracking == TrackingType.CARDIO) {
+                    listOf(WorkoutSet(durationSec = TrackingType.DEFAULT_CARDIO_SEC))
                 } else {
                     List(3) { WorkoutSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
                 }
@@ -171,8 +173,8 @@ object WorkoutEditor {
     /** Edición de un entreno ya terminado: quita ejercicios que se quedan sin series. */
     fun cleanupFinished(workout: Workout): Workout = workout.copy(exercises = workout.exercises.filter { it.sets.isNotEmpty() })
 
-    fun toggleSetCompleted(workout: Workout, workoutExerciseId: String, setId: String): Workout =
-        updateSet(workout, workoutExerciseId, setId) { it.copy(completed = !it.completed) }
+    fun toggleSetCompleted(workout: Workout, workoutExerciseId: String, setId: String, nowEpochMs: Long = System.currentTimeMillis()): Workout =
+        updateSet(workout, workoutExerciseId, setId) { it.copy(completed = !it.completed, completedAtEpochMs = if (it.completed) null else nowEpochMs) }
 
     /** Cicla Normal → Calentamiento → Drop → Fallo → Normal. */
     fun cycleSetType(workout: Workout, workoutExerciseId: String, setId: String): Workout =

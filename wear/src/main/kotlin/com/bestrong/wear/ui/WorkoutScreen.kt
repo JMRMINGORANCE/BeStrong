@@ -172,6 +172,7 @@ fun WorkoutScreen(
 
                 when (we.exercise.tracking) {
                     TrackingType.DURATION -> BigValue("${set.durationSec}", "s", selected = true) {}
+                    TrackingType.CARDIO -> BigValue("${set.durationSec / 60}", "min", selected = true) {}
                     else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         if (we.exercise.tracking == TrackingType.WEIGHT_REPS || set.weightKg > 0) {
                             BigValue(unit.format(set.weightKg), unit.label, selected = target == RotaryTarget.WEIGHT) {
@@ -194,7 +195,7 @@ fun WorkoutScreen(
                         )
                     }
                 }
-                previous?.let {
+                previous?.takeIf { we.exercise.tracking != TrackingType.CARDIO }?.let {
                     Text(
                         stringResource(R.string.previous, unit.format(it.weightKg), it.reps),
                         // «La última vez» bien visible: es lo que hay que batir

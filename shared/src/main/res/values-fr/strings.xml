@@ -476,7 +476,7 @@
     <string name="privacy_csv_title">Export et import</string>
     <string name="privacy_delete">Désinstaller l’app ou effacer ses données depuis les Paramètres d’Android supprime toutes les informations de BeStrong de l’appareil.</string>
     <string name="privacy_delete_title">Supprimer tes données</string>
-    <string name="privacy_hc">Si tu actives l’exportation, BeStrong écrit dans Health Connect chaque séance terminée comme session de musculation (début, fin, nom et notes), ses calories totales et actives (mesurées par la montre, ou calculées à partir de ta fréquence cardiaque ou de la durée et du poids si tu t’entraînes sans montre) et le graphique de fréquence cardiaque mesuré par la montre. Si tu l’autorises, il lit aussi ton poids, ta taille, ton sommeil et ta fréquence cardiaque au repos pour calculer ta forme du jour et ta dépense, ainsi que la fréquence cardiaque enregistrée par d’autres appareils pendant tes séances pour en estimer l’intensité. Tu peux retirer les autorisations à tout moment dans Paramètres › Health Connect.</string>
+    <string name="privacy_hc">Si tu actives l’exportation, BeStrong écrit dans Health Connect chaque séance terminée comme session de musculation ou de cardio (début, fin, nom et notes), ses calories totales et actives (mesurées par la montre, ou calculées à partir de ta fréquence cardiaque ou de la durée et du poids si tu t’entraînes sans montre), le graphique de fréquence cardiaque mesuré par la montre et la distance parcourue en course, en marche, sur tapis ou à vélo. Si tu l’autorises, il lit aussi ton poids, ta taille, ton sommeil et ta fréquence cardiaque au repos pour calculer ta forme du jour et ta dépense, ainsi que la fréquence cardiaque enregistrée par d’autres appareils pendant tes séances pour en estimer l’intensité. Tu peux retirer les autorisations à tout moment dans Paramètres › Health Connect.</string>
     <string name="privacy_hc_title">Health Connect</string>
     <string name="privacy_images">Les animations et images des exercices sont téléchargées depuis exercisedb.dev (AscendAPI) et wger.de. Aucune donnée personnelle n’est envoyée lors de ces téléchargements. Tes photos et vidéos de technique sont stockées uniquement dans l’espace privé de l’app.</string>
     <string name="privacy_images_title">Images des exercices</string>
@@ -834,4 +834,9 @@
     <string name="calories_source_hr">Calories selon ta fréquence cardiaque</string>
     <string name="calories_source_estimate">Calories estimées selon la durée et le rythme</string>
     <string name="active_kcal">%1$d kcal actives</string>
+    <string name="track_cardio">Cardio (temps et distance)</string>
+    <string name="set_minutes">Minutes</string>
+    <string name="set_km">Kilomètres</string>
+    <string name="set_col_minutes">MIN</string>
+    <string name="set_col_km">KM</string>
 </resources>

@@ -68,6 +68,8 @@ class RoutineEditorViewModel @Inject constructor(
                     val prev = lookup(ex.id)
                     val sets = if (prev.isNotEmpty()) {
                         prev.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) }
+                    } else if (ex.tracking == TrackingType.CARDIO) {
+                        listOf(RoutineSet(reps = 0, durationSec = TrackingType.DEFAULT_CARDIO_SEC))
                     } else {
                         List(3) { RoutineSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
                     }

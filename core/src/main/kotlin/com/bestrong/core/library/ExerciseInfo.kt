@@ -95,6 +95,12 @@ object ExerciseInfo {
         "running" to "Carrera libre con el GPS del reloj: distancia, ritmo y pulso.",
         "walking" to "Caminata a buen ritmo con el GPS del reloj: distancia, ritmo y pulso.",
         "cycling" to "Salida en bici con el GPS del reloj: distancia, velocidad y pulso.",
+        "treadmill" to "Anota el tiempo y la distancia de la pantalla: la velocidad distingue caminar de correr para las calorías.",
+        "elliptical" to "Tronco erguido, empuja y tira con brazos y piernas; anota tiempo y distancia.",
+        "stationary_bike" to "Sillín a la altura de la cadera y rodilla algo flexionada abajo; anota tiempo y distancia.",
+        "rowing_machine" to "Piernas, luego espalda y por último brazos; vuelve al revés. Con distancia y tiempo se calcula tu potencia.",
+        "stair_climber" to "Erguido y sin apoyarte en las barras; pisa entero empujando con el talón.",
+        "jump_rope" to "Saltos pequeños sobre la parte delantera del pie, girando la cuerda con las muñecas.",
         "burpee" to "Sentadilla, manos al suelo, salto atrás a plancha, flexión, recoger y saltar arriba.",
     )
 

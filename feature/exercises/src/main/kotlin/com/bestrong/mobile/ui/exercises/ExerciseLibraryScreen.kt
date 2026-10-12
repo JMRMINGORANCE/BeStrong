@@ -268,11 +268,13 @@ private fun CreateExerciseDialog(onDismiss: () -> Unit, onCreate: (String, Muscl
                     EnumFilter(stringResource(R.string.filter_equipment), Equipment.entries, equipment, { it.label() }) { it?.let { e -> equipment = e } }
                 }
                 Text(stringResource(R.string.track), style = MaterialTheme.typography.labelLarge)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(
                         TrackingType.WEIGHT_REPS to stringResource(R.string.track_weight_reps),
                         TrackingType.REPS_ONLY to stringResource(R.string.track_reps),
                         TrackingType.DURATION to stringResource(R.string.track_time),
+                        TrackingType.CARDIO to stringResource(R.string.track_cardio),
                     )
                         .forEach { (t, l) -> FilterChip(selected = tracking == t, onClick = { tracking = t }, label = { Text(l) }) }
                 }

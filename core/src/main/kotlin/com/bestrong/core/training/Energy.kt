@@ -2,6 +2,7 @@ package com.bestrong.core.training
 
 import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.model.HeartRateSample
+import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.Sex
 import kotlin.math.roundToInt
 
@@ -138,6 +139,9 @@ object Energy {
     fun estimateStrengthKcal(activeSeconds: Long, bodyWeightKg: Double?, met: Double = STRENGTH_MET): Int? =
         metKcal(met, activeSeconds, BodyProfile(weightKg = bodyWeightKg))?.roundToInt()
 
+    /** Pulso en reposo si Health Connect no lo da. */
+    const val DEFAULT_RESTING_HR = 70
+
     /** Fuerza vigorosa: halterofilia, culturismo (Compendio 02050). */
     const val VIGOROUS_STRENGTH_MET = 6.0
 
@@ -146,7 +150,7 @@ object Energy {
 
     /** Reserva de frecuencia cardiaca usada (0–1) con el pulso medio del entreno. */
     fun heartRateReserve(avgBpm: Int, p: BodyProfile): Double {
-        val rest = p.restingHr ?: 70
+        val rest = p.restingHr ?: DEFAULT_RESTING_HR
         val max = maxHr(p.age)
         if (max <= rest) return 0.0
         return ((avgBpm - rest).toDouble() / (max - rest)).coerceIn(0.0, 1.0)
@@ -200,4 +204,115 @@ object Energy {
         }
         return total?.roundToInt()?.let { EnergyResult(it, activeKcal(it, activeSeconds, profile), source) }
     }
+
+    /**
+     * Calorías de un entreno completo: los bloques de cardio (cinta, elíptica, bici…) con
+     * [CardioEnergy] y el resto del tiempo como fuerza. Con calorías del reloj, mandan esas.
+     */
+    fun forWorkout(
+        workout: Workout,
+        profile: BodyProfile,
+        watchKcal: Int? = null,
+        heartRate: List<HeartRateSample> = emptyList(),
+        bucketSec: Int = 10,
+    ): EnergyResult? {
+        val activeSeconds = workout.durationSeconds()
+        val blocks = cardioBlocks(workout)
+        return when {
+            blocks.isEmpty() -> compute(activeSeconds, workout.completedSetCount, profile, watchKcal, heartRate, bucketSec)
+            watchKcal != null && watchKcal > 0 -> EnergyResult(watchKcal, activeKcal(watchKcal, activeSeconds, profile), CaloriesSource.WATCH)
+            else -> mixedEstimate(workout, blocks, profile, heartRate, bucketSec)
+        }
+    }
+
+    /** Sin reloj: cada bloque de cardio con su modelo y el resto del tiempo como fuerza. */
+    private fun mixedEstimate(
+        workout: Workout,
+        blocks: List<CardioBlock>,
+        profile: BodyProfile,
+        heartRate: List<HeartRateSample>,
+        bucketSec: Int,
+    ): EnergyResult? {
+        val activeSeconds = workout.durationSeconds()
+        val cardio = blocks.map { b ->
+            val hr = blockAverageBpm(heartRate, bucketSec, b)
+            cardioKcal(b, profile, hr) to (hr != null)
+        }
+        val cardioKcal = cardio.map { it.first }.takeIf { list -> list.none { it == null } }?.sumOf { it ?: 0.0 }
+        val (strengthKcal, strengthHr) = strengthPart(workout, blocks, activeSeconds, profile, heartRate, bucketSec)
+        return cardioKcal?.let { (it + strengthKcal).roundToInt() }?.let { total ->
+            val usedHr = strengthHr || cardio.any { it.second }
+            EnergyResult(total, activeKcal(total, activeSeconds, profile), if (usedHr) CaloriesSource.HEART_RATE else CaloriesSource.ESTIMATE)
+        }
+    }
+
+    /**
+     * El tiempo fuera de los bloques de cardio: fuerza (con el pulso de ese tiempo o la densidad).
+     * Si no hubo series de fuerza, solo cuenta el gasto en reposo (no suma calorías activas).
+     */
+    private fun strengthPart(
+        workout: Workout,
+        blocks: List<CardioBlock>,
+        activeSeconds: Long,
+        profile: BodyProfile,
+        heartRate: List<HeartRateSample>,
+        bucketSec: Int,
+    ): Pair<Double, Boolean> {
+        val strengthSec = (activeSeconds - blocks.sumOf { it.durationSec.toLong() }).coerceAtLeast(0)
+        val strengthSets = workout.exercises.filter { CardioEnergy.kindOf(it.exercise.id) == null }.sumOf { it.completedSets.size }
+        val outside = heartRate.filter { s -> blocks.none { b -> b.contains(s.offsetSec) } }
+        val hrAvg = coveredAverageBpm(outside, bucketSec, strengthSec).takeIf { strengthSets > 0 }
+        val met = when {
+            strengthSets == 0 -> 1.0
+            hrAvg != null -> metFromHeartRate(hrAvg, profile)
+            else -> strengthMet(strengthSets, strengthSec)
+        }
+        return (metKcal(met, strengthSec, profile) ?: 0.0) to (hrAvg != null)
+    }
+
+    /** Series de cardio completadas, situadas en el tiempo del entreno si se sabe cuándo acabaron. */
+    fun cardioBlocks(workout: Workout): List<CardioBlock> = workout.exercises.flatMap { we ->
+        val kind = CardioEnergy.kindOf(we.exercise.id) ?: return@flatMap emptyList()
+        we.completedSets.filter { it.durationSec > 0 }.map { set ->
+            CardioBlock(
+                kind = kind,
+                durationSec = set.durationSec,
+                distanceM = set.distanceM,
+                endOffsetSec = set.completedAtEpochMs?.let { ((it - workout.startedAtEpochMs) / 1000).toInt() }?.takeIf { it > 0 },
+            )
+        }
+    }
+
+    private fun CardioBlock.contains(offsetSec: Int): Boolean {
+        val start = startOffsetSec
+        val end = endOffsetSec
+        return start != null && end != null && offsetSec in start until end
+    }
+
+    /** Pulso medio del bloque si las muestras cubren al menos la mitad. */
+    fun blockAverageBpm(samples: List<HeartRateSample>, bucketSec: Int, block: CardioBlock): Int? {
+        if (block.startOffsetSec == null) return null
+        return coveredAverageBpm(samples.filter { block.contains(it.offsetSec) }, bucketSec, block.durationSec.toLong())
+    }
+
+    /** kcal de un bloque de cardio (null sin peso). Ver [CardioEnergy] para el orden de fuentes. */
+    fun cardioKcal(block: CardioBlock, p: BodyProfile, avgBpm: Int?): Double? {
+        val weight = p.weightKg?.takeIf { it > 0 } ?: return null
+        val speed = CardioEnergy.speedMPerMin(block)
+        val hrVo2 = avgBpm?.let { CardioEnergy.hrVo2(it, p) }
+        return when {
+            block.kind == CardioKind.ROWER && speed != null ->
+                CardioEnergy.rowerKcalPerMin(CardioEnergy.rowerWatts(speed)) * block.durationSec / 60.0
+            speed != null && block.kind in WALK_RUN -> {
+                // Sin inclinación la velocidad da el mínimo; si el pulso marca más (cuesta), manda el pulso
+                val vo2 = maxOf(CardioEnergy.acsmVo2(speed), hrVo2 ?: 0.0)
+                CardioEnergy.vo2Kcal(vo2, weight, block.durationSec)
+            }
+            hrVo2 != null -> CardioEnergy.vo2Kcal(hrVo2, weight, block.durationSec)
+            block.kind == CardioKind.BIKE && speed != null -> metKcal(CardioEnergy.bikeMet(speed), block.durationSec.toLong(), p)
+            else -> metKcal(CardioEnergy.defaultMet(block.kind), block.durationSec.toLong(), p)
+        }
+    }
+
+    private val WALK_RUN = setOf(CardioKind.RUN, CardioKind.WALK, CardioKind.TREADMILL)
 }

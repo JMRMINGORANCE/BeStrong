@@ -6,6 +6,7 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
+import com.bestrong.core.training.HeartRateTracker
 import com.bestrong.wear.ApplicationScope
 import com.bestrong.wear.data.PhoneSync
 import com.bestrong.wear.data.WearStore
@@ -29,10 +30,11 @@ data class CardioState(
     val distanceM: Double = 0.0,
     val speedMps: Double = 0.0,
     val heartRate: Int? = null,
-    val hrSamples: List<Int> = emptyList(),
+    /** Media ponderada por tiempo y máximo (ver [HeartRateTracker]). */
+    val avgHeartRate: Int? = null,
+    val maxHeartRate: Int? = null,
     val calories: Int? = null,
 ) {
-    val avgHeartRate: Int? get() = hrSamples.takeIf { it.isNotEmpty() }?.average()?.toInt()
 
     /** Ritmo medio en segundos por km (0 si aún no hay distancia). */
     fun paceSecPerKm(nowEpochMs: Long): Long {
@@ -61,18 +63,26 @@ class CardioSession @Inject constructor(
 
     val isActive: Boolean get() = _state.value != null
 
+    private var hr = HeartRateTracker(0)
+
     fun start(type: CardioType) {
         if (_state.value != null) return
         _finished.value = null
-        _state.value = CardioState(type, System.currentTimeMillis())
+        val now = System.currentTimeMillis()
+        hr = HeartRateTracker(now)
+        _state.value = CardioState(type, now)
         ExerciseService.start(context)
     }
 
     fun onDistance(totalM: Double) = _state.update { it?.copy(distanceM = totalM) }
     fun onSpeed(mps: Double) = _state.update { it?.copy(speedMps = mps) }
     fun onCalories(kcal: Double) = _state.update { it?.copy(calories = kcal.toInt()) }
-    fun onHeartRate(bpm: Int) {
-        if (bpm > 0) _state.update { it?.copy(heartRate = bpm, hrSamples = it.hrSamples + bpm) }
+
+    /** Cada lectura con su hora real (las que llegan en lote con la pantalla apagada también). */
+    fun onHeartRate(bpm: Int, atEpochMs: Long) {
+        if (_state.value == null) return
+        hr.add(bpm, atEpochMs)
+        _state.update { it?.copy(heartRate = hr.latest, avgHeartRate = hr.average, maxHeartRate = hr.max) }
     }
 
     fun finish() {
@@ -89,12 +99,13 @@ class CardioSession @Inject constructor(
             finishedAtEpochMs = now,
             source = WorkoutSource.WATCH,
             avgHeartRate = s.avgHeartRate,
-            maxHeartRate = s.hrSamples.maxOrNull(),
+            maxHeartRate = s.maxHeartRate,
+            heartRateSamples = hr.samples(),
             calories = s.calories,
             exercises = listOf(
                 WorkoutExercise(
                     exercise = exercise,
-                    sets = listOf(WorkoutSet(reps = 0, durationSec = durationSec, distanceM = s.distanceM, completed = true)),
+                    sets = listOf(WorkoutSet(reps = 0, durationSec = durationSec, distanceM = s.distanceM, completed = true, completedAtEpochMs = now)),
                 ),
             ),
         )

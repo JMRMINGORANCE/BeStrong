@@ -93,6 +93,7 @@ object WorkoutShareCard {
             val detail = when {
                 best == null -> ""
                 e.exercise.tracking == TrackingType.DURATION -> "${sets.size} × ${best.durationSec} s"
+                e.exercise.tracking == TrackingType.CARDIO -> com.bestrong.mobile.ui.workout.cardioText(sets.sumOf { it.durationSec }, sets.sumOf { it.distanceM })
                 best.weightKg > 0 -> "${sets.size} × ${unit.format(best.weightKg, withUnit = true)} × ${best.reps}"
                 else -> "${sets.size} × ${best.reps}"
             }

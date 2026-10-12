@@ -88,6 +88,10 @@ fun SetHeader(tracking: TrackingType, dumbbell: Boolean = false, dumbbellTotal: 
                 Text(unit, style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
                 Text(stringResource(R.string.set_col_meters), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
+            TrackingType.CARDIO -> {
+                Text(stringResource(R.string.set_col_minutes), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text(stringResource(R.string.set_col_km), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            }
         }
         Box(Modifier.size(48.dp))
     }
@@ -295,6 +299,14 @@ fun SetRow(
                         }
                         NumberField(set.distanceM.takeIf { it > 0 }?.toInt()?.toString() ?: "", stringResource(R.string.set_meters), Modifier.weight(1f)) {
                             onDistance(it.toDoubleOrNull() ?: 0.0)
+                        }
+                    }
+                    TrackingType.CARDIO -> {
+                        NumberField((set.durationSec / 60).takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_minutes), Modifier.weight(1f)) {
+                            onDuration((it.toIntOrNull() ?: 0) * 60)
+                        }
+                        NumberField(set.distanceM.takeIf { it > 0 }?.let { "%.2f".format(it / 1000) } ?: "", stringResource(R.string.set_km), Modifier.weight(1f), decimal = true) {
+                            onDistance(it.replace(',', '.').toDoubleOrNull()?.times(1000) ?: 0.0)
                         }
                     }
                 }

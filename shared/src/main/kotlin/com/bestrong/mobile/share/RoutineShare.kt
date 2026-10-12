@@ -67,7 +67,7 @@ object RoutineShare {
             r.exercises.forEach { re ->
                 ensure(16f)
                 val work = re.sets.filter { it.type != SetType.WARMUP }
-                val reps = if (re.exercise.tracking == TrackingType.DURATION) "${work.firstOrNull()?.durationSec ?: 0} s" else "${work.firstOrNull()?.reps ?: 0}"
+                val reps = targetText(re.exercise.tracking, work.firstOrNull())
                 val line = "• " + re.exercise.displayName(context) + "  —  " + context.getString(R.string.pdf_routine_sets, work.size, reps) +
                     "  ·  " + context.getString(R.string.pdf_rest, formatDuration(re.restSeconds.toLong()))
                 page.canvas.drawText(line, 52f, y, bodyP)
@@ -85,4 +85,11 @@ object RoutineShare {
         send.clipData = ClipData.newRawUri(null, uri)
         context.startActivity(Intent.createChooser(send, context.getString(R.string.export_routine_pdf)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
+}
+
+/** Objetivo de la serie en el PDF: repeticiones, segundos o minutos de cardio. */
+private fun targetText(tracking: TrackingType, set: com.bestrong.core.model.RoutineSet?): String = when (tracking) {
+    TrackingType.DURATION -> "${set?.durationSec ?: 0} s"
+    TrackingType.CARDIO -> com.bestrong.mobile.ui.workout.cardioText(set?.durationSec ?: 0, 0.0)
+    else -> "${set?.reps ?: 0}"
 }

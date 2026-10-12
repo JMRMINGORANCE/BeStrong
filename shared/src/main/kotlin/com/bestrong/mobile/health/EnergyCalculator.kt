@@ -46,9 +46,8 @@ class EnergyCalculator @Inject constructor(
         // (no se guarda en el entreno para no volver a exportarlo a Health Connect duplicado)
         val external = if (workout.heartRateSamples.isEmpty()) reader.heartRateDuring(workout.startedAtEpochMs, end) else emptyList()
         val heartRate = workout.heartRateSamples.ifEmpty { external }
-        val result = Energy.compute(
-            activeSeconds = workout.durationSeconds(),
-            completedSets = workout.completedSetCount,
+        val result = Energy.forWorkout(
+            workout = workout,
             profile = profile(),
             watchKcal = watchKcal,
             heartRate = heartRate,

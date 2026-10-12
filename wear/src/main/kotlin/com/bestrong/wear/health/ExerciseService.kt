@@ -63,15 +63,15 @@ class ExerciseService : LifecycleService() {
     private val callback = object : ExerciseUpdateCallback {
         override fun onExerciseUpdateReceived(update: ExerciseUpdate) {
             val m = update.latestMetrics
+            // Todas las lecturas del lote, con su hora real (no solo la última)
+            val boot = Instant.ofEpochMilli(System.currentTimeMillis() - SystemClock.elapsedRealtime())
             if (cardio.isActive) {
-                m.getData(DataType.HEART_RATE_BPM).lastOrNull()?.let { cardio.onHeartRate(it.value.toInt()) }
+                m.getData(DataType.HEART_RATE_BPM).forEach { p -> cardio.onHeartRate(p.value.roundToInt(), p.getTimeInstant(boot).toEpochMilli()) }
                 m.getData(DataType.CALORIES_TOTAL)?.let { cardio.onCalories(it.total) }
                 m.getData(DataType.DISTANCE_TOTAL)?.let { cardio.onDistance(it.total) }
                 m.getData(DataType.SPEED).lastOrNull()?.let { cardio.onSpeed(it.value) }
                 return
             }
-            // Todas las lecturas del lote, con su hora real (no solo la última)
-            val boot = Instant.ofEpochMilli(System.currentTimeMillis() - SystemClock.elapsedRealtime())
             m.getData(DataType.HEART_RATE_BPM).forEach { p ->
                 session.onHeartRate(p.value.roundToInt(), p.getTimeInstant(boot).toEpochMilli())
             }

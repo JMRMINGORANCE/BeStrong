@@ -52,7 +52,8 @@ object Progression {
         stallSessions: Int = 3,
     ): ProgressionSuggestion? {
         val last = WorkoutStats.previousSets(exercise.id, history).filter { it.type != SetType.WARMUP }
-        if (last.isEmpty()) return null
+        // El cardio no progresa por peso ni repeticiones
+        if (last.isEmpty() || exercise.tracking == TrackingType.CARDIO) return null
 
         if (isStalled(exercise.id, history, stallSessions)) {
             val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
