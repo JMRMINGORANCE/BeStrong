@@ -21,6 +21,7 @@ import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.training.HeartRate
+import com.bestrong.core.training.HeartRateTracker
 import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.Tempo
@@ -112,7 +113,12 @@ class WorkoutSession @Inject constructor(
     private var restJob: Job? = null
     private var pushJob: Job? = null
     private var lastMetricsSentAt = 0L
-    private val hrSamples = mutableListOf<Int>()
+
+    /** Pulso del entreno en curso: media ponderada por tiempo, máximo y serie para Health Connect. */
+    private var hr = HeartRateTracker(_workout.value?.startedAtEpochMs ?: System.currentTimeMillis())
+
+    /** Media y máximo de toda la sesión según Health Services (sobreviven si el proceso se reinicia). */
+    private var platformHr: Pair<Int, Int>? = null
 
     init {
         // Si el proceso murió con un entrenamiento activo, retomamos el servicio
@@ -177,7 +183,8 @@ class WorkoutSession @Inject constructor(
         _summary.value = null
         _exerciseIndex.value = 0
         _metrics.value = HealthMetrics()
-        hrSamples.clear()
+        hr = HeartRateTracker(w.startedAtEpochMs)
+        platformHr = null
         set(w)
         ExerciseService.start(context)
         if (_repCounting.value) repCounter.start()
@@ -190,6 +197,7 @@ class WorkoutSession @Inject constructor(
             avgHeartRate = m.avgHeartRate,
             maxHeartRate = m.maxHeartRate,
             calories = m.calories,
+            heartRateSamples = hr.samples(),
         )
         end()
         if (finished.exercises.isEmpty()) return
@@ -227,7 +235,8 @@ class WorkoutSession @Inject constructor(
         if (isNew) {
             _summary.value = null
             _metrics.value = HealthMetrics()
-            hrSamples.clear()
+            hr = HeartRateTracker(remote.startedAtEpochMs)
+            platformHr = null
             _exerciseIndex.value = WorkoutEditor.nextPendingSet(remote)?.first ?: 0
             // Empezado en el móvil: el reloj mide el pulso automáticamente
             ExerciseService.start(context)
@@ -568,9 +577,13 @@ class WorkoutSession @Inject constructor(
 
     // --- Métricas (llamado desde ExerciseService) --------------------------------------------
 
-    fun onHeartRate(bpm: Int) {
+    /**
+     * Una lectura de pulso con su hora real. Health Services las agrupa en lotes (sobre todo con
+     * la pantalla apagada): se pasan todas, no solo la última, para no perder picos.
+     */
+    fun onHeartRate(bpm: Int, atEpochMs: Long = System.currentTimeMillis()) {
         if (bpm <= 0) return
-        hrSamples += bpm
+        hr.add(bpm, atEpochMs)
         val rest = _rest.value
         if (rest == null) {
             if (bpm > setPeakBpm) setPeakBpm = bpm
@@ -582,8 +595,24 @@ class WorkoutSession @Inject constructor(
                 haptic(Haptics.RECOVERED)
             }
         }
+        publishHeartRate()
+    }
+
+    /** Media y máximo de la sesión calculados por Health Services (desde que empezó el ejercicio). */
+    fun onHeartRateStats(average: Int, max: Int) {
+        if (average <= 0) return
+        platformHr = average to max
+        publishHeartRate()
+    }
+
+    private fun publishHeartRate() {
+        val platform = platformHr
         _metrics.update {
-            it.copy(heartRate = bpm, avgHeartRate = hrSamples.average().toInt(), maxHeartRate = hrSamples.max())
+            it.copy(
+                heartRate = hr.latest ?: it.heartRate,
+                avgHeartRate = platform?.first ?: hr.average,
+                maxHeartRate = listOfNotNull(platform?.second, hr.max).maxOrNull(),
+            )
         }
         maybeSendMetrics()
     }

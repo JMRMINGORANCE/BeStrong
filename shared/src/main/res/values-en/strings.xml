@@ -476,7 +476,7 @@
     <string name="privacy_csv_title">Export and import</string>
     <string name="privacy_delete">Uninstalling the app or clearing its data from Android Settings removes all BeStrong information from the device.</string>
     <string name="privacy_delete_title">Deleting your data</string>
-    <string name="privacy_hc">If you turn on export, BeStrong writes each finished workout to Health Connect as a weightlifting session (start, end, name and notes) plus the calories estimated by the watch. BeStrong never reads data from Health Connect. You can revoke the permission at any time from Settings › Health Connect.</string>
+    <string name="privacy_hc">If you turn on export, BeStrong writes each finished workout to Health Connect as a weightlifting session (start, end, name and notes), its calories (measured by the watch, or estimated from duration and body weight if you train without the watch) and the heart-rate graph measured by the watch. If you allow it, it also reads your weight, sleep and resting heart rate to calculate daily readiness. You can revoke the permissions at any time in Settings › Health Connect.</string>
     <string name="privacy_hc_title">Health Connect</string>
     <string name="privacy_images">Exercise animations and images are downloaded from exercisedb.dev (AscendAPI) and wger.de. No personal data is sent with those downloads. Your technique photos and videos are stored only in the app’s private storage.</string>
     <string name="privacy_images_title">Exercise images</string>

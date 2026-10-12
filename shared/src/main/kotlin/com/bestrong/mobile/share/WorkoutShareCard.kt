@@ -120,7 +120,7 @@ object WorkoutShareCard {
         }
 
         val hr = w.avgHeartRate?.let { context.getString(R.string.bpm_value, it) }
-        val footer = listOfNotNull(hr, w.calories?.let { context.getString(R.string.kcal_value, it) }).joinToString("  ·  ")
+        val footer = listOfNotNull(hr, w.calories?.let { (if (w.caloriesEstimated) "≈" else "") + context.getString(R.string.kcal_value, it) }).joinToString("  ·  ")
         if (footer.isNotEmpty()) c.drawText(footer, PAD, H - PAD, text(34f, Color.LTGRAY))
         return bmp
     }

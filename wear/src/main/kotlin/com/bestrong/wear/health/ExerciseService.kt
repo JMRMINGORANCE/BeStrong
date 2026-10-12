@@ -17,10 +17,14 @@ import androidx.health.services.client.data.Availability
 import androidx.health.services.client.data.DataType
 import androidx.health.services.client.data.ExerciseConfig
 import androidx.health.services.client.data.ExerciseLapSummary
+import androidx.health.services.client.data.ExerciseTrackedStatus
 import androidx.health.services.client.data.ExerciseType
 import androidx.health.services.client.data.ExerciseUpdate
 import androidx.health.services.client.endExercise
 import androidx.health.services.client.getCapabilities
+import androidx.health.services.client.getCurrentExerciseInfo
+import androidx.health.services.client.pauseExercise
+import androidx.health.services.client.resumeExercise
 import androidx.health.services.client.startExercise
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
@@ -32,7 +36,11 @@ import com.bestrong.wear.session.CardioSession
 import com.bestrong.wear.session.CardioType
 import com.bestrong.wear.session.WorkoutSession
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.Instant
 import javax.inject.Inject
+import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
@@ -61,7 +69,12 @@ class ExerciseService : LifecycleService() {
                 m.getData(DataType.SPEED).lastOrNull()?.let { cardio.onSpeed(it.value) }
                 return
             }
-            m.getData(DataType.HEART_RATE_BPM).lastOrNull()?.let { session.onHeartRate(it.value.toInt()) }
+            // Todas las lecturas del lote, con su hora real (no solo la última)
+            val boot = Instant.ofEpochMilli(System.currentTimeMillis() - SystemClock.elapsedRealtime())
+            m.getData(DataType.HEART_RATE_BPM).forEach { p ->
+                session.onHeartRate(p.value.roundToInt(), p.getTimeInstant(boot).toEpochMilli())
+            }
+            m.getData(DataType.HEART_RATE_BPM_STATS)?.let { session.onHeartRateStats(it.average.roundToInt(), it.max.roundToInt()) }
             m.getData(DataType.CALORIES_TOTAL)?.let { session.onCalories(it.total) }
         }
         override fun onLapSummaryReceived(lapSummary: ExerciseLapSummary) = Unit
@@ -85,6 +98,7 @@ class ExerciseService : LifecycleService() {
         if (!exerciseStarted) {
             exerciseStarted = true
             lifecycleScope.launch { startExercise() }
+            followPause()
         }
         return START_STICKY
     }
@@ -144,15 +158,21 @@ class ExerciseService : LifecycleService() {
                 return
             }
             val supported = capabilities.getExerciseTypeCapabilities(type).supportedDataTypes
-            val dataTypes = setOf(DataType.HEART_RATE_BPM, DataType.CALORIES_TOTAL).filter { it in supported }.toSet()
+            val wanted = setOf(DataType.HEART_RATE_BPM, DataType.HEART_RATE_BPM_STATS, DataType.CALORIES_TOTAL)
+            val dataTypes = wanted.filter { it in supported }.toSet()
             exerciseClient.setUpdateCallback(callback)
-            exerciseClient.startExercise(
-                ExerciseConfig.builder(type)
-                    .setDataTypes(dataTypes)
-                    .setIsAutoPauseAndResumeEnabled(false)
-                    .setIsGpsEnabled(false)
-                    .build(),
-            )
+            // Si Android reinició la app con el ejercicio aún en marcha, se sigue con él: empezar
+            // otro pondría las calorías y las estadísticas de pulso a cero
+            val info = runCatching { exerciseClient.getCurrentExerciseInfo() }.getOrNull()
+            if (info?.exerciseTrackedStatus != ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS) {
+                exerciseClient.startExercise(
+                    ExerciseConfig.builder(type)
+                        .setDataTypes(dataTypes)
+                        .setIsAutoPauseAndResumeEnabled(false)
+                        .setIsGpsEnabled(false)
+                        .build(),
+                )
+            }
         } catch (e: Exception) {
             Log.w(TAG, "No se pudo iniciar la sesión de Health Services", e)
         }
@@ -181,6 +201,16 @@ class ExerciseService : LifecycleService() {
             )
         } catch (e: Exception) {
             Log.w(TAG, "No se pudo iniciar el cardio", e)
+        }
+    }
+
+    /** La pausa del entreno (desde el móvil o el reloj) también pausa pulso y calorías. */
+    private fun followPause() {
+        lifecycleScope.launch {
+            session.workout.map { it?.isPaused == true }.distinctUntilChanged().collect { paused ->
+                if (cardio.isActive) return@collect
+                runCatching { if (paused) exerciseClient.pauseExercise() else exerciseClient.resumeExercise() }
+            }
         }
     }
 

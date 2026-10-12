@@ -114,6 +114,10 @@ data class Workout(
     val rating: SessionRating? = null,
     /** Modo pareja: entreno de otra persona en el mismo móvil (null = el tuyo). */
     val athlete: String? = null,
+    /** Pulso a lo largo del entreno (una muestra cada ~10 s, medido por el reloj). */
+    val heartRateSamples: List<HeartRateSample> = emptyList(),
+    /** Calorías estimadas por duración y peso (entreno sin reloj), no medidas. */
+    val caloriesEstimated: Boolean = false,
 ) {
     val isPaused: Boolean get() = pausedAtEpochMs != null
 
@@ -134,3 +138,7 @@ data class Workout(
         return (end - startedAtEpochMs - pausedTotalMs).coerceAtLeast(0) / 1000
     }
 }
+
+/** Pulso en un momento del entreno: segundos desde el inicio y pulsaciones por minuto. */
+@Serializable
+data class HeartRateSample(val offsetSec: Int, val bpm: Int)

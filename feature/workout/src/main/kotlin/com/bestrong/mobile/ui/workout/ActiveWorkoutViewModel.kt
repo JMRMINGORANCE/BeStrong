@@ -15,6 +15,7 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Autoregulation
+import com.bestrong.core.training.Energy
 import com.bestrong.core.training.NextTime
 import com.bestrong.core.training.NextTimeSuggestion
 import com.bestrong.core.training.Progression
@@ -305,10 +306,16 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val metrics = metricsStore.metrics.value?.takeIf { it.workoutId == current.id }
-            val finished = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
+            val ended = WorkoutEditor.finish(current, System.currentTimeMillis())
+            val measured = metrics?.calories ?: current.calories
+            // Sin reloj: estimación por MET con el peso más reciente y el tiempo activo (sin pausas)
+            val bodyWeight = repo.measurements.value.sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg }
+            val estimated = if (measured == null) Energy.estimateStrengthKcal(ended.durationSeconds(), bodyWeight) else null
+            val finished = ended.copy(
                 avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
                 maxHeartRate = metrics?.maxHeartRate ?: current.maxHeartRate,
-                calories = metrics?.calories ?: current.calories,
+                calories = measured ?: estimated,
+                caloriesEstimated = estimated != null,
             )
             restTimer.skip()
             repo.setActive(null)

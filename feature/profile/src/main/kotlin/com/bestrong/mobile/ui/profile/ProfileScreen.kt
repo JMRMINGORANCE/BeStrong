@@ -86,7 +86,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     // Lectura (peso, sueño, pulso en reposo): permiso aparte y luego se importa el peso
     val hcReadLauncher = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { vm.importHealthWeights() }
     val hcLauncher = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
-        val ok = granted.containsAll(vm.healthConnectPermissions)
+        // Basta con la sesión; si no se conceden calorías o pulso, se exporta lo demás
+        val ok = vm.healthConnectRequired in granted
         vm.updateSettings { it.copy(healthConnectExport = ok) }
         vm.refreshHealthConnect()
     }

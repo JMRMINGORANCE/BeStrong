@@ -66,7 +66,7 @@ object SyncContract {
      */
     fun compactHistory(history: List<Workout>, limit: Int = 30): List<Workout> =
         history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.take(limit)
-            .map { w -> w.copy(notes = "", exercises = w.exercises.map { it.copy(notes = "", sets = it.completedSets) }) }
+            .map { w -> w.copy(notes = "", heartRateSamples = emptyList(), exercises = w.exercises.map { it.copy(notes = "", sets = it.completedSets) }) }
 }
 
 /** Métricas del reloj durante un entreno (para mostrarlas en el móvil). */

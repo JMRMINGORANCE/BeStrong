@@ -476,7 +476,7 @@
     <string name="privacy_csv_title">Exportar e importar</string>
     <string name="privacy_delete">Desinstalar la app o borrar sus datos desde Ajustes de Android elimina toda la información de BeStrong del dispositivo.</string>
     <string name="privacy_delete_title">Borrar tus datos</string>
-    <string name="privacy_hc">Si activas la exportación, BeStrong escribe en Health Connect cada entrenamiento terminado como sesión de pesas (hora de inicio, fin, nombre y notas) y las calorías estimadas por el reloj. BeStrong no lee ningún dato de Health Connect. Puedes retirar el permiso en cualquier momento desde Ajustes › Health Connect.</string>
+    <string name="privacy_hc">Si activas la exportación, BeStrong escribe en Health Connect cada entrenamiento terminado como sesión de pesas (hora de inicio, fin, nombre y notas), sus calorías (medidas por el reloj, o estimadas por duración y peso si entrenas sin reloj) y la gráfica de pulso medida por el reloj. Si lo permites, también lee tu peso, tu sueño y tu pulso en reposo para calcular la preparación del día. Puedes retirar los permisos en cualquier momento desde Ajustes › Health Connect.</string>
     <string name="privacy_hc_title">Health Connect</string>
     <string name="privacy_images">Las animaciones e imágenes de los ejercicios se descargan de exercisedb.dev (AscendAPI) y wger.de. En esas descargas no se envía ningún dato tuyo. Tus fotos y vídeos de técnica se guardan solo en la memoria privada de la app.</string>
     <string name="privacy_images_title">Imágenes de ejercicios</string>

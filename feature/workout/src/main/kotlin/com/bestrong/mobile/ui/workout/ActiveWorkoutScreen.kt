@@ -686,7 +686,9 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
                     StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
                 }
                 Text(stringResource(R.string.summary_sets_exercises, w.completedSetCount, w.exercises.size))
-                w.avgHeartRate?.let { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") + (w.calories?.let { c -> stringResource(R.string.summary_kcal, c) } ?: "")) }
+                val kcal = w.calories?.let { c -> (if (w.caloriesEstimated) "≈" else "") + stringResource(R.string.kcal_value, c) }
+                listOfNotNull(w.avgHeartRate?.let { stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") }, kcal)
+                    .takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(" · ")) }
                 // Frente a la última vez que hiciste cada ejercicio
                 if (summary.comparisons.isNotEmpty()) {
                     Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)

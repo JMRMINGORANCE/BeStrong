@@ -184,6 +184,7 @@ class ProfileViewModel @Inject constructor(
 
     val healthConnectAvailable = healthConnect.isAvailable()
     val healthConnectPermissions = healthConnect.permissions
+    val healthConnectRequired = healthConnect.sessionPermission
     val healthConnectGranted = MutableStateFlow(false)
 
     fun refreshHealthConnect() = viewModelScope.launch {

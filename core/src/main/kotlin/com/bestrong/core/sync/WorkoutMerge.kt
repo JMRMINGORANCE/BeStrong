@@ -36,6 +36,7 @@ object WorkoutMerge {
             avgHeartRate = newer.avgHeartRate ?: older.avgHeartRate,
             maxHeartRate = newer.maxHeartRate ?: older.maxHeartRate,
             calories = newer.calories ?: older.calories,
+            heartRateSamples = newer.heartRateSamples.ifEmpty { older.heartRateSamples },
         )
     }
 

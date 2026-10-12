@@ -255,7 +255,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         w.avgHeartRate?.let { StatTile(stringResource(R.string.stat_avg_hr), stringResource(R.string.bpm_value, it), Modifier.weight(1f)) }
                         w.maxHeartRate?.let { StatTile(stringResource(R.string.stat_max_hr), stringResource(R.string.bpm_value, it), Modifier.weight(1f)) }
-                        w.calories?.let { StatTile(stringResource(R.string.stat_calories), stringResource(R.string.kcal_value, it), Modifier.weight(1f)) }
+                        w.calories?.let { StatTile(stringResource(R.string.stat_calories), (if (w.caloriesEstimated) "≈" else "") + stringResource(R.string.kcal_value, it), Modifier.weight(1f)) }
                     }
                 }
             }
