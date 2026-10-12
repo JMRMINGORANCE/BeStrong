@@ -7,25 +7,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.bestrong.mobile.share.MusicApps
 import com.bestrong.mobile.shared.R
 
 /**
- * Controles de la música que suene (Spotify, YouTube Music…) sin salir del entreno.
- * Envía las teclas multimedia del sistema: no necesita cuentas ni permisos.
+ * Controles de la música que suene (Apple Music, Spotify, YouTube Music…) sin salir del entreno.
+ * Envía las teclas multimedia del sistema: no necesita cuentas ni permisos. El último botón
+ * abre la app de música elegida en Ajustes.
  */
 @Composable
-fun MediaControls(modifier: Modifier = Modifier) {
+fun MediaControls(musicApp: String? = null, modifier: Modifier = Modifier) {
     val context = LocalContext.current
+    val app = remember(musicApp) { MusicApps.preferred(context, musicApp) }
     fun send(code: Int) {
         val am = context.getSystemService(AudioManager::class.java) ?: return
         val t = SystemClock.uptimeMillis()
@@ -36,5 +41,8 @@ fun MediaControls(modifier: Modifier = Modifier) {
         IconButton(onClick = { send(KeyEvent.KEYCODE_MEDIA_PREVIOUS) }) { Icon(Icons.Default.SkipPrevious, stringResource(R.string.media_previous)) }
         IconButton(onClick = { send(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE) }) { Icon(Icons.Default.PlayArrow, stringResource(R.string.media_play_pause)) }
         IconButton(onClick = { send(KeyEvent.KEYCODE_MEDIA_NEXT) }) { Icon(Icons.Default.SkipNext, stringResource(R.string.media_next)) }
+        app?.let { a ->
+            IconButton(onClick = { MusicApps.open(context, a) }) { Icon(Icons.Default.LibraryMusic, stringResource(R.string.media_open_app, a.label)) }
+        }
     }
 }

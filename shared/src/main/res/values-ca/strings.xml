@@ -345,9 +345,10 @@
     <string name="measurements">Mesures corporals</string>
     <string name="media_add">Foto o vídeo</string>
     <string name="media_controls">Controls de música a l’entrenament</string>
-    <string name="media_controls_body">Per a Spotify, YouTube Music o qualsevol reproductor</string>
+    <string name="media_controls_body">Apple Music, Spotify, YouTube Music o qualsevol reproductor</string>
     <string name="media_delete">Esborrar</string>
     <string name="media_next">Cançó següent</string>
+    <string name="media_open_app">Obre %1$s</string>
     <string name="media_open_photo">Obrir foto</string>
     <string name="media_open_video">Reproduir vídeo</string>
     <string name="media_play_pause">Reproduir o pausar la música</string>
@@ -392,6 +393,8 @@
     <string name="muscle_traps">Trapezi</string>
     <string name="muscle_triceps">Tríceps</string>
     <string name="muscles_worked">Músculs treballats</string>
+    <string name="music_app">App de música del botó</string>
+    <string name="music_app_auto">Automàtica</string>
     <string name="n_records">🏆 %1$d rècords</string>
     <string name="n_reps">%1$d reps</string>
     <string name="n_sets">%1$s sèries</string>

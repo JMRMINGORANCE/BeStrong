@@ -48,6 +48,8 @@ data class UserSettings(
     val volumeKeys: Boolean = false,
     val mediaControls: Boolean = true,
     val voiceAnnouncements: Boolean = false,
+    /** App de música que abre el botón del entreno (paquete; null = la primera instalada). */
+    val musicApp: String? = null,
     /** Modo pareja: nombre de la otra persona (vacío = desactivado). */
     val partnerName: String = "",
     /** Tema, acento, AMOLED, alto contraste, modo daltónico y tipo de letra. */
@@ -98,6 +100,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         volumeKeys = prefs.getBoolean("volume_keys", false),
         mediaControls = prefs.getBoolean("media_controls", true),
         voiceAnnouncements = prefs.getBoolean("voice_announcements", false),
+        musicApp = prefs.getString("music_app", null),
         partnerName = prefs.getString("partner_name", "").orEmpty(),
         sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
         appearance = Appearance(
@@ -146,6 +149,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBoolean("volume_keys", s.volumeKeys)
             putBoolean("media_controls", s.mediaControls)
             putBoolean("voice_announcements", s.voiceAnnouncements)
+            putString("music_app", s.musicApp)
             putString("partner_name", s.partnerName)
             putString("theme_mode", s.appearance.mode.name)
             putString("accent", s.appearance.accent.name)

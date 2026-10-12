@@ -286,6 +286,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             body = stringResource(R.string.media_controls_body),
                             checked = settings.mediaControls,
                         ) { v -> vm.updateSettings { it.copy(mediaControls = v) } }
+                        if (settings.mediaControls) MusicAppPicker(settings.musicApp) { pkg -> vm.updateSettings { it.copy(musicApp = pkg) } }
                         SwitchItem(
                             title = stringResource(R.string.voice_announcements),
                             body = stringResource(R.string.voice_announcements_body),
@@ -412,4 +413,22 @@ private fun SwitchItem(title: String, body: String? = null, checked: Boolean, en
         trailingContent = { Switch(checked = checked, onCheckedChange = null, enabled = enabled) },
         modifier = Modifier.toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onChange),
     )
+}
+
+/** Qué app de música abre el botón del entreno (solo las instaladas). */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun MusicAppPicker(selected: String?, onSelect: (String?) -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val apps = remember { com.bestrong.mobile.share.MusicApps.installed(context) }
+    if (apps.isEmpty()) return
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+        Text(stringResource(R.string.music_app), style = MaterialTheme.typography.bodyMedium)
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            androidx.compose.material3.FilterChip(selected = selected == null, onClick = { onSelect(null) }, label = { Text(stringResource(R.string.music_app_auto)) })
+            apps.forEach { a ->
+                androidx.compose.material3.FilterChip(selected = selected == a.packageName, onClick = { onSelect(a.packageName) }, label = { Text(a.label) })
+            }
+        }
+    }
 }

@@ -20,6 +20,14 @@
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
+        <!-- Apps de música que se pueden abrir desde el entreno -->
+        <package android:name="com.apple.android.music" />
+        <package android:name="com.spotify.music" />
+        <package android:name="com.google.android.apps.youtube.music" />
+        <package android:name="com.sec.android.app.music" />
+        <package android:name="com.amazon.mp3" />
+        <package android:name="deezer.android.app" />
+        <package android:name="com.aspiro.tidal" />
         <!-- Búsqueda de ejercicios por voz -->
         <intent>
             <action android:name="android.speech.action.RECOGNIZE_SPEECH" />

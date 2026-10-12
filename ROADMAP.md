@@ -93,7 +93,7 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Calendario del sistema (.ics); atajos de la app (también para Bixby Routines); mosaico de ajustes rápidos
 - [x] Rutina por enlace/QR, exportar programa a PDF, tarjeta de récord, Quick Share
 - [x] Modo pareja en el mismo móvil; modo clase/circuito
-- [x] Controles de música (teclas multimedia, sin cuentas) y avisos por voz por los auriculares (Galaxy Buds)
+- [x] Controles de música para Apple Music, Spotify, YouTube Music o cualquier reproductor (teclas multimedia, sin cuentas) y botón para abrir la app elegida y avisos por voz por los auriculares (Galaxy Buds)
 - [ ] Strava / Google Fit 🔑, API de Spotify 🔑, geovalla del gimnasio 🔑 — necesitan claves o cuentas del propietario
 
 ## Fase 7 — Accesibilidad, idiomas y personalización ✅

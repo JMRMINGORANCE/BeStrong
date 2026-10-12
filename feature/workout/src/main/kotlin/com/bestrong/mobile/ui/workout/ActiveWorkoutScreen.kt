@@ -267,7 +267,7 @@ fun ActiveWorkoutScreen(
                     rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true) }
                     if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
-                    if (settings.mediaControls) MediaControls()
+                    if (settings.mediaControls) MediaControls(settings.musicApp)
                     SummaryPanel(w, previous, liveMetrics)
                 }
                 listContent(Modifier.weight(0.62f))
@@ -276,7 +276,7 @@ fun ActiveWorkoutScreen(
                 if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                 if (w.isPaused) PausedBanner(vm::togglePause)
                 RestOverrunBanner(restEndedAt, vm::dismissOverrun)
-                if (settings.mediaControls) MediaControls()
+                if (settings.mediaControls) MediaControls(settings.musicApp)
                 StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                 listContent(Modifier.weight(1f))
             }
