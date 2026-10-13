@@ -419,7 +419,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             return@launch
         }
         restTimer.skip()
-        repo.setActive(null)
+        // Se puede deshacer desde Inicio durante unos segundos
+        repo.discardActive()
     }
 
     fun saveSummaryAsRoutine() {

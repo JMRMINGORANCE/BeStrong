@@ -132,7 +132,14 @@ class HomeViewModel @Inject constructor(
         _messages.tryEmit(context.getString(R.string.msg_forgotten_saved))
     }
 
-    fun discardActive() = viewModelScope.launch { repo.setActive(null) }
+    fun discardActive() = viewModelScope.launch { repo.discardActive() }
+
+    /** Entreno recién descartado (para el aviso con «Deshacer»). */
+    val discarded: StateFlow<com.bestrong.core.model.Workout?> = repo.discarded
+
+    fun restoreDiscarded(onRestored: () -> Unit) = viewModelScope.launch { if (repo.restoreDiscarded()) onRestored() }
+
+    fun forgetDiscarded() = repo.forgetDiscarded()
 
     /** Training max sugerido (90 % del mejor 1RM estimado) para preparar un programa. */
     fun suggestedTrainingMax(exerciseId: String): Double? = Periodization.suggestedTrainingMax(exerciseId, repo.history.value)

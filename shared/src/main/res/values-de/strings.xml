@@ -907,4 +907,5 @@
     <string name="weight_trend_change">7-Tage-Schnitt: %1$s (%2$s gegenüber der Vorwoche)</string>
     <string name="routine_estimated">≈ %1$d Min.</string>
     <string name="exercise_last_time">Zuletzt: %1$s · %2$s</string>
+    <string name="undo_workout_discarded">Training „%1$s“ verworfen</string>
 </resources>

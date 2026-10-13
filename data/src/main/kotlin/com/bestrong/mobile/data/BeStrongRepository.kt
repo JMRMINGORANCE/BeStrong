@@ -25,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -140,7 +141,34 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     private val activeMutex = Mutex()
 
     /** Cambio local: marca la hora de modificación para la sincronización con el reloj. */
-    suspend fun setActive(workout: Workout?) = activeMutex.withLock { write(workout?.copy(updatedAtEpochMs = System.currentTimeMillis())) }
+    suspend fun setActive(workout: Workout?) = activeMutex.withLock {
+        // Con un entreno nuevo ya no se ofrece recuperar el descartado
+        if (workout != null) _discarded.value = null
+        write(workout?.copy(updatedAtEpochMs = System.currentTimeMillis()))
+    }
+
+    /** Último entreno descartado (en memoria): se puede recuperar mientras no se empiece otro. */
+    private val _discarded = MutableStateFlow<Workout?>(null)
+    val discarded: StateFlow<Workout?> = _discarded
+
+    /** Descarta el entreno en curso guardándolo para poder deshacerlo. */
+    suspend fun discardActive() = activeMutex.withLock {
+        _discarded.value = currentActive()
+        write(null)
+    }
+
+    /** Recupera el entreno descartado si no hay otro en curso. Devuelve si se recuperó. */
+    suspend fun restoreDiscarded(): Boolean = activeMutex.withLock {
+        val w = _discarded.value
+        _discarded.value = null
+        if (w == null || currentActive() != null) return@withLock false
+        write(w.copy(updatedAtEpochMs = System.currentTimeMillis()))
+        true
+    }
+
+    fun forgetDiscarded() {
+        _discarded.value = null
+    }
 
     private suspend fun write(workout: Workout?) {
         if (workout == null) {

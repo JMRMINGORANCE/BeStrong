@@ -104,6 +104,7 @@ fun HomeScreen(
     var showPrograms by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
     UndoRoutineDelete(vm, snackbar)
+    UndoDiscard(vm, snackbar, onOpenWorkout)
     // ¿Se quedó un entreno abierto sin querer? Ofrecer terminarlo a la hora de la última serie
     var forgotten by remember { mutableStateOf(vm.forgottenWorkout()) }
     forgotten?.let { fw ->
@@ -402,5 +403,19 @@ private fun LazyGridScope.routineItems(
             FolderHeader(folder, list.size, folded) { onToggleFolder(folder) }
         }
         if (!folded) items(list, key = { it.id }) { card(it) }
+    }
+}
+
+/** Descartar un entreno por error se puede deshacer al volver a Inicio. */
+@Composable
+private fun UndoDiscard(vm: HomeViewModel, snackbar: SnackbarHostState, onOpenWorkout: () -> Unit) {
+    val discarded by vm.discarded.collectAsStateWithLifecycle()
+    val msg = discarded?.let { stringResource(R.string.undo_workout_discarded, it.name) }
+    val undoLabel = stringResource(R.string.action_undo)
+    LaunchedEffect(discarded) {
+        if (msg != null) {
+            val result = snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Long)
+            if (result == SnackbarResult.ActionPerformed) vm.restoreDiscarded(onOpenWorkout) else vm.forgetDiscarded()
+        }
     }
 }
