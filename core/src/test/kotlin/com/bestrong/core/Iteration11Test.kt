@@ -92,3 +92,21 @@ class Iteration12Test {
         assertEquals("a · b", ProgramTexts.userPart("a · X · b", listOf("X")))
     }
 }
+
+class TrimToFitTest {
+    @Test fun removesPendingSetsFromTheEndUntilItFits() {
+        val curl = com.bestrong.core.library.ExerciseLibrary.byId("barbell_curl") ?: com.bestrong.core.library.ExerciseLibrary.all[5]
+        val main = WorkoutExercise(exercise = bench, restSeconds = 120, sets = List(3) { WorkoutSet(weightKg = 100.0, reps = 5) })
+        val acc = WorkoutExercise(exercise = curl, restSeconds = 60, sets = List(3) { WorkoutSet(weightKg = 20.0, reps = 10) })
+        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(main, acc))
+        val est = { x: Workout -> WorkoutEditor.estimatedRemainingSeconds(x, nowEpochMs = 0) }
+        // 6×40 + 2×120 + 120 (cambio) + 2×60 = 720; con 500 s debe caer el accesorio
+        val trimmed = WorkoutEditor.trimToFit(w, 500, est)
+        assertEquals(true, est(trimmed) <= 500)
+        assertEquals(3, trimmed.exercises[0].sets.size)
+        // Nunca quita la siguiente serie
+        val minimal = WorkoutEditor.trimToFit(w, 0, est)
+        assertEquals(1, minimal.exercises.size)
+        assertEquals(main.sets[0].id, minimal.exercises[0].sets.single().id)
+    }
+}

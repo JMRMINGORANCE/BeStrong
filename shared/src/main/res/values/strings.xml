@@ -942,4 +942,9 @@
     <string name="deadline_clear">Quitar</string>
     <string name="undo_completed_sets">Series marcadas como hechas</string>
     <string name="deadline_set_action">poner hora límite</string>
+    <string name="deadline_fit">Ajustar a mi hora límite</string>
+    <string name="undo_trimmed_sets">Series del final quitadas para llegar a tiempo</string>
+    <string name="rest_use_real">Usar %1$s en la rutina</string>
+    <string name="lagging_muscle_open">ver ejercicios</string>
+    <string name="notif_progress_eta">%1$d/%2$d series · ≈ %3$d min, fin %4$s</string>
 </resources>

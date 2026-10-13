@@ -203,6 +203,27 @@ object WorkoutEditor {
     /** Series que [completeRemaining] marcaría. */
     fun completableCount(we: WorkoutExercise): Int = we.sets.count { !it.completed && (it.isRunning || it.hasTarget) }
 
+    /**
+     * «Ajustar a mi hora límite»: quita series pendientes desde el final del entreno (los accesorios
+     * suelen ir al final), la última de cada vez, hasta que la estimación quepa en [budgetSeconds].
+     * Nunca toca la siguiente serie por hacer ni un cronómetro en marcha; los ejercicios que se quedan
+     * sin series se quitan. Si ni así cabe, quita lo que puede.
+     */
+    fun trimToFit(workout: Workout, budgetSeconds: Int, estimate: (Workout) -> Int): Workout {
+        var w = workout
+        val keep = nextPendingSet(workout)?.second?.id
+        while (estimate(w) > budgetSeconds) {
+            val target = w.exercises.indices.reversed().firstNotNullOfOrNull { i ->
+                w.exercises[i].sets.lastOrNull { !it.completed && !it.isRunning && it.id != keep }?.let { i to it.id }
+            } ?: break
+            val (i, setId) = target
+            val we = w.exercises[i]
+            val sets = we.sets.filterNot { it.id == setId }
+            w = w.copy(exercises = if (sets.isEmpty()) w.exercises.filterIndexed { j, _ -> j != i } else w.exercises.map { if (it.id == we.id) it.copy(sets = sets) else it })
+        }
+        return w
+    }
+
     /** Lo que se baja el peso en un drop set. */
     const val DROP_FACTOR = 0.8
 

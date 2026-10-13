@@ -3,6 +3,7 @@ package com.bestrong.mobile.ui.home
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -243,16 +244,22 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
 
 /** «Esta semana vas corto de: Espalda 4 de 10 series». */
 @Composable
-fun LaggingMusclesCard(vm: HomeViewModel) {
+fun LaggingMusclesCard(vm: HomeViewModel, onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {}) {
     val lagging by vm.laggingMuscles.collectAsStateWithLifecycle()
     if (lagging.isEmpty()) return
     Card {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.lagging_muscles_title), fontWeight = FontWeight.Bold)
+        Column(Modifier.padding(vertical = 12.dp)) {
+            Text(stringResource(R.string.lagging_muscles_title), fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
+            // Cada músculo abre la biblioteca con sus ejercicios
             lagging.forEach { (muscle, sets) ->
                 Text(
-                    stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()),
+                    stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()) + "  ›",
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = stringResource(R.string.lagging_muscle_open)) { onOpenMuscle(muscle) }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                 )
             }
         }

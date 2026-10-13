@@ -38,6 +38,8 @@ internal data class EtaInputs(
     val warmupRestSeconds: Int = WorkoutEditor.WARMUP_REST_SECONDS,
     val deadlineEpochMs: Long? = null,
     val onDeadline: (Long?) -> Unit = {},
+    /** Recortar series del final para llegar a la hora límite. */
+    val onFit: () -> Unit = {},
 )
 
 /**
@@ -73,6 +75,7 @@ internal fun RemainingTimeLine(remainingSeconds: Int, now: Long, eta: EtaInputs)
         Icon(Icons.Default.Schedule, contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
         Text(text, style = MaterialTheme.typography.labelMedium, color = color)
     }
+    if (over) TextButton(onClick = eta.onFit) { Text(stringResource(R.string.deadline_fit)) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

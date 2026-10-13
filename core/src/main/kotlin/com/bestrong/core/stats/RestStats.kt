@@ -5,7 +5,10 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 
 /** Descanso real frente al planificado, en segundos (medias). */
-data class RestSummary(val realSeconds: Int, val plannedSeconds: Int, val samples: Int)
+data class RestSummary(val realSeconds: Int, val plannedSeconds: Int, val samples: Int) {
+    /** El descanso real redondeado a 15 s, para llevarlo a la rutina. */
+    val suggestedSeconds: Int get() = (Math.round(realSeconds / 15.0) * 15).toInt().coerceAtLeast(15)
+}
 
 object RestStats {
     /** Más que esto entre dos series no es descanso (pausa, cambio de máquina, charla…). */

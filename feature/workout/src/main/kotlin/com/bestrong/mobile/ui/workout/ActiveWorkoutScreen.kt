@@ -183,6 +183,7 @@ fun ActiveWorkoutScreen(
     val undoExercise = stringResource(R.string.undo_exercise_deleted)
     val undoCopy = stringResource(R.string.undo_copied_sets)
     val undoComplete = stringResource(R.string.undo_completed_sets)
+    val undoTrim = stringResource(R.string.undo_trimmed_sets)
     val undoLabel = stringResource(R.string.action_undo)
     val applyLabel = stringResource(R.string.action_apply)
     val rpeDown = stringResource(R.string.rpe_suggest_down)
@@ -204,6 +205,7 @@ fun ActiveWorkoutScreen(
                         ActiveWorkoutViewModel.UndoKind.EXERCISE -> undoExercise
                         ActiveWorkoutViewModel.UndoKind.COPY -> undoCopy
                         ActiveWorkoutViewModel.UndoKind.COMPLETE -> undoComplete
+                        ActiveWorkoutViewModel.UndoKind.TRIM -> undoTrim
                     }
                     if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo(e)
                 }
@@ -266,7 +268,7 @@ fun ActiveWorkoutScreen(
         },
     ) { padding ->
         val content = Modifier.padding(padding).fillMaxSize()
-        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline, vm::setDeadline)
+        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline, vm::setDeadline, vm::fitToDeadline)
         when {
             posture == FoldPosture.TABLETOP -> Column(content) {
                 // Mitad superior: lo que se mira desde el banco
@@ -834,6 +836,14 @@ fun WorkoutSummaryDialog(
                 listOfNotNull(w.avgHeartRate?.let { stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") }, kcal)
                     .takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(" · ")) }
                 if (w.notes.isNotBlank()) Text(w.notes, style = MaterialTheme.typography.bodySmall, fontStyle = FontStyle.Italic)
+                // Cuánto descansaste de verdad frente a lo previsto
+                remember(w) { com.bestrong.core.stats.RestStats.summary(w) }?.let { r ->
+                    Text(
+                        stringResource(R.string.rest_real_avg, formatDuration(r.realSeconds.toLong()), formatDuration(r.plannedSeconds.toLong())),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 summary.weeklyGoalReached?.let { goal ->
                     Text(stringResource(R.string.weekly_goal_reached, goal), fontWeight = FontWeight.Bold, color = statusColors.good)
                 }

@@ -87,6 +87,8 @@ fun HomeScreen(
     onOpenWorkout: () -> Unit,
     onEditRoutine: (String?) -> Unit,
     onOpenPlanning: () -> Unit = {},
+    /** Abre la biblioteca filtrada por ese músculo. */
+    onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {},
 ) {
     val routines by vm.routines.collectAsStateWithLifecycle()
     val active by vm.active.collectAsStateWithLifecycle()
@@ -226,7 +228,7 @@ fun HomeScreen(
                 )
             }
             // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
-            item { LaggingMusclesCard(vm) }
+            item { LaggingMusclesCard(vm, onOpenMuscle) }
             item { ReadinessCard(vm) }
             item { IntakeCard(vm) }
             item { TipCard("home_reorder", R.string.tip_home) }

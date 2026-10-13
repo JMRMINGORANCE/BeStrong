@@ -98,6 +98,12 @@ class ExercisesViewModel @Inject constructor(
 
     val filter = MutableStateFlow(ExerciseFilter())
 
+    /** Abre la biblioteca con solo ese músculo (nombre del enum; se ignora si no existe). */
+    fun showMuscle(name: String) {
+        val muscle = MuscleGroup.entries.firstOrNull { it.name == name } ?: return
+        filter.value = ExerciseFilter(muscle = muscle)
+    }
+
     /** Ejercicios usados recientemente, primero (como Hevy). */
     val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, favorites, planning.state) { all, f, history, favs, plan ->
         val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }

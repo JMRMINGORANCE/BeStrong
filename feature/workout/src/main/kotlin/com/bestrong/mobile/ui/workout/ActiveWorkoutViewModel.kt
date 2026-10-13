@@ -134,6 +134,37 @@ class ActiveWorkoutViewModel @Inject constructor(
     ) { at, id, w -> at.takeIf { id != null && id == w?.id } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    /** Quita series pendientes del final hasta que la estimación quepa en la hora límite (se puede deshacer). */
+    fun fitToDeadline() {
+        val limit = deadline.value ?: return
+        val partner = partnerMode.value
+        val restEnds = restTimer.rest.value?.endsAtEpochMs
+        val warmup = settings.value.warmupRestSeconds
+        viewModelScope.launch {
+            val now = System.currentTimeMillis()
+            val budget = ((limit - now) / 1000).toInt().coerceAtLeast(0)
+            val (before, after) = update(partner) { w ->
+                WorkoutEditor.trimToFit(w, budget) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = now, warmupRestSeconds = warmup, restEndsAtEpochMs = restEnds) }
+            } ?: return@launch
+            if (before == after) return@launch
+            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.TRIM, partner, before.id) { w -> restoreMissing(before, w) })
+        }
+    }
+
+    /** Vuelve a poner, en su sitio, los ejercicios y series de [before] que faltan en [w] (sin tocar lo demás). */
+    private fun restoreMissing(before: Workout, w: Workout): Workout {
+        val current = w.exercises.associateBy { it.id }
+        val merged = before.exercises.map { old ->
+            val now = current[old.id] ?: return@map old
+            val ids = now.sets.map { it.id }.toSet()
+            val missing = old.sets.filter { it.id !in ids }
+            if (missing.isEmpty()) now else now.copy(sets = old.sets.mapNotNull { s -> if (s.id in ids) now.sets.first { it.id == s.id } else s })
+        }
+        // Lo añadido después del recorte se queda al final
+        val extra = w.exercises.filter { e -> before.exercises.none { it.id == e.id } }
+        return w.copy(exercises = merged + extra)
+    }
+
     fun setDeadline(epochMs: Long?) {
         savedState[KEY_DEADLINE_WORKOUT] = workout.value?.id
         savedState[KEY_DEADLINE] = epochMs
@@ -215,7 +246,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         class Undoable(val kind: UndoKind, val partner: Boolean, val workoutId: String, val restore: (Workout) -> Workout) : WorkoutEvent
         data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
     }
-    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE }
+    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, TRIM }
 
     private val _events = MutableSharedFlow<WorkoutEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<WorkoutEvent> = _events

@@ -193,13 +193,24 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
                         onEditRoutine = { nav.navigate(Routes.routine(it)) },
                         onOpenPlanning = { nav.navigate(Routes.PLANNING) },
+                        onOpenMuscle = { muscle ->
+                            nav.navigateTopLevel(TopLevel.EXERCISES.route)
+                            nav.currentBackStackEntry?.savedStateHandle?.set(KEY_MUSCLE_FILTER, muscle.name)
+                        },
                     )
                 }
                 composable(TopLevel.HISTORY.route) {
                     HistoryScreen(hiltViewModel<HistoryViewModel>(), onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } })
                 }
-                composable(TopLevel.EXERCISES.route) {
-                    ExerciseLibraryScreen(hiltViewModel<ExercisesViewModel>())
+                composable(TopLevel.EXERCISES.route) { entry ->
+                    val exercisesVm = hiltViewModel<ExercisesViewModel>()
+                    // Desde Inicio («vas corto de espalda»): la biblioteca se abre filtrada por ese músculo
+                    val muscle by entry.savedStateHandle.getStateFlow<String?>(KEY_MUSCLE_FILTER, null).collectAsStateWithLifecycle()
+                    LaunchedEffect(muscle) {
+                        muscle?.let { exercisesVm.showMuscle(it) }
+                        entry.savedStateHandle[KEY_MUSCLE_FILTER] = null
+                    }
+                    ExerciseLibraryScreen(exercisesVm)
                 }
                 composable(TopLevel.PROFILE.route) {
                     ProfileScreen(
@@ -284,6 +295,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
         }
     }
 }
+
+private const val KEY_MUSCLE_FILTER = "muscle_filter"
 
 private fun NavHostController.navigateTopLevel(route: String) = navigate(route) {
     popUpTo(graph.findStartDestination().id) { saveState = true }

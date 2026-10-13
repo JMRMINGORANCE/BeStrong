@@ -65,6 +65,7 @@ import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RestStats
+import com.bestrong.core.stats.RestSummary
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.share.DragShare
@@ -238,6 +239,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     var editSet by remember { mutableStateOf<Pair<String, String>?>(null) }
     val records by produceState(emptyList<PersonalRecord>(), w) { value = vm.recordsIn(w) }
     val restByExercise = remember(w) { RestStats.byExercise(w) }
+    val routinesById by vm.routinesById.collectAsStateWithLifecycle()
     if (editInfo) {
         EditPastWorkoutInfoDialog(
             w.name, w.notes, w.startedAtEpochMs, w.durationSeconds() / 60,
@@ -332,13 +334,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp)) }
                         }
-                        restByExercise[we.id]?.let { r ->
-                            Text(
-                                stringResource(R.string.rest_real_exercise, formatDuration(r.realSeconds.toLong()), formatDuration(r.plannedSeconds.toLong())),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (r.realSeconds > r.plannedSeconds * OVERRUN_FACTOR) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        restByExercise[we.id]?.let { r -> ExerciseRestLine(w, we.exercise.id, r, routinesById, vm) }
                         if (editing) TextButton(onClick = { vm.addPastSet(w, we.id) }) { Text(stringResource(R.string.add_set)) }
                     }
                 }
@@ -356,6 +352,25 @@ private fun RestSummaryLine(w: Workout) {
         style = MaterialTheme.typography.bodySmall,
         color = if (rest.realSeconds > rest.plannedSeconds * OVERRUN_FACTOR) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
     )
+}
+
+/** Descanso real de un ejercicio y, si la rutina lo tiene distinto, botón para usarlo en ella. */
+@Composable
+private fun ExerciseRestLine(w: Workout, exerciseId: String, r: RestSummary, routines: Map<String, com.bestrong.core.model.Routine>, vm: HistoryViewModel) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(R.string.rest_real_exercise, formatDuration(r.realSeconds.toLong()), formatDuration(r.plannedSeconds.toLong())),
+            style = MaterialTheme.typography.bodySmall,
+            color = if (r.realSeconds > r.plannedSeconds * OVERRUN_FACTOR) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        val planned = w.routineId?.let { routines[it] }?.exercises?.firstOrNull { it.exercise.id == exerciseId }?.restSeconds
+        if (planned != null && planned != r.suggestedSeconds) {
+            TextButton(onClick = { vm.useRealRest(w, exerciseId, r.suggestedSeconds) }) {
+                Text(stringResource(R.string.rest_use_real, formatDuration(r.suggestedSeconds.toLong())))
+            }
+        }
+    }
 }
 
 /** Descansar más de un 50 % de lo previsto se resalta. */

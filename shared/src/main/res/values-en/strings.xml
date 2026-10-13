@@ -942,4 +942,9 @@
     <string name="deadline_clear">Remove</string>
     <string name="undo_completed_sets">Sets marked as done</string>
     <string name="deadline_set_action">set time limit</string>
+    <string name="deadline_fit">Fit to my time limit</string>
+    <string name="undo_trimmed_sets">Removed sets at the end to finish on time</string>
+    <string name="rest_use_real">Use %1$s in routine</string>
+    <string name="lagging_muscle_open">see exercises</string>
+    <string name="notif_progress_eta">%1$d/%2$d sets · ≈ %3$d min, done %4$s</string>
 </resources>

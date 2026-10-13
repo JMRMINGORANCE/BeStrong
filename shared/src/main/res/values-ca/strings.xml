@@ -942,4 +942,9 @@
     <string name="deadline_clear">Treu</string>
     <string name="undo_completed_sets">Sèries marcades com a fetes</string>
     <string name="deadline_set_action">posar hora límit</string>
+    <string name="deadline_fit">Ajusta a la meva hora límit</string>
+    <string name="undo_trimmed_sets">S\'han tret sèries del final per arribar a temps</string>
+    <string name="rest_use_real">Usa %1$s a la rutina</string>
+    <string name="lagging_muscle_open">veure exercicis</string>
+    <string name="notif_progress_eta">%1$d/%2$d sèries · ≈ %3$d min, fi %4$s</string>
 </resources>

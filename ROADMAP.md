@@ -207,3 +207,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Duplicar una serie justo debajo
 - [x] Historial: descanso real frente al previsto en cada ejercicio
 - [x] Inicio: músculos que esta semana van por detrás de lo habitual (desde el jueves)
+
+## Fase 19 — Llegar a tiempo ✅
+- [x] «Ajustar a mi hora límite»: quita series del final hasta que quepa (con deshacer)
+- [x] Historial: llevar el descanso real de un ejercicio a su rutina
+- [x] Inicio: tocar un músculo atrasado abre la biblioteca filtrada
+- [x] Notificación del entreno con tiempo restante y hora de fin
+- [x] Resumen final con descanso real frente al previsto

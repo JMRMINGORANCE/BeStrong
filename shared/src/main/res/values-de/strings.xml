@@ -942,4 +942,9 @@
     <string name="deadline_clear">Entfernen</string>
     <string name="undo_completed_sets">Sätze als erledigt markiert</string>
     <string name="deadline_set_action">Zeitlimit festlegen</string>
+    <string name="deadline_fit">An mein Zeitlimit anpassen</string>
+    <string name="undo_trimmed_sets">Sätze am Ende entfernt, um rechtzeitig fertig zu sein</string>
+    <string name="rest_use_real">%1$s in Routine übernehmen</string>
+    <string name="lagging_muscle_open">Übungen ansehen</string>
+    <string name="notif_progress_eta">%1$d/%2$d Sätze · ≈ %3$d Min., Ende %4$s</string>
 </resources>

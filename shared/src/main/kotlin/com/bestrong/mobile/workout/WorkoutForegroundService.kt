@@ -14,11 +14,13 @@ import androidx.core.app.ServiceCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.bestrong.core.model.Workout
+import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.mobile.AppIntents
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.RestState
+import com.bestrong.mobile.ui.components.formatClock
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.combine
@@ -37,6 +39,8 @@ class WorkoutForegroundService : LifecycleService() {
     @Inject lateinit var restTimer: RestTimerController
 
     @Inject lateinit var actions: WorkoutActions
+
+    @Inject lateinit var settings: com.bestrong.mobile.data.SettingsStore
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -78,6 +82,15 @@ class WorkoutForegroundService : LifecycleService() {
     }
 
     private var started = false
+
+    /** «3/12 series · ≈ 25 min, fin 18:45» (la hora de fin no cambia cada minuto, así que sirve aunque no se refresque). */
+    private fun progressText(w: Workout): String {
+        val now = System.currentTimeMillis()
+        val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now, warmupRestSeconds = settings.settings.value.warmupRestSeconds)
+        if (remaining <= 0) return getString(R.string.notif_progress, w.completedSetCount, w.totalSetCount)
+        val is24 = android.text.format.DateFormat.is24HourFormat(this)
+        return getString(R.string.notif_progress_eta, w.completedSetCount, w.totalSetCount, (remaining + 59) / 60, formatClock(now + remaining * 1000L, is24))
+    }
 
     private fun stop() {
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -137,7 +150,7 @@ class WorkoutForegroundService : LifecycleService() {
                 .addAction(0, getString(R.string.rest_skip), action(ACTION_SKIP, 2))
         } else {
             b.setContentTitle(w.name)
-                .setContentText(getString(R.string.notif_progress, w.completedSetCount, w.totalSetCount))
+                .setContentText(progressText(w))
                 .setWhen(w.startedAtEpochMs)
                 .setChronometerCountDown(false)
                 // Texto corto del chip (en descanso se muestra la cuenta atrás)
