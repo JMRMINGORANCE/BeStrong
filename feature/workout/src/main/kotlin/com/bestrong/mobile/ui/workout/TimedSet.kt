@@ -38,8 +38,9 @@ import kotlinx.coroutines.delay
  * y, al acabar, vibración y la serie se marca hecha (lo que arranca el descanso).
  * Se calcula con el reloj del sistema desde el arranque, así no se desvía aunque la pantalla parpadee.
  */
+/** [onDone] recibe los segundos aguantados: el objetivo si se llegó al final, lo hecho si se para antes. */
 @Composable
-fun TimedSetDialog(seconds: Int, onDone: () -> Unit, onDismiss: () -> Unit) {
+fun TimedSetDialog(seconds: Int, onDone: (heldSeconds: Int) -> Unit, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val total = seconds.coerceAtLeast(1) * 1000L
     // Momento de inicio de la serie (tras la preparación); sobrevive a girar o plegar el móvil
@@ -55,7 +56,7 @@ fun TimedSetDialog(seconds: Int, onDone: () -> Unit, onDismiss: () -> Unit) {
             val left = startAt + total - now
             if (left <= 0) {
                 buzz(context, long = true)
-                finish()
+                finish(seconds)
                 break
             }
             // Aviso corto al empezar la serie y en cada uno de los 3 últimos segundos
@@ -85,7 +86,11 @@ fun TimedSetDialog(seconds: Int, onDone: () -> Unit, onDismiss: () -> Unit) {
                 if (!preparing) LinearProgressIndicator(progress = { ((now - startAt).toFloat() / total).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
             }
         },
-        confirmButton = { Button(onClick = onDone) { Text(stringResource(R.string.timed_set_finish_now)) } },
+        confirmButton = {
+            Button(onClick = { onDone(((SystemClock.elapsedRealtime() - startAt) / 1000).toInt().coerceIn(0, seconds)) }) {
+                Text(stringResource(R.string.timed_set_finish_now))
+            }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }

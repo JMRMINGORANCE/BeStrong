@@ -39,8 +39,9 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         return runCatching {
             val data = deps.backup().data()
             val date = LocalDate.now()
-            write(tree, "bestrong-$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
-            write(tree, "bestrong-$date.json", "application/json", Backup.encode(data).toByteArray())
+            // Prefijo propio: la rotación nunca toca las exportaciones manuales («bestrong-fecha.csv»)
+            write(tree, "$PREFIX$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
+            write(tree, "$PREFIX$date.json", "application/json", Backup.encode(data).toByteArray())
             settingsStore.update { it.copy(lastBackupEpochMs = System.currentTimeMillis()) }
             // Sin rotación, cada semana se acumulan varios MB en la carpeta (Drive) para siempre
             runCatching { pruneOld(tree) }.onFailure { Log.w("AutoBackup", "No se pudieron borrar copias antiguas", it) }
@@ -56,11 +57,11 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     private fun write(tree: Uri, name: String, mime: String, bytes: ByteArray) {
         val resolver = applicationContext.contentResolver
         val parent = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
-        // Si ya existe (reintento o copia manual el mismo día) se sobrescribe en vez de crear «(1)»
-        val doc = children(tree)[name]
-            ?: DocumentsContract.createDocument(resolver, parent, mime, name)
-            ?: error("No se pudo crear $name")
-        resolver.openOutputStream(doc, "wt")?.use { it.write(bytes) } ?: error("No se pudo escribir $name")
+        // Si ya existe (reintento el mismo día) se sustituye en vez de crear «(1)»; borrar y crear
+        // funciona en todos los proveedores (no todos admiten truncar con "wt")
+        children(tree)[name]?.let { DocumentsContract.deleteDocument(resolver, it) }
+        val doc = DocumentsContract.createDocument(resolver, parent, mime, name) ?: error("No se pudo crear $name")
+        resolver.openOutputStream(doc, "w")?.use { it.write(bytes) } ?: error("No se pudo escribir $name")
     }
 
     /** Nombre → documento de los archivos de la carpeta. */
@@ -87,7 +88,8 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     companion object {
         private const val NAME = "auto-backup"
         private const val KEEP = 8
-        private val BACKUP_NAME = Regex("""bestrong-\d{4}-\d{2}-\d{2}( \(\d+\))?\.(csv|json)""")
+        private const val PREFIX = "bestrong-auto-"
+        private val BACKUP_NAME = Regex("""bestrong-auto-\d{4}-\d{2}-\d{2}( \(\d+\))?\.(csv|json)""")
 
         fun schedule(context: Context, enabled: Boolean) {
             val wm = WorkManager.getInstance(context)

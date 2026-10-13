@@ -136,9 +136,13 @@ fun SetRow(
     if (timing) {
         TimedSetDialog(
             seconds = set.durationSec,
-            onDone = {
+            onDone = { held ->
                 timing = false
-                if (!set.completed) onToggle()
+                // Parada antes de tiempo: se guarda lo aguantado (no el objetivo); sin empezar, no cuenta
+                if (held > 0 && !set.completed) {
+                    if (held < set.durationSec) onDuration(held)
+                    onToggle()
+                }
             },
             onDismiss = { timing = false },
         )

@@ -198,15 +198,16 @@ object WorkoutStats {
     fun newRecordsInEach(history: List<Workout>, include: (Workout) -> Boolean): Map<String, List<PersonalRecord>> {
         val best = HashMap<String, MutableMap<RecordType, Double>>()
         val result = HashMap<String, List<PersonalRecord>>()
-        history.filter { it.isFinished }.sortedBy { it.startedAtEpochMs }.forEach { w ->
-            val bests = w.exercises.flatMap { we -> bestsOf(we) }
-            if (include(w)) {
+        // Entrenos a la misma hora (importados solo con fecha) no cuentan como «anteriores» entre sí
+        history.filter { it.isFinished }.groupBy { it.startedAtEpochMs }.toSortedMap().values.forEach { group ->
+            val bestsByWorkout = group.map { w -> w to w.exercises.flatMap { we -> bestsOf(we) } }
+            bestsByWorkout.filter { (w, _) -> include(w) }.forEach { (w, bests) ->
                 // La primera vez que se hace un ejercicio no cuenta como récord
                 result[w.id] = bests.filter { (we, type, value) -> best[we.exercise.id]?.let { value > (it[type] ?: 0.0) } == true }
                     .map { (we, type, value) -> PersonalRecord(we.exercise.id, we.exercise.name, type, value, w.id, w.finishedAt()) }
             }
-            // Se aplica al terminar el entreno: dentro de él todo se compara con lo anterior
-            bests.forEach { (we, type, value) -> best.getOrPut(we.exercise.id) { mutableMapOf() }.merge(type, value, ::maxOf) }
+            // Se aplica al terminar el grupo: dentro de él todo se compara con lo anterior
+            bestsByWorkout.flatMap { it.second }.forEach { (we, type, value) -> best.getOrPut(we.exercise.id) { mutableMapOf() }.merge(type, value, ::maxOf) }
         }
         return result
     }

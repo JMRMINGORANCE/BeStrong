@@ -239,9 +239,11 @@ class HomeViewModel @Inject constructor(
     }
 
     /** Vuelve a guardar la rutina tal cual (mismo id y posición). */
-    fun undoDelete() = viewModelScope.launch {
-        _deletedRoutine.value?.let { repo.saveRoutine(it) }
+    fun undoDelete() {
+        // Se toma ya (no dentro de la corrutina): el aviso limpia el estado justo después
+        val routine = _deletedRoutine.value ?: return
         _deletedRoutine.value = null
+        viewModelScope.launch { repo.saveRoutine(routine) }
     }
 
     fun clearDeleted() {
@@ -251,9 +253,13 @@ class HomeViewModel @Inject constructor(
     fun move(routine: Routine, delta: Int) = viewModelScope.launch {
         val list = repo.routines.value.toMutableList()
         val i = list.indexOfFirst { it.id == routine.id }
-        val j = i + delta
-        if (i < 0 || j !in list.indices) return@launch
-        list.add(j, list.removeAt(i))
+
+        // Se mueve dentro de su carpeta (en Inicio cada carpeta se ve aparte): el vecino es el de la misma carpeta
+        fun folderOf(r: Routine) = r.folder?.trim()?.takeIf(String::isNotEmpty)
+        val sameFolder = list.indices.filter { folderOf(list[it]) == folderOf(routine) }
+        val j = sameFolder.getOrNull(sameFolder.indexOf(i) + delta) ?: return@launch
+        if (i < 0) return@launch
+        list[i] = list[j].also { list[j] = list[i] }
         list.forEachIndexed { pos, r -> repo.saveRoutine(r.copy(position = pos)) }
     }
 }

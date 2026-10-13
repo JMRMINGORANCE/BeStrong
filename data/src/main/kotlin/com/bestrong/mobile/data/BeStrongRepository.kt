@@ -44,15 +44,19 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
      * Entrenos ya decodificados por id (con el JSON del que salieron): cada escritura en la tabla
      * vuelve a emitir toda la lista, pero solo se decodifican las filas nuevas o cambiadas.
      */
-    private val decoded = HashMap<String, Pair<String, Workout>>()
+    private val decoded = HashMap<String, Pair<JsonKey, Workout>>()
+
+    /** Huella del JSON de una fila (sin guardar el texto entero, que duplicaría la memoria). */
+    private data class JsonKey(val length: Int, val hash: Int)
 
     private fun decodeRows(rows: List<WorkoutEntity>): List<Workout> = synchronized(decoded) {
         val result = rows.mapNotNull { row ->
-            decoded[row.id]?.takeIf { it.first == row.json }?.second
-                ?: runCatching { Persistence.decodeWorkout(row.json) }.getOrNull()?.also { decoded[row.id] = row.json to it }
+            val key = JsonKey(row.json.length, row.json.hashCode())
+            decoded[row.id]?.takeIf { it.first == key }?.second
+                ?: runCatching { Persistence.decodeWorkout(row.json) }.getOrNull()?.also { decoded[row.id] = key to it }
         }
         // Lo borrado sale de la caché
-        if (decoded.size > rows.size) decoded.keys.retainAll(rows.mapTo(HashSet()) { it.id })
+        decoded.keys.retainAll(rows.mapTo(HashSet()) { it.id })
         result
     }
 

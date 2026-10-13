@@ -192,3 +192,18 @@ class PlateLoadTest {
         assertEquals(listOf(45.0), lb.perSide)
     }
 }
+
+class RecordsTieTest {
+    @Test fun workoutsAtSameTimeAreNotBeforeEachOther() {
+        val day = LocalDate.of(2025, 3, 1)
+        val a = finishedWorkout("a", day, bench to listOf(done(60.0, 5)))
+        val b = finishedWorkout("b", day, bench to listOf(done(70.0, 5)))
+        val first = finishedWorkout("0", day.minusDays(1), bench to listOf(done(50.0, 5)))
+        val h = listOf(first, a, b)
+        val each = com.bestrong.core.stats.WorkoutStats.newRecordsInEach(h) { true }
+        listOf(a, b).forEach { w ->
+            val expected = com.bestrong.core.stats.WorkoutStats.newRecordsIn(w, h.filter { it.startedAtEpochMs < w.startedAtEpochMs })
+            assertEquals(expected.map { it.type to it.value }.toSet(), each[w.id].orEmpty().map { it.type to it.value }.toSet())
+        }
+    }
+}

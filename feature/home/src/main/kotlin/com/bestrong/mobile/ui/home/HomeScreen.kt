@@ -350,8 +350,13 @@ private fun UndoRoutineDelete(vm: HomeViewModel, snackbar: SnackbarHostState) {
     val undoLabel = stringResource(R.string.action_undo)
     LaunchedEffect(deletedRoutine) {
         if (deletedMsg != null) {
-            val result = snackbar.showSnackbar(deletedMsg, undoLabel, duration = SnackbarDuration.Short)
-            if (result == SnackbarResult.ActionPerformed) vm.undoDelete() else vm.clearDeleted()
+            try {
+                val result = snackbar.showSnackbar(deletedMsg, undoLabel, duration = SnackbarDuration.Short)
+                if (result == SnackbarResult.ActionPerformed) vm.undoDelete()
+            } finally {
+                // También si se sale de Inicio con el aviso abierto: no debe volver a aparecer más tarde
+                if (vm.deletedRoutine.value == deletedRoutine) vm.clearDeleted()
+            }
         }
     }
 }

@@ -122,7 +122,7 @@ class ExercisesViewModel @Inject constructor(
         h.flatMap { w -> w.exercises.map { it.exercise.id } }.groupingBy { it }.eachCount()
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history) { all, fullHistory ->
+    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings) { all, fullHistory, settings ->
         val ex = all.firstOrNull { it.id == exerciseId } ?: return@combine null
         val family = ExerciseLibrary.familyOf(exerciseId)
         val history = if (includeVariants) WorkoutStats.mergeVariants(fullHistory, exerciseId, family) else fullHistory
@@ -134,7 +134,7 @@ class ExercisesViewModel @Inject constructor(
             records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
-            nextTarget = Progression.suggest(ex, fullHistory, settingsStore.settings.value.stepKgFor(ex.id)),
+            nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id)),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

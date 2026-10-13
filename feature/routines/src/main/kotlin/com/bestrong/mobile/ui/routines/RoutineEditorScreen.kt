@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -250,6 +251,8 @@ private fun EditorDialogs(
 @Composable
 private fun FolderField(folder: String, existing: List<String>, onChange: (String) -> Unit) {
     var text by remember { mutableStateOf(folder) }
+    // La rutina se carga después de pintar (arranque en frío): se recoge la carpeta cuando llega
+    LaunchedEffect(folder) { if (text.trim() != folder) text = folder }
     OutlinedTextField(
         text,
         { text = it.take(40); onChange(text) },
