@@ -195,6 +195,7 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     val values = rememberSaveable(program.id, saver = TextMapSaver) {
         mutableStateMapOf<String, String>().apply { program.mainLifts.forEach { id -> put(id, suggested(id)?.let { unit.format(it) }.orEmpty()) } }
     }
+
     // Todos los básicos con un TM válido: si falta uno, el programa no podría calcular sus cargas
     fun tmOf(id: String) = unit.parseToKg(values[id].orEmpty())?.takeIf { it > 0 }
     val lifts = program.mainLifts.filter { ExerciseLibrary.byId(it) != null }
