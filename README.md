@@ -10,10 +10,13 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
   **"Anterior"** (lo que hiciste la última vez; tócala para copiarla), tipos de serie
   (calentamiento / normal / drop / al fallo), notas por ejercicio, reordenar y quitar ejercicios,
   deslizar para borrar series.
+- **Nota fija por ejercicio** (altura del asiento, agarre…), **incremento de peso propio** (mancuernas de 2 kg, máquinas de 5 kg…),
+  **cuenta atrás** en las series por tiempo y, al terminar, **actualizar la rutina** con los cambios hechos.
+- **Registrar un entreno pasado** y corregir fecha, hora y duración desde el historial.
 - **Temporizador de descanso automático** al completar cada serie (±15 s, saltar, vibración al acabar).
 - **Biblioteca de ~70 ejercicios** en español, búsqueda sin tildes, filtros por músculo y equipo,
   ejercicios personalizados y recientes primero.
-- **Rutinas**: crear, editar, reordenar, duplicar, empezar con un toque (los pesos se rellenan con tu
+- **Rutinas**: crear, editar (tipos de serie, notas, tempo y descanso por ejercicio), reordenar, duplicar, empezar con un toque (los pesos se rellenan con tu
   última sesión), guardar un entrenamiento como rutina y **empezar una rutina en el reloj** desde el móvil.
 - **Historial** con calendario mensual, detalle de cada sesión, repetir entrenamiento.
 - **Progreso por ejercicio**: gráficas de 1RM estimado (Epley), peso máximo, volumen y reps,

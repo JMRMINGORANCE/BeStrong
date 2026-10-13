@@ -413,9 +413,10 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Pasa a la rutina los cambios hechos en el entreno (ejercicios, series, descansos…). */
     fun updateRoutineFromSummary() {
-        val s = _summary.value ?: return
-        val routine = s.routineToUpdate ?: return
-        val planned = s.planned ?: return
+        val s = _summary.value
+        val routine = s?.routineToUpdate
+        val planned = s?.planned
+        if (routine == null || planned == null) return
         _summary.value = s.copy(routineToUpdate = null)
         viewModelScope.launch { repo.saveRoutine(routine.updatedFrom(planned)) }
     }

@@ -98,16 +98,7 @@ fun HomeScreen(
     val snackbar = remember { SnackbarHostState() }
     var showPrograms by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
-    // Borrar una rutina se puede deshacer (como los entrenos, series y ejercicios)
-    val deletedRoutine by vm.deletedRoutine.collectAsStateWithLifecycle()
-    val deletedMsg = deletedRoutine?.let { stringResource(R.string.undo_routine_deleted, it.name) }
-    val undoLabel = stringResource(R.string.action_undo)
-    LaunchedEffect(deletedRoutine) {
-        if (deletedMsg != null) {
-            val result = snackbar.showSnackbar(deletedMsg, undoLabel, duration = SnackbarDuration.Short)
-            if (result == SnackbarResult.ActionPerformed) vm.undoDelete() else vm.clearDeleted()
-        }
-    }
+    UndoRoutineDelete(vm, snackbar)
     // ¿Se quedó un entreno abierto sin querer? Ofrecer terminarlo a la hora de la última serie
     var forgotten by remember { mutableStateOf(vm.forgottenWorkout()) }
     forgotten?.let { fw ->
@@ -345,4 +336,18 @@ private fun ShareRoutineDialog(routine: Routine, onDismiss: () -> Unit) {
         confirmButton = { TextButton(onClick = { RoutineShare.shareLink(context, routine); onDismiss() }) { Text(stringResource(R.string.share_routine_send)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
     )
+}
+
+/** Borrar una rutina se puede deshacer (como los entrenos, series y ejercicios). */
+@Composable
+private fun UndoRoutineDelete(vm: HomeViewModel, snackbar: SnackbarHostState) {
+    val deletedRoutine by vm.deletedRoutine.collectAsStateWithLifecycle()
+    val deletedMsg = deletedRoutine?.let { stringResource(R.string.undo_routine_deleted, it.name) }
+    val undoLabel = stringResource(R.string.action_undo)
+    LaunchedEffect(deletedRoutine) {
+        if (deletedMsg != null) {
+            val result = snackbar.showSnackbar(deletedMsg, undoLabel, duration = SnackbarDuration.Short)
+            if (result == SnackbarResult.ActionPerformed) vm.undoDelete() else vm.clearDeleted()
+        }
+    }
 }

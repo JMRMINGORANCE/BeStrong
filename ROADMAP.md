@@ -128,3 +128,14 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Imágenes de ExerciseDB y wger con atribución; notas de técnica con foto/vídeo
 - [x] Android 16 Live Updates (Now Bar); compileSdk 36; Dependabot; ktlint; accesibilidad (letra 200 %, TalkBack)
 - [x] Tests de Room y Workers; medición de arranque; módulo `:designsystem`
+
+## Fase 9 — Auditoría y mejoras del día a día ✅
+- [x] Auditoría completa (lógica, entreno, reloj, datos, planificación, perfil, tiles): más de 60 fallos corregidos con tests de regresión
+- [x] «Actualizar rutina» al terminar un entreno que cambió su estructura
+- [x] Incremento de peso por ejercicio (botones ±, progresión, «la próxima vez», bisel del reloj)
+- [x] Nota fija por ejercicio visible durante el entreno; notas del entreno durante la sesión; notas de serie en el historial
+- [x] Registrar un entreno pasado y cambiar fecha, hora y duración; añadir series al editar
+- [x] Editor de rutinas con tipos de serie, notas, tempo, cualquier descanso y aviso de cambios sin guardar
+- [x] Editar ejercicios personalizados (músculos secundarios, unilateral, distancia)
+- [x] Cuenta atrás para series por tiempo
+- [x] Deshacer al borrar una rutina; confirmación al borrar rutinas y ejercicios personalizados

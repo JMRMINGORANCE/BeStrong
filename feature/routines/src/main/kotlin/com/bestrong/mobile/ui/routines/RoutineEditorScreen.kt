@@ -67,39 +67,18 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
     // Atrás con cambios sin guardar: se pregunta antes de perderlos
     val leave = { if (vm.hasChanges) confirmLeave = true else onClose() }
     BackHandler(onBack = leave)
-    if (confirmLeave) {
-        AlertDialog(
-            onDismissRequest = { confirmLeave = false },
-            title = { Text(stringResource(R.string.routine_discard_q)) },
-            text = { Text(stringResource(R.string.routine_discard_body)) },
-            confirmButton = { Button(onClick = { confirmLeave = false; vm.save(onClose) }) { Text(stringResource(R.string.action_save)) } },
-            dismissButton = { TextButton(onClick = { confirmLeave = false; onClose() }) { Text(stringResource(R.string.action_discard)) } },
-        )
-    }
-    if (confirmDelete) {
-        AlertDialog(
-            onDismissRequest = { confirmDelete = false },
-            title = { Text(stringResource(R.string.routine_delete_q, routine.name)) },
-            text = { Text(stringResource(R.string.routine_delete_body)) },
-            confirmButton = { Button(onClick = { confirmDelete = false; vm.delete(onClose) }) { Text(stringResource(R.string.action_delete)) } },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
-        )
-    }
-    restFor?.let { id ->
-        val current = routine.exercises.firstOrNull { it.id == id }?.restSeconds
-        AlertDialog(
-            onDismissRequest = { restFor = null },
-            title = { Text(stringResource(R.string.rest_time)) },
-            text = {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    REST_OPTIONS.forEach { s ->
-                        FilterChip(selected = s == current, onClick = { vm.setRest(id, s); restFor = null }, label = { Text(formatDuration(s.toLong())) })
-                    }
-                }
-            },
-            confirmButton = { TextButton(onClick = { restFor = null }) { Text(stringResource(R.string.action_close)) } },
-        )
-    }
+    EditorDialogs(
+        vm = vm,
+        routineName = routine.name,
+        restFor = restFor,
+        currentRest = routine.exercises.firstOrNull { it.id == restFor }?.restSeconds,
+        confirmLeave = confirmLeave,
+        confirmDelete = confirmDelete,
+        onClose = onClose,
+        onDismissLeave = { confirmLeave = false },
+        onDismissDelete = { confirmDelete = false },
+        onDismissRest = { restFor = null },
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -213,6 +192,56 @@ private fun SmallNumberField(label: String, value: String, modifier: Modifier, d
         keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
         modifier = modifier,
     )
+}
+
+/** Diálogos del editor: salir con cambios, borrar la rutina y elegir el descanso. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun EditorDialogs(
+    vm: RoutineEditorViewModel,
+    routineName: String,
+    restFor: String?,
+    currentRest: Int?,
+    confirmLeave: Boolean,
+    confirmDelete: Boolean,
+    onClose: () -> Unit,
+    onDismissLeave: () -> Unit,
+    onDismissDelete: () -> Unit,
+    onDismissRest: () -> Unit,
+) {
+    if (confirmLeave) {
+        AlertDialog(
+            onDismissRequest = { onDismissLeave() },
+            title = { Text(stringResource(R.string.routine_discard_q)) },
+            text = { Text(stringResource(R.string.routine_discard_body)) },
+            confirmButton = { Button(onClick = { onDismissLeave(); vm.save(onClose) }) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = { TextButton(onClick = { onDismissLeave(); onClose() }) { Text(stringResource(R.string.action_discard)) } },
+        )
+    }
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { onDismissDelete() },
+            title = { Text(stringResource(R.string.routine_delete_q, routineName)) },
+            text = { Text(stringResource(R.string.routine_delete_body)) },
+            confirmButton = { Button(onClick = { onDismissDelete(); vm.delete(onClose) }) { Text(stringResource(R.string.action_delete)) } },
+            dismissButton = { TextButton(onClick = { onDismissDelete() }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
+    restFor?.let { id ->
+        val current = currentRest
+        AlertDialog(
+            onDismissRequest = { onDismissRest() },
+            title = { Text(stringResource(R.string.rest_time)) },
+            text = {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    REST_OPTIONS.forEach { s ->
+                        FilterChip(selected = s == current, onClick = { vm.setRest(id, s); onDismissRest() }, label = { Text(formatDuration(s.toLong())) })
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { onDismissRest() }) { Text(stringResource(R.string.action_close)) } },
+        )
+    }
 }
 
 private val REST_OPTIONS = listOf(0, 30, 45, 60, 90, 120, 150, 180, 240, 300)
