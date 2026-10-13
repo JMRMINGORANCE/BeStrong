@@ -897,4 +897,5 @@
     <string name="file_too_big">O ficheiro é demasiado grande (máx. 64 MB)</string>
     <string name="history_day_filter">%1$s ✕</string>
     <string name="backup_damaged">O ficheiro está danificado ou não é uma cópia cifrada do BeStrong</string>
+    <string name="add_drop_set">Adicionar drop set (−20 %)</string>
 </resources>

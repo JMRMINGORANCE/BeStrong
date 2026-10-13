@@ -111,6 +111,22 @@ object WorkoutEditor {
         workout.copy(exercises = workout.exercises.map { if (it.id == workoutExerciseId) block(it) else it })
 
     /** Añade una serie copiando la última (peso y reps). */
+    /**
+     * Drop set: justo después de la última serie efectiva, una serie de tipo drop con el peso bajado
+     * un 20 % (redondeado a [stepKg]) y las mismas reps como objetivo.
+     */
+    fun addDropSet(workout: Workout, workoutExerciseId: String, stepKg: Double): Workout = updateExercise(workout, workoutExerciseId) { we ->
+        val base = we.sets.lastOrNull { it.type != SetType.WARMUP } ?: return@updateExercise we
+        val raw = base.weightKg * DROP_FACTOR
+        val weight = if (stepKg > 0) (Math.round(raw / stepKg) * stepKg).coerceAtMost(base.weightKg - stepKg).coerceAtLeast(0.0) else raw
+        val index = we.sets.indexOf(base) + 1
+        val drop = WorkoutSet(weightKg = weight, reps = base.reps, durationSec = base.durationSec, type = SetType.DROP)
+        we.copy(sets = we.sets.toMutableList().apply { add(index, drop) })
+    }
+
+    /** Lo que se baja el peso en un drop set. */
+    const val DROP_FACTOR = 0.8
+
     fun addSet(workout: Workout, workoutExerciseId: String): Workout = updateExercise(workout, workoutExerciseId) { we ->
         val last = we.sets.lastOrNull()
         we.copy(

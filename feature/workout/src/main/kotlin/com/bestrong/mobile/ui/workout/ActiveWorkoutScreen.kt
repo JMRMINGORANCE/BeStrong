@@ -541,6 +541,7 @@ private fun ExerciseCard(
                         DropdownMenuItem(text = { Text(stringResource(R.string.pinned_note)) }, onClick = { menu = false; editPinned = true })
                         if (we.exercise.tracking == TrackingType.WEIGHT_REPS) {
                             DropdownMenuItem(text = { Text(stringResource(R.string.weight_increment)) }, onClick = { menu = false; editIncrement = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.add_drop_set)) }, onClick = { menu = false; vm.addDropSet(we.id) })
                         }
                         DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.substitute_title)) }, onClick = { menu = false; substituting = true })

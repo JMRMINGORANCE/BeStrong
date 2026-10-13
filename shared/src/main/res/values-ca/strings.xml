@@ -897,4 +897,5 @@
     <string name="file_too_big">El fitxer és massa gran (màx. 64 MB)</string>
     <string name="history_day_filter">%1$s ✕</string>
     <string name="backup_damaged">El fitxer està malmès o no és una còpia xifrada de BeStrong</string>
+    <string name="add_drop_set">Afegir drop set (−20 %)</string>
 </resources>

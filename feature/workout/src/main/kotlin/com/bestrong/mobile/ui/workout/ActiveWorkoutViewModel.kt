@@ -230,6 +230,10 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun setRestSeconds(weId: String, seconds: Int) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(restSeconds = seconds) } }
     fun setExerciseNotes(weId: String, notes: String) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(notes = notes) } }
     fun addSet(weId: String) = edit { WorkoutEditor.addSet(it, weId) }
+    fun addDropSet(weId: String) = edit { w ->
+        val exerciseId = w.exercises.firstOrNull { it.id == weId }?.exercise?.id ?: return@edit w
+        WorkoutEditor.addDropSet(w, weId, settings.value.stepKgFor(exerciseId))
+    }
     fun removeSet(weId: String, setId: String) {
         val partner = partnerMode.value
         viewModelScope.launch {

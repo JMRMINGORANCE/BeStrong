@@ -295,3 +295,14 @@ class EncryptedBackupErrorsTest {
         assertTrue(damaged is com.bestrong.core.io.DamagedBackupException)
     }
 }
+
+class DropSetTest {
+    @Test fun dropSetGoesAfterLastWorkingSetAt80Percent() {
+        val w = Workout(name = "W", startedAtEpochMs = 0, exercises = listOf(WorkoutExercise(exercise = bench, sets = listOf(done(100.0, 8), WorkoutSet(weightKg = 100.0, reps = 8)))))
+        val we = w.exercises.single()
+        val after = WorkoutEditor.addDropSet(w, we.id, 2.5).exercises.single().sets
+        assertEquals(3, after.size)
+        assertEquals(SetType.DROP, after[2].type)
+        assertEquals(80.0, after[2].weightKg, 0.0)
+    }
+}
