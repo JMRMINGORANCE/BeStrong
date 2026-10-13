@@ -887,4 +887,5 @@
     <string name="folder_expanded">Ausgeklappt</string>
     <string name="next_target">Nächstes Mal</string>
     <string name="next_target_line">%1$d Sätze · %2$s</string>
+    <string name="set_new_record">persönlicher Rekord</string>
 </resources>

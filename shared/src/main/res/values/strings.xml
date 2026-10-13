@@ -887,4 +887,5 @@
     <string name="folder_expanded">Desplegada</string>
     <string name="next_target">Próxima vez</string>
     <string name="next_target_line">%1$d series · %2$s</string>
+    <string name="set_new_record">récord personal</string>
 </resources>

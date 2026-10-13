@@ -615,6 +615,8 @@ private fun ExerciseCard(
             val weightFactor = if (dumbbell && prefs.dumbbellTotal) 2 else 1
             SetHeader(we.exercise.tracking, dumbbell, prefs.dumbbellTotal)
             var normalIndex = 0
+            // Mejor 1RM estimado y peso máximo hasta hoy (sin historial no hay récord que batir)
+            val best = vm.bests.collectAsStateWithLifecycle().value[we.exercise.id]
             we.sets.forEachIndexed { i, set ->
                 val displayIndex = if (set.type == SetType.NORMAL) normalIndex++ else -1
                 key(set.id) {
@@ -640,6 +642,8 @@ private fun ExerciseCard(
                         onStepReps = { vm.stepReps(we.id, set.id, it) },
                         weightFactor = weightFactor,
                         stepKg = stepKg,
+                        isRecord = best != null && set.completed && set.countsForRecords && we.exercise.tracking == TrackingType.WEIGHT_REPS &&
+                            (set.estimatedOneRepMax > best.first + 1e-6 || set.weightKg > best.second + 1e-6),
                     )
                 }
             }

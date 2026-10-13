@@ -127,6 +127,8 @@ fun SetRow(
     weightFactor: Int = 1,
     /** Salto de peso de los botones ± (el propio del ejercicio); null = el de la unidad. */
     stepKg: Double? = null,
+    /** Serie hecha que supera tu mejor marca (1RM estimado o peso máximo). */
+    isRecord: Boolean = false,
     onType: (SetType) -> Unit,
     onRpe: (Double?) -> Unit,
     onDelete: () -> Unit,
@@ -196,7 +198,7 @@ fun SetRow(
                         dismissButton = { TextButton(onClick = { editingNote = false }) { Text(stringResource(R.string.action_cancel)) } },
                     )
                 }
-                val typeDescription = stringResource(R.string.set_type_and_rpe, label)
+                val typeDescription = stringResource(R.string.set_type_and_rpe, label) + if (isRecord) ", " + stringResource(R.string.set_new_record) else ""
                 val stateText = stringResource(if (set.completed) R.string.set_done else R.string.set_pending)
                 val labelColor = when (set.type) {
                     SetType.WARMUP -> MaterialTheme.colorScheme.tertiary
@@ -211,6 +213,8 @@ fun SetRow(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(label + (if (set.note.isNotBlank()) " ✎" else "") + (if (set.assisted) " ⚑" else ""), fontWeight = FontWeight.Bold, color = labelColor, textAlign = TextAlign.Center)
+                        // Récord en vivo, al momento de marcar la serie
+                        if (isRecord) Text("🏆", style = MaterialTheme.typography.labelSmall)
                         set.rpe?.let { Text("@${it.toString().removeSuffix(".0")}", style = MaterialTheme.typography.labelSmall) }
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {

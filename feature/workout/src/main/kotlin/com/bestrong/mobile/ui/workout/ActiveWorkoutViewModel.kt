@@ -14,6 +14,7 @@ import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
+import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Autoregulation
@@ -149,6 +150,13 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun savePinnedNote(exerciseId: String, text: String) {
         viewModelScope.launch { media.saveNote(exerciseId, text.trim()) }
     }
+
+    /** Por ejercicio: (mejor 1RM estimado, peso máximo) del historial, para marcar récords en vivo. */
+    val bests: StateFlow<Map<String, Pair<Double, Double>>> = repo.history.map { h ->
+        WorkoutStats.personalRecords(h).mapValues { (_, r) ->
+            (r[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0) to (r[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0)
+        }
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     private val _summary = MutableStateFlow<FinishedSummary?>(null)
     val summary: StateFlow<FinishedSummary?> = _summary.asStateFlow()
