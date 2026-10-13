@@ -63,10 +63,16 @@ object WorkoutEditor {
      * tiempo o cardio) más el descanso de su ejercicio, salvo la última del entreno. En una superserie
      * solo se descansa al cerrar la ronda (tras el último ejercicio del grupo).
      */
-    fun estimatedRemainingSeconds(workout: Workout, secondsPerSet: Int = 40): Int {
+    fun estimatedRemainingSeconds(workout: Workout, secondsPerSet: Int = 40, nowEpochMs: Long = System.currentTimeMillis()): Int {
         val pending = workout.exercises.withIndex().flatMap { (i, we) ->
-            val restsHere = we.supersetId == null || supersetGroup(workout, i).last() == i
-            we.sets.filter { !it.completed }.map { set -> maxOf(secondsPerSet, set.durationSec) to if (restsHere) we.restSeconds else 0 }
+            val group = supersetGroup(workout, i)
+            we.sets.withIndex().filter { !it.value.completed }.map { (k, set) ->
+                // Se descansa al cerrar la ronda: si ningún ejercicio posterior del grupo tiene esa serie pendiente
+                val closesRound = group.filter { it > i }.none { j -> workout.exercises[j].sets.getOrNull(k)?.completed == false }
+                // Cronómetro en marcha: solo lo que le queda
+                val left = set.startedAtEpochMs?.let { (set.durationSec - ((nowEpochMs - it) / 1000).toInt()).coerceAtLeast(0) } ?: set.durationSec
+                maxOf(if (set.isRunning) 0 else secondsPerSet, left) to if (closesRound) we.restSeconds else 0
+            }
         }
         if (pending.isEmpty()) return 0
         return pending.sumOf { it.first } + pending.dropLast(1).sumOf { it.second }

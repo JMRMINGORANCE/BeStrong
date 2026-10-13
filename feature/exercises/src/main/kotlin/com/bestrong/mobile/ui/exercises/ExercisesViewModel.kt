@@ -16,7 +16,6 @@ import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.training.Injuries
-import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.util.newId
@@ -162,15 +161,15 @@ class ExercisesViewModel @Inject constructor(
      */
     private fun sessionNotes(exerciseId: String, history: List<Workout>, routines: List<com.bestrong.core.model.Routine>): Map<String, String> {
         val templates = routines.flatMap { it.exercises }.filter { it.exercise.id == exerciseId }.map { it.notes }.toSet()
-        // Las sesiones de programa traen la nota del programa (T1, AMRAP…), no una del día
-        val withNotes = history.filter { it.isFinished && it.routineId?.startsWith(Periodization.ROUTINE_PREFIX) != true }
-            .sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
-                w.exercises.filter { it.exercise.id == exerciseId }.takeIf { it.isNotEmpty() }
-                    ?.let { list -> w.id to list.map { it.notes }.filter(String::isNotBlank).joinToString(" · ") }
-            }
+        val withNotes = history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
+            w.exercises.filter { it.exercise.id == exerciseId }.takeIf { it.isNotEmpty() }
+                ?.let { list -> w.id to list.map { it.notes }.filter(String::isNotBlank).joinToString(" · ") }
+        }
+        // Una nota que se repite en muchas sesiones es la del programa (T1, AMRAP…), no una del día
+        val repeated = withNotes.groupingBy { it.second }.eachCount().filterValues { it >= 3 }.keys
         return withNotes.withIndex().mapNotNull { (i, p) ->
             val (id, note) = p
-            note.takeIf { it.isNotBlank() && it !in templates && it != withNotes.getOrNull(i + 1)?.second }?.let { id to it }
+            note.takeIf { it.isNotBlank() && it !in templates && it !in repeated && it != withNotes.getOrNull(i + 1)?.second }?.let { id to it }
         }.toMap()
     }
 

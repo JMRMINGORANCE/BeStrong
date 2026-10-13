@@ -226,20 +226,23 @@ class ProfileViewModel @Inject constructor(
     /** Periodo de las exportaciones a CSV y Excel. */
     val exportRange = MutableStateFlow(ExportRange.ALL)
 
-    private fun inRange(history: List<com.bestrong.core.model.Workout>): List<com.bestrong.core.model.Workout> {
+    /** Inicio del periodo elegido para exportar (0 = todo). */
+    private fun rangeStart(): Long {
         val now = java.time.LocalDate.now()
-        val from = when (exportRange.value) {
-            ExportRange.ALL -> return history
+        return when (exportRange.value) {
+            ExportRange.ALL -> return 0
             ExportRange.YEAR -> now.withDayOfYear(1)
             ExportRange.DAYS_90 -> now.minusDays(90)
             ExportRange.DAYS_30 -> now.minusDays(30)
         }.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-        return history.filter { it.startedAtEpochMs >= from }
     }
+
+    private fun inRange(history: List<com.bestrong.core.model.Workout>): List<com.bestrong.core.model.Workout> =
+        rangeStart().let { from -> history.filter { it.startedAtEpochMs >= from } }
 
     fun exportXlsx(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
-            val bytes = withContext(Dispatchers.Default) { Xlsx.workouts(inRange(repo.historyOnce()), measurements = repo.measurements.value) }
+            val bytes = withContext(Dispatchers.Default) { Xlsx.workouts(inRange(repo.historyOnce()), measurements = rangeStart().let { from -> repo.measurements.value.filter { it.dateEpochMs >= from } }) }
             withContext(Dispatchers.IO) {
                 context.contentResolver.openOutputStream(uri)?.use { it.write(bytes) } ?: error(context.getString(R.string.file_open_error))
             }

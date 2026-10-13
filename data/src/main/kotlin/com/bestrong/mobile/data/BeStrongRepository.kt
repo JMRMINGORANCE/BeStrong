@@ -152,11 +152,19 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     val discarded: StateFlow<Workout?> = _discarded
 
     /** Descarta el entreno en curso guardándolo para poder deshacerlo. */
-    suspend fun discardActive() = activeMutex.withLock {
+    /** [restEndsAtEpochMs]: fin del descanso en marcha al descartar, para retomarlo al deshacer. */
+    suspend fun discardActive(restEndsAtEpochMs: Long? = null) = activeMutex.withLock {
         _discarded.value = currentActive()
         discardedAt = System.currentTimeMillis()
+        discardedRestEnd = restEndsAtEpochMs
         write(null)
     }
+
+    private var discardedRestEnd: Long? = null
+
+    /** Fin del descanso que había al descartar el entreno recuperado (null si no había). */
+    var restoredRestEnd: Long? = null
+        private set
 
     private var discardedAt = 0L
 
@@ -165,8 +173,11 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** Recupera el entreno descartado si no hay otro en curso. Devuelve si se recuperó. */
     suspend fun restoreDiscarded(): Boolean = activeMutex.withLock {
-        val w = _discarded.value?.takeIf { recentlyDiscarded }
+        // El plazo ya se comprobó al ofrecer deshacer: aquí basta con que siga guardado
+        val w = _discarded.value
         _discarded.value = null
+        restoredRestEnd = discardedRestEnd
+        discardedRestEnd = null
         if (w == null || currentActive() != null) return@withLock false
         write(w.copy(updatedAtEpochMs = System.currentTimeMillis()))
         true

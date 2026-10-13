@@ -94,6 +94,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
         vm.updateSettings { it.copy(healthConnectExport = ok) }
         vm.refreshHealthConnect()
     }
+    // Pedir los permisos que faltan no debe apagar la exportación si se cancela
+    val hcMoreLauncher = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { vm.refreshHealthConnect() }
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri -> uri?.let(vm::exportCsv) }
@@ -352,7 +354,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             }
                         }
                         if (settings.healthConnectExport && hcGranted && !hcComplete) {
-                            TextButton(onClick = { hcLauncher.launch(vm.healthConnectPermissions) }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                            TextButton(onClick = { hcMoreLauncher.launch(vm.healthConnectPermissions) }, modifier = Modifier.padding(horizontal = 8.dp)) {
                                 Text(stringResource(R.string.hc_grant_more))
                             }
                         }

@@ -145,12 +145,9 @@ class HistoryViewModel @Inject constructor(
             val template = workout.routineId?.let { repo.routine(it) }
             val fromProgram = workout.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
             // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
-            val again = Routine.repeatOf(workout, keepAllSets = template != null) { id ->
-                if (fromProgram) {
-                    workout.exercises.firstOrNull { it.exercise.id == id }?.notes.orEmpty()
-                } else {
-                    template?.exercises?.firstOrNull { it.exercise.id == id }?.notes.orEmpty()
-                }
+            // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya
+            val again = Routine.repeatOf(workout, keepAllSets = template != null || fromProgram) { we ->
+                if (fromProgram) we.notes else template?.exercises?.firstOrNull { it.exercise.id == we.exercise.id }?.notes.orEmpty()
             }
                 .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             // Una sesión de programa repetida no cuenta como el siguiente día del programa

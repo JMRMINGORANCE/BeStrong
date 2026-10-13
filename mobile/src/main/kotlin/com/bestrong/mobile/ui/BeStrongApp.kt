@@ -224,7 +224,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         onAddExercises = { nav.navigate(Routes.PICKER) },
                         onBack = { nav.popBackStack() },
                         onFinished = { nav.navigateTopLevel(TopLevel.HISTORY.route) },
-                        onDiscarded = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
+                        // Vuelta a Inicio sin restaurar estado guardado (si no, reaparecería la pantalla del entreno vacía)
+                        onDiscarded = { if (!nav.popBackStack(TopLevel.TRAIN.route, inclusive = false)) nav.navigate(TopLevel.TRAIN.route) },
                     )
                 }
                 composable(Routes.PICKER) {

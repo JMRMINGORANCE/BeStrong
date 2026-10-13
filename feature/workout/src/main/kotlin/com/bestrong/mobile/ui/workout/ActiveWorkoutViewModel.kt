@@ -318,7 +318,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /** Añade series de aproximación antes de la primera serie de trabajo. */
-    fun addWarmup(weId: String) = edit { w -> WorkoutEditor.addWarmup(w, weId, settings.value.unit, settings.value.activeGym.barKg) }
+    fun addWarmup(weId: String) = edit { w -> WorkoutEditor.addWarmup(w, weId, settings.value.unit, settings.value.unit.toKg(com.bestrong.core.training.GymProfile.barIn(settings.value.unit, settings.value.activeGym.barKg))) }
 
     /** Tempo de la repetición (p. ej. "3-1-1-0"); vacío lo quita. */
     fun setTempo(weId: String, tempo: String) = edit { w ->
@@ -418,9 +418,10 @@ class ActiveWorkoutViewModel @Inject constructor(
             setPartnerMode(false)
             return@launch
         }
+        // Se puede deshacer desde Inicio durante unos segundos (con el descanso tal como iba)
+        val restEnd = restTimer.rest.value?.endsAtEpochMs
         restTimer.skip()
-        // Se puede deshacer desde Inicio durante unos segundos
-        repo.discardActive()
+        repo.discardActive(restEnd)
     }
 
     fun saveSummaryAsRoutine() {

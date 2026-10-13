@@ -64,16 +64,19 @@ data class GymProfile(
         )
         fun gym() = GymProfile(name = "Gimnasio")
 
-        private val STANDARD_LB_BARS = listOf(45.0, 35.0, 25.0, 15.0)
+        private val METRIC_TO_LB = mapOf(20.0 to 45.0, 15.0 to 35.0, 10.0 to 25.0)
 
         /**
          * La barra en [unit]. En libras, la estándar si la del perfil (en kg) se le parece: una de
          * 20 kg es la de 45 lb del gimnasio; si no, su peso real a media libra.
          */
         fun barIn(unit: WeightUnit, barKg: Double): Double {
-            if (unit == WeightUnit.KG) return barKg
-            val lb = unit.fromKg(barKg)
-            return STANDARD_LB_BARS.firstOrNull { kotlin.math.abs(it - lb) < 2.5 } ?: (Math.round(lb * 2) / 2.0)
+            // En libras, solo las barras métricas estándar (las que vienen por defecto) pasan a la de libras;
+            // una escrita en libras se respeta (a media libra)
+            return when {
+                unit == WeightUnit.KG -> barKg
+                else -> METRIC_TO_LB[barKg] ?: (Math.round(unit.fromKg(barKg) * 2) / 2.0)
+            }
         }
     }
 }

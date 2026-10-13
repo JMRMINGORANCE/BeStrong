@@ -348,3 +348,17 @@ class XlsxMeasurementsTest {
         assertTrue("xl/worksheets/sheet2.xml" in names)
     }
 }
+
+class EstimateRoundsTest {
+    @Test fun unevenSupersetRestsAfterEachRound() {
+        val w = Workout(
+            name = "W", startedAtEpochMs = 0,
+            exercises = listOf(
+                WorkoutExercise(exercise = bench, restSeconds = 90, supersetId = "g", sets = List(3) { WorkoutSet(weightKg = 60.0, reps = 8) }),
+                WorkoutExercise(exercise = squat, restSeconds = 90, supersetId = "g", sets = List(2) { WorkoutSet(weightKg = 80.0, reps = 8) }),
+            ),
+        )
+        // 5 series × 40 s; descansos al cerrar las rondas 1 y 2 (tras sentadilla) y 3 (tras press, última: no cuenta)
+        assertEquals(5 * 40 + 90 + 90, WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = 0))
+    }
+}
