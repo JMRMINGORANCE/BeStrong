@@ -193,8 +193,12 @@ class ProfileViewModel @Inject constructor(
     val healthConnectRequired = healthConnect.sessionPermission
     val healthConnectGranted = MutableStateFlow(false)
 
+    /** Todos los permisos de exportación (los nuevos, como el peso, se piden aunque ya exportes). */
+    val healthConnectComplete = MutableStateFlow(true)
+
     fun refreshHealthConnect() = viewModelScope.launch {
         healthConnectGranted.value = runCatching { healthConnect.hasPermissions() }.getOrDefault(false)
+        healthConnectComplete.value = runCatching { healthConnect.hasAllPermissions() }.getOrDefault(false)
     }
 
     fun updateSettings(block: (UserSettings) -> UserSettings) = settingsStore.update(block)
@@ -206,7 +210,10 @@ class ProfileViewModel @Inject constructor(
             runCatching { healthConnect.exportMeasurement(m) }.onFailure { android.util.Log.w("Profile", "Medida no exportada", it) }
         }
     }
-    fun deleteMeasurement(id: String) = viewModelScope.launch { repo.deleteMeasurement(id) }
+    fun deleteMeasurement(id: String) = viewModelScope.launch {
+        repo.deleteMeasurement(id)
+        runCatching { healthConnect.deleteMeasurement(id) }
+    }
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
     val messages: SharedFlow<String> = _messages
@@ -299,7 +306,10 @@ class ProfileViewModel @Inject constructor(
                 repo.historyOnce().filter { it.startedAtEpochMs < limit }.map { it.id }.also { repo.deleteWorkouts(it) }.size
             }
             DeleteKind.ALL_HISTORY -> repo.historyOnce(includePartner = true).map { it.id }.also { repo.deleteWorkouts(it) }.size
-            DeleteKind.MEASUREMENTS -> repo.measurements.value.onEach { repo.deleteMeasurement(it.id) }.size
+            DeleteKind.MEASUREMENTS -> repo.measurements.value.onEach {
+                repo.deleteMeasurement(it.id)
+                runCatching { healthConnect.deleteMeasurement(it.id) }
+            }.size
             DeleteKind.PHOTOS -> photoStore.photos.value.onEach { photoStore.delete(it) }.size
         }
         _messages.tryEmit(context.getString(R.string.delete_done, count))

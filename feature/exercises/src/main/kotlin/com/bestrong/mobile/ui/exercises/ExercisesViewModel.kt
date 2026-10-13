@@ -16,6 +16,7 @@ import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.training.Injuries
+import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.util.newId
@@ -138,7 +139,7 @@ class ExercisesViewModel @Inject constructor(
         result
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings) { all, fullHistory, settings ->
+    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings, repo.routines) { all, fullHistory, settings, routines ->
         val ex = all.firstOrNull { it.id == exerciseId } ?: return@combine null
         val family = ExerciseLibrary.familyOf(exerciseId)
         val history = if (includeVariants) WorkoutStats.mergeVariants(fullHistory, exerciseId, family) else fullHistory
@@ -151,7 +152,7 @@ class ExercisesViewModel @Inject constructor(
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
             nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id)),
-            sessionNotes = sessionNotes(exerciseId, history),
+            sessionNotes = sessionNotes(exerciseId, history, routines),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -159,12 +160,14 @@ class ExercisesViewModel @Inject constructor(
      * Una nota es «de ese día» si no es la de ninguna rutina para el ejercicio y cambia respecto a la
      * sesión anterior (las de los programas se copian igual en cada sesión).
      */
-    private fun sessionNotes(exerciseId: String, history: List<Workout>): Map<String, String> {
-        val templates = repo.routines.value.flatMap { it.exercises }.filter { it.exercise.id == exerciseId }.map { it.notes }.toSet()
-        val withNotes = history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
-            w.exercises.filter { it.exercise.id == exerciseId }.takeIf { it.isNotEmpty() }
-                ?.let { list -> w.id to list.map { it.notes }.filter(String::isNotBlank).joinToString(" · ") }
-        }
+    private fun sessionNotes(exerciseId: String, history: List<Workout>, routines: List<com.bestrong.core.model.Routine>): Map<String, String> {
+        val templates = routines.flatMap { it.exercises }.filter { it.exercise.id == exerciseId }.map { it.notes }.toSet()
+        // Las sesiones de programa traen la nota del programa (T1, AMRAP…), no una del día
+        val withNotes = history.filter { it.isFinished && it.routineId?.startsWith(Periodization.ROUTINE_PREFIX) != true }
+            .sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
+                w.exercises.filter { it.exercise.id == exerciseId }.takeIf { it.isNotEmpty() }
+                    ?.let { list -> w.id to list.map { it.notes }.filter(String::isNotBlank).joinToString(" · ") }
+            }
         return withNotes.withIndex().mapNotNull { (i, p) ->
             val (id, note) = p
             note.takeIf { it.isNotBlank() && it !in templates && it != withNotes.getOrNull(i + 1)?.second }?.let { id to it }

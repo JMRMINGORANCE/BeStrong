@@ -58,6 +58,16 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
     /** Basta con poder escribir la sesión; calorías y pulso se añaden si también están concedidos. */
     suspend fun hasPermissions(): Boolean = sessionPermission in granted()
 
+    /** Todo lo que se exporta está permitido (si falta algo, como el peso tras actualizar, se vuelve a pedir). */
+    suspend fun hasAllPermissions(): Boolean = granted().containsAll(permissions)
+
+    /** Borra de Health Connect el peso y la grasa de una medida borrada en la app. */
+    suspend fun deleteMeasurement(id: String) {
+        val granted = granted()
+        if (weightPermission in granted) runCatching { client.deleteRecords(WeightRecord::class, emptyList(), listOf("$id-weight")) }
+        if (bodyFatPermission in granted) runCatching { client.deleteRecords(BodyFatRecord::class, emptyList(), listOf("$id-fat")) }
+    }
+
     /**
      * Cada registro lleva un id de cliente estable (id del entreno + tipo): si se exporta otra vez
      * (reenvío del reloj, reintento), Health Connect lo sustituye en lugar de duplicarlo.

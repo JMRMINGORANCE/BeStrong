@@ -909,4 +909,6 @@
     <string name="exercise_last_time">Last: %1$s · %2$s</string>
     <string name="undo_workout_discarded">Workout “%1$s” discarded</string>
     <string name="warmup_rest_setting">Rest after a warm-up set</string>
+    <string name="hc_more_perms">Missing permissions to also export body weight and body fat from Measurements</string>
+    <string name="hc_grant_more">Grant permissions</string>
 </resources>

@@ -137,9 +137,11 @@ class HomeViewModel @Inject constructor(
     /** Entreno recién descartado (para el aviso con «Deshacer»). */
     val discarded: StateFlow<com.bestrong.core.model.Workout?> = repo.discarded
 
-    fun restoreDiscarded(onRestored: () -> Unit) = viewModelScope.launch { if (repo.restoreDiscarded()) onRestored() }
+    fun restoreDiscarded(onRestored: () -> Unit) = viewModelScope.launch { if (actions.restoreDiscarded()) onRestored() }
 
     fun forgetDiscarded() = repo.forgetDiscarded()
+
+    fun discardRecent(): Boolean = repo.recentlyDiscarded
 
     /** Training max sugerido (90 % del mejor 1RM estimado) para preparar un programa. */
     fun suggestedTrainingMax(exerciseId: String): Double? = Periodization.suggestedTrainingMax(exerciseId, repo.history.value)
@@ -181,7 +183,15 @@ class HomeViewModel @Inject constructor(
         val last = repo.history.value.firstOrNull { it.isFinished } ?: return@launch
         if (repo.activeOnce() == null) {
             val template = last.routineId?.let { repo.routine(it) }
-            val again = Routine.repeatOf(last) { id -> template?.exercises?.firstOrNull { it.exercise.id == id }?.notes.orEmpty() }
+            val fromProgram = last.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
+            // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
+            val again = Routine.repeatOf(last, keepAllSets = template != null) { id ->
+                if (fromProgram) {
+                    last.exercises.firstOrNull { it.exercise.id == id }?.notes.orEmpty()
+                } else {
+                    template?.exercises?.firstOrNull { it.exercise.id == id }?.notes.orEmpty()
+                }
+            }
                 .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             // Una sesión de programa repetida no cuenta como el siguiente día del programa
             repo.setActive(again.copy(routineId = last.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))

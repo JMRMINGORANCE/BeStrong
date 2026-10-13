@@ -72,7 +72,8 @@ object SyncContract {
      */
     fun encodeSettingsWithin(s: SharedSettings, maxBytes: Int = MAX_HISTORY_BYTES): ByteArray =
         sequenceOf(s, s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap()), s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap(), pinnedNotes = emptyMap()))
-            .map(::encodeSettings).firstOrNull { it.size <= maxBytes } ?: encodeSettings(SharedSettings(s.unit, s.progressionEnabled, s.restVibration, s.weeklyGoal))
+            .map(::encodeSettings).firstOrNull { it.size <= maxBytes }
+            ?: encodeSettings(s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap(), pinnedNotes = emptyMap(), exerciseIncrementKg = emptyMap()))
     fun decodeSettings(bytes: ByteArray): SharedSettings = json.decodeFromString(SharedSettings.serializer(), bytes.decodeToString())
 
     /**

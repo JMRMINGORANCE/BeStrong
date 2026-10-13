@@ -909,4 +909,6 @@
     <string name="exercise_last_time">Última: %1$s · %2$s</string>
     <string name="undo_workout_discarded">Entreno «%1$s» descartado</string>
     <string name="warmup_rest_setting">Descanso tras una serie de calentamiento</string>
+    <string name="hc_more_perms">Faltan permisos para exportar también el peso y la grasa de Medidas</string>
+    <string name="hc_grant_more">Conceder permisos</string>
 </resources>

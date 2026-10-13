@@ -27,8 +27,7 @@ data class GymProfile(
      */
     fun plateLoad(targetKg: Double, unit: WeightUnit): PlateLoad {
         val plates = platesKg.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
-        // Barra en libras con su peso real redondeado a media libra (20 kg → 44 lb)
-        val bar = if (unit == WeightUnit.KG) barKg else Math.round(unit.fromKg(barKg) * 2) / 2.0
+        val bar = barIn(unit, barKg)
         return PlateCalculator.calculate(unit.fromKg(targetKg), unit, bar, plates)
     }
 
@@ -64,5 +63,17 @@ data class GymProfile(
             dumbbellsKg = (1..15).map { it * 2.0 },
         )
         fun gym() = GymProfile(name = "Gimnasio")
+
+        private val STANDARD_LB_BARS = listOf(45.0, 35.0, 25.0, 15.0)
+
+        /**
+         * La barra en [unit]. En libras, la estándar si la del perfil (en kg) se le parece: una de
+         * 20 kg es la de 45 lb del gimnasio; si no, su peso real a media libra.
+         */
+        fun barIn(unit: WeightUnit, barKg: Double): Double {
+            if (unit == WeightUnit.KG) return barKg
+            val lb = unit.fromKg(barKg)
+            return STANDARD_LB_BARS.firstOrNull { kotlin.math.abs(it - lb) < 2.5 } ?: (Math.round(lb * 2) / 2.0)
+        }
     }
 }

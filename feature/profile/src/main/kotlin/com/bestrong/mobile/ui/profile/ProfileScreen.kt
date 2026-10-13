@@ -85,6 +85,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     if (showOneRm) OneRepMaxDialog { showOneRm = false }
     if (showScores) ScoresDialog(advanced.bodyWeightKg, settings.sex) { showScores = false }
     val hcGranted by vm.healthConnectGranted.collectAsStateWithLifecycle()
+    val hcComplete by vm.healthConnectComplete.collectAsStateWithLifecycle()
     // Lectura (peso, sueño, pulso en reposo): permiso aparte y luego se importa el peso
     val hcReadLauncher = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { vm.importHealthWeights() }
     val hcLauncher = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
@@ -328,6 +329,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             body = when {
                                 !vm.healthConnectAvailable -> stringResource(R.string.hc_unavailable)
                                 settings.healthConnectExport && !hcGranted -> stringResource(R.string.hc_missing_perms)
+                                settings.healthConnectExport && !hcComplete -> stringResource(R.string.hc_more_perms)
                                 else -> stringResource(R.string.hc_body)
                             },
                             checked = settings.healthConnectExport && hcGranted,
@@ -337,6 +339,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 hcLauncher.launch(vm.healthConnectPermissions)
                             } else {
                                 vm.updateSettings { it.copy(healthConnectExport = on) }
+                            }
+                        }
+                        if (settings.healthConnectExport && hcGranted && !hcComplete) {
+                            TextButton(onClick = { hcLauncher.launch(vm.healthConnectPermissions) }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                                Text(stringResource(R.string.hc_grant_more))
                             }
                         }
                         if (vm.healthConnectAvailable) {

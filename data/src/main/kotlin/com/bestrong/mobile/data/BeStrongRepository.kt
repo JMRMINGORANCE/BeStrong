@@ -154,12 +154,18 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     /** Descarta el entreno en curso guardándolo para poder deshacerlo. */
     suspend fun discardActive() = activeMutex.withLock {
         _discarded.value = currentActive()
+        discardedAt = System.currentTimeMillis()
         write(null)
     }
 
+    private var discardedAt = 0L
+
+    /** Descartado hace poco (pasado ese rato ya no se ofrece deshacer: el entreno quedaría viejo). */
+    val recentlyDiscarded: Boolean get() = _discarded.value != null && System.currentTimeMillis() - discardedAt < UNDO_DISCARD_MS
+
     /** Recupera el entreno descartado si no hay otro en curso. Devuelve si se recuperó. */
     suspend fun restoreDiscarded(): Boolean = activeMutex.withLock {
-        val w = _discarded.value
+        val w = _discarded.value?.takeIf { recentlyDiscarded }
         _discarded.value = null
         if (w == null || currentActive() != null) return@withLock false
         write(w.copy(updatedAtEpochMs = System.currentTimeMillis()))
@@ -354,3 +360,6 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         const val KEY_PROGRAM = "active_program"
     }
 }
+
+/** Cuánto se puede deshacer «Descartar entreno». */
+private const val UNDO_DISCARD_MS = 60_000L

@@ -59,13 +59,17 @@ object WorkoutEditor {
     }
 
     /**
-     * Tiempo estimado para terminar: cada serie pendiente ≈ [secondsPerSet] más el descanso
-     * de su ejercicio (salvo la última del entreno).
+     * Tiempo estimado para terminar: cada serie pendiente ≈ [secondsPerSet] (o lo que dure, si es por
+     * tiempo o cardio) más el descanso de su ejercicio, salvo la última del entreno. En una superserie
+     * solo se descansa al cerrar la ronda (tras el último ejercicio del grupo).
      */
     fun estimatedRemainingSeconds(workout: Workout, secondsPerSet: Int = 40): Int {
-        val pending = workout.exercises.flatMap { we -> we.sets.filter { !it.completed }.map { we.restSeconds } }
+        val pending = workout.exercises.withIndex().flatMap { (i, we) ->
+            val restsHere = we.supersetId == null || supersetGroup(workout, i).last() == i
+            we.sets.filter { !it.completed }.map { set -> maxOf(secondsPerSet, set.durationSec) to if (restsHere) we.restSeconds else 0 }
+        }
         if (pending.isEmpty()) return 0
-        return pending.size * secondsPerSet + pending.dropLast(1).sum()
+        return pending.sumOf { it.first } + pending.dropLast(1).sumOf { it.second }
     }
 
     // --- Pausa y entreno olvidado -----------------------------------------------------------

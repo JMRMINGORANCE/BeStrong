@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -78,7 +79,8 @@ class AppSync @Inject constructor(
         // La primera, ya leída de la base de datos (la lista en memoria empieza vacía hasta que carga)
         val bests = flow {
             emit(bestsOf(repository.historyOnce()))
-            emitAll(repository.history.drop(1).map(::bestsOf))
+            // La lista en memoria empieza vacía hasta que carga: se salta solo ese arranque
+            emitAll(repository.history.dropWhile { it.isEmpty() }.map(::bestsOf))
         }.flowOn(Dispatchers.Default)
         combine(settings.settings, repository.activeProgram, notes, bests) { s, program, pinned, (best1rm, heaviest) ->
             SharedSettings(

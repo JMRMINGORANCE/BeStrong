@@ -143,7 +143,15 @@ class HistoryViewModel @Inject constructor(
     fun repeat(workout: Workout, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() == null) {
             val template = workout.routineId?.let { repo.routine(it) }
-            val again = Routine.repeatOf(workout) { id -> template?.exercises?.firstOrNull { it.exercise.id == id }?.notes.orEmpty() }
+            val fromProgram = workout.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
+            // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
+            val again = Routine.repeatOf(workout, keepAllSets = template != null) { id ->
+                if (fromProgram) {
+                    workout.exercises.firstOrNull { it.exercise.id == id }?.notes.orEmpty()
+                } else {
+                    template?.exercises?.firstOrNull { it.exercise.id == id }?.notes.orEmpty()
+                }
+            }
                 .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             // Una sesión de programa repetida no cuenta como el siguiente día del programa
             repo.setActive(again.copy(routineId = workout.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))

@@ -91,8 +91,13 @@ data class Routine(
          * Para repetir un entreno: lo que se hizo (no las series saltadas) y sin las notas de ese día,
          * que eran de esa sesión ([templateNote] = la nota fija de la rutina de origen, si la hay).
          */
-        fun repeatOf(workout: Workout, templateNote: (exerciseId: String) -> String = { "" }): Routine = fromWorkout(
-            workout.copy(exercises = workout.exercises.map { it.copy(notes = templateNote(it.exercise.id), sets = it.completedSets.ifEmpty { it.sets }) }),
+        fun repeatOf(workout: Workout, keepAllSets: Boolean = false, templateNote: (exerciseId: String) -> String = { "" }): Routine = fromWorkout(
+            workout.copy(
+                exercises = workout.exercises.map {
+                    // Con rutina de origen se repite su estructura completa (saltarse una serie no la cambia)
+                    it.copy(notes = templateNote(it.exercise.id), sets = if (keepAllSets) it.sets else it.completedSets.ifEmpty { it.sets })
+                },
+            ),
         )
 
         /** Guarda un entrenamiento terminado como rutina nueva. */

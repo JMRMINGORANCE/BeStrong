@@ -67,7 +67,9 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
         val weights = if (HealthPermission.getReadPermission(WeightRecord::class) in ok) {
             runCatching {
                 client.readRecords(ReadRecordsRequest(WeightRecord::class, TimeRangeFilter.between(now.minus(Duration.ofDays(90)), now)))
-                    .records.map { it.time.toEpochMilli() to it.weight.inKilograms }
+                    // Los que escribió la propia app ya están en Medidas (y si se borraron, no deben volver)
+                    .records.filter { it.metadata.dataOrigin.packageName != context.packageName }
+                    .map { it.time.toEpochMilli() to it.weight.inKilograms }
             }.getOrDefault(emptyList())
         } else {
             emptyList()

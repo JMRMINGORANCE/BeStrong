@@ -134,6 +134,8 @@ fun ActiveWorkoutScreen(
     onAddExercises: () -> Unit,
     onBack: () -> Unit,
     onFinished: () -> Unit,
+    /** Tras descartar: a Inicio, donde se ofrece deshacerlo. */
+    onDiscarded: () -> Unit = onFinished,
 ) {
     val workout by vm.workout.collectAsStateWithLifecycle()
     val previous by vm.previousSets.collectAsStateWithLifecycle()
@@ -313,7 +315,7 @@ fun ActiveWorkoutScreen(
             onDismissRequest = { confirmDiscard = false },
             title = { Text(stringResource(R.string.workout_discard_q)) },
             text = { Text(stringResource(R.string.workout_discard_body)) },
-            confirmButton = { Button(onClick = { confirmDiscard = false; vm.discard(); onFinished() }) { Text(stringResource(R.string.action_discard)) } },
+            confirmButton = { Button(onClick = { confirmDiscard = false; vm.discard(); onDiscarded() }) { Text(stringResource(R.string.action_discard)) } },
             dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }

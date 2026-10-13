@@ -413,7 +413,8 @@ private fun UndoDiscard(vm: HomeViewModel, snackbar: SnackbarHostState, onOpenWo
     val msg = discarded?.let { stringResource(R.string.undo_workout_discarded, it.name) }
     val undoLabel = stringResource(R.string.action_undo)
     LaunchedEffect(discarded) {
-        if (msg != null) {
+        if (msg != null && !vm.discardRecent()) vm.forgetDiscarded()
+        if (msg != null && vm.discardRecent()) {
             val result = snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Long)
             if (result == SnackbarResult.ActionPerformed) vm.restoreDiscarded(onOpenWorkout) else vm.forgetDiscarded()
         }

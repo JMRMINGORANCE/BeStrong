@@ -86,4 +86,17 @@ class WorkoutActions @Inject constructor(
         if (!settings.settings.value.healthConnectExport) return
         runCatching { healthConnect.export(workout) }.onFailure { Log.w("HealthConnect", "Exportación fallida", it) }
     }
+
+    /** Recupera el entreno descartado y, si se descartó en mitad de un descanso, lo sigue donde iba. */
+    suspend fun restoreDiscarded(): Boolean {
+        if (!repository.restoreDiscarded()) return false
+        val w = repository.activeOnce()
+        val last = w?.exercises?.flatMap { we -> we.completedSets.map { we to it } }?.maxByOrNull { it.second.completedAtEpochMs ?: 0L }
+        if (last != null && w.exercises.any { e -> e.sets.any { !it.completed } }) {
+            val (we, set) = last
+            val left = ((set.completedAtEpochMs ?: 0L) + we.restSeconds * 1000L - System.currentTimeMillis()) / 1000
+            if (left > 0) restTimer.start(left.toInt())
+        }
+        return true
+    }
 }

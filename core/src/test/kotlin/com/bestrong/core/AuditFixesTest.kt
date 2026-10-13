@@ -318,3 +318,24 @@ class BodyWeightTrendTest {
         assertEquals(null, com.bestrong.core.stats.BodyWeightTrend.of(listOf(now - 20 * day to 80.0), now))
     }
 }
+
+class EstimateAndBarTest {
+    @Test fun timedSetsAndSupersetsInEstimate() {
+        val run = ExerciseLibrary.all.first { it.tracking == com.bestrong.core.model.TrackingType.CARDIO }
+        val w = Workout(
+            name = "W", startedAtEpochMs = 0,
+            exercises = listOf(
+                WorkoutExercise(exercise = run, restSeconds = 60, sets = listOf(WorkoutSet(durationSec = 1800))),
+                WorkoutExercise(exercise = bench, restSeconds = 90, supersetId = "g", sets = List(2) { WorkoutSet(weightKg = 60.0, reps = 8) }),
+                WorkoutExercise(exercise = squat, restSeconds = 90, supersetId = "g", sets = List(2) { WorkoutSet(weightKg = 80.0, reps = 8) }),
+            ),
+        )
+        // 1800 + 4×40 de trabajo; descansos: 60 tras el cardio y 90 al cerrar la 1.ª ronda (la última no cuenta)
+        assertEquals(1800 + 160 + 60 + 90, WorkoutEditor.estimatedRemainingSeconds(w))
+    }
+
+    @Test fun twentyKiloBarIsTheStandard45PoundBar() {
+        assertEquals(45.0, com.bestrong.core.training.GymProfile.barIn(com.bestrong.core.util.WeightUnit.LB, 20.0), 0.0)
+        assertEquals(20.0, com.bestrong.core.training.GymProfile.barIn(com.bestrong.core.util.WeightUnit.KG, 20.0), 0.0)
+    }
+}

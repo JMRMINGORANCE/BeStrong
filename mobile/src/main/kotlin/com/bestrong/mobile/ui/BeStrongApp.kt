@@ -224,6 +224,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         onAddExercises = { nav.navigate(Routes.PICKER) },
                         onBack = { nav.popBackStack() },
                         onFinished = { nav.navigateTopLevel(TopLevel.HISTORY.route) },
+                        onDiscarded = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
                     )
                 }
                 composable(Routes.PICKER) {
