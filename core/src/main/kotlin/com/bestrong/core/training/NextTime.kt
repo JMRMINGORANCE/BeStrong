@@ -34,5 +34,9 @@ object NextTime {
         }
     }
 
-    fun forWorkout(workout: Workout, stepKg: Double): List<NextTimeSuggestion> = workout.exercises.mapNotNull { suggest(it, stepKg) }
+    fun forWorkout(workout: Workout, stepKg: Double): List<NextTimeSuggestion> = forWorkout(workout) { stepKg }
+
+    /** Con incremento propio por ejercicio (mancuernas de 2 kg, máquinas de 5 kg…). */
+    fun forWorkout(workout: Workout, stepFor: (exerciseId: String) -> Double): List<NextTimeSuggestion> =
+        workout.exercises.mapNotNull { suggest(it, stepFor(it.exercise.id)) }
 }
