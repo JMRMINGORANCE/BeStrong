@@ -57,13 +57,18 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val photos by vm.photos.collectAsStateWithLifecycle()
     // El desbloqueo dura mientras la pantalla está abierta (no se guarda al girar ni al volver)
-    var unlocked by remember { mutableStateOf(!settings.lockProgressPhotos || !BiometricLock.isAvailable(context)) }
     val locks = settings.lockProgressPhotos && BiometricLock.isAvailable(context)
-    PhotoPrivacy(unlocked, locks) { unlocked = false }
+    var unlocked by remember { mutableStateOf(!locks) }
+    // Elegir una foto abre otra pantalla: eso no cuenta como salir de la app
+    var picking by rememberSaveable { mutableStateOf(false) }
+    PhotoPrivacy(unlocked, locks) { if (!picking) unlocked = false }
     var comparing by rememberSaveable { mutableStateOf(false) }
     val chosen = remember { mutableStateListOf<String>() }
     var toDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> uri?.let(vm::addPhoto) }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        picking = false
+        uri?.let(vm::addPhoto)
+    }
     val unlockTitle = stringResource(R.string.progress_unlock_title)
 
     Card {
@@ -78,7 +83,10 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
                 return@Column
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilledTonalButton(onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }) {
+                FilledTonalButton(onClick = {
+                    picking = true
+                    picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }) {
                     Icon(Icons.Default.AddAPhoto, null)
                     Text(stringResource(R.string.progress_add), Modifier.padding(start = 8.dp))
                 }

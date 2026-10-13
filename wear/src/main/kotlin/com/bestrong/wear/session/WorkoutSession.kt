@@ -416,12 +416,20 @@ class WorkoutSession @Inject constructor(
     val record: StateFlow<Boolean> = _record.asStateFlow()
     private var recordJob: Job? = null
 
-    /** Supera tu mejor 1RM estimado o peso máximo en ese ejercicio (sin historial no hay récord que batir). */
+    /**
+     * Supera tu mejor 1RM estimado o peso máximo en ese ejercicio: las marcas de todo el historial
+     * (llegan del móvil), las de lo hecho solo en el reloj y las series anteriores de esta sesión.
+     * Sin ninguna marca previa no hay récord que batir.
+     */
     private fun isRecord(exerciseId: String, tracking: TrackingType, set: WorkoutSet): Boolean {
-        val best = WorkoutStats.personalRecords(store.history.value)[exerciseId]
-            ?.takeIf { tracking == TrackingType.WEIGHT_REPS && set.countsForRecords } ?: return false
-        return set.estimatedOneRepMax > (best[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0) + 1e-6 ||
-            set.weightKg > (best[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0) + 1e-6
+        val s = store.settings.value
+        val local = WorkoutStats.personalRecords(store.history.value)[exerciseId]
+        val earlier = _workout.value?.exercises.orEmpty().filter { it.exercise.id == exerciseId }
+            .flatMap { it.completedSets }.filter { it.id != set.id && it.countsForRecords }
+        val best1rm = listOfNotNull(s.bestOneRepMaxKg[exerciseId], local?.get(RecordType.BEST_ONE_REP_MAX)?.value) + earlier.map { it.estimatedOneRepMax }
+        val heaviest = listOfNotNull(s.heaviestKg[exerciseId], local?.get(RecordType.HEAVIEST_WEIGHT)?.value) + earlier.map { it.weightKg }
+        val eligible = tracking == TrackingType.WEIGHT_REPS && set.countsForRecords && best1rm.isNotEmpty()
+        return eligible && (set.estimatedOneRepMax > best1rm.max() + 1e-6 || set.weightKg > heaviest.max() + 1e-6)
     }
 
     private fun celebrateRecord() {

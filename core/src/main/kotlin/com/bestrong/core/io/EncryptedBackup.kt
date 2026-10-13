@@ -39,7 +39,7 @@ object EncryptedBackup {
         val b64 = Base64.getDecoder()
         val (salt, iv, data) = parts.takeIf { it.size == 4 && it[0] == PREFIX }
             ?.let { runCatching { Triple(b64.decode(it[1]), b64.decode(it[2]), b64.decode(it[3])) }.getOrNull() }
-            ?.takeIf { (_, iv, data) -> iv.size == 12 && data.size >= 16 }
+            ?.takeIf { (salt, iv, data) -> salt.size == 16 && iv.size == 12 && data.size >= 16 }
             ?: throw DamagedBackupException()
         return try {
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")

@@ -57,7 +57,9 @@ class WatchSyncService : WearableListenerService() {
                         val received = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
                         // Calorías del reloj + activas (sin el gasto en reposo) con tus datos corporales
-                        val workout = energy.complete(received, watchKcal = received.calories)
+                        // Ejercicios con los datos completos del móvil (el reloj puede traerlos recortados)
+                        val full = received.copy(exercises = received.exercises.map { we -> we.copy(exercise = repository.exercise(we.exercise.id) ?: we.exercise) })
+                        val workout = energy.complete(full, watchKcal = received.calories)
                         val isNew = repository.historyOnce().none { it.id == workout.id }
                         repository.saveWorkout(workout)
                         repository.clearRemoteActive(workout.id)

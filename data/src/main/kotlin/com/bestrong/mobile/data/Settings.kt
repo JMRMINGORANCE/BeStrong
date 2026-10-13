@@ -214,7 +214,8 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     fun restoreBackup(json: JsonObject) {
         // Se escriben antes todos los ajustes actuales: así cada clave conocida tiene su tipo en prefs
         update { it }
-        val current = prefs.all
+        // Los textos opcionales vacíos no quedan guardados (putString null los borra): también son texto
+        val current = NULLABLE_STRING_KEYS.associateWith { "" } + prefs.all
         prefs.edit {
             json.filterKeys { it !in DEVICE_KEYS && it in current }.forEach { (k, v) -> putTyped(k, current[k], v) }
         }
@@ -237,6 +238,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
     }
 }

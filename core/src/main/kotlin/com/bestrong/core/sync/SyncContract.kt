@@ -80,6 +80,8 @@ object SyncContract {
      * y, si aun así no caben, las primeras (la sesión de hoy va la primera).
      */
     fun encodeRoutinesWithin(routines: List<Routine>, maxBytes: Int = MAX_HISTORY_BYTES): ByteArray {
+        // Si caben tal cual, completas (los entrenos del reloj salen de estas rutinas)
+        encodeRoutines(routines).let { if (it.size <= maxBytes) return it }
         var list = routines.map { r ->
             r.copy(notes = "", exercises = r.exercises.map { it.copy(notes = "", exercise = it.exercise.copy(secondaryMuscles = emptyList())) })
         }
@@ -137,6 +139,9 @@ data class SharedSettings(
     val exerciseIncrementKg: Map<String, Double> = emptyMap(),
     /** Nota fija de cada ejercicio (altura del asiento, agarre…), recortada para el reloj. */
     val pinnedNotes: Map<String, String> = emptyMap(),
+    /** Mejores marcas de todo el historial (el reloj solo tiene el reciente): 1RM estimado y peso máximo. */
+    val bestOneRepMaxKg: Map<String, Double> = emptyMap(),
+    val heaviestKg: Map<String, Double> = emptyMap(),
 ) {
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
 }

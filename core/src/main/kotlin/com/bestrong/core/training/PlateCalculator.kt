@@ -26,7 +26,8 @@ object PlateCalculator {
         val perSide = mutableListOf<Double>()
         // Un disco de 0 (o negativo) dejaría el bucle sin terminar
         plates.filter { it > 0 }.sortedDescending().forEach { p ->
-            while (remaining + 1e-9 >= p) {
+            // Tolerancia de redondeo (conversiones kg ↔ lb)
+            while (remaining + 1e-3 >= p) {
                 perSide += p
                 remaining -= p
             }

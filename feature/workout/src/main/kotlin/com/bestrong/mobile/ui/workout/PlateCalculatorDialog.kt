@@ -37,12 +37,12 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onApply: ((Double) -> Unit)? = null, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
     var text by remember { mutableStateOf(unit.format(initialKg).takeIf { initialKg > 0 } ?: "") }
-    // La barra y los discos del gimnasio activo van primero
-    val gymBar = gym?.let { unit.fromKg(it.barKg) }
-    val bars = (listOfNotNull(gymBar) + if (unit == WeightUnit.KG) listOf(20.0, 15.0, 10.0) else listOf(45.0, 35.0, 25.0)).distinct()
+    // Lo que ponen los discos tocados, exacto (el texto redondea y en libras dejaría de cuadrar)
+    var exact by remember { mutableStateOf<Double?>(null) }
+    val bars = barsFor(gym, unit)
     var bar by remember { mutableDoubleStateOf(bars.first()) }
-    val target = text.replace(',', '.').toDoubleOrNull() ?: 0.0
-    val plates = gym?.platesKg?.map { unit.fromKg(it) }?.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
+    val target = exact?.takeIf { formatWeight(it) == text } ?: text.replace(',', '.').toDoubleOrNull() ?: 0.0
+    val plates = platesFor(gym, unit)
     val load = PlateCalculator.calculate(target, unit, bar, plates)
 
     AlertDialog(
@@ -63,12 +63,15 @@ fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onApply: (
                 }
                 Text(stringResource(R.string.plates_per_side), style = MaterialTheme.typography.labelLarge)
                 if (load.perSide.isEmpty()) Text(stringResource(R.string.plates_only_bar))
-                PlateChips(load, plates, bar) { text = formatWeight(it) }
+                PlateChips(load, plates, bar) {
+                    exact = it
+                    text = formatWeight(it)
+                }
                 PlateTotals(load, unit)
             }
         },
         confirmButton = {
-            if (onApply != null && load.achieved > 0) {
+            if (onApply != null && target > 0) {
                 TextButton(onClick = { onApply(unit.toKg(load.achieved)); onDismiss() }) { Text(stringResource(R.string.plates_use_weight)) }
             } else {
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
@@ -108,3 +111,13 @@ private fun PlateTotals(load: PlateLoad, unit: WeightUnit) {
         )
     }
 }
+
+/** Barras a elegir: la del gimnasio activo primero (en libras, redondeada a la estándar). */
+private fun barsFor(gym: GymProfile?, unit: WeightUnit): List<Double> {
+    val gymBar = gym?.let { if (unit == WeightUnit.KG) it.barKg else Math.round(unit.fromKg(it.barKg) / 5) * 5.0 }
+    return (listOfNotNull(gymBar) + if (unit == WeightUnit.KG) listOf(20.0, 15.0, 10.0) else listOf(45.0, 35.0, 25.0)).distinct()
+}
+
+/** Discos del gimnasio (en kg); en libras, los estándar. */
+private fun platesFor(gym: GymProfile?, unit: WeightUnit): List<Double> =
+    gym?.platesKg?.map { unit.fromKg(it) }?.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)

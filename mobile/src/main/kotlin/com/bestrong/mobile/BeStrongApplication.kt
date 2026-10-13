@@ -9,6 +9,8 @@ import androidx.core.graphics.drawable.IconCompat
 import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.decode.ImageDecoderDecoder
+import com.bestrong.core.stats.RecordType
+import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SharedSettings
 import com.bestrong.mobile.backup.AutoBackupWorker
 import com.bestrong.mobile.backup.ImagePrefetchWorker
@@ -28,11 +30,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
@@ -61,12 +65,20 @@ class AppSync @Inject constructor(
      */
     private suspend fun syncSettings() {
         val notes = media.version.map { media.allNotes().mapValues { (_, n) -> n.trim().take(MAX_WATCH_NOTE) } }
-        combine(settings.settings, repository.activeProgram, notes) { s, program, pinned ->
+        // Mejores marcas por ejercicio, para que el reloj sepa si una serie es récord
+        val bests = repository.history.map { h ->
+            val records = WorkoutStats.personalRecords(h)
+            records.mapValues { (_, r) -> r[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0 } to
+                records.mapValues { (_, r) -> r[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0 }
+        }.flowOn(Dispatchers.Default)
+        combine(settings.settings, repository.activeProgram, notes, bests) { s, program, pinned, (best1rm, heaviest) ->
             SharedSettings(
                 s.unit, s.progressionEnabled, s.restVibration,
                 weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal,
                 exerciseIncrementKg = s.exerciseIncrementKg,
                 pinnedNotes = pinned,
+                bestOneRepMaxKg = best1rm,
+                heaviestKg = heaviest,
             )
         }.distinctUntilChanged()
             .collect { watchSync.pushSettings(it) }
