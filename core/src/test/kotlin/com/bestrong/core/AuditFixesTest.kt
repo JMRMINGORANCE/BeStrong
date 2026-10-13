@@ -124,3 +124,13 @@ class RoutinePrefillKindTest {
         assertEquals(listOf(80.0, 82.5, 85.0), w.exercises[0].sets.map { it.weightKg })
     }
 }
+
+class SharedSettingsTest {
+    @Test fun oldSettingsWithoutIncrementsStillDecode() {
+        val old = """{"unit":"LB","progressionEnabled":true}"""
+        val s = com.bestrong.core.sync.SyncContract.json.decodeFromString(com.bestrong.core.sync.SharedSettings.serializer(), old)
+        assertEquals(4, s.weeklyGoal)
+        assertEquals(com.bestrong.core.util.WeightUnit.LB.stepKg(), s.stepKgFor("bench_press"), 0.0)
+        assertEquals(2.0, s.copy(exerciseIncrementKg = mapOf("bench_press" to 2.0)).stepKgFor("bench_press"), 0.0)
+    }
+}

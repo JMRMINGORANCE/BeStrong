@@ -164,7 +164,7 @@ class WorkoutSession @Inject constructor(
         val s = store.settings.value
         if (s.progressionEnabled) {
             val ex = exerciseFor(exerciseId)
-            if (ex != null) Progression.suggest(ex, store.history.value, s.unit.stepKg())?.let { return it.sets }
+            if (ex != null) Progression.suggest(ex, store.history.value, s.stepKgFor(exerciseId))?.let { return it.sets }
         }
         return previous(exerciseId)
     }
@@ -352,11 +352,11 @@ class WorkoutSession @Inject constructor(
     /** Serie que se está editando: la primera pendiente del ejercicio actual. */
     fun currentSet(): WorkoutSet? = currentExercise()?.sets?.firstOrNull { !it.completed }
 
-    /** Bisel: un paso = 2,5 kg / 5 lb (o 1 rep / 5 s según el campo y el tipo de ejercicio). */
+    /** Bisel: un paso = el incremento del ejercicio (2,5 kg / 5 lb por defecto), o 1 rep / 5 s según el campo. */
     fun rotaryStep(direction: Int) {
         val we = currentExercise() ?: return
         val s = currentSet() ?: return
-        val step = store.settings.value.unit.stepKg()
+        val step = store.settings.value.stepKgFor(we.exercise.id)
         edit { w ->
             WorkoutEditor.updateSet(w, we.id, s.id) { set ->
                 when {

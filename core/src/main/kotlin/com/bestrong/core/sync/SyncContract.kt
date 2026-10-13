@@ -98,7 +98,11 @@ data class SharedSettings(
      * defecto 4, lo que mostraba el reloj antes de recibirlo, para ajustes guardados sin este campo.
      */
     val weeklyGoal: Int = 4,
-)
+    /** Incremento propio por ejercicio en kg (elegido en el móvil): bisel y progresión en el reloj. */
+    val exerciseIncrementKg: Map<String, Double> = emptyMap(),
+) {
+    fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
+}
 
 /**
  * Lo que midió el reloj durante un entreno que se terminó en el móvil: el móvil solo tenía las

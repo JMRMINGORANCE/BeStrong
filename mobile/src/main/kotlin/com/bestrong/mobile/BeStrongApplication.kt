@@ -69,7 +69,7 @@ class AppSync @Inject constructor(
         scope.launch {
             // Objetivo semanal: el del programa activo si lo hay, como en la pantalla de inicio
             combine(settings.settings, repository.activeProgram) { s, program ->
-                SharedSettings(s.unit, s.progressionEnabled, s.restVibration, weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal)
+                SharedSettings(s.unit, s.progressionEnabled, s.restVibration, weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal, exerciseIncrementKg = s.exerciseIncrementKg)
             }.distinctUntilChanged()
                 .collect { watchSync.pushSettings(it) }
         }
