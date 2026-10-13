@@ -123,7 +123,7 @@ class ProfileViewModel @Inject constructor(
                 .take(8),
             weeklyMuscles = WorkoutStats.weeklySetsPerMuscle(history, today, zone),
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
     val advanced: StateFlow<AdvancedStats> = combine(repo.history, repo.measurements, settingsStore.settings) { history, measures, s ->
         val zone = ZoneId.systemDefault()
@@ -270,9 +270,9 @@ class ProfileViewModel @Inject constructor(
         val count = when (kind) {
             DeleteKind.OLD_HISTORY -> {
                 val limit = System.currentTimeMillis() - 365L * 86_400_000L
-                repo.historyOnce().filter { it.startedAtEpochMs < limit }.onEach { repo.deleteWorkout(it.id) }.size
+                repo.historyOnce().filter { it.startedAtEpochMs < limit }.map { it.id }.also { repo.deleteWorkouts(it) }.size
             }
-            DeleteKind.ALL_HISTORY -> repo.historyOnce(includePartner = true).onEach { repo.deleteWorkout(it.id) }.size
+            DeleteKind.ALL_HISTORY -> repo.historyOnce(includePartner = true).map { it.id }.also { repo.deleteWorkouts(it) }.size
             DeleteKind.MEASUREMENTS -> repo.measurements.value.onEach { repo.deleteMeasurement(it.id) }.size
             DeleteKind.PHOTOS -> photoStore.photos.value.onEach { photoStore.delete(it) }.size
         }

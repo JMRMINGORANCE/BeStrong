@@ -74,6 +74,25 @@ object SyncContract {
     fun compactHistory(history: List<Workout>, limit: Int = 30): List<Workout> =
         history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.take(limit)
             .map { w -> w.copy(notes = "", heartRateSamples = emptyList(), exercises = w.exercises.map { it.copy(notes = "", sets = it.completedSets) }) }
+
+    /** Tamaño máximo del historial para el reloj (un DataItem admite ~100 KB; se deja margen). */
+    const val MAX_HISTORY_BYTES = 90_000
+
+    /**
+     * Historial reciente codificado sin pasar de [maxBytes]: un entreno típico ocupa ~8 KB, así que
+     * con historiales grandes se quitan los más antiguos hasta que cabe (si no, el envío falla en silencio).
+     */
+    fun encodeRecentHistory(history: List<Workout>, maxBytes: Int = MAX_HISTORY_BYTES): ByteArray {
+        var recent = compactHistory(history)
+        var bytes = encodeWorkouts(recent)
+        while (bytes.size > maxBytes && recent.isNotEmpty()) {
+            // Recorte proporcional al exceso (mínimo uno) para no recodificar 30 veces
+            val keep = (recent.size.toLong() * maxBytes / bytes.size).toInt().coerceIn(0, recent.size - 1)
+            recent = recent.take(keep)
+            bytes = encodeWorkouts(recent)
+        }
+        return bytes
+    }
 }
 
 /** Métricas del reloj durante un entreno (para mostrarlas en el móvil). */

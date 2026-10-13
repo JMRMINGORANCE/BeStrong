@@ -42,6 +42,8 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             write(tree, "bestrong-$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
             write(tree, "bestrong-$date.json", "application/json", Backup.encode(data).toByteArray())
             settingsStore.update { it.copy(lastBackupEpochMs = System.currentTimeMillis()) }
+            // Sin rotación, cada semana se acumulan varios MB en la carpeta (Drive) para siempre
+            runCatching { pruneOld(tree) }.onFailure { Log.w("AutoBackup", "No se pudieron borrar copias antiguas", it) }
         }.fold(
             { Result.success() },
             {
@@ -54,12 +56,38 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     private fun write(tree: Uri, name: String, mime: String, bytes: ByteArray) {
         val resolver = applicationContext.contentResolver
         val parent = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
-        val doc = DocumentsContract.createDocument(resolver, parent, mime, name) ?: error("No se pudo crear $name")
-        resolver.openOutputStream(doc, "w")?.use { it.write(bytes) } ?: error("No se pudo escribir $name")
+        // Si ya existe (reintento o copia manual el mismo día) se sobrescribe en vez de crear «(1)»
+        val doc = children(tree)[name]
+            ?: DocumentsContract.createDocument(resolver, parent, mime, name)
+            ?: error("No se pudo crear $name")
+        resolver.openOutputStream(doc, "wt")?.use { it.write(bytes) } ?: error("No se pudo escribir $name")
+    }
+
+    /** Nombre → documento de los archivos de la carpeta. */
+    private fun children(tree: Uri): Map<String, Uri> {
+        val uri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
+        val projection = arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+        return applicationContext.contentResolver.query(uri, projection, null, null, null)?.use { c ->
+            buildMap {
+                while (c.moveToNext()) put(c.getString(1), DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0)))
+            }
+        }.orEmpty()
+    }
+
+    /** Deja solo las [KEEP] copias más recientes de cada tipo (el nombre lleva la fecha ISO, así que ordena bien). */
+    private fun pruneOld(tree: Uri) {
+        val resolver = applicationContext.contentResolver
+        children(tree).filterKeys { BACKUP_NAME.matches(it) }.entries
+            .groupBy { it.key.substringAfterLast('.') }
+            .values.forEach { files ->
+                files.sortedByDescending { it.key }.drop(KEEP).forEach { DocumentsContract.deleteDocument(resolver, it.value) }
+            }
     }
 
     companion object {
         private const val NAME = "auto-backup"
+        private const val KEEP = 8
+        private val BACKUP_NAME = Regex("""bestrong-\d{4}-\d{2}-\d{2}( \(\d+\))?\.(csv|json)""")
 
         fun schedule(context: Context, enabled: Boolean) {
             val wm = WorkManager.getInstance(context)

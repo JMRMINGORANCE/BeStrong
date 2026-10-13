@@ -26,10 +26,12 @@ import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -99,9 +101,9 @@ class ExercisesViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val usageCount: StateFlow<Map<String, Int>> = combine(repo.history, filter) { h, _ ->
+    val usageCount: StateFlow<Map<String, Int>> = repo.history.map { h ->
         h.flatMap { w -> w.exercises.map { it.exercise.id } }.groupingBy { it }.eachCount()
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history) { all, fullHistory ->
         val ex = all.firstOrNull { it.id == exerciseId } ?: return@combine null
@@ -116,7 +118,7 @@ class ExercisesViewModel @Inject constructor(
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     fun createCustom(draft: Exercise): Exercise {
         val ex = draft.copy(id = "custom_${newId()}", isCustom = true)

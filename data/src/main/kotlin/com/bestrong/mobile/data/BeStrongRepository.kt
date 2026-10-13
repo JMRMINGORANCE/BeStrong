@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.sync.Mutex
@@ -39,8 +40,25 @@ import kotlinx.coroutines.withContext
 @Singleton
 class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @ApplicationScope scope: CoroutineScope) {
 
+    /**
+     * Entrenos ya decodificados por id (con el JSON del que salieron): cada escritura en la tabla
+     * vuelve a emitir toda la lista, pero solo se decodifican las filas nuevas o cambiadas.
+     */
+    private val decoded = HashMap<String, Pair<String, Workout>>()
+
+    private fun decodeRows(rows: List<WorkoutEntity>): List<Workout> = synchronized(decoded) {
+        val result = rows.mapNotNull { row ->
+            decoded[row.id]?.takeIf { it.first == row.json }?.second
+                ?: runCatching { Persistence.decodeWorkout(row.json) }.getOrNull()?.also { decoded[row.id] = row.json to it }
+        }
+        // Lo borrado sale de la caché
+        if (decoded.size > rows.size) decoded.keys.retainAll(rows.mapTo(HashSet()) { it.id })
+        result
+    }
+
     private val allHistory: StateFlow<List<Workout>> = dao.workouts()
-        .map { list -> list.mapNotNull { runCatching { Persistence.decodeWorkout(it.json) }.getOrNull() } }
+        .map { decodeRows(it) }
+        .flowOn(Dispatchers.Default)
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     /** Tu historial (sin los entrenos de la pareja, que no cuentan para tus estadísticas). */
@@ -89,7 +107,13 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** Últimas series de cada ejercicio, para la columna "Anterior". */
     val previousSetsLookup: StateFlow<(String) -> List<WorkoutSet>> = history
-        .map { h -> { id: String -> WorkoutStats.previousSets(id, h) } }
+        .map { h ->
+            // Una pasada por historial (no una ordenación entera por cada ejercicio y recomposición)
+            val last = WorkoutStats.lastSetsByExercise(h)
+            val lookup: (String) -> List<WorkoutSet> = { id -> last[id].orEmpty() }
+            lookup
+        }
+        .flowOn(Dispatchers.Default)
         .stateIn(scope, SharingStarted.Eagerly) { _: String -> emptyList() }
 
     fun exercise(id: String): Exercise? = exercises.value.firstOrNull { it.id == id }
@@ -227,12 +251,14 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
+    /** Borrado masivo: una consulta por bloque en vez de una transacción (y un recálculo) por entreno. */
+    suspend fun deleteWorkouts(ids: List<String>) = ids.chunked(500).forEach { dao.deleteWorkouts(it) }
+
     suspend fun historyOnce(includePartner: Boolean = false): List<Workout> {
         val rows = dao.workoutsOnce()
         // Decodificar miles de entrenos no debe hacerse en el hilo principal
         return withContext(Dispatchers.Default) {
-            rows.mapNotNull { runCatching { Persistence.decodeWorkout(it.json) }.getOrNull() }
-                .filter { includePartner || it.athlete == null }
+            decodeRows(rows).filter { includePartner || it.athlete == null }
         }
     }
 

@@ -5,7 +5,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +12,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
@@ -84,8 +84,9 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
                 }
             }
             if (comparing) Text(stringResource(R.string.progress_compare_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                photos.forEach { p ->
+            // Perezosa: con años de fotos solo se cargan las que se ven
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(photos, key = { it.file.name }) { p ->
                     val id = p.file.name
                     val isSelected = id in chosen
                     val desc = stringResource(R.string.progress_photo_of, formatShortDate(p.dateEpochMs))

@@ -134,3 +134,50 @@ class SharedSettingsTest {
         assertEquals(2.0, s.copy(exerciseIncrementKg = mapOf("bench_press" to 2.0)).stepKgFor("bench_press"), 0.0)
     }
 }
+
+class PerformanceFixesTest {
+    private fun history(n: Int) = (0 until n).map { i ->
+        finishedWorkout(
+            "w$i", LocalDate.of(2024, 1, 1).plusDays(i.toLong()),
+            bench to List(4) { done(60.0 + i % 10, 8) }, squat to List(4) { done(100.0, 5) },
+        )
+    }
+
+    @Test fun lastSetsByExerciseMatchesPreviousSets() {
+        val h = history(40).shuffled(java.util.Random(1))
+        val map = com.bestrong.core.stats.WorkoutStats.lastSetsByExercise(h)
+        listOf("bench_press", "squat", "deadlift").forEach { id ->
+            assertEquals(com.bestrong.core.stats.WorkoutStats.previousSets(id, h), map[id].orEmpty())
+        }
+    }
+
+    @Test fun watchHistoryFitsInOneDataItem() {
+        val bytes = com.bestrong.core.sync.SyncContract.encodeRecentHistory(history(200), maxBytes = 20_000)
+        assertTrue(bytes.size <= 20_000)
+        assertTrue(com.bestrong.core.sync.SyncContract.decodeWorkouts(bytes).isNotEmpty())
+    }
+
+    @Test fun persistenceFastPathRoundTrips() {
+        val w = history(1).single()
+        val text = com.bestrong.core.io.Persistence.encodeWorkout(w)
+        assertEquals(w, com.bestrong.core.io.Persistence.decodeWorkout(text))
+    }
+}
+
+class RecordsInEachTest {
+    @Test fun matchesNewRecordsInPerWorkout() {
+        val rnd = java.util.Random(7)
+        val h = (0 until 60).map { i ->
+            finishedWorkout(
+                "w$i", LocalDate.of(2025, 1, 1).plusDays(i.toLong()),
+                bench to List(3) { done(50.0 + rnd.nextInt(40), 3 + rnd.nextInt(8)) },
+                squat to List(3) { done(80.0 + rnd.nextInt(60), 2 + rnd.nextInt(6)) },
+            )
+        }
+        val each = com.bestrong.core.stats.WorkoutStats.newRecordsInEach(h) { true }
+        h.forEach { w ->
+            val expected = com.bestrong.core.stats.WorkoutStats.newRecordsIn(w, h.filter { it.startedAtEpochMs < w.startedAtEpochMs })
+            assertEquals(expected.map { it.exerciseId to it.type to it.value }.toSet(), each[w.id].orEmpty().map { it.exerciseId to it.type to it.value }.toSet())
+        }
+    }
+}

@@ -16,14 +16,19 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
+@OptIn(kotlinx.coroutines.FlowPreview::class)
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val repo: BeStrongRepository,
@@ -34,7 +39,7 @@ class HistoryViewModel @Inject constructor(
 
     val trainingDays: StateFlow<Set<LocalDate>> = repo.history
         .map { WorkoutStats.trainingDays(it, ZoneId.systemDefault()) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
+        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     /** Búsqueda por entreno, ejercicio o nota. */
     val query = MutableStateFlow("")
@@ -43,17 +48,19 @@ class HistoryViewModel @Inject constructor(
     val showPartner = MutableStateFlow(false)
     val partnerHistory: StateFlow<List<Workout>> = repo.partnerHistory
 
-    val filtered: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, query, showPartner) { h, p, q, sp ->
+    val filtered: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, query.debounce { if (it.isEmpty()) 0L else 150L }, showPartner) { h, p, q, sp ->
         val all = if (sp) (h + p).sortedByDescending { it.startedAtEpochMs } else h
         WorkoutStats.search(all, q) { it.displayName(context) }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Entrenos por día del año actual (mapa de calor). */
     val heatmap: StateFlow<Map<LocalDate, Int>> = repo.history
         .map { WorkoutStats.dailyCounts(it, LocalDate.now().year, ZoneId.systemDefault()) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    fun recordsIn(workout: Workout): List<PersonalRecord> = WorkoutStats.newRecordsIn(workout, history.value)
+    /** Récords de ese entreno: recorre todo el historial, así que fuera del hilo principal. */
+    suspend fun recordsIn(workout: Workout): List<PersonalRecord> =
+        withContext(Dispatchers.Default) { WorkoutStats.newRecordsIn(workout, history.value) }
 
     /** Último entreno borrado, para poder deshacer. */
     private val _deleted = MutableStateFlow<Workout?>(null)

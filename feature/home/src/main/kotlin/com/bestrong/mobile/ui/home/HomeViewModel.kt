@@ -36,12 +36,14 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -90,13 +92,13 @@ class HomeViewModel @Inject constructor(
         val session = active?.let { Periodization.nextSession(it, history, context.uiLanguage(), plan.customPrograms) }
         // Semana de descarga del mesociclo: la sesión se aligera sola
         if (session != null && plan.mesocycle?.isDeloadWeek(LocalDate.now()) == true) session.copy(routine = Fatigue.deload(session.routine)) else session
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Si no hay programa: la rutina que lleva más tiempo sin hacerse. */
     val suggestedRoutine: StateFlow<Routine?> = combine(repo.routines, repo.history) { routines, history ->
         val last = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
         routines.filter { it.exercises.isNotEmpty() }.minByOrNull { last[it.id] ?: 0L }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Semana actual: días entrenados frente al objetivo y adherencia de las 8 semanas anteriores. */
     val week: StateFlow<WeekProgress> = combine(repo.history, repo.activeProgram, settingsStore.settings) { history, active, s ->
@@ -112,7 +114,7 @@ class HomeViewModel @Inject constructor(
             adherence = if (history.isEmpty()) null else Periodization.adherence(history, goal, today, zone, since = since),
             today = today.dayOfWeek,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 
     /** Programas predefinidos más los creados por el usuario. */
     val periodizedPrograms: List<PeriodizedProgram> get() = PeriodizedPrograms.all + planning.state.value.customPrograms

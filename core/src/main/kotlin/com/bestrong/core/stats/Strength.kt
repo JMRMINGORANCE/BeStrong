@@ -218,7 +218,9 @@ object Strength {
         val before = done.filter { it.startedAtEpochMs in (from - (to - from)) until from }
         val volume = inPeriod.sumOf { it.totalVolume }
         val prevVolume = before.sumOf { it.totalVolume }
-        val records = inPeriod.flatMap { w -> WorkoutStats.newRecordsIn(w, all.filter { it.startedAtEpochMs < w.startedAtEpochMs }) }
+        val ids = inPeriod.mapTo(HashSet()) { it.id }
+        val byWorkout = WorkoutStats.newRecordsInEach(all + inPeriod.filter { w -> all.none { it.id == w.id } }) { it.id in ids }
+        val records = inPeriod.flatMap { byWorkout[it.id].orEmpty() }
         val top = inPeriod.flatMap { it.exercises }.groupBy { it.exercise.id }
             .mapValues { (_, l) -> l.sumOf { we -> we.completedSets.sumOf { it.volume } } }
             .entries.sortedByDescending { it.value }.take(3).map { it.key to it.value }

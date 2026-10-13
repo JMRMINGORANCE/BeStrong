@@ -3,6 +3,7 @@ package com.bestrong.core.stats
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
+import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import java.time.DayOfWeek
 import java.time.Instant
@@ -64,6 +65,19 @@ object WorkoutStats {
             .mapNotNull { w -> w.exercises.firstOrNull { it.exercise.id == exerciseId }?.completedSets?.takeIf { it.isNotEmpty() } }
             .firstOrNull()
             .orEmpty()
+
+    /**
+     * [previousSets] de todos los ejercicios a la vez: id de ejercicio → series completadas de la
+     * última sesión en que se hizo. Una sola pasada por el historial.
+     */
+    fun lastSetsByExercise(history: List<Workout>): Map<String, List<WorkoutSet>> {
+        val result = HashMap<String, List<WorkoutSet>>()
+        history.asSequence().filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }
+            // Como previousSets: cuenta la primera aparición del ejercicio en cada entreno
+            .flatMap { w -> w.exercises.distinctBy { it.exercise.id } }
+            .forEach { we -> we.completedSets.takeIf { it.isNotEmpty() }?.let { result.putIfAbsent(we.exercise.id, it) } }
+        return result
+    }
 
     private fun recordValue(type: RecordType, set: WorkoutSet): Double = when (type) {
         RecordType.HEAVIEST_WEIGHT -> set.weightKg
@@ -175,6 +189,33 @@ object WorkoutStats {
             }
         }
         return records
+    }
+
+    /**
+     * [newRecordsIn] de varios entrenos a la vez ([include]) en una sola pasada cronológica por
+     * [history], en vez de recalcular todos los récords una vez por entreno. Mismo resultado.
+     */
+    fun newRecordsInEach(history: List<Workout>, include: (Workout) -> Boolean): Map<String, List<PersonalRecord>> {
+        val best = HashMap<String, MutableMap<RecordType, Double>>()
+        val result = HashMap<String, List<PersonalRecord>>()
+        history.filter { it.isFinished }.sortedBy { it.startedAtEpochMs }.forEach { w ->
+            val bests = w.exercises.flatMap { we -> bestsOf(we) }
+            if (include(w)) {
+                // La primera vez que se hace un ejercicio no cuenta como récord
+                result[w.id] = bests.filter { (we, type, value) -> best[we.exercise.id]?.let { value > (it[type] ?: 0.0) } == true }
+                    .map { (we, type, value) -> PersonalRecord(we.exercise.id, we.exercise.name, type, value, w.id, w.finishedAt()) }
+            }
+            // Se aplica al terminar el entreno: dentro de él todo se compara con lo anterior
+            bests.forEach { (we, type, value) -> best.getOrPut(we.exercise.id) { mutableMapOf() }.merge(type, value, ::maxOf) }
+        }
+        return result
+    }
+
+    /** Mejor valor (> 0) de cada tipo de récord en ese ejercicio del entreno. */
+    private fun bestsOf(we: WorkoutExercise): List<Triple<WorkoutExercise, RecordType, Double>> {
+        val sets = we.completedSets.filter { it.countsForRecords }
+        if (sets.isEmpty()) return emptyList()
+        return RecordType.entries.map { type -> Triple(we, type, sets.maxOf { recordValue(type, it) }) }.filter { it.third > 0 }
     }
 
     fun exerciseProgress(exerciseId: String, history: List<Workout>): List<ExerciseProgressPoint> =

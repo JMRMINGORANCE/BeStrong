@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class FinishedSummary(
     val workout: Workout,
@@ -130,7 +131,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         } else {
             exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.stepKgFor(ex.id))?.let { ex.id to it } }.toMap()
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** Nota fija de cada ejercicio (altura del asiento, agarre…): id de ejercicio → nota. */
     val pinnedNotes: StateFlow<Map<String, String>> = combine(
@@ -389,7 +390,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (finished.exercises.isEmpty()) return@launch
             repo.saveWorkout(finished)
             savedState[KEY_SUMMARY_ID] = finished.id
-            _summary.value = buildSummary(finished, repo.historyOnce())
+            val history = repo.historyOnce()
+            _summary.value = withContext(Dispatchers.Default) { buildSummary(finished, history) }
             // Se compara con lo planificado (series sin hacer incluidas): saltarse una serie por cansancio no cambia la rutina
             changedRoutine(current)?.let { r -> _summary.value = _summary.value?.copy(routineToUpdate = r, planned = current) }
             actions.exportToHealthConnectIfEnabled(finished)

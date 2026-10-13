@@ -23,6 +23,10 @@ interface BeStrongDao {
     @Query("DELETE FROM workouts WHERE id = :id")
     suspend fun deleteWorkout(id: String)
 
+    /** Varios a la vez en una sola transacción (Room limita a ~999 parámetros: se trocea fuera). */
+    @Query("DELETE FROM workouts WHERE id IN (:ids)")
+    suspend fun deleteWorkouts(ids: List<String>)
+
     @Query("SELECT * FROM routines ORDER BY position, id")
     fun routines(): Flow<List<RoutineEntity>>
 

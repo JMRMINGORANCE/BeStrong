@@ -47,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -62,6 +63,7 @@ import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.session.WorkoutEditor
+import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.share.DragShare
@@ -221,7 +223,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     var editing by remember(w.id) { mutableStateOf(false) }
     var editInfo by remember { mutableStateOf(false) }
     var editSet by remember { mutableStateOf<Pair<String, String>?>(null) }
-    val records = remember(w) { vm.recordsIn(w) }
+    val records by produceState(emptyList<PersonalRecord>(), w) { value = vm.recordsIn(w) }
     if (editInfo) {
         EditPastWorkoutInfoDialog(
             w.name, w.notes, w.startedAtEpochMs, w.durationSeconds() / 60,

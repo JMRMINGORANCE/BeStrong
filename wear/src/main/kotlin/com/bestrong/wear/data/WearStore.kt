@@ -26,6 +26,25 @@ import org.json.JSONObject
 @Singleton
 class WearStore @Inject constructor(@ApplicationContext context: Context) {
     private val prefs = context.getSharedPreferences("bestrong_wear", Context.MODE_PRIVATE)
+
+    /**
+     * Lo que cambia en cada serie o giro de corona (entreno activo, descanso, cardio) va en un archivo
+     * aparte y pequeño: SharedPreferences reescribe el archivo entero, y el principal guarda historiales de ~1 MB.
+     */
+    private val live = context.getSharedPreferences("bestrong_wear_live", Context.MODE_PRIVATE).also { live ->
+        // Una sola vez: se trae lo que hubiera en el archivo grande de versiones anteriores
+        if (LIVE_KEYS.any { it in prefs.all }) {
+            live.edit {
+                prefs.all.filterKeys { it in LIVE_KEYS }.forEach { (k, v) ->
+                    when (v) {
+                        is String -> putString(k, v)
+                        is Int -> putInt(k, v)
+                    }
+                }
+            }
+            prefs.edit { LIVE_KEYS.forEach { remove(it) } }
+        }
+    }
     private val json = SyncContract.json
 
     private val _routines = MutableStateFlow(readRoutines())
@@ -123,28 +142,28 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
      * pesas…): cada tramo empieza de cero y aquí se acumulan. Sobrevive a un reinicio del proceso.
      */
     var closedSegmentsKcal: Int
-        get() = prefs.getInt(KEY_SEGMENTS_KCAL, 0)
-        set(value) = prefs.edit { putInt(KEY_SEGMENTS_KCAL, value) }
+        get() = live.getInt(KEY_SEGMENTS_KCAL, 0)
+        set(value) = live.edit { putInt(KEY_SEGMENTS_KCAL, value) }
 
     var activeWorkout: Workout?
-        get() = prefs.getString(KEY_ACTIVE, null)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
-        set(value) = prefs.edit {
+        get() = live.getString(KEY_ACTIVE, null)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
+        set(value) = live.edit {
             if (value == null) remove(KEY_ACTIVE) else putString(KEY_ACTIVE, Persistence.encodeWorkout(value))
         }
 
     /** Descanso en marcha: si el proceso muere, al volver sigue contando hasta la misma hora. */
     var activeRest: Rest?
         get() = runCatching {
-            prefs.getString(KEY_REST, null)?.split(';')?.let { (ends, total) -> Rest(ends.toLong(), total.toInt()) }
+            live.getString(KEY_REST, null)?.split(';')?.let { (ends, total) -> Rest(ends.toLong(), total.toInt()) }
         }.getOrNull()
-        set(value) = prefs.edit {
+        set(value) = live.edit {
             if (value == null) remove(KEY_REST) else putString(KEY_REST, "${value.endsAtEpochMs};${value.totalSeconds}")
         }
 
     /** Cardio libre en curso (sobrevive a un reinicio del proceso). */
     var activeCardio: CardioState?
         get() = runCatching {
-            prefs.getString(KEY_CARDIO, null)?.let { text ->
+            live.getString(KEY_CARDIO, null)?.let { text ->
                 val o = JSONObject(text)
                 CardioState(
                     type = CardioType.valueOf(o.getString("type")),
@@ -156,7 +175,7 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
                 )
             }
         }.getOrNull()
-        set(value) = prefs.edit {
+        set(value) = live.edit {
             if (value == null) {
                 remove(KEY_CARDIO)
             } else {
@@ -172,6 +191,7 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         }
 
     private companion object {
+        val LIVE_KEYS = setOf("active", "active_rest", "active_cardio", "segments_kcal")
         const val KEY_ROUTINES = "routines"
         const val KEY_PHONE_HISTORY = "phone_history"
         const val KEY_LOCAL_HISTORY = "local_history"

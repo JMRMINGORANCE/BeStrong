@@ -27,7 +27,7 @@ class WatchSync @Inject constructor(@ApplicationContext private val context: Con
         put(SyncContract.PATH_ROUTINES, SyncContract.encodeRoutines(routines))
 
     suspend fun pushHistory(history: List<Workout>) =
-        put(SyncContract.PATH_RECENT_HISTORY, SyncContract.encodeWorkouts(SyncContract.compactHistory(history)))
+        put(SyncContract.PATH_RECENT_HISTORY, SyncContract.encodeRecentHistory(history))
 
     suspend fun pushSettings(settings: SharedSettings) =
         put(SyncContract.PATH_SETTINGS, SyncContract.encodeSettings(settings))
