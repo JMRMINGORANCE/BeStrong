@@ -145,4 +145,6 @@
     <string name="workout_morning">Morgentraining</string>
     <string name="workout_night">Abendtraining</string>
     <string name="cardio_start">Cardio-Stoppuhr starten</string>
+    <string name="remove_set">Satz entfernen</string>
+    <string name="undo_last_set">Letzten Satz rückgängig</string>
 </resources>

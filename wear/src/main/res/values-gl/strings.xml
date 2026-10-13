@@ -145,4 +145,6 @@
     <string name="workout_morning">Adestramento de mañá</string>
     <string name="workout_night">Adestramento de noite</string>
     <string name="cardio_start">Iniciar o cronómetro de cardio</string>
+    <string name="remove_set">Quitar unha serie</string>
+    <string name="undo_last_set">Desfacer a última serie</string>
 </resources>

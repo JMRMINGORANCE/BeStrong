@@ -145,4 +145,6 @@
     <string name="workout_morning">Séance du matin</string>
     <string name="workout_night">Séance du soir</string>
     <string name="cardio_start">Démarrer le chrono cardio</string>
+    <string name="remove_set">Retirer une série</string>
+    <string name="undo_last_set">Annuler la dernière série</string>
 </resources>

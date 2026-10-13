@@ -99,6 +99,16 @@ fun MenuScreen(
             item {
                 Button(onClick = { session.addSet(); onBack() }, label = { Text(stringResource(R.string.add_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }
+            if (w.exercises.getOrNull(index)?.sets?.any { !it.completed } == true) {
+                item {
+                    Button(onClick = { if (session.removePendingSet()) onBack() }, label = { Text(stringResource(R.string.remove_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                }
+            }
+            if (w.completedSetCount > 0) {
+                item {
+                    Button(onClick = { if (session.undoLastSet()) onBack() }, label = { Text(stringResource(R.string.undo_last_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                }
+            }
             item {
                 Button(onClick = onAddExercise, label = { Text(stringResource(R.string.add_exercise)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }

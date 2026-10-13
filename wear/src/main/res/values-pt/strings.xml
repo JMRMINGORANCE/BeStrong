@@ -145,4 +145,6 @@
     <string name="workout_morning">Treino da manhã</string>
     <string name="workout_night">Treino da noite</string>
     <string name="cardio_start">Iniciar o cronómetro de cardio</string>
+    <string name="remove_set">Remover uma série</string>
+    <string name="undo_last_set">Desfazer última série</string>
 </resources>

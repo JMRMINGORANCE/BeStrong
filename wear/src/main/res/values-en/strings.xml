@@ -145,4 +145,6 @@
     <string name="workout_morning">Morning workout</string>
     <string name="workout_night">Night workout</string>
     <string name="cardio_start">Start cardio timer</string>
+    <string name="remove_set">Remove a set</string>
+    <string name="undo_last_set">Undo last set</string>
 </resources>
