@@ -67,7 +67,8 @@ class WatchSyncService : WearableListenerService() {
                         }
                         Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.name}")
                         runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
-                        appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }
+                        // Un reenvío del mismo entreno no se vuelve a exportar
+                        if (isNew) appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }
                     }
                     // Entreno terminado en el móvil: el reloj manda el pulso y las calorías finales
                     path.startsWith(SyncContract.PATH_WORKOUT_HEALTH_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
