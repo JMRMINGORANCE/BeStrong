@@ -913,4 +913,6 @@
     <string name="hc_grant_more">Berechtigungen erteilen</string>
     <string name="dumbbells_nearest">Nächste Kurzhanteln in deinem Studio: %1$s</string>
     <string name="previous_set_note">Letztes Mal: ✎ %1$s</string>
+    <string name="muscle_trend">Sätze pro Muskel (8 Wochen)</string>
+    <string name="muscle_trend_hint">Effektive Sätze pro Woche (Nebenmuskeln halb). Empfohlen: 10–20.</string>
 </resources>

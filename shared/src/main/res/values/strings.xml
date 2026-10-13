@@ -913,4 +913,6 @@
     <string name="hc_grant_more">Conceder permisos</string>
     <string name="dumbbells_nearest">Mancuernas más cercanas en tu gimnasio: %1$s</string>
     <string name="previous_set_note">Última vez: ✎ %1$s</string>
+    <string name="muscle_trend">Series por músculo (8 semanas)</string>
+    <string name="muscle_trend_hint">Series efectivas por semana (secundarios a la mitad). Recomendado: 10–20.</string>
 </resources>

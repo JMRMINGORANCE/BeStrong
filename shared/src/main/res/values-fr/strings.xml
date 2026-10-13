@@ -913,4 +913,6 @@
     <string name="hc_grant_more">Accorder les autorisations</string>
     <string name="dumbbells_nearest">Haltères les plus proches dans ta salle : %1$s</string>
     <string name="previous_set_note">La dernière fois : ✎ %1$s</string>
+    <string name="muscle_trend">Séries par muscle (8 semaines)</string>
+    <string name="muscle_trend_hint">Séries efficaces par semaine (secondaires pour moitié). Recommandé : 10–20.</string>
 </resources>

@@ -376,3 +376,24 @@ fun TrainingLoadCard(stats: AdvancedStats) {
         }
     }
 }
+
+/** Series por semana de un músculo (8 semanas) frente a la recomendación de 10–20. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+fun MuscleTrendCard(trend: Map<com.bestrong.core.model.MuscleGroup, List<Pair<java.time.LocalDate, Double>>>) {
+    if (trend.isEmpty()) return
+    var selected by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(trend.keys.first()) }
+    val weeks = trend[selected] ?: trend.values.first()
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            SectionHeader(stringResource(R.string.muscle_trend))
+            androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                trend.keys.forEach { m ->
+                    androidx.compose.material3.FilterChip(selected = m == selected, onClick = { selected = m }, label = { Text(m.label()) })
+                }
+            }
+            BarChart(weeks.map { (monday, sets) -> ChartPoint(formatShortDate(monday.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()), sets) })
+            Text(stringResource(R.string.muscle_trend_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}

@@ -203,6 +203,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                 }
             }
             item { WeeklyMuscleMap(stats.weeklyMuscles) }
+            item { MuscleTrendCard(stats.muscleTrend) }
             item { WeekSummaryCard(advanced) }
             item { TrainingLoadCard(advanced) }
             item { StrengthLevelsCard(advanced, settings.sex) { sex -> vm.updateSettings { it.copy(sex = sex) } } }

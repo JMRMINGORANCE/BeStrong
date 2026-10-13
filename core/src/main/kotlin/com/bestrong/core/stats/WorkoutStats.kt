@@ -286,6 +286,15 @@ object WorkoutStats {
         return setsPerMuscle(inWeek, 0)
     }
 
+    /** Series por músculo de cada una de las últimas [weeks] semanas (lunes, series), de la más antigua a la actual. */
+    fun muscleTrend(history: List<Workout>, today: LocalDate, zone: ZoneId, weeks: Int = 8): Map<MuscleGroup, List<Pair<LocalDate, Double>>> {
+        val monday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val perWeek = (weeks - 1 downTo 0).map { k -> monday.minusWeeks(k.toLong()).let { it to weeklySetsPerMuscle(history, it, zone) } }
+        val muscles = perWeek.flatMap { it.second.keys }.toSet()
+        return muscles.associateWith { m -> perWeek.map { (d, sets) -> d to (sets[m] ?: 0.0) } }
+            .toList().sortedByDescending { (_, l) -> l.sumOf { it.second } }.toMap()
+    }
+
     /** Series efectivas por grupo muscular (el principal cuenta 1, los secundarios 0,5). */
     fun setsPerMuscle(history: List<Workout>, sinceEpochMs: Long): Map<MuscleGroup, Double> {
         val result = mutableMapOf<MuscleGroup, Double>()

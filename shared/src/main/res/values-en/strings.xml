@@ -913,4 +913,6 @@
     <string name="hc_grant_more">Grant permissions</string>
     <string name="dumbbells_nearest">Closest dumbbells in your gym: %1$s</string>
     <string name="previous_set_note">Last time: ✎ %1$s</string>
+    <string name="muscle_trend">Sets per muscle (8 weeks)</string>
+    <string name="muscle_trend_hint">Effective sets per week (secondary muscles count half). Recommended: 10–20.</string>
 </resources>
