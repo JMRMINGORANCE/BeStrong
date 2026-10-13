@@ -32,8 +32,8 @@ object CoachReport {
                     " (" + (w.durationSeconds() / 60) + " min · " + unit.label + ")"
                 val lines = w.exercises.filter { it.completedSets.isNotEmpty() }.map { we ->
                     // Con «suma de las dos» el peso se da como en la app (se guarda por mancuerna)
-                    val factor = if (dumbbellTotal && we.exercise.equipment == Equipment.DUMBBELL) 2 else 1
-                    val sets = we.completedSets.joinToString(", ") { set(it.copy(weightKg = it.weightKg * factor), we.exercise.tracking, unit) }
+                    val factor = if (dumbbellTotal && we.exercise.equipment == Equipment.DUMBBELL && we.exercise.tracking == TrackingType.WEIGHT_REPS) 2 else 1
+                    val sets = we.completedSets.joinToString(" / ") { set(it.copy(weightKg = it.weightKg * factor), we.exercise.tracking, unit) }
                     "• " + exerciseName(we.exercise) + ": " + sets + we.notes.takeIf { it.isNotBlank() }?.let { " — $it" }.orEmpty()
                 }
                 (listOf(header) + lines + listOfNotNull(w.notes.takeIf { it.isNotBlank() }?.let { "✎ $it" })).joinToString("\n")
@@ -43,7 +43,12 @@ object CoachReport {
     private fun set(s: WorkoutSet, tracking: TrackingType, unit: WeightUnit): String {
         val body = when (tracking) {
             TrackingType.WEIGHT_REPS -> "${unit.format(s.weightKg)}×${s.reps}"
-            TrackingType.REPS_ONLY -> if (s.weightKg > 0) "+${unit.format(s.weightKg)}×${s.reps}" else "${s.reps}"
+            // Lastre (+) o asistencia (−): sin peso, solo las reps
+            TrackingType.REPS_ONLY -> when {
+                s.weightKg > 0 -> "+${unit.format(s.weightKg)}×${s.reps}"
+                s.weightKg < 0 -> "−${unit.format(-s.weightKg)}×${s.reps}"
+                else -> "${s.reps}"
+            }
             TrackingType.DURATION -> "${s.durationSec}s"
             TrackingType.DISTANCE -> "${s.distanceM.toInt()}m"
             TrackingType.CARDIO -> "${s.durationSec / 60}min" + if (s.distanceM > 0) " " + decimal(s.distanceM / 1000) + "km" else ""

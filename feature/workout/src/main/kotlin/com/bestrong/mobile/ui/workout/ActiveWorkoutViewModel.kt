@@ -199,7 +199,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         class Undoable(val kind: UndoKind, val partner: Boolean, val workoutId: String, val restore: (Workout) -> Workout) : WorkoutEvent
         data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
     }
-    enum class UndoKind { SET, EXERCISE }
+    enum class UndoKind { SET, EXERCISE, COPY }
 
     private val _events = MutableSharedFlow<WorkoutEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<WorkoutEvent> = _events
@@ -253,7 +253,24 @@ class ActiveWorkoutViewModel @Inject constructor(
             )
         }
     }
-    fun copyToFollowing(weId: String, setId: String) = edit { WorkoutEditor.copyToFollowing(it, weId, setId) }
+
+    /** Copia la carga a las siguientes series; se puede deshacer (vuelven las que no se hayan tocado después). */
+    fun copyToFollowing(weId: String, setId: String) {
+        val partner = partnerMode.value
+        viewModelScope.launch {
+            val (before, after) = update(partner) { WorkoutEditor.copyToFollowing(it, weId, setId) } ?: return@launch
+            val old = before.exercises.firstOrNull { it.id == weId }?.sets?.associateBy { it.id } ?: return@launch
+            val copied = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
+            if (copied.isEmpty()) return@launch
+            _events.tryEmit(
+                WorkoutEvent.Undoable(UndoKind.COPY, partner, before.id) { w ->
+                    WorkoutEditor.updateExercise(w, weId) { we ->
+                        we.copy(sets = we.sets.map { s -> if (copied[s.id] == s) old.getValue(s.id) else s })
+                    }
+                },
+            )
+        }
+    }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
     fun setRpe(weId: String, setId: String, rpe: Double?) {
         val current = workout.value ?: return
@@ -475,9 +492,10 @@ class ActiveWorkoutViewModel @Inject constructor(
         val zone = java.time.ZoneId.systemDefault()
         val day = java.time.Instant.ofEpochMilli(finished.startedAtEpochMs).atZone(zone).toLocalDate()
         val goal = repo.activeProgram.value?.weeklyGoal ?: settings.value.weeklyGoal
-        // Solo si es de esta semana (un entreno olvidado abierto desde la anterior no cuenta para hoy)
-        val thisMonday = java.time.LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-        if (day.isBefore(thisMonday)) return null
+        // Un entreno olvidado abierto desde hace días no cuenta para hoy; uno que cruza la medianoche
+        // del domingo sí (se compara con cuándo terminó, no con el lunes)
+        val end = finished.finishedAtEpochMs ?: System.currentTimeMillis()
+        if (end - finished.startedAtEpochMs > STALE_WORKOUT_MS) return null
         val others = history.filter { it.id != finished.id }
         val before = Periodization.trainedDaysOfWeek(others, day, zone).size
         val after = Periodization.trainedDaysOfWeek(others + finished, day, zone).size
@@ -497,6 +515,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     private companion object {
+        /** Más de esto abierto: entreno olvidado, no se felicita por el objetivo semanal. */
+        const val STALE_WORKOUT_MS = 6 * 60 * 60 * 1000L
         const val KEY_PARTNER_MODE = "partner_mode"
         const val KEY_SUMMARY_ID = "summary_workout_id"
     }

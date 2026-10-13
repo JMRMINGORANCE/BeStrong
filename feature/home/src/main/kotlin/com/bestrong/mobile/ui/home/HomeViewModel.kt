@@ -28,6 +28,7 @@ import com.bestrong.mobile.health.HealthConnectReader
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.sync.WatchSync
 import com.bestrong.mobile.ui.components.defaultWorkoutName
+import com.bestrong.mobile.ui.components.programTexts
 import com.bestrong.mobile.ui.components.uiLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -89,7 +90,7 @@ class HomeViewModel @Inject constructor(
 
     /** Sesión que toca hoy del programa activo (con las cargas ya calculadas). */
     val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state) { active, history, plan ->
-        val session = active?.let { Periodization.nextSession(it, history, context.uiLanguage(), plan.customPrograms) }
+        val session = active?.let { Periodization.nextSession(it, history, context.uiLanguage(), plan.customPrograms, context.programTexts()) }
         // Semana de descarga del mesociclo: la sesión se aligera sola
         if (session != null && plan.mesocycle?.isDeloadWeek(LocalDate.now()) == true) session.copy(routine = Fatigue.deload(session.routine)) else session
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)

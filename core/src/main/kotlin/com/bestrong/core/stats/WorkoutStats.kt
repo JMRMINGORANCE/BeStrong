@@ -300,8 +300,9 @@ object WorkoutStats {
      * queda frente al rango habitual para ganar músculo ([LOW_WEEKLY_SETS]–[HIGH_WEEKLY_SETS]).
      */
     fun weeklySetsZone(weeks: List<Pair<LocalDate, Double>>, closedWeeks: Int = 4): Pair<Double, VolumeZone>? {
-        val closed = weeks.dropLast(1).takeLast(closedWeeks)
-        if (closed.isEmpty() || closed.all { it.second == 0.0 }) return null
+        // Las semanas antes de empezar a entrenar ese músculo no cuentan (bajarían la media)
+        val closed = weeks.dropLast(1).dropWhile { it.second == 0.0 }.takeLast(closedWeeks)
+        if (closed.size < 2) return null
         val avg = closed.map { it.second }.average()
         val zone = when {
             avg < LOW_WEEKLY_SETS -> VolumeZone.LOW

@@ -78,6 +78,10 @@ fun uiLanguage(): String = contentLanguage(LocalConfiguration.current.locales[0]
 
 fun Context.uiLanguage(): String = contentLanguage(resources.configuration.locales[0].language)
 
+/** Textos que los programas escriben en cada sesión, en el idioma de la app. */
+fun Context.programTexts(): com.bestrong.core.training.ProgramTexts =
+    com.bestrong.core.training.ProgramTexts(getString(com.bestrong.mobile.shared.R.string.program_amrap_note), getString(com.bestrong.mobile.shared.R.string.program_week_prefix))
+
 /** Nombre del ejercicio en el idioma de la app (los personalizados se muestran tal cual). */
 @Composable @ReadOnlyComposable
 fun Exercise.displayName(): String = ExerciseLibrary.displayName(this, uiLanguage())

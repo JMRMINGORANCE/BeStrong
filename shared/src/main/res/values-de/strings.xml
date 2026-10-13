@@ -928,4 +928,7 @@
     <string name="muscle_zone_low">Wochenschnitt zuletzt: %1$s Sätze — unter dem üblichen Bereich (10–20)</string>
     <string name="muscle_zone_ok">Wochenschnitt zuletzt: %1$s Sätze — im üblichen Bereich (10–20)</string>
     <string name="muscle_zone_high">Wochenschnitt zuletzt: %1$s Sätze — über dem üblichen Bereich (10–20): achte auf die Erholung</string>
+    <string name="undo_copied_sets">Last auf die folgenden Sätze übertragen</string>
+    <string name="program_amrap_note">Letzter Satz: so viele Wdh. wie möglich (+)</string>
+    <string name="program_week_prefix">W</string>
 </resources>

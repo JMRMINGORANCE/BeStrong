@@ -90,7 +90,10 @@
     <string name="muscle_shoulders">Espatlles</string>
     <string name="muscle_traps">Trapezi</string>
     <string name="muscle_triceps">Tríceps</string>
-    <string name="n_exercises">%1$d exercicis</string>
+    <plurals name="n_exercises">
+        <item quantity="one">%1$d exercici</item>
+        <item quantity="other">%1$d exercicis</item>
+    </plurals>
     <string name="n_records">🏆 %1$d rècords</string>
     <string name="next_short">Seg.: %1$s %2$s×%3$d</string>
     <string name="notif_channel">Entrenament</string>

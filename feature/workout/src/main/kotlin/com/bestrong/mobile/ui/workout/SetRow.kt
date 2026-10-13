@@ -221,6 +221,11 @@ fun SetRow(
                         set.rpe?.let { Text("@${it.toString().removeSuffix(".0")}", style = MaterialTheme.typography.labelSmall) }
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        // Lo más usado arriba: la lista de tipos y RPE es larga
+                        if (followingCount > 0) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.set_copy_following, followingCount)) }, onClick = { onCopyFollowing(); menu = false })
+                            HorizontalDivider()
+                        }
                         listOf(
                             SetType.NORMAL to stringResource(R.string.set_type_normal),
                             SetType.WARMUP to stringResource(R.string.set_type_warmup),
@@ -244,9 +249,6 @@ fun SetRow(
                             onClick = { onAssisted(!set.assisted); menu = false },
                         )
                         DropdownMenuItem(text = { Text(stringResource(R.string.set_note)) }, onClick = { editingNote = true; menu = false })
-                        if (followingCount > 0 && !set.completed) {
-                            DropdownMenuItem(text = { Text(stringResource(R.string.set_copy_following, followingCount)) }, onClick = { onCopyFollowing(); menu = false })
-                        }
                     }
                 }
                 val columns = LocalSetColumns.current

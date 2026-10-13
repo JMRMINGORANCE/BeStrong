@@ -117,7 +117,13 @@ object Periodization {
     fun round(kg: Double, step: Double = PLATE_STEP): Double = floor(kg / step + 0.5) * step
 
     /** Siguiente sesión del programa (día, semana, ciclo y cargas calculadas). */
-    fun nextSession(active: ActiveProgram, history: List<Workout>, lang: String, custom: List<PeriodizedProgram> = emptyList()): ProgramSession? {
+    fun nextSession(
+        active: ActiveProgram,
+        history: List<Workout>,
+        lang: String,
+        custom: List<PeriodizedProgram> = emptyList(),
+        texts: ProgramTexts = ProgramTexts.forLang(lang),
+    ): ProgramSession? {
         val program = PeriodizedPrograms.byId(active.programId) ?: custom.firstOrNull { it.id == active.programId } ?: return null
         val done = sessionsDone(active, history)
         val n = done.size
@@ -129,11 +135,11 @@ object Periodization {
         val exercises = day.items.mapNotNull { item ->
             val ex = ExerciseLibrary.byId(item.exerciseId) ?: return@mapNotNull null
             val sets = setsFor(item, program, active, cycle, week, done)
-            val amrapNote = if (sets.second) (if (lang == "en") "Last set: as many reps as possible (+)" else "Última serie: máximas repeticiones (+)") else ""
+            val amrapNote = if (sets.second) texts.amrapNote else ""
             val tier = item.tier?.let { "$it · " }.orEmpty()
             RoutineExercise(exercise = ex, sets = sets.first, restSeconds = item.restSeconds, notes = (tier + amrapNote).trimEnd(' ', '·'))
         }
-        val weekLabel = if (program.weeksPerCycle > 1) (if (lang == "en") " · W${week + 1}" else " · S${week + 1}") else ""
+        val weekLabel = if (program.weeksPerCycle > 1) " · ${texts.weekPrefix}${week + 1}" else ""
         val routine = Routine(
             id = routineId(program.id, dayIndex),
             name = "${program.name(lang)} · ${if (lang == "en") day.nameEn else day.nameEs}$weekLabel",
@@ -352,4 +358,25 @@ object PeriodizedPrograms {
     )
 
     fun byId(id: String) = all.firstOrNull { it.id == id }
+}
+
+/** Textos que el programa escribe en la sesión, en el idioma de la app (los pone la interfaz desde sus recursos). */
+data class ProgramTexts(val amrapNote: String, val weekPrefix: String) {
+    companion object {
+        val ES = ProgramTexts("Última serie: máximas repeticiones (+)", "S")
+        val EN = ProgramTexts("Last set: as many reps as possible (+)", "W")
+        fun forLang(lang: String) = if (lang == "en") EN else ES
+
+        private val TIER = Regex("^\\s*T\\d\\b")
+
+        /**
+         * Lo que escribió el usuario en la nota de un ejercicio de programa: se quitan el nivel (T1/T2/T3)
+         * y la frase de AMRAP que pone el programa ([generated], en los idiomas que se hayan usado).
+         */
+        fun userPart(note: String, generated: Collection<String>): String {
+            var rest = generated.filter { it.isNotBlank() }.fold(note) { acc, g -> acc.replace(g, "") }
+            rest = rest.replace(TIER, "")
+            return rest.trim { it.isWhitespace() || it == '·' }
+        }
+    }
 }

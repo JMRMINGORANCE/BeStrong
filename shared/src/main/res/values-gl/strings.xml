@@ -928,4 +928,7 @@
     <string name="muscle_zone_low">Media das últimas semanas: %1$s series — por debaixo do rango habitual (10–20)</string>
     <string name="muscle_zone_ok">Media das últimas semanas: %1$s series — dentro do rango habitual (10–20)</string>
     <string name="muscle_zone_high">Media das últimas semanas: %1$s series — por riba do rango habitual (10–20): vixía a recuperación</string>
+    <string name="undo_copied_sets">Carga copiada ás seguintes series</string>
+    <string name="program_amrap_note">Última serie: máximas repeticións (+)</string>
+    <string name="program_week_prefix">S</string>
 </resources>

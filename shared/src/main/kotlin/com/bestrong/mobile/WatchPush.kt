@@ -8,6 +8,7 @@ import com.bestrong.core.training.Periodization
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.sync.WatchSync
+import com.bestrong.mobile.ui.components.programTexts
 import com.bestrong.mobile.ui.components.uiLanguage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -22,7 +23,7 @@ class WatchPush @Inject constructor(
     private val planning: PlanningStore,
 ) {
     fun routinesForWatch(routines: List<Routine>, program: ActiveProgram?, history: List<Workout>): List<Routine> {
-        val today = program?.let { Periodization.nextSession(it, history, context.uiLanguage(), planning.state.value.customPrograms)?.routine }
+        val today = program?.let { Periodization.nextSession(it, history, context.uiLanguage(), planning.state.value.customPrograms, context.programTexts())?.routine }
         return listOfNotNull(today) + routines
     }
 

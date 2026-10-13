@@ -63,7 +63,14 @@ object WorkoutEditor {
      * tiempo o cardio) más el descanso de su ejercicio, salvo la última del entreno. En una superserie
      * solo se descansa al cerrar la ronda (tras el último ejercicio del grupo).
      */
-    fun estimatedRemainingSeconds(workout: Workout, secondsPerSet: Int = 40, nowEpochMs: Long = System.currentTimeMillis()): Int {
+    fun estimatedRemainingSeconds(
+        workout: Workout,
+        secondsPerSet: Int = 40,
+        nowEpochMs: Long = System.currentTimeMillis(),
+        warmupRestSeconds: Int = WARMUP_REST_SECONDS,
+        /** Fin del descanso en marcha (lo que le queda también cuenta). */
+        restEndsAtEpochMs: Long? = null,
+    ): Int {
         val pending = workout.exercises.withIndex().flatMap { (i, we) ->
             val group = supersetGroup(workout, i)
             we.sets.withIndex().filter { !it.value.completed }.map { (k, set) ->
@@ -71,13 +78,16 @@ object WorkoutEditor {
                 val closesRound = group.filter { it > i }.none { j -> workout.exercises[j].sets.getOrNull(k)?.completed == false }
                 // Cronómetro en marcha: solo lo que le queda
                 val left = set.startedAtEpochMs?.let { (set.durationSec - ((nowEpochMs - it) / 1000).toInt()).coerceAtLeast(0) } ?: set.durationSec
-                // Antes de un drop set no se descansa (como en afterSetCompleted)
-                val nextIsDrop = we.sets.drop(k + 1).firstOrNull { !it.completed }?.type == SetType.DROP
-                maxOf(if (set.isRunning) 0 else secondsPerSet, left) to if (closesRound && !nextIsDrop) we.restSeconds else 0
+                // Como en afterSetCompleted: fuera de superserie no se descansa antes de un drop set
+                // y tras un calentamiento basta el descanso corto
+                val nextIsDrop = group.size == 1 && we.sets.drop(k + 1).firstOrNull { !it.completed }?.type == SetType.DROP
+                val rest = if (set.type == SetType.WARMUP && group.size == 1) we.restSeconds.coerceAtMost(warmupRestSeconds) else we.restSeconds
+                maxOf(if (set.isRunning) 0 else secondsPerSet, left) to if (closesRound && !nextIsDrop) rest else 0
             }
         }
         if (pending.isEmpty()) return 0
-        return pending.sumOf { it.first } + pending.dropLast(1).sumOf { it.second }
+        val restLeft = restEndsAtEpochMs?.let { ((it - nowEpochMs) / 1000).toInt().coerceAtLeast(0) } ?: 0
+        return restLeft + pending.sumOf { it.first } + pending.dropLast(1).sumOf { it.second }
     }
 
     // --- Pausa y entreno olvidado -----------------------------------------------------------

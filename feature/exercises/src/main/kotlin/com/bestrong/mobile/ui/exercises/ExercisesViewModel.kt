@@ -17,6 +17,7 @@ import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.training.Injuries
 import com.bestrong.core.training.Periodization
+import com.bestrong.core.training.ProgramTexts
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.util.newId
@@ -168,12 +169,12 @@ class ExercisesViewModel @Inject constructor(
                 Triple(w.id, list.map { it.notes }.filter(String::isNotBlank).joinToString(" · "), w.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true)
             }
         }
-        // En los programas, las notas que genera el propio programa (T1/T2/T3, AMRAP…) se repiten entre sesiones
-        val programNotes = withNotes.filter { it.third }.groupingBy { it.second }.eachCount().filterValues { it >= 2 }.keys
-        return withNotes.withIndex().mapNotNull { (i, t) ->
-            val (id, note, fromProgram) = t
-            val generated = fromProgram && (note in programNotes || PROGRAM_TIER.containsMatchIn(note))
-            note.takeIf { it.isNotBlank() && it !in templates && !generated && it != withNotes.getOrNull(i + 1)?.second }?.let { id to it }
+        // En los programas, la nota lleva el nivel (T1/T2/T3) y la frase de AMRAP: solo cuenta lo que añadió el usuario
+        val generated = listOf(context.getString(com.bestrong.mobile.shared.R.string.program_amrap_note), ProgramTexts.ES.amrapNote, ProgramTexts.EN.amrapNote)
+        val cleaned = withNotes.map { (id, note, fromProgram) -> id to if (fromProgram) ProgramTexts.userPart(note, generated) else note }
+        return cleaned.withIndex().mapNotNull { (i, t) ->
+            val (id, note) = t
+            note.takeIf { it.isNotBlank() && it !in templates && it != cleaned.getOrNull(i + 1)?.second }?.let { id to it }
         }.toMap()
     }
 
@@ -196,6 +197,3 @@ class ExercisesViewModel @Inject constructor(
 
     fun deleteCustom(id: String) = viewModelScope.launch { repo.deleteCustomExercise(id) }
 }
-
-/** Notas de nivel que genera un programa (GZCLP: «T1», «T2 · …»). */
-private val PROGRAM_TIER = Regex("^T\\d\\b")

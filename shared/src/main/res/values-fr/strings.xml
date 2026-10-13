@@ -928,4 +928,7 @@
     <string name="muscle_zone_low">Moyenne des dernières semaines : %1$s séries — sous la fourchette habituelle (10–20)</string>
     <string name="muscle_zone_ok">Moyenne des dernières semaines : %1$s séries — dans la fourchette habituelle (10–20)</string>
     <string name="muscle_zone_high">Moyenne des dernières semaines : %1$s séries — au-dessus de la fourchette habituelle (10–20) : surveille ta récupération</string>
+    <string name="undo_copied_sets">Charge copiée sur les séries suivantes</string>
+    <string name="program_amrap_note">Dernière série : max. de répétitions (+)</string>
+    <string name="program_week_prefix">S</string>
 </resources>

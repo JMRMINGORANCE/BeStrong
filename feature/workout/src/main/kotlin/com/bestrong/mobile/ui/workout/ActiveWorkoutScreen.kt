@@ -181,6 +181,7 @@ fun ActiveWorkoutScreen(
     val snackbar = remember { SnackbarHostState() }
     val undoSet = stringResource(R.string.undo_set_deleted)
     val undoExercise = stringResource(R.string.undo_exercise_deleted)
+    val undoCopy = stringResource(R.string.undo_copied_sets)
     val undoLabel = stringResource(R.string.action_undo)
     val applyLabel = stringResource(R.string.action_apply)
     val rpeDown = stringResource(R.string.rpe_suggest_down)
@@ -197,7 +198,11 @@ fun ActiveWorkoutScreen(
         vm.events.collect { e ->
             when (e) {
                 is ActiveWorkoutViewModel.WorkoutEvent.Undoable -> {
-                    val msg = if (e.kind == ActiveWorkoutViewModel.UndoKind.SET) undoSet else undoExercise
+                    val msg = when (e.kind) {
+                        ActiveWorkoutViewModel.UndoKind.SET -> undoSet
+                        ActiveWorkoutViewModel.UndoKind.EXERCISE -> undoExercise
+                        ActiveWorkoutViewModel.UndoKind.COPY -> undoCopy
+                    }
                     if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo(e)
                 }
                 is ActiveWorkoutViewModel.WorkoutEvent.RpeSuggestion -> {
@@ -259,12 +264,13 @@ fun ActiveWorkoutScreen(
         },
     ) { padding ->
         val content = Modifier.padding(padding).fillMaxSize()
+        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds)
         when {
             posture == FoldPosture.TABLETOP -> Column(content) {
                 // Mitad superior: lo que se mira desde el banco
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true) }
-                        ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp))
+                        ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp), eta)
                 }
                 HorizontalDivider()
                 listContent(Modifier.weight(1f))
@@ -278,7 +284,7 @@ fun ActiveWorkoutScreen(
                     if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                     if (settings.mediaControls) MediaControls(settings.musicApp)
-                    SummaryPanel(w, previous, liveMetrics)
+                    SummaryPanel(w, previous, liveMetrics, eta = eta)
                 }
                 listContent(Modifier.weight(0.62f))
             }
@@ -287,7 +293,7 @@ fun ActiveWorkoutScreen(
                 if (w.isPaused) PausedBanner(vm::togglePause)
                 RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                 if (settings.mediaControls) MediaControls(settings.musicApp)
-                StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), eta)
                 listContent(Modifier.weight(1f))
             }
         }
@@ -351,8 +357,11 @@ private fun KeepScreenOn(enabled: Boolean) {
     }
 }
 
+/** Lo que necesita la hora de fin además del entreno: descanso en marcha y descanso tras calentar. */
+private data class EtaInputs(val restEndsAtEpochMs: Long? = null, val warmupRestSeconds: Int = WorkoutEditor.WARMUP_REST_SECONDS)
+
 @Composable
-private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Modifier) {
+private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Modifier, eta: EtaInputs = EtaInputs()) {
     val now = rememberNow()
     val unit = LocalWeightUnit.current
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -363,7 +372,7 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
             metrics?.heartRate?.let { StatTile(stringResource(R.string.stat_watch_hr), "$it", Modifier.weight(0.8f)) }
         }
         // Tiempo aproximado para terminar (series pendientes + descansos) y a qué hora
-        val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now)
+        val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now, warmupRestSeconds = eta.warmupRestSeconds, restEndsAtEpochMs = eta.restEndsAtEpochMs)
         if (remaining > 0) {
             Text(
                 stringResource(R.string.remaining_time_eta, (remaining + 59) / 60, formatClock(now + remaining * 1000L)),
@@ -375,10 +384,10 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
 }
 
 @Composable
-private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, metrics: LiveMetrics?, modifier: Modifier = Modifier) {
+private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, metrics: LiveMetrics?, modifier: Modifier = Modifier, eta: EtaInputs = EtaInputs()) {
     val unit = LocalWeightUnit.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatsRow(w, metrics)
+        StatsRow(w, metrics, eta = eta)
         metrics?.let { m ->
             Text(
                 stringResource(R.string.watch_metrics, m.heartRate?.toString() ?: "--", m.avgHeartRate?.toString() ?: "--", m.calories?.toString() ?: "--"),

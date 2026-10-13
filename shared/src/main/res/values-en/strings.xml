@@ -928,4 +928,7 @@
     <string name="muscle_zone_low">Recent weekly average: %1$s sets — below the usual range (10–20)</string>
     <string name="muscle_zone_ok">Recent weekly average: %1$s sets — within the usual range (10–20)</string>
     <string name="muscle_zone_high">Recent weekly average: %1$s sets — above the usual range (10–20): watch your recovery</string>
+    <string name="undo_copied_sets">Load copied to the next sets</string>
+    <string name="program_amrap_note">Last set: as many reps as possible (+)</string>
+    <string name="program_week_prefix">W</string>
 </resources>

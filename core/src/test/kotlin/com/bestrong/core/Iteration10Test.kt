@@ -64,5 +64,26 @@ class Iteration10Test {
         assertEquals(VolumeZone.LOW, zone)
         assertEquals(VolumeZone.HIGH, WorkoutStats.weeklySetsZone(listOf(d to 25.0, d to 22.0, d to 0.0))!!.second)
         assertNull(WorkoutStats.weeklySetsZone(listOf(d to 12.0)))
+        // Empezó hace 2 semanas a 14 series: no está «por debajo»
+        val fresh = listOf(0.0, 0.0, 0.0, 0.0, 0.0, 14.0, 14.0, 3.0).mapIndexed { i, v -> d.plusWeeks(i.toLong()) to v }
+        assertEquals(VolumeZone.OPTIMAL, WorkoutStats.weeklySetsZone(fresh)!!.second)
+    }
+
+    @Test fun restSummaryIgnoresSupersetsAndUsesSetDuration() {
+        val t0 = 1_000_000L
+        val plank = com.bestrong.core.library.ExerciseLibrary.byId("plank")!!
+        val timed = WorkoutExercise(
+            exercise = plank,
+            restSeconds = 60,
+            sets = listOf(
+                WorkoutSet(durationSec = 90, completed = true, completedAtEpochMs = t0),
+                // 150 s después: 90 s de plancha → 60 s de descanso real
+                WorkoutSet(durationSec = 90, completed = true, completedAtEpochMs = t0 + 150_000),
+            ),
+        )
+        val ss = WorkoutExercise(exercise = bench, restSeconds = 90, supersetId = "a", sets = listOf(WorkoutSet(completed = true, completedAtEpochMs = t0), WorkoutSet(completed = true, completedAtEpochMs = t0 + 400_000)))
+        val s = RestStats.summary(Workout(name = "w", startedAtEpochMs = 0, finishedAtEpochMs = t0 + 500_000, exercises = listOf(timed, ss)))!!
+        assertEquals(60, s.realSeconds)
+        assertEquals(1, s.samples)
     }
 }

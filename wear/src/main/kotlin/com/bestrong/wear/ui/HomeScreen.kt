@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
@@ -100,7 +101,7 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
                         secondaryLabel = {
                             // Ejercicios y tiempo aproximado (series × 40 s + descansos)
                             val minutes = remember(routine) { (WorkoutEditor.estimatedRemainingSeconds(routine.toWorkout(0)) + 59) / 60 }
-                            val exercises = stringResource(R.string.n_exercises, routine.exercises.size)
+                            val exercises = pluralStringResource(R.plurals.n_exercises, routine.exercises.size, routine.exercises.size)
                             Text(if (minutes > 0) stringResource(R.string.routine_minutes_suffix, exercises, minutes) else exercises)
                         },
                         colors = ButtonDefaults.filledTonalButtonColors(),

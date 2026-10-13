@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -71,15 +72,8 @@ fun MenuScreen(
                     textAlign = TextAlign.Center,
                 )
             }
-            // Lo que queda y a qué hora se acabaría
-            val remaining = WorkoutEditor.estimatedRemainingSeconds(w)
-            if (remaining > 0) {
-                item {
-                    val ends = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
-                        .format(java.time.Instant.ofEpochMilli(System.currentTimeMillis() + remaining * 1000L).atZone(java.time.ZoneId.systemDefault()))
-                    Text(stringResource(R.string.remaining_eta, (remaining + 59) / 60, ends), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
-                }
-            }
+            // Lo que queda (con el descanso en marcha) y a qué hora se acabaría
+            item { RemainingEta(session, w) }
             item { ListHeader { Text(stringResource(R.string.exercises)) } }
             itemsIndexed(w.exercises, key = { _, we -> we.id }) { i, we ->
                 val done = we.sets.count { it.completed }
@@ -182,6 +176,24 @@ fun MenuScreen(
 }
 
 /** Selector de ejercicios en el reloj: recientes primero, luego por grupo muscular. */
+@Composable
+private fun RemainingEta(session: WorkoutSession, w: Workout) {
+    val rest by session.rest.collectAsStateWithLifecycle()
+    val settings by session.settings.collectAsStateWithLifecycle()
+    // Se recalcula cada 30 s mientras el menú sigue abierto
+    val now by produceState(System.currentTimeMillis()) {
+        while (true) {
+            kotlinx.coroutines.delay(30_000)
+            value = System.currentTimeMillis()
+        }
+    }
+    val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now, warmupRestSeconds = settings.warmupRestSeconds, restEndsAtEpochMs = rest?.endsAtEpochMs)
+    if (remaining <= 0) return
+    val ends = java.time.format.DateTimeFormatter.ofLocalizedTime(java.time.format.FormatStyle.SHORT)
+        .format(java.time.Instant.ofEpochMilli(now + remaining * 1000L).atZone(java.time.ZoneId.systemDefault()))
+    Text(stringResource(R.string.remaining_eta, (remaining + 59) / 60, ends), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
+}
+
 @Composable
 fun ExercisePickerScreen(container: WearContainer, onPick: (Exercise) -> Unit) {
     val history by container.store.history.collectAsStateWithLifecycle()

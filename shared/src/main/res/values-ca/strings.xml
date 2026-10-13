@@ -928,4 +928,7 @@
     <string name="muscle_zone_low">Mitjana de les darreres setmanes: %1$s sèries — per sota del rang habitual (10–20)</string>
     <string name="muscle_zone_ok">Mitjana de les darreres setmanes: %1$s sèries — dins del rang habitual (10–20)</string>
     <string name="muscle_zone_high">Mitjana de les darreres setmanes: %1$s sèries — per sobre del rang habitual (10–20): vigila la recuperació</string>
+    <string name="undo_copied_sets">Càrrega copiada a les sèries següents</string>
+    <string name="program_amrap_note">Última sèrie: màximes repeticions (+)</string>
+    <string name="program_week_prefix">S</string>
 </resources>
