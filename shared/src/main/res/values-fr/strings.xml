@@ -911,4 +911,5 @@
     <string name="warmup_rest_setting">Repos après une série d\'échauffement</string>
     <string name="hc_more_perms">Il manque des autorisations pour exporter aussi le poids et la masse grasse des Mesures</string>
     <string name="hc_grant_more">Accorder les autorisations</string>
+    <string name="dumbbells_nearest">Haltères les plus proches dans ta salle : %1$s</string>
 </resources>

@@ -581,6 +581,20 @@ private fun ExerciseCard(
                     )
                 }
             }
+            // Mancuernas: si el peso no existe en el gimnasio activo, las más cercanas (por debajo y por encima)
+            if (we.exercise.equipment == Equipment.DUMBBELL && we.exercise.tracking == TrackingType.WEIGHT_REPS) {
+                val next = we.sets.firstOrNull { !it.completed }?.weightKg ?: 0.0
+                val available = vm.settings.collectAsStateWithLifecycle().value.activeGym.dumbbellsKg
+                if (next > 0 && available.isNotEmpty() && available.none { kotlin.math.abs(it - next) < 0.01 }) {
+                    val near = listOfNotNull(available.filter { it < next }.maxOrNull(), available.filter { it > next }.minOrNull())
+                    Text(
+                        stringResource(R.string.dumbbells_nearest, near.joinToString(" · ") { unit.format(it, withUnit = true) }),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                    )
+                }
+            }
             // Nota fija del ejercicio (se guarda para siempre, no solo en este entreno)
             if (pinnedNote.isNotBlank()) {
                 Text(

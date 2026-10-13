@@ -911,4 +911,5 @@
     <string name="warmup_rest_setting">Descanso após uma série de aquecimento</string>
     <string name="hc_more_perms">Faltam permissões para exportar também o peso e a gordura de Medidas</string>
     <string name="hc_grant_more">Conceder permissões</string>
+    <string name="dumbbells_nearest">Halteres mais próximos no teu ginásio: %1$s</string>
 </resources>

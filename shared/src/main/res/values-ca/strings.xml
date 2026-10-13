@@ -911,4 +911,5 @@
     <string name="warmup_rest_setting">Descans després d\'una sèrie d\'escalfament</string>
     <string name="hc_more_perms">Falten permisos per exportar també el pes i el greix de Mesures</string>
     <string name="hc_grant_more">Concedir permisos</string>
+    <string name="dumbbells_nearest">Manuelles més properes al teu gimnàs: %1$s</string>
 </resources>

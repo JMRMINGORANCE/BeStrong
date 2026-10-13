@@ -911,4 +911,5 @@
     <string name="warmup_rest_setting">Pause nach einem Aufwärmsatz</string>
     <string name="hc_more_perms">Es fehlen Berechtigungen, um auch Gewicht und Körperfett aus Maße zu exportieren</string>
     <string name="hc_grant_more">Berechtigungen erteilen</string>
+    <string name="dumbbells_nearest">Nächste Kurzhanteln in deinem Studio: %1$s</string>
 </resources>
