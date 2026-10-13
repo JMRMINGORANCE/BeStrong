@@ -37,6 +37,7 @@ fun DataToolsSection(vm: ProfileViewModel) {
     val pending by vm.pendingEncrypted.collectAsStateWithLifecycle()
     var askPassword by remember { mutableStateOf(false) }
     var password by remember { mutableStateOf("") }
+    var repeated by remember { mutableStateOf("") }
     var deleting by remember { mutableStateOf(false) }
     val xlsxLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) { uri ->
         uri?.let(vm::exportXlsx)
@@ -72,14 +73,24 @@ fun DataToolsSection(vm: ProfileViewModel) {
         AlertDialog(
             onDismissRequest = { askPassword = false },
             title = { Text(stringResource(R.string.export_encrypted)) },
-            text = { PasswordField(password, stringResource(R.string.password_hint)) { password = it } },
+            text = {
+                // Se escribe dos veces: con una errata la copia sería irrecuperable
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PasswordField(password, stringResource(R.string.password_hint)) { password = it }
+                    PasswordField(repeated, stringResource(R.string.password_repeat)) { repeated = it }
+                    if (repeated.isNotEmpty() && repeated != password) {
+                        Text(stringResource(R.string.password_mismatch), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            },
             confirmButton = {
-                TextButton(enabled = password.length >= 6, onClick = {
+                TextButton(enabled = password.length >= MIN_PASSWORD && repeated == password, onClick = {
+                    repeated = ""
                     askPassword = false
                     encLauncher.launch("bestrong-${java.time.LocalDate.now()}.bestrong")
                 }) { Text(stringResource(R.string.action_export)) }
             },
-            dismissButton = { TextButton(onClick = { askPassword = false; password = "" }) { Text(stringResource(R.string.action_cancel)) } },
+            dismissButton = { TextButton(onClick = { askPassword = false; password = ""; repeated = "" }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
     if (pending != null) {
@@ -128,3 +139,6 @@ private fun PasswordField(value: String, hint: String, onChange: (String) -> Uni
         )
     }
 }
+
+/** Mínimo para la copia cifrada: el archivo puede atacarse sin conexión. */
+private const val MIN_PASSWORD = 10

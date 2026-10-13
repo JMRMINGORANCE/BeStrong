@@ -87,7 +87,9 @@ data class UserSettings(
 @Singleton
 class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
-    private val _settings = MutableStateFlow(read())
+
+    // Si algún valor guardado no se puede leer, mejor los ajustes por defecto que no arrancar
+    private val _settings = MutableStateFlow(runCatching { read() }.getOrElse { UserSettings() })
     val settings: StateFlow<UserSettings> = _settings
 
     private fun read() = UserSettings(
@@ -204,26 +206,37 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         }.toMap(),
     )
 
-    /** Restaura los ajustes de una copia (los que falten se quedan como están). */
+    /**
+     * Restaura los ajustes de una copia (los que falten se quedan como están). Solo claves conocidas y
+     * con el tipo que espera la app: un valor de otro tipo (copia dañada o ajena) haría fallar cada arranque.
+     */
     @Synchronized
     fun restoreBackup(json: JsonObject) {
+        // Se escriben antes todos los ajustes actuales: así cada clave conocida tiene su tipo en prefs
+        update { it }
+        val current = prefs.all
         prefs.edit {
-            json.filterKeys { it !in DEVICE_KEYS }.forEach { (k, v) ->
-                when {
-                    v is JsonArray -> putStringSet(k, v.mapNotNull { (it as? JsonPrimitive)?.content }.toSet())
-                    v !is JsonPrimitive -> Unit
-                    v.isString -> putString(k, v.content)
-                    v.booleanOrNull != null -> putBoolean(k, v.booleanOrNull!!)
-                    // Los números son Int salvo los que ya se guardan como Long
-                    v.longOrNull != null -> if (prefs.all[k] is Long) putLong(k, v.longOrNull!!) else putInt(k, v.longOrNull!!.toInt())
-                }
-            }
+            json.filterKeys { it !in DEVICE_KEYS && it in current }.forEach { (k, v) -> putTyped(k, current[k], v) }
         }
-        _settings.value = read()
+        _settings.value = runCatching { read() }.getOrDefault(_settings.value)
+    }
+
+    /** Escribe [v] solo si es del mismo tipo que el valor actual [expected]; si no, se ignora. */
+    private fun android.content.SharedPreferences.Editor.putTyped(k: String, expected: Any?, v: kotlinx.serialization.json.JsonElement) {
+        val p = v as? JsonPrimitive
+        when {
+            expected is Set<*> && v is JsonArray -> putStringSet(k, v.mapNotNull { (it as? JsonPrimitive)?.content }.toSet())
+            p == null -> Unit
+            p.isString -> if (expected is String) putString(k, p.content)
+            expected is Boolean -> p.booleanOrNull?.let { putBoolean(k, it) }
+            expected is Int -> p.longOrNull?.let { putInt(k, it.toInt()) }
+            expected is Long -> p.longOrNull?.let { putLong(k, it) }
+        }
     }
 
     private companion object {
-        val DEVICE_KEYS = setOf("backup_folder", "backup_last")
+        // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
+        val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
     }
 }

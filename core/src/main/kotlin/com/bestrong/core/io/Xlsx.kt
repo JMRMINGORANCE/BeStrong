@@ -81,5 +81,7 @@ object Xlsx {
         return sb.toString()
     }
 
-    private fun esc(s: String) = s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+    /** Fuera los caracteres que XML 1.0 no admite (un nombre con \u0001 dejaría el .xlsx corrupto). */
+    private fun esc(s: String) = s.filter { it == '\t' || it == '\n' || it == '\r' || (it >= ' ' && it != '\uFFFE' && it != '\uFFFF') }
+        .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
 }

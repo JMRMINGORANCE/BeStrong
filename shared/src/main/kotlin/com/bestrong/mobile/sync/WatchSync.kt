@@ -24,7 +24,7 @@ class WatchSync @Inject constructor(@ApplicationContext private val context: Con
     private val nodeClient by lazy { Wearable.getNodeClient(context) }
 
     suspend fun pushRoutines(routines: List<Routine>) =
-        put(SyncContract.PATH_ROUTINES, SyncContract.encodeRoutines(routines))
+        put(SyncContract.PATH_ROUTINES, SyncContract.encodeRoutinesWithin(routines))
 
     suspend fun pushHistory(history: List<Workout>) =
         put(SyncContract.PATH_RECENT_HISTORY, SyncContract.encodeRecentHistory(history))

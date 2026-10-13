@@ -269,6 +269,20 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
+    /** Lee un archivo elegido por el usuario, rechazando los enormes (un fichero equivocado de GB agotaría la memoria). */
+    private fun readLimited(uri: android.net.Uri): String =
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            val out = java.io.ByteArrayOutputStream()
+            val buf = ByteArray(64 * 1024)
+            while (true) {
+                val n = input.read(buf)
+                if (n < 0) break
+                out.write(buf, 0, n)
+                require(out.size() <= MAX_IMPORT_BYTES) { context.getString(R.string.file_too_big) }
+            }
+            out.toByteArray().decodeToString()
+        } ?: error(context.getString(R.string.file_open_error))
+
     /** Borrado selectivo: entrenos antiguos, medidas, fotos o todo el historial. */
     fun deleteData(kind: DeleteKind) = viewModelScope.launch {
         val count = when (kind) {
@@ -299,7 +313,7 @@ class ProfileViewModel @Inject constructor(
     fun importCsv(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
             val text = withContext(Dispatchers.IO) {
-                context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error(context.getString(R.string.file_open_error))
+                readLimited(uri)
             }
             val parsed = withContext(Dispatchers.Default) {
                 WorkoutCsv.import(text, repo.exercises.value, strongUnit = settings.value.unit)
@@ -323,7 +337,7 @@ class ProfileViewModel @Inject constructor(
     fun restoreBackup(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
             val text = withContext(Dispatchers.IO) {
-                context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error(context.getString(R.string.file_open_error))
+                readLimited(uri)
             }
             // Copia cifrada: se pide la contraseña y se sigue en restoreEncrypted
             if (EncryptedBackup.isEncrypted(text)) {
@@ -367,3 +381,5 @@ class ProfileViewModel @Inject constructor(
 enum class ExportRange { ALL, YEAR, DAYS_90, DAYS_30 }
 
 enum class DeleteKind { OLD_HISTORY, MEASUREMENTS, PHOTOS, ALL_HISTORY }
+
+private const val MAX_IMPORT_BYTES = 64 * 1024 * 1024

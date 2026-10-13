@@ -75,6 +75,22 @@ object SyncContract {
         history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.take(limit)
             .map { w -> w.copy(notes = "", heartRateSamples = emptyList(), exercises = w.exercises.map { it.copy(notes = "", sets = it.completedSets) }) }
 
+    /**
+     * Rutinas para el reloj sin pasar de [maxBytes]: sin notas ni músculos secundarios (no los usa)
+     * y, si aun así no caben, las primeras (la sesión de hoy va la primera).
+     */
+    fun encodeRoutinesWithin(routines: List<Routine>, maxBytes: Int = MAX_HISTORY_BYTES): ByteArray {
+        var list = routines.map { r ->
+            r.copy(notes = "", exercises = r.exercises.map { it.copy(notes = "", exercise = it.exercise.copy(secondaryMuscles = emptyList())) })
+        }
+        var bytes = encodeRoutines(list)
+        while (bytes.size > maxBytes && list.isNotEmpty()) {
+            list = list.take((list.size.toLong() * maxBytes / bytes.size).toInt().coerceIn(0, list.size - 1))
+            bytes = encodeRoutines(list)
+        }
+        return bytes
+    }
+
     /** Tamaño máximo del historial para el reloj (un DataItem admite ~100 KB; se deja margen). */
     const val MAX_HISTORY_BYTES = 90_000
 

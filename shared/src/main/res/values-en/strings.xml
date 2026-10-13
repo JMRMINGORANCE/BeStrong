@@ -443,7 +443,7 @@
     <string name="partner_name_body">Name of the person training with you (empty = off)</string>
     <string name="partner_saved">%1$s’s workout saved</string>
     <string name="password">Password</string>
-    <string name="password_hint">At least 6 characters. Without it the backup can’t be recovered.</string>
+    <string name="password_hint">At least 10 characters. Without it the backup can’t be recovered.</string>
     <string name="password_restore">This backup is encrypted: enter its password</string>
     <string name="pdf_rest">Rest %1$s</string>
     <string name="pdf_routine_sets">%1$d × %2$s</string>
@@ -892,4 +892,7 @@
     <string name="training_load_ratio">This week: %1$s× your average of the previous 4</string>
     <string name="training_load_high">This week: %1$s× your average. Ramping up this fast raises injury risk: consider an easier session.</string>
     <string name="training_load_hint">Effort (average RPE, 7 if not logged) × minutes of each session.</string>
+    <string name="password_repeat">Repeat the password</string>
+    <string name="password_mismatch">They don\'t match</string>
+    <string name="file_too_big">The file is too big (max. 64 MB)</string>
 </resources>

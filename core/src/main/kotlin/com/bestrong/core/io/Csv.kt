@@ -37,8 +37,24 @@ object Csv {
         return if (header.count { it == ';' } > header.count { it == ',' }) ';' else ','
     }
 
-    fun escape(value: String): String =
-        if (value.any { it == ',' || it == '"' || it == '\n' || it == '\r' }) "\"" + value.replace("\"", "\"\"") + "\"" else value
+    fun escape(value: String): String {
+        val safe = neutralizeFormula(value)
+        return if (safe.any { it in NEEDS_QUOTES }) "\"" + safe.replace("\"", "\"\"") + "\"" else safe
+    }
+
+    private val NEEDS_QUOTES = setOf(',', '"', '\n', '\r')
+    private val FORMULA_START = setOf('=', '+', '-', '@', '\t', '\r')
+
+    /**
+     * Un texto que empieza por = + - @ (p. ej. el nombre de una rutina compartida) se ejecutaría como
+     * fórmula al abrir el CSV en Excel o Sheets: se le antepone ' (los números negativos no se tocan).
+     */
+    fun neutralizeFormula(value: String): String =
+        if (value.isNotEmpty() && value[0] in FORMULA_START && value.replace(',', '.').toDoubleOrNull() == null) "'$value" else value
+
+    /** Lo contrario de [neutralizeFormula], al importar. */
+    fun restoreFormula(value: String): String =
+        if (value.length >= 2 && value[0] == '\'' && value[1] in FORMULA_START) value.substring(1) else value
 
     fun write(rows: List<List<String>>): String = rows.joinToString("\n") { r -> r.joinToString(",") { escape(it) } } + "\n"
 }

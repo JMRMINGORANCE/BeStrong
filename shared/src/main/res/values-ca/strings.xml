@@ -443,7 +443,7 @@
     <string name="partner_name_body">Nom de qui entrena amb tu (buit = desactivat)</string>
     <string name="partner_saved">Entrenament de %1$s desat</string>
     <string name="password">Contrasenya</string>
-    <string name="password_hint">Mínim 6 caràcters. Sense ella no es pot recuperar la còpia.</string>
+    <string name="password_hint">Mínim 10 caràcters. Sense ella no es pot recuperar la còpia.</string>
     <string name="password_restore">Aquesta còpia està xifrada: escriu-ne la contrasenya</string>
     <string name="pdf_rest">Descans %1$s</string>
     <string name="pdf_routine_sets">%1$d × %2$s</string>
@@ -892,4 +892,7 @@
     <string name="training_load_ratio">Aquesta setmana: %1$s× la teva mitjana de les 4 anteriors</string>
     <string name="training_load_high">Aquesta setmana: %1$s× la teva mitjana. Pujar la càrrega tan ràpid augmenta el risc de lesió: valora una sessió més suau.</string>
     <string name="training_load_hint">Esforç (RPE mitjà, 7 si no l\'anotes) × minuts de cada sessió.</string>
+    <string name="password_repeat">Repeteix la contrasenya</string>
+    <string name="password_mismatch">No coincideixen</string>
+    <string name="file_too_big">El fitxer és massa gran (màx. 64 MB)</string>
 </resources>

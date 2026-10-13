@@ -443,7 +443,7 @@
     <string name="partner_name_body">Nombre de quien entrena contigo (vacío = desactivado)</string>
     <string name="partner_saved">Entreno de %1$s guardado</string>
     <string name="password">Contraseña</string>
-    <string name="password_hint">Mínimo 6 caracteres. Sin ella no se puede recuperar la copia.</string>
+    <string name="password_hint">Mínimo 10 caracteres. Sin ella no se puede recuperar la copia.</string>
     <string name="password_restore">Esta copia está cifrada: escribe su contraseña</string>
     <string name="pdf_rest">Descanso %1$s</string>
     <string name="pdf_routine_sets">%1$d × %2$s</string>
@@ -892,4 +892,7 @@
     <string name="training_load_ratio">Esta semana: %1$s× tu media de las 4 anteriores</string>
     <string name="training_load_high">Esta semana: %1$s× tu media. Subir la carga tan rápido aumenta el riesgo de lesión: valora una sesión más suave.</string>
     <string name="training_load_hint">Esfuerzo (RPE medio, 7 si no lo anotas) × minutos de cada sesión.</string>
+    <string name="password_repeat">Repite la contraseña</string>
+    <string name="password_mismatch">No coinciden</string>
+    <string name="file_too_big">El archivo es demasiado grande (máx. 64 MB)</string>
 </resources>

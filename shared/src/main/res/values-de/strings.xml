@@ -443,7 +443,7 @@
     <string name="partner_name_body">Name der Person, die mit dir trainiert (leer = aus)</string>
     <string name="partner_saved">Training von %1$s gespeichert</string>
     <string name="password">Passwort</string>
-    <string name="password_hint">Mindestens 6 Zeichen. Ohne Passwort lässt sich das Backup nicht wiederherstellen.</string>
+    <string name="password_hint">Mindestens 10 Zeichen. Ohne Passwort lässt sich das Backup nicht wiederherstellen.</string>
     <string name="password_restore">Dieses Backup ist verschlüsselt: Gib das Passwort ein</string>
     <string name="pdf_rest">Pause %1$s</string>
     <string name="pdf_routine_sets">%1$d × %2$s</string>
@@ -892,4 +892,7 @@
     <string name="training_load_ratio">Diese Woche: %1$s× dein Schnitt der 4 Wochen davor</string>
     <string name="training_load_high">Diese Woche: %1$s× dein Schnitt. So schnelle Steigerung erhöht das Verletzungsrisiko: plane eine leichtere Einheit.</string>
     <string name="training_load_hint">Anstrengung (mittlerer RPE, 7 wenn nicht erfasst) × Minuten jeder Einheit.</string>
+    <string name="password_repeat">Passwort wiederholen</string>
+    <string name="password_mismatch">Stimmen nicht überein</string>
+    <string name="file_too_big">Die Datei ist zu groß (max. 64 MB)</string>
 </resources>

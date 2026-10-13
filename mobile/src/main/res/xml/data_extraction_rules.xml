@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Android 12+: copia en la nube de Google y transferencia al cambiar de móvil. -->
 <data-extraction-rules>
-    <cloud-backup>
+    <!-- Solo si la copia va cifrada en el dispositivo (con bloqueo de pantalla): son datos de salud -->
+    <cloud-backup disableIfNoEncryptionCapabilities="true">
         <include domain="database" path="." />
         <include domain="sharedpref" path="." />
     </cloud-backup>

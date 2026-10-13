@@ -41,16 +41,20 @@ object RoutineLink {
         require(data.length <= MAX_LINK_CHARS)
         val bytes = Base64.getUrlDecoder().decode(data)
         val inflater = Inflater()
-        inflater.setInput(bytes)
         val out = ByteArrayOutputStream()
-        val buf = ByteArray(1024)
-        while (!inflater.finished()) {
-            val n = inflater.inflate(buf)
-            if (n == 0 && (inflater.needsInput() || inflater.needsDictionary())) break
-            out.write(buf, 0, n)
-            require(out.size() <= MAX_JSON_BYTES)
+        try {
+            inflater.setInput(bytes)
+            val buf = ByteArray(1024)
+            while (!inflater.finished()) {
+                val n = inflater.inflate(buf)
+                if (n == 0 && (inflater.needsInput() || inflater.needsDictionary())) break
+                out.write(buf, 0, n)
+                require(out.size() <= MAX_JSON_BYTES)
+            }
+        } finally {
+            // La memoria nativa del Inflater se libera siempre, también si el enlace es inválido
+            inflater.end()
         }
-        inflater.end()
         SyncContract.json.decodeFromString(Routine.serializer(), out.toByteArray().decodeToString())
             .also { require(it.exercises.size <= MAX_EXERCISES && it.exercises.all { e -> e.sets.size <= MAX_SETS }) }
             .copy(id = newId())

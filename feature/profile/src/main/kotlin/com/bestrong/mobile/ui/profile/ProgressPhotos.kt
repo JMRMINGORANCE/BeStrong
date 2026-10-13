@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +58,8 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
     val photos by vm.photos.collectAsStateWithLifecycle()
     // El desbloqueo dura mientras la pantalla está abierta (no se guarda al girar ni al volver)
     var unlocked by remember { mutableStateOf(!settings.lockProgressPhotos || !BiometricLock.isAvailable(context)) }
+    val locks = settings.lockProgressPhotos && BiometricLock.isAvailable(context)
+    PhotoPrivacy(unlocked, locks) { unlocked = false }
     var comparing by rememberSaveable { mutableStateOf(false) }
     val chosen = remember { mutableStateListOf<String>() }
     var toDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
@@ -154,5 +157,25 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
             confirmButton = { TextButton(onClick = { vm.deletePhoto(p); toDelete = null }) { Text(stringResource(R.string.action_delete)) } },
             dismissButton = { TextButton(onClick = { toDelete = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
+    }
+}
+
+/** Al salir de la app las fotos se vuelven a bloquear, y mientras se ven no salen en la miniatura de Recientes. */
+@Composable
+private fun PhotoPrivacy(unlocked: Boolean, locks: Boolean, onLock: () -> Unit) {
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    val lock by androidx.compose.runtime.rememberUpdatedState(onLock)
+    DisposableEffect(lifecycle, locks) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_STOP && locks) lock()
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+    val activity = LocalContext.current as? android.app.Activity
+    DisposableEffect(activity, unlocked, locks) {
+        val secure = unlocked && locks
+        if (secure) activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose { if (secure) activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE) }
     }
 }

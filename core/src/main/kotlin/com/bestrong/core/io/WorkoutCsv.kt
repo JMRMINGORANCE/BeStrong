@@ -103,7 +103,7 @@ object WorkoutCsv {
             else -> throw CsvImportException("Formato no reconocido. Se admiten CSV de BeStrong, Hevy, Strong, FitNotes y JEFIT.")
         }
         val col = header.withIndex().associate { (i, h) -> h to i }
-        fun List<String>.get(name: String): String = col[name]?.let { getOrNull(it) }?.trim().orEmpty()
+        fun List<String>.get(name: String): String = col[name]?.let { getOrNull(it) }?.trim().orEmpty().let(Csv::restoreFormula)
 
         val resolver = ExerciseResolver(known)
         var skipped = 0

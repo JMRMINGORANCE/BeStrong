@@ -262,3 +262,25 @@ class TrainingLoadTest {
         assertEquals(null, newcomer.acuteChronicRatio)
     }
 }
+
+class CsvFormulaTest {
+    @Test fun formulasAreNeutralizedAndRoundTrip() {
+        assertEquals("'=HYPERLINK(\"x\")", com.bestrong.core.io.Csv.neutralizeFormula("=HYPERLINK(\"x\")"))
+        assertEquals("-10.0", com.bestrong.core.io.Csv.neutralizeFormula("-10.0"))
+        val w = finishedWorkout("w1", LocalDate.of(2026, 3, 2), bench to listOf(done(80.0, 8))).copy(name = "=1+1", notes = "@cmd")
+        val back = WorkoutCsv.import(WorkoutCsv.export(listOf(w), UTC), ExerciseLibrary.all, UTC).workouts.single()
+        assertEquals("=1+1", back.name)
+        assertEquals("@cmd", back.notes)
+        assertTrue(!WorkoutCsv.export(listOf(w), UTC).contains("\n" + "w1," + "="))
+    }
+}
+
+class SecurityFixesTest {
+    @Test fun routinesForWatchFitAndXlsxDropsControlChars() {
+        val many = (1..300).map { i -> Routine(name = "R$i", notes = "x".repeat(200), exercises = listOf(RoutineExercise(exercise = bench, sets = List(5) { RoutineSet(60.0, 8) }))) }
+        val bytes = com.bestrong.core.sync.SyncContract.encodeRoutinesWithin(many, maxBytes = 30_000)
+        assertTrue(bytes.size <= 30_000)
+        assertTrue(com.bestrong.core.sync.SyncContract.decodeRoutines(bytes).isNotEmpty())
+        assertTrue(com.bestrong.core.io.RoutineLink.decode("bestrong://routine?d=%%%") == null)
+    }
+}

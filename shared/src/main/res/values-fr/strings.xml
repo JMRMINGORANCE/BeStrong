@@ -443,7 +443,7 @@
     <string name="partner_name_body">Nom de la personne qui s’entraîne avec toi (vide = désactivé)</string>
     <string name="partner_saved">Entraînement de %1$s enregistré</string>
     <string name="password">Mot de passe</string>
-    <string name="password_hint">6 caractères minimum. Sans lui, la sauvegarde est irrécupérable.</string>
+    <string name="password_hint">10 caractères minimum. Sans lui, la sauvegarde est irrécupérable.</string>
     <string name="password_restore">Cette sauvegarde est chiffrée : saisis son mot de passe</string>
     <string name="pdf_rest">Repos %1$s</string>
     <string name="pdf_routine_sets">%1$d × %2$s</string>
@@ -892,4 +892,7 @@
     <string name="training_load_ratio">Cette semaine : %1$s× ta moyenne des 4 précédentes</string>
     <string name="training_load_high">Cette semaine : %1$s× ta moyenne. Augmenter la charge si vite accroît le risque de blessure : envisage une séance plus légère.</string>
     <string name="training_load_hint">Effort (RPE moyen, 7 si non noté) × minutes de chaque séance.</string>
+    <string name="password_repeat">Répète le mot de passe</string>
+    <string name="password_mismatch">Ils ne correspondent pas</string>
+    <string name="file_too_big">Le fichier est trop volumineux (max. 64 Mo)</string>
 </resources>
