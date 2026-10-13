@@ -55,7 +55,8 @@ class CardioSession @Inject constructor(
     private val phoneSync: PhoneSync,
     @ApplicationScope private val scope: CoroutineScope,
 ) {
-    private val _state = MutableStateFlow<CardioState?>(null)
+    /** Se guarda en [WearStore]: si el proceso muere a mitad de la carrera, se retoma. */
+    private val _state = MutableStateFlow(store.activeCardio)
     val state: StateFlow<CardioState?> = _state.asStateFlow()
 
     private val _finished = MutableStateFlow<Workout?>(null)
@@ -63,7 +64,11 @@ class CardioSession @Inject constructor(
 
     val isActive: Boolean get() = _state.value != null
 
-    private var hr = HeartRateTracker(0)
+    private var hr = HeartRateTracker(_state.value?.startedAtEpochMs ?: 0)
+
+    /** Pulso guardado antes de un reinicio del proceso (el nuevo contador empieza vacío). */
+    private val restoredHr = _state.value?.let { it.avgHeartRate to it.maxHeartRate }
+    private var lastSavedAt = 0L
 
     fun start(type: CardioType) {
         if (_state.value != null) return
@@ -71,23 +76,44 @@ class CardioSession @Inject constructor(
         val now = System.currentTimeMillis()
         hr = HeartRateTracker(now)
         _state.value = CardioState(type, now)
+        save(force = true)
         ExerciseService.start(context)
     }
 
-    fun onDistance(totalM: Double) = _state.update { it?.copy(distanceM = totalM) }
-    fun onSpeed(mps: Double) = _state.update { it?.copy(speedMps = mps) }
-    fun onCalories(kcal: Double) = _state.update { it?.copy(calories = kcal.toInt()) }
+    fun onDistance(totalM: Double) = changed { it.copy(distanceM = totalM) }
+    fun onSpeed(mps: Double) = changed { it.copy(speedMps = mps) }
+    fun onCalories(kcal: Double) = changed { it.copy(calories = kcal.toInt()) }
 
     /** Cada lectura con su hora real (las que llegan en lote con la pantalla apagada también). */
     fun onHeartRate(bpm: Int, atEpochMs: Long) {
         if (_state.value == null) return
         hr.add(bpm, atEpochMs)
-        _state.update { it?.copy(heartRate = hr.latest, avgHeartRate = hr.average, maxHeartRate = hr.max) }
+        changed {
+            it.copy(
+                heartRate = hr.latest,
+                avgHeartRate = hr.average ?: restoredHr?.first,
+                maxHeartRate = listOfNotNull(hr.max, restoredHr?.second).maxOrNull(),
+            )
+        }
+    }
+
+    private fun changed(block: (CardioState) -> CardioState) {
+        _state.update { it?.let(block) }
+        save()
+    }
+
+    /** Guarda como mucho cada 10 s (las métricas llegan cada segundo). */
+    private fun save(force: Boolean = false) {
+        val now = System.currentTimeMillis()
+        if (!force && now - lastSavedAt < SAVE_EVERY_MS) return
+        lastSavedAt = now
+        store.activeCardio = _state.value
     }
 
     fun finish() {
         val s = _state.value ?: return
         _state.value = null
+        store.activeCardio = null
         ExerciseService.stop(context)
         val now = System.currentTimeMillis()
         val exercise = ExerciseLibrary.byId(s.type.exerciseId) ?: return
@@ -116,10 +142,15 @@ class CardioSession @Inject constructor(
 
     fun discard() {
         _state.value = null
+        store.activeCardio = null
         ExerciseService.stop(context)
     }
 
     fun dismissFinished() {
         _finished.value = null
+    }
+
+    private companion object {
+        const val SAVE_EVERY_MS = 10_000L
     }
 }
