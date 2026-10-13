@@ -93,6 +93,11 @@ data class SharedSettings(
     val progressionEnabled: Boolean = true,
     /** Vibración al acabar el descanso, elegida en el móvil y usada también en el reloj. */
     val restVibration: VibrationStyle = VibrationStyle.TRIPLE,
+    /**
+     * Entrenos por semana que se buscan (el del programa activo o el elegido en el móvil). Por
+     * defecto 4, lo que mostraba el reloj antes de recibirlo, para ajustes guardados sin este campo.
+     */
+    val weeklyGoal: Int = 4,
 )
 
 /**
