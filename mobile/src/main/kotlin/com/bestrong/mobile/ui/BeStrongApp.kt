@@ -8,8 +8,10 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
@@ -144,6 +146,18 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             null -> return@LaunchedEffect
         }
         onLaunchHandled()
+    }
+
+    // Rutina por enlace o QR: se confirma antes de añadirla
+    val pendingImport by home.pendingImport.collectAsStateWithLifecycle()
+    pendingImport?.let { routine ->
+        AlertDialog(
+            onDismissRequest = home::dismissImport,
+            title = { Text(stringResource(R.string.routine_import_confirm_title)) },
+            text = { Text(stringResource(R.string.routine_import_confirm_text, routine.name, routine.exercises.size)) },
+            confirmButton = { TextButton(onClick = { home.confirmImport() }) { Text(stringResource(R.string.action_import)) } },
+            dismissButton = { TextButton(onClick = home::dismissImport) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 
     val layoutType = if (topLevel == null) {
