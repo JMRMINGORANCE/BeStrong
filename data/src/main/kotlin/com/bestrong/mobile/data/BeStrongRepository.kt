@@ -47,11 +47,22 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     private val decoded = HashMap<String, Pair<JsonKey, Workout>>()
 
     /** Huella del JSON de una fila (sin guardar el texto entero, que duplicaría la memoria). */
-    private data class JsonKey(val length: Int, val hash: Int)
+    private data class JsonKey(val length: Int, val hash: Long) {
+        companion object {
+            /** FNV-1a de 64 bits: con 32 bits una colisión (rarísima) devolvería un entreno sin actualizar. */
+            fun of(text: String): JsonKey {
+                var h = -0x340d631b7bdddcdbL
+                for (c in text) {
+                    h = (h xor c.code.toLong()) * 0x100000001b3L
+                }
+                return JsonKey(text.length, h)
+            }
+        }
+    }
 
     private fun decodeRows(rows: List<WorkoutEntity>): List<Workout> = synchronized(decoded) {
         val result = rows.mapNotNull { row ->
-            val key = JsonKey(row.json.length, row.json.hashCode())
+            val key = JsonKey.of(row.json)
             decoded[row.id]?.takeIf { it.first == key }?.second
                 ?: runCatching { Persistence.decodeWorkout(row.json) }.getOrNull()?.also { decoded[row.id] = key to it }
         }
@@ -268,8 +279,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     // --- Rutinas -----------------------------------------------------------------------------
 
-    suspend fun saveRoutine(routine: Routine) {
-        val position = if (routines.value.any { it.id == routine.id }) routine.position else (routines.value.maxOfOrNull { it.position } ?: -1) + 1
+    /** [keepPosition]: deshacer un borrado la devuelve a su sitio en vez de al final. */
+    suspend fun saveRoutine(routine: Routine, keepPosition: Boolean = false) {
+        val position = if (keepPosition || routines.value.any { it.id == routine.id }) routine.position else (routines.value.maxOfOrNull { it.position } ?: -1) + 1
         val r = routine.copy(position = position)
         dao.upsertRoutine(RoutineEntity(r.id, r.position, Persistence.encodeRoutine(r)))
     }

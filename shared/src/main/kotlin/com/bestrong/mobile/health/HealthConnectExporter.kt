@@ -110,7 +110,11 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         }
         if (heartRatePermission in granted) heartRateRecord(workout)?.let { records += it }
         if (distancePermission in granted) records += distanceRecords(workout, start, end)
-        client.insertRecords(records)
+        // Si Health Connect rechaza la sesión con segmentos (proveedor antiguo), se exporta sin ellos
+        runCatching { client.insertRecords(records) }.getOrElse {
+            if (segments.isEmpty()) throw it
+            client.insertRecords(listOf(session(emptyList())) + records.drop(1))
+        }
     }
 
     /** Solo la gráfica de pulso (llega del reloj después de exportar la sesión). */

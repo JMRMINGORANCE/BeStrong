@@ -21,7 +21,7 @@ object TrainingLoad {
     data class Weekly(
         /** Carga de cada semana, de la más antigua a la actual (lunes a domingo). */
         val weeks: List<Pair<LocalDate, Double>>,
-        /** Semana actual frente a la media de las 4 anteriores (null sin historial previo). */
+        /** Últimos 7 días frente a la media semanal de los 28 anteriores (null sin historial suficiente). */
         val acuteChronicRatio: Double?,
     ) {
         val tooHigh: Boolean get() = (acuteChronicRatio ?: 0.0) > HIGH_RATIO
@@ -34,15 +34,24 @@ object TrainingLoad {
     }
 
     fun weekly(history: List<Workout>, today: LocalDate, zone: ZoneId, weeks: Int = 8): Weekly {
+        val done = history.filter { it.isFinished }
         val thisMonday = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val mondays = (weeks - 1 downTo 0).map { thisMonday.minusWeeks(it.toLong()) }
-        val byWeek = history.filter { it.isFinished }.groupBy {
+        val byWeek = done.groupBy {
             Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         }.mapValues { (_, ws) -> ws.sumOf(::session) }
         val series = mondays.map { it to (byWeek[it] ?: 0.0) }
-        // Media de las 4 semanas anteriores a la actual; sin carga previa no hay relación que dar
-        val chronic = (1..4).map { byWeek[thisMonday.minusWeeks(it.toLong())] ?: 0.0 }.average()
-        val ratio = if (chronic > 0) (byWeek[thisMonday] ?: 0.0) / chronic else null
+        // Ventanas móviles (no la semana natural, que el lunes está casi vacía): últimos 7 días frente
+        // a la media semanal de los 28 anteriores
+        val end = today.plusDays(1)
+        fun load(fromDaysAgo: Long, toDaysAgo: Long) = done.filter {
+            val d = Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate()
+            !d.isBefore(end.minusDays(fromDaysAgo)) && d.isBefore(end.minusDays(toDaysAgo))
+        }.sumOf(::session)
+        val previousWeeks = (1..4).map { k -> load(7L * (k + 1), 7L * k) }
+        // Sin al menos 3 de esas 4 semanas con entrenos (empezando o volviendo de un parón) la
+        // relación no significa nada y daría falsas alarmas
+        val ratio = if (previousWeeks.count { it > 0 } >= 3) load(7, 0) / previousWeeks.average() else null
         return Weekly(series, ratio)
     }
 }

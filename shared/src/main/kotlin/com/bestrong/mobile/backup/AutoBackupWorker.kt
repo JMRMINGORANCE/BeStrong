@@ -57,11 +57,21 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     private fun write(tree: Uri, name: String, mime: String, bytes: ByteArray) {
         val resolver = applicationContext.contentResolver
         val parent = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
-        // Si ya existe (reintento el mismo día) se sustituye en vez de crear «(1)»; borrar y crear
-        // funciona en todos los proveedores (no todos admiten truncar con "wt")
-        children(tree)[name]?.let { DocumentsContract.deleteDocument(resolver, it) }
+        // Primero se escribe la copia nueva y solo si sale bien se borra la del mismo día (reintento):
+        // así un fallo a medias nunca deja sin la última copia buena. No se trunca con "wt" porque
+        // no todos los proveedores lo admiten.
+        val old = children(tree)[name]
         val doc = DocumentsContract.createDocument(resolver, parent, mime, name) ?: error("No se pudo crear $name")
-        resolver.openOutputStream(doc, "w")?.use { it.write(bytes) } ?: error("No se pudo escribir $name")
+        val written = runCatching { resolver.openOutputStream(doc, "w")?.use { it.write(bytes) } ?: error("No se pudo escribir $name") }
+        if (written.isFailure) {
+            runCatching { DocumentsContract.deleteDocument(resolver, doc) }
+            written.getOrThrow()
+        }
+        if (old != null && old != doc) {
+            DocumentsContract.deleteDocument(resolver, old)
+            // El proveedor la habrá creado como «nombre (1)»: se le devuelve el nombre si se puede
+            runCatching { DocumentsContract.renameDocument(resolver, doc, name) }
+        }
     }
 
     /** Nombre → documento de los archivos de la carpeta. */

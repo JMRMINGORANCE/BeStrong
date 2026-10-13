@@ -249,11 +249,16 @@ class TrainingLoadTest {
         // 60 min (18:00–19:00) a RPE 8 → 480
         assertEquals(480.0, com.bestrong.core.stats.TrainingLoad.session(w("a", monday, 8.0)), 1e-6)
         assertEquals(420.0, com.bestrong.core.stats.TrainingLoad.session(w("b", monday, null)), 1e-6)
-        val history = (1..4).map { w("p$it", monday.minusWeeks(it.toLong()), null) } + listOf(w("c1", monday, 8.0), w("c2", monday.plusDays(1), 8.0))
-        val weekly = com.bestrong.core.stats.TrainingLoad.weekly(history, monday.plusDays(2), UTC)
+        val today = monday.plusDays(2)
+        // Una sesión en cada una de las 4 semanas anteriores (días 8–35) y dos esta semana
+        val history = (1..4).map { w("p$it", today.minusDays(7L * it + 1), null) } + listOf(w("c1", monday, 8.0), w("c2", monday.plusDays(1), 8.0))
+        val weekly = com.bestrong.core.stats.TrainingLoad.weekly(history, today, UTC)
         assertEquals(960.0 / 420.0, weekly.acuteChronicRatio!!, 1e-6)
         assertTrue(weekly.tooHigh)
         assertEquals(8, weekly.weeks.size)
         assertEquals(monday, weekly.weeks.last().first)
+        // Usuario nuevo (una sola semana previa): sin relación, sin falsa alarma
+        val newcomer = com.bestrong.core.stats.TrainingLoad.weekly(history.drop(1).drop(1).drop(1), today, UTC)
+        assertEquals(null, newcomer.acuteChronicRatio)
     }
 }

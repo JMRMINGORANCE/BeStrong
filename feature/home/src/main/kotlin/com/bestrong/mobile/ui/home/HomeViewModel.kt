@@ -233,8 +233,16 @@ class HomeViewModel @Inject constructor(
     private val _deletedRoutine = MutableStateFlow<Routine?>(null)
     val deletedRoutine: StateFlow<Routine?> = _deletedRoutine
 
+    private var forgetDeleted: kotlinx.coroutines.Job? = null
+
     fun delete(routine: Routine) = viewModelScope.launch {
         _deletedRoutine.value = routine
+        // El aviso dura unos segundos: pasado ese rato ya no se ofrece deshacer (ni al volver a Inicio)
+        forgetDeleted?.cancel()
+        forgetDeleted = viewModelScope.launch {
+            kotlinx.coroutines.delay(UNDO_WINDOW_MS)
+            if (_deletedRoutine.value?.id == routine.id) _deletedRoutine.value = null
+        }
         repo.deleteRoutine(routine.id)
     }
 
@@ -243,7 +251,7 @@ class HomeViewModel @Inject constructor(
         // Se toma ya (no dentro de la corrutina): el aviso limpia el estado justo después
         val routine = _deletedRoutine.value ?: return
         _deletedRoutine.value = null
-        viewModelScope.launch { repo.saveRoutine(routine) }
+        viewModelScope.launch { repo.saveRoutine(routine, keepPosition = true) }
     }
 
     fun clearDeleted() {
@@ -263,6 +271,8 @@ class HomeViewModel @Inject constructor(
         list.forEachIndexed { pos, r -> repo.saveRoutine(r.copy(position = pos)) }
     }
 }
+
+private const val UNDO_WINDOW_MS = 10_000L
 
 data class WeekProgress(
     val trainedDays: Set<DayOfWeek> = emptySet(),

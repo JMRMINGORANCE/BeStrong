@@ -315,6 +315,8 @@ class WorkoutSession @Inject constructor(
         val we = currentExercise()
         val set = we?.sets?.lastOrNull { !it.completed } ?: return false
         edit { WorkoutEditor.removeSet(it, we.id, set.id) }
+        // Si este ejercicio ya no tiene series pendientes, se pasa al siguiente que las tenga
+        if (currentSet() == null) _workout.value?.let { w -> WorkoutEditor.nextPendingSet(w)?.let { _exerciseIndex.value = it.first } }
         return true
     }
 
@@ -326,7 +328,7 @@ class WorkoutSession @Inject constructor(
         val (index, set) = _workout.value?.exercises.orEmpty().withIndex()
             .flatMap { (i, we) -> we.sets.filter { it.completed }.map { i to it } }
             .maxByOrNull { (_, s) -> s.completedAtEpochMs ?: 0L } ?: return false
-        edit { WorkoutEditor.toggleSetCompleted(it, it.exercises[index].id, set.id) }
+        edit { WorkoutEditor.uncompleteSet(it, it.exercises[index].id, set.id) }
         stopRest()
         _exerciseIndex.value = index
         return true

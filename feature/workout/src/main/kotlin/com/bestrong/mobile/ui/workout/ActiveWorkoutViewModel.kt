@@ -152,7 +152,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /** Por ejercicio: (mejor 1RM estimado, peso máximo) del historial, para marcar récords en vivo. */
-    val bests: StateFlow<Map<String, Pair<Double, Double>>> = repo.history.map { h ->
+    val bests: StateFlow<Map<String, Pair<Double, Double>>> = combine(repo.history, repo.partnerHistory, partnerMode, settings) { me, partner, isPartner, s ->
+        // En modo pareja se compara con las marcas de la pareja, no con las tuyas
+        val h = if (isPartner) partner.filter { it.athlete == s.partnerName } else me
         WorkoutStats.personalRecords(h).mapValues { (_, r) ->
             (r[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0) to (r[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0)
         }

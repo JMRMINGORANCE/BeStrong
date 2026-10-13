@@ -210,6 +210,13 @@ object WorkoutEditor {
     private fun findSet(workout: Workout, workoutExerciseId: String, setId: String): WorkoutSet? =
         workout.exercises.firstOrNull { it.id == workoutExerciseId }?.sets?.firstOrNull { it.id == setId }
 
+    /**
+     * Vuelve a dejar pendiente una serie hecha (deshacer). En el cardio se quita también la hora de
+     * arranque: si no, el cronómetro volvería a correr desde el principio y falsearía la duración.
+     */
+    fun uncompleteSet(workout: Workout, workoutExerciseId: String, setId: String): Workout =
+        updateSet(workout, workoutExerciseId, setId) { it.copy(completed = false, completedAtEpochMs = null, startedAtEpochMs = null) }
+
     /** Descarta el cronómetro sin completar la serie. */
     fun cancelCardio(workout: Workout, workoutExerciseId: String, setId: String): Workout =
         updateSet(workout, workoutExerciseId, setId) { it.copy(startedAtEpochMs = null) }
