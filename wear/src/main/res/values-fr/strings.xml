@@ -144,4 +144,5 @@
     <string name="workout_midday">Séance de midi</string>
     <string name="workout_morning">Séance du matin</string>
     <string name="workout_night">Séance du soir</string>
+    <string name="cardio_start">Démarrer le chrono cardio</string>
 </resources>

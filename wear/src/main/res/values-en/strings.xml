@@ -144,4 +144,5 @@
     <string name="workout_midday">Midday workout</string>
     <string name="workout_morning">Morning workout</string>
     <string name="workout_night">Night workout</string>
+    <string name="cardio_start">Start cardio timer</string>
 </resources>

@@ -73,6 +73,7 @@ object WorkoutMerge {
     private fun mergeSet(older: WorkoutSet, newer: WorkoutSet): WorkoutSet = when {
         newer.completed -> newer
         older.completed -> older
-        else -> newer
+        // Un cronómetro de cardio arrancado en un lado no lo para una edición del otro que no lo sabía
+        else -> newer.copy(startedAtEpochMs = newer.startedAtEpochMs ?: older.startedAtEpochMs)
     }
 }

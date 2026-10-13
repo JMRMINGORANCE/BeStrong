@@ -144,4 +144,5 @@
     <string name="workout_midday">Treino do meio-dia</string>
     <string name="workout_morning">Treino da manhã</string>
     <string name="workout_night">Treino da noite</string>
+    <string name="cardio_start">Iniciar o cronómetro de cardio</string>
 </resources>

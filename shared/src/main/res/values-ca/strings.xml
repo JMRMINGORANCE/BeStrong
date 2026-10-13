@@ -839,4 +839,5 @@
     <string name="set_km">Quilòmetres</string>
     <string name="set_col_minutes">MIN</string>
     <string name="set_col_km">KM</string>
+    <string name="cardio_start">Iniciar el cronòmetre de cardio</string>
 </resources>

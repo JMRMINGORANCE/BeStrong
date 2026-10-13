@@ -839,4 +839,5 @@
     <string name="set_km">Kilometer</string>
     <string name="set_col_minutes">MIN</string>
     <string name="set_col_km">KM</string>
+    <string name="cardio_start">Cardio-Stoppuhr starten</string>
 </resources>

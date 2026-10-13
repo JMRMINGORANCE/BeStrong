@@ -174,7 +174,49 @@ object WorkoutEditor {
     fun cleanupFinished(workout: Workout): Workout = workout.copy(exercises = workout.exercises.filter { it.sets.isNotEmpty() })
 
     fun toggleSetCompleted(workout: Workout, workoutExerciseId: String, setId: String, nowEpochMs: Long = System.currentTimeMillis()): Workout =
-        updateSet(workout, workoutExerciseId, setId) { it.copy(completed = !it.completed, completedAtEpochMs = if (it.completed) null else nowEpochMs) }
+        updateSet(workout, workoutExerciseId, setId) {
+            val started = it.startedAtEpochMs
+            if (it.isRunning && started != null) {
+                // Marcar un cardio en marcha lo termina con el tiempo del cronómetro
+                it.copy(durationSec = ((nowEpochMs - started) / 1000).toInt().coerceAtLeast(1), completed = true, completedAtEpochMs = nowEpochMs)
+            } else {
+                it.copy(completed = !it.completed, completedAtEpochMs = if (it.completed) null else nowEpochMs)
+            }
+        }
+
+    // --- Cronómetro de cardio ------------------------------------------------------------------
+
+    /** Arranca el cronómetro de una serie de cardio (solo uno a la vez: los demás se paran sin guardar). */
+    fun startCardio(workout: Workout, workoutExerciseId: String, setId: String, nowEpochMs: Long = System.currentTimeMillis()): Workout =
+        workout.copy(
+            exercises = workout.exercises.map { we ->
+                we.copy(
+                    sets = we.sets.map { s ->
+                        when {
+                            we.id == workoutExerciseId && s.id == setId -> s.copy(startedAtEpochMs = nowEpochMs, completed = false, completedAtEpochMs = null)
+                            s.isRunning -> s.copy(startedAtEpochMs = null)
+                            else -> s
+                        }
+                    },
+                )
+            },
+            updatedAtEpochMs = nowEpochMs,
+        )
+
+    /** Para el cronómetro: la serie queda hecha con el tiempo medido. */
+    fun finishCardio(workout: Workout, workoutExerciseId: String, setId: String, nowEpochMs: Long = System.currentTimeMillis()): Workout =
+        if (findSet(workout, workoutExerciseId, setId)?.isRunning == true) toggleSetCompleted(workout, workoutExerciseId, setId, nowEpochMs) else workout
+
+    private fun findSet(workout: Workout, workoutExerciseId: String, setId: String): WorkoutSet? =
+        workout.exercises.firstOrNull { it.id == workoutExerciseId }?.sets?.firstOrNull { it.id == setId }
+
+    /** Descarta el cronómetro sin completar la serie. */
+    fun cancelCardio(workout: Workout, workoutExerciseId: String, setId: String): Workout =
+        updateSet(workout, workoutExerciseId, setId) { it.copy(startedAtEpochMs = null) }
+
+    /** El bloque de cardio en marcha, si hay uno. */
+    fun runningCardio(workout: Workout): Pair<WorkoutExercise, WorkoutSet>? =
+        workout.exercises.firstNotNullOfOrNull { we -> we.sets.firstOrNull { it.isRunning }?.let { we to it } }
 
     /** Cicla Normal → Calentamiento → Drop → Fallo → Normal. */
     fun cycleSetType(workout: Workout, workoutExerciseId: String, setId: String): Workout =

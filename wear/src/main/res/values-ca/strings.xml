@@ -144,4 +144,5 @@
     <string name="workout_midday">Entrenament de migdia</string>
     <string name="workout_morning">Entrenament de matí</string>
     <string name="workout_night">Entrenament de nit</string>
+    <string name="cardio_start">Iniciar el cronòmetre de cardio</string>
 </resources>

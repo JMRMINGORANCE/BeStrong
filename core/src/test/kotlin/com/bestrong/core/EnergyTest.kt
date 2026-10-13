@@ -176,4 +176,24 @@ class EnergyTest {
         val r = Energy.forWorkout(workout(1800, cardio("treadmill", 1800, 50_000.0)), me)!!
         assertEquals((8.0 * 1780.0 / 24 / 2).roundToInt(), r.totalKcal)
     }
+
+    @Test
+    fun cardioTimer_measuresTime_andOnlyOneRuns() {
+        val w0 = workout(0, cardio("treadmill", 1200), cardio("elliptical", 1200)).copy(finishedAtEpochMs = null)
+        val (t, e) = w0.exercises
+        var w = com.bestrong.core.session.WorkoutEditor.startCardio(w0, t.id, t.sets[0].id, nowEpochMs = 1_000)
+            .let { it.copy(exercises = it.exercises.map { we -> we.copy(sets = we.sets.map { s -> s.copy(completed = false) }) }) }
+        w = com.bestrong.core.session.WorkoutEditor.startCardio(w, t.id, t.sets[0].id, nowEpochMs = 1_000)
+        assertEquals(t.id, com.bestrong.core.session.WorkoutEditor.runningCardio(w)!!.first.id)
+        // Arrancar otro para el primero sin guardarlo
+        w = com.bestrong.core.session.WorkoutEditor.startCardio(w, e.id, e.sets[0].id, nowEpochMs = 2_000)
+        assertEquals(e.id, com.bestrong.core.session.WorkoutEditor.runningCardio(w)!!.first.id)
+        assertTrue(!w.exercises[0].sets[0].completed && w.exercises[0].sets[0].startedAtEpochMs == null)
+        // Marcarlo como hecho lo termina con el tiempo medido (15 min)
+        w = com.bestrong.core.session.WorkoutEditor.toggleSetCompleted(w, e.id, e.sets[0].id, nowEpochMs = 2_000 + 900_000)
+        val done = w.exercises[1].sets[0]
+        assertTrue(done.completed)
+        assertEquals(900, done.durationSec)
+        assertNull(com.bestrong.core.session.WorkoutEditor.runningCardio(w))
+    }
 }

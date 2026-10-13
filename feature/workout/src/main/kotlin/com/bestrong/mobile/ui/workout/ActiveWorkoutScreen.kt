@@ -580,6 +580,7 @@ private fun ExerciseCard(
                         unilateral = we.exercise.unilateral,
                         onRepsRight = { vm.updateSetFields(we.id, set.id) { s -> s.copy(repsRight = it) } },
                         onDistance = { vm.updateSetFields(we.id, set.id) { s -> s.copy(distanceM = it) } },
+                        onStartTimer = { vm.startCardio(we.id, set.id) },
                         onNote = { vm.updateSetFields(we.id, set.id) { s -> s.copy(note = it) } },
                         onAssisted = { vm.updateSetFields(we.id, set.id) { s -> s.copy(assisted = it) } },
                         onStepWeight = { vm.stepWeight(we.id, set.id, it) },

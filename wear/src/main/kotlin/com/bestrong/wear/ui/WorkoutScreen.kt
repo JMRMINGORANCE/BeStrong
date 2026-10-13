@@ -172,7 +172,11 @@ fun WorkoutScreen(
 
                 when (we.exercise.tracking) {
                     TrackingType.DURATION -> BigValue("${set.durationSec}", "s", selected = true) {}
-                    TrackingType.CARDIO -> BigValue("${set.durationSec / 60}", "min", selected = true) {}
+                    TrackingType.CARDIO -> if (set.isRunning) {
+                        CardioStopwatch(set.startedAtEpochMs ?: 0L)
+                    } else {
+                        BigValue("${set.durationSec / 60}", "min", selected = true) {}
+                    }
                     else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         if (we.exercise.tracking == TrackingType.WEIGHT_REPS || set.weightKg > 0) {
                             BigValue(unit.format(set.weightKg), unit.label, selected = target == RotaryTarget.WEIGHT) {
@@ -218,12 +222,17 @@ fun WorkoutScreen(
                 }
             }
             if (set != null) {
+                val startsTimer = we?.exercise?.tracking == TrackingType.CARDIO && !set.isRunning
+                val edgeDescription = if (startsTimer) stringResource(R.string.cardio_start) else completeDescription
                 EdgeButton(
                     onClick = { if (session.completeSet()) onRest() },
                     buttonSize = EdgeButtonSize.Small,
                     colors = ButtonDefaults.buttonColors(containerColor = Done, contentColor = Color.Black),
-                    modifier = Modifier.align(Alignment.BottomCenter).semantics { contentDescription = completeDescription },
-                ) { Text("✓", fontSize = 24.sp, fontWeight = FontWeight.Bold) }
+                    modifier = Modifier.align(Alignment.BottomCenter).semantics { contentDescription = edgeDescription },
+                ) {
+                    // Cardio: ▶ arranca el cronómetro (y el reloj pasa al modo de esa máquina); ✓ lo para
+                    Text(if (startsTimer) "▶" else "✓", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
@@ -255,3 +264,15 @@ internal val STEM_KEYS = setOf(
     android.view.KeyEvent.KEYCODE_STEM_2,
     android.view.KeyEvent.KEYCODE_STEM_3,
 )
+
+/** Cronómetro del bloque de cardio en marcha (mm:ss), actualizado cada segundo. */
+@Composable
+private fun CardioStopwatch(startedAtEpochMs: Long) {
+    val elapsed by androidx.compose.runtime.produceState(0L, startedAtEpochMs) {
+        while (true) {
+            value = ((System.currentTimeMillis() - startedAtEpochMs) / 1000).coerceAtLeast(0)
+            kotlinx.coroutines.delay(1000)
+        }
+    }
+    BigValue(com.bestrong.core.util.formatDuration(elapsed), "", selected = true) {}
+}

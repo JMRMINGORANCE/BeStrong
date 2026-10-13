@@ -11,6 +11,7 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.RoutineExercise
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
+import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.sensors.BarVelocity
@@ -186,6 +187,7 @@ class WorkoutSession @Inject constructor(
         _metrics.value = HealthMetrics()
         hr = HeartRateTracker(w.startedAtEpochMs)
         platformHr = null
+        resetHealthSegments()
         set(w)
         ExerciseService.start(context)
         if (_repCounting.value) repCounter.start()
@@ -238,6 +240,7 @@ class WorkoutSession @Inject constructor(
             _metrics.value = HealthMetrics()
             hr = HeartRateTracker(remote.startedAtEpochMs)
             platformHr = null
+            resetHealthSegments()
             _exerciseIndex.value = WorkoutEditor.nextPendingSet(remote)?.first ?: 0
             // Empezado en el móvil: el reloj mide el pulso automáticamente
             ExerciseService.start(context)
@@ -361,18 +364,14 @@ class WorkoutSession @Inject constructor(
         val index = _exerciseIndex.value
         val we = currentExercise() ?: return false
         val s = currentSet() ?: return false
-        val counted = repCounter.reps.value
-        val velocities = repCounter.velocities.value
-        val rir = if (_repCounting.value) BarVelocity.estimatedRir(velocities) else null
-        _velocityInfo.value = velocities.lastOrNull()?.let { VelocityInfo(it, rir) }
-        edit { w ->
-            val withReps = if (_repCounting.value && counted > 0 && we.exercise.tracking in REP_TRACKING) {
-                WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = counted, rpe = it.rpe ?: rir?.let(BarVelocity::rpeFromRir)) }
-            } else {
-                w
-            }
-            WorkoutEditor.toggleSetCompleted(withReps, we.id, s.id)
+        // Cardio: el primer toque arranca el cronómetro; el segundo lo para y completa la serie
+        if (we.exercise.tracking == TrackingType.CARDIO && !s.isRunning) {
+            stopRest()
+            edit { WorkoutEditor.startCardio(it, we.id, s.id) }
+            haptic(Haptics.SET_DONE)
+            return false
         }
+        edit { w -> WorkoutEditor.toggleSetCompleted(withCountedReps(w, we, s), we.id, s.id) }
         repCounter.reset()
         haptic(Haptics.SET_DONE)
         val updated = _workout.value ?: w0
@@ -384,6 +383,16 @@ class WorkoutSession @Inject constructor(
         } else {
             false
         }
+    }
+
+    /** Repeticiones contadas por el acelerómetro (y RPE por la velocidad) en la serie que se completa. */
+    private fun withCountedReps(w: Workout, we: WorkoutExercise, s: WorkoutSet): Workout {
+        val counted = repCounter.reps.value
+        val velocities = repCounter.velocities.value
+        val rir = if (_repCounting.value) BarVelocity.estimatedRir(velocities) else null
+        _velocityInfo.value = velocities.lastOrNull()?.let { VelocityInfo(it, rir) }
+        val counts = _repCounting.value && counted > 0 && we.exercise.tracking in REP_TRACKING
+        return if (counts) WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = counted, rpe = it.rpe ?: rir?.let(BarVelocity::rpeFromRir)) } else w
     }
 
     // --- Descanso ----------------------------------------------------------------------------
@@ -609,7 +618,8 @@ class WorkoutSession @Inject constructor(
 
     /** Media y máximo de la sesión calculados por Health Services (desde que empezó el ejercicio). */
     fun onHeartRateStats(average: Int, max: Int) {
-        if (average <= 0) return
+        // Con varios tramos (pesas, cinta…) las estadísticas de Health Services son solo del tramo actual
+        if (average <= 0 || multiSegment) return
         platformHr = average to max
         publishHeartRate()
     }
@@ -626,9 +636,32 @@ class WorkoutSession @Inject constructor(
         maybeSendMetrics()
     }
 
+    /** Calorías del tramo actual de Health Services (empiezan de cero en cada tramo). */
     fun onCalories(kcal: Double) {
-        _metrics.update { it.copy(calories = kcal.toInt()) }
+        segmentKcal = kcal.toInt()
+        _metrics.update { it.copy(calories = store.closedSegmentsKcal + segmentKcal) }
     }
+
+    /**
+     * Health Services cambia de ejercicio (pesas → cinta o al revés): lo medido en el tramo que se
+     * cierra se acumula y el nuevo empieza de cero.
+     */
+    fun onHealthSegmentChanged() {
+        store.closedSegmentsKcal += segmentKcal
+        segmentKcal = 0
+        multiSegment = true
+        platformHr = null
+        publishHeartRate()
+    }
+
+    private fun resetHealthSegments() {
+        store.closedSegmentsKcal = 0
+        segmentKcal = 0
+        multiSegment = false
+    }
+
+    private var segmentKcal = 0
+    private var multiSegment = false
 
     /** Envía las métricas al móvil como mucho cada 5 s. */
     private fun maybeSendMetrics() {

@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -24,6 +25,7 @@ import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SwipeToDismissBox
@@ -36,6 +38,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -112,6 +115,8 @@ fun SetRow(
     unilateral: Boolean = false,
     onRepsRight: (Int) -> Unit = {},
     onDistance: (Double) -> Unit = {},
+    /** Cardio: arranca el cronómetro (se para al marcar la serie). */
+    onStartTimer: () -> Unit = {},
     onNote: (String) -> Unit = {},
     onAssisted: (Boolean) -> Unit = {},
     onStepWeight: (Int) -> Unit = {},
@@ -302,13 +307,20 @@ fun SetRow(
                         }
                     }
                     TrackingType.CARDIO -> {
-                        NumberField((set.durationSec / 60).takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_minutes), Modifier.weight(1f)) {
-                            onDuration((it.toIntOrNull() ?: 0) * 60)
+                        if (set.isRunning) {
+                            CardioElapsed(set.startedAtEpochMs ?: 0L, Modifier.weight(1f))
+                        } else {
+                            NumberField((set.durationSec / 60).takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_minutes), Modifier.weight(1f)) {
+                                onDuration((it.toIntOrNull() ?: 0) * 60)
+                            }
                         }
                         NumberField(set.distanceM.takeIf { it > 0 }?.let { "%.2f".format(it / 1000) } ?: "", stringResource(R.string.set_km), Modifier.weight(1f), decimal = true) {
                             onDistance(it.replace(',', '.').toDoubleOrNull()?.times(1000) ?: 0.0)
                         }
                     }
+                }
+                if (tracking == TrackingType.CARDIO && !set.completed && !set.isRunning) {
+                    IconButton(onClick = onStartTimer) { Icon(Icons.Default.PlayArrow, stringResource(R.string.cardio_start)) }
                 }
                 FilledIconToggleButton(
                     checked = set.completed,
@@ -417,5 +429,25 @@ private fun NumberField(
                 inner()
             }
         },
+    )
+}
+
+/** Tiempo del cronómetro de cardio en marcha, actualizado cada segundo. */
+@Composable
+private fun CardioElapsed(startedAtEpochMs: Long, modifier: Modifier) {
+    val elapsed by produceState(0L, startedAtEpochMs) {
+        while (true) {
+            value = ((System.currentTimeMillis() - startedAtEpochMs) / 1000).coerceAtLeast(0)
+            kotlinx.coroutines.delay(1000)
+        }
+    }
+    val text = com.bestrong.core.util.formatDuration(elapsed)
+    Text(
+        text,
+        modifier = modifier.semantics { contentDescription = text },
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.titleMedium,
     )
 }

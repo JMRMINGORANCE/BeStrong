@@ -31,6 +31,9 @@ import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import androidx.wear.ongoing.OngoingActivity
 import androidx.wear.ongoing.Status
+import com.bestrong.core.session.WorkoutEditor
+import com.bestrong.core.training.CardioEnergy
+import com.bestrong.core.training.CardioKind
 import com.bestrong.wear.MainActivity
 import com.bestrong.wear.R
 import com.bestrong.wear.session.CardioSession
@@ -40,9 +43,11 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Servicio en primer plano durante el entrenamiento:
@@ -59,6 +64,9 @@ class ExerciseService : LifecycleService() {
 
     private val exerciseClient by lazy { HealthServices.getClient(this).exerciseClient }
     private var exerciseStarted = false
+
+    /** Tipo del ejercicio abierto en Health Services (pesas o la máquina de cardio en marcha). */
+    private var currentType: ExerciseType? = null
 
     private val callback = object : ExerciseUpdateCallback {
         override fun onExerciseUpdateReceived(update: ExerciseUpdate) {
@@ -98,7 +106,10 @@ class ExerciseService : LifecycleService() {
         }
         if (!exerciseStarted) {
             exerciseStarted = true
-            lifecycleScope.launch { startExercise() }
+            lifecycleScope.launch {
+                startExercise()
+                followCardio()
+            }
             followPause()
         }
         return START_STICKY
@@ -152,30 +163,76 @@ class ExerciseService : LifecycleService() {
     private suspend fun startExercise() {
         if (cardio.isActive) return startCardio()
         try {
-            val capabilities = exerciseClient.getCapabilities()
-            val type = ExerciseType.WEIGHTLIFTING
-            if (type !in capabilities.supportedExerciseTypes) {
-                Log.i(TAG, "El dispositivo no soporta WEIGHTLIFTING; sin métricas")
-                return
-            }
-            val supported = capabilities.getExerciseTypeCapabilities(type).supportedDataTypes
-            val wanted = setOf(DataType.HEART_RATE_BPM, DataType.HEART_RATE_BPM_STATS, DataType.CALORIES_TOTAL)
-            val dataTypes = wanted.filter { it in supported }.toSet()
             exerciseClient.setUpdateCallback(callback)
+            val type = supportedOrNull(wantedType()) ?: supportedOrNull(ExerciseType.WEIGHTLIFTING)
             // Si Android reinició la app con el ejercicio aún en marcha, se sigue con él: empezar
             // otro pondría las calorías y las estadísticas de pulso a cero
-            if (!ownsExerciseInProgress()) {
-                exerciseClient.startExercise(
-                    ExerciseConfig.builder(type)
-                        .setDataTypes(dataTypes)
-                        .setIsAutoPauseAndResumeEnabled(false)
-                        .setIsGpsEnabled(false)
-                        .build(),
-                )
-            }
+            if (type != null && !ownsExerciseInProgress()) startSegment(type)
+            currentType = type
         } catch (e: Exception) {
             Log.w(TAG, "No se pudo iniciar la sesión de Health Services", e)
         }
+    }
+
+    /** Pesas, o la máquina del bloque de cardio con el cronómetro en marcha. */
+    private fun wantedType(): ExerciseType =
+        session.workout.value?.let { WorkoutEditor.runningCardio(it) }
+            ?.let { (we, _) -> CardioEnergy.kindOf(we.exercise.id) }
+            ?.let(::exerciseTypeFor)
+            ?: ExerciseType.WEIGHTLIFTING
+
+    private suspend fun supportedOrNull(type: ExerciseType): ExerciseType? =
+        type.takeIf { it in exerciseClient.getCapabilities().supportedExerciseTypes }
+
+    private suspend fun startSegment(type: ExerciseType) {
+        val supported = exerciseClient.getCapabilities().getExerciseTypeCapabilities(type).supportedDataTypes
+        val wanted = setOf(DataType.HEART_RATE_BPM, DataType.HEART_RATE_BPM_STATS, DataType.CALORIES_TOTAL)
+        exerciseClient.startExercise(
+            ExerciseConfig.builder(type)
+                .setDataTypes(wanted.filter { it in supported }.toSet())
+                .setIsAutoPauseAndResumeEnabled(false)
+                .setIsGpsEnabled(false)
+                .build(),
+        )
+    }
+
+    /**
+     * Cronómetro de cardio dentro de la rutina: se cierra el ejercicio de pesas y se abre el de la
+     * máquina (cinta, elíptica…) para que el reloj calcule las calorías con su modelo; al pararlo,
+     * vuelta a pesas. Las calorías de cada tramo se suman en [WorkoutSession.onHealthSegmentChanged].
+     */
+    private fun followCardio() {
+        lifecycleScope.launch {
+            session.workout
+                .map { w -> w?.let { WorkoutEditor.runningCardio(it) }?.first?.exercise?.id }
+                .distinctUntilChanged()
+                .collect { if (!cardio.isActive && session.workout.value != null) switchTo(wantedType()) }
+        }
+    }
+
+    private suspend fun switchTo(type: ExerciseType) {
+        val target = runCatching { supportedOrNull(type) }.getOrNull() ?: ExerciseType.WEIGHTLIFTING
+        if (target == currentType || currentType == null) return
+        runCatching {
+            exerciseClient.endExercise()
+            // Health Services tarda un momento en cerrar el ejercicio anterior
+            withTimeoutOrNull(SWITCH_TIMEOUT_MS) { while (ownsExerciseInProgress()) delay(SWITCH_POLL_MS) }
+            session.onHealthSegmentChanged()
+            startSegment(target)
+            currentType = target
+        }.onFailure { Log.w(TAG, "No se pudo cambiar de ejercicio en Health Services", it) }
+    }
+
+    private fun exerciseTypeFor(kind: CardioKind): ExerciseType = when (kind) {
+        CardioKind.RUN -> ExerciseType.RUNNING
+        CardioKind.WALK -> ExerciseType.WALKING
+        CardioKind.TREADMILL -> ExerciseType.RUNNING_TREADMILL
+        CardioKind.BIKE -> ExerciseType.BIKING
+        CardioKind.STATIONARY_BIKE -> ExerciseType.BIKING_STATIONARY
+        CardioKind.ELLIPTICAL -> ExerciseType.ELLIPTICAL
+        CardioKind.ROWER -> ExerciseType.ROWING_MACHINE
+        CardioKind.STAIRS -> ExerciseType.STAIR_CLIMBING_MACHINE
+        CardioKind.JUMP_ROPE -> ExerciseType.JUMP_ROPE
     }
 
     /** Carrera, caminata o bici con GPS: distancia, velocidad, pulso y calorías. */
@@ -239,6 +296,8 @@ class ExerciseService : LifecycleService() {
         private const val CHANNEL_ID = "workout"
         private const val NOTIFICATION_ID = 42
         private const val ACTION_STOP = "com.bestrong.wear.STOP"
+        private const val SWITCH_TIMEOUT_MS = 5_000L
+        private const val SWITCH_POLL_MS = 250L
 
         fun start(context: Context) {
             runCatching { context.startForegroundService(Intent(context, ExerciseService::class.java)) }

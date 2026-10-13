@@ -264,6 +264,12 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
 
+    /** Cronómetro de cardio: en el reloj, además, cambia la sesión de pesas a la de esa máquina. */
+    fun startCardio(weId: String, setId: String) {
+        restTimer.skip()
+        edit { WorkoutEditor.startCardio(it, weId, setId) }
+    }
+
     fun toggleSet(weId: String, setId: String) {
         val current = workout.value ?: return
         val index = current.exercises.indexOfFirst { it.id == weId }

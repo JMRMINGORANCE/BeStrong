@@ -42,7 +42,12 @@ data class WorkoutSet(
     val distanceM: Double = 0.0,
     /** Cuándo se marcó como hecha: sitúa los bloques de cardio en la gráfica de pulso. */
     val completedAtEpochMs: Long? = null,
+    /** Cardio con cronómetro: cuándo arrancó (en marcha mientras no esté completada). */
+    val startedAtEpochMs: Long? = null,
 ) {
+    /** Cronómetro de cardio en marcha. */
+    val isRunning: Boolean get() = startedAtEpochMs != null && !completed
+
     /** Cuenta para récords: ni calentamiento, ni parciales/negativas, ni con ayuda. */
     val countsForRecords: Boolean
         get() = type != SetType.WARMUP && type != SetType.PARTIAL && type != SetType.NEGATIVE && !assisted

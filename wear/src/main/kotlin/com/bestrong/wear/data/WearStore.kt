@@ -114,6 +114,14 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
     /** Rutina creada en el reloj: se guarda aquí y se envía al móvil. */
     fun addRoutine(routine: Routine) = setRoutines(_routines.value.filterNot { it.id == routine.id } + routine)
 
+    /**
+     * Calorías de los tramos de Health Services ya cerrados en el entreno en curso (pesas → cinta →
+     * pesas…): cada tramo empieza de cero y aquí se acumulan. Sobrevive a un reinicio del proceso.
+     */
+    var closedSegmentsKcal: Int
+        get() = prefs.getInt(KEY_SEGMENTS_KCAL, 0)
+        set(value) = prefs.edit { putInt(KEY_SEGMENTS_KCAL, value) }
+
     var activeWorkout: Workout?
         get() = prefs.getString(KEY_ACTIVE, null)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
         set(value) = prefs.edit {
@@ -130,6 +138,7 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_STEM = "stem_action"
         const val KEY_LOW_POWER = "low_power"
         const val KEY_MAX_HR = "max_hr"
+        const val KEY_SEGMENTS_KCAL = "segments_kcal"
         const val KEY_REP_THRESHOLD = "rep_threshold"
         const val MAX_LOCAL = 50
     }
