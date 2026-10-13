@@ -7,6 +7,9 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.sync.SyncContract
+import com.bestrong.wear.session.CardioState
+import com.bestrong.wear.session.CardioType
+import com.bestrong.wear.session.Rest
 import com.bestrong.wear.session.StemAction
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -14,6 +17,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.json.JSONObject
 
 /**
  * Almacenamiento local del reloj (SharedPreferences + JSON): rutinas e historial que llegan
@@ -128,6 +132,45 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
             if (value == null) remove(KEY_ACTIVE) else putString(KEY_ACTIVE, Persistence.encodeWorkout(value))
         }
 
+    /** Descanso en marcha: si el proceso muere, al volver sigue contando hasta la misma hora. */
+    var activeRest: Rest?
+        get() = runCatching {
+            prefs.getString(KEY_REST, null)?.split(';')?.let { (ends, total) -> Rest(ends.toLong(), total.toInt()) }
+        }.getOrNull()
+        set(value) = prefs.edit {
+            if (value == null) remove(KEY_REST) else putString(KEY_REST, "${value.endsAtEpochMs};${value.totalSeconds}")
+        }
+
+    /** Cardio libre en curso (sobrevive a un reinicio del proceso). */
+    var activeCardio: CardioState?
+        get() = runCatching {
+            prefs.getString(KEY_CARDIO, null)?.let { text ->
+                val o = JSONObject(text)
+                CardioState(
+                    type = CardioType.valueOf(o.getString("type")),
+                    startedAtEpochMs = o.getLong("startedAt"),
+                    distanceM = o.optDouble("distanceM", 0.0),
+                    avgHeartRate = o.optInt("avgHr").takeIf { it > 0 },
+                    maxHeartRate = o.optInt("maxHr").takeIf { it > 0 },
+                    calories = o.optInt("kcal", -1).takeIf { it >= 0 },
+                )
+            }
+        }.getOrNull()
+        set(value) = prefs.edit {
+            if (value == null) {
+                remove(KEY_CARDIO)
+            } else {
+                val o = JSONObject()
+                    .put("type", value.type.name)
+                    .put("startedAt", value.startedAtEpochMs)
+                    .put("distanceM", value.distanceM)
+                value.avgHeartRate?.let { o.put("avgHr", it) }
+                value.maxHeartRate?.let { o.put("maxHr", it) }
+                value.calories?.let { o.put("kcal", it) }
+                putString(KEY_CARDIO, o.toString())
+            }
+        }
+
     private companion object {
         const val KEY_ROUTINES = "routines"
         const val KEY_PHONE_HISTORY = "phone_history"
@@ -140,6 +183,8 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_MAX_HR = "max_hr"
         const val KEY_SEGMENTS_KCAL = "segments_kcal"
         const val KEY_REP_THRESHOLD = "rep_threshold"
+        const val KEY_REST = "active_rest"
+        const val KEY_CARDIO = "active_cardio"
         const val MAX_LOCAL = 50
     }
 }
