@@ -38,7 +38,7 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         val repo = deps.repository()
         val history = repo.historyOnce()
         val trainedToday = history.any { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == today }
-        if (trainedToday || repo.activeWorkout.value != null) return
+        if (trainedToday || repo.activeOnce() != null) return
         val lastDone = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
         val next = repo.routinesOnce().minByOrNull { lastDone[it.id] ?: 0L }
         Notifier.reminder(applicationContext, next?.name)

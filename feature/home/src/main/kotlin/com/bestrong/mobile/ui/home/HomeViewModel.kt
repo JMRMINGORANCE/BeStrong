@@ -146,7 +146,7 @@ class HomeViewModel @Inject constructor(
 
     /** Empieza la sesión del programa con las cargas prescritas (sin sustituirlas por la última vez). */
     fun startProgramSession(session: ProgramSession, onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeWorkout.value != null) {
+        if (repo.activeOnce() != null) {
             _messages.tryEmit(context.getString(R.string.msg_workout_already_active))
             onStarted()
             return@launch
@@ -163,12 +163,12 @@ class HomeViewModel @Inject constructor(
     val messages: SharedFlow<String> = _messages
 
     fun startEmpty(onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeWorkout.value == null) repo.setActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
+        if (repo.activeOnce() == null) repo.setActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
         onStarted()
     }
 
     fun startRoutine(routine: Routine, onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeWorkout.value != null) {
+        if (repo.activeOnce() != null) {
             _messages.tryEmit(context.getString(R.string.msg_workout_already_active))
             onStarted()
             return@launch
