@@ -227,3 +227,17 @@ class WarmupRestTest {
         assertEquals(0 to 180, WorkoutEditor.afterSetCompleted(afterWork, 0))
     }
 }
+
+class SetTimelineTest {
+    @Test fun windowsDoNotOverlapAndStayInsideWorkout() {
+        val sets = listOf(
+            done(60.0, 5).copy(completedAtEpochMs = 30_000),
+            done(60.0, 5).copy(completedAtEpochMs = 50_000),
+            done(60.0, 5).copy(completedAtEpochMs = null),
+            done(60.0, 5).copy(completedAtEpochMs = 200_000),
+        )
+        val w = Workout(name = "W", startedAtEpochMs = 10_000, finishedAtEpochMs = 300_000, exercises = listOf(WorkoutExercise(exercise = bench, sets = sets)))
+        val windows = com.bestrong.core.stats.SetTimeline.windows(w)
+        assertEquals(listOf(10_000L to 30_000L, 30_000L to 50_000L, 160_000L to 200_000L), windows.map { it.startEpochMs to it.endEpochMs })
+    }
+}

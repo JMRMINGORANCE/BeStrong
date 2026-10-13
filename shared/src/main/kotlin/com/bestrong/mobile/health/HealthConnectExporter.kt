@@ -5,6 +5,7 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ExerciseSegment
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
@@ -13,6 +14,7 @@ import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import com.bestrong.core.model.Workout
+import com.bestrong.core.stats.SetTimeline
 import com.bestrong.core.training.CardioEnergy
 import com.bestrong.core.training.CardioKind
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -61,17 +63,24 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         if (sessionPermission !in granted) return
         val start = Instant.ofEpochMilli(workout.startedAtEpochMs)
         val end = Instant.ofEpochMilli(workout.finishedAtEpochMs ?: return)
+        val type = sessionType(workout)
+        fun session(segments: List<ExerciseSegment>) = ExerciseSessionRecord(
+            startTime = start,
+            startZoneOffset = null,
+            endTime = end,
+            endZoneOffset = null,
+            exerciseType = type,
+            title = workout.name,
+            notes = workout.notes.ifBlank { null },
+            metadata = meta(workout, "session"),
+            segments = segments,
+        )
+        // Cada serie como segmento con sus repeticiones (Samsung Health / Fit las muestran); si
+        // Health Connect rechazara algún segmento, se exporta la sesión sin ellos
+        val segments = if (type == ExerciseSessionRecord.EXERCISE_TYPE_WEIGHTLIFTING) segmentsOf(workout) else emptyList()
+        val generic = segments.map { ExerciseSegment(it.startTime, it.endTime, ExerciseSegment.EXERCISE_SEGMENT_TYPE_WEIGHTLIFTING, it.repetitions) }
         val records = mutableListOf<Record>(
-            ExerciseSessionRecord(
-                startTime = start,
-                startZoneOffset = null,
-                endTime = end,
-                endZoneOffset = null,
-                exerciseType = sessionType(workout),
-                title = workout.name,
-                notes = workout.notes.ifBlank { null },
-                metadata = meta(workout, "session"),
-            ),
+            runCatching { session(segments) }.recoverCatching { session(generic) }.getOrElse { session(emptyList()) },
         )
         // Calorías medidas por el reloj o estimadas (sin reloj); Samsung Health las suma al día
         if (caloriesPermission in granted) {
@@ -124,6 +133,37 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
      * Tipo de sesión: si todo el entreno es un único cardio (carrera, cinta, elíptica…), ese tipo;
      * si hay fuerza (aunque lleve cardio dentro), pesas.
      */
+    private fun segmentsOf(workout: Workout): List<ExerciseSegment> = SetTimeline.windows(workout)
+        .filter { CardioEnergy.kindOf(it.exercise.exercise.id) == null }
+        .map { w ->
+            ExerciseSegment(
+                startTime = Instant.ofEpochMilli(w.startEpochMs),
+                endTime = Instant.ofEpochMilli(w.endEpochMs),
+                segmentType = segmentType(w.exercise.exercise.id),
+                repetitions = w.set.reps + (w.set.repsRight ?: 0),
+            )
+        }
+
+    /** Tipo de segmento de Health Connect para los básicos; el resto, «levantamiento de pesas». */
+    private fun segmentType(exerciseId: String): Int = when (exerciseId) {
+        "bench_press", "incline_bench_press", "decline_bench_press", "close_grip_bench", "db_bench_press" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_BENCH_PRESS
+        "squat", "front_squat", "smith_squat", "goblet_squat", "hack_squat", "air_squat" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_SQUAT
+        "deadlift", "romanian_deadlift" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_DEADLIFT
+        "overhead_press" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_BARBELL_SHOULDER_PRESS
+        "lat_pulldown" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LAT_PULL_DOWN
+        "pull_up", "chin_up", "chest_to_bar", "band_pull_up", "negative_pull_up" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_PULL_UP
+        "leg_press" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_PRESS
+        "leg_curl", "seated_leg_curl" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_CURL
+        "leg_extension" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_EXTENSION
+        "lunge", "bulgarian_split_squat" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LUNGE
+        "lateral_raise", "cable_lateral_raise" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LATERAL_RAISE
+        "db_row" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_DUMBBELL_ROW
+        "front_raise" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_DUMBBELL_FRONT_RAISE
+        "hanging_leg_raise" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_RAISE
+        "plank", "side_plank" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_PLANK
+        else -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_WEIGHTLIFTING
+    }
+
     private fun sessionType(workout: Workout): Int {
         val done = workout.exercises.filter { it.completedSets.isNotEmpty() }
         val kinds = done.mapNotNull { CardioEnergy.kindOf(it.exercise.id) }.toSet()
