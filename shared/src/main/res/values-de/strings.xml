@@ -920,4 +920,7 @@
     <string name="tool_share_week">Woche teilen (Text für deinen Coach)</string>
     <string name="share_week_title">Meine Trainings der letzten 7 Tage (BeStrong)</string>
     <string name="share_week_empty">Keine Trainings in den letzten 7 Tagen</string>
+    <string name="body_weight_last">Gewicht: %1$s</string>
+    <string name="body_weight_none">Kein Gewicht eingetragen</string>
+    <string name="body_weight_log">Heutiges Gewicht eintragen</string>
 </resources>

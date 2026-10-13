@@ -141,6 +141,11 @@ class HomeViewModel @Inject constructor(
 
     fun forgetDiscarded() = repo.forgetDiscarded()
 
+    /** Peso de hoy apuntado desde Inicio (va a Medidas y, si se exporta, a Health Connect). */
+    fun logBodyWeight(kg: Double) = viewModelScope.launch {
+        actions.saveMeasurement(com.bestrong.core.model.BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = kg))
+    }
+
     fun discardRecent(): Boolean = repo.recentlyDiscarded
 
     /** Training max sugerido (90 % del mejor 1RM estimado) para preparar un programa. */

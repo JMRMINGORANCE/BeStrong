@@ -94,4 +94,12 @@ class WorkoutActions @Inject constructor(
         if (left > 0) restTimer.start(left.toInt())
         return true
     }
+
+    /** Guarda una medida y, con la exportación activada, también en Health Connect. */
+    suspend fun saveMeasurement(m: com.bestrong.core.model.BodyMeasurement) {
+        repository.saveMeasurement(m)
+        if (settings.settings.value.healthConnectExport) {
+            runCatching { healthConnect.exportMeasurement(m) }.onFailure { Log.w("HealthConnect", "Medida no exportada", it) }
+        }
+    }
 }

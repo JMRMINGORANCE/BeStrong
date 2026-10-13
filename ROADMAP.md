@@ -186,3 +186,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Nota de la serie de la última vez mientras está pendiente
 - [x] Series por músculo de las últimas 8 semanas
 - [x] Entreno medio (duración, series y volumen) en Perfil
+
+## Fase 16 — Detalles de entrenador ✅
+- [x] Sin descanso antes de un drop set
+- [x] Aviso de objetivo semanal cumplido en el resumen
+- [x] Compartir la semana como texto para el entrenador
+- [x] Reloj: duración estimada de cada rutina
+- [x] Apuntar el peso de hoy desde Inicio

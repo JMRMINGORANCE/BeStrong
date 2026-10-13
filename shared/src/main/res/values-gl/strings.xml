@@ -920,4 +920,7 @@
     <string name="tool_share_week">Compartir a semana (texto para o teu adestrador)</string>
     <string name="share_week_title">Os meus adestramentos dos últimos 7 días (BeStrong)</string>
     <string name="share_week_empty">Non hai adestramentos nos últimos 7 días</string>
+    <string name="body_weight_last">Peso: %1$s</string>
+    <string name="body_weight_none">Sen peso anotado</string>
+    <string name="body_weight_log">Anotar o peso de hoxe</string>
 </resources>

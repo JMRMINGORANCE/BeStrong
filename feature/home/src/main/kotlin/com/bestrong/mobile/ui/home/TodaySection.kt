@@ -292,6 +292,43 @@ fun IntakeCard(vm: HomeViewModel) {
                 FilledTonalButton(onClick = { vm.addIntake(proteinG = 20) }) { Text(stringResource(R.string.intake_add_protein)) }
                 FilledTonalButton(onClick = { vm.addIntake(waterMl = 250) }) { Text(stringResource(R.string.intake_add_water)) }
             }
+            BodyWeightQuickEntry(bw) { vm.logBodyWeight(it) }
         }
+    }
+}
+
+/** Último peso corporal y botón para apuntar el de hoy sin ir a Medidas. */
+@Composable
+private fun BodyWeightQuickEntry(lastKg: Double?, onSave: (Double) -> Unit) {
+    val unit = com.bestrong.mobile.ui.components.LocalBodyUnit.current
+    var editing by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            lastKg?.let { stringResource(R.string.body_weight_last, unit.format(it, withUnit = true)) } ?: stringResource(R.string.body_weight_none),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.weight(1f),
+        )
+        androidx.compose.material3.TextButton(onClick = { editing = true }) { Text(stringResource(R.string.body_weight_log)) }
+    }
+    if (editing) {
+        var text by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(lastKg?.let { unit.format(it) }.orEmpty()) }
+        val kg = unit.parseToKg(text)?.takeIf { it in 20.0..400.0 }
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { editing = false },
+            title = { Text(stringResource(R.string.body_weight_log)) },
+            text = {
+                androidx.compose.material3.OutlinedTextField(
+                    text,
+                    { text = it.filter { c -> c.isDigit() || c == ',' || c == '.' }.take(6) },
+                    label = { Text(unit.label) },
+                    singleLine = true,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { kg?.let(onSave); editing = false }, enabled = kg != null) { Text(stringResource(R.string.action_save)) }
+            },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 }
