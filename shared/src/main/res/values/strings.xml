@@ -900,4 +900,5 @@
     <string name="add_drop_set">Añadir drop set (−20 %)</string>
     <string name="plates_add_per_side">Añadir por lado</string>
     <string name="plates_use_weight">Usar este peso</string>
+    <string name="rep_max">%1$dRM %2$s</string>
 </resources>

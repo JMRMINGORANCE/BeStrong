@@ -196,6 +196,16 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                             SectionHeader(stringResource(R.string.strength_curve))
                             Text(stringResource(R.string.strength_curve_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             BarChart(s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps", unit.fromKg(kg)) })
+                            // Mejores marcas por repeticiones (1RM, 3RM, 5RM…), las que se suelen buscar
+                            val repMaxes = REP_MAXES.mapNotNull { r -> s.strengthCurve[r]?.let { r to it } }
+                            if (repMaxes.isNotEmpty()) {
+                                Text(
+                                    repMaxes.joinToString("  ·  ") { (r, kg) -> stringResource(R.string.rep_max, r, unit.format(kg, withUnit = true)) },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
+                            }
                         }
                     }
                 }
@@ -206,6 +216,10 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     Column(Modifier.padding(12.dp)) {
                         Text(w.name, fontWeight = FontWeight.SemiBold)
                         Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
+                        // Notas de ese día para el ejercicio («hombro cargado», «agarre más abierto»…)
+                        w.exercises.filter { it.exercise.id == exerciseId && it.notes.isNotBlank() }.forEach {
+                            Text("✎ " + it.notes, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary)
+                        }
                         w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
                             Text("${i + 1}. ${describeSet(set, s.exercise.tracking, unit)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax)) else "")
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -216,3 +230,5 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
         }
     }
 }
+
+private val REP_MAXES = listOf(1, 3, 5, 8, 10, 12)
