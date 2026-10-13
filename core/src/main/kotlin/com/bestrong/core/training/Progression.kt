@@ -92,8 +92,8 @@ object Progression {
         val points = WorkoutStats.exerciseProgress(exerciseId, history)
         if (points.size < sessions + 1) return false
         val before = points.dropLast(sessions).maxOf { it.bestOneRepMax }
-        if (before <= 0.0) return false
-        return points.takeLast(sessions).all { it.bestOneRepMax <= before }
+        // Sin carga (1RM 0) no hay forma de medir el estancamiento
+        return before > 0.0 && points.takeLast(sessions).all { it.bestOneRepMax <= before }
     }
 
     private fun roundTo(value: Double, step: Double) = Math.round(value / step) * step

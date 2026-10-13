@@ -26,13 +26,14 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     override suspend fun doWork(): Result {
         val deps = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val settingsStore = deps.settings()
-        val folder = settingsStore.settings.value.backupFolderUri ?: return Result.success()
+        val tree = settingsStore.settings.value.backupFolderUri?.let(Uri::parse)
         // Permiso revocado (carpeta borrada, app de archivos desinstalada…): se desactiva en vez de fallar cada semana
-        val tree = Uri.parse(folder)
-        val granted = applicationContext.contentResolver.persistedUriPermissions.any { it.uri == tree && it.isWritePermission }
-        if (!granted) {
-            Log.w("AutoBackup", "Sin permiso sobre la carpeta de copias: se desactiva")
-            settingsStore.update { it.copy(backupFolderUri = null) }
+        val granted = tree != null && applicationContext.contentResolver.persistedUriPermissions.any { it.uri == tree && it.isWritePermission }
+        if (tree == null || !granted) {
+            if (tree != null) {
+                Log.w("AutoBackup", "Sin permiso sobre la carpeta de copias: se desactiva")
+                settingsStore.update { it.copy(backupFolderUri = null) }
+            }
             return Result.success()
         }
         return runCatching {
