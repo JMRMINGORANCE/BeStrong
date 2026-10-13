@@ -858,4 +858,8 @@
     <string name="weight_increment">Gewichtsschritt</string>
     <string name="weight_increment_hint">Schritt der ±-Tasten und der Progressionsvorschläge für diese Übung (Kurzhanteln, Maschinen, Mikroscheiben…).</string>
     <string name="weight_increment_default">Standard (%1$s)</string>
+    <string name="routine_discard_q">Änderungen speichern?</string>
+    <string name="routine_discard_body">Du hast die Routine geändert und nicht gespeichert.</string>
+    <string name="routine_delete_q">„%1$s“ löschen?</string>
+    <string name="routine_delete_body">Bereits damit absolvierte Trainings bleiben im Verlauf.</string>
 </resources>

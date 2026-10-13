@@ -858,4 +858,8 @@
     <string name="weight_increment">Increment de pes</string>
     <string name="weight_increment_hint">Salt dels botons ± i dels suggeriments de progressió per a aquest exercici (manuelles, màquines, microdiscos…).</string>
     <string name="weight_increment_default">Predeterminat (%1$s)</string>
+    <string name="routine_discard_q">Desar els canvis?</string>
+    <string name="routine_discard_body">Has canviat la rutina i no l\'has desada.</string>
+    <string name="routine_delete_q">Esborrar «%1$s»?</string>
+    <string name="routine_delete_body">Els entrenaments que ja vas fer amb ella es queden a l\'historial.</string>
 </resources>

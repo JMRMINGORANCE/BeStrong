@@ -858,4 +858,8 @@
     <string name="weight_increment">Incremento de peso</string>
     <string name="weight_increment_hint">Salto dos botóns ± e das suxestións de progresión para este exercicio (mancuernas, máquinas, microdiscos…).</string>
     <string name="weight_increment_default">Predeterminado (%1$s)</string>
+    <string name="routine_discard_q">Gardar os cambios?</string>
+    <string name="routine_discard_body">Cambiaches a rutina e non a gardaches.</string>
+    <string name="routine_delete_q">Borrar «%1$s»?</string>
+    <string name="routine_delete_body">Os adestramentos que xa fixeches con ela quedan no historial.</string>
 </resources>

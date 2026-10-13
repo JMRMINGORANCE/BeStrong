@@ -858,4 +858,8 @@
     <string name="weight_increment">Weight increment</string>
     <string name="weight_increment_hint">Step for the ± buttons and progression suggestions on this exercise (dumbbells, machines, microplates…).</string>
     <string name="weight_increment_default">Default (%1$s)</string>
+    <string name="routine_discard_q">Save changes?</string>
+    <string name="routine_discard_body">You changed the routine and haven\'t saved it.</string>
+    <string name="routine_delete_q">Delete “%1$s”?</string>
+    <string name="routine_delete_body">Workouts you already did with it stay in your history.</string>
 </resources>

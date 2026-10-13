@@ -1,7 +1,11 @@
 package com.bestrong.mobile.ui.routines
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +21,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,24 +48,65 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
+import com.bestrong.core.training.Tempo
 import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.displayName
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, onClose: () -> Unit) {
     val unit = LocalWeightUnit.current
     val routine by vm.routine.collectAsStateWithLifecycle()
+    var confirmLeave by remember { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf(false) }
+    var restFor by remember { mutableStateOf<String?>(null) }
+    // Atrás con cambios sin guardar: se pregunta antes de perderlos
+    val leave = { if (vm.hasChanges) confirmLeave = true else onClose() }
+    BackHandler(onBack = leave)
+    if (confirmLeave) {
+        AlertDialog(
+            onDismissRequest = { confirmLeave = false },
+            title = { Text(stringResource(R.string.routine_discard_q)) },
+            text = { Text(stringResource(R.string.routine_discard_body)) },
+            confirmButton = { Button(onClick = { confirmLeave = false; vm.save(onClose) }) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = { TextButton(onClick = { confirmLeave = false; onClose() }) { Text(stringResource(R.string.action_discard)) } },
+        )
+    }
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.routine_delete_q, routine.name)) },
+            text = { Text(stringResource(R.string.routine_delete_body)) },
+            confirmButton = { Button(onClick = { confirmDelete = false; vm.delete(onClose) }) { Text(stringResource(R.string.action_delete)) } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
+    restFor?.let { id ->
+        val current = routine.exercises.firstOrNull { it.id == id }?.restSeconds
+        AlertDialog(
+            onDismissRequest = { restFor = null },
+            title = { Text(stringResource(R.string.rest_time)) },
+            text = {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    REST_OPTIONS.forEach { s ->
+                        FilterChip(selected = s == current, onClick = { vm.setRest(id, s); restFor = null }, label = { Text(formatDuration(s.toLong())) })
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { restFor = null }) { Text(stringResource(R.string.action_close)) } },
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(if (vm.isNew) R.string.routine_new else R.string.routine_edit)) },
-                navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_cancel)) } },
+                navigationIcon = { IconButton(onClick = leave) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_cancel)) } },
                 actions = {
-                    if (!vm.isNew) IconButton(onClick = { vm.delete(onClose) }) { Icon(Icons.Default.Delete, stringResource(R.string.routine_delete)) }
+                    if (!vm.isNew) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, stringResource(R.string.routine_delete)) }
                     TextButton(onClick = { vm.save(onClose) }) { Text(stringResource(R.string.action_save)) }
                 },
             )
@@ -86,7 +132,12 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
                                 Text(re.exercise.displayName(), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
-                                Text(stringResource(R.string.rest_value, formatDuration(re.restSeconds.toLong())), style = MaterialTheme.typography.bodySmall)
+                                Text(
+                                    stringResource(R.string.rest_value, formatDuration(re.restSeconds.toLong())),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    modifier = Modifier.clickable { restFor = re.id },
+                                )
                             }
                             IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.action_move_up)) }
                             IconButton(onClick = { vm.moveExercise(index, index + 1) }, enabled = index < routine.exercises.lastIndex) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.action_move_down)) }
@@ -100,17 +151,23 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                                 label = { Text(stringResource(if (linked) R.string.in_superset_with_next else R.string.superset_with_next)) },
                             )
                         }
-                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            listOf(60, 90, 120, 180).forEach { s ->
-                                TextButton(onClick = { vm.setRest(re.id, s) }) {
-                                    Text(formatDuration(s.toLong()), fontWeight = if (s == re.restSeconds) FontWeight.Bold else FontWeight.Normal)
-                                }
-                            }
-                        }
+                        ExerciseExtras(
+                            notes = re.notes,
+                            tempo = re.tempo.orEmpty(),
+                            showTempo = re.exercise.tracking != TrackingType.CARDIO,
+                            onNotes = { vm.setExerciseNotes(re.id, it) },
+                            onTempo = { vm.setTempo(re.id, it) },
+                        )
                         re.sets.forEachIndexed { i, set ->
                             key(re.id, i, re.sets.size) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text("${i + 1}", Modifier.widthIn(min = 24.dp), fontWeight = FontWeight.Bold)
+                                    // Tocar el número cambia el tipo de serie (C calentamiento, D drop, F al fallo)
+                                    Text(
+                                        set.type.short.ifEmpty { "${i + 1}" },
+                                        Modifier.widthIn(min = 24.dp).clickable { vm.cycleSetType(re.id, i) }.padding(vertical = 8.dp),
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (set.type == SetType.NORMAL) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.tertiary,
+                                    )
                                     if (re.exercise.tracking == TrackingType.CARDIO) {
                                         SmallNumberField(stringResource(R.string.set_minutes), (set.durationSec / 60).toString(), Modifier.weight(1f)) { v ->
                                             vm.updateSet(re.id, i) { it.copy(durationSec = (v.toIntOrNull() ?: 0) * 60) }
@@ -156,6 +213,32 @@ private fun SmallNumberField(label: String, value: String, modifier: Modifier, d
         keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
         modifier = modifier,
     )
+}
+
+private val REST_OPTIONS = listOf(0, 30, 45, 60, 90, 120, 150, 180, 240, 300)
+
+/** Notas y tempo del ejercicio dentro de la rutina (se copian al empezar el entreno). */
+@Composable
+private fun ExerciseExtras(notes: String, tempo: String, showTempo: Boolean, onNotes: (String) -> Unit, onTempo: (String) -> Unit) {
+    var tempoText by remember { mutableStateOf(tempo) }
+    val tempoValid = tempoText.isBlank() || Tempo.parse(tempoText) != null
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
+        OutlinedTextField(notes, onNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.weight(2f))
+        if (showTempo) {
+            OutlinedTextField(
+                tempoText,
+                { t ->
+                    tempoText = t.take(9)
+                    if (tempoText.isBlank() || Tempo.parse(tempoText) != null) onTempo(tempoText)
+                },
+                label = { Text(stringResource(R.string.tempo)) },
+                placeholder = { Text("3-1-1-0") },
+                isError = !tempoValid,
+                singleLine = true,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
 }
 
 private val ROUTINE_EMOJIS = listOf("💪", "🦵", "🏋️", "🔥", "🏃", "🧘", "⚡", "🎯", "🍑", "🤸", "🥊", "🚴", "🏊", "❤️", "🧠", "⭐")

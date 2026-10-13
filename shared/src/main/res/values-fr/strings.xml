@@ -858,4 +858,8 @@
     <string name="weight_increment">Incrément de charge</string>
     <string name="weight_increment_hint">Pas des boutons ± et des suggestions de progression pour cet exercice (haltères, machines, micro-disques…).</string>
     <string name="weight_increment_default">Par défaut (%1$s)</string>
+    <string name="routine_discard_q">Enregistrer les modifications ?</string>
+    <string name="routine_discard_body">Tu as modifié la routine sans l\'enregistrer.</string>
+    <string name="routine_delete_q">Supprimer « %1$s » ?</string>
+    <string name="routine_delete_body">Les séances déjà faites avec elle restent dans l\'historique.</string>
 </resources>

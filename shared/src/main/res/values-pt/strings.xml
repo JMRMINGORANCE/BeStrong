@@ -858,4 +858,8 @@
     <string name="weight_increment">Incremento de peso</string>
     <string name="weight_increment_hint">Salto dos botões ± e das sugestões de progressão neste exercício (halteres, máquinas, microdiscos…).</string>
     <string name="weight_increment_default">Predefinido (%1$s)</string>
+    <string name="routine_discard_q">Guardar as alterações?</string>
+    <string name="routine_discard_body">Alteraste a rotina e não a guardaste.</string>
+    <string name="routine_delete_q">Apagar «%1$s»?</string>
+    <string name="routine_delete_body">Os treinos que já fizeste com ela ficam no histórico.</string>
 </resources>

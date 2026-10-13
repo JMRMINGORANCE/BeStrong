@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.RoutineExercise
 import com.bestrong.core.model.RoutineSet
+import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
+import com.bestrong.core.training.Tempo
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.shared.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,10 +36,19 @@ class RoutineEditorViewModel @Inject constructor(
     val routine: StateFlow<Routine> = _routine.asStateFlow()
     val isNew = routineId == null
 
+    /** Rutina tal y como se abrió, para saber si hay cambios sin guardar al salir. */
+    private var original: Routine = _routine.value
+    val hasChanges: Boolean get() = _routine.value != original
+
     init {
         // Si la app se reabrió desde cero, las rutinas aún no estaban cargadas: las leemos de la BD
         if (routineId != null && _routine.value.id != routineId) {
-            viewModelScope.launch { repo.routine(routineId)?.let { _routine.value = it } }
+            viewModelScope.launch {
+                repo.routine(routineId)?.let {
+                    _routine.value = it
+                    original = it
+                }
+            }
         }
     }
 
@@ -97,6 +108,22 @@ class RoutineEditorViewModel @Inject constructor(
     fun updateSet(id: String, index: Int, block: (RoutineSet) -> RoutineSet) =
         updateExercise(id) { re -> re.copy(sets = re.sets.mapIndexed { i, s -> if (i == index) block(s) else s }) }
     fun setRest(id: String, seconds: Int) = updateExercise(id) { it.copy(restSeconds = seconds) }
+    fun setExerciseNotes(id: String, notes: String) = updateExercise(id) { it.copy(notes = notes) }
+
+    /** Tempo («3-1-1-0»); vacío o no válido lo quita. */
+    fun setTempo(id: String, tempo: String) = updateExercise(id) { it.copy(tempo = Tempo.parse(tempo)?.toString()) }
+
+    /** Tipo de serie como en el entreno: normal → calentamiento → drop → al fallo → normal. */
+    fun cycleSetType(id: String, index: Int) = updateSet(id, index) { s ->
+        s.copy(
+            type = when (s.type) {
+                SetType.NORMAL -> SetType.WARMUP
+                SetType.WARMUP -> SetType.DROP
+                SetType.DROP -> SetType.FAILURE
+                else -> SetType.NORMAL
+            },
+        )
+    }
 
     fun save(onSaved: () -> Unit) = viewModelScope.launch {
         val r = _routine.value
