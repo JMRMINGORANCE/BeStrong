@@ -875,4 +875,5 @@
     <string name="timed_set_ready">Mach dich bereit…</string>
     <string name="timed_set_go">Halten!</string>
     <string name="timed_set_finish_now">Fertig</string>
+    <string name="undo_routine_deleted">Routine „%1$s“ gelöscht</string>
 </resources>

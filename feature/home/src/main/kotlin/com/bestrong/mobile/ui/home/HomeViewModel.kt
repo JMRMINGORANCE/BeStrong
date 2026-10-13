@@ -227,7 +227,24 @@ class HomeViewModel @Inject constructor(
         _messages.tryEmit(context.getString(R.string.msg_program_added, program.name(context.uiLanguage()), routines.size))
     }
 
-    fun delete(routine: Routine) = viewModelScope.launch { repo.deleteRoutine(routine.id) }
+    /** Última rutina borrada, para poder deshacerlo desde el aviso. */
+    private val _deletedRoutine = MutableStateFlow<Routine?>(null)
+    val deletedRoutine: StateFlow<Routine?> = _deletedRoutine
+
+    fun delete(routine: Routine) = viewModelScope.launch {
+        _deletedRoutine.value = routine
+        repo.deleteRoutine(routine.id)
+    }
+
+    /** Vuelve a guardar la rutina tal cual (mismo id y posición). */
+    fun undoDelete() = viewModelScope.launch {
+        _deletedRoutine.value?.let { repo.saveRoutine(it) }
+        _deletedRoutine.value = null
+    }
+
+    fun clearDeleted() {
+        _deletedRoutine.value = null
+    }
 
     fun move(routine: Routine, delta: Int) = viewModelScope.launch {
         val list = repo.routines.value.toMutableList()
