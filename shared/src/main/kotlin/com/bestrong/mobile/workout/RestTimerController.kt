@@ -2,6 +2,7 @@ package com.bestrong.mobile.workout
 
 import android.content.Context
 import android.os.Build
+import android.os.PowerManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -9,6 +10,7 @@ import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.di.ApplicationScope
 import com.bestrong.mobile.ui.components.RestState
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -37,6 +39,24 @@ class RestTimerController @Inject constructor(
     private val _rest = MutableStateFlow(restore())
     val rest: StateFlow<RestState?> = _rest.asStateFlow()
     private var job: Job? = null
+
+    /**
+     * Con la pantalla apagada la CPU puede dormirse y el delay() no despertaría a tiempo: se mantiene
+     * despierta (solo CPU) durante el descanso, con un tope de seguridad por si algo falla.
+     */
+    private val wakeLock: PowerManager.WakeLock? by lazy {
+        context.getSystemService(PowerManager::class.java)
+            ?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BeStrong:rest")
+            ?.apply { setReferenceCounted(false) }
+    }
+
+    private fun holdWakeLock(ms: Long) {
+        runCatching { wakeLock?.acquire(ms + WAKE_MARGIN_MS) }
+    }
+
+    private fun releaseWakeLock() {
+        runCatching { wakeLock?.takeIf { it.isHeld }?.release() }
+    }
 
     /** Cuándo terminó el último descanso sin que se haya empezado la siguiente serie (aviso de descanso excesivo). */
     private val _restEndedAt = MutableStateFlow<Long?>(null)
@@ -76,20 +96,30 @@ class RestTimerController @Inject constructor(
 
     fun skip() {
         job?.cancel()
+        releaseWakeLock()
         _restEndedAt.value = null
         _rest.value = null
         persist(null)
     }
 
+    /** Descanso programado más reciente: un job cancelado no suelta el WakeLock del siguiente. */
+    private val generation = AtomicInteger()
+
     private fun schedule() {
         job?.cancel()
+        val gen = generation.incrementAndGet()
+        _rest.value?.let { holdWakeLock((it.endsAtEpochMs - System.currentTimeMillis()).coerceAtLeast(0)) }
         job = scope.launch {
             val r = _rest.value ?: return@launch
-            delay((r.endsAtEpochMs - System.currentTimeMillis()).coerceAtLeast(0))
-            _rest.value = null
-            persist(null)
-            if (vibrateEnabled()) vibrate()
-            announcer.say(context.getString(com.bestrong.mobile.shared.R.string.tts_go))
+            try {
+                delay((r.endsAtEpochMs - System.currentTimeMillis()).coerceAtLeast(0))
+                _rest.value = null
+                persist(null)
+                if (vibrateEnabled()) vibrate()
+                announcer.say(context.getString(com.bestrong.mobile.shared.R.string.tts_go))
+            } finally {
+                if (generation.get() == gen) releaseWakeLock()
+            }
             // Si pasa un buen rato sin empezar la serie, un toque suave de recordatorio
             val ended = System.currentTimeMillis()
             _restEndedAt.value = ended
@@ -117,5 +147,8 @@ class RestTimerController @Inject constructor(
     companion object {
         /** Margen tras el descanso antes de avisar de que se está alargando. */
         const val OVERRUN_ALERT_MS = 60_000L
+
+        /** Margen del WakeLock sobre el descanso (se suelta antes al terminar). */
+        private const val WAKE_MARGIN_MS = 10_000L
     }
 }
