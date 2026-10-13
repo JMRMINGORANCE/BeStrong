@@ -30,7 +30,7 @@ class WatchSync @Inject constructor(@ApplicationContext private val context: Con
         put(SyncContract.PATH_RECENT_HISTORY, SyncContract.encodeRecentHistory(history))
 
     suspend fun pushSettings(settings: SharedSettings) =
-        put(SyncContract.PATH_SETTINGS, SyncContract.encodeSettings(settings))
+        put(SyncContract.PATH_SETTINGS, SyncContract.encodeSettingsWithin(settings))
 
     /** Publica el entreno en curso (o lo borra) para que el reloj lo muestre en vivo. */
     suspend fun pushActive(workout: Workout?) {

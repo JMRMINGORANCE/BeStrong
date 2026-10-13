@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -65,11 +67,18 @@ class AppSync @Inject constructor(
      */
     private suspend fun syncSettings() {
         val notes = media.version.map { media.allNotes().mapValues { (_, n) -> n.trim().take(MAX_WATCH_NOTE) } }
+
         // Mejores marcas por ejercicio, para que el reloj sepa si una serie es récord
-        val bests = repository.history.map { h ->
+        fun bestsOf(h: List<com.bestrong.core.model.Workout>): Pair<Map<String, Double>, Map<String, Double>> {
             val records = WorkoutStats.personalRecords(h)
-            records.mapValues { (_, r) -> r[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0 } to
-                records.mapValues { (_, r) -> r[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0 }
+            // Solo las que tienen peso (el cardio o los isométricos no pesan nada en el mensaje)
+            return records.mapValues { (_, r) -> r[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0 }.filterValues { it > 0 } to
+                records.mapValues { (_, r) -> r[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0 }.filterValues { it > 0 }
+        }
+        // La primera, ya leída de la base de datos (la lista en memoria empieza vacía hasta que carga)
+        val bests = flow {
+            emit(bestsOf(repository.historyOnce()))
+            emitAll(repository.history.drop(1).map(::bestsOf))
         }.flowOn(Dispatchers.Default)
         combine(settings.settings, repository.activeProgram, notes, bests) { s, program, pinned, (best1rm, heaviest) ->
             SharedSettings(

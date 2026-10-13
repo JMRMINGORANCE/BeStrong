@@ -65,6 +65,14 @@ object SyncContract {
     fun decodeHealth(bytes: ByteArray): WorkoutHealthData = json.decodeFromString(WorkoutHealthData.serializer(), bytes.decodeToString())
 
     fun encodeSettings(s: SharedSettings): ByteArray = json.encodeToString(SharedSettings.serializer(), s).encodeToByteArray()
+
+    /**
+     * Ajustes para el reloj sin pasar de [maxBytes]: si no caben (miles de ejercicios con marca o de
+     * notas), primero se quitan las marcas y luego las notas; lo básico (unidad, objetivo…) llega siempre.
+     */
+    fun encodeSettingsWithin(s: SharedSettings, maxBytes: Int = MAX_HISTORY_BYTES): ByteArray =
+        sequenceOf(s, s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap()), s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap(), pinnedNotes = emptyMap()))
+            .map(::encodeSettings).firstOrNull { it.size <= maxBytes } ?: encodeSettings(SharedSettings(s.unit, s.progressionEnabled, s.restVibration, s.weeklyGoal))
     fun decodeSettings(bytes: ByteArray): SharedSettings = json.decodeFromString(SharedSettings.serializer(), bytes.decodeToString())
 
     /**

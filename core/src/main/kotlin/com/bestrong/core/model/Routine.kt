@@ -87,6 +87,14 @@ data class Routine(
     }
 
     companion object {
+        /**
+         * Para repetir un entreno: lo que se hizo (no las series saltadas) y sin las notas de ese día,
+         * que eran de esa sesión ([templateNote] = la nota fija de la rutina de origen, si la hay).
+         */
+        fun repeatOf(workout: Workout, templateNote: (exerciseId: String) -> String = { "" }): Routine = fromWorkout(
+            workout.copy(exercises = workout.exercises.map { it.copy(notes = templateNote(it.exercise.id), sets = it.completedSets.ifEmpty { it.sets }) }),
+        )
+
         /** Guarda un entrenamiento terminado como rutina nueva. */
         fun fromWorkout(workout: Workout, name: String = workout.name): Routine = Routine(
             name = name,

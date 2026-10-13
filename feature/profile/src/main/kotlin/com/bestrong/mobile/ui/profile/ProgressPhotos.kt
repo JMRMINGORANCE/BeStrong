@@ -59,16 +59,10 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
     // El desbloqueo dura mientras la pantalla está abierta (no se guarda al girar ni al volver)
     val locks = settings.lockProgressPhotos && BiometricLock.isAvailable(context)
     var unlocked by remember { mutableStateOf(!locks) }
-    // Elegir una foto abre otra pantalla: eso no cuenta como salir de la app
-    var picking by rememberSaveable { mutableStateOf(false) }
-    PhotoPrivacy(unlocked, locks) { if (!picking) unlocked = false }
+    val pickPhoto = rememberGuardedPicker(locks, unlocked, onLock = { unlocked = false }, onPicked = vm::addPhoto)
     var comparing by rememberSaveable { mutableStateOf(false) }
     val chosen = remember { mutableStateListOf<String>() }
     var toDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        picking = false
-        uri?.let(vm::addPhoto)
-    }
     val unlockTitle = stringResource(R.string.progress_unlock_title)
 
     Card {
@@ -83,10 +77,7 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
                 return@Column
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilledTonalButton(onClick = {
-                    picking = true
-                    picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                }) {
+                FilledTonalButton(onClick = pickPhoto) {
                     Icon(Icons.Default.AddAPhoto, null)
                     Text(stringResource(R.string.progress_add), Modifier.padding(start = 8.dp))
                 }
@@ -185,5 +176,30 @@ private fun PhotoPrivacy(unlocked: Boolean, locks: Boolean, onLock: () -> Unit) 
         val secure = unlocked && locks
         if (secure) activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
         onDispose { if (secure) activity?.window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE) }
+    }
+}
+
+/** Lo que se tarda, como mucho, en elegir una foto sin salir de verdad de la app. */
+private const val PICKER_GRACE_MS = 30_000L
+
+/**
+ * Selector de fotos que no vuelve a bloquear la sección por abrir la galería, salvo que se tarde más
+ * de [PICKER_GRACE_MS] (entonces se salió de la app de verdad). Devuelve la acción de abrirlo.
+ */
+@Composable
+private fun rememberGuardedPicker(locks: Boolean, unlocked: Boolean, onLock: () -> Unit, onPicked: (android.net.Uri) -> Unit): () -> Unit {
+    var picking by rememberSaveable { mutableStateOf(false) }
+    var stoppedAt by remember { mutableStateOf<Long?>(null) }
+    PhotoPrivacy(unlocked, locks) { if (picking) stoppedAt = android.os.SystemClock.elapsedRealtime() else onLock() }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        picking = false
+        val away = stoppedAt?.let { android.os.SystemClock.elapsedRealtime() - it } ?: 0L
+        stoppedAt = null
+        if (locks && away > PICKER_GRACE_MS) onLock()
+        uri?.let(onPicked)
+    }
+    return {
+        picking = true
+        picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
 }

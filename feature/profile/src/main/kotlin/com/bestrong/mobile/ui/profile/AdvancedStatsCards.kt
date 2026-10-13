@@ -367,7 +367,7 @@ fun TrainingLoadCard(stats: AdvancedStats) {
             BarChart(load.weeks.map { (monday, value) -> ChartPoint(formatShortDate(monday.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()), value) })
             load.acuteChronicRatio?.let { r ->
                 Text(
-                    stringResource(if (load.tooHigh) R.string.training_load_high else R.string.training_load_ratio, formatWeight(r)),
+                    stringResource(if (load.tooHigh) R.string.training_load_high else R.string.training_load_ratio, String.format(java.util.Locale.getDefault(), "%.1f", r)),
                     color = if (load.tooHigh) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                 )

@@ -27,8 +27,8 @@ data class GymProfile(
      */
     fun plateLoad(targetKg: Double, unit: WeightUnit): PlateLoad {
         val plates = platesKg.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
-        // Barra en libras redondeada a la estándar más cercana (20 kg → 45 lb)
-        val bar = if (unit == WeightUnit.KG) barKg else Math.round(unit.fromKg(barKg) / 5) * 5.0
+        // Barra en libras con su peso real redondeado a media libra (20 kg → 44 lb)
+        val bar = if (unit == WeightUnit.KG) barKg else Math.round(unit.fromKg(barKg) * 2) / 2.0
         return PlateCalculator.calculate(unit.fromKg(targetKg), unit, bar, plates)
     }
 

@@ -95,7 +95,7 @@ object Notifier {
             text,
             week.records.takeIf { it.isNotEmpty() }?.let { context.getString(R.string.notif_weekly_records, it.size) },
             week.volumeChange?.let { c -> context.getString(R.string.notif_weekly_change, (if (c >= 0) "+" else "−") + "${(kotlin.math.abs(c) * 100).toInt()} %") },
-            highLoadRatio?.let { context.getString(R.string.notif_weekly_load_high, com.bestrong.core.util.formatWeight(it)) },
+            highLoadRatio?.let { context.getString(R.string.notif_weekly_load_high, String.format(java.util.Locale.getDefault(), "%.1f", it)) },
         )
         val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)

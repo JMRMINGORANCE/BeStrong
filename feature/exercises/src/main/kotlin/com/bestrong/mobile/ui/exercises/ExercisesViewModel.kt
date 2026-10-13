@@ -63,6 +63,8 @@ data class ExerciseDetailState(
     val strengthCurve: Map<Int, Double> = emptyMap(),
     /** Qué toca la próxima vez (sobrecarga progresiva con el incremento de este ejercicio). */
     val nextTarget: ProgressionSuggestion? = null,
+    /** Notas de ese día por entreno (sin las fijas de la rutina o del programa, que se repiten siempre). */
+    val sessionNotes: Map<String, String> = emptyMap(),
 )
 
 @HiltViewModel
@@ -135,8 +137,25 @@ class ExercisesViewModel @Inject constructor(
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
             nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id)),
+            sessionNotes = sessionNotes(exerciseId, history),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /**
+     * Una nota es «de ese día» si no es la de ninguna rutina para el ejercicio y cambia respecto a la
+     * sesión anterior (las de los programas se copian igual en cada sesión).
+     */
+    private fun sessionNotes(exerciseId: String, history: List<Workout>): Map<String, String> {
+        val templates = repo.routines.value.flatMap { it.exercises }.filter { it.exercise.id == exerciseId }.map { it.notes }.toSet()
+        val withNotes = history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
+            w.exercises.filter { it.exercise.id == exerciseId }.takeIf { it.isNotEmpty() }
+                ?.let { list -> w.id to list.map { it.notes }.filter(String::isNotBlank).joinToString(" · ") }
+        }
+        return withNotes.withIndex().mapNotNull { (i, p) ->
+            val (id, note) = p
+            note.takeIf { it.isNotBlank() && it !in templates && it != withNotes.getOrNull(i + 1)?.second }?.let { id to it }
+        }.toMap()
+    }
 
     fun createCustom(draft: Exercise): Exercise {
         val ex = draft.copy(id = "custom_${newId()}", isCustom = true)

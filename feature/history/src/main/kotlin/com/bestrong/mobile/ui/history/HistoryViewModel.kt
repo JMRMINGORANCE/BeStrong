@@ -8,6 +8,7 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
+import com.bestrong.core.training.Periodization
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.ui.components.displayName
@@ -141,8 +142,11 @@ class HistoryViewModel @Inject constructor(
     /** Repite un entrenamiento pasado como entrenamiento activo. */
     fun repeat(workout: Workout, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() == null) {
-            val again = Routine.fromWorkout(workout).toWorkout(System.currentTimeMillis(), actions.prefillLookup())
-            repo.setActive(again.copy(routineId = workout.routineId))
+            val template = workout.routineId?.let { repo.routine(it) }
+            val again = Routine.repeatOf(workout) { id -> template?.exercises?.firstOrNull { it.exercise.id == id }?.notes.orEmpty() }
+                .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
+            // Una sesión de programa repetida no cuenta como el siguiente día del programa
+            repo.setActive(again.copy(routineId = workout.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))
         }
         onStarted()
     }

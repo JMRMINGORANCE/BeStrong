@@ -173,8 +173,11 @@ class HomeViewModel @Inject constructor(
     fun repeatLast(onStarted: () -> Unit) = viewModelScope.launch {
         val last = repo.history.value.firstOrNull { it.isFinished } ?: return@launch
         if (repo.activeOnce() == null) {
-            val again = Routine.fromWorkout(last).toWorkout(System.currentTimeMillis(), actions.prefillLookup())
-            repo.setActive(again.copy(routineId = last.routineId))
+            val template = last.routineId?.let { repo.routine(it) }
+            val again = Routine.repeatOf(last) { id -> template?.exercises?.firstOrNull { it.exercise.id == id }?.notes.orEmpty() }
+                .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
+            // Una sesión de programa repetida no cuenta como el siguiente día del programa
+            repo.setActive(again.copy(routineId = last.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))
         }
         onStarted()
     }

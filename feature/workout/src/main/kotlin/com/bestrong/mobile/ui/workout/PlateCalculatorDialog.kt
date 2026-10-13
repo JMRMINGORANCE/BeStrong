@@ -114,7 +114,8 @@ private fun PlateTotals(load: PlateLoad, unit: WeightUnit) {
 
 /** Barras a elegir: la del gimnasio activo primero (en libras, redondeada a la estándar). */
 private fun barsFor(gym: GymProfile?, unit: WeightUnit): List<Double> {
-    val gymBar = gym?.let { if (unit == WeightUnit.KG) it.barKg else Math.round(unit.fromKg(it.barKg) / 5) * 5.0 }
+    // En libras, el peso real de la barra (20 kg = 44 lb) redondeado a media libra: lo que se apunta debe ser exacto
+    val gymBar = gym?.let { if (unit == WeightUnit.KG) it.barKg else Math.round(unit.fromKg(it.barKg) * 2) / 2.0 }
     return (listOfNotNull(gymBar) + if (unit == WeightUnit.KG) listOf(20.0, 15.0, 10.0) else listOf(45.0, 35.0, 25.0)).distinct()
 }
 
