@@ -339,3 +339,12 @@ class EstimateAndBarTest {
         assertEquals(20.0, com.bestrong.core.training.GymProfile.barIn(com.bestrong.core.util.WeightUnit.KG, 20.0), 0.0)
     }
 }
+
+class XlsxMeasurementsTest {
+    @Test fun measurementsGoToTheirOwnSheet() {
+        val w = finishedWorkout("w", LocalDate.of(2026, 3, 2), bench to listOf(done(80.0, 5)))
+        val bytes = com.bestrong.core.io.Xlsx.workouts(listOf(w), UTC, listOf(com.bestrong.core.model.BodyMeasurement(dateEpochMs = 0, weightKg = 80.5)))
+        val names = java.util.zip.ZipInputStream(bytes.inputStream()).use { z -> generateSequence { z.nextEntry }.map { it.name }.toList() }
+        assertTrue("xl/worksheets/sheet2.xml" in names)
+    }
+}

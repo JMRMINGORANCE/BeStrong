@@ -1,5 +1,6 @@
 package com.bestrong.core.io
 
+import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.Workout
 import java.io.ByteArrayOutputStream
 import java.time.Instant
@@ -10,10 +11,10 @@ import java.util.zip.ZipOutputStream
 
 /**
  * Exportación a Excel (.xlsx) sin librerías: un libro mínimo (SpreadsheetML) con una hoja
- * «Series» que también abren Google Sheets, Numbers y LibreOffice.
+ * «Series» (y «Medidas» si las hay) que también abren Google Sheets, Numbers y LibreOffice.
  */
 object Xlsx {
-    fun workouts(workouts: List<Workout>, zone: ZoneId = ZoneId.systemDefault()): ByteArray {
+    fun workouts(workouts: List<Workout>, zone: ZoneId = ZoneId.systemDefault(), measurements: List<BodyMeasurement> = emptyList()): ByteArray {
         val fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         val rows = mutableListOf<List<Any>>(listOf("Fecha", "Entreno", "Ejercicio", "Serie", "Tipo", "Peso (kg)", "Reps", "Segundos", "Metros", "RPE", "1RM est.", "Notas"))
         workouts.sortedBy { it.startedAtEpochMs }.forEach { w ->
@@ -24,10 +25,18 @@ object Xlsx {
                 }
             }
         }
-        return book("Series", rows)
+        // Medidas corporales en su propia hoja (para gráficas en la hoja de cálculo)
+        val measures = mutableListOf<List<Any>>(listOf("Fecha", "Peso (kg)", "Grasa (%)", "Cintura (cm)", "Pecho (cm)", "Brazo (cm)", "Muslo (cm)"))
+        measurements.sortedBy { it.dateEpochMs }.forEach { m ->
+            measures += listOf<Any>(fmt.format(Instant.ofEpochMilli(m.dateEpochMs).atZone(zone)), m.weightKg ?: "", m.bodyFatPct ?: "", m.waistCm ?: "", m.chestCm ?: "", m.armCm ?: "", m.thighCm ?: "")
+        }
+        return book(listOf("Series" to rows) + if (measurements.isEmpty()) emptyList() else listOf("Medidas" to measures))
     }
 
-    fun book(sheetName: String, rows: List<List<Any>>): ByteArray {
+    fun book(sheetName: String, rows: List<List<Any>>): ByteArray = book(listOf(sheetName to rows))
+
+    /** Libro con varias hojas (nombre → filas). */
+    fun book(sheets: List<Pair<String, List<List<Any>>>>): ByteArray {
         val out = ByteArrayOutputStream()
         ZipOutputStream(out).use { zip ->
             fun put(name: String, content: String) {
@@ -35,9 +44,11 @@ object Xlsx {
                 zip.write(content.encodeToByteArray())
                 zip.closeEntry()
             }
+            val n = sheets.indices.map { it + 1 }
             put(
                 "[Content_Types].xml",
-                """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>""",
+                """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>""" +
+                    n.joinToString("") { """<Override PartName="/xl/worksheets/sheet$it.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>""" } + "</Types>",
             )
             put(
                 "_rels/.rels",
@@ -45,28 +56,33 @@ object Xlsx {
             )
             put(
                 "xl/workbook.xml",
-                """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${esc(sheetName)}" sheetId="1" r:id="rId1"/></sheets></workbook>""",
+                """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>""" +
+                    sheets.withIndex().joinToString("") { (i, sh) -> """<sheet name="${esc(sh.first)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>""" } + "</sheets></workbook>",
             )
             put(
                 "xl/_rels/workbook.xml.rels",
-                """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>""",
+                """<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">""" +
+                    n.joinToString("") { """<Relationship Id="rId$it" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet$it.xml"/>""" } + "</Relationships>",
             )
-            val sheet = StringBuilder("""<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>""")
-            rows.forEachIndexed { r, row ->
-                sheet.append("<row r=\"${r + 1}\">")
-                row.forEachIndexed { c, v ->
-                    val ref = column(c) + (r + 1)
-                    when (v) {
-                        is Number -> sheet.append("<c r=\"$ref\"><v>$v</v></c>")
-                        else -> sheet.append("<c r=\"$ref\" t=\"inlineStr\"><is><t>${esc(v.toString())}</t></is></c>")
-                    }
-                }
-                sheet.append("</row>")
-            }
-            sheet.append("</sheetData></worksheet>")
-            put("xl/worksheets/sheet1.xml", sheet.toString())
+            sheets.forEachIndexed { i, (_, rows) -> put("xl/worksheets/sheet${i + 1}.xml", sheetXml(rows)) }
         }
         return out.toByteArray()
+    }
+
+    private fun sheetXml(rows: List<List<Any>>): String {
+        val sheet = StringBuilder("""<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>""")
+        rows.forEachIndexed { r, row ->
+            sheet.append("<row r=\"${r + 1}\">")
+            row.forEachIndexed { c, v ->
+                val ref = column(c) + (r + 1)
+                when (v) {
+                    is Number -> sheet.append("<c r=\"$ref\"><v>$v</v></c>")
+                    else -> sheet.append("<c r=\"$ref\" t=\"inlineStr\"><is><t>${esc(v.toString())}</t></is></c>")
+                }
+            }
+            sheet.append("</row>")
+        }
+        return sheet.append("</sheetData></worksheet>").toString()
     }
 
     /** 0 → A, 25 → Z, 26 → AA. */

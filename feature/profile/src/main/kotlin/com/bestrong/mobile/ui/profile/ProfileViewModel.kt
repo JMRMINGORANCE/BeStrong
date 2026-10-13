@@ -234,7 +234,7 @@ class ProfileViewModel @Inject constructor(
 
     fun exportXlsx(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
-            val bytes = withContext(Dispatchers.Default) { Xlsx.workouts(inRange(repo.historyOnce())) }
+            val bytes = withContext(Dispatchers.Default) { Xlsx.workouts(inRange(repo.historyOnce()), measurements = repo.measurements.value) }
             withContext(Dispatchers.IO) {
                 context.contentResolver.openOutputStream(uri)?.use { it.write(bytes) } ?: error(context.getString(R.string.file_open_error))
             }
