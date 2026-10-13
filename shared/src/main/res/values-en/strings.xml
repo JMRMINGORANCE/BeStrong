@@ -862,4 +862,11 @@
     <string name="routine_discard_body">You changed the routine and haven\'t saved it.</string>
     <string name="routine_delete_q">Delete “%1$s”?</string>
     <string name="routine_delete_body">Workouts you already did with it stay in your history.</string>
+    <string name="edit_exercise">Edit exercise</string>
+    <string name="track_distance">Distance</string>
+    <string name="secondary_muscles_label">Secondary muscles</string>
+    <string name="unilateral_exercise">One side at a time (log each side)</string>
+    <string name="delete_exercise_q">Delete “%1$s”?</string>
+    <string name="delete_exercise_body">Workouts where you did it stay in your history.</string>
+    <string name="delete_exercise_used">%1$d routines use it: they\'ll keep showing it, but it will no longer be in the library.</string>
 </resources>

@@ -13,6 +13,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -23,6 +26,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -63,6 +67,21 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
     val state by flow.collectAsStateWithLifecycle()
     val s = state ?: return
     var metric by rememberSaveable { mutableIntStateOf(0) }
+    var editing by rememberSaveable { mutableStateOf(false) }
+    var confirmDelete by remember { mutableStateOf(false) }
+    if (editing) {
+        ExerciseFormDialog(initial = s.exercise, onDismiss = { editing = false }, onSave = { vm.updateCustom(it); editing = false })
+    }
+    if (confirmDelete) {
+        val used = remember { vm.routinesUsing(s.exercise.id) }
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.delete_exercise_q, s.exercise.name)) },
+            text = { Text(if (used > 0) stringResource(R.string.delete_exercise_used, used) else stringResource(R.string.delete_exercise_body)) },
+            confirmButton = { Button(onClick = { confirmDelete = false; vm.deleteCustom(s.exercise.id); onBack?.invoke() }) { Text(stringResource(R.string.action_delete)) } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
 
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
@@ -70,7 +89,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
                 if (s.exercise.isCustom) {
-                    IconButton(onClick = { vm.deleteCustom(s.exercise.id); onBack?.invoke() }) {
+                    IconButton(onClick = { editing = true }) { Icon(Icons.Default.Edit, stringResource(R.string.edit_exercise)) }
+                    IconButton(onClick = { confirmDelete = true }) {
                         Icon(Icons.Default.Delete, stringResource(R.string.delete_exercise))
                     }
                 }

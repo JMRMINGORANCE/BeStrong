@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -39,6 +40,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -55,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -224,10 +227,11 @@ fun ExerciseSearchList(
     }
 
     if (creating) {
-        CreateExerciseDialog(
+        ExerciseFormDialog(
+            initial = null,
             onDismiss = { creating = false },
-            onCreate = { name, muscle, equipment, tracking ->
-                val ex = vm.createCustom(name, muscle, equipment, tracking)
+            onSave = { draft ->
+                val ex = vm.createCustom(draft)
                 creating = false
                 if (multiSelect) onClick(ex)
             },
@@ -251,17 +255,20 @@ private fun <T> EnumFilter(label: String, values: List<T>, selected: T?, name: @
     }
 }
 
+/** Crear (initial = null) o editar un ejercicio personalizado; devuelve un borrador sin id definitivo. */
 @Composable
-private fun CreateExerciseDialog(onDismiss: () -> Unit, onCreate: (String, MuscleGroup, Equipment, TrackingType) -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var muscle by remember { mutableStateOf(MuscleGroup.CHEST) }
-    var equipment by remember { mutableStateOf(Equipment.BARBELL) }
-    var tracking by remember { mutableStateOf(TrackingType.WEIGHT_REPS) }
+fun ExerciseFormDialog(initial: Exercise?, onDismiss: () -> Unit, onSave: (Exercise) -> Unit) {
+    var name by rememberSaveable { mutableStateOf(initial?.name.orEmpty()) }
+    var muscle by rememberSaveable { mutableStateOf(initial?.primaryMuscle ?: MuscleGroup.CHEST) }
+    var secondary by rememberSaveable { mutableStateOf(initial?.secondaryMuscles.orEmpty()) }
+    var equipment by rememberSaveable { mutableStateOf(initial?.equipment ?: Equipment.BARBELL) }
+    var tracking by rememberSaveable { mutableStateOf(initial?.tracking ?: TrackingType.WEIGHT_REPS) }
+    var unilateral by rememberSaveable { mutableStateOf(initial?.unilateral ?: false) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.new_exercise)) },
+        title = { Text(stringResource(if (initial == null) R.string.new_exercise else R.string.edit_exercise)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.name)) }, singleLine = true)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, muscle, { it.label() }) { it?.let { m -> muscle = m } }
@@ -274,13 +281,43 @@ private fun CreateExerciseDialog(onDismiss: () -> Unit, onCreate: (String, Muscl
                         TrackingType.WEIGHT_REPS to stringResource(R.string.track_weight_reps),
                         TrackingType.REPS_ONLY to stringResource(R.string.track_reps),
                         TrackingType.DURATION to stringResource(R.string.track_time),
+                        TrackingType.DISTANCE to stringResource(R.string.track_distance),
                         TrackingType.CARDIO to stringResource(R.string.track_cardio),
                     )
                         .forEach { (t, l) -> FilterChip(selected = tracking == t, onClick = { tracking = t }, label = { Text(l) }) }
                 }
+                Text(stringResource(R.string.secondary_muscles_label), style = MaterialTheme.typography.labelLarge)
+                @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    MuscleGroup.entries.filter { it != muscle }.forEach { m ->
+                        FilterChip(
+                            selected = m in secondary,
+                            onClick = { secondary = if (m in secondary) secondary - m else secondary + m },
+                            label = { Text(m.label()) },
+                        )
+                    }
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.unilateral_exercise), Modifier.weight(1f))
+                    Switch(checked = unilateral, onCheckedChange = { unilateral = it })
+                }
             }
         },
-        confirmButton = { Button(enabled = name.isNotBlank(), onClick = { onCreate(name, muscle, equipment, tracking) }) { Text(stringResource(R.string.action_create)) } },
+        confirmButton = {
+            Button(enabled = name.isNotBlank(), onClick = {
+                val base = initial ?: Exercise(id = "", name = "", primaryMuscle = muscle, isCustom = true)
+                onSave(
+                    base.copy(
+                        name = name.trim(),
+                        primaryMuscle = muscle,
+                        secondaryMuscles = secondary.filter { it != muscle },
+                        equipment = equipment,
+                        tracking = tracking,
+                        unilateral = unilateral,
+                    ),
+                )
+            }) { Text(stringResource(if (initial == null) R.string.action_create else R.string.action_save)) }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }

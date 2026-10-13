@@ -862,4 +862,11 @@
     <string name="routine_discard_body">Has canviat la rutina i no l\'has desada.</string>
     <string name="routine_delete_q">Esborrar «%1$s»?</string>
     <string name="routine_delete_body">Els entrenaments que ja vas fer amb ella es queden a l\'historial.</string>
+    <string name="edit_exercise">Editar exercici</string>
+    <string name="track_distance">Distància</string>
+    <string name="secondary_muscles_label">Músculs secundaris</string>
+    <string name="unilateral_exercise">Un costat cada vegada (registrar cada costat)</string>
+    <string name="delete_exercise_q">Esborrar «%1$s»?</string>
+    <string name="delete_exercise_body">Els entrenaments on el vas fer es queden a l\'historial.</string>
+    <string name="delete_exercise_used">El fan servir %1$d rutines: el continuaran mostrant, però ja no sortirà a la biblioteca.</string>
 </resources>

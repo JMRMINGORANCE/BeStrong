@@ -862,4 +862,11 @@
     <string name="routine_discard_body">Tu as modifié la routine sans l\'enregistrer.</string>
     <string name="routine_delete_q">Supprimer « %1$s » ?</string>
     <string name="routine_delete_body">Les séances déjà faites avec elle restent dans l\'historique.</string>
+    <string name="edit_exercise">Modifier l\'exercice</string>
+    <string name="track_distance">Distance</string>
+    <string name="secondary_muscles_label">Muscles secondaires</string>
+    <string name="unilateral_exercise">Un côté à la fois (noter chaque côté)</string>
+    <string name="delete_exercise_q">Supprimer « %1$s » ?</string>
+    <string name="delete_exercise_body">Les séances où tu l\'as fait restent dans l\'historique.</string>
+    <string name="delete_exercise_used">%1$d routines l\'utilisent : elles continueront à l\'afficher, mais il ne sera plus dans la bibliothèque.</string>
 </resources>

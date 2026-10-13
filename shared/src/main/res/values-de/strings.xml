@@ -862,4 +862,11 @@
     <string name="routine_discard_body">Du hast die Routine geändert und nicht gespeichert.</string>
     <string name="routine_delete_q">„%1$s“ löschen?</string>
     <string name="routine_delete_body">Bereits damit absolvierte Trainings bleiben im Verlauf.</string>
+    <string name="edit_exercise">Übung bearbeiten</string>
+    <string name="track_distance">Distanz</string>
+    <string name="secondary_muscles_label">Sekundäre Muskeln</string>
+    <string name="unilateral_exercise">Einseitig (jede Seite erfassen)</string>
+    <string name="delete_exercise_q">„%1$s“ löschen?</string>
+    <string name="delete_exercise_body">Trainings mit dieser Übung bleiben im Verlauf.</string>
+    <string name="delete_exercise_used">%1$d Routinen verwenden sie: Sie bleibt dort sichtbar, verschwindet aber aus der Bibliothek.</string>
 </resources>

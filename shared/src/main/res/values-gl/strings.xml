@@ -862,4 +862,11 @@
     <string name="routine_discard_body">Cambiaches a rutina e non a gardaches.</string>
     <string name="routine_delete_q">Borrar «%1$s»?</string>
     <string name="routine_delete_body">Os adestramentos que xa fixeches con ela quedan no historial.</string>
+    <string name="edit_exercise">Editar exercicio</string>
+    <string name="track_distance">Distancia</string>
+    <string name="secondary_muscles_label">Músculos secundarios</string>
+    <string name="unilateral_exercise">Un lado cada vez (rexistrar cada lado)</string>
+    <string name="delete_exercise_q">Borrar «%1$s»?</string>
+    <string name="delete_exercise_body">Os adestramentos onde o fixeches quedan no historial.</string>
+    <string name="delete_exercise_used">Úsano %1$d rutinas: seguirán amosándoo, pero xa non aparecerá na biblioteca.</string>
 </resources>

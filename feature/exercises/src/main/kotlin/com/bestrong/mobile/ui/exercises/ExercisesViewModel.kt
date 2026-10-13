@@ -8,7 +8,6 @@ import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
-import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
@@ -119,11 +118,22 @@ class ExercisesViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    fun createCustom(name: String, muscle: MuscleGroup, equipment: Equipment, tracking: TrackingType): Exercise {
-        val ex = Exercise(id = "custom_${newId()}", name = name.trim(), primaryMuscle = muscle, equipment = equipment, tracking = tracking, isCustom = true)
+    fun createCustom(draft: Exercise): Exercise {
+        val ex = draft.copy(id = "custom_${newId()}", isCustom = true)
         viewModelScope.launch { repo.saveCustomExercise(ex) }
         return ex
     }
+
+    /** Corrige un ejercicio personalizado; las rutinas que lo usan se actualizan (el historial guarda lo que se hizo). */
+    fun updateCustom(ex: Exercise) = viewModelScope.launch {
+        repo.saveCustomExercise(ex)
+        repo.routinesOnce().filter { r -> r.exercises.any { it.exercise.id == ex.id } }.forEach { r ->
+            repo.saveRoutine(r.copy(exercises = r.exercises.map { if (it.exercise.id == ex.id) it.copy(exercise = ex) else it }))
+        }
+    }
+
+    /** Cuántas rutinas usan el ejercicio (para avisar antes de borrarlo). */
+    fun routinesUsing(exerciseId: String): Int = repo.routines.value.count { r -> r.exercises.any { it.exercise.id == exerciseId } }
 
     fun deleteCustom(id: String) = viewModelScope.launch { repo.deleteCustomExercise(id) }
 }
