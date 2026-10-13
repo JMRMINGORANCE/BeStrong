@@ -869,4 +869,8 @@
     <string name="delete_exercise_q">Supprimer « %1$s » ?</string>
     <string name="delete_exercise_body">Les séances où tu l\'as fait restent dans l\'historique.</string>
     <string name="delete_exercise_used">%1$d routines l\'utilisent : elles continueront à l\'afficher, mais il ne sera plus dans la bibliothèque.</string>
+    <string name="timed_set_start">Lancer le compte à rebours</string>
+    <string name="timed_set_ready">Prépare-toi…</string>
+    <string name="timed_set_go">Tiens bon !</string>
+    <string name="timed_set_finish_now">Terminé</string>
 </resources>

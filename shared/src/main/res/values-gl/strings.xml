@@ -869,4 +869,8 @@
     <string name="delete_exercise_q">Borrar «%1$s»?</string>
     <string name="delete_exercise_body">Os adestramentos onde o fixeches quedan no historial.</string>
     <string name="delete_exercise_used">Úsano %1$d rutinas: seguirán amosándoo, pero xa non aparecerá na biblioteca.</string>
+    <string name="timed_set_start">Comezar conta atrás</string>
+    <string name="timed_set_ready">Prepárate…</string>
+    <string name="timed_set_go">Aguanta!</string>
+    <string name="timed_set_finish_now">Feito</string>
 </resources>

@@ -869,4 +869,8 @@
     <string name="delete_exercise_q">Apagar «%1$s»?</string>
     <string name="delete_exercise_body">Os treinos em que o fizeste ficam no histórico.</string>
     <string name="delete_exercise_used">Usam-no %1$d rotinas: continuarão a mostrá-lo, mas deixará de aparecer na biblioteca.</string>
+    <string name="timed_set_start">Iniciar contagem decrescente</string>
+    <string name="timed_set_ready">Prepara-te…</string>
+    <string name="timed_set_go">Aguenta!</string>
+    <string name="timed_set_finish_now">Feito</string>
 </resources>

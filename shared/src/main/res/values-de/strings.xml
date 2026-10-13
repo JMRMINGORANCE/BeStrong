@@ -869,4 +869,8 @@
     <string name="delete_exercise_q">„%1$s“ löschen?</string>
     <string name="delete_exercise_body">Trainings mit dieser Übung bleiben im Verlauf.</string>
     <string name="delete_exercise_used">%1$d Routinen verwenden sie: Sie bleibt dort sichtbar, verschwindet aber aus der Bibliothek.</string>
+    <string name="timed_set_start">Countdown starten</string>
+    <string name="timed_set_ready">Mach dich bereit…</string>
+    <string name="timed_set_go">Halten!</string>
+    <string name="timed_set_finish_now">Fertig</string>
 </resources>

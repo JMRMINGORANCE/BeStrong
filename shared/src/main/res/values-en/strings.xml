@@ -869,4 +869,8 @@
     <string name="delete_exercise_q">Delete “%1$s”?</string>
     <string name="delete_exercise_body">Workouts where you did it stay in your history.</string>
     <string name="delete_exercise_used">%1$d routines use it: they\'ll keep showing it, but it will no longer be in the library.</string>
+    <string name="timed_set_start">Start countdown</string>
+    <string name="timed_set_ready">Get ready…</string>
+    <string name="timed_set_go">Hold it!</string>
+    <string name="timed_set_finish_now">Done</string>
 </resources>

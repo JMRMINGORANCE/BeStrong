@@ -869,4 +869,8 @@
     <string name="delete_exercise_q">Esborrar «%1$s»?</string>
     <string name="delete_exercise_body">Els entrenaments on el vas fer es queden a l\'historial.</string>
     <string name="delete_exercise_used">El fan servir %1$d rutines: el continuaran mostrant, però ja no sortirà a la biblioteca.</string>
+    <string name="timed_set_start">Començar compte enrere</string>
+    <string name="timed_set_ready">Prepara\'t…</string>
+    <string name="timed_set_go">Aguanta!</string>
+    <string name="timed_set_finish_now">Fet</string>
 </resources>

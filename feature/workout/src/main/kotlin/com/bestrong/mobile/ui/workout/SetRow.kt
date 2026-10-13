@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -40,6 +41,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -130,6 +132,17 @@ fun SetRow(
     onDelete: () -> Unit,
 ) {
     val unit = LocalWeightUnit.current
+    var timing by rememberSaveable(set.id) { mutableStateOf(false) }
+    if (timing) {
+        TimedSetDialog(
+            seconds = set.durationSec,
+            onDone = {
+                timing = false
+                if (!set.completed) onToggle()
+            },
+            onDismiss = { timing = false },
+        )
+    }
     val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
         // Deslizar a la izquierda borra; a la derecha completa (o desmarca) la serie
         when (it) {
@@ -325,6 +338,10 @@ fun SetRow(
                 }
                 if (tracking == TrackingType.CARDIO && !set.completed && !set.isRunning) {
                     IconButton(onClick = onStartTimer) { Icon(Icons.Default.PlayArrow, stringResource(R.string.cardio_start)) }
+                }
+                // Series por tiempo: cuenta atrás que marca la serie al acabar
+                if (tracking == TrackingType.DURATION && !set.completed && set.durationSec > 0) {
+                    IconButton(onClick = { timing = true }) { Icon(Icons.Default.Timer, stringResource(R.string.timed_set_start)) }
                 }
                 FilledIconToggleButton(
                     checked = set.completed,

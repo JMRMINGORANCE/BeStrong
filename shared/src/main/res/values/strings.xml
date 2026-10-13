@@ -869,4 +869,8 @@
     <string name="delete_exercise_q">¿Borrar «%1$s»?</string>
     <string name="delete_exercise_body">Los entrenos donde lo hiciste se quedan en el historial.</string>
     <string name="delete_exercise_used">Lo usan %1$d rutinas: seguirán mostrándolo, pero ya no aparecerá en la biblioteca.</string>
+    <string name="timed_set_start">Empezar cuenta atrás</string>
+    <string name="timed_set_ready">Prepárate…</string>
+    <string name="timed_set_go">¡Aguanta!</string>
+    <string name="timed_set_finish_now">Hecho</string>
 </resources>
