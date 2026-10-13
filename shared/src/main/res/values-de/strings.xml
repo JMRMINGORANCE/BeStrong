@@ -947,4 +947,5 @@
     <string name="rest_use_real">%1$s in Routine übernehmen</string>
     <string name="lagging_muscle_open">Übungen ansehen</string>
     <string name="notif_progress_eta">%1$d/%2$d Sätze · ≈ %3$d Min., Ende %4$s</string>
+    <string name="rest_use_real_done">Routine aktualisiert: %1$s Pause</string>
 </resources>

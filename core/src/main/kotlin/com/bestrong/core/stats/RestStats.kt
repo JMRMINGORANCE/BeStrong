@@ -34,8 +34,10 @@ object RestStats {
     /** (segundos reales, segundos previstos) de cada descanso entre series seguidas de [we]. */
     private fun gaps(we: WorkoutExercise): List<Pair<Long, Int>> {
         if (we.restSeconds <= 0 || we.supersetId != null) return emptyList()
+        // Series marcadas de golpe («marcar las que faltan») comparten la hora: no hubo descanso medible
+        val bulk = we.completedSets.mapNotNull { it.completedAtEpochMs }.groupingBy { it }.eachCount().filterValues { it > 1 }.keys
         return we.completedSets.zipWithNext().mapNotNull { (a, b) ->
-            if (a.type == SetType.WARMUP || b.type == SetType.DROP) return@mapNotNull null
+            if (a.type == SetType.WARMUP || b.type == SetType.DROP || b.completedAtEpochMs in bulk) return@mapNotNull null
             val end = a.completedAtEpochMs ?: return@mapNotNull null
             val nextStart = b.startedAtEpochMs ?: ((b.completedAtEpochMs ?: return@mapNotNull null) - maxOf(SetTimeline.DEFAULT_SET_MS, b.durationSec * 1000L))
             val gap = nextStart - end

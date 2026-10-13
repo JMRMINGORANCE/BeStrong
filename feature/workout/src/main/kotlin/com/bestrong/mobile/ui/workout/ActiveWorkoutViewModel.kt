@@ -10,7 +10,6 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.SessionRating
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
-import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
@@ -131,7 +130,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         savedState.getStateFlow<Long?>(KEY_DEADLINE, null),
         savedState.getStateFlow<String?>(KEY_DEADLINE_WORKOUT, null),
         workout,
-    ) { at, id, w -> at.takeIf { id != null && id == w?.id } }
+    ) { at, ids, w -> at.takeIf { w != null && ids?.split(',')?.contains(w.id) == true } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Quita series pendientes del final hasta que la estimación quepa en la hora límite (se puede deshacer). */
@@ -147,26 +146,13 @@ class ActiveWorkoutViewModel @Inject constructor(
                 WorkoutEditor.trimToFit(w, budget) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = now, warmupRestSeconds = warmup, restEndsAtEpochMs = restEnds) }
             } ?: return@launch
             if (before == after) return@launch
-            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.TRIM, partner, before.id) { w -> restoreMissing(before, w) })
+            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.TRIM, partner, before.id, WorkoutEditor.undoRemoval(before, after)))
         }
-    }
-
-    /** Vuelve a poner, en su sitio, los ejercicios y series de [before] que faltan en [w] (sin tocar lo demás). */
-    private fun restoreMissing(before: Workout, w: Workout): Workout {
-        val current = w.exercises.associateBy { it.id }
-        val merged = before.exercises.map { old ->
-            val now = current[old.id] ?: return@map old
-            val ids = now.sets.map { it.id }.toSet()
-            val missing = old.sets.filter { it.id !in ids }
-            if (missing.isEmpty()) now else now.copy(sets = old.sets.mapNotNull { s -> if (s.id in ids) now.sets.first { it.id == s.id } else s })
-        }
-        // Lo añadido después del recorte se queda al final
-        val extra = w.exercises.filter { e -> before.exercises.none { it.id == e.id } }
-        return w.copy(exercises = merged + extra)
     }
 
     fun setDeadline(epochMs: Long?) {
-        savedState[KEY_DEADLINE_WORKOUT] = workout.value?.id
+        // Vale para tu entreno y el del compañero (la hora de irse es la misma)
+        savedState[KEY_DEADLINE_WORKOUT] = listOfNotNull(repo.activeWorkout.value?.id, repo.partnerWorkout.value?.id).joinToString(",")
         savedState[KEY_DEADLINE] = epochMs
     }
     val watchMetrics: StateFlow<LiveMetrics?> = metricsStore.metrics
@@ -262,18 +248,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun removeExercise(weId: String) {
         val partner = partnerMode.value
         viewModelScope.launch {
-            val (before, _) = update(partner) { WorkoutEditor.removeExercise(it, weId) } ?: return@launch
-            val index = before.exercises.indexOfFirst { it.id == weId }
-            val removed: WorkoutExercise = before.exercises.getOrNull(index) ?: return@launch
-            _events.tryEmit(
-                WorkoutEvent.Undoable(UndoKind.EXERCISE, partner, before.id) { w ->
-                    if (w.exercises.any { it.id == weId }) {
-                        w
-                    } else {
-                        w.copy(exercises = w.exercises.toMutableList().apply { add(index.coerceAtMost(size), removed) })
-                    }
-                },
-            )
+            val (before, after) = update(partner) { WorkoutEditor.removeExercise(it, weId) } ?: return@launch
+            if (before.exercises.none { it.id == weId }) return@launch
+            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.EXERCISE, partner, before.id, WorkoutEditor.undoRemoval(before, after)))
         }
     }
     fun moveExercise(from: Int, to: Int) = edit { WorkoutEditor.moveExercise(it, from, to) }
@@ -328,9 +305,12 @@ class ActiveWorkoutViewModel @Inject constructor(
             val old = before.exercises.firstOrNull { it.id == weId }?.sets?.associateBy { it.id } ?: return@launch
             val marked = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
             if (marked.isEmpty()) return@launch
-            onSetCompleted(after, after.exercises.indexOfFirst { it.id == weId })
+            // Si ya hay un descanso en marcha (p. ej. se completa un ejercicio olvidado), no se reinicia
+            val startsRest = restTimer.rest.value == null
+            if (startsRest) onSetCompleted(after, after.exercises.indexOfFirst { it.id == weId })
             _events.tryEmit(
                 WorkoutEvent.Undoable(UndoKind.COMPLETE, partner, before.id) { w ->
+                    if (startsRest) restTimer.skip()
                     WorkoutEditor.updateExercise(w, weId) { we -> we.copy(sets = we.sets.map { s -> if (marked[s.id] == s) old.getValue(s.id) else s }) }
                 },
             )
@@ -559,8 +539,10 @@ class ActiveWorkoutViewModel @Inject constructor(
         val goal = repo.activeProgram.value?.weeklyGoal ?: settings.value.weeklyGoal
         // Un entreno olvidado abierto desde hace días no cuenta para hoy; uno que cruza la medianoche
         // del domingo sí (se compara con cuándo terminó, no con el lunes)
-        // Las pausas no cuentan (una sesión partida por la comida sigue siendo la de hoy)
-        if (finished.durationSeconds() * 1000L > STALE_WORKOUT_MS) return null
+        // Las pausas no cuentan (una sesión partida por la comida sigue siendo la de hoy), pero uno
+        // pausado y olvidado días tampoco vale
+        val wallClock = (finished.finishedAtEpochMs ?: System.currentTimeMillis()) - finished.startedAtEpochMs
+        if (finished.durationSeconds() * 1000L > STALE_WORKOUT_MS || wallClock > MAX_WALL_CLOCK_MS) return null
         val others = history.filter { it.id != finished.id }
         val before = Periodization.trainedDaysOfWeek(others, day, zone).size
         val after = Periodization.trainedDaysOfWeek(others + finished, day, zone).size
@@ -582,6 +564,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     private companion object {
         /** Más de esto abierto: entreno olvidado, no se felicita por el objetivo semanal. */
         const val STALE_WORKOUT_MS = 6 * 60 * 60 * 1000L
+        const val MAX_WALL_CLOCK_MS = 24 * 60 * 60 * 1000L
         const val KEY_PARTNER_MODE = "partner_mode"
         const val KEY_SUMMARY_ID = "summary_workout_id"
         const val KEY_DEADLINE = "deadline"

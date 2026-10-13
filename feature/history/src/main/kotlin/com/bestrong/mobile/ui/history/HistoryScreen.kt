@@ -334,7 +334,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp)) }
                         }
-                        restByExercise[we.id]?.let { r -> ExerciseRestLine(w, we.exercise.id, r, routinesById, vm) }
+                        restByExercise[we.id]?.let { r -> ExerciseRestLine(w, we, r, routinesById, vm) }
                         if (editing) TextButton(onClick = { vm.addPastSet(w, we.id) }) { Text(stringResource(R.string.add_set)) }
                     }
                 }
@@ -356,7 +356,7 @@ private fun RestSummaryLine(w: Workout) {
 
 /** Descanso real de un ejercicio y, si la rutina lo tiene distinto, botón para usarlo en ella. */
 @Composable
-private fun ExerciseRestLine(w: Workout, exerciseId: String, r: RestSummary, routines: Map<String, com.bestrong.core.model.Routine>, vm: HistoryViewModel) {
+private fun ExerciseRestLine(w: Workout, we: com.bestrong.core.model.WorkoutExercise, r: RestSummary, routines: Map<String, com.bestrong.core.model.Routine>, vm: HistoryViewModel) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             stringResource(R.string.rest_real_exercise, formatDuration(r.realSeconds.toLong()), formatDuration(r.plannedSeconds.toLong())),
@@ -364,9 +364,18 @@ private fun ExerciseRestLine(w: Workout, exerciseId: String, r: RestSummary, rou
             color = if (r.realSeconds > r.plannedSeconds * OVERRUN_FACTOR) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
-        val planned = w.routineId?.let { routines[it] }?.exercises?.firstOrNull { it.exercise.id == exerciseId }?.restSeconds
+        // La misma aparición del ejercicio en la rutina (puede salir más de una vez)
+        val occurrence = w.exercises.takeWhile { it.id != we.id }.count { it.exercise.id == we.exercise.id }
+        val planned = w.routineId?.let { routines[it] }?.exercises?.filter { it.exercise.id == we.exercise.id }?.getOrNull(occurrence)?.restSeconds
         if (planned != null && planned != r.suggestedSeconds) {
-            TextButton(onClick = { vm.useRealRest(w, exerciseId, r.suggestedSeconds) }) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val done = stringResource(R.string.rest_use_real_done, formatDuration(r.suggestedSeconds.toLong()))
+            TextButton(
+                onClick = {
+                    vm.useRealRest(w, we.exercise.id, occurrence, r.suggestedSeconds)
+                    android.widget.Toast.makeText(context, done, android.widget.Toast.LENGTH_SHORT).show()
+                },
+            ) {
                 Text(stringResource(R.string.rest_use_real, formatDuration(r.suggestedSeconds.toLong())))
             }
         }

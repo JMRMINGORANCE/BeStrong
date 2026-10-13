@@ -47,7 +47,7 @@ internal data class EtaInputs(
  * 19:30»): si la estimación se pasa, la línea se pone en rojo y propone acortar.
  */
 @Composable
-internal fun RemainingTimeLine(remainingSeconds: Int, now: Long, eta: EtaInputs) {
+internal fun RemainingTimeLine(remainingSeconds: Int, now: Long, eta: EtaInputs, canFit: Boolean = false) {
     var picking by remember { mutableStateOf(false) }
     if (picking) {
         DeadlineDialog(eta.deadlineEpochMs ?: (now + remainingSeconds * 1000L), now, hasDeadline = eta.deadlineEpochMs != null, { eta.onDeadline(it); picking = false }) { picking = false }
@@ -75,7 +75,7 @@ internal fun RemainingTimeLine(remainingSeconds: Int, now: Long, eta: EtaInputs)
         Icon(Icons.Default.Schedule, contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
         Text(text, style = MaterialTheme.typography.labelMedium, color = color)
     }
-    if (over) TextButton(onClick = eta.onFit) { Text(stringResource(R.string.deadline_fit)) }
+    if (over && canFit) TextButton(onClick = eta.onFit) { Text(stringResource(R.string.deadline_fit)) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

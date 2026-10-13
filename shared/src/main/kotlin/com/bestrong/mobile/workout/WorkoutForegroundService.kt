@@ -87,7 +87,8 @@ class WorkoutForegroundService : LifecycleService() {
     private fun progressText(w: Workout): String {
         val now = System.currentTimeMillis()
         val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now, warmupRestSeconds = settings.settings.value.warmupRestSeconds)
-        if (remaining <= 0) return getString(R.string.notif_progress, w.completedSetCount, w.totalSetCount)
+        // En pausa la hora de fin no significa nada (no se refresca mientras tanto)
+        if (remaining <= 0 || w.isPaused) return getString(R.string.notif_progress, w.completedSetCount, w.totalSetCount)
         val is24 = android.text.format.DateFormat.is24HourFormat(this)
         return getString(R.string.notif_progress_eta, w.completedSetCount, w.totalSetCount, (remaining + 59) / 60, formatClock(now + remaining * 1000L, is24))
     }

@@ -110,3 +110,44 @@ class TrimToFitTest {
         assertEquals(main.sets[0].id, minimal.exercises[0].sets.single().id)
     }
 }
+
+class Iteration13Test {
+    private val curl = com.bestrong.core.library.ExerciseLibrary.all[5]
+
+    @Test fun undoRemovalOnlyRestoresWhatWasRemoved() {
+        val a = WorkoutExercise(exercise = bench, sets = List(3) { WorkoutSet(reps = 5) })
+        val b = WorkoutExercise(exercise = curl, sets = List(2) { WorkoutSet(reps = 10) })
+        val before = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(a, b))
+        val after = before.copy(exercises = listOf(a.copy(sets = a.sets.take(2))))
+        val undo = WorkoutEditor.undoRemoval(before, after)
+        // Después del recorte el usuario añade una serie al primero: se conserva
+        val extra = WorkoutSet(reps = 1)
+        val later = after.copy(exercises = listOf(after.exercises[0].copy(sets = after.exercises[0].sets + extra)))
+        val restored = undo(later)
+        assertEquals(listOf(a.id, b.id), restored.exercises.map { it.id })
+        assertEquals(listOf(a.sets[0].id, a.sets[1].id, a.sets[2].id, extra.id), restored.exercises[0].sets.map { it.id })
+    }
+
+    @Test fun trimKeepsNextSetOfStartedExerciseAndClearsLoneSuperset() {
+        val e1 = WorkoutExercise(exercise = bench, restSeconds = 60, sets = listOf(WorkoutSet(reps = 5, completed = true), WorkoutSet(reps = 5)))
+        val e2 = WorkoutExercise(exercise = curl, restSeconds = 60, supersetId = "s", sets = listOf(WorkoutSet(reps = 5, completed = true), WorkoutSet(reps = 5), WorkoutSet(reps = 5)))
+        val e3 = WorkoutExercise(exercise = com.bestrong.core.library.ExerciseLibrary.all[7], restSeconds = 60, supersetId = "s", sets = listOf(WorkoutSet(reps = 5)))
+        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(e1, e2, e3))
+        val out = WorkoutEditor.trimToFit(w, 0) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = 0) }
+        // e3 desaparece; de e2 queda la hecha y la siguiente
+        assertEquals(2, out.exercises.size)
+        assertEquals(2, out.exercises[1].sets.size)
+        assertEquals(null, out.exercises[1].supersetId)
+    }
+
+    @Test fun bulkCompletedSetsAreNotRest() {
+        val t0 = 1_000_000L
+        val sets = listOf(
+            WorkoutSet(reps = 5, completed = true, completedAtEpochMs = t0),
+            WorkoutSet(reps = 5, completed = true, completedAtEpochMs = t0 + 540_000),
+            WorkoutSet(reps = 5, completed = true, completedAtEpochMs = t0 + 540_000),
+        )
+        val we = WorkoutExercise(exercise = bench, sets = sets, restSeconds = 90)
+        assertEquals(null, com.bestrong.core.stats.RestStats.summary(Workout(name = "w", startedAtEpochMs = 0, finishedAtEpochMs = t0 + 600_000, exercises = listOf(we))))
+    }
+}

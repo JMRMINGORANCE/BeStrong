@@ -374,7 +374,15 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
         }
         // Tiempo aproximado para terminar (series pendientes + descansos) y a qué hora
         val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now, warmupRestSeconds = eta.warmupRestSeconds, restEndsAtEpochMs = eta.restEndsAtEpochMs)
-        if (remaining > 0) RemainingTimeLine(remaining, now, eta)
+        if (remaining > 0) {
+            // «Ajustar» solo si de verdad hay algo que recortar
+            val deadline = eta.deadlineEpochMs
+            val canFit = deadline != null && now + remaining * 1000L > deadline &&
+                WorkoutEditor.trimToFit(w, ((deadline - now) / 1000).toInt().coerceAtLeast(0)) {
+                    WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = now, warmupRestSeconds = eta.warmupRestSeconds, restEndsAtEpochMs = eta.restEndsAtEpochMs)
+                } != w
+            RemainingTimeLine(remaining, now, eta, canFit)
+        }
     }
 }
 

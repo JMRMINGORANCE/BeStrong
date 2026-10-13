@@ -141,11 +141,15 @@ class HistoryViewModel @Inject constructor(
     val routinesById: StateFlow<Map<String, com.bestrong.core.model.Routine>> = repo.routines.map { list -> list.associateBy { it.id } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    /** Pone en la rutina de ese entreno el descanso real que hiciste en ese ejercicio. */
-    fun useRealRest(workout: Workout, exerciseId: String, seconds: Int) = viewModelScope.launch {
+    /**
+     * Pone en la rutina de ese entreno el descanso real que hiciste en ese ejercicio. [occurrence] dice
+     * cuál de las apariciones del ejercicio es (una rutina puede repetirlo, p. ej. series de descarga).
+     */
+    fun useRealRest(workout: Workout, exerciseId: String, occurrence: Int, seconds: Int) = viewModelScope.launch {
         val routine = workout.routineId?.let { repo.routine(it) } ?: return@launch
+        val target = routine.exercises.filter { it.exercise.id == exerciseId }.getOrNull(occurrence) ?: return@launch
         repo.saveRoutine(
-            routine.copy(exercises = routine.exercises.map { if (it.exercise.id == exerciseId) it.copy(restSeconds = seconds) else it }),
+            routine.copy(exercises = routine.exercises.map { if (it.id == target.id) it.copy(restSeconds = seconds) else it }),
             keepPosition = true,
         )
     }

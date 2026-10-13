@@ -117,7 +117,41 @@ object WorkoutEditor {
         }
 
     fun removeExercise(workout: Workout, workoutExerciseId: String): Workout =
-        workout.copy(exercises = workout.exercises.filterNot { it.id == workoutExerciseId })
+        dropLoneSupersets(workout.copy(exercises = workout.exercises.filterNot { it.id == workoutExerciseId }))
+
+    /** Una superserie de un solo ejercicio ya no lo es (p. ej. tras quitar a su pareja). */
+    fun dropLoneSupersets(workout: Workout): Workout {
+        val sizes = workout.exercises.mapNotNull { it.supersetId }.groupingBy { it }.eachCount()
+        if (sizes.values.none { it == 1 }) return workout
+        return workout.copy(exercises = workout.exercises.map { if (it.supersetId != null && sizes[it.supersetId] == 1) it.copy(supersetId = null) else it })
+    }
+
+    /**
+     * Deshacer exacto de un borrado ([before] → [after]): devuelve cómo volver a poner, en su sitio, solo
+     * los ejercicios y series que se quitaron (y las superseries que se deshicieron), respetando lo que el
+     * usuario haya cambiado después.
+     */
+    fun undoRemoval(before: Workout, after: Workout): (Workout) -> Workout {
+        val afterById = after.exercises.associateBy { it.id }
+        val removedExercises = before.exercises.withIndex().filter { it.value.id !in afterById }
+        val removedSets = before.exercises.flatMap { we ->
+            val kept = afterById[we.id]?.sets?.map { it.id }?.toSet() ?: return@flatMap emptyList()
+            we.sets.withIndex().filter { it.value.id !in kept }.map { Triple(we.id, it.index, it.value) }
+        }
+        val unlinked = before.exercises.filter { it.supersetId != null && afterById[it.id]?.let { a -> a.supersetId == null } == true }
+            .associate { it.id to it.supersetId!! }
+        return { w ->
+            var exercises = w.exercises.map { we ->
+                val sets = removedSets.filter { it.first == we.id && we.sets.none { s -> s.id == it.third.id } }
+                    .fold(we.sets) { acc, (_, index, set) -> acc.toMutableList().apply { add(index.coerceAtMost(size), set) } }
+                we.copy(sets = sets, supersetId = we.supersetId ?: unlinked[we.id])
+            }
+            removedExercises.filter { r -> exercises.none { it.id == r.value.id } }.forEach { (index, we) ->
+                exercises = exercises.toMutableList().apply { add(index.coerceAtMost(size), we) }
+            }
+            w.copy(exercises = exercises)
+        }
+    }
 
     fun moveExercise(workout: Workout, from: Int, to: Int): Workout {
         if (from !in workout.exercises.indices || to !in workout.exercises.indices) return workout
@@ -211,17 +245,19 @@ object WorkoutEditor {
      */
     fun trimToFit(workout: Workout, budgetSeconds: Int, estimate: (Workout) -> Int): Workout {
         var w = workout
-        val keep = nextPendingSet(workout)?.second?.id
+        // La siguiente serie del entreno y la siguiente de cada ejercicio ya empezado (estás en él)
+        val keep = setOfNotNull(nextPendingSet(workout)?.second?.id) +
+            workout.exercises.filter { we -> we.sets.any { it.completed } }.mapNotNull { we -> we.sets.firstOrNull { !it.completed }?.id }
         while (estimate(w) > budgetSeconds) {
             val target = w.exercises.indices.reversed().firstNotNullOfOrNull { i ->
-                w.exercises[i].sets.lastOrNull { !it.completed && !it.isRunning && it.id != keep }?.let { i to it.id }
+                w.exercises[i].sets.lastOrNull { !it.completed && !it.isRunning && it.id !in keep }?.let { i to it.id }
             } ?: break
             val (i, setId) = target
             val we = w.exercises[i]
             val sets = we.sets.filterNot { it.id == setId }
             w = w.copy(exercises = if (sets.isEmpty()) w.exercises.filterIndexed { j, _ -> j != i } else w.exercises.map { if (it.id == we.id) it.copy(sets = sets) else it })
         }
-        return w
+        return dropLoneSupersets(w)
     }
 
     /** Lo que se baja el peso en un drop set. */

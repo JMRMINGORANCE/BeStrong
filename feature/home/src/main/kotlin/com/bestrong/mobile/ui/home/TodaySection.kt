@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
@@ -252,15 +253,21 @@ fun LaggingMusclesCard(vm: HomeViewModel, onOpenMuscle: (com.bestrong.core.model
             Text(stringResource(R.string.lagging_muscles_title), fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
             // Cada músculo abre la biblioteca con sus ejercicios
             lagging.forEach { (muscle, sets) ->
-                Text(
-                    stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()) + "  ›",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
+                Row(
+                    Modifier
                         .fillMaxWidth()
                         .clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = stringResource(R.string.lagging_muscle_open)) { onOpenMuscle(muscle) }
                         .padding(horizontal = 16.dp, vertical = 12.dp),
-                )
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                }
             }
         }
     }

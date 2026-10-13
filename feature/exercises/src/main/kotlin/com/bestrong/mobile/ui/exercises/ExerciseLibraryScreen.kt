@@ -50,6 +50,7 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -86,6 +87,8 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
     val scope = rememberCoroutineScope()
+    // Llegando desde Inicio con un músculo: se enseña la lista filtrada, no la ficha que quedó abierta
+    LaunchedEffect(Unit) { vm.showList.collect { navigator.navigateTo(ListDetailPaneScaffoldRole.List) } }
     NavigableListDetailPaneScaffold(
         navigator = navigator,
         listPane = {

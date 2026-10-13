@@ -98,10 +98,15 @@ class ExercisesViewModel @Inject constructor(
 
     val filter = MutableStateFlow(ExerciseFilter())
 
-    /** Abre la biblioteca con solo ese músculo (nombre del enum; se ignora si no existe). */
+    /** Avisos de un solo uso para que la biblioteca vuelva a la lista (cierra la ficha que hubiera abierta). */
+    private val _showList = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val showList: kotlinx.coroutines.flow.SharedFlow<Unit> = _showList
+
+    /** Abre la biblioteca con solo ese músculo (nombre del enum; se ignora si no existe). Se mantiene el orden elegido. */
     fun showMuscle(name: String) {
         val muscle = MuscleGroup.entries.firstOrNull { it.name == name } ?: return
-        filter.value = ExerciseFilter(muscle = muscle)
+        filter.value = filter.value.copy(query = "", muscle = muscle, equipment = null, favoritesOnly = false, noEquipment = false)
+        _showList.tryEmit(Unit)
     }
 
     /** Ejercicios usados recientemente, primero (como Hevy). */
@@ -163,10 +168,6 @@ class ExercisesViewModel @Inject constructor(
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /**
-     * Una nota es «de ese día» si no es la de ninguna rutina para el ejercicio y cambia respecto a la
-     * sesión anterior (las de los programas se copian igual en cada sesión).
-     */
     /** La frase de AMRAP en todos los idiomas de la app: las sesiones pudieron hacerse con otro idioma. */
     private val amrapNotes: List<String> by lazy {
         APP_LOCALES.map { tag ->
@@ -175,6 +176,10 @@ class ExercisesViewModel @Inject constructor(
         } + ProgramTexts.ES.amrapNote + ProgramTexts.EN.amrapNote
     }
 
+    /**
+     * Una nota es «de ese día» si no es la de ninguna rutina para el ejercicio y cambia respecto a la
+     * sesión anterior (las de los programas se copian igual en cada sesión).
+     */
     private fun sessionNotes(exerciseId: String, history: List<Workout>, routines: List<com.bestrong.core.model.Routine>): Map<String, String> {
         val templates = routines.flatMap { it.exercises }.filter { it.exercise.id == exerciseId }.map { it.notes }.toSet()
         // (id, nota, ¿de programa?), de la sesión más reciente a la más antigua

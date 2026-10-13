@@ -947,4 +947,5 @@
     <string name="rest_use_real">Utiliser %1$s dans la routine</string>
     <string name="lagging_muscle_open">voir les exercices</string>
     <string name="notif_progress_eta">%1$d/%2$d séries · ≈ %3$d min, fin %4$s</string>
+    <string name="rest_use_real_done">Routine mise à jour : repos de %1$s</string>
 </resources>
