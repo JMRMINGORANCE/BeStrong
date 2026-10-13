@@ -20,6 +20,7 @@ import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Autoregulation
 import com.bestrong.core.training.NextTime
 import com.bestrong.core.training.NextTimeSuggestion
+import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.training.RestPolicy
@@ -66,6 +67,8 @@ data class FinishedSummary(
     val routineToUpdate: Routine? = null,
     /** El entreno tal y como estaba al terminar, con las series sin hacer: lo que se pasa a la rutina. */
     val planned: Workout? = null,
+    /** Objetivo semanal (días) que se acaba de cumplir con este entreno; null si no. */
+    val weeklyGoalReached: Int? = null,
 )
 
 @HiltViewModel
@@ -463,7 +466,19 @@ class ActiveWorkoutViewModel @Inject constructor(
         WorkoutStats.compareWithPrevious(finished, history),
         WorkoutStats.imbalances(finished),
         NextTime.forWorkout(finished) { settings.value.stepKgFor(it) },
+        weeklyGoalReached = weeklyGoalReachedBy(finished, history),
     )
+
+    /** Si con este entreno se llega justo al objetivo de días de la semana (el del programa o el propio). */
+    private fun weeklyGoalReachedBy(finished: Workout, history: List<Workout>): Int? {
+        val zone = java.time.ZoneId.systemDefault()
+        val day = java.time.Instant.ofEpochMilli(finished.startedAtEpochMs).atZone(zone).toLocalDate()
+        val goal = repo.activeProgram.value?.weeklyGoal ?: settings.value.weeklyGoal
+        val others = history.filter { it.id != finished.id }
+        val before = Periodization.trainedDaysOfWeek(others, day, zone).size
+        val after = Periodization.trainedDaysOfWeek(others + finished, day, zone).size
+        return goal.takeIf { goal in (before + 1)..after }
+    }
 
     init {
         // Resumen sin cerrar cuando el sistema mató el proceso: se reconstruye desde el historial

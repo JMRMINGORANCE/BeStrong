@@ -916,4 +916,5 @@
     <string name="muscle_trend">Sèries per múscul (8 setmanes)</string>
     <string name="muscle_trend_hint">Sèries efectives per setmana (secundaris a la meitat). Recomanat: 10–20.</string>
     <string name="stat_average_workout">Entrenament mitjà: %1$s · %2$d sèries · %3$s</string>
+    <string name="weekly_goal_reached">🎯 Objectiu setmanal assolit! (%1$d dies)</string>
 </resources>

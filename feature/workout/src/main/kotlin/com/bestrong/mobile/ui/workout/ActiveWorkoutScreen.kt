@@ -826,6 +826,9 @@ fun WorkoutSummaryDialog(
                 listOfNotNull(w.avgHeartRate?.let { stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") }, kcal)
                     .takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(" · ")) }
                 if (w.notes.isNotBlank()) Text(w.notes, style = MaterialTheme.typography.bodySmall, fontStyle = FontStyle.Italic)
+                summary.weeklyGoalReached?.let { goal ->
+                    Text(stringResource(R.string.weekly_goal_reached, goal), fontWeight = FontWeight.Bold, color = statusColors.good)
+                }
                 // Frente a la última vez que hiciste cada ejercicio
                 if (summary.comparisons.isNotEmpty()) {
                     Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)
