@@ -32,13 +32,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,7 +58,18 @@ import com.bestrong.core.training.PeriodizedPrograms
 import com.bestrong.core.training.ProgramDay
 import com.bestrong.core.util.newId
 import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.displayName
+import kotlin.math.roundToInt
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.double
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 
 enum class SchemeKind { LINEAR, FIXED, FIVE_THREE_ONE }
 
@@ -104,13 +120,68 @@ fun buildProgram(id: String, name: String, days: List<DayDraft>): PeriodizedProg
     )
 }
 
+/** Borrador en JSON para guardarlo en el estado de la pantalla (giro, Fold, proceso muerto). */
+internal fun encodeDrafts(days: List<DayDraft>): String = buildJsonArray {
+    days.forEach { d ->
+        add(
+            buildJsonObject {
+                put("name", d.name)
+                put(
+                    "items",
+                    buildJsonArray {
+                        d.items.forEach { i ->
+                            add(
+                                buildJsonObject {
+                                    put("ex", i.exerciseId)
+                                    put("kind", i.kind.name)
+                                    put("sets", i.sets)
+                                    put("reps", i.reps)
+                                    put("percent", i.percent)
+                                    put("inc", i.incrementKg)
+                                    put("rest", i.rest)
+                                },
+                            )
+                        }
+                    },
+                )
+            },
+        )
+    }
+}.toString()
+
+internal fun decodeDrafts(json: String): List<DayDraft> = runCatching {
+    Json.parseToJsonElement(json).jsonArray.map { d ->
+        val o = d.jsonObject
+        DayDraft(
+            o.getValue("name").jsonPrimitive.content,
+            o.getValue("items").jsonArray.map { e ->
+                val i = e.jsonObject
+                ItemDraft(
+                    exerciseId = i.getValue("ex").jsonPrimitive.content,
+                    kind = SchemeKind.valueOf(i.getValue("kind").jsonPrimitive.content),
+                    sets = i.getValue("sets").jsonPrimitive.int,
+                    reps = i.getValue("reps").jsonPrimitive.int,
+                    percent = i.getValue("percent").jsonPrimitive.int,
+                    incrementKg = i.getValue("inc").jsonPrimitive.double,
+                    rest = i.getValue("rest").jsonPrimitive.int,
+                )
+            },
+        )
+    }
+}.getOrDefault(emptyList())
+
+private val DraftsSaver = Saver<SnapshotStateList<DayDraft>, String>(
+    save = { encodeDrafts(it) },
+    restore = { mutableStateListOf<DayDraft>().apply { addAll(decodeDrafts(it)) } },
+)
+
 private fun draftsOf(p: PeriodizedProgram): List<DayDraft> = p.days.map { d ->
     DayDraft(
         d.nameEs,
         d.items.map { item ->
             when (val s = item.scheme) {
                 is LoadScheme.Linear -> ItemDraft(item.exerciseId, SchemeKind.LINEAR, s.sets, s.reps, incrementKg = s.incrementKg, rest = item.restSeconds)
-                is LoadScheme.Fixed -> ItemDraft(item.exerciseId, SchemeKind.FIXED, s.sets.size, s.sets.firstOrNull()?.reps ?: 5, ((s.sets.firstOrNull()?.percent ?: 0.75) * 100).toInt(), rest = item.restSeconds)
+                is LoadScheme.Fixed -> ItemDraft(item.exerciseId, SchemeKind.FIXED, s.sets.size, s.sets.firstOrNull()?.reps ?: 5, ((s.sets.firstOrNull()?.percent ?: 0.75) * 100).roundToInt(), rest = item.restSeconds)
                 is LoadScheme.Weekly -> ItemDraft(item.exerciseId, SchemeKind.FIVE_THREE_ONE, rest = item.restSeconds)
             }
         },
@@ -121,13 +192,14 @@ private fun draftsOf(p: PeriodizedProgram): List<DayDraft> = p.days.map { d ->
 @Composable
 fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -> Unit) {
     val existing = remember(programId) { programId?.let { id -> vm.ui.value.state.customPrograms.firstOrNull { it.id == id } } }
-    var name by remember { mutableStateOf(existing?.nameEs ?: "") }
+    // El borrador sobrevive al giro y al plegar/desplegar el Fold
+    var name by rememberSaveable { mutableStateOf(existing?.nameEs ?: "") }
     val dayLabel = stringResource(R.string.prog_day_n, 1)
-    val days = remember { mutableStateListOf<DayDraft>().apply { addAll(existing?.let(::draftsOf) ?: listOf(DayDraft(dayLabel))) } }
-    var picking by remember { mutableStateOf<Int?>(null) }
+    val days = rememberSaveable(saver = DraftsSaver) { mutableStateListOf<DayDraft>().apply { addAll(existing?.let(::draftsOf) ?: listOf(DayDraft(dayLabel))) } }
+    var picking by rememberSaveable { mutableStateOf<Int?>(null) }
     val defaultDayName = stringResource(R.string.prog_day_n, days.size + 1)
 
-    picking?.let { dayIndex ->
+    picking?.takeIf { it in days.indices }?.let { dayIndex ->
         ExercisePickDialog(onPick = { id ->
             days[dayIndex] = days[dayIndex].copy(items = days[dayIndex].items + ItemDraft(id))
             picking = null
@@ -183,6 +255,7 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
 
 @Composable
 private fun ItemEditor(item: ItemDraft, name: String, onChange: (ItemDraft) -> Unit, onRemove: () -> Unit) {
+    val unit = LocalWeightUnit.current
     Column(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(name, Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
@@ -195,32 +268,51 @@ private fun ItemEditor(item: ItemDraft, name: String, onChange: (ItemDraft) -> U
         }
         if (item.kind != SchemeKind.FIVE_THREE_ONE) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                NumberBox(stringResource(R.string.prog_sets), item.sets, Modifier.weight(1f)) { onChange(item.copy(sets = it.coerceIn(1, 12))) }
-                NumberBox(stringResource(R.string.prog_reps), item.reps, Modifier.weight(1f)) { onChange(item.copy(reps = it.coerceIn(1, 50))) }
+                NumberBox(stringResource(R.string.prog_sets), item.sets, 1..12, Modifier.weight(1f)) { onChange(item.copy(sets = it)) }
+                NumberBox(stringResource(R.string.prog_reps), item.reps, 1..50, Modifier.weight(1f)) { onChange(item.copy(reps = it)) }
                 if (item.kind == SchemeKind.FIXED) {
-                    NumberBox(stringResource(R.string.prog_percent), item.percent, Modifier.weight(1f)) { onChange(item.copy(percent = it.coerceIn(30, 110))) }
+                    NumberBox(stringResource(R.string.prog_percent), item.percent, 30..110, Modifier.weight(1f)) { onChange(item.copy(percent = it)) }
                 } else {
-                    NumberBox(stringResource(R.string.prog_increment), item.incrementKg.toInt(), Modifier.weight(1f)) { onChange(item.copy(incrementKg = it.toDouble().coerceIn(0.0, 20.0))) }
+                    // Incremento con decimales (1,25 / 2,5) y en la unidad elegida
+                    ValueBox(
+                        label = stringResource(R.string.prog_increment) + " (" + unit.label + ")",
+                        value = item.incrementKg,
+                        show = { unit.formatStep(it).removeSuffix(" " + unit.label) },
+                        parse = { t -> unit.parseToKg(t)?.takeIf { it in 0.0..20.0 } },
+                        decimal = true,
+                        modifier = Modifier.weight(1f),
+                    ) { onChange(item.copy(incrementKg = it)) }
                 }
-                NumberBox(stringResource(R.string.prog_rest), item.rest, Modifier.weight(1f)) { onChange(item.copy(rest = it.coerceIn(15, 600))) }
+                NumberBox(stringResource(R.string.prog_rest), item.rest, 15..600, Modifier.weight(1f)) { onChange(item.copy(rest = it)) }
             }
         }
     }
 }
 
 @Composable
-private fun NumberBox(label: String, value: Int, modifier: Modifier, onChange: (Int) -> Unit) {
-    var text by remember(value) { mutableStateOf(value.toString()) }
+private fun NumberBox(label: String, value: Int, range: IntRange, modifier: Modifier, onChange: (Int) -> Unit) =
+    ValueBox(label, value, show = { it.toString() }, parse = { t -> t.toIntOrNull()?.takeIf { it in range } }, decimal = false, modifier = modifier, onChange = onChange)
+
+/**
+ * Campo numérico que guarda el texto tal cual se escribe (para poder teclear «85» pasando por «8»)
+ * y solo comunica el valor cuando es válido; al salir del campo vuelve al último válido.
+ */
+@Composable
+private fun <T> ValueBox(label: String, value: T, show: (T) -> String, parse: (String) -> T?, decimal: Boolean, modifier: Modifier, onChange: (T) -> Unit) {
+    var text by rememberSaveable { mutableStateOf(show(value)) }
+    // Cambio desde fuera (otro esquema, otra unidad…): se refleja si no coincide con lo escrito
+    LaunchedEffect(value) { if (parse(text) != value) text = show(value) }
     OutlinedTextField(
         text,
         { t ->
-            text = t.filter(Char::isDigit).take(3)
-            text.toIntOrNull()?.let(onChange)
+            text = (if (decimal) t.filter { it.isDigit() || it == ',' || it == '.' }.take(6) else t.filter(Char::isDigit).take(3))
+            parse(text)?.let(onChange)
         },
         label = { Text(label, style = MaterialTheme.typography.labelSmall) },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = modifier,
+        isError = parse(text) == null,
+        keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
+        modifier = modifier.onFocusChanged { if (!it.isFocused && parse(text) == null) text = show(value) },
     )
 }
 
