@@ -43,7 +43,11 @@ data class ExerciseFilter(
     val favoritesOnly: Boolean = false,
     /** Solo peso corporal o bandas (entrenar en casa sin material). */
     val noEquipment: Boolean = false,
+    val sort: ExerciseSort = ExerciseSort.RECENT,
 )
+
+/** Orden de la biblioteca: recientes primero (como Hevy), alfabético o los que más haces. */
+enum class ExerciseSort { RECENT, NAME, MOST_USED }
 
 data class ExerciseDetailState(
     val exercise: Exercise,
@@ -92,14 +96,23 @@ class ExercisesViewModel @Inject constructor(
             // Lesiones marcadas en Planificación: fuera los ejercicios que cargan esas zonas
             .filter { Injuries.isSafe(it, plan.injuries) }
             .filter { !f.noEquipment || it.equipment == Equipment.BODYWEIGHT || it.equipment == Equipment.BAND }
-        if (f.query.isBlank() && f.muscle == null && f.equipment == null) {
-            val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)
-            val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id } }
-            recent + (found - recent.toSet())
-        } else {
-            found
+        when {
+            f.sort == ExerciseSort.NAME -> {
+                val collator = java.text.Collator.getInstance().apply { strength = java.text.Collator.PRIMARY }
+                found.sortedWith(compareBy(collator) { it.displayName(context) })
+            }
+            f.sort == ExerciseSort.MOST_USED -> {
+                val counts = history.flatMap { w -> w.exercises.map { it.exercise.id } }.groupingBy { it }.eachCount()
+                found.sortedByDescending { counts[it.id] ?: 0 }
+            }
+            f.query.isBlank() && f.muscle == null && f.equipment == null -> {
+                val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)
+                val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id } }
+                recent + (found - recent.toSet())
+            }
+            else -> found
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val usageCount: StateFlow<Map<String, Int>> = repo.history.map { h ->
         h.flatMap { w -> w.exercises.map { it.exercise.id } }.groupingBy { it }.eachCount()

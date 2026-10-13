@@ -1,6 +1,7 @@
 package com.bestrong.core.training
 
 import com.bestrong.core.model.Equipment
+import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.newId
 import kotlinx.serialization.Serializable
 
@@ -20,6 +21,17 @@ data class GymProfile(
     /** Mancuernas disponibles (kg); vacío = cualquier peso. */
     val dumbbellsKg: List<Double> = emptyList(),
 ) {
+    /**
+     * Discos por lado para [targetKg] con la barra y los discos de este gimnasio, en [unit]
+     * (en libras se usan los discos estándar, porque los del perfil están en kg).
+     */
+    fun plateLoad(targetKg: Double, unit: WeightUnit): PlateLoad {
+        val plates = platesKg.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
+        // Barra en libras redondeada a la estándar más cercana (20 kg → 45 lb)
+        val bar = if (unit == WeightUnit.KG) barKg else Math.round(unit.fromKg(barKg) / 5) * 5.0
+        return PlateCalculator.calculate(unit.fromKg(targetKg), unit, bar, plates)
+    }
+
     /** Peso más cercano alcanzable con este material para el ejercicio dado. */
     fun nearestLoad(targetKg: Double, equipment: Equipment): Double = when (equipment) {
         Equipment.BARBELL, Equipment.SMITH -> nearestBarbell(targetKg)
@@ -32,7 +44,7 @@ data class GymProfile(
         if (targetKg <= barKg) return barKg
         var remaining = (targetKg - barKg) / 2
         var side = 0.0
-        platesKg.sortedDescending().forEach { p ->
+        platesKg.filter { it > 0 }.sortedDescending().forEach { p ->
             while (remaining + 1e-9 >= p) {
                 side += p
                 remaining -= p
@@ -40,7 +52,7 @@ data class GymProfile(
         }
         val below = barKg + side * 2
         // Si queda un hueco grande, probamos con el disco más pequeño de más
-        val smallest = platesKg.minOrNull() ?: return below
+        val smallest = platesKg.filter { it > 0 }.minOrNull() ?: return below
         val above = below + smallest * 2
         return if (targetKg - below <= above - targetKg) below else above
     }

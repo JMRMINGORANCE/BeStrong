@@ -181,3 +181,14 @@ class RecordsInEachTest {
         }
     }
 }
+
+class PlateLoadTest {
+    @Test fun gymPlateLoadAndZeroPlateGuard() {
+        val gym = com.bestrong.core.training.GymProfile(name = "G", platesKg = listOf(0.0, 20.0, 10.0, 2.5))
+        val load = gym.plateLoad(65.0, com.bestrong.core.util.WeightUnit.KG)
+        assertEquals(listOf(20.0, 2.5), load.perSide)
+        assertEquals(65.0, gym.nearestBarbell(65.0), 0.0)
+        val lb = gym.plateLoad(com.bestrong.core.util.WeightUnit.LB.toKg(135.0), com.bestrong.core.util.WeightUnit.LB)
+        assertEquals(listOf(45.0), lb.perSide)
+    }
+}

@@ -183,6 +183,7 @@ fun ExerciseSearchList(
         ) {
             EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, filter.muscle, { it.label() }) { vm.filter.value = filter.copy(muscle = it) }
             EnumFilter(stringResource(R.string.filter_equipment), Equipment.entries, filter.equipment, { it.label() }) { vm.filter.value = filter.copy(equipment = it) }
+            SortChip(filter.sort) { vm.filter.value = filter.copy(sort = it) }
             FilterChip(selected = filter.favoritesOnly, onClick = { vm.filter.value = filter.copy(favoritesOnly = !filter.favoritesOnly) }, label = { Text(stringResource(R.string.filter_favorites)) })
             FilterChip(selected = filter.noEquipment, onClick = { vm.filter.value = filter.copy(noEquipment = !filter.noEquipment) }, label = { Text(stringResource(R.string.filter_no_equipment)) })
             if (title == null) FilterChip(selected = false, onClick = { creating = true }, label = { Text(stringResource(R.string.create_short)) })
@@ -236,6 +237,26 @@ fun ExerciseSearchList(
                 if (multiSelect) onClick(ex)
             },
         )
+    }
+}
+
+@Composable
+private fun SortChip(selected: ExerciseSort, onSelect: (ExerciseSort) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val label: @Composable (ExerciseSort) -> String = {
+        stringResource(
+            when (it) {
+                ExerciseSort.RECENT -> R.string.sort_recent
+                ExerciseSort.NAME -> R.string.sort_name
+                ExerciseSort.MOST_USED -> R.string.sort_most_used
+            },
+        )
+    }
+    Column {
+        FilterChip(selected = selected != ExerciseSort.RECENT, onClick = { open = true }, label = { Text("⇅ " + label(selected)) })
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            ExerciseSort.entries.forEach { s -> DropdownMenuItem(text = { Text(label(s)) }, onClick = { onSelect(s); open = false }) }
+        }
     }
 }
 

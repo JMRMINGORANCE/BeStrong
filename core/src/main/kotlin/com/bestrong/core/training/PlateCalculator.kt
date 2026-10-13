@@ -24,7 +24,8 @@ object PlateCalculator {
         if (target <= bar) return PlateLoad(emptyList(), bar, bar, (target - bar).coerceAtLeast(0.0))
         var remaining = (target - bar) / 2
         val perSide = mutableListOf<Double>()
-        plates.sortedDescending().forEach { p ->
+        // Un disco de 0 (o negativo) dejaría el bucle sin terminar
+        plates.filter { it > 0 }.sortedDescending().forEach { p ->
             while (remaining + 1e-9 >= p) {
                 perSide += p
                 remaining -= p

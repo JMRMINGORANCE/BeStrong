@@ -876,4 +876,9 @@
     <string name="timed_set_go">Tiens bon !</string>
     <string name="timed_set_finish_now">Terminé</string>
     <string name="undo_routine_deleted">Routine « %1$s » supprimée</string>
+    <string name="plates_inline">Par côté : %1$s</string>
+    <string name="plates_inline_bar">Barre seule</string>
+    <string name="sort_recent">Récents</string>
+    <string name="sort_name">A–Z</string>
+    <string name="sort_most_used">Les plus utilisés</string>
 </resources>

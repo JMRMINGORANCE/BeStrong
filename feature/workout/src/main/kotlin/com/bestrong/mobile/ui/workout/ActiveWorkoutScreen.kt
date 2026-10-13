@@ -560,6 +560,24 @@ private fun ExerciseCard(
                     modifier = Modifier.padding(horizontal = 12.dp),
                 )
             }
+            // Barra: discos por lado de la siguiente serie, sin abrir la calculadora
+            if (we.exercise.equipment == Equipment.BARBELL && we.exercise.tracking == TrackingType.WEIGHT_REPS) {
+                val next = we.sets.firstOrNull { !it.completed }?.weightKg ?: 0.0
+                val gym = vm.settings.collectAsStateWithLifecycle().value.activeGym
+                if (next > 0) {
+                    val load = remember(next, gym, unit) { gym.plateLoad(next, unit) }
+                    Text(
+                        if (load.perSide.isEmpty()) {
+                            stringResource(R.string.plates_inline_bar)
+                        } else {
+                            stringResource(R.string.plates_inline, load.perSide.joinToString(" + ") { formatWeight(it) }) + if (load.remainder > 0.01) " ≈" else ""
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 12.dp).clickable { showPlates = true },
+                    )
+                }
+            }
             // Nota fija del ejercicio (se guarda para siempre, no solo en este entreno)
             if (pinnedNote.isNotBlank()) {
                 Text(

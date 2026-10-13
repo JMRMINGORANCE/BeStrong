@@ -876,4 +876,9 @@
     <string name="timed_set_go">Aguanta!</string>
     <string name="timed_set_finish_now">Fet</string>
     <string name="undo_routine_deleted">Rutina «%1$s» esborrada</string>
+    <string name="plates_inline">Per costat: %1$s</string>
+    <string name="plates_inline_bar">Només la barra</string>
+    <string name="sort_recent">Recents</string>
+    <string name="sort_name">A–Z</string>
+    <string name="sort_most_used">Més utilitzats</string>
 </resources>

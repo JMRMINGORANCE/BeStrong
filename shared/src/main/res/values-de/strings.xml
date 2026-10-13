@@ -876,4 +876,9 @@
     <string name="timed_set_go">Halten!</string>
     <string name="timed_set_finish_now">Fertig</string>
     <string name="undo_routine_deleted">Routine „%1$s“ gelöscht</string>
+    <string name="plates_inline">Pro Seite: %1$s</string>
+    <string name="plates_inline_bar">Nur die Stange</string>
+    <string name="sort_recent">Zuletzt</string>
+    <string name="sort_name">A–Z</string>
+    <string name="sort_most_used">Meistgenutzt</string>
 </resources>
