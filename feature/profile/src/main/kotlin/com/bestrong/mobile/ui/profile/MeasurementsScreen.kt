@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -41,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.BodyMeasurement
+import com.bestrong.core.stats.BodyWeightTrend
+import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.ChartPoint
@@ -83,6 +86,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                         Column(Modifier.padding(16.dp)) {
                             SectionHeader(stringResource(R.string.body_weight_unit, unit.label))
                             LineChart(weights.map { ChartPoint(formatShortDate(it.dateEpochMs), it.weightKg!!) }, valueFormatter = { unit.format(it) })
+                            WeightTrendLine(weights.map { it.dateEpochMs to it.weightKg!! }, unit)
                         }
                     }
                 }
@@ -175,4 +179,18 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             dismissButton = { TextButton(onClick = { adding = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
+}
+
+/** Media de 7 días y cambio frente a la semana anterior: el peso de un día suelto sube y baja con el agua y la comida. */
+@Composable
+private fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) {
+    val t = remember(points) { BodyWeightTrend.of(points, System.currentTimeMillis()) } ?: return
+    val average = unit.format(t.averageKg, withUnit = true)
+    val change = t.changeKg?.let { c -> (if (c >= 0) "+" else "−") + unit.format(kotlin.math.abs(c), withUnit = true) }
+    Text(
+        if (change != null) stringResource(R.string.weight_trend_change, average, change) else stringResource(R.string.weight_trend, average),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 8.dp),
+    )
 }

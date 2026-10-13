@@ -903,4 +903,6 @@
     <string name="rep_max">%1$dRM %2$s</string>
     <string name="home_repeat_last">Repetir «%1$s»</string>
     <string name="notif_weekly_load_high">⚠ Càrrega %1$s× la teva mitjana: valora una setmana més suau</string>
+    <string name="weight_trend">Mitjana de 7 dies: %1$s</string>
+    <string name="weight_trend_change">Mitjana de 7 dies: %1$s (%2$s respecte a la setmana anterior)</string>
 </resources>

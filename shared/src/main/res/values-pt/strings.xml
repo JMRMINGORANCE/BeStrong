@@ -903,4 +903,6 @@
     <string name="rep_max">%1$dRM %2$s</string>
     <string name="home_repeat_last">Repetir «%1$s»</string>
     <string name="notif_weekly_load_high">⚠ Carga %1$s× a tua média: considera uma semana mais leve</string>
+    <string name="weight_trend">Média de 7 dias: %1$s</string>
+    <string name="weight_trend_change">Média de 7 dias: %1$s (%2$s face à semana anterior)</string>
 </resources>

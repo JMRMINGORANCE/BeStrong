@@ -165,3 +165,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Añadir drop set (−20 %) desde el menú del ejercicio
 - [x] Calculadora de discos al revés y «Usar este peso»
 - [x] Reloj: aviso de récord al marcar la serie
+
+## Fase 13 — Detalle de progreso ✅
+- [x] Ficha del ejercicio: mejores marcas por repeticiones (1RM, 3RM, 5RM…) y notas de cada sesión
+- [x] Inicio: repetir el último entreno con un toque
+- [x] Pruebas de interfaz de las novedades (drop set, registro de entrenos pasados)
+- [x] Resumen semanal con aviso de carga alta
+- [x] Peso corporal: media de 7 días y cambio frente a la semana anterior

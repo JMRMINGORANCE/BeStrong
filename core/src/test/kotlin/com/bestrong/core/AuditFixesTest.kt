@@ -306,3 +306,15 @@ class DropSetTest {
         assertEquals(80.0, after[2].weightKg, 0.0)
     }
 }
+
+class BodyWeightTrendTest {
+    @Test fun sevenDayAverageAndChange() {
+        val day = 86_400_000L
+        val now = 100 * day
+        val points = listOf(now - 10 * day to 81.0, now - 9 * day to 81.4, now - 3 * day to 80.2, now - 1 * day to 80.6)
+        val t = com.bestrong.core.stats.BodyWeightTrend.of(points, now)!!
+        assertEquals(80.4, t.averageKg, 1e-9)
+        assertEquals(80.4 - 81.2, t.changeKg!!, 1e-9)
+        assertEquals(null, com.bestrong.core.stats.BodyWeightTrend.of(listOf(now - 20 * day to 80.0), now))
+    }
+}
