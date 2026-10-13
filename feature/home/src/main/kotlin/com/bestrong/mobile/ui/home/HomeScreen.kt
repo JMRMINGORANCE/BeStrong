@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.library.TrainingProgram
 import com.bestrong.core.model.Routine
+import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.training.PeriodizedProgram
 import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.share.RoutineShare
@@ -272,7 +273,13 @@ private fun RoutineCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
-            lastDone?.let { Text(stringResource(R.string.routine_last_done, it), style = MaterialTheme.typography.labelSmall) }
+            // Cuánto se tarda, más o menos (series × 40 s + descansos), para elegir según el tiempo que haya
+            val minutes = remember(routine) { (WorkoutEditor.estimatedRemainingSeconds(routine.toWorkout(0)) + 59) / 60 }
+            val info = listOfNotNull(
+                stringResource(R.string.routine_estimated, minutes).takeIf { minutes > 0 },
+                lastDone?.let { stringResource(R.string.routine_last_done, it) },
+            )
+            if (info.isNotEmpty()) Text(info.joinToString(" · "), style = MaterialTheme.typography.labelSmall)
             Button(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), enabled = routine.exercises.isNotEmpty()) {
                 Text(stringResource(R.string.routine_start))
             }

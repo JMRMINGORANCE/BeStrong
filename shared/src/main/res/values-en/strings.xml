@@ -905,4 +905,5 @@
     <string name="notif_weekly_load_high">⚠ Load %1$s× your average: consider an easier week</string>
     <string name="weight_trend">7-day average: %1$s</string>
     <string name="weight_trend_change">7-day average: %1$s (%2$s vs the previous week)</string>
+    <string name="routine_estimated">≈ %1$d min</string>
 </resources>

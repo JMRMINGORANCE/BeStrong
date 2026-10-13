@@ -905,4 +905,5 @@
     <string name="notif_weekly_load_high">⚠ Carga %1$s× tu media: valora una semana más suave</string>
     <string name="weight_trend">Media de 7 días: %1$s</string>
     <string name="weight_trend_change">Media de 7 días: %1$s (%2$s frente a la semana anterior)</string>
+    <string name="routine_estimated">≈ %1$d min</string>
 </resources>
