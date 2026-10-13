@@ -72,8 +72,11 @@ import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.model.TrackingType
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.EmptyState
+import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.workout.describeSet
 import kotlinx.coroutines.launch
 
 /** Pestaña "Ejercicios": lista y detalle lado a lado en el Fold desplegado. */
@@ -159,6 +162,8 @@ fun ExerciseSearchList(
     val results by vm.results.collectAsStateWithLifecycle()
     val favorites by vm.favorites.collectAsStateWithLifecycle()
     val usage by vm.usageCount.collectAsStateWithLifecycle()
+    val last by vm.lastSession.collectAsStateWithLifecycle()
+    val unit = LocalWeightUnit.current
     var creating by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier.fillMaxSize()) {
@@ -200,7 +205,17 @@ fun ExerciseSearchList(
                             if (ex.isCustom) stringResource(R.string.custom) else null,
                             times?.let { stringResource(R.string.n_times, it) },
                         )
-                        Text(parts.joinToString(" · "))
+                        Column {
+                            Text(parts.joinToString(" · "))
+                            // Última vez y su mejor serie, para elegir sin abrir la ficha
+                            last[ex.id]?.let { (date, set) ->
+                                Text(
+                                    stringResource(R.string.exercise_last_time, formatShortDate(date), describeSet(set, ex.tracking, unit)),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
                     },
                     trailingContent = {
                         if (multiSelect) {

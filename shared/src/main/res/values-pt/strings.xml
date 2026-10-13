@@ -906,4 +906,5 @@
     <string name="weight_trend">Média de 7 dias: %1$s</string>
     <string name="weight_trend_change">Média de 7 dias: %1$s (%2$s face à semana anterior)</string>
     <string name="routine_estimated">≈ %1$d min</string>
+    <string name="exercise_last_time">Última: %1$s · %2$s</string>
 </resources>

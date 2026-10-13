@@ -906,4 +906,5 @@
     <string name="weight_trend">Mitjana de 7 dies: %1$s</string>
     <string name="weight_trend_change">Mitjana de 7 dies: %1$s (%2$s respecte a la setmana anterior)</string>
     <string name="routine_estimated">≈ %1$d min</string>
+    <string name="exercise_last_time">Última: %1$s · %2$s</string>
 </resources>

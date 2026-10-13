@@ -9,6 +9,7 @@ import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.model.Workout
+import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
@@ -122,6 +123,19 @@ class ExercisesViewModel @Inject constructor(
 
     val usageCount: StateFlow<Map<String, Int>> = repo.history.map { h ->
         h.flatMap { w -> w.exercises.map { it.exercise.id } }.groupingBy { it }.eachCount()
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    /** Por ejercicio: fecha de la última sesión y su mejor serie (para elegir de un vistazo). */
+    val lastSession: StateFlow<Map<String, Pair<Long, WorkoutSet>>> = repo.history.map { h ->
+        val result = HashMap<String, Pair<Long, WorkoutSet>>()
+        h.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.forEach { w ->
+            w.exercises.forEach { we ->
+                val best = we.completedSets.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
+                    .maxWithOrNull(compareBy({ it.estimatedOneRepMax }, { it.weightKg }, { it.reps }, { it.durationSec }))
+                if (best != null) result.putIfAbsent(we.exercise.id, w.startedAtEpochMs to best)
+            }
+        }
+        result
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings) { all, fullHistory, settings ->
