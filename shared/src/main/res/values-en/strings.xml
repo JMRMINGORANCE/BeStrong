@@ -901,4 +901,5 @@
     <string name="plates_add_per_side">Add per side</string>
     <string name="plates_use_weight">Use this weight</string>
     <string name="rep_max">%1$dRM %2$s</string>
+    <string name="home_repeat_last">Repeat “%1$s”</string>
 </resources>

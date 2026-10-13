@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -173,6 +174,12 @@ fun HomeScreen(
                     Button(onClick = { vm.startEmpty(onOpenWorkout) }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Default.Add, null)
                         Text(stringResource(R.string.home_empty_workout), Modifier.padding(start = 8.dp))
+                    }
+                    history.firstOrNull { it.isFinished }?.let { last ->
+                        FilledTonalButton(onClick = { vm.repeatLast(onOpenWorkout) }) {
+                            Icon(Icons.Default.Replay, null)
+                            Text(stringResource(R.string.home_repeat_last, last.name), Modifier.padding(start = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
                     }
                     FilledTonalButton(onClick = { vm.startOnWatch(null) }) {
                         Icon(Icons.Default.Watch, null)

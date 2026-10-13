@@ -901,4 +901,5 @@
     <string name="plates_add_per_side">Engadir por lado</string>
     <string name="plates_use_weight">Usar este peso</string>
     <string name="rep_max">%1$dRM %2$s</string>
+    <string name="home_repeat_last">Repetir «%1$s»</string>
 </resources>

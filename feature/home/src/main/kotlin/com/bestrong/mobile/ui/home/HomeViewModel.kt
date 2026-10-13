@@ -169,6 +169,16 @@ class HomeViewModel @Inject constructor(
         onStarted()
     }
 
+    /** Repite el último entreno (mismos ejercicios y series, con los pesos que tocan hoy). */
+    fun repeatLast(onStarted: () -> Unit) = viewModelScope.launch {
+        val last = repo.history.value.firstOrNull { it.isFinished } ?: return@launch
+        if (repo.activeOnce() == null) {
+            val again = Routine.fromWorkout(last).toWorkout(System.currentTimeMillis(), actions.prefillLookup())
+            repo.setActive(again.copy(routineId = last.routineId))
+        }
+        onStarted()
+    }
+
     fun startRoutine(routine: Routine, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() != null) {
             _messages.tryEmit(context.getString(R.string.msg_workout_already_active))
