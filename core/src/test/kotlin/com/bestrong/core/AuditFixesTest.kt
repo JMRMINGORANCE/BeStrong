@@ -97,3 +97,18 @@ class AuditFixesTest {
         assertNotEquals(true, m.isDeloadWeek(start.minusDays(10)))
     }
 }
+
+class RoutineUpdateTest {
+    @Test fun updatedFromKeepsIdentityAndTakesStructure() {
+        val routine = Routine(name = "Empuje", emoji = "💪", exercises = listOf(RoutineExercise(exercise = bench, sets = List(3) { RoutineSet(60.0, 8) })))
+        val w = routine.toWorkout(0)
+        assertTrue(!routine.structureDiffersFrom(w))
+        val changed = w.copy(exercises = w.exercises + WorkoutExercise(exercise = squat, sets = listOf(done(100.0, 5)), notes = "talones"))
+        assertTrue(routine.structureDiffersFrom(changed))
+        val updated = routine.updatedFrom(changed)
+        assertEquals(routine.id, updated.id)
+        assertEquals("💪", updated.emoji)
+        assertEquals(listOf("bench_press", "squat"), updated.exercises.map { it.exercise.id })
+        assertEquals("talones", updated.exercises[1].notes)
+    }
+}
