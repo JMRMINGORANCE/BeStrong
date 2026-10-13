@@ -845,4 +845,12 @@
     <string name="pinned_note">Nota fixa</string>
     <string name="pinned_note_hint">Amósase cada vez que fagas este exercicio (altura do asento, agarre, máquina…).</string>
     <string name="update_routine">Actualizar «%1$s»</string>
+    <string name="log_past_title">Rexistrar adestramento pasado</string>
+    <string name="log_past_routine">Rutina</string>
+    <string name="log_past_date">Data: %1$s</string>
+    <string name="log_past_time">Hora (HH:MM)</string>
+    <string name="log_past_minutes">Duración (min)</string>
+    <string name="log_past_invalid">Revisa a hora e a duración (non pode quedar no futuro).</string>
+    <string name="log_past_hint">As series gárdanse feitas cos pesos da última vez; despois podes axustalas editando o adestramento.</string>
+    <string name="log_past_no_routines">Crea antes unha rutina cos exercicios que fixeches.</string>
 </resources>

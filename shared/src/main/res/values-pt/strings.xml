@@ -845,4 +845,12 @@
     <string name="pinned_note">Nota fixa</string>
     <string name="pinned_note_hint">Aparece sempre que fizeres este exercício (altura do banco, pega, máquina…).</string>
     <string name="update_routine">Atualizar «%1$s»</string>
+    <string name="log_past_title">Registar treino passado</string>
+    <string name="log_past_routine">Rotina</string>
+    <string name="log_past_date">Data: %1$s</string>
+    <string name="log_past_time">Hora (HH:MM)</string>
+    <string name="log_past_minutes">Duração (min)</string>
+    <string name="log_past_invalid">Verifica a hora e a duração (não pode ficar no futuro).</string>
+    <string name="log_past_hint">As séries ficam feitas com os pesos da última vez; depois podes ajustá-las editando o treino.</string>
+    <string name="log_past_no_routines">Cria primeiro uma rotina com os exercícios que fizeste.</string>
 </resources>

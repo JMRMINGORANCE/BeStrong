@@ -112,11 +112,19 @@ fun EditPastSetDialog(set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutS
     )
 }
 
-/** Nombre y notas de un entreno pasado. */
+/** Nombre, notas, fecha, hora y duración de un entreno pasado. */
 @Composable
-fun EditPastWorkoutInfoDialog(name: String, notes: String, onSave: (String, String) -> Unit, onDismiss: () -> Unit) {
+fun EditPastWorkoutInfoDialog(
+    name: String,
+    notes: String,
+    startEpochMs: Long,
+    durationMin: Long,
+    onSave: (name: String, notes: String, range: Pair<Long, Long>) -> Unit,
+    onDismiss: () -> Unit,
+) {
     var n by remember { mutableStateOf(name) }
     var t by remember { mutableStateOf(notes) }
+    val time = rememberWorkoutTimeState(startEpochMs, durationMin)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.history_edit_info)) },
@@ -124,9 +132,13 @@ fun EditPastWorkoutInfoDialog(name: String, notes: String, onSave: (String, Stri
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(n, { n = it }, label = { Text(stringResource(R.string.history_workout_name)) }, singleLine = true)
                 OutlinedTextField(t, { t = it }, label = { Text(stringResource(R.string.history_workout_notes)) }, minLines = 2)
+                WorkoutTimeFields(time)
             }
         },
-        confirmButton = { TextButton(onClick = { onSave(n.trim().ifBlank { name }, t.trim()) }) { Text(stringResource(R.string.action_save)) } },
+        confirmButton = {
+            val range = time.range
+            TextButton(onClick = { range?.let { onSave(n.trim().ifBlank { name }, t.trim(), it) } }, enabled = range != null) { Text(stringResource(R.string.action_save)) }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
@@ -35,6 +36,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
@@ -99,13 +101,31 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
         }
     }
 
+    var logging by remember { mutableStateOf(false) }
+    if (logging) {
+        val routines by vm.routines.collectAsStateWithLifecycle()
+        LogPastWorkoutDialog(
+            routines = routines,
+            onLog = { r, start, end ->
+                logging = false
+                vm.logPast(r, start, end) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
+            },
+            onDismiss = { logging = false },
+        )
+    }
+
     Box(Modifier.fillMaxSize()) {
         NavigableListDetailPaneScaffold(
             navigator = navigator,
             listPane = {
                 AnimatedPane {
                     Column(Modifier.fillMaxSize()) {
-                        TopAppBar(title = { Text(stringResource(R.string.nav_history)) })
+                        TopAppBar(
+                            title = { Text(stringResource(R.string.nav_history)) },
+                            actions = {
+                                IconButton(onClick = { logging = true }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
+                            },
+                        )
                         if (history.isEmpty()) {
                             EmptyState(Icons.Default.History, stringResource(R.string.history_empty_title), stringResource(R.string.history_empty_body))
                             return@Column
@@ -203,7 +223,14 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     var editSet by remember { mutableStateOf<Pair<String, String>?>(null) }
     val records = remember(w) { vm.recordsIn(w) }
     if (editInfo) {
-        EditPastWorkoutInfoDialog(w.name, w.notes, onSave = { n, t -> vm.editWorkout(w) { it.copy(name = n, notes = t) }; editInfo = false }, onDismiss = { editInfo = false })
+        EditPastWorkoutInfoDialog(
+            w.name, w.notes, w.startedAtEpochMs, w.durationSeconds() / 60,
+            onSave = { n, t, (start, end) ->
+                if (start != w.startedAtEpochMs || end != w.finishedAtEpochMs) vm.retime(w.copy(name = n, notes = t), start, end) else vm.editWorkout(w) { it.copy(name = n, notes = t) }
+                editInfo = false
+            },
+            onDismiss = { editInfo = false },
+        )
     }
     editSet?.let { (weId, setId) ->
         val we = w.exercises.firstOrNull { it.id == weId }
@@ -288,6 +315,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp)) }
                         }
+                        if (editing) TextButton(onClick = { vm.addPastSet(w, we.id) }) { Text(stringResource(R.string.add_set)) }
                     }
                 }
             }

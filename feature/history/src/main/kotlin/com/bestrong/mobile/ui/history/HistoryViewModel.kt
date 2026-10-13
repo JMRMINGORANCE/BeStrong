@@ -84,6 +84,41 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    val routines: StateFlow<List<Routine>> = repo.routines
+
+    /**
+     * Registra un entreno pasado a partir de una rutina: series completadas con los pesos de la
+     * última vez (o los de la rutina). Devuelve el id para abrirlo y ajustar lo que haga falta.
+     */
+    fun logPast(routine: Routine, startMs: Long, endMs: Long, onLogged: (String) -> Unit) = viewModelScope.launch {
+        val w = routine.toWorkout(startMs, actions.prefillLookup())
+        val done = w.copy(
+            finishedAtEpochMs = endMs,
+            updatedAtEpochMs = System.currentTimeMillis(),
+            exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { it.copy(completed = true, completedAtEpochMs = endMs) }) },
+        )
+        repo.saveWorkout(done)
+        onLogged(done.id)
+    }
+
+    /** Cambia la fecha, la hora y la duración de un entreno pasado. */
+    fun retime(workout: Workout, startMs: Long, endMs: Long) = editWorkout(workout) { w ->
+        val shift = startMs - w.startedAtEpochMs
+        w.copy(
+            startedAtEpochMs = startMs,
+            finishedAtEpochMs = endMs,
+            exercises = w.exercises.map { we ->
+                we.copy(sets = we.sets.map { s -> s.copy(completedAtEpochMs = s.completedAtEpochMs?.plus(shift), startedAtEpochMs = s.startedAtEpochMs?.plus(shift)) })
+            },
+        )
+    }
+
+    /** Añade una serie hecha (copia de la última) a un ejercicio de un entreno pasado. */
+    fun addPastSet(workout: Workout, weId: String) = editWorkout(workout) { w ->
+        val added = WorkoutEditor.addSet(w, weId)
+        WorkoutEditor.updateExercise(added, weId) { we -> we.copy(sets = we.sets.dropLast(1) + we.sets.last().copy(completed = true)) }
+    }
+
     fun saveAsRoutine(workout: Workout) = viewModelScope.launch { repo.saveRoutine(Routine.fromWorkout(workout)) }
 
     /** Repite un entrenamiento pasado como entrenamiento activo. */

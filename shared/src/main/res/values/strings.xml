@@ -845,4 +845,12 @@
     <string name="pinned_note">Nota fija</string>
     <string name="pinned_note_hint">Se muestra cada vez que hagas este ejercicio (altura del asiento, agarre, máquina…).</string>
     <string name="update_routine">Actualizar «%1$s»</string>
+    <string name="log_past_title">Registrar entreno pasado</string>
+    <string name="log_past_routine">Rutina</string>
+    <string name="log_past_date">Fecha: %1$s</string>
+    <string name="log_past_time">Hora (HH:MM)</string>
+    <string name="log_past_minutes">Duración (min)</string>
+    <string name="log_past_invalid">Revisa la hora y la duración (no puede quedar en el futuro).</string>
+    <string name="log_past_hint">Las series se guardan hechas con los pesos de la última vez; después puedes ajustarlas editando el entreno.</string>
+    <string name="log_past_no_routines">Crea antes una rutina con los ejercicios que hiciste.</string>
 </resources>

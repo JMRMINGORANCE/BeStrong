@@ -845,4 +845,12 @@
     <string name="pinned_note">Nota fixa</string>
     <string name="pinned_note_hint">Es mostra cada cop que facis aquest exercici (alçada del seient, agafada, màquina…).</string>
     <string name="update_routine">Actualitzar «%1$s»</string>
+    <string name="log_past_title">Registrar entrenament passat</string>
+    <string name="log_past_routine">Rutina</string>
+    <string name="log_past_date">Data: %1$s</string>
+    <string name="log_past_time">Hora (HH:MM)</string>
+    <string name="log_past_minutes">Durada (min)</string>
+    <string name="log_past_invalid">Revisa l\'hora i la durada (no pot quedar en el futur).</string>
+    <string name="log_past_hint">Les sèries es desen fetes amb els pesos de l\'última vegada; després les pots ajustar editant l\'entrenament.</string>
+    <string name="log_past_no_routines">Crea abans una rutina amb els exercicis que vas fer.</string>
 </resources>

@@ -845,4 +845,12 @@
     <string name="pinned_note">Note épinglée</string>
     <string name="pinned_note_hint">Affichée à chaque fois que tu fais cet exercice (hauteur du siège, prise, machine…).</string>
     <string name="update_routine">Mettre à jour « %1$s »</string>
+    <string name="log_past_title">Ajouter une séance passée</string>
+    <string name="log_past_routine">Routine</string>
+    <string name="log_past_date">Date : %1$s</string>
+    <string name="log_past_time">Heure (HH:MM)</string>
+    <string name="log_past_minutes">Durée (min)</string>
+    <string name="log_past_invalid">Vérifie l\'heure et la durée (pas dans le futur).</string>
+    <string name="log_past_hint">Les séries sont enregistrées comme faites avec les charges de la dernière fois ; tu peux les ajuster ensuite en modifiant la séance.</string>
+    <string name="log_past_no_routines">Crée d\'abord une routine avec les exercices effectués.</string>
 </resources>

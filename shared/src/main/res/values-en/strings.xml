@@ -845,4 +845,12 @@
     <string name="pinned_note">Pinned note</string>
     <string name="pinned_note_hint">Shown every time you do this exercise (seat height, grip, machine…).</string>
     <string name="update_routine">Update “%1$s”</string>
+    <string name="log_past_title">Log past workout</string>
+    <string name="log_past_routine">Routine</string>
+    <string name="log_past_date">Date: %1$s</string>
+    <string name="log_past_time">Time (HH:MM)</string>
+    <string name="log_past_minutes">Duration (min)</string>
+    <string name="log_past_invalid">Check the time and duration (it can\'t be in the future).</string>
+    <string name="log_past_hint">Sets are saved as done with last time\'s weights; you can adjust them afterwards by editing the workout.</string>
+    <string name="log_past_no_routines">First create a routine with the exercises you did.</string>
 </resources>

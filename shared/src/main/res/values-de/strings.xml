@@ -845,4 +845,12 @@
     <string name="pinned_note">Feste Notiz</string>
     <string name="pinned_note_hint">Wird bei jeder Ausführung dieser Übung angezeigt (Sitzhöhe, Griff, Gerät…).</string>
     <string name="update_routine">„%1$s“ aktualisieren</string>
+    <string name="log_past_title">Vergangenes Training eintragen</string>
+    <string name="log_past_routine">Routine</string>
+    <string name="log_past_date">Datum: %1$s</string>
+    <string name="log_past_time">Uhrzeit (HH:MM)</string>
+    <string name="log_past_minutes">Dauer (min)</string>
+    <string name="log_past_invalid">Prüfe Uhrzeit und Dauer (nicht in der Zukunft).</string>
+    <string name="log_past_hint">Die Sätze werden mit den Gewichten vom letzten Mal als erledigt gespeichert; danach kannst du sie beim Bearbeiten des Trainings anpassen.</string>
+    <string name="log_past_no_routines">Lege zuerst eine Routine mit den gemachten Übungen an.</string>
 </resources>
