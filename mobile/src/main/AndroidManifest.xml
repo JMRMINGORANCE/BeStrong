@@ -22,6 +22,8 @@
     <uses-permission android:name="android.health.permission.READ_RESTING_HEART_RATE" />
     <uses-permission android:name="android.health.permission.READ_HEIGHT" />
     <uses-permission android:name="android.health.permission.READ_HEART_RATE" />
+    <!-- Historial de más de 30 días (peso de los últimos 90 días, altura) -->
+    <uses-permission android:name="android.health.permission.READ_HEALTH_DATA_HISTORY" />
     <uses-permission android:name="android.health.permission.WRITE_ACTIVE_CALORIES_BURNED" />
     <uses-permission android:name="android.health.permission.WRITE_DISTANCE" />
 
