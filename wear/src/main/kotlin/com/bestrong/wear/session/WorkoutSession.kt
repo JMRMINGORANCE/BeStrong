@@ -19,6 +19,7 @@ import com.bestrong.core.sensors.BarVelocity
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
+import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.sync.SharedSettings
@@ -74,6 +75,8 @@ object Haptics {
     val RECORD = longArrayOf(0, 80, 60, 80, 60, 80, 60, 400)
     val VOICE_OK = longArrayOf(0, 30, 60, 30)
 }
+
+private const val RECORD_BANNER_MS = 5_000L
 
 /** Campo que ajusta el bisel/corona. */
 enum class RotaryTarget { WEIGHT, REPS }
@@ -407,6 +410,30 @@ class WorkoutSession @Inject constructor(
      * Completa la serie actual. En superserie pasa al siguiente ejercicio del grupo sin descanso;
      * al cerrar la ronda arranca el descanso. Devuelve true si empieza un descanso.
      */
+    private val _record = MutableStateFlow(false)
+
+    /** Durante unos segundos tras marcar una serie que es récord (se ve en el descanso). */
+    val record: StateFlow<Boolean> = _record.asStateFlow()
+    private var recordJob: Job? = null
+
+    /** Supera tu mejor 1RM estimado o peso máximo en ese ejercicio (sin historial no hay récord que batir). */
+    private fun isRecord(exerciseId: String, tracking: TrackingType, set: WorkoutSet): Boolean {
+        val best = WorkoutStats.personalRecords(store.history.value)[exerciseId]
+            ?.takeIf { tracking == TrackingType.WEIGHT_REPS && set.countsForRecords } ?: return false
+        return set.estimatedOneRepMax > (best[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0) + 1e-6 ||
+            set.weightKg > (best[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0) + 1e-6
+    }
+
+    private fun celebrateRecord() {
+        haptic(Haptics.RECORD)
+        _record.value = true
+        recordJob?.cancel()
+        recordJob = scope.launch {
+            delay(RECORD_BANNER_MS)
+            _record.value = false
+        }
+    }
+
     fun completeSet(): Boolean {
         stopTempo()
         val w0 = _workout.value ?: return false
@@ -422,8 +449,9 @@ class WorkoutSession @Inject constructor(
         }
         edit { w -> WorkoutEditor.toggleSetCompleted(withCountedReps(w, we, s), we.id, s.id) }
         repCounter.reset()
-        haptic(Haptics.SET_DONE)
         val updated = _workout.value ?: w0
+        val done = updated.exercises.firstOrNull { it.id == we.id }?.sets?.firstOrNull { it.id == s.id }
+        if (done != null && isRecord(we.exercise.id, we.exercise.tracking, done)) celebrateRecord() else haptic(Haptics.SET_DONE)
         val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
         next?.let { _exerciseIndex.value = it }
         return if (next != null && restSeconds > 0) {

@@ -147,4 +147,5 @@
     <string name="cardio_start">Iniciar el cronòmetre de cardio</string>
     <string name="remove_set">Treure una sèrie</string>
     <string name="undo_last_set">Desfer l\'última sèrie</string>
+    <string name="new_record_live">🏆 Rècord!</string>
 </resources>

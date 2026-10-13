@@ -156,3 +156,12 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Reloj: deshacer la última serie y quitar una serie pendiente
 - [x] Health Connect: cada serie como segmento con repeticiones (Samsung Health / Fit)
 - [x] Carga de entrenamiento semanal (RPE × minutos) con aviso de subida brusca (relación aguda:crónica > 1,5)
+
+## Fase 12 — Seguridad y comodidad ✅
+- [x] Auditoría de seguridad: restauración de ajustes a prueba de copias dañadas, fotos bloqueadas al salir y sin miniatura,
+  CSV sin fórmulas ejecutables, copia cifrada con contraseña repetida (10+), copia en la nube solo cifrada
+- [x] Calendario del historial: tocar un día filtra sus entrenos
+- [x] Copia cifrada: «archivo dañado» distinto de «contraseña incorrecta»
+- [x] Añadir drop set (−20 %) desde el menú del ejercicio
+- [x] Calculadora de discos al revés y «Usar este peso»
+- [x] Reloj: aviso de récord al marcar la serie

@@ -8,7 +8,7 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
-class WrongPasswordException : Exception("Contraseña incorrecta")
+class WrongPasswordException(cause: Throwable? = null) : Exception("Contraseña incorrecta", cause)
 
 /** El archivo no tiene el formato de una copia cifrada (cortado, editado o de otra app). */
 class DamagedBackupException : Exception("Archivo dañado")
@@ -36,18 +36,18 @@ object EncryptedBackup {
 
     fun decrypt(text: String, password: CharArray): String {
         val parts = text.trim().split(':')
-        if (parts.size != 4 || parts[0] != PREFIX) throw DamagedBackupException()
         val b64 = Base64.getDecoder()
-        val (salt, iv, data) = runCatching { Triple(b64.decode(parts[1]), b64.decode(parts[2]), b64.decode(parts[3])) }
-            .getOrElse { throw DamagedBackupException() }
-        if (iv.size != 12 || data.size < 16) throw DamagedBackupException()
+        val (salt, iv, data) = parts.takeIf { it.size == 4 && it[0] == PREFIX }
+            ?.let { runCatching { Triple(b64.decode(it[1]), b64.decode(it[2]), b64.decode(it[3])) }.getOrNull() }
+            ?.takeIf { (_, iv, data) -> iv.size == 12 && data.size >= 16 }
+            ?: throw DamagedBackupException()
         return try {
             val cipher = Cipher.getInstance("AES/GCM/NoPadding")
             cipher.init(Cipher.DECRYPT_MODE, key(password, salt), GCMParameterSpec(128, iv))
             cipher.doFinal(data).decodeToString()
         } catch (e: javax.crypto.AEADBadTagException) {
             // La etiqueta GCM no cuadra: contraseña equivocada (o datos alterados)
-            throw WrongPasswordException()
+            throw WrongPasswordException(e)
         }
     }
 

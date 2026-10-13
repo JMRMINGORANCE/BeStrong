@@ -147,4 +147,5 @@
     <string name="cardio_start">Cardio-Stoppuhr starten</string>
     <string name="remove_set">Satz entfernen</string>
     <string name="undo_last_set">Letzten Satz rückgängig</string>
+    <string name="new_record_live">🏆 Rekord!</string>
 </resources>

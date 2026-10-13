@@ -172,7 +172,7 @@ private fun PhotoPrivacy(unlocked: Boolean, locks: Boolean, onLock: () -> Unit) 
         lifecycle.addObserver(observer)
         onDispose { lifecycle.removeObserver(observer) }
     }
-    val activity = LocalContext.current as? android.app.Activity
+    val activity = androidx.activity.compose.LocalActivity.current
     DisposableEffect(activity, unlocked, locks) {
         val secure = unlocked && locks
         if (secure) activity?.window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)

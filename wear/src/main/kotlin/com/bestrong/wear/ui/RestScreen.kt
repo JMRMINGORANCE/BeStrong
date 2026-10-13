@@ -49,6 +49,7 @@ fun RestScreen(session: WorkoutSession) {
     val metrics by session.metrics.collectAsStateWithLifecycle()
     val workout by session.workout.collectAsStateWithLifecycle()
     val recovered by session.recovered.collectAsStateWithLifecycle()
+    val record by session.record.collectAsStateWithLifecycle()
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(200) } }
 
@@ -88,6 +89,7 @@ fun RestScreen(session: WorkoutSession) {
                 val zone = session.heartRateZone(metrics.heartRate)
                 Text("♥ ${metrics.heartRate ?: "--"}" + if (zone > 0) " · Z$zone" else "", color = HeartRed, style = MaterialTheme.typography.labelSmall)
                 if (recovered) Text(stringResource(R.string.recovered), color = Done, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
+                if (record) Text(stringResource(R.string.new_record_live), color = Done, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
                 next?.let { (we, s) ->
                     Text(
                         stringResource(R.string.next_short, we.exercise.displayName(), unit.format(s.weightKg), s.reps),

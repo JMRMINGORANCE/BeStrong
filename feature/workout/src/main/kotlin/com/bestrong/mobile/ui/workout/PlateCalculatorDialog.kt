@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.bestrong.core.training.GymProfile
 import com.bestrong.core.training.PlateCalculator
+import com.bestrong.core.training.PlateLoad
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.shared.R
@@ -62,26 +63,8 @@ fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onApply: (
                 }
                 Text(stringResource(R.string.plates_per_side), style = MaterialTheme.typography.labelLarge)
                 if (load.perSide.isEmpty()) Text(stringResource(R.string.plates_only_bar))
-                // Tocar un disco lo quita de cada lado; abajo se añaden (cargar la barra al revés)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    load.perSide.forEach { p ->
-                        SuggestionChip(onClick = { text = formatWeight((load.achieved - 2 * p).coerceAtLeast(bar)) }, label = { Text(formatWeight(p), fontWeight = FontWeight.Bold) })
-                    }
-                }
-                Text(stringResource(R.string.plates_add_per_side), style = MaterialTheme.typography.labelLarge)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    plates.sortedDescending().forEach { p ->
-                        SuggestionChip(onClick = { text = formatWeight(maxOf(load.achieved, bar) + 2 * p) }, label = { Text("+" + formatWeight(p)) })
-                    }
-                }
-                Text(stringResource(R.string.plates_total, formatWeight(load.achieved), unit.label), fontWeight = FontWeight.SemiBold)
-                if (load.remainder > 0) {
-                    Text(
-                        stringResource(R.string.plates_remainder, formatWeight(load.remainder), unit.label),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
+                PlateChips(load, plates, bar) { text = formatWeight(it) }
+                PlateTotals(load, unit)
             }
         },
         confirmButton = {
@@ -93,4 +76,35 @@ fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onApply: (
         },
         dismissButton = if (onApply != null) ({ TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } }) else null,
     )
+}
+
+/** Discos por lado (tocar uno lo quita) y discos para añadir: cargar la barra al revés. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun PlateChips(load: PlateLoad, plates: List<Double>, bar: Double, onTarget: (Double) -> Unit) {
+    // Tocar un disco lo quita de cada lado; abajo se añaden (cargar la barra al revés)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        load.perSide.forEach { p ->
+            SuggestionChip(onClick = { onTarget((load.achieved - 2 * p).coerceAtLeast(bar)) }, label = { Text(formatWeight(p), fontWeight = FontWeight.Bold) })
+        }
+    }
+    Text(stringResource(R.string.plates_add_per_side), style = MaterialTheme.typography.labelLarge)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        plates.sortedDescending().forEach { p ->
+            SuggestionChip(onClick = { onTarget(maxOf(load.achieved, bar) + 2 * p) }, label = { Text("+" + formatWeight(p)) })
+        }
+    }
+}
+
+/** Peso conseguido y lo que falta si los discos no cuadran. */
+@Composable
+private fun PlateTotals(load: PlateLoad, unit: WeightUnit) {
+    Text(stringResource(R.string.plates_total, formatWeight(load.achieved), unit.label), fontWeight = FontWeight.SemiBold)
+    if (load.remainder > 0) {
+        Text(
+            stringResource(R.string.plates_remainder, formatWeight(load.remainder), unit.label),
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+        )
+    }
 }
