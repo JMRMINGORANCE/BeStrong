@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 /** Replica rutinas, historial, ajustes y el entreno en curso al reloj; mantiene el widget al día. */
@@ -59,13 +60,17 @@ class AppSync @Inject constructor(
             }.debounce(1_000).distinctUntilChanged().collect { watchSync.pushRoutines(it) }
         }
         scope.launch {
-            repository.history.debounce(2_000).collect {
-                watchSync.pushHistory(it)
-                BeStrongWidget.refresh(context)
-            }
+            repository.history.debounce(2_000).collect { watchSync.pushHistory(it) }
+        }
+        // El widget muestra la semana y la rutina que toca: se redibuja si cambia el historial o las rutinas
+        scope.launch {
+            merge(repository.history, repository.routines).debounce(2_000).collect { BeStrongWidget.refresh(context) }
         }
         scope.launch {
-            settings.settings.map { SharedSettings(it.unit, it.progressionEnabled, it.restVibration) }.distinctUntilChanged()
+            // Objetivo semanal: el del programa activo si lo hay, como en la pantalla de inicio
+            combine(settings.settings, repository.activeProgram) { s, program ->
+                SharedSettings(s.unit, s.progressionEnabled, s.restVibration, weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal)
+            }.distinctUntilChanged()
                 .collect { watchSync.pushSettings(it) }
         }
         // Entreno en curso compartido en vivo con el reloj + servicio en primer plano

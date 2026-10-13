@@ -20,7 +20,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 
-/** Complicación para la esfera: entrenos de esta semana (objetivo: 4). */
+/** Complicación para la esfera: entrenos de esta semana frente al objetivo semanal elegido en el móvil. */
 @AndroidEntryPoint
 class WeeklyComplicationService : SuspendingComplicationDataSourceService() {
     @Inject lateinit var store: WearStore
@@ -29,12 +29,13 @@ class WeeklyComplicationService : SuspendingComplicationDataSourceService() {
         val history = store.history.value
         val zone = ZoneId.systemDefault()
         val count = WorkoutStats.weeklySummary(history, 1, LocalDate.now(zone), zone).first().workouts
-        return build(request.complicationType, count)
+        return build(request.complicationType, count, store.settings.value.weeklyGoal)
     }
 
-    override fun getPreviewData(type: ComplicationType): ComplicationData? = build(type, 3)
+    override fun getPreviewData(type: ComplicationType): ComplicationData? = build(type, 3, PREVIEW_GOAL)
 
-    private fun build(type: ComplicationType, count: Int): ComplicationData? {
+    private fun build(type: ComplicationType, count: Int, weeklyGoal: Int): ComplicationData? {
+        val goal = weeklyGoal.coerceAtLeast(1).toFloat()
         val tap = PendingIntent.getActivity(
             this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
@@ -50,9 +51,9 @@ class WeeklyComplicationService : SuspendingComplicationDataSourceService() {
                 .setTapAction(tap)
                 .build()
             ComplicationType.RANGED_VALUE -> RangedValueComplicationData.Builder(
-                value = count.toFloat().coerceAtMost(WEEKLY_GOAL),
+                value = count.toFloat().coerceAtMost(goal),
                 min = 0f,
-                max = WEEKLY_GOAL,
+                max = goal,
                 contentDescription = description,
             ).setText(PlainComplicationText.Builder("$count").build())
                 .setMonochromaticImage(icon)
@@ -63,6 +64,6 @@ class WeeklyComplicationService : SuspendingComplicationDataSourceService() {
     }
 
     private companion object {
-        const val WEEKLY_GOAL = 4f
+        const val PREVIEW_GOAL = 4
     }
 }

@@ -3,6 +3,7 @@ package com.bestrong.wear.complication
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Icon
+import android.net.Uri
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType
 import androidx.wear.watchface.complications.data.LongTextComplicationData
@@ -11,6 +12,7 @@ import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
+import com.bestrong.core.sync.SyncContract
 import com.bestrong.wear.MainActivity
 import com.bestrong.wear.R
 import com.bestrong.wear.data.WearStore
@@ -24,14 +26,31 @@ class TodayComplicationService : SuspendingComplicationDataSourceService() {
 
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         val routine = store.todayRoutine()
-        return build(request.complicationType, routine?.name, routine?.id)
+        return build(request.complicationType, routine?.name, tapAction(routine?.id))
     }
 
+    // La vista previa no lleva acción: compartir el PendingIntent con la real (mismo request code y
+    // FLAG_UPDATE_CURRENT) le borraría la rutina a la complicación ya puesta en la esfera.
     override fun getPreviewData(type: ComplicationType): ComplicationData? = build(type, "Full Body A", null)
 
-    private fun build(type: ComplicationType, name: String?, routineId: String?): ComplicationData? {
-        val intent = Intent(this, MainActivity::class.java).apply { routineId?.let { putExtra(MainActivity.EXTRA_ROUTINE, it) } }
-        val tap = PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    /**
+     * Abre el reloj y empieza la rutina. La rutina va en el URI del deep link (no en un extra): así
+     * cada rutina tiene su propio PendingIntent y ninguna actualización pisa la de otra.
+     */
+    private fun tapAction(routineId: String?): PendingIntent {
+        val intent = Intent(this, MainActivity::class.java)
+        if (routineId != null) {
+            intent.action = Intent.ACTION_VIEW
+            intent.data = Uri.Builder()
+                .scheme(SyncContract.DEEP_LINK_SCHEME)
+                .authority(SyncContract.DEEP_LINK_HOST)
+                .appendQueryParameter(SyncContract.DEEP_LINK_PARAM_ROUTINE, routineId)
+                .build()
+        }
+        return PendingIntent.getActivity(this, 1, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    private fun build(type: ComplicationType, name: String?, tap: PendingIntent?): ComplicationData? {
         val icon = MonochromaticImage.Builder(Icon.createWithResource(this, R.drawable.ic_dumbbell)).build()
         val text = name ?: getString(R.string.complication_today_none)
         val description = PlainComplicationText.Builder(getString(R.string.complication_today_desc, text)).build()
