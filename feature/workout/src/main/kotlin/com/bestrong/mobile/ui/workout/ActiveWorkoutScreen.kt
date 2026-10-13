@@ -189,7 +189,7 @@ fun ActiveWorkoutScreen(
             when (e) {
                 is ActiveWorkoutViewModel.WorkoutEvent.Undoable -> {
                     val msg = if (e.kind == ActiveWorkoutViewModel.UndoKind.SET) undoSet else undoExercise
-                    if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo()
+                    if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo(e)
                 }
                 is ActiveWorkoutViewModel.WorkoutEvent.RpeSuggestion -> {
                     val template = if (e.adjustment.direction < 0) rpeDown else rpeUp

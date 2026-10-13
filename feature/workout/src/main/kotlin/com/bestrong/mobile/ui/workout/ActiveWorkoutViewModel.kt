@@ -1,6 +1,7 @@
 package com.bestrong.mobile.ui.workout
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.library.Alternatives
@@ -9,6 +10,7 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.SessionRating
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
+import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
@@ -67,10 +69,15 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val actions: WorkoutActions,
     private val announcer: Announcer,
     @ApplicationContext private val appContext: Context,
+    private val savedState: SavedStateHandle,
 ) : ViewModel() {
 
-    /** Modo pareja: true = se está viendo y editando el entreno de la otra persona. */
-    val partnerMode = MutableStateFlow(false)
+    /** Modo pareja: true = se está viendo y editando el entreno de la otra persona (sobrevive a la muerte del proceso). */
+    val partnerMode: StateFlow<Boolean> = savedState.getStateFlow(KEY_PARTNER_MODE, false)
+
+    private fun setPartnerMode(on: Boolean) {
+        savedState[KEY_PARTNER_MODE] = on
+    }
 
     val workout: StateFlow<Workout?> = combine(repo.activeWorkout, repo.partnerWorkout, partnerMode) { me, partner, isPartner ->
         if (isPartner) partner else me
@@ -95,7 +102,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             }
             repo.setPartnerActive(copy)
         }
-        partnerMode.value = partner
+        setPartnerMode(partner)
     }
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = repo.previousSetsLookup
     val settings: StateFlow<UserSettings> = settingsStore.settings
@@ -125,8 +132,12 @@ class ActiveWorkoutViewModel @Inject constructor(
     val focusExercise: SharedFlow<Int> = _focusExercise
 
     private fun edit(block: (Workout) -> Workout) {
-        viewModelScope.launch { if (partnerMode.value) repo.updatePartnerActive(block) else repo.updateActive(block) }
+        viewModelScope.launch { update(block = block) }
     }
+
+    /** Cambio bajo el cerrojo del repositorio: devuelve el estado antes y después (null sin entreno). */
+    private suspend fun update(partner: Boolean = partnerMode.value, block: (Workout) -> Workout): Pair<Workout, Workout>? =
+        if (partner) repo.updatePartnerActive(block) else repo.updateActive(block)
 
     fun rename(name: String) = edit { it.copy(name = name.ifBlank { it.name }) }
 
@@ -142,7 +153,8 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Avisos con acción: deshacer un borrado o aplicar un ajuste por RPE. */
     sealed interface WorkoutEvent {
-        data class Undoable(val kind: UndoKind) : WorkoutEvent
+        /** Borrado que se puede deshacer: [restore] vuelve a meter solo lo borrado en su sitio. */
+        class Undoable(val kind: UndoKind, val partner: Boolean, val workoutId: String, val restore: (Workout) -> Workout) : WorkoutEvent
         data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
     }
     enum class UndoKind { SET, EXERCISE }
@@ -152,27 +164,49 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Conflictos de sincronización con el reloj (misma serie con valores distintos). */
     val syncConflicts = repo.syncConflicts
-    private var undoSnapshot: Workout? = null
 
-    private fun editUndoable(kind: UndoKind, block: (Workout) -> Workout) {
-        undoSnapshot = workout.value
-        edit(block)
-        _events.tryEmit(WorkoutEvent.Undoable(kind))
+    /** Deshace el borrado de ese aviso: se recupera lo borrado sin perder lo que haya cambiado después. */
+    fun undo(event: WorkoutEvent.Undoable) {
+        viewModelScope.launch { update(event.partner) { w -> if (w.id == event.workoutId) event.restore(w) else w } }
     }
 
-    fun undo() {
-        val snapshot = undoSnapshot ?: return
-        undoSnapshot = null
-        // Se recupera lo borrado sin perder lo que haya cambiado después en otras series
-        edit { current -> if (current.id == snapshot.id) snapshot.copy(updatedAtEpochMs = current.updatedAtEpochMs) else current }
+    fun removeExercise(weId: String) {
+        val partner = partnerMode.value
+        viewModelScope.launch {
+            val (before, _) = update(partner) { WorkoutEditor.removeExercise(it, weId) } ?: return@launch
+            val index = before.exercises.indexOfFirst { it.id == weId }
+            val removed: WorkoutExercise = before.exercises.getOrNull(index) ?: return@launch
+            _events.tryEmit(
+                WorkoutEvent.Undoable(UndoKind.EXERCISE, partner, before.id) { w ->
+                    if (w.exercises.any { it.id == weId }) {
+                        w
+                    } else {
+                        w.copy(exercises = w.exercises.toMutableList().apply { add(index.coerceAtMost(size), removed) })
+                    }
+                },
+            )
+        }
     }
-
-    fun removeExercise(weId: String) = editUndoable(UndoKind.EXERCISE) { WorkoutEditor.removeExercise(it, weId) }
     fun moveExercise(from: Int, to: Int) = edit { WorkoutEditor.moveExercise(it, from, to) }
     fun setRestSeconds(weId: String, seconds: Int) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(restSeconds = seconds) } }
     fun setExerciseNotes(weId: String, notes: String) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(notes = notes) } }
     fun addSet(weId: String) = edit { WorkoutEditor.addSet(it, weId) }
-    fun removeSet(weId: String, setId: String) = editUndoable(UndoKind.SET) { WorkoutEditor.removeSet(it, weId, setId) }
+    fun removeSet(weId: String, setId: String) {
+        val partner = partnerMode.value
+        viewModelScope.launch {
+            val (before, _) = update(partner) { WorkoutEditor.removeSet(it, weId, setId) } ?: return@launch
+            val sets = before.exercises.firstOrNull { it.id == weId }?.sets ?: return@launch
+            val index = sets.indexOfFirst { it.id == setId }
+            val removed = sets.getOrNull(index) ?: return@launch
+            _events.tryEmit(
+                WorkoutEvent.Undoable(UndoKind.SET, partner, before.id) { w ->
+                    WorkoutEditor.updateExercise(w, weId) { we ->
+                        if (we.sets.any { it.id == setId }) we else we.copy(sets = we.sets.toMutableList().apply { add(index.coerceAtMost(size), removed) })
+                    }
+                },
+            )
+        }
+    }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
     fun setRpe(weId: String, setId: String, rpe: Double?) {
         val current = workout.value ?: return
@@ -271,47 +305,51 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     fun toggleSet(weId: String, setId: String) {
-        val current = workout.value ?: return
-        val index = current.exercises.indexOfFirst { it.id == weId }
-        val set = current.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId } ?: return
-        val completing = !set.completed
-        val updated = WorkoutEditor.toggleSetCompleted(current, weId, setId)
-        edit { WorkoutEditor.toggleSetCompleted(it, weId, setId) }
-        if (completing) {
-            val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
-            if (restSeconds > 0) restTimer.start(restSeconds) else restTimer.skip()
-            // Aviso por voz: cuánto descansar y qué viene
-            WorkoutEditor.nextPendingSet(updated)?.let { (i, s) ->
-                val we = updated.exercises[i]
-                announcer.say(
-                    appContext.getString(
-                        R.string.tts_next,
-                        formatDuration(restSeconds.toLong()),
-                        we.exercise.displayName(appContext),
-                        describeSet(s, we.exercise.tracking, settings.value.unit),
-                    ),
-                )
-            }
-            if (next != null && next != index) _focusExercise.tryEmit(next)
+        viewModelScope.launch {
+            // Se decide con el estado real del cambio (bajo el cerrojo), no con una copia que puede ir atrasada
+            val (before, updated) = update { WorkoutEditor.toggleSetCompleted(it, weId, setId) } ?: return@launch
+            val index = updated.exercises.indexOfFirst { it.id == weId }
+            fun done(w: Workout) = w.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId }?.completed == true
+            if (index >= 0 && !done(before) && done(updated)) onSetCompleted(updated, index)
         }
+    }
+
+    /** Descanso, aviso por voz y desplazamiento al siguiente ejercicio tras completar una serie. */
+    private fun onSetCompleted(updated: Workout, index: Int) {
+        val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
+        if (restSeconds > 0) restTimer.start(restSeconds) else restTimer.skip()
+        // Aviso por voz: cuánto descansar y qué viene
+        WorkoutEditor.nextPendingSet(updated)?.let { (i, s) ->
+            val we = updated.exercises[i]
+            announcer.say(
+                appContext.getString(
+                    R.string.tts_next,
+                    formatDuration(restSeconds.toLong()),
+                    we.exercise.displayName(appContext),
+                    describeSet(s, we.exercise.tracking, settings.value.unit),
+                ),
+            )
+        }
+        if (next != null && next != index) _focusExercise.tryEmit(next)
     }
 
     fun adjustRest(deltaSeconds: Int) = restTimer.adjust(deltaSeconds)
     fun skipRest() = restTimer.skip()
 
     fun finish() {
-        val current = workout.value ?: return
         if (partnerMode.value) {
             // Entreno de la pareja: se guarda aparte (no cuenta para tus récords ni estadísticas)
             viewModelScope.launch {
+                val current = repo.takePartnerActive() ?: return@launch
                 val finished = WorkoutEditor.finish(current, System.currentTimeMillis())
-                repo.setPartnerActive(null)
-                partnerMode.value = false
+                setPartnerMode(false)
                 if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
             }
             return
         }
         viewModelScope.launch {
+            // Se lee y se quita bajo el cerrojo: no se pierde ninguna serie marcada en el último momento
+            val current = repo.takeActive() ?: return@launch
             val metrics = metricsStore.metrics.value?.takeIf { it.workoutId == current.id }
             val ended = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
                 avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
@@ -320,17 +358,10 @@ class ActiveWorkoutViewModel @Inject constructor(
             // Calorías totales y activas: las del reloj si las hay; si no, pulso o estimación personalizada
             val finished = energy.complete(ended, watchKcal = metrics?.calories ?: current.calories)
             restTimer.skip()
-            repo.setActive(null)
             if (finished.exercises.isEmpty()) return@launch
             repo.saveWorkout(finished)
-            val history = repo.historyOnce()
-            _summary.value = FinishedSummary(
-                finished,
-                WorkoutStats.newRecordsIn(finished, history),
-                WorkoutStats.compareWithPrevious(finished, history),
-                WorkoutStats.imbalances(finished),
-                NextTime.forWorkout(finished, settings.value.unit.stepKg()),
-            )
+            savedState[KEY_SUMMARY_ID] = finished.id
+            _summary.value = buildSummary(finished, repo.historyOnce())
             actions.exportToHealthConnectIfEnabled(finished)
         }
     }
@@ -338,7 +369,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun discard() = viewModelScope.launch {
         if (partnerMode.value) {
             repo.setPartnerActive(null)
-            partnerMode.value = false
+            setPartnerMode(false)
             return@launch
         }
         restTimer.skip()
@@ -362,5 +393,29 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     fun dismissSummary() {
         _summary.value = null
+        savedState.remove<String>(KEY_SUMMARY_ID)
+    }
+
+    private fun buildSummary(finished: Workout, history: List<Workout>) = FinishedSummary(
+        finished,
+        WorkoutStats.newRecordsIn(finished, history),
+        WorkoutStats.compareWithPrevious(finished, history),
+        WorkoutStats.imbalances(finished),
+        NextTime.forWorkout(finished, settings.value.unit.stepKg()),
+    )
+
+    init {
+        // Resumen sin cerrar cuando el sistema mató el proceso: se reconstruye desde el historial
+        savedState.get<String>(KEY_SUMMARY_ID)?.let { id ->
+            viewModelScope.launch {
+                val history = repo.historyOnce()
+                history.firstOrNull { it.id == id }?.let { if (_summary.value == null) _summary.value = buildSummary(it, history) }
+            }
+        }
+    }
+
+    private companion object {
+        const val KEY_PARTNER_MODE = "partner_mode"
+        const val KEY_SUMMARY_ID = "summary_workout_id"
     }
 }
