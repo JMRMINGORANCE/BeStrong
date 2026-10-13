@@ -5,8 +5,12 @@ import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.sync.SyncContract
+import com.bestrong.core.training.ActiveProgram
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.intOrNull
@@ -20,6 +24,13 @@ data class BackupData(
     val routines: List<Routine> = emptyList(),
     val customExercises: List<Exercise> = emptyList(),
     val measurements: List<BodyMeasurement> = emptyList(),
+    /** Opcionales (null en copias antiguas): programa activo con sus training max… */
+    val activeProgram: ActiveProgram? = null,
+    /** …planificación y ajustes, como JSON tal cual (sus tipos viven en la capa de datos)… */
+    val planning: JsonObject? = null,
+    val settings: JsonObject? = null,
+    /** …y notas de técnica por ejercicio. */
+    val techniqueNotes: Map<String, String>? = null,
 )
 
 /**
@@ -37,7 +48,13 @@ object Backup {
         put("routines", JsonArray(data.routines.map { json.parseToJsonElement(Persistence.encodeRoutine(it)) }))
         put("customExercises", json.encodeToJsonElement(ListSerializer(Exercise.serializer()), data.customExercises))
         put("measurements", json.encodeToJsonElement(ListSerializer(BodyMeasurement.serializer()), data.measurements))
+        data.activeProgram?.let { put("activeProgram", json.encodeToJsonElement(ActiveProgram.serializer(), it)) }
+        data.planning?.let { put("planning", it) }
+        data.settings?.let { put("settings", it) }
+        data.techniqueNotes?.let { put("techniqueNotes", json.encodeToJsonElement(notesSerializer, it)) }
     }.toString()
+
+    private val notesSerializer = MapSerializer(String.serializer(), String.serializer())
 
     /** Lanza [IllegalArgumentException] si el archivo no es una copia de BeStrong o es de una versión futura. */
     fun decode(text: String): BackupData {
@@ -56,6 +73,10 @@ object Backup {
             routines = root["routines"]?.jsonArray?.mapNotNull { runCatching { Persistence.decodeRoutine(stamped(it)) }.getOrNull() }.orEmpty(),
             customExercises = root["customExercises"]?.let { runCatching { json.decodeFromJsonElement(ListSerializer(Exercise.serializer()), it) }.getOrNull() }.orEmpty(),
             measurements = root["measurements"]?.let { runCatching { json.decodeFromJsonElement(ListSerializer(BodyMeasurement.serializer()), it) }.getOrNull() }.orEmpty(),
+            activeProgram = root["activeProgram"]?.let { runCatching { json.decodeFromJsonElement(ActiveProgram.serializer(), it) }.getOrNull() },
+            planning = root["planning"] as? JsonObject,
+            settings = root["settings"] as? JsonObject,
+            techniqueNotes = root["techniqueNotes"]?.let { runCatching { json.decodeFromJsonElement(notesSerializer, it) }.getOrNull() },
         )
     }
 }

@@ -130,6 +130,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
+        // Al volver desde Recientes Android repite el intent original: no se vuelve a empezar ni importar nada
+        if (intent != null && intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
         val data = intent?.data
         if (intent?.action == Intent.ACTION_VIEW && data?.scheme == RoutineLink.SCHEME && data.host == RoutineLink.HOST) {
             launchRequest.value = LaunchRequest.ImportRoutine(data.toString())

@@ -82,6 +82,7 @@ import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.theme.statusColors
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.TextStyle
 import kotlin.math.roundToInt
@@ -150,7 +151,7 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { weekOffset-- }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.action_back)) }
             Text(
-                stringResource(R.string.cal_week_of, formatShortDate(weekStart.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())),
+                stringResource(R.string.cal_week_of, formatShortDate(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())),
                 Modifier.weight(1f),
                 textAlign = TextAlign.Center,
             )
@@ -334,7 +335,7 @@ private fun PeakCard(vm: PlanningViewModel, ui: PlanningUi) {
         val meet = ui.state.meetEpochDay
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { picking = true }) {
-                Text(meet?.let { formatShortDate(LocalDate.ofEpochDay(it).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()) } ?: stringResource(R.string.peak_pick))
+                Text(meet?.let { formatShortDate(LocalDate.ofEpochDay(it).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()) } ?: stringResource(R.string.peak_pick))
             }
             if (meet != null) TextButton(onClick = { vm.setMeetDate(null) }) { Text(stringResource(R.string.peak_clear)) }
         }

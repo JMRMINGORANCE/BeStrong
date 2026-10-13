@@ -4,6 +4,8 @@
     <!-- Bloqueo con huella de las fotos de progreso -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- CPU despierta durante el descanso con la pantalla apagada (aviso puntual al terminar) -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- Solo para descargar las imágenes de ejercicios de wger.de (ningún dato del usuario sale del móvil) -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -20,6 +22,8 @@
     <uses-permission android:name="android.health.permission.READ_RESTING_HEART_RATE" />
     <uses-permission android:name="android.health.permission.READ_HEIGHT" />
     <uses-permission android:name="android.health.permission.READ_HEART_RATE" />
+    <!-- Historial de más de 30 días (peso de los últimos 90 días, altura) -->
+    <uses-permission android:name="android.health.permission.READ_HEALTH_DATA_HISTORY" />
     <uses-permission android:name="android.health.permission.WRITE_ACTIVE_CALORIES_BURNED" />
     <uses-permission android:name="android.health.permission.WRITE_DISTANCE" />
 

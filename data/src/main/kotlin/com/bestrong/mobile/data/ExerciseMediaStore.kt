@@ -81,6 +81,18 @@ class ExerciseMediaStore @Inject constructor(@ApplicationContext private val con
         _version.value++
     }
 
+    /** Todas las notas de técnica (clave = carpeta del ejercicio), para la copia de seguridad. */
+    suspend fun allNotes(): Map<String, String> = withContext(Dispatchers.IO) {
+        root.listFiles().orEmpty().mapNotNull { d -> File(d, NOTE).takeIf { it.exists() }?.let { d.name to it.readText() } }.toMap()
+    }
+
+    /** Restaura notas de una copia sin pisar las que ya haya. Devuelve cuántas se añadieron. */
+    suspend fun restoreNotes(notes: Map<String, String>): Int {
+        val fresh = notes.filter { (id, text) -> text.isNotBlank() && withContext(Dispatchers.IO) { note(id).isBlank() } }
+        fresh.forEach { (id, text) -> saveNote(id, text) }
+        return fresh.size
+    }
+
     /** Imágenes de wger cruzadas con la biblioteca (assets/exercise_media.json; vacío si no existe). */
     val images: Map<String, ExerciseImage> by lazy {
         runCatching {

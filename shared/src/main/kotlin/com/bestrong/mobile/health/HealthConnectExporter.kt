@@ -9,6 +9,7 @@ import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
+import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import com.bestrong.core.model.Workout
@@ -48,6 +49,13 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
     /** Basta con poder escribir la sesión; calorías y pulso se añaden si también están concedidos. */
     suspend fun hasPermissions(): Boolean = sessionPermission in granted()
 
+    /**
+     * Cada registro lleva un id de cliente estable (id del entreno + tipo): si se exporta otra vez
+     * (reenvío del reloj, reintento), Health Connect lo sustituye en lugar de duplicarlo.
+     */
+    private fun meta(workout: Workout, suffix: String) =
+        Metadata(clientRecordId = "${workout.id}-$suffix", clientRecordVersion = System.currentTimeMillis())
+
     suspend fun export(workout: Workout) {
         val granted = granted()
         if (sessionPermission !in granted) return
@@ -62,6 +70,7 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
                 exerciseType = sessionType(workout),
                 title = workout.name,
                 notes = workout.notes.ifBlank { null },
+                metadata = meta(workout, "session"),
             ),
         )
         // Calorías medidas por el reloj o estimadas (sin reloj); Samsung Health las suma al día
@@ -73,6 +82,7 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
                     endTime = end,
                     endZoneOffset = null,
                     energy = Energy.kilocalories(it.toDouble()),
+                    metadata = meta(workout, "kcal"),
                 )
             }
         }
@@ -85,6 +95,7 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
                     endTime = end,
                     endZoneOffset = null,
                     energy = Energy.kilocalories(it.toDouble()),
+                    metadata = meta(workout, "active-kcal"),
                 )
             }
         }
@@ -106,7 +117,7 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         val samples = workout.heartRateSamples
             .map { HeartRateRecord.Sample(start.plusSeconds(it.offsetSec.toLong()), it.bpm.toLong()) }
             .filter { it.time in start..end }
-        return if (samples.isEmpty()) null else HeartRateRecord(startTime = start, startZoneOffset = null, endTime = end, endZoneOffset = null, samples = samples)
+        return if (samples.isEmpty()) null else HeartRateRecord(startTime = start, startZoneOffset = null, endTime = end, endZoneOffset = null, samples = samples, metadata = meta(workout, "hr"))
     }
 
     /**
@@ -139,16 +150,17 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
     private fun distanceRecords(workout: Workout, start: Instant, end: Instant): List<Record> =
         com.bestrong.core.training.Energy.cardioBlocks(workout)
             .filter { it.distanceM > 0 && it.kind in DISPLACEMENT }
-            .mapNotNull { b ->
+            .mapIndexedNotNull { i, b ->
                 val blockEnd = b.endOffsetSec?.let { start.plusSeconds(it.toLong()) }?.coerceAtMost(end) ?: end
                 val blockStart = blockEnd.minusSeconds(b.durationSec.toLong()).coerceAtLeast(start)
-                if (!blockStart.isBefore(blockEnd)) return@mapNotNull null
+                if (!blockStart.isBefore(blockEnd)) return@mapIndexedNotNull null
                 DistanceRecord(
                     startTime = blockStart,
                     startZoneOffset = null,
                     endTime = blockEnd,
                     endZoneOffset = null,
                     distance = Length.meters(b.distanceM),
+                    metadata = meta(workout, "dist-$i"),
                 )
             }
 

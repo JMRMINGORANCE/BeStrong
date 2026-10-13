@@ -17,6 +17,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 /** Todo lo de planificación avanzada (fase 5), guardado como JSON en preferencias. */
 @Serializable
@@ -55,6 +57,25 @@ class PlanningStore @Inject constructor(@ApplicationContext context: Context) {
 
     fun saveProgram(p: PeriodizedProgram) = update { s -> s.copy(customPrograms = s.customPrograms.filterNot { it.id == p.id } + p.copy(custom = true)) }
     fun deleteProgram(id: String) = update { s -> s.copy(customPrograms = s.customPrograms.filterNot { it.id == id }) }
+
+    fun backupJson(): JsonObject = SyncContract.json.encodeToJsonElement(PlanningState.serializer(), state.value).jsonObject
+
+    /** Restaura sin borrar: añade programas y semanas que falten y rellena lo que no esté puesto. */
+    fun restoreBackup(json: JsonObject) {
+        val b = runCatching { SyncContract.json.decodeFromJsonElement(PlanningState.serializer(), json) }.getOrNull() ?: return
+        update { s ->
+            val ids = s.customPrograms.map { it.id }.toSet()
+            s.copy(
+                customPrograms = s.customPrograms + b.customPrograms.filter { it.id !in ids },
+                weekPlans = b.weekPlans + s.weekPlans,
+                mesocycle = s.mesocycle ?: b.mesocycle,
+                injuries = s.injuries + b.injuries,
+                weeklyCap = s.weeklyCap ?: b.weeklyCap,
+                minutesPerSession = if (s.minutesPerSession == PlanningState().minutesPerSession) b.minutesPerSession else s.minutesPerSession,
+                meetEpochDay = s.meetEpochDay ?: b.meetEpochDay,
+            )
+        }
+    }
 
     companion object {
         private const val KEY = "state"

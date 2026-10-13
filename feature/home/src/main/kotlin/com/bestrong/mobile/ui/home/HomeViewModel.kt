@@ -146,7 +146,7 @@ class HomeViewModel @Inject constructor(
 
     /** Empieza la sesión del programa con las cargas prescritas (sin sustituirlas por la última vez). */
     fun startProgramSession(session: ProgramSession, onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeWorkout.value != null) {
+        if (repo.activeOnce() != null) {
             _messages.tryEmit(context.getString(R.string.msg_workout_already_active))
             onStarted()
             return@launch
@@ -163,12 +163,12 @@ class HomeViewModel @Inject constructor(
     val messages: SharedFlow<String> = _messages
 
     fun startEmpty(onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeWorkout.value == null) repo.setActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
+        if (repo.activeOnce() == null) repo.setActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
         onStarted()
     }
 
     fun startRoutine(routine: Routine, onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeWorkout.value != null) {
+        if (repo.activeOnce() != null) {
             _messages.tryEmit(context.getString(R.string.msg_workout_already_active))
             onStarted()
             return@launch
@@ -177,11 +177,25 @@ class HomeViewModel @Inject constructor(
         onStarted()
     }
 
-    /** Rutina recibida por enlace o QR: se añade a «Mis rutinas». */
-    fun importRoutineLink(link: String) = viewModelScope.launch {
-        val routine = RoutineLink.decode(link) ?: return@launch
+    /** Rutina recibida por enlace o QR, pendiente de que el usuario confirme la importación. */
+    private val _pendingImport = MutableStateFlow<Routine?>(null)
+    val pendingImport: StateFlow<Routine?> = _pendingImport
+
+    /** Un enlace puede llegar de cualquier web o app: se pregunta antes de guardarla. */
+    fun importRoutineLink(link: String) {
+        _pendingImport.value = RoutineLink.decode(link) ?: return
+    }
+
+    /** Confirmada: se añade a «Mis rutinas». */
+    fun confirmImport() = viewModelScope.launch {
+        val routine = _pendingImport.value ?: return@launch
+        _pendingImport.value = null
         repo.saveRoutine(routine)
         _messages.tryEmit(context.getString(R.string.routine_imported, routine.name))
+    }
+
+    fun dismissImport() {
+        _pendingImport.value = null
     }
 
     /** Desde el widget: empezar una rutina por id. */

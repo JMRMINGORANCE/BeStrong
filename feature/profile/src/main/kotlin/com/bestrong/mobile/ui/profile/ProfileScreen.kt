@@ -56,6 +56,7 @@ import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.AppIntents
+import com.bestrong.mobile.security.BiometricLock
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.BarChart
 import com.bestrong.mobile.ui.components.ChartPoint
@@ -299,8 +300,14 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             body = stringResource(R.string.volume_keys_body),
                             checked = settings.volumeKeys,
                         ) { v -> vm.updateSettings { it.copy(volumeKeys = v) } }
+                        val unlockTitle = stringResource(R.string.progress_unlock_title)
                         SwitchItem(stringResource(R.string.progress_lock_setting), checked = settings.lockProgressPhotos) { v ->
-                            vm.updateSettings { it.copy(lockProgressPhotos = v) }
+                            // Quitar el bloqueo pide la huella/PIN: si no, cualquiera con el móvil desbloqueado lo desactivaría
+                            if (v) {
+                                vm.updateSettings { it.copy(lockProgressPhotos = true) }
+                            } else {
+                                BiometricLock.authenticate(context, unlockTitle, onSuccess = { vm.updateSettings { it.copy(lockProgressPhotos = false) } })
+                            }
                         }
                         SwitchItem(
                             title = stringResource(R.string.dumbbell_total),

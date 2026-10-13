@@ -10,4 +10,5 @@ interface WorkerEntryPoint {
     fun repository(): com.bestrong.mobile.data.BeStrongRepository
     fun settings(): com.bestrong.mobile.data.SettingsStore
     fun media(): com.bestrong.mobile.data.ExerciseMediaStore
+    fun backup(): com.bestrong.mobile.backup.FullBackup
 }

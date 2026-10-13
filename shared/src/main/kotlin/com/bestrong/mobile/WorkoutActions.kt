@@ -38,11 +38,14 @@ class WorkoutActions @Inject constructor(
      * botones de volumen). Devuelve false si no queda ninguna.
      */
     suspend fun completeNextSet(): Boolean {
-        val w = repository.activeWorkout.value ?: return false
-        val (index, set) = WorkoutEditor.nextPendingSet(w) ?: return false
-        val we = w.exercises[index]
-        val updated = WorkoutEditor.toggleSetCompleted(w, we.id, set.id)
-        repository.updateActive { WorkoutEditor.toggleSetCompleted(it, we.id, set.id) }
+        // La serie se elige dentro de updateActive, sobre el último estado guardado: dos toques
+        // seguidos (o un cambio del reloj) completan series distintas y nunca desmarcan una hecha
+        // (nextPendingSet solo devuelve series sin completar)
+        val (before, updated) = repository.updateActive { w ->
+            val (index, set) = WorkoutEditor.nextPendingSet(w) ?: return@updateActive w
+            WorkoutEditor.toggleSetCompleted(w, w.exercises[index].id, set.id)
+        } ?: return false
+        val (index, _) = WorkoutEditor.nextPendingSet(before) ?: return false
         val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index)
         if (rest > 0) restTimer.start(rest) else restTimer.skip()
         return true

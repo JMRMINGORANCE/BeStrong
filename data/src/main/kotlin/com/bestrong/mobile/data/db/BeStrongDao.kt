@@ -16,6 +16,10 @@ interface BeStrongDao {
     @Upsert
     suspend fun upsertWorkout(entity: WorkoutEntity)
 
+    /** Importación en bloque: ejercicios nuevos y entrenos en una sola transacción. */
+    @Upsert
+    suspend fun upsertAll(exercises: List<CustomExerciseEntity>, workouts: List<WorkoutEntity>)
+
     @Query("DELETE FROM workouts WHERE id = :id")
     suspend fun deleteWorkout(id: String)
 

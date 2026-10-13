@@ -123,7 +123,7 @@ class HistoryViewModel @Inject constructor(
 
     /** Repite un entrenamiento pasado como entrenamiento activo. */
     fun repeat(workout: Workout, onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeWorkout.value == null) {
+        if (repo.activeOnce() == null) {
             val again = Routine.fromWorkout(workout).toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             repo.setActive(again.copy(routineId = workout.routineId))
         }

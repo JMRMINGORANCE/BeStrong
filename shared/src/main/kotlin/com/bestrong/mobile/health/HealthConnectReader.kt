@@ -2,6 +2,8 @@ package com.bestrong.mobile.health
 
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.HealthConnectFeatures
+import androidx.health.connect.client.feature.ExperimentalFeatureAvailabilityApi
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -34,17 +36,26 @@ data class HealthSnapshot(
 @Singleton
 class HealthConnectReader @Inject constructor(@ApplicationContext private val context: Context) {
 
-    val permissions: Set<String> = setOf(
-        HealthPermission.getReadPermission(WeightRecord::class),
-        HealthPermission.getReadPermission(SleepSessionRecord::class),
-        HealthPermission.getReadPermission(RestingHeartRateRecord::class),
-        // Para calcular calorías más precisas: altura (metabolismo basal) y pulso durante el entreno
-        HealthPermission.getReadPermission(HeightRecord::class),
-        HealthPermission.getReadPermission(HeartRateRecord::class),
-    )
-
     private fun available() = HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE
     private val client by lazy { HealthConnectClient.getOrCreate(context) }
+
+    val permissions: Set<String> by lazy {
+        setOfNotNull(
+            HealthPermission.getReadPermission(WeightRecord::class),
+            HealthPermission.getReadPermission(SleepSessionRecord::class),
+            HealthPermission.getReadPermission(RestingHeartRateRecord::class),
+            // Para calcular calorías más precisas: altura (metabolismo basal) y pulso durante el entreno
+            HealthPermission.getReadPermission(HeightRecord::class),
+            HealthPermission.getReadPermission(HeartRateRecord::class),
+            // Sin este permiso Health Connect solo deja leer 30 días antes de la concesión (peso de 90 días, altura)
+            HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY.takeIf { historyAvailable() },
+        )
+    }
+
+    @OptIn(ExperimentalFeatureAvailabilityApi::class)
+    private fun historyAvailable(): Boolean = runCatching {
+        available() && client.features.getFeatureStatus(HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
+    }.getOrDefault(false)
 
     suspend fun granted(): Set<String> =
         if (!available()) emptySet() else runCatching { client.permissionController.getGrantedPermissions() }.getOrDefault(emptySet())

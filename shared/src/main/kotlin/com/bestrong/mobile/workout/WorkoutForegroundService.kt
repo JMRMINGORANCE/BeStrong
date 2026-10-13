@@ -50,28 +50,26 @@ class WorkoutForegroundService : LifecycleService() {
                 return START_NOT_STICKY
             }
         }
-        val workout = repository.activeWorkout.value
-        if (workout == null) {
-            stopSelf()
-            return START_NOT_STICKY
-        }
         if (!started) {
             started = true
             createChannel()
+            // startForeground enseguida (obligatorio tras startForegroundService), aunque en arranque
+            // en frío el entreno aún no se haya leído de la base de datos
+            val now = repository.activeWorkout.value
             try {
-                ServiceCompat.startForeground(this, NOTIFICATION_ID, build(workout, restTimer.rest.value), fgsType())
+                ServiceCompat.startForeground(this, NOTIFICATION_ID, now?.let { build(it, restTimer.rest.value) } ?: placeholder(), fgsType())
             } catch (e: Exception) {
                 Log.w(TAG, "No se pudo pasar a primer plano", e)
                 stopSelf()
                 return START_NOT_STICKY
             }
             lifecycleScope.launch {
+                if (repository.activeOnce() == null) return@launch stop()
                 combine(repository.activeWorkout, restTimer.rest) { w, r -> w to r }.collect { (w, r) ->
-                    if (w == null) {
-                        ServiceCompat.stopForeground(this@WorkoutForegroundService, ServiceCompat.STOP_FOREGROUND_REMOVE)
-                        stopSelf()
-                    } else {
-                        getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, build(w, r))
+                    when {
+                        w != null -> getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, build(w, r))
+                        // El StateFlow empieza en null: se comprueba en la base de datos antes de parar
+                        repository.activeOnce() == null -> stop()
                     }
                 }
             }
@@ -80,6 +78,20 @@ class WorkoutForegroundService : LifecycleService() {
     }
 
     private var started = false
+
+    private fun stop() {
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    /** Notificación provisional mientras se lee el entreno en curso. */
+    private fun placeholder(): Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        .setSmallIcon(R.drawable.ic_stat_dumbbell)
+        .setContentTitle(getString(R.string.notif_channel))
+        .setOngoing(true)
+        .setSilent(true)
+        .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+        .build()
 
     private fun fgsType(): Int =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE else 0
