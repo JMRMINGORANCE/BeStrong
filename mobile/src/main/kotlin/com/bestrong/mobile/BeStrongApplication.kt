@@ -13,6 +13,7 @@ import com.bestrong.core.sync.SharedSettings
 import com.bestrong.mobile.backup.AutoBackupWorker
 import com.bestrong.mobile.backup.ImagePrefetchWorker
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.ExerciseMediaStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.di.ApplicationScope
 import com.bestrong.mobile.notify.ReminderWorker
@@ -36,6 +37,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
+private const val MAX_WATCH_NOTE = 140
+
 /** Replica rutinas, historial, ajustes y el entreno en curso al reloj; mantiene el widget al día. */
 @Singleton
 class AppSync @Inject constructor(
@@ -47,6 +50,7 @@ class AppSync @Inject constructor(
     private val restTimer: RestTimerController,
     private val watchMetrics: WatchMetricsStore,
     private val watchPush: WatchPush,
+    private val media: ExerciseMediaStore,
 ) {
     /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
     suspend fun pushToWatchNow() = watchPush.pushToWatchNow()
@@ -68,8 +72,15 @@ class AppSync @Inject constructor(
         }
         scope.launch {
             // Objetivo semanal: el del programa activo si lo hay, como en la pantalla de inicio
-            combine(settings.settings, repository.activeProgram) { s, program ->
-                SharedSettings(s.unit, s.progressionEnabled, s.restVibration, weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal, exerciseIncrementKg = s.exerciseIncrementKg)
+            // Notas fijas: se releen cuando cambia alguna (cortas, para que quepan en la pantalla del reloj)
+            val notes = media.version.map { media.allNotes().mapValues { (_, n) -> n.trim().take(MAX_WATCH_NOTE) } }
+            combine(settings.settings, repository.activeProgram, notes) { s, program, pinned ->
+                SharedSettings(
+                    s.unit, s.progressionEnabled, s.restVibration,
+                    weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal,
+                    exerciseIncrementKg = s.exerciseIncrementKg,
+                    pinnedNotes = pinned,
+                )
             }.distinctUntilChanged()
                 .collect { watchSync.pushSettings(it) }
         }

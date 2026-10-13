@@ -21,6 +21,7 @@ import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
+import com.bestrong.core.sync.SharedSettings
 import com.bestrong.core.sync.WorkoutHealthData
 import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.core.training.HeartRate
@@ -91,6 +92,9 @@ class WorkoutSession @Inject constructor(
 ) {
     private val _workout = MutableStateFlow(store.activeWorkout)
     val workout: StateFlow<Workout?> = _workout.asStateFlow()
+
+    /** Ajustes del móvil (incluye las notas fijas por ejercicio). */
+    val settings: StateFlow<SharedSettings> get() = store.settings
 
     private val _exerciseIndex = MutableStateFlow(0)
     val exerciseIndex: StateFlow<Int> = _exerciseIndex.asStateFlow()

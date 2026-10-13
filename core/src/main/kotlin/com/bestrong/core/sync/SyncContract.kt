@@ -119,6 +119,8 @@ data class SharedSettings(
     val weeklyGoal: Int = 4,
     /** Incremento propio por ejercicio en kg (elegido en el móvil): bisel y progresión en el reloj. */
     val exerciseIncrementKg: Map<String, Double> = emptyMap(),
+    /** Nota fija de cada ejercicio (altura del asiento, agarre…), recortada para el reloj. */
+    val pinnedNotes: Map<String, String> = emptyMap(),
 ) {
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
 }

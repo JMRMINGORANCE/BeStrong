@@ -74,6 +74,7 @@ fun WorkoutScreen(
     val target by session.rotaryTarget.collectAsStateWithLifecycle()
     val repCounting by session.repCounting.collectAsStateWithLifecycle()
     val countedReps by session.repCounter.reps.collectAsStateWithLifecycle()
+    val pinnedNotes = session.settings.collectAsStateWithLifecycle().value.pinnedNotes
     val velocity by session.velocityInfo.collectAsStateWithLifecycle()
     val voice = rememberVoiceInput(stringResource(R.string.voice_prompt)) { session.applySpoken(it) }
     val unit = LocalWeightUnit.current
@@ -152,6 +153,10 @@ fun WorkoutScreen(
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
                 )
+                // Nota fija del móvil (asiento, agarre…), en una línea
+                pinnedNotes[we.exercise.id]?.let {
+                    Text("📌 $it", style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
+                }
                 if (set == null) {
                     Text(stringResource(R.string.exercise_done), color = Done, style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(6.dp))
