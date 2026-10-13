@@ -282,7 +282,8 @@ class ProfileViewModel @Inject constructor(
     /** Exporta todo el historial al archivo elegido (SAF). */
     fun exportCsv(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
-            val csv = WorkoutCsv.export(inRange(repo.historyOnce()))
+            val history = repo.historyOnce()
+            val csv = withContext(Dispatchers.Default) { WorkoutCsv.export(inRange(history)) }
             withContext(Dispatchers.IO) {
                 context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error(context.getString(R.string.file_open_error))
             }

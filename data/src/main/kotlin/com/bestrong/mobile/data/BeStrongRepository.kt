@@ -22,6 +22,7 @@ import com.bestrong.mobile.di.ApplicationScope
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 @Singleton
 class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @ApplicationScope scope: CoroutineScope) {
@@ -157,12 +159,15 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** Importa entrenamientos (p. ej. desde CSV) evitando duplicados. Devuelve cuántos se añadieron. */
     suspend fun importWorkouts(workouts: List<Workout>, newExercises: List<Exercise>): Int {
-        newExercises.forEach { saveCustomExercise(it) }
         val existing = historyOnce(includePartner = true)
         val ids = existing.map { it.id }.toSet()
         val keys = existing.map { it.startedAtEpochMs to it.name }.toSet()
         val fresh = workouts.filter { it.id !in ids && (it.startedAtEpochMs to it.name) !in keys }
-        fresh.forEach { saveWorkout(it) }
+        // Todo de una vez (una transacción): rápido con miles de entrenos y sin importaciones a medias
+        val (exerciseRows, workoutRows) = withContext(Dispatchers.Default) {
+            newExercises.map { customExerciseEntity(it) } to fresh.map { WorkoutEntity(it.id, it.startedAtEpochMs, Persistence.encodeWorkout(it)) }
+        }
+        dao.upsertAll(exerciseRows, workoutRows)
         return fresh.size
     }
 
@@ -203,9 +208,14 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
-    suspend fun historyOnce(includePartner: Boolean = false): List<Workout> =
-        dao.workoutsOnce().mapNotNull { runCatching { Persistence.decodeWorkout(it.json) }.getOrNull() }
-            .filter { includePartner || it.athlete == null }
+    suspend fun historyOnce(includePartner: Boolean = false): List<Workout> {
+        val rows = dao.workoutsOnce()
+        // Decodificar miles de entrenos no debe hacerse en el hilo principal
+        return withContext(Dispatchers.Default) {
+            rows.mapNotNull { runCatching { Persistence.decodeWorkout(it.json) }.getOrNull() }
+                .filter { includePartner || it.athlete == null }
+        }
+    }
 
     // --- Rutinas -----------------------------------------------------------------------------
 
@@ -228,13 +238,17 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun routine(id: String): Routine? = routinesOnce().firstOrNull { it.id == id }
 
-    suspend fun routinesOnce(): List<Routine> =
-        dao.routinesOnce().mapNotNull { runCatching { Persistence.decodeRoutine(it.json) }.getOrNull() }
+    suspend fun routinesOnce(): List<Routine> {
+        val rows = dao.routinesOnce()
+        return withContext(Dispatchers.Default) { rows.mapNotNull { runCatching { Persistence.decodeRoutine(it.json) }.getOrNull() } }
+    }
 
     // --- Ejercicios personalizados ----------------------------------------------------------
 
-    suspend fun saveCustomExercise(exercise: Exercise) =
-        dao.upsertCustomExercise(CustomExerciseEntity(exercise.id, json.encodeToString(Exercise.serializer(), exercise.copy(isCustom = true))))
+    suspend fun saveCustomExercise(exercise: Exercise) = dao.upsertCustomExercise(customExerciseEntity(exercise))
+
+    private fun customExerciseEntity(exercise: Exercise) =
+        CustomExerciseEntity(exercise.id, json.encodeToString(Exercise.serializer(), exercise.copy(isCustom = true)))
 
     suspend fun deleteCustomExercise(id: String) = dao.deleteCustomExercise(id)
 
