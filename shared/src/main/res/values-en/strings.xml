@@ -912,4 +912,5 @@
     <string name="hc_more_perms">Missing permissions to also export body weight and body fat from Measurements</string>
     <string name="hc_grant_more">Grant permissions</string>
     <string name="dumbbells_nearest">Closest dumbbells in your gym: %1$s</string>
+    <string name="previous_set_note">Last time: ✎ %1$s</string>
 </resources>

@@ -360,6 +360,15 @@ fun SetRow(
                 }
             }
         }
+        // Lo que apuntaste en esta serie la última vez, mientras está pendiente
+        previous?.note?.takeIf { it.isNotBlank() && !set.completed }?.let { note ->
+            Text(
+                stringResource(R.string.previous_set_note, note),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(start = 48.dp, bottom = 2.dp),
+            )
+        }
         focusedField?.let { field ->
             StepBar(
                 field = field,

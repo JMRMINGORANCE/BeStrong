@@ -912,4 +912,5 @@
     <string name="hc_more_perms">Faltan permisos para exportar también el peso y la grasa de Medidas</string>
     <string name="hc_grant_more">Conceder permisos</string>
     <string name="dumbbells_nearest">Mancuernas más cercanas en tu gimnasio: %1$s</string>
+    <string name="previous_set_note">Última vez: ✎ %1$s</string>
 </resources>
