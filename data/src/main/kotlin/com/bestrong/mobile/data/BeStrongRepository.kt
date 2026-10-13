@@ -72,8 +72,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         .stateIn(scope, SharingStarted.Eagerly, null)
 
     /** Entreno en curso leído de la base de datos (en arranque en frío [activeWorkout] aún vale null). */
-    suspend fun activeOnce(): Workout? =
-        dao.valueOnce(KEY_ACTIVE)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
+    suspend fun activeOnce(): Workout? = currentActive()
 
     /** Programa con progresión que sigue el usuario (null = ninguno). */
     val activeProgram: StateFlow<ActiveProgram?> = dao.value(KEY_PROGRAM)
