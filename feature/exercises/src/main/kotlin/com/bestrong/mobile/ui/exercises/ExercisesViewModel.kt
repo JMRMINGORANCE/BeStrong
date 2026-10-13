@@ -16,6 +16,7 @@ import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.training.Injuries
+import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.util.newId
@@ -161,15 +162,18 @@ class ExercisesViewModel @Inject constructor(
      */
     private fun sessionNotes(exerciseId: String, history: List<Workout>, routines: List<com.bestrong.core.model.Routine>): Map<String, String> {
         val templates = routines.flatMap { it.exercises }.filter { it.exercise.id == exerciseId }.map { it.notes }.toSet()
+        // (id, nota, ¿de programa?), de la sesión más reciente a la más antigua
         val withNotes = history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
-            w.exercises.filter { it.exercise.id == exerciseId }.takeIf { it.isNotEmpty() }
-                ?.let { list -> w.id to list.map { it.notes }.filter(String::isNotBlank).joinToString(" · ") }
+            w.exercises.filter { it.exercise.id == exerciseId }.takeIf { it.isNotEmpty() }?.let { list ->
+                Triple(w.id, list.map { it.notes }.filter(String::isNotBlank).joinToString(" · "), w.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true)
+            }
         }
-        // Una nota que se repite en muchas sesiones es la del programa (T1, AMRAP…), no una del día
-        val repeated = withNotes.groupingBy { it.second }.eachCount().filterValues { it >= 3 }.keys
-        return withNotes.withIndex().mapNotNull { (i, p) ->
-            val (id, note) = p
-            note.takeIf { it.isNotBlank() && it !in templates && it !in repeated && it != withNotes.getOrNull(i + 1)?.second }?.let { id to it }
+        // En los programas, las notas que genera el propio programa (T1/T2/T3, AMRAP…) se repiten entre sesiones
+        val programNotes = withNotes.filter { it.third }.groupingBy { it.second }.eachCount().filterValues { it >= 2 }.keys
+        return withNotes.withIndex().mapNotNull { (i, t) ->
+            val (id, note, fromProgram) = t
+            val generated = fromProgram && (note in programNotes || PROGRAM_TIER.containsMatchIn(note))
+            note.takeIf { it.isNotBlank() && it !in templates && !generated && it != withNotes.getOrNull(i + 1)?.second }?.let { id to it }
         }.toMap()
     }
 
@@ -192,3 +196,6 @@ class ExercisesViewModel @Inject constructor(
 
     fun deleteCustom(id: String) = viewModelScope.launch { repo.deleteCustomExercise(id) }
 }
+
+/** Notas de nivel que genera un programa (GZCLP: «T1», «T2 · …»). */
+private val PROGRAM_TIER = Regex("^T\\d\\b")

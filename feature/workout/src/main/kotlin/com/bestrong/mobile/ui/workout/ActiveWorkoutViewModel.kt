@@ -422,9 +422,9 @@ class ActiveWorkoutViewModel @Inject constructor(
             return@launch
         }
         // Se puede deshacer desde Inicio durante unos segundos (con el descanso tal como iba)
-        val restEnd = restTimer.rest.value?.endsAtEpochMs
+        val rest = restTimer.rest.value
         restTimer.skip()
-        repo.discardActive(restEnd)
+        repo.discardActive(rest?.endsAtEpochMs, rest?.totalSeconds ?: 0)
     }
 
     fun saveSummaryAsRoutine() {
@@ -474,6 +474,9 @@ class ActiveWorkoutViewModel @Inject constructor(
         val zone = java.time.ZoneId.systemDefault()
         val day = java.time.Instant.ofEpochMilli(finished.startedAtEpochMs).atZone(zone).toLocalDate()
         val goal = repo.activeProgram.value?.weeklyGoal ?: settings.value.weeklyGoal
+        // Solo si es de esta semana (un entreno olvidado abierto desde la anterior no cuenta para hoy)
+        val thisMonday = java.time.LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        if (day.isBefore(thisMonday)) return null
         val others = history.filter { it.id != finished.id }
         val before = Periodization.trainedDaysOfWeek(others, day, zone).size
         val after = Periodization.trainedDaysOfWeek(others + finished, day, zone).size

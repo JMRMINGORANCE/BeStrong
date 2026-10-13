@@ -148,4 +148,5 @@
     <string name="remove_set">Satz entfernen</string>
     <string name="undo_last_set">Letzten Satz rückgängig</string>
     <string name="new_record_live">🏆 Rekord!</string>
+    <string name="routine_minutes_suffix">%1$s · ≈ %2$d Min.</string>
 </resources>

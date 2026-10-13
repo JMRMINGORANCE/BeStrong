@@ -90,8 +90,7 @@ class WorkoutActions @Inject constructor(
     /** Recupera el entreno descartado y, si se descartó en mitad de un descanso, lo sigue donde iba. */
     suspend fun restoreDiscarded(): Boolean {
         if (!repository.restoreDiscarded()) return false
-        val left = repository.restoredRestEnd?.let { (it - System.currentTimeMillis()) / 1000 } ?: 0
-        if (left > 0) restTimer.start(left.toInt())
+        repository.restoredRestEnd?.let { (end, total) -> restTimer.restore(end, total) }
         return true
     }
 

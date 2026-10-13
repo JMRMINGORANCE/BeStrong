@@ -75,7 +75,8 @@ data class GymProfile(
             // una escrita en libras se respeta (a media libra)
             return when {
                 unit == WeightUnit.KG -> barKg
-                else -> METRIC_TO_LB[barKg] ?: (Math.round(unit.fromKg(barKg) * 2) / 2.0)
+                // Con margen: guardar el gimnasio en libras deja la barra en 20,003 kg (44,1 lb tecleado)
+                else -> METRIC_TO_LB.entries.firstOrNull { kotlin.math.abs(it.key - barKg) < 0.05 }?.value ?: (Math.round(unit.fromKg(barKg) * 2) / 2.0)
             }
         }
     }

@@ -71,7 +71,9 @@ object WorkoutEditor {
                 val closesRound = group.filter { it > i }.none { j -> workout.exercises[j].sets.getOrNull(k)?.completed == false }
                 // Cronómetro en marcha: solo lo que le queda
                 val left = set.startedAtEpochMs?.let { (set.durationSec - ((nowEpochMs - it) / 1000).toInt()).coerceAtLeast(0) } ?: set.durationSec
-                maxOf(if (set.isRunning) 0 else secondsPerSet, left) to if (closesRound) we.restSeconds else 0
+                // Antes de un drop set no se descansa (como en afterSetCompleted)
+                val nextIsDrop = we.sets.drop(k + 1).firstOrNull { !it.completed }?.type == SetType.DROP
+                maxOf(if (set.isRunning) 0 else secondsPerSet, left) to if (closesRound && !nextIsDrop) we.restSeconds else 0
             }
         }
         if (pending.isEmpty()) return 0

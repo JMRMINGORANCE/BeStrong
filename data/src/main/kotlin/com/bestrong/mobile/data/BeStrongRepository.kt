@@ -153,17 +153,17 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** Descarta el entreno en curso guardándolo para poder deshacerlo. */
     /** [restEndsAtEpochMs]: fin del descanso en marcha al descartar, para retomarlo al deshacer. */
-    suspend fun discardActive(restEndsAtEpochMs: Long? = null) = activeMutex.withLock {
+    suspend fun discardActive(restEndsAtEpochMs: Long? = null, restTotalSeconds: Int = 0) = activeMutex.withLock {
         _discarded.value = currentActive()
         discardedAt = System.currentTimeMillis()
-        discardedRestEnd = restEndsAtEpochMs
+        discardedRestEnd = restEndsAtEpochMs?.let { it to restTotalSeconds }
         write(null)
     }
 
-    private var discardedRestEnd: Long? = null
+    private var discardedRestEnd: Pair<Long, Int>? = null
 
-    /** Fin del descanso que había al descartar el entreno recuperado (null si no había). */
-    var restoredRestEnd: Long? = null
+    /** Fin y duración total del descanso que había al descartar el entreno recuperado (null si no había). */
+    var restoredRestEnd: Pair<Long, Int>? = null
         private set
 
     private var discardedAt = 0L

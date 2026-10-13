@@ -87,6 +87,15 @@ class RestTimerController @Inject constructor(
         schedule()
     }
 
+    /** Retoma un descanso que ya estaba en marcha (al deshacer un descarte), con su duración total. */
+    fun restore(endsAtEpochMs: Long, totalSeconds: Int) {
+        if (endsAtEpochMs <= System.currentTimeMillis()) return skip()
+        _restEndedAt.value = null
+        _rest.value = RestState(endsAtEpochMs, totalSeconds.coerceAtLeast(1))
+        persist(_rest.value)
+        schedule()
+    }
+
     fun adjust(deltaSeconds: Int) {
         val r = _rest.value ?: return
         _rest.value = RestState(

@@ -100,7 +100,8 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
                         secondaryLabel = {
                             // Ejercicios y tiempo aproximado (series × 40 s + descansos)
                             val minutes = remember(routine) { (WorkoutEditor.estimatedRemainingSeconds(routine.toWorkout(0)) + 59) / 60 }
-                            Text(stringResource(R.string.n_exercises, routine.exercises.size) + if (minutes > 0) " · ≈ $minutes min" else "")
+                            val exercises = stringResource(R.string.n_exercises, routine.exercises.size)
+                            Text(if (minutes > 0) stringResource(R.string.routine_minutes_suffix, exercises, minutes) else exercises)
                         },
                         colors = ButtonDefaults.filledTonalButtonColors(),
                         modifier = Modifier.fillMaxWidth(),

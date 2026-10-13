@@ -231,7 +231,9 @@ class ProfileViewModel @Inject constructor(
     /** Entrenos de los últimos 7 días en texto, para el entrenador (null y aviso si no hay ninguno). */
     fun coachWeekText(): String? {
         val from = System.currentTimeMillis() - 7 * 86_400_000L
-        val text = CoachReport.text(repo.history.value, from, settingsStore.settings.value.unit, exerciseName = { it.displayName(context) })
+        val text = settingsStore.settings.value.let { prefs ->
+            CoachReport.text(repo.history.value, from, prefs.unit, exerciseName = { it.displayName(context) }, dumbbellTotal = prefs.dumbbellTotal)
+        }
         if (text.isBlank()) _messages.tryEmit(context.getString(R.string.share_week_empty))
         return text.takeIf { it.isNotBlank() }?.let { context.getString(R.string.share_week_title) + "\n\n" + it }
     }
