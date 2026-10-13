@@ -6,7 +6,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -43,6 +45,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -64,6 +67,12 @@ class ExerciseService : LifecycleService() {
 
     private val exerciseClient by lazy { HealthServices.getClient(this).exerciseClient }
     private var exerciseStarted = false
+
+    /** Seguimiento del entreno (inicio, cardio y pausa): se cancela al parar. */
+    private var sessionJob: Job? = null
+
+    /** Parada en curso: un arranque nuevo la cancela. */
+    private var stopJob: Job? = null
 
     /** Tipo del ejercicio abierto en Health Services (pesas o la máquina de cardio en marcha). */
     private var currentType: ExerciseType? = null
@@ -97,20 +106,32 @@ class ExerciseService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
         if (intent?.action == ACTION_STOP) {
-            stopEverything()
+            stopEverything(startId)
             return START_NOT_STICKY
         }
+        stopJob?.cancel()
+        stopJob = null
         if (!goForeground()) {
-            stopSelf()
+            // Sin permiso de sensores: hay que cumplir con startForeground (si no, Android cierra
+            // la app) y parar enseguida
+            goForegroundWithoutHealth()
+            stopEverything(startId)
+            return START_NOT_STICKY
+        }
+        // Reinicio del sistema (START_STICKY) sin nada en marcha: se cierra Health Services y se para
+        if (session.workout.value == null && !cardio.isActive) {
+            stopEverything(startId, endExercise = true)
             return START_NOT_STICKY
         }
         if (!exerciseStarted) {
             exerciseStarted = true
-            lifecycleScope.launch {
-                startExercise()
-                followCardio()
+            sessionJob = lifecycleScope.launch {
+                launch {
+                    startExercise()
+                    followCardio()
+                }
+                followPause()
             }
-            followPause()
         }
         return START_STICKY
     }
@@ -150,6 +171,7 @@ class ExerciseService : LifecycleService() {
         // Con GPS (cardio y permiso concedido) el servicio también es de ubicación
         val gps = cardio.isActive && checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
         val type = if (gps) ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION else ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH
+        lastNotification = builder.build()
         return try {
             ServiceCompat.startForeground(this, NOTIFICATION_ID, builder.build(), type)
             true
@@ -158,6 +180,25 @@ class ExerciseService : LifecycleService() {
             Log.w(TAG, "No se pudo iniciar en primer plano", e)
             false
         }
+    }
+
+    private var lastNotification: android.app.Notification? = null
+
+    /** Primer plano mínimo (servicio corto, sin permisos) solo para poder pararse sin que Android cierre la app. */
+    private fun goForegroundWithoutHealth() {
+        val notification = lastNotification ?: return
+        runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE)
+            } else {
+                startForeground(NOTIFICATION_ID, notification)
+            }
+        }.onFailure { Log.w(TAG, "No se pudo iniciar en primer plano sin sensores", it) }
+    }
+
+    /** Límite del servicio corto (no debería llegar: se para enseguida). */
+    override fun onTimeout(startId: Int) {
+        stopSelf()
     }
 
     private suspend fun startExercise() {
@@ -201,13 +242,11 @@ class ExerciseService : LifecycleService() {
      * máquina (cinta, elíptica…) para que el reloj calcule las calorías con su modelo; al pararlo,
      * vuelta a pesas. Las calorías de cada tramo se suman en [WorkoutSession.onHealthSegmentChanged].
      */
-    private fun followCardio() {
-        lifecycleScope.launch {
-            session.workout
-                .map { w -> w?.let { WorkoutEditor.runningCardio(it) }?.first?.exercise?.id }
-                .distinctUntilChanged()
-                .collect { if (!cardio.isActive && session.workout.value != null) switchTo(wantedType()) }
-        }
+    private suspend fun followCardio() {
+        session.workout
+            .map { w -> w?.let { WorkoutEditor.runningCardio(it) }?.first?.exercise?.id }
+            .distinctUntilChanged()
+            .collect { if (!cardio.isActive && session.workout.value != null) switchTo(wantedType()) }
     }
 
     private suspend fun switchTo(type: ExerciseType) {
@@ -271,23 +310,29 @@ class ExerciseService : LifecycleService() {
             ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS
 
     /** La pausa del entreno (desde el móvil o el reloj) también pausa pulso y calorías. */
-    private fun followPause() {
-        lifecycleScope.launch {
-            session.workout.map { it?.isPaused == true }.distinctUntilChanged().collect { paused ->
-                if (cardio.isActive) return@collect
-                runCatching { if (paused) exerciseClient.pauseExercise() else exerciseClient.resumeExercise() }
-            }
+    private suspend fun followPause() {
+        session.workout.map { it?.isPaused == true }.distinctUntilChanged().collect { paused ->
+            if (cardio.isActive) return@collect
+            runCatching { if (paused) exerciseClient.pauseExercise() else exerciseClient.resumeExercise() }
         }
     }
 
-    private fun stopEverything() {
-        lifecycleScope.launch {
-            if (exerciseStarted) {
+    /**
+     * Cierra Health Services y para el servicio. Con stopSelfResult(startId) un arranque llegado
+     * mientras tanto no se pierde; ese arranque además cancela esta parada.
+     */
+    private fun stopEverything(startId: Int, endExercise: Boolean = exerciseStarted) {
+        exerciseStarted = false
+        currentType = null
+        sessionJob?.cancel()
+        sessionJob = null
+        stopJob?.cancel()
+        stopJob = lifecycleScope.launch {
+            if (endExercise) {
                 runCatching { exerciseClient.endExercise() }
                 runCatching { exerciseClient.clearUpdateCallback(callback) }
             }
-            ServiceCompat.stopForeground(this@ExerciseService, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            stopSelf()
+            if (stopSelfResult(startId)) ServiceCompat.stopForeground(this@ExerciseService, ServiceCompat.STOP_FOREGROUND_REMOVE)
         }
     }
 
@@ -299,7 +344,17 @@ class ExerciseService : LifecycleService() {
         private const val SWITCH_TIMEOUT_MS = 5_000L
         private const val SWITCH_POLL_MS = 250L
 
+        /** Permiso del pulso: en Android 16 (API 36) pasa de BODY_SENSORS a health.READ_HEART_RATE. */
+        val HEART_RATE_PERMISSION: String =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) "android.permission.health.READ_HEART_RATE" else android.Manifest.permission.BODY_SENSORS
+
+        /** El servicio de tipo "health" exige pulso o actividad física; sin ninguno no se arranca. */
+        fun hasSensorPermission(context: Context): Boolean =
+            listOf(HEART_RATE_PERMISSION, android.Manifest.permission.ACTIVITY_RECOGNITION)
+                .any { context.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
+
         fun start(context: Context) {
+            if (!hasSensorPermission(context)) return
             runCatching { context.startForegroundService(Intent(context, ExerciseService::class.java)) }
                 .onFailure { Log.w(TAG, "No se pudo arrancar el servicio", it) }
         }

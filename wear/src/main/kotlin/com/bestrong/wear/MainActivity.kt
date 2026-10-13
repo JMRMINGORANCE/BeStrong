@@ -42,8 +42,9 @@ class MainActivity : ComponentActivity() {
         // En dispositivos sin la librería de Wear (tests, emuladores no-Wear) el modo ambiente no existe
         runCatching { lifecycle.addObserver(AmbientLifecycleObserver(this, ambientCallback)) }
 
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {}
-            .launch(arrayOf(Manifest.permission.BODY_SENSORS, Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.POST_NOTIFICATIONS))
+        // El servicio de medición solo se arranca con el permiso concedido (si no, Android cierra la app)
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startMeasuringIfActive() }
+            .launch(arrayOf(ExerciseService.HEART_RATE_PERMISSION, Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.POST_NOTIFICATIONS))
 
         lifecycleScope.launch { container.phoneSync.pullFromPhone(onActive = container.session::applyRemote) }
         if (savedInstanceState == null) handleIntent(intent)
@@ -60,8 +61,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Entreno empezado en el móvil con la app del reloj cerrada: arrancamos la medición ahora
-        if (container.session.workout.value != null) ExerciseService.start(this)
+        // Entreno empezado en el móvil con la app del reloj cerrada (o retomado tras un reinicio
+        // del proceso): arrancamos la medición ahora, si ya hay permiso
+        startMeasuringIfActive()
+    }
+
+    private fun startMeasuringIfActive() {
+        if (container.session.workout.value != null || container.cardio.isActive) ExerciseService.start(this)
     }
 
     override fun onNewIntent(intent: Intent) {
