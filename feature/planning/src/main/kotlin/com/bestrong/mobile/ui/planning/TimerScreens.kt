@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.planning
 
+import android.os.SystemClock
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.compose.foundation.background
@@ -100,27 +101,26 @@ fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -> Unit) {
     }
     var elapsedMs by rememberSaveable { mutableLongStateOf(0L) }
     var running by rememberSaveable { mutableStateOf(true) }
-    var lastPhase by remember { mutableIntStateOf(-1) }
     val total = IntervalTimer.totalSeconds(plan)
+    val phases = remember(plan) { IntervalTimer.phases(plan) }
+    fun phaseAt(ms: Long) = IntervalTimer.at(plan, (ms / 1000).toInt())?.let { phases.indexOf(it.first) } ?: phases.size
     LaunchedEffect(running) {
-        var last = System.currentTimeMillis()
+        // El propio bucle detecta el cambio de fase y vibra: sin recomposición (pantalla apagada,
+        // app en segundo plano) también avisa. Reloj monótono: no le afectan cambios de hora.
+        val start = SystemClock.elapsedRealtime() - elapsedMs
+        var lastPhase = phaseAt(elapsedMs)
         while (running) {
             delay(200)
-            val now = System.currentTimeMillis()
-            elapsedMs += now - last
-            last = now
+            elapsedMs = SystemClock.elapsedRealtime() - start
+            val phase = phaseAt(elapsedMs)
+            if (phase != lastPhase) {
+                vibrate(context, long = phase >= phases.size)
+                lastPhase = phase
+            }
+            if (phase >= phases.size) running = false
         }
     }
     val current = IntervalTimer.at(plan, (elapsedMs / 1000).toInt())
-    val phases = IntervalTimer.phases(plan)
-    val phaseIndex = current?.let { phases.indexOf(it.first) } ?: phases.size
-    LaunchedEffect(phaseIndex) {
-        if (phaseIndex != lastPhase) {
-            if (lastPhase >= 0) vibrate(context, long = phaseIndex >= phases.size)
-            lastPhase = phaseIndex
-        }
-        if (phaseIndex >= phases.size) running = false
-    }
     val work = current?.first?.work == true
     Scaffold(
         topBar = {
@@ -170,14 +170,24 @@ fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -> Unit) {
 @Composable
 fun GuidedSessionScreen(warmup: Boolean, focus: BodyFocus, onBack: () -> Unit) {
     val context = LocalContext.current
+    val view = LocalView.current
+    DisposableEffect(Unit) {
+        view.keepScreenOn = true
+        onDispose { view.keepScreenOn = false }
+    }
     val lang = com.bestrong.mobile.ui.components.uiLanguage()
     val steps = remember(warmup, focus) { if (warmup) GuidedRoutines.warmup(focus) else GuidedRoutines.stretching(focus) }
     var index by rememberSaveable { mutableIntStateOf(0) }
-    var left by rememberSaveable(index) { mutableIntStateOf(steps.getOrNull(index)?.seconds ?: 0) }
+    // Fin del paso en reloj monótono: la cuenta no se retrasa aunque el bucle se frene
+    val endAt by rememberSaveable(index) { mutableLongStateOf(SystemClock.elapsedRealtime() + (steps.getOrNull(index)?.seconds ?: 0) * 1_000L) }
+    var now by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+    val left = ((endAt - now + 999) / 1_000).coerceAtLeast(0).toInt()
     LaunchedEffect(index) {
-        while (left > 0) {
-            delay(1_000)
-            left--
+        while (true) {
+            now = SystemClock.elapsedRealtime()
+            val remaining = endAt - now
+            if (remaining <= 0) break
+            delay(remaining.coerceAtMost(250))
         }
         if (index < steps.size) {
             vibrate(context, long = index == steps.lastIndex)
