@@ -2,6 +2,7 @@ package com.bestrong.wear.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,12 +67,8 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
                 return@CompositionLocalProvider
             }
             AppScaffold {
-                val start = when {
-                    active != null -> WearRoutes.WORKOUT
-                    cardioState != null -> WearRoutes.CARDIO
-                    else -> WearRoutes.HOME
-                }
-                SwipeDismissableNavHost(navController = nav, startDestination = start) {
+                // Inicio fijo: si dependiera del estado en vivo, cada cambio rehace el grafo y borra la pila
+                SwipeDismissableNavHost(navController = nav, startDestination = WearRoutes.HOME) {
                     composable(WearRoutes.HOME) {
                         HomeScreen(
                             container = container,
@@ -102,6 +99,8 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
                     }
                     composable(WearRoutes.INFO) { ExerciseInfoScreen(session) }
                     composable(WearRoutes.CARDIO) {
+                        // Al salir (también deslizando) el resumen del cardio ya visto no vuelve a salir
+                        DisposableEffect(Unit) { onDispose { if (container.cardio.state.value == null) container.cardio.dismissFinished() } }
                         CardioScreen(container.cardio) { nav.navigate(WearRoutes.HOME) { popUpTo(0) } }
                     }
                     composable(WearRoutes.ROUTINE_NEW) { RoutineCreateScreen(container) { nav.popBackStack() } }
@@ -117,6 +116,20 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
                             session.dismissSummary()
                             nav.navigate(WearRoutes.HOME) { popUpTo(0) }
                         }
+                    }
+                }
+                // Entreno o cardio en marcha (al abrir la app o empezado desde el móvil): a su pantalla
+                val cardioActive = cardioState != null
+                LaunchedEffect(active?.id, cardioActive) {
+                    if (nav.currentDestination?.route != WearRoutes.HOME) return@LaunchedEffect
+                    val target = when {
+                        active != null -> WearRoutes.WORKOUT
+                        cardioActive -> WearRoutes.CARDIO
+                        else -> return@LaunchedEffect
+                    }
+                    nav.navigate(target) {
+                        popUpTo(WearRoutes.HOME)
+                        launchSingleTop = true
                     }
                 }
             }
