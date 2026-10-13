@@ -931,4 +931,14 @@
     <string name="undo_copied_sets">Load copied to the next sets</string>
     <string name="program_amrap_note">Last set: as many reps as possible (+)</string>
     <string name="program_week_prefix">W</string>
+    <string name="set_duplicate">Duplicate set</string>
+    <string name="complete_remaining">Mark remaining sets as done (%1$d)</string>
+    <string name="rest_real_exercise">Actual rest %1$s · planned %2$s</string>
+    <string name="lagging_muscles_title">This week you\'re behind on</string>
+    <string name="lagging_muscle_line">%1$s: %2$s of %3$d sets</string>
+    <string name="deadline_title">When do you need to finish?</string>
+    <string name="deadline_over">You\'d go %1$d min past your limit (%2$s): skip or shorten an exercise</string>
+    <string name="deadline_ok">Limit %1$s: you\'re on time</string>
+    <string name="deadline_hint">Tap to set a time limit</string>
+    <string name="deadline_clear">Remove</string>
 </resources>

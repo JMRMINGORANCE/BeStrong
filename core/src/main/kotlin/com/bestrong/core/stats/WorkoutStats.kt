@@ -297,23 +297,30 @@ object WorkoutStats {
 
     /**
      * Media semanal de series de [trend] en las semanas ya cerradas (la actual va a medias) y cómo
-     * queda frente al rango habitual para ganar músculo ([LOW_WEEKLY_SETS]–[HIGH_WEEKLY_SETS]).
+     * queda frente al rango habitual para ganar músculo ([MuscleTargets]).
      */
-    fun weeklySetsZone(weeks: List<Pair<LocalDate, Double>>, closedWeeks: Int = 4): Pair<Double, VolumeZone>? {
+    fun weeklySetsZone(weeks: List<Pair<LocalDate, Double>>, closedWeeks: Int = 4): Pair<Double, VolumeStatus>? {
         // Las semanas antes de empezar a entrenar ese músculo no cuentan (bajarían la media)
         val closed = weeks.dropLast(1).dropWhile { it.second == 0.0 }.takeLast(closedWeeks)
         if (closed.size < 2) return null
         val avg = closed.map { it.second }.average()
-        val zone = when {
-            avg < LOW_WEEKLY_SETS -> VolumeZone.LOW
-            avg > HIGH_WEEKLY_SETS -> VolumeZone.HIGH
-            else -> VolumeZone.OPTIMAL
-        }
+        val zone = MuscleTargets.status(avg)
         return avg to zone
     }
 
-    const val LOW_WEEKLY_SETS = 10
-    const val HIGH_WEEKLY_SETS = 20
+    /**
+     * Músculos que esta semana van por detrás: de jueves en adelante, los que normalmente llegas a
+     * [MuscleTargets.MIN_WEEKLY_SETS] (media de las semanas cerradas) y esta semana aún no. Como mucho [limit],
+     * los más atrasados primero, con las series que llevas.
+     */
+    fun laggingMuscles(history: List<Workout>, today: LocalDate, zone: ZoneId, limit: Int = 3): List<Pair<MuscleGroup, Double>> {
+        if (today.dayOfWeek < DayOfWeek.THURSDAY) return emptyList()
+        return muscleTrend(history, today, zone).mapNotNull { (m, weeks) ->
+            val usual = weeklySetsZone(weeks)?.second ?: return@mapNotNull null
+            val now = weeks.last().second
+            (m to now).takeIf { usual >= VolumeStatus.OPTIMAL && now < MuscleTargets.MIN_WEEKLY_SETS }
+        }.sortedBy { it.second }.take(limit)
+    }
 
     /** Series efectivas por grupo muscular (el principal cuenta 1, los secundarios 0,5). */
     fun setsPerMuscle(history: List<Workout>, sinceEpochMs: Long): Map<MuscleGroup, Double> {
@@ -329,6 +336,3 @@ object WorkoutStats {
         return result.toList().sortedByDescending { it.second }.toMap()
     }
 }
-
-/** Dónde queda el volumen semanal de un músculo frente al rango habitual. */
-enum class VolumeZone { LOW, OPTIMAL, HIGH }

@@ -112,7 +112,6 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.RestTimerBar
 import com.bestrong.mobile.ui.components.StatTile
 import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.ui.components.formatClock
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.rememberNow
@@ -144,6 +143,7 @@ fun ActiveWorkoutScreen(
     val restEndedAt by vm.restEndedAt.collectAsStateWithLifecycle()
     val summary by vm.summary.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
+    val deadline by vm.deadline.collectAsStateWithLifecycle()
     val suggestions by vm.suggestions.collectAsStateWithLifecycle()
     val metrics by vm.watchMetrics.collectAsStateWithLifecycle()
     var confirmFinish by remember { mutableStateOf(false) }
@@ -264,7 +264,7 @@ fun ActiveWorkoutScreen(
         },
     ) { padding ->
         val content = Modifier.padding(padding).fillMaxSize()
-        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds)
+        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline?.takeIf { it > System.currentTimeMillis() - STALE_DEADLINE_MS }, vm::setDeadline)
         when {
             posture == FoldPosture.TABLETOP -> Column(content) {
                 // Mitad superior: lo que se mira desde el banco
@@ -357,8 +357,8 @@ private fun KeepScreenOn(enabled: Boolean) {
     }
 }
 
-/** Lo que necesita la hora de fin además del entreno: descanso en marcha y descanso tras calentar. */
-private data class EtaInputs(val restEndsAtEpochMs: Long? = null, val warmupRestSeconds: Int = WorkoutEditor.WARMUP_REST_SECONDS)
+/** Una hora límite de hace más de esto es de otro día: no se muestra. */
+private const val STALE_DEADLINE_MS = 6 * 60 * 60 * 1000L
 
 @Composable
 private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Modifier, eta: EtaInputs = EtaInputs()) {
@@ -373,13 +373,7 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
         }
         // Tiempo aproximado para terminar (series pendientes + descansos) y a qué hora
         val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now, warmupRestSeconds = eta.warmupRestSeconds, restEndsAtEpochMs = eta.restEndsAtEpochMs)
-        if (remaining > 0) {
-            Text(
-                stringResource(R.string.remaining_time_eta, (remaining + 59) / 60, formatClock(now + remaining * 1000L)),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        if (remaining > 0) RemainingTimeLine(remaining, now, eta)
     }
 }
 
@@ -557,6 +551,8 @@ private fun ExerciseCard(
                         }
                         DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.substitute_title)) }, onClick = { menu = false; substituting = true })
+                        val completable = WorkoutEditor.completableCount(we)
+                        if (completable > 0) DropdownMenuItem(text = { Text(stringResource(R.string.complete_remaining, completable)) }, onClick = { menu = false; vm.completeRemaining(we.id) })
                         if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.skip_exercise)) }, onClick = { menu = false; vm.skipExercise(we.id) })
                         if (index > 0) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; vm.moveExercise(index, index - 1) })
                         if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; vm.moveExercise(index, index + 1) })
@@ -670,6 +666,7 @@ private fun ExerciseCard(
                         onAssisted = { vm.updateSetFields(we.id, set.id) { s -> s.copy(assisted = it) } },
                         followingCount = WorkoutEditor.followingCount(we, set.id),
                         onCopyFollowing = { vm.copyToFollowing(we.id, set.id) },
+                        onDuplicate = { vm.duplicateSet(we.id, set.id) },
                         onStepWeight = { vm.stepWeight(we.id, set.id, it) },
                         onStepReps = { vm.stepReps(we.id, set.id, it) },
                         weightFactor = weightFactor,

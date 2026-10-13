@@ -406,9 +406,9 @@ private fun MuscleZoneLine(weeks: List<Pair<java.time.LocalDate, Double>>) {
     val (avg, zone) = com.bestrong.core.stats.WorkoutStats.weeklySetsZone(weeks) ?: return
     val value = "%.1f".format(avg).removeSuffix(",0").removeSuffix(".0")
     val (text, color) = when (zone) {
-        com.bestrong.core.stats.VolumeZone.LOW -> stringResource(R.string.muscle_zone_low, value) to MaterialTheme.colorScheme.onSurfaceVariant
-        com.bestrong.core.stats.VolumeZone.OPTIMAL -> stringResource(R.string.muscle_zone_ok, value) to MaterialTheme.colorScheme.primary
-        com.bestrong.core.stats.VolumeZone.HIGH -> stringResource(R.string.muscle_zone_high, value) to MaterialTheme.colorScheme.error
+        com.bestrong.core.stats.VolumeStatus.NONE, com.bestrong.core.stats.VolumeStatus.LOW -> stringResource(R.string.muscle_zone_low, value) to MaterialTheme.colorScheme.onSurfaceVariant
+        com.bestrong.core.stats.VolumeStatus.OPTIMAL -> stringResource(R.string.muscle_zone_ok, value) to MaterialTheme.colorScheme.primary
+        com.bestrong.core.stats.VolumeStatus.HIGH -> stringResource(R.string.muscle_zone_high, value) to MaterialTheme.colorScheme.error
     }
     Text(text, style = MaterialTheme.typography.bodyMedium, color = color)
 }

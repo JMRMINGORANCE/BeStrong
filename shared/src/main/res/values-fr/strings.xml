@@ -931,4 +931,14 @@
     <string name="undo_copied_sets">Charge copiée sur les séries suivantes</string>
     <string name="program_amrap_note">Dernière série : max. de répétitions (+)</string>
     <string name="program_week_prefix">S</string>
+    <string name="set_duplicate">Dupliquer la série</string>
+    <string name="complete_remaining">Marquer les séries restantes comme faites (%1$d)</string>
+    <string name="rest_real_exercise">Repos réel %1$s · prévu %2$s</string>
+    <string name="lagging_muscles_title">Cette semaine, il te manque</string>
+    <string name="lagging_muscle_line">%1$s : %2$s sur %3$d séries</string>
+    <string name="deadline_title">À quelle heure dois-tu finir ?</string>
+    <string name="deadline_over">Tu dépasserais ton heure limite de %1$d min (%2$s) : saute ou raccourcis un exercice</string>
+    <string name="deadline_ok">Heure limite %1$s : tu es dans les temps</string>
+    <string name="deadline_hint">Touche pour fixer une heure limite</string>
+    <string name="deadline_clear">Retirer</string>
 </resources>

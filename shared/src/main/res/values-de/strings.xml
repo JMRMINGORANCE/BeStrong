@@ -931,4 +931,14 @@
     <string name="undo_copied_sets">Last auf die folgenden Sätze übertragen</string>
     <string name="program_amrap_note">Letzter Satz: so viele Wdh. wie möglich (+)</string>
     <string name="program_week_prefix">W</string>
+    <string name="set_duplicate">Satz duplizieren</string>
+    <string name="complete_remaining">Restliche Sätze als erledigt markieren (%1$d)</string>
+    <string name="rest_real_exercise">Pause tatsächlich %1$s · geplant %2$s</string>
+    <string name="lagging_muscles_title">Diese Woche fehlt dir noch</string>
+    <string name="lagging_muscle_line">%1$s: %2$s von %3$d Sätzen</string>
+    <string name="deadline_title">Wann musst du fertig sein?</string>
+    <string name="deadline_over">Du würdest dein Limit (%2$s) um %1$d Min. überschreiten: lass eine Übung weg oder kürze sie</string>
+    <string name="deadline_ok">Limit %1$s: du liegst gut in der Zeit</string>
+    <string name="deadline_hint">Tippen, um ein Zeitlimit festzulegen</string>
+    <string name="deadline_clear">Entfernen</string>
 </resources>

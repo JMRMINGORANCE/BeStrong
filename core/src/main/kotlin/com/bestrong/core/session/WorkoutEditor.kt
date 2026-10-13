@@ -10,6 +10,7 @@ import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.training.RestPolicy
 import com.bestrong.core.training.WarmupGenerator
 import com.bestrong.core.util.WeightUnit
+import com.bestrong.core.util.newId
 
 /**
  * Operaciones inmutables sobre el entrenamiento en curso. Las usan tanto el móvil como el reloj.
@@ -171,6 +172,37 @@ object WorkoutEditor {
         if (i < 0) return 0
         return we.sets.drop(i + 1).count { !it.completed && it.type == we.sets[i].type }
     }
+
+    /** Copia de la serie justo debajo (pendiente, sin nota ni horas): repetir una serie suelta. */
+    fun duplicateSet(workout: Workout, workoutExerciseId: String, setId: String): Workout = updateExercise(workout, workoutExerciseId) { we ->
+        val i = we.sets.indexOfFirst { it.id == setId }
+        if (i < 0) return@updateExercise we
+        val copy = we.sets[i].copy(id = newId(), completed = false, completedAtEpochMs = null, startedAtEpochMs = null, note = "", rpe = null, assisted = false)
+        we.copy(sets = we.sets.toMutableList().apply { add(i + 1, copy) })
+    }
+
+    /**
+     * Marca como hechas, con lo que tienen apuntado, las series pendientes del ejercicio que tengan algo
+     * (reps, tiempo o distancia). Las vacías se dejan, y un cardio en marcha se cierra con su cronómetro.
+     */
+    fun completeRemaining(workout: Workout, workoutExerciseId: String, nowEpochMs: Long = System.currentTimeMillis()): Workout =
+        updateExercise(workout, workoutExerciseId) { we ->
+            we.copy(
+                sets = we.sets.map { s ->
+                    val started = s.startedAtEpochMs
+                    when {
+                        s.completed -> s
+                        s.isRunning && started != null ->
+                            s.copy(durationSec = ((nowEpochMs - started) / 1000).toInt().coerceAtLeast(1), completed = true, completedAtEpochMs = nowEpochMs)
+                        s.reps > 0 || s.durationSec > 0 || s.distanceM > 0 -> s.copy(completed = true, completedAtEpochMs = nowEpochMs)
+                        else -> s
+                    }
+                },
+            )
+        }
+
+    /** Series que [completeRemaining] marcaría. */
+    fun completableCount(we: WorkoutExercise): Int = we.sets.count { !it.completed && (it.isRunning || it.reps > 0 || it.durationSec > 0 || it.distanceM > 0) }
 
     /** Lo que se baja el peso en un drop set. */
     const val DROP_FACTOR = 0.8

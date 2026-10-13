@@ -117,6 +117,12 @@ class HomeViewModel @Inject constructor(
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 
+    /** Músculos que esta semana van por detrás de lo habitual (de jueves en adelante). */
+    val laggingMuscles: StateFlow<List<Pair<com.bestrong.core.model.MuscleGroup, Double>>> = repo.history.map { history ->
+        val zone = ZoneId.systemDefault()
+        com.bestrong.core.stats.WorkoutStats.laggingMuscles(history, LocalDate.now(zone), zone)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /** Programas predefinidos más los creados por el usuario. */
     val periodizedPrograms: List<PeriodizedProgram> get() = PeriodizedPrograms.all + planning.state.value.customPrograms
 

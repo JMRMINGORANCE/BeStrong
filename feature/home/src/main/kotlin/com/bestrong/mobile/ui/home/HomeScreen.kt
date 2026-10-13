@@ -226,6 +226,7 @@ fun HomeScreen(
                 )
             }
             // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
+            item { LaggingMusclesCard(vm) }
             item { ReadinessCard(vm) }
             item { IntakeCard(vm) }
             item { TipCard("home_reorder", R.string.tip_home) }

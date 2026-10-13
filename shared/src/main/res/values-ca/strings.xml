@@ -931,4 +931,14 @@
     <string name="undo_copied_sets">Càrrega copiada a les sèries següents</string>
     <string name="program_amrap_note">Última sèrie: màximes repeticions (+)</string>
     <string name="program_week_prefix">S</string>
+    <string name="set_duplicate">Duplica la sèrie</string>
+    <string name="complete_remaining">Marca les que falten com a fetes (%1$d)</string>
+    <string name="rest_real_exercise">Descans real %1$s · previst %2$s</string>
+    <string name="lagging_muscles_title">Aquesta setmana vas curt de</string>
+    <string name="lagging_muscle_line">%1$s: %2$s de %3$d sèries</string>
+    <string name="deadline_title">A quina hora has d\'acabar?</string>
+    <string name="deadline_over">Et passaries %1$d min de l\'hora límit (%2$s): salta o escurça algun exercici</string>
+    <string name="deadline_ok">Hora límit %1$s: vas a temps</string>
+    <string name="deadline_hint">Toca per posar una hora límit</string>
+    <string name="deadline_clear">Treu</string>
 </resources>

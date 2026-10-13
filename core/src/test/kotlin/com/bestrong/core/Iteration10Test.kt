@@ -6,7 +6,7 @@ import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.RestStats
-import com.bestrong.core.stats.VolumeZone
+import com.bestrong.core.stats.VolumeStatus
 import com.bestrong.core.stats.WorkoutStats
 import java.time.LocalDate
 import org.junit.Assert.assertEquals
@@ -61,12 +61,12 @@ class Iteration10Test {
         val weeks = listOf(6.0, 8.0, 7.0, 9.0, 30.0).mapIndexed { i, v -> d.plusWeeks(i.toLong()) to v }
         val (avg, zone) = WorkoutStats.weeklySetsZone(weeks)!!
         assertEquals(7.5, avg, 0.001)
-        assertEquals(VolumeZone.LOW, zone)
-        assertEquals(VolumeZone.HIGH, WorkoutStats.weeklySetsZone(listOf(d to 25.0, d to 22.0, d to 0.0))!!.second)
+        assertEquals(VolumeStatus.LOW, zone)
+        assertEquals(VolumeStatus.HIGH, WorkoutStats.weeklySetsZone(listOf(d to 25.0, d to 22.0, d to 0.0))!!.second)
         assertNull(WorkoutStats.weeklySetsZone(listOf(d to 12.0)))
         // Empezó hace 2 semanas a 14 series: no está «por debajo»
         val fresh = listOf(0.0, 0.0, 0.0, 0.0, 0.0, 14.0, 14.0, 3.0).mapIndexed { i, v -> d.plusWeeks(i.toLong()) to v }
-        assertEquals(VolumeZone.OPTIMAL, WorkoutStats.weeklySetsZone(fresh)!!.second)
+        assertEquals(VolumeStatus.OPTIMAL, WorkoutStats.weeklySetsZone(fresh)!!.second)
     }
 
     @Test fun restSummaryIgnoresSupersetsAndUsesSetDuration() {

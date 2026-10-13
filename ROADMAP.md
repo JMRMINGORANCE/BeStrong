@@ -200,3 +200,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Historial: descanso real medio frente al previsto
 - [x] Tendencia por músculo: media semanal frente al rango habitual de 10–20 series
 - [x] Informe al entrenador con unidad, total de mancuernas y decimales coherentes
+
+## Fase 18 — Control del tiempo ✅
+- [x] Hora límite del entreno: aviso en rojo si la estimación se pasa
+- [x] Marcar de golpe las series que faltan de un ejercicio
+- [x] Duplicar una serie justo debajo
+- [x] Historial: descanso real frente al previsto en cada ejercicio
+- [x] Inicio: músculos que esta semana van por detrás de lo habitual (desde el jueves)

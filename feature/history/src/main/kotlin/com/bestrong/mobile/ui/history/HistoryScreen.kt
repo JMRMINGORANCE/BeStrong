@@ -237,6 +237,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     var editInfo by remember { mutableStateOf(false) }
     var editSet by remember { mutableStateOf<Pair<String, String>?>(null) }
     val records by produceState(emptyList<PersonalRecord>(), w) { value = vm.recordsIn(w) }
+    val restByExercise = remember(w) { RestStats.byExercise(w) }
     if (editInfo) {
         EditPastWorkoutInfoDialog(
             w.name, w.notes, w.startedAtEpochMs, w.durationSeconds() / 60,
@@ -330,6 +331,13 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             }
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp)) }
+                        }
+                        restByExercise[we.id]?.let { r ->
+                            Text(
+                                stringResource(R.string.rest_real_exercise, formatDuration(r.realSeconds.toLong()), formatDuration(r.plannedSeconds.toLong())),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (r.realSeconds > r.plannedSeconds * OVERRUN_FACTOR) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                         if (editing) TextButton(onClick = { vm.addPastSet(w, we.id) }) { Text(stringResource(R.string.add_set)) }
                     }

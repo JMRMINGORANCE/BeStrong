@@ -63,6 +63,7 @@ import com.bestrong.core.training.ProgramSession
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.uiLanguage
 import java.time.DayOfWeek
 import java.time.format.TextStyle
@@ -241,6 +242,24 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
 }
 
 /** Cómo llegas hoy: sueño y pulso en reposo (Health Connect) y la última valoración. */
+/** «Esta semana vas corto de: Espalda 4 de 10 series». */
+@Composable
+fun LaggingMusclesCard(vm: HomeViewModel) {
+    val lagging by vm.laggingMuscles.collectAsStateWithLifecycle()
+    if (lagging.isEmpty()) return
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.lagging_muscles_title), fontWeight = FontWeight.Bold)
+            lagging.forEach { (muscle, sets) ->
+                Text(
+                    stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun ReadinessCard(vm: HomeViewModel) {
     val r by vm.readiness.collectAsStateWithLifecycle()

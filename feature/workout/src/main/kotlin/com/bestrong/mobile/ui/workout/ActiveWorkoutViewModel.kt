@@ -122,6 +122,12 @@ class ActiveWorkoutViewModel @Inject constructor(
     val rest: StateFlow<RestState?> = restTimer.rest
     val restEndedAt: StateFlow<Long?> = restTimer.restEndedAt
     fun dismissOverrun() = restTimer.clearOverrun()
+
+    /** Hora a la que hay que acabar (la pone el usuario); sobrevive a que Android cierre la app. */
+    val deadline: StateFlow<Long?> = savedState.getStateFlow(KEY_DEADLINE, null)
+    fun setDeadline(epochMs: Long?) {
+        savedState[KEY_DEADLINE] = epochMs
+    }
     val watchMetrics: StateFlow<LiveMetrics?> = metricsStore.metrics
 
     /** Sugerencia de progresión por ejercicio (id de ejercicio → sugerencia). */
@@ -271,6 +277,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             )
         }
     }
+    fun duplicateSet(weId: String, setId: String) = edit { WorkoutEditor.duplicateSet(it, weId, setId) }
+    fun completeRemaining(weId: String) = edit { WorkoutEditor.completeRemaining(it, weId) }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
     fun setRpe(weId: String, setId: String, rpe: Double?) {
         val current = workout.value ?: return
@@ -401,6 +409,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun skipRest() = restTimer.skip()
 
     fun finish() {
+        setDeadline(null)
         if (partnerMode.value) {
             // Entreno de la pareja: se guarda aparte (no cuenta para tus récords ni estadísticas)
             viewModelScope.launch {
@@ -434,6 +443,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     fun discard() = viewModelScope.launch {
+        setDeadline(null)
         if (partnerMode.value) {
             repo.setPartnerActive(null)
             setPartnerMode(false)
@@ -519,5 +529,6 @@ class ActiveWorkoutViewModel @Inject constructor(
         const val STALE_WORKOUT_MS = 6 * 60 * 60 * 1000L
         const val KEY_PARTNER_MODE = "partner_mode"
         const val KEY_SUMMARY_ID = "summary_workout_id"
+        const val KEY_DEADLINE = "deadline"
     }
 }
