@@ -3,6 +3,7 @@ package com.bestrong.wear.ui
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -18,6 +19,7 @@ import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
+import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.util.formatDuration
 import com.bestrong.wear.R
@@ -95,7 +97,11 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
                     Button(
                         onClick = { container.session.startRoutine(routine); onStart() },
                         label = { Text(routine.displayName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        secondaryLabel = { Text(stringResource(R.string.n_exercises, routine.exercises.size)) },
+                        secondaryLabel = {
+                            // Ejercicios y tiempo aproximado (series × 40 s + descansos)
+                            val minutes = remember(routine) { (WorkoutEditor.estimatedRemainingSeconds(routine.toWorkout(0)) + 59) / 60 }
+                            Text(stringResource(R.string.n_exercises, routine.exercises.size) + if (minutes > 0) " · ≈ $minutes min" else "")
+                        },
                         colors = ButtonDefaults.filledTonalButtonColors(),
                         modifier = Modifier.fillMaxWidth(),
                     )
