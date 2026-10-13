@@ -917,4 +917,7 @@
     <string name="muscle_trend_hint">Series efectivas por semana (secundarios á metade). Recomendado: 10–20.</string>
     <string name="stat_average_workout">Adestramento medio: %1$s · %2$d series · %3$s</string>
     <string name="weekly_goal_reached">🎯 Obxectivo semanal cumprido! (%1$d días)</string>
+    <string name="tool_share_week">Compartir a semana (texto para o teu adestrador)</string>
+    <string name="share_week_title">Os meus adestramentos dos últimos 7 días (BeStrong)</string>
+    <string name="share_week_empty">Non hai adestramentos nos últimos 7 días</string>
 </resources>

@@ -917,4 +917,7 @@
     <string name="muscle_trend_hint">Séries efficaces par semaine (secondaires pour moitié). Recommandé : 10–20.</string>
     <string name="stat_average_workout">Séance moyenne : %1$s · %2$d séries · %3$s</string>
     <string name="weekly_goal_reached">🎯 Objectif hebdomadaire atteint ! (%1$d jours)</string>
+    <string name="tool_share_week">Partager la semaine (texte pour ton coach)</string>
+    <string name="share_week_title">Mes séances des 7 derniers jours (BeStrong)</string>
+    <string name="share_week_empty">Aucune séance ces 7 derniers jours</string>
 </resources>

@@ -222,7 +222,20 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             item { MuscleRecoveryCard(advanced) }
             item { AchievementsCard(advanced) }
             item { RecordTimelineCard(advanced) }
-            item { ToolsCard(onOneRm = { showOneRm = true }, onScores = { showScores = true }, onReport = { showReport = true }) }
+            item {
+                ToolsCard(
+                    onOneRm = { showOneRm = true },
+                    onScores = { showScores = true },
+                    onReport = { showReport = true },
+                    onShareWeek = {
+                        // Texto de los últimos 7 días para el entrenador (WhatsApp, correo…)
+                        vm.coachWeekText()?.let { text ->
+                            val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, text)
+                            context.startActivity(android.content.Intent.createChooser(send, null))
+                        }
+                    },
+                )
+            }
             item {
                 Card {
                     Column(Modifier.padding(16.dp)) {

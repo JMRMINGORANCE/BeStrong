@@ -917,4 +917,7 @@
     <string name="muscle_trend_hint">Effective sets per week (secondary muscles count half). Recommended: 10–20.</string>
     <string name="stat_average_workout">Average workout: %1$s · %2$d sets · %3$s</string>
     <string name="weekly_goal_reached">🎯 Weekly goal reached! (%1$d days)</string>
+    <string name="tool_share_week">Share the week (text for your coach)</string>
+    <string name="share_week_title">My workouts from the last 7 days (BeStrong)</string>
+    <string name="share_week_empty">No workouts in the last 7 days</string>
 </resources>

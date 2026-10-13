@@ -917,4 +917,7 @@
     <string name="muscle_trend_hint">Effektive Sätze pro Woche (Nebenmuskeln halb). Empfohlen: 10–20.</string>
     <string name="stat_average_workout">Durchschnittliches Training: %1$s · %2$d Sätze · %3$s</string>
     <string name="weekly_goal_reached">🎯 Wochenziel erreicht! (%1$d Tage)</string>
+    <string name="tool_share_week">Woche teilen (Text für deinen Coach)</string>
+    <string name="share_week_title">Meine Trainings der letzten 7 Tage (BeStrong)</string>
+    <string name="share_week_empty">Keine Trainings in den letzten 7 Tagen</string>
 </resources>

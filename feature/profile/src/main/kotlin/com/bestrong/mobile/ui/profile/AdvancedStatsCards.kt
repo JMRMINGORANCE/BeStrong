@@ -221,13 +221,14 @@ fun MuscleRecoveryCard(stats: AdvancedStats) {
 }
 
 @Composable
-fun ToolsCard(onOneRm: () -> Unit, onScores: () -> Unit, onReport: () -> Unit = {}) {
+fun ToolsCard(onOneRm: () -> Unit, onScores: () -> Unit, onReport: () -> Unit = {}, onShareWeek: () -> Unit = {}) {
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(stringResource(R.string.tools))
             OutlinedButton(onClick = onOneRm, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_1rm)) }
             OutlinedButton(onClick = onScores, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_scores)) }
             OutlinedButton(onClick = onReport, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_monthly_report)) }
+            OutlinedButton(onClick = onShareWeek, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_share_week)) }
         }
     }
 }

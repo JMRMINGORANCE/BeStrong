@@ -917,4 +917,7 @@
     <string name="muscle_trend_hint">Sèries efectives per setmana (secundaris a la meitat). Recomanat: 10–20.</string>
     <string name="stat_average_workout">Entrenament mitjà: %1$s · %2$d sèries · %3$s</string>
     <string name="weekly_goal_reached">🎯 Objectiu setmanal assolit! (%1$d dies)</string>
+    <string name="tool_share_week">Compartir la setmana (text per al teu entrenador)</string>
+    <string name="share_week_title">Els meus entrenaments dels últims 7 dies (BeStrong)</string>
+    <string name="share_week_empty">No hi ha entrenaments en els últims 7 dies</string>
 </resources>

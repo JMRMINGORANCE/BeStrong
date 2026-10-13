@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.io.Backup
+import com.bestrong.core.io.CoachReport
 import com.bestrong.core.io.EncryptedBackup
 import com.bestrong.core.io.WorkoutCsv
 import com.bestrong.core.io.Xlsx
@@ -33,6 +34,7 @@ import com.bestrong.mobile.health.HealthConnectExporter
 import com.bestrong.mobile.health.HealthConnectReader
 import com.bestrong.mobile.share.MonthlyReport
 import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.DayOfWeek
@@ -225,6 +227,14 @@ class ProfileViewModel @Inject constructor(
 
     /** Periodo de las exportaciones a CSV y Excel. */
     val exportRange = MutableStateFlow(ExportRange.ALL)
+
+    /** Entrenos de los últimos 7 días en texto, para el entrenador (null y aviso si no hay ninguno). */
+    fun coachWeekText(): String? {
+        val from = System.currentTimeMillis() - 7 * 86_400_000L
+        val text = CoachReport.text(repo.history.value, from, settingsStore.settings.value.unit, exerciseName = { it.displayName(context) })
+        if (text.isBlank()) _messages.tryEmit(context.getString(R.string.share_week_empty))
+        return text.takeIf { it.isNotBlank() }?.let { context.getString(R.string.share_week_title) + "\n\n" + it }
+    }
 
     /** Inicio del periodo elegido para exportar (0 = todo). */
     private fun rangeStart(): Long {
