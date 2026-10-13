@@ -87,6 +87,7 @@
     <string name="cal_export_ics">Add to calendar</string>
     <string name="cal_hint">Tap a day to pick a routine; long-press and drag to move it.</string>
     <string name="cal_minutes">~%1$d min</string>
+    <string name="cal_over">Over the time per session</string>
     <string name="cal_rest">Rest</string>
     <string name="cal_title">Week calendar</string>
     <string name="cal_too_long">⚠ %1$d min over your time</string>
@@ -512,6 +513,7 @@
     <string name="program_start">Start program</string>
     <string name="program_stop">Leave program</string>
     <string name="program_tm_help">Training max (TM): 90% of your 1RM. Pre-filled from your history; adjust if needed.</string>
+    <string name="program_tm_required">Enter a training max above 0 for each lift</string>
     <string name="program_tm_label">TM %1$s (%2$s)</string>
     <string name="programs_periodized">With automatic progression</string>
     <string name="programs_templates">Routine templates</string>
