@@ -112,3 +112,15 @@ class RoutineUpdateTest {
         assertEquals("talones", updated.exercises[1].notes)
     }
 }
+
+class RoutinePrefillKindTest {
+    @Test fun failureAndDropSetsStillPrefillWorkingSets() {
+        val last = finishedWorkout(
+            "w", LocalDate.of(2026, 3, 2),
+            bench to listOf(done(40.0, 10).copy(type = SetType.WARMUP), done(80.0, 5), done(82.5, 5), done(85.0, 4).copy(type = SetType.FAILURE)),
+        )
+        val routine = Routine(name = "R", exercises = listOf(RoutineExercise(exercise = bench, sets = List(3) { RoutineSet(weightKg = 70.0, reps = 5) })))
+        val w = routine.toWorkout(0, previousSets = { id -> com.bestrong.core.stats.WorkoutStats.previousSets(id, listOf(last)) })
+        assertEquals(listOf(80.0, 82.5, 85.0), w.exercises[0].sets.map { it.weightKg })
+    }
+}

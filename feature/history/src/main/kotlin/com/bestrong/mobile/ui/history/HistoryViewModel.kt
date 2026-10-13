@@ -91,7 +91,9 @@ class HistoryViewModel @Inject constructor(
      * última vez (o los de la rutina). Devuelve el id para abrirlo y ajustar lo que haga falta.
      */
     fun logPast(routine: Routine, startMs: Long, endMs: Long, onLogged: (String) -> Unit) = viewModelScope.launch {
-        val w = routine.toWorkout(startMs, actions.prefillLookup())
+        // Pesos de la última sesión anterior a esa fecha (no la sugerencia de progresión de hoy)
+        val before = repo.historyOnce().filter { it.isFinished && it.startedAtEpochMs < startMs }
+        val w = routine.toWorkout(startMs, { id -> WorkoutStats.previousSets(id, before) })
         val done = w.copy(
             finishedAtEpochMs = endMs,
             updatedAtEpochMs = System.currentTimeMillis(),
@@ -104,9 +106,12 @@ class HistoryViewModel @Inject constructor(
     /** Cambia la fecha, la hora y la duración de un entreno pasado. */
     fun retime(workout: Workout, startMs: Long, endMs: Long) = editWorkout(workout) { w ->
         val shift = startMs - w.startedAtEpochMs
+        // La duración que se escribe es la de entreno: las pausas ya no cuentan aparte
         w.copy(
             startedAtEpochMs = startMs,
             finishedAtEpochMs = endMs,
+            pausedTotalMs = 0,
+            pausedAtEpochMs = null,
             exercises = w.exercises.map { we ->
                 we.copy(sets = we.sets.map { s -> s.copy(completedAtEpochMs = s.completedAtEpochMs?.plus(shift), startedAtEpochMs = s.startedAtEpochMs?.plus(shift)) })
             },

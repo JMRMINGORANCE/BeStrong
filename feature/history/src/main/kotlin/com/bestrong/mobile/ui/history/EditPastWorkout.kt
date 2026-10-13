@@ -119,7 +119,8 @@ fun EditPastWorkoutInfoDialog(
     notes: String,
     startEpochMs: Long,
     durationMin: Long,
-    onSave: (name: String, notes: String, range: Pair<Long, Long>) -> Unit,
+    /** [range] es null si no se cambió la fecha, la hora ni la duración. */
+    onSave: (name: String, notes: String, range: Pair<Long, Long>?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     var n by remember { mutableStateOf(name) }
@@ -137,7 +138,9 @@ fun EditPastWorkoutInfoDialog(
         },
         confirmButton = {
             val range = time.range
-            TextButton(onClick = { range?.let { onSave(n.trim().ifBlank { name }, t.trim(), it) } }, enabled = range != null) { Text(stringResource(R.string.action_save)) }
+            TextButton(onClick = { onSave(n.trim().ifBlank { name }, t.trim(), range?.takeIf { time.changed }) }, enabled = range != null || !time.changed) {
+                Text(stringResource(R.string.action_save))
+            }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )

@@ -40,6 +40,9 @@ class RestTimerController @Inject constructor(
     val rest: StateFlow<RestState?> = _rest.asStateFlow()
     private var job: Job? = null
 
+    /** Descanso programado más reciente: un job cancelado no suelta el WakeLock del siguiente. Va antes del init, que ya lo usa. */
+    private val generation = AtomicInteger()
+
     /**
      * Con la pantalla apagada la CPU puede dormirse y el delay() no despertaría a tiempo: se mantiene
      * despierta (solo CPU) durante el descanso, con un tope de seguridad por si algo falla.
@@ -101,9 +104,6 @@ class RestTimerController @Inject constructor(
         _rest.value = null
         persist(null)
     }
-
-    /** Descanso programado más reciente: un job cancelado no suelta el WakeLock del siguiente. */
-    private val generation = AtomicInteger()
 
     private fun schedule() {
         job?.cancel()

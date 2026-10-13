@@ -57,9 +57,10 @@ data class Routine(
                 supersetId = re.supersetId,
                 tempo = re.tempo,
                 sets = re.sets.mapIndexed { i, rs ->
-                    // Se empareja dentro del mismo tipo: los calentamientos de la última vez no rellenan series efectivas
-                    val sameTypeIndex = re.sets.take(i).count { it.type == rs.type }
-                    val prev = previous.filter { it.type == rs.type }.getOrNull(sameTypeIndex)
+                    // Calentamientos con calentamientos y efectivas (normal, drop, fallo…) con efectivas
+                    val warm = rs.type == SetType.WARMUP
+                    val sameKindIndex = re.sets.take(i).count { (it.type == SetType.WARMUP) == warm }
+                    val prev = previous.filter { (it.type == SetType.WARMUP) == warm }.getOrNull(sameKindIndex)
                     WorkoutSet(
                         weightKg = prev?.weightKg?.takeIf { it > 0 } ?: rs.weightKg,
                         reps = prev?.reps?.takeIf { it > 0 } ?: rs.reps,

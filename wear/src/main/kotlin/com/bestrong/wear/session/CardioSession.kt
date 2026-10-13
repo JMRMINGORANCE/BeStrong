@@ -67,7 +67,7 @@ class CardioSession @Inject constructor(
     private var hr = HeartRateTracker(_state.value?.startedAtEpochMs ?: 0)
 
     /** Pulso guardado antes de un reinicio del proceso (el nuevo contador empieza vacío). */
-    private val restoredHr = _state.value?.let { it.avgHeartRate to it.maxHeartRate }
+    private var restoredHr = _state.value?.let { it.avgHeartRate to it.maxHeartRate }
     private var lastSavedAt = 0L
 
     fun start(type: CardioType) {
@@ -75,6 +75,7 @@ class CardioSession @Inject constructor(
         _finished.value = null
         val now = System.currentTimeMillis()
         hr = HeartRateTracker(now)
+        restoredHr = null
         _state.value = CardioState(type, now)
         save(force = true)
         ExerciseService.start(context)
@@ -113,6 +114,7 @@ class CardioSession @Inject constructor(
     fun finish() {
         val s = _state.value ?: return
         _state.value = null
+        restoredHr = null
         store.activeCardio = null
         ExerciseService.stop(context)
         val now = System.currentTimeMillis()
@@ -142,6 +144,7 @@ class CardioSession @Inject constructor(
 
     fun discard() {
         _state.value = null
+        restoredHr = null
         store.activeCardio = null
         ExerciseService.stop(context)
     }

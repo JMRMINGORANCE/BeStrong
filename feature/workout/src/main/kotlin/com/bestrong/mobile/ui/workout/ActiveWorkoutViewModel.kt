@@ -62,6 +62,8 @@ data class FinishedSummary(
     val nextTime: List<NextTimeSuggestion> = emptyList(),
     /** Rutina de la que salió el entreno, si este cambió su estructura (para ofrecer actualizarla). */
     val routineToUpdate: Routine? = null,
+    /** El entreno tal y como estaba al terminar, con las series sin hacer: lo que se pasa a la rutina. */
+    val planned: Workout? = null,
 )
 
 @HiltViewModel
@@ -388,7 +390,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             repo.saveWorkout(finished)
             savedState[KEY_SUMMARY_ID] = finished.id
             _summary.value = buildSummary(finished, repo.historyOnce())
-            changedRoutine(finished)?.let { r -> _summary.value = _summary.value?.copy(routineToUpdate = r) }
+            // Se compara con lo planificado (series sin hacer incluidas): saltarse una serie por cansancio no cambia la rutina
+            changedRoutine(current)?.let { r -> _summary.value = _summary.value?.copy(routineToUpdate = r, planned = current) }
             actions.exportToHealthConnectIfEnabled(finished)
         }
     }
@@ -412,8 +415,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun updateRoutineFromSummary() {
         val s = _summary.value ?: return
         val routine = s.routineToUpdate ?: return
+        val planned = s.planned ?: return
         _summary.value = s.copy(routineToUpdate = null)
-        viewModelScope.launch { repo.saveRoutine(routine.updatedFrom(s.workout)) }
+        viewModelScope.launch { repo.saveRoutine(routine.updatedFrom(planned)) }
     }
 
     private suspend fun changedRoutine(finished: Workout): Routine? =
@@ -448,7 +452,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             viewModelScope.launch {
                 val history = repo.historyOnce()
                 history.firstOrNull { it.id == id }?.let {
-                    if (_summary.value == null) _summary.value = buildSummary(it, history).copy(routineToUpdate = changedRoutine(it))
+                    if (_summary.value == null) _summary.value = buildSummary(it, history)
                 }
             }
         }

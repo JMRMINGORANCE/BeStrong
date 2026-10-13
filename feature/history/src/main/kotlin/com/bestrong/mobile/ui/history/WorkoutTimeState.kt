@@ -47,7 +47,9 @@ class WorkoutTimeState(startEpochMs: Long, durationMin: Long) {
     var minutes by mutableStateOf(durationMin.coerceAtLeast(1).toString())
 
     private val parsedTime: LocalTime? get() = runCatching { LocalTime.parse(time.trim().padStart(5, '0')) }.getOrNull()
-    private val parsedMinutes: Long? get() = minutes.trim().toLongOrNull()?.takeIf { it in 1..24 * 60 }
+
+    // Hasta una semana: un entreno que se quedó abierto por error también se puede corregir
+    private val parsedMinutes: Long? get() = minutes.trim().toLongOrNull()?.takeIf { it in 1..7 * 24 * 60 }
 
     /** Inicio y fin en milisegundos, o null si algo no es válido o queda en el futuro. */
     val range: Pair<Long, Long>? get() {
@@ -57,6 +59,10 @@ class WorkoutTimeState(startEpochMs: Long, durationMin: Long) {
         if (startMs > System.currentTimeMillis()) return null
         return startMs to startMs + m * 60_000
     }
+
+    /** Lo que se mostró al abrir: si [range] sigue igual, el usuario no tocó fecha, hora ni duración. */
+    private val initialRange = range
+    val changed: Boolean get() = range != initialRange
 }
 
 @Composable
@@ -119,7 +125,8 @@ fun WorkoutTimeFields(state: WorkoutTimeState) {
 @Composable
 fun LogPastWorkoutDialog(routines: List<Routine>, onLog: (Routine, Long, Long) -> Unit, onDismiss: () -> Unit) {
     var selected by remember { mutableStateOf(routines.firstOrNull()) }
-    val time = rememberWorkoutTimeState(System.currentTimeMillis() - 60 * 60_000L, 60)
+    // Sin clave: el estado no se reinicia si la lista de rutinas cambia mientras se escribe
+    val time = remember { WorkoutTimeState(System.currentTimeMillis() - 60 * 60_000L, 60) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.log_past_title)) },

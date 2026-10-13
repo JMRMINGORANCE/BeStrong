@@ -225,8 +225,8 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     if (editInfo) {
         EditPastWorkoutInfoDialog(
             w.name, w.notes, w.startedAtEpochMs, w.durationSeconds() / 60,
-            onSave = { n, t, (start, end) ->
-                if (start != w.startedAtEpochMs || end != w.finishedAtEpochMs) vm.retime(w.copy(name = n, notes = t), start, end) else vm.editWorkout(w) { it.copy(name = n, notes = t) }
+            onSave = { n, t, range ->
+                if (range != null) vm.retime(w.copy(name = n, notes = t), range.first, range.second) else vm.editWorkout(w) { it.copy(name = n, notes = t) }
                 editInfo = false
             },
             onDismiss = { editInfo = false },
