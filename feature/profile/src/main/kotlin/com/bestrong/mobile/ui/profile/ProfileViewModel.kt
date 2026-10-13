@@ -246,10 +246,12 @@ class ProfileViewModel @Inject constructor(
 
     fun restoreEncrypted(password: CharArray) = viewModelScope.launch {
         val text = pendingEncrypted.value ?: return@launch
-        val plain = runCatching { withContext(Dispatchers.Default) { EncryptedBackup.decrypt(text, password) } }.getOrNull()
+        val result = runCatching { withContext(Dispatchers.Default) { EncryptedBackup.decrypt(text, password) } }
         password.fill(' ')
-        if (plain == null) {
-            _messages.tryEmit(context.getString(R.string.wrong_password))
+        val plain = result.getOrElse { e ->
+            // Con contraseña equivocada se puede reintentar; un archivo dañado no se arregla repitiéndola
+            if (e is com.bestrong.core.io.DamagedBackupException) pendingEncrypted.value = null
+            _messages.tryEmit(context.getString(if (e is com.bestrong.core.io.DamagedBackupException) R.string.backup_damaged else R.string.wrong_password))
             return@launch
         }
         pendingEncrypted.value = null

@@ -284,3 +284,14 @@ class SecurityFixesTest {
         assertTrue(com.bestrong.core.io.RoutineLink.decode("bestrong://routine?d=%%%") == null)
     }
 }
+
+class EncryptedBackupErrorsTest {
+    @Test fun damagedFileIsNotReportedAsWrongPassword() {
+        val enc = com.bestrong.core.io.EncryptedBackup.encrypt("hola", "contraseña1".toCharArray())
+        assertEquals("hola", com.bestrong.core.io.EncryptedBackup.decrypt(enc, "contraseña1".toCharArray()))
+        val wrong = runCatching { com.bestrong.core.io.EncryptedBackup.decrypt(enc, "otra".toCharArray()) }.exceptionOrNull()
+        assertTrue(wrong is com.bestrong.core.io.WrongPasswordException)
+        val damaged = runCatching { com.bestrong.core.io.EncryptedBackup.decrypt(enc.dropLast(30) + "%%%", "contraseña1".toCharArray()) }.exceptionOrNull()
+        assertTrue(damaged is com.bestrong.core.io.DamagedBackupException)
+    }
+}

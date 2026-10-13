@@ -896,4 +896,5 @@
     <string name="password_mismatch">Ils ne correspondent pas</string>
     <string name="file_too_big">Le fichier est trop volumineux (max. 64 Mo)</string>
     <string name="history_day_filter">%1$s ✕</string>
+    <string name="backup_damaged">Le fichier est endommagé ou n\'est pas une sauvegarde chiffrée BeStrong</string>
 </resources>

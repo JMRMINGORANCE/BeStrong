@@ -896,4 +896,5 @@
     <string name="password_mismatch">They don\'t match</string>
     <string name="file_too_big">The file is too big (max. 64 MB)</string>
     <string name="history_day_filter">%1$s ✕</string>
+    <string name="backup_damaged">The file is damaged or isn\'t a BeStrong encrypted backup</string>
 </resources>
