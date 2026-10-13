@@ -74,6 +74,7 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.StatTile
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
+import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.workout.describeSet
 import com.bestrong.mobile.ui.workout.setRemark
@@ -89,6 +90,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     val heatmap by vm.heatmap.collectAsStateWithLifecycle()
     val partnerWorkouts by vm.partnerHistory.collectAsStateWithLifecycle()
     val showPartner by vm.showPartner.collectAsStateWithLifecycle()
+    val selectedDay by vm.selectedDay.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val view = LocalView.current
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
@@ -154,7 +156,17 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                             }
                             if (query.isBlank()) {
                                 item { YearHeatmap(heatmap, Modifier.padding(vertical = 4.dp)) }
-                                item { CalendarMonth(days, Modifier.padding(bottom = 8.dp)) }
+                                item { CalendarMonth(days, Modifier.padding(bottom = 8.dp), selectedDay) { vm.selectedDay.value = it } }
+                            }
+                            selectedDay?.let { day ->
+                                item {
+                                    // Filtro por el día tocado en el calendario; tocar el chip lo quita
+                                    FilterChip(
+                                        selected = true,
+                                        onClick = { vm.selectedDay.value = null },
+                                        label = { Text(stringResource(R.string.history_day_filter, formatShortDate(day.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()))) },
+                                    )
+                                }
                             }
                             items(filtered, key = { it.id }) { w ->
                                 // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)

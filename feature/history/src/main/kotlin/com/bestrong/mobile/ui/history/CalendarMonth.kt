@@ -1,6 +1,8 @@
 package com.bestrong.mobile.ui.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,9 +35,9 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-/** Calendario mensual con los días entrenados marcados. */
+/** Calendario mensual con los días entrenados marcados; tocar uno filtra el historial por ese día. */
 @Composable
-fun CalendarMonth(trainingDays: Set<LocalDate>, modifier: Modifier = Modifier) {
+fun CalendarMonth(trainingDays: Set<LocalDate>, modifier: Modifier = Modifier, selected: LocalDate? = null, onSelect: (LocalDate?) -> Unit = {}) {
     var monthOffset by rememberSaveable { mutableStateOf(0L) }
     val month = YearMonth.now().plusMonths(monthOffset)
     val locale = Locale.getDefault()
@@ -69,9 +71,12 @@ fun CalendarMonth(trainingDays: Set<LocalDate>, modifier: Modifier = Modifier) {
                         if (day in 1..month.lengthOfMonth()) {
                             val date = month.atDay(day)
                             val trained = date in trainingDays
+                            val isSelected = date == selected
                             Box(
                                 Modifier.fillMaxWidth(0.8f).aspectRatio(1f).clip(CircleShape)
-                                    .background(if (trained) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface),
+                                    .background(if (trained) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
+                                    .then(if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.tertiary, CircleShape) else Modifier)
+                                    .then(if (trained) Modifier.clickable { onSelect(if (isSelected) null else date) } else Modifier),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(

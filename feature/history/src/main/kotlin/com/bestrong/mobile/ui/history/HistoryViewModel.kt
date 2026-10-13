@@ -48,9 +48,14 @@ class HistoryViewModel @Inject constructor(
     val showPartner = MutableStateFlow(false)
     val partnerHistory: StateFlow<List<Workout>> = repo.partnerHistory
 
-    val filtered: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, query.debounce { if (it.isEmpty()) 0L else 150L }, showPartner) { h, p, q, sp ->
+    /** Día elegido en el calendario (null = todos). */
+    val selectedDay = MutableStateFlow<LocalDate?>(null)
+
+    val filtered: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, query.debounce { if (it.isEmpty()) 0L else 150L }, showPartner, selectedDay) { h, p, q, sp, day ->
         val all = if (sp) (h + p).sortedByDescending { it.startedAtEpochMs } else h
-        WorkoutStats.search(all, q) { it.displayName(context) }
+        val zone = ZoneId.systemDefault()
+        val ofDay = if (day == null) all else all.filter { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == day }
+        WorkoutStats.search(ofDay, q) { it.displayName(context) }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Entrenos por día del año actual (mapa de calor). */

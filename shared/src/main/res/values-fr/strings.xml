@@ -895,4 +895,5 @@
     <string name="password_repeat">Répète le mot de passe</string>
     <string name="password_mismatch">Ils ne correspondent pas</string>
     <string name="file_too_big">Le fichier est trop volumineux (max. 64 Mo)</string>
+    <string name="history_day_filter">%1$s ✕</string>
 </resources>
