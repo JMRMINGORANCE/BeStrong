@@ -840,4 +840,9 @@
     <string name="set_col_minutes">MIN</string>
     <string name="set_col_km">KM</string>
     <string name="cardio_start">Iniciar o cronómetro de cardio</string>
+    <string name="workout_notes">Notas do adestramento</string>
+    <string name="workout_notes_hint">Como te sentiches, molestias, sono…</string>
+    <string name="pinned_note">Nota fixa</string>
+    <string name="pinned_note_hint">Amósase cada vez que fagas este exercicio (altura do asento, agarre, máquina…).</string>
+    <string name="update_routine">Actualizar «%1$s»</string>
 </resources>

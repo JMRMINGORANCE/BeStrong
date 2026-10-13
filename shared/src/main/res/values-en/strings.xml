@@ -840,4 +840,9 @@
     <string name="set_col_minutes">MIN</string>
     <string name="set_col_km">KM</string>
     <string name="cardio_start">Start cardio timer</string>
+    <string name="workout_notes">Workout notes</string>
+    <string name="workout_notes_hint">How you felt, aches, sleep…</string>
+    <string name="pinned_note">Pinned note</string>
+    <string name="pinned_note_hint">Shown every time you do this exercise (seat height, grip, machine…).</string>
+    <string name="update_routine">Update “%1$s”</string>
 </resources>

@@ -78,6 +78,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -142,6 +143,7 @@ fun ActiveWorkoutScreen(
     var confirmFinish by remember { mutableStateOf(false) }
     var confirmDiscard by remember { mutableStateOf(false) }
     var renaming by remember { mutableStateOf(false) }
+    var editingNotes by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
 
     KeepScreenOn(settings.keepScreenOn)
@@ -155,6 +157,7 @@ fun ActiveWorkoutScreen(
             onRate = vm::rateWorkout,
             summary = s,
             onSaveRoutine = { vm.saveSummaryAsRoutine(); vm.dismissSummary(); onFinished() },
+            onUpdateRoutine = { vm.updateRoutineFromSummary(); vm.dismissSummary(); onFinished() },
             onDone = { vm.dismissSummary(); onFinished() },
         )
         return
@@ -233,6 +236,7 @@ fun ActiveWorkoutScreen(
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.workout_notes)) }, onClick = { menu = false; editingNotes = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.touch_lock)) }, onClick = { menu = false; touchLocked = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.workout_discard)) }, onClick = { menu = false; confirmDiscard = true })
                     }
@@ -318,6 +322,16 @@ fun ActiveWorkoutScreen(
             text = { OutlinedTextField(name, { name = it }, singleLine = true) },
             confirmButton = { Button(onClick = { vm.rename(name); renaming = false }) { Text(stringResource(R.string.action_save)) } },
             dismissButton = { TextButton(onClick = { renaming = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
+    if (editingNotes) {
+        var notes by remember { mutableStateOf(w.notes) }
+        AlertDialog(
+            onDismissRequest = { editingNotes = false },
+            title = { Text(stringResource(R.string.workout_notes)) },
+            text = { OutlinedTextField(notes, { notes = it }, minLines = 3, placeholder = { Text(stringResource(R.string.workout_notes_hint)) }) },
+            confirmButton = { Button(onClick = { vm.setWorkoutNotes(notes); editingNotes = false }) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = { TextButton(onClick = { editingNotes = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }
@@ -451,6 +465,8 @@ private fun ExerciseCard(
     var menu by remember { mutableStateOf(false) }
     var editRest by remember { mutableStateOf(false) }
     var editNotes by remember { mutableStateOf(false) }
+    var editPinned by remember { mutableStateOf(false) }
+    val pinnedNote = vm.pinnedNotes.collectAsStateWithLifecycle().value[we.exercise.id].orEmpty()
     var editTempo by remember { mutableStateOf(false) }
     var substituting by remember { mutableStateOf(false) }
     if (substituting) SubstituteDialog(vm, we.id) { substituting = false }
@@ -516,6 +532,7 @@ private fun ExerciseCard(
                         if (we.supersetId != null) DropdownMenuItem(text = { Text(stringResource(R.string.superset_remove)) }, onClick = { menu = false; vm.unlinkSuperset(we.id) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.rest_time)) }, onClick = { menu = false; editRest = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.notes)) }, onClick = { menu = false; editNotes = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.pinned_note)) }, onClick = { menu = false; editPinned = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.substitute_title)) }, onClick = { menu = false; substituting = true })
                         if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.skip_exercise)) }, onClick = { menu = false; vm.skipExercise(we.id) })
@@ -532,6 +549,15 @@ private fun ExerciseCard(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(horizontal = 12.dp),
+                )
+            }
+            // Nota fija del ejercicio (se guarda para siempre, no solo en este entreno)
+            if (pinnedNote.isNotBlank()) {
+                Text(
+                    "📌 $pinnedNote",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(horizontal = 12.dp).clickable { editPinned = true },
                 )
             }
             if (we.notes.isNotBlank()) {
@@ -649,6 +675,21 @@ private fun ExerciseCard(
             dismissButton = { TextButton(onClick = { editNotes = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
+    if (editPinned) {
+        var note by remember { mutableStateOf(pinnedNote) }
+        AlertDialog(
+            onDismissRequest = { editPinned = false },
+            title = { Text(stringResource(R.string.pinned_note)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.pinned_note_hint), style = MaterialTheme.typography.bodySmall)
+                    OutlinedTextField(note, { note = it }, minLines = 2)
+                }
+            },
+            confirmButton = { Button(onClick = { vm.savePinnedNote(we.exercise.id, note); editPinned = false }) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = { TextButton(onClick = { editPinned = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
     if (showInfo) {
         AlertDialog(
             onDismissRequest = { showInfo = false },
@@ -673,7 +714,14 @@ private fun ExerciseCard(
 }
 
 @Composable
-fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, onDone: () -> Unit, onShare: () -> Unit = {}, onRate: (SessionRating) -> Unit = {}) {
+fun WorkoutSummaryDialog(
+    summary: FinishedSummary,
+    onSaveRoutine: () -> Unit,
+    onDone: () -> Unit,
+    onShare: () -> Unit = {},
+    onRate: (SessionRating) -> Unit = {},
+    onUpdateRoutine: () -> Unit = {},
+) {
     val w = summary.workout
     val unit = LocalWeightUnit.current
     AlertDialog(
@@ -690,6 +738,7 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
                 val kcal = w.calories?.let { c -> (if (w.caloriesEstimated) "≈" else "") + stringResource(R.string.kcal_value, c) }
                 listOfNotNull(w.avgHeartRate?.let { stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") }, kcal)
                     .takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(" · ")) }
+                if (w.notes.isNotBlank()) Text(w.notes, style = MaterialTheme.typography.bodySmall, fontStyle = FontStyle.Italic)
                 // Frente a la última vez que hiciste cada ejercicio
                 if (summary.comparisons.isNotEmpty()) {
                     Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)
@@ -743,6 +792,11 @@ fun WorkoutSummaryDialog(summary: FinishedSummary, onSaveRoutine: () -> Unit, on
             }
         },
         confirmButton = { Button(onClick = onDone) { Text(stringResource(R.string.action_done)) } },
-        dismissButton = if (w.routineId == null) ({ TextButton(onClick = onSaveRoutine) { Text(stringResource(R.string.save_as_routine)) } }) else null,
+        dismissButton = when {
+            w.routineId == null -> ({ TextButton(onClick = onSaveRoutine) { Text(stringResource(R.string.save_as_routine)) } })
+            // El entreno cambió la rutina (ejercicios, series, descansos): se ofrece guardar esos cambios en ella
+            summary.routineToUpdate != null -> ({ TextButton(onClick = onUpdateRoutine) { Text(stringResource(R.string.update_routine, summary.routineToUpdate.name)) } })
+            else -> null
+        },
     )
 }

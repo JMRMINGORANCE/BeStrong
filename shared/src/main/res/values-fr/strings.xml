@@ -840,4 +840,9 @@
     <string name="set_col_minutes">MIN</string>
     <string name="set_col_km">KM</string>
     <string name="cardio_start">Démarrer le chrono cardio</string>
+    <string name="workout_notes">Notes de la séance</string>
+    <string name="workout_notes_hint">Ressenti, douleurs, sommeil…</string>
+    <string name="pinned_note">Note épinglée</string>
+    <string name="pinned_note_hint">Affichée à chaque fois que tu fais cet exercice (hauteur du siège, prise, machine…).</string>
+    <string name="update_routine">Mettre à jour « %1$s »</string>
 </resources>

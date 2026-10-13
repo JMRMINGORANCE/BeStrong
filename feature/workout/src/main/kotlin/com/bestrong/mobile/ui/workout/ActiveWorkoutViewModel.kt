@@ -28,6 +28,7 @@ import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.WatchMetricsStore
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
+import com.bestrong.mobile.data.ExerciseMediaStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.health.EnergyCalculator
@@ -39,6 +40,7 @@ import com.bestrong.mobile.workout.RestTimerController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -47,6 +49,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -57,6 +60,8 @@ data class FinishedSummary(
     val comparisons: List<WorkoutStats.ExerciseComparison> = emptyList(),
     val imbalances: List<Pair<String, Double>> = emptyList(),
     val nextTime: List<NextTimeSuggestion> = emptyList(),
+    /** Rutina de la que salió el entreno, si este cambió su estructura (para ofrecer actualizarla). */
+    val routineToUpdate: Routine? = null,
 )
 
 @HiltViewModel
@@ -70,6 +75,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val announcer: Announcer,
     @ApplicationContext private val appContext: Context,
     private val savedState: SavedStateHandle,
+    private val media: ExerciseMediaStore,
 ) : ViewModel() {
 
     /** Modo pareja: true = se está viendo y editando el entreno de la otra persona (sobrevive a la muerte del proceso). */
@@ -124,6 +130,18 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
+    /** Nota fija de cada ejercicio (altura del asiento, agarre…): id de ejercicio → nota. */
+    val pinnedNotes: StateFlow<Map<String, String>> = combine(
+        workout.map { w -> w?.exercises?.map { it.exercise.id }.orEmpty() }.distinctUntilChanged(),
+        media.version,
+    ) { ids, _ -> ids.distinct().associateWith { media.note(it) }.filterValues { it.isNotBlank() } }
+        .flowOn(Dispatchers.IO)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    fun savePinnedNote(exerciseId: String, text: String) {
+        viewModelScope.launch { media.saveNote(exerciseId, text.trim()) }
+    }
+
     private val _summary = MutableStateFlow<FinishedSummary?>(null)
     val summary: StateFlow<FinishedSummary?> = _summary.asStateFlow()
 
@@ -140,6 +158,9 @@ class ActiveWorkoutViewModel @Inject constructor(
         if (partner) repo.updatePartnerActive(block) else repo.updateActive(block)
 
     fun rename(name: String) = edit { it.copy(name = name.ifBlank { it.name }) }
+
+    /** Notas del entreno («dormí mal, hombro cargado»), también durante la sesión. */
+    fun setWorkoutNotes(notes: String) = edit { it.copy(notes = notes.trim()) }
 
     fun addExercises(ids: List<String>) {
         val exercises = ids.mapNotNull { repo.exercise(it) }
@@ -362,6 +383,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             repo.saveWorkout(finished)
             savedState[KEY_SUMMARY_ID] = finished.id
             _summary.value = buildSummary(finished, repo.historyOnce())
+            changedRoutine(finished)?.let { r -> _summary.value = _summary.value?.copy(routineToUpdate = r) }
             actions.exportToHealthConnectIfEnabled(finished)
         }
     }
@@ -380,6 +402,17 @@ class ActiveWorkoutViewModel @Inject constructor(
         val s = _summary.value ?: return
         viewModelScope.launch { repo.saveRoutine(Routine.fromWorkout(s.workout)) }
     }
+
+    /** Pasa a la rutina los cambios hechos en el entreno (ejercicios, series, descansos…). */
+    fun updateRoutineFromSummary() {
+        val s = _summary.value ?: return
+        val routine = s.routineToUpdate ?: return
+        _summary.value = s.copy(routineToUpdate = null)
+        viewModelScope.launch { repo.saveRoutine(routine.updatedFrom(s.workout)) }
+    }
+
+    private suspend fun changedRoutine(finished: Workout): Routine? =
+        finished.routineId?.let { repo.routine(it) }?.takeIf { it.structureDiffersFrom(finished) }
 
     /** Guarda la valoración de la sesión recién terminada. */
     fun rateWorkout(rating: SessionRating) {
@@ -409,7 +442,9 @@ class ActiveWorkoutViewModel @Inject constructor(
         savedState.get<String>(KEY_SUMMARY_ID)?.let { id ->
             viewModelScope.launch {
                 val history = repo.historyOnce()
-                history.firstOrNull { it.id == id }?.let { if (_summary.value == null) _summary.value = buildSummary(it, history) }
+                history.firstOrNull { it.id == id }?.let {
+                    if (_summary.value == null) _summary.value = buildSummary(it, history).copy(routineToUpdate = changedRoutine(it))
+                }
             }
         }
     }

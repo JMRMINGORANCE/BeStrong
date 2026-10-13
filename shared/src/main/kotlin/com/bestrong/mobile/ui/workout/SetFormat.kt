@@ -18,3 +18,8 @@ fun cardioText(durationSec: Int, distanceM: Double): String {
     val time = if (durationSec % 60 == 0) "${durationSec / 60} min" else "%d:%02d".format(durationSec / 60, durationSec % 60)
     return if (distanceM > 0) "$time · ${"%.2f".format(distanceM / 1000)} km" else time
 }
+
+/** Línea secundaria de una serie en el historial: su nota y una marca si fue con ayuda (null si no hay nada). */
+fun setRemark(set: WorkoutSet): String? =
+    listOfNotNull("🤝".takeIf { set.assisted }, set.note.takeIf { it.isNotBlank() }?.let { "✎ $it" })
+        .takeIf { it.isNotEmpty() }?.joinToString(" ")
