@@ -199,7 +199,13 @@ class ProfileViewModel @Inject constructor(
 
     fun updateSettings(block: (UserSettings) -> UserSettings) = settingsStore.update(block)
 
-    fun saveMeasurement(m: BodyMeasurement) = viewModelScope.launch { repo.saveMeasurement(m) }
+    fun saveMeasurement(m: BodyMeasurement) = viewModelScope.launch {
+        repo.saveMeasurement(m)
+        // Con la exportación activada, el peso y la grasa también van a Health Connect
+        if (settingsStore.settings.value.healthConnectExport) {
+            runCatching { healthConnect.exportMeasurement(m) }.onFailure { android.util.Log.w("Profile", "Medida no exportada", it) }
+        }
+    }
     fun deleteMeasurement(id: String) = viewModelScope.launch { repo.deleteMeasurement(id) }
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)

@@ -4,15 +4,20 @@ import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSegment
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
+import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
+import androidx.health.connect.client.units.Mass
+import androidx.health.connect.client.units.Percentage
+import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.SetTimeline
 import com.bestrong.core.training.CardioEnergy
@@ -35,10 +40,12 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
     private val heartRatePermission = HealthPermission.getWritePermission(HeartRateRecord::class)
     private val activeCaloriesPermission = HealthPermission.getWritePermission(ActiveCaloriesBurnedRecord::class)
     private val distancePermission = HealthPermission.getWritePermission(DistanceRecord::class)
+    private val weightPermission = HealthPermission.getWritePermission(WeightRecord::class)
+    private val bodyFatPermission = HealthPermission.getWritePermission(BodyFatRecord::class)
 
     /** Lo que se pide al activar la exportación (sesión, calorías, pulso y distancia). */
     val permissions: Set<String> =
-        setOf(sessionPermission, caloriesPermission, activeCaloriesPermission, heartRatePermission, distancePermission)
+        setOf(sessionPermission, caloriesPermission, activeCaloriesPermission, heartRatePermission, distancePermission, weightPermission, bodyFatPermission)
 
     fun isAvailable(): Boolean =
         HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE
@@ -115,6 +122,24 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
             if (segments.isEmpty()) throw it
             client.insertRecords(listOf(session(emptyList())) + records.drop(1))
         }
+    }
+
+    /**
+     * Peso y % de grasa apuntados en Medidas (Samsung Health y las básculas los comparten por aquí).
+     * Con id de cliente estable: editar o volver a guardar la medida la sustituye.
+     */
+    suspend fun exportMeasurement(m: BodyMeasurement) {
+        val granted = granted()
+        val time = Instant.ofEpochMilli(m.dateEpochMs)
+        val records = listOfNotNull<Record>(
+            m.weightKg?.takeIf { weightPermission in granted && it in 1.0..1000.0 }?.let {
+                WeightRecord(time, null, Mass.kilograms(it), Metadata(clientRecordId = "${m.id}-weight", clientRecordVersion = System.currentTimeMillis()))
+            },
+            m.bodyFatPct?.takeIf { bodyFatPermission in granted && it in 1.0..100.0 }?.let {
+                BodyFatRecord(time, null, Percentage(it), Metadata(clientRecordId = "${m.id}-fat", clientRecordVersion = System.currentTimeMillis()))
+            },
+        )
+        if (records.isNotEmpty()) client.insertRecords(records)
     }
 
     /** Solo la gráfica de pulso (llega del reloj después de exportar la sesión). */

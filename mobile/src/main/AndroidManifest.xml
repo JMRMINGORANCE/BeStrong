@@ -16,6 +16,8 @@
     <uses-permission android:name="android.health.permission.WRITE_EXERCISE" />
     <uses-permission android:name="android.health.permission.WRITE_TOTAL_CALORIES_BURNED" />
     <uses-permission android:name="android.health.permission.WRITE_HEART_RATE" />
+    <uses-permission android:name="android.health.permission.WRITE_WEIGHT" />
+    <uses-permission android:name="android.health.permission.WRITE_BODY_FAT" />
     <!-- Peso corporal y preparación del día (sueño y pulso en reposo) -->
     <uses-permission android:name="android.health.permission.READ_WEIGHT" />
     <uses-permission android:name="android.health.permission.READ_SLEEP" />
