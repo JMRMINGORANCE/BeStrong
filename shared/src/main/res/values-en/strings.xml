@@ -855,4 +855,7 @@
     <string name="log_past_invalid">Check the time and duration (it can\'t be in the future).</string>
     <string name="log_past_hint">Sets are saved as done with last time\'s weights; you can adjust them afterwards by editing the workout.</string>
     <string name="log_past_no_routines">First create a routine with the exercises you did.</string>
+    <string name="weight_increment">Weight increment</string>
+    <string name="weight_increment_hint">Step for the ± buttons and progression suggestions on this exercise (dumbbells, machines, microplates…).</string>
+    <string name="weight_increment_default">Default (%1$s)</string>
 </resources>

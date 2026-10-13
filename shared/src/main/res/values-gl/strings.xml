@@ -855,4 +855,7 @@
     <string name="log_past_invalid">Revisa a hora e a duración (non pode quedar no futuro).</string>
     <string name="log_past_hint">As series gárdanse feitas cos pesos da última vez; despois podes axustalas editando o adestramento.</string>
     <string name="log_past_no_routines">Crea antes unha rutina cos exercicios que fixeches.</string>
+    <string name="weight_increment">Incremento de peso</string>
+    <string name="weight_increment_hint">Salto dos botóns ± e das suxestións de progresión para este exercicio (mancuernas, máquinas, microdiscos…).</string>
+    <string name="weight_increment_default">Predeterminado (%1$s)</string>
 </resources>

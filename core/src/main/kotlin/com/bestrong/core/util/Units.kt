@@ -28,4 +28,16 @@ enum class WeightUnit(val label: String, val kgPerUnit: Double, val defaultIncre
 
     /** Paso del bisel / botones ±. */
     fun stepKg(): Double = toKg(defaultIncrement)
+
+    /** Incrementos que se pueden elegir por ejercicio, en esta unidad. */
+    fun incrementChoices(): List<Double> = when (this) {
+        KG -> listOf(0.5, 1.0, 1.25, 2.0, 2.5, 5.0, 10.0)
+        LB -> listOf(1.0, 2.5, 5.0, 10.0, 20.0)
+    }
+
+    /** Formatea un incremento con hasta dos decimales («1,25 kg»), que [format] redondearía. */
+    fun formatStep(kg: Double): String {
+        val v = (fromKg(kg) * 100).roundToLong() / 100.0
+        return (if (v % 1.0 == 0.0) v.toLong().toString() else v.toString().replace('.', ',')) + " " + label
+    }
 }

@@ -855,4 +855,7 @@
     <string name="log_past_invalid">Prüfe Uhrzeit und Dauer (nicht in der Zukunft).</string>
     <string name="log_past_hint">Die Sätze werden mit den Gewichten vom letzten Mal als erledigt gespeichert; danach kannst du sie beim Bearbeiten des Trainings anpassen.</string>
     <string name="log_past_no_routines">Lege zuerst eine Routine mit den gemachten Übungen an.</string>
+    <string name="weight_increment">Gewichtsschritt</string>
+    <string name="weight_increment_hint">Schritt der ±-Tasten und der Progressionsvorschläge für diese Übung (Kurzhanteln, Maschinen, Mikroscheiben…).</string>
+    <string name="weight_increment_default">Standard (%1$s)</string>
 </resources>

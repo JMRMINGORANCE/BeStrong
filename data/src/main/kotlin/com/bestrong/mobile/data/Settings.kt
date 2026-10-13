@@ -13,6 +13,8 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -73,8 +75,13 @@ data class UserSettings(
     val tutorialDone: Boolean = false,
     val lastSeenVersion: Int = 0,
     val dismissedTips: Set<String> = emptySet(),
+    /** Incremento propio por ejercicio en kg (mancuernas de 2 kg, máquinas de 5 kg, microdiscos…). */
+    val exerciseIncrementKg: Map<String, Double> = emptyMap(),
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
+
+    /** Salto de peso de ese ejercicio: el suyo propio o el de la unidad (2,5 kg / 5 lb). */
+    fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
 }
 
 @Singleton
@@ -128,6 +135,9 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         tutorialDone = prefs.getBoolean("tutorial_done", false),
         lastSeenVersion = prefs.getInt("last_seen_version", 0),
         dismissedTips = prefs.getStringSet("dismissed_tips", emptySet()).orEmpty().toSet(),
+        exerciseIncrementKg = prefs.getString("exercise_increments", null)
+            ?.let { runCatching { SyncContract.json.decodeFromString(INCREMENTS, it) }.getOrNull() }
+            .orEmpty(),
     )
 
     private inline fun <reified E : Enum<E>> enumOr(key: String, default: E): E =
@@ -176,6 +186,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBoolean("tutorial_done", s.tutorialDone)
             putInt("last_seen_version", s.lastSeenVersion)
             putStringSet("dismissed_tips", s.dismissedTips)
+            putString("exercise_increments", SyncContract.json.encodeToString(INCREMENTS, s.exerciseIncrementKg))
         }
         _settings.value = s
     }
@@ -213,5 +224,6 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
 
     private companion object {
         val DEVICE_KEYS = setOf("backup_folder", "backup_last")
+        val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
     }
 }

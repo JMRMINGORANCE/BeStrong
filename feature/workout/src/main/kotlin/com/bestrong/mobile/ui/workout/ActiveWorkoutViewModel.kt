@@ -67,7 +67,7 @@ data class FinishedSummary(
 @HiltViewModel
 class ActiveWorkoutViewModel @Inject constructor(
     private val repo: BeStrongRepository,
-    settingsStore: SettingsStore,
+    private val settingsStore: SettingsStore,
     private val restTimer: RestTimerController,
     private val metricsStore: WatchMetricsStore,
     private val energy: EnergyCalculator,
@@ -126,7 +126,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         if (!s.progressionEnabled) {
             emptyMap()
         } else {
-            exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.unit.stepKg())?.let { ex.id to it } }.toMap()
+            exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.stepKgFor(ex.id))?.let { ex.id to it } }.toMap()
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
@@ -137,6 +137,11 @@ class ActiveWorkoutViewModel @Inject constructor(
     ) { ids, _ -> ids.distinct().associateWith { media.note(it) }.filterValues { it.isNotBlank() } }
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    /** Incremento propio del ejercicio en kg; null vuelve al de la unidad. */
+    fun setIncrement(exerciseId: String, kg: Double?) = settingsStore.update { s ->
+        s.copy(exerciseIncrementKg = if (kg == null) s.exerciseIncrementKg - exerciseId else s.exerciseIncrementKg + (exerciseId to kg))
+    }
 
     fun savePinnedNote(exerciseId: String, text: String) {
         viewModelScope.launch { media.saveNote(exerciseId, text.trim()) }
@@ -235,7 +240,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(rpe = rpe) } }
         // Autorregulación: con RPE muy alto o muy bajo, proponer ajustar las series que quedan
         val we = updated.exercises.firstOrNull { it.id == weId } ?: return
-        Autoregulation.suggest(we, setId, settings.value.unit.stepKg())?.let {
+        Autoregulation.suggest(we, setId, settings.value.stepKgFor(we.exercise.id))?.let {
             _events.tryEmit(WorkoutEvent.RpeSuggestion(weId, we.exercise, it))
         }
     }
@@ -263,7 +268,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun substitute(weId: String, exerciseId: String) {
         val to = repo.exercise(exerciseId) ?: return
         val previousOfNew = WorkoutStats.previousSets(exerciseId, repo.history.value)
-        val step = settings.value.unit.stepKg()
+        val step = settings.value.stepKgFor(exerciseId)
         edit { WorkoutEditor.substitute(it, weId, to, previousOfNew, step) }
     }
     fun linkWithNext(weId: String) = edit { WorkoutEditor.linkWithNext(it, weId) }
@@ -280,7 +285,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         val we = w.exercises.firstOrNull { it.id == weId }
         val old = we?.sets?.firstOrNull { it.id == setId } ?: return@edit w
         val allowNegative = we.exercise.tracking == com.bestrong.core.model.TrackingType.REPS_ONLY
-        val stepped = WorkoutEditor.stepWeight(w, weId, setId, sign * settings.value.unit.stepKg(), allowNegative)
+        val stepped = WorkoutEditor.stepWeight(w, weId, setId, sign * settings.value.stepKgFor(we.exercise.id), allowNegative)
         val newKg = stepped.exercises.first { it.id == weId }.sets.first { it.id == setId }.weightKg
         WorkoutEditor.updateSetPropagating(w, weId, old.id, weightKg = newKg)
     }
@@ -434,7 +439,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         WorkoutStats.newRecordsIn(finished, history),
         WorkoutStats.compareWithPrevious(finished, history),
         WorkoutStats.imbalances(finished),
-        NextTime.forWorkout(finished, settings.value.unit.stepKg()),
+        NextTime.forWorkout(finished) { settings.value.stepKgFor(it) },
     )
 
     init {

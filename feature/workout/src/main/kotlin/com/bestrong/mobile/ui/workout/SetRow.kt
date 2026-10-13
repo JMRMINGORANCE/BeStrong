@@ -123,6 +123,8 @@ fun SetRow(
     onStepReps: (Int) -> Unit = {},
     /** 2 = se muestra y escribe el total de las dos mancuernas (se guarda por mancuerna). */
     weightFactor: Int = 1,
+    /** Salto de peso de los botones ± (el propio del ejercicio); null = el de la unidad. */
+    stepKg: Double? = null,
     onType: (SetType) -> Unit,
     onRpe: (Double?) -> Unit,
     onDelete: () -> Unit,
@@ -336,7 +338,7 @@ fun SetRow(
         focusedField?.let { field ->
             StepBar(
                 field = field,
-                stepLabel = if (field == StepField.WEIGHT) unit.format(unit.stepKg() * weightFactor, withUnit = true) else "1",
+                stepLabel = if (field == StepField.WEIGHT) unit.formatStep((stepKg ?: unit.stepKg()) * weightFactor) else "1",
                 onStep = { sign ->
                     if (field == StepField.WEIGHT) {
                         onStepWeight(sign)

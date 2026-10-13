@@ -855,4 +855,7 @@
     <string name="log_past_invalid">Vérifie l\'heure et la durée (pas dans le futur).</string>
     <string name="log_past_hint">Les séries sont enregistrées comme faites avec les charges de la dernière fois ; tu peux les ajuster ensuite en modifiant la séance.</string>
     <string name="log_past_no_routines">Crée d\'abord une routine avec les exercices effectués.</string>
+    <string name="weight_increment">Incrément de charge</string>
+    <string name="weight_increment_hint">Pas des boutons ± et des suggestions de progression pour cet exercice (haltères, machines, micro-disques…).</string>
+    <string name="weight_increment_default">Par défaut (%1$s)</string>
 </resources>

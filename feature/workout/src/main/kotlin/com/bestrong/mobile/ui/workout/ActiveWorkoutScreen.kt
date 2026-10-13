@@ -8,6 +8,8 @@ import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -40,6 +42,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -449,6 +452,7 @@ private fun ExerciseList(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ExerciseCard(
     we: WorkoutExercise,
@@ -466,6 +470,8 @@ private fun ExerciseCard(
     var editRest by remember { mutableStateOf(false) }
     var editNotes by remember { mutableStateOf(false) }
     var editPinned by remember { mutableStateOf(false) }
+    var editIncrement by remember { mutableStateOf(false) }
+    val stepKg = vm.settings.collectAsStateWithLifecycle().value.stepKgFor(we.exercise.id)
     val pinnedNote = vm.pinnedNotes.collectAsStateWithLifecycle().value[we.exercise.id].orEmpty()
     var editTempo by remember { mutableStateOf(false) }
     var substituting by remember { mutableStateOf(false) }
@@ -533,6 +539,9 @@ private fun ExerciseCard(
                         DropdownMenuItem(text = { Text(stringResource(R.string.rest_time)) }, onClick = { menu = false; editRest = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.notes)) }, onClick = { menu = false; editNotes = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.pinned_note)) }, onClick = { menu = false; editPinned = true })
+                        if (we.exercise.tracking == TrackingType.WEIGHT_REPS) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.weight_increment)) }, onClick = { menu = false; editIncrement = true })
+                        }
                         DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.substitute_title)) }, onClick = { menu = false; substituting = true })
                         if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.skip_exercise)) }, onClick = { menu = false; vm.skipExercise(we.id) })
@@ -612,6 +621,7 @@ private fun ExerciseCard(
                         onStepWeight = { vm.stepWeight(we.id, set.id, it) },
                         onStepReps = { vm.stepReps(we.id, set.id, it) },
                         weightFactor = weightFactor,
+                        stepKg = stepKg,
                     )
                 }
             }
@@ -673,6 +683,34 @@ private fun ExerciseCard(
             text = { OutlinedTextField(notes, { notes = it }, minLines = 3) },
             confirmButton = { Button(onClick = { vm.setExerciseNotes(we.id, notes); editNotes = false }) { Text(stringResource(R.string.action_save)) } },
             dismissButton = { TextButton(onClick = { editNotes = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
+    if (editIncrement) {
+        val custom = vm.settings.collectAsStateWithLifecycle().value.exerciseIncrementKg[we.exercise.id]
+        AlertDialog(
+            onDismissRequest = { editIncrement = false },
+            title = { Text(stringResource(R.string.weight_increment)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.weight_increment_hint), style = MaterialTheme.typography.bodySmall)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = custom == null,
+                            onClick = { vm.setIncrement(we.exercise.id, null); editIncrement = false },
+                            label = { Text(stringResource(R.string.weight_increment_default, unit.formatStep(unit.stepKg()))) },
+                        )
+                        unit.incrementChoices().forEach { value ->
+                            val kg = unit.toKg(value)
+                            FilterChip(
+                                selected = custom != null && kotlin.math.abs(custom - kg) < 1e-6,
+                                onClick = { vm.setIncrement(we.exercise.id, kg); editIncrement = false },
+                                label = { Text(unit.formatStep(kg)) },
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { editIncrement = false }) { Text(stringResource(R.string.action_close)) } },
         )
     }
     if (editPinned) {
