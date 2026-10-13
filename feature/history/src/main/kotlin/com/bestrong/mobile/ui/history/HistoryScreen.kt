@@ -72,6 +72,7 @@ import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.workout.describeSet
+import com.bestrong.mobile.ui.workout.setRemark
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
@@ -284,6 +285,8 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                                 Text(describeSet(set, we.exercise.tracking, unit), Modifier.weight(1f))
                                 if (set.estimatedOneRepMax > 0) Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax)), style = MaterialTheme.typography.bodySmall)
                             }
+                            // Nota de la serie y si fue con ayuda (se anotan en el entreno)
+                            setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp)) }
                         }
                     }
                 }

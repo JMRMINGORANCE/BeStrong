@@ -57,7 +57,9 @@ data class Routine(
                 supersetId = re.supersetId,
                 tempo = re.tempo,
                 sets = re.sets.mapIndexed { i, rs ->
-                    val prev = previous.getOrNull(i)
+                    // Se empareja dentro del mismo tipo: los calentamientos de la última vez no rellenan series efectivas
+                    val sameTypeIndex = re.sets.take(i).count { it.type == rs.type }
+                    val prev = previous.filter { it.type == rs.type }.getOrNull(sameTypeIndex)
                     WorkoutSet(
                         weightKg = prev?.weightKg?.takeIf { it > 0 } ?: rs.weightKg,
                         reps = prev?.reps?.takeIf { it > 0 } ?: rs.reps,
@@ -69,19 +71,34 @@ data class Routine(
         },
     )
 
+    /**
+     * Rutina con la estructura del entreno que se hizo a partir de ella (ejercicios, orden, series,
+     * descansos…), conservando su identidad, nombre, emoji, notas y posición.
+     */
+    fun updatedFrom(workout: Workout): Routine = copy(exercises = exercisesOf(workout))
+
+    /** Si el entreno cambió la estructura de la rutina (ejercicios, orden, nº de series, tipos o descansos). */
+    fun structureDiffersFrom(workout: Workout): Boolean {
+        fun RoutineExercise.shape() = listOf(exercise.id, sets.map { it.type }, restSeconds, supersetId)
+        return exercises.map { it.shape() } != exercisesOf(workout).map { it.shape() }
+    }
+
     companion object {
         /** Guarda un entrenamiento terminado como rutina nueva. */
         fun fromWorkout(workout: Workout, name: String = workout.name): Routine = Routine(
             name = name,
-            exercises = workout.exercises.map { we ->
-                RoutineExercise(
-                    exercise = we.exercise,
-                    restSeconds = we.restSeconds,
-                    supersetId = we.supersetId,
-                    tempo = we.tempo,
-                    sets = we.sets.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) },
-                )
-            },
+            exercises = exercisesOf(workout),
         )
+
+        private fun exercisesOf(workout: Workout): List<RoutineExercise> = workout.exercises.map { we ->
+            RoutineExercise(
+                exercise = we.exercise,
+                restSeconds = we.restSeconds,
+                notes = we.notes,
+                supersetId = we.supersetId,
+                tempo = we.tempo,
+                sets = we.sets.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) },
+            )
+        }
     }
 }

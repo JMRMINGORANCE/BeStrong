@@ -186,7 +186,8 @@ object Periodization {
         val (weight, success) = last
         return when {
             success -> weight + s.incrementKg
-            attempts.size >= 2 && !attempts[attempts.size - 2].second -> round(weight * 0.9)
+            // Dos fallos seguidos con el mismo peso (el fallo que ya provocó una descarga no cuenta otra vez)
+            attempts.size >= 2 && attempts[attempts.size - 2].let { (w, ok) -> !ok && w == weight } -> round(weight * 0.9)
             else -> weight
         }
     }

@@ -842,4 +842,9 @@
     <string name="set_col_minutes">MIN</string>
     <string name="set_col_km">KM</string>
     <string name="cardio_start">Cardio-Stoppuhr starten</string>
+    <string name="workout_notes">Trainingsnotizen</string>
+    <string name="workout_notes_hint">Wie du dich gefühlt hast, Beschwerden, Schlaf…</string>
+    <string name="pinned_note">Feste Notiz</string>
+    <string name="pinned_note_hint">Wird bei jeder Ausführung dieser Übung angezeigt (Sitzhöhe, Griff, Gerät…).</string>
+    <string name="update_routine">„%1$s“ aktualisieren</string>
 </resources>

@@ -112,10 +112,20 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         }
     }
 
-    /** Aplica un cambio sobre el último estado guardado (evita perder ediciones rápidas). */
-    suspend fun updateActive(block: (Workout) -> Workout) = activeMutex.withLock {
-        val current = currentActive() ?: return@withLock
-        write(block(current).copy(updatedAtEpochMs = System.currentTimeMillis()))
+    /**
+     * Aplica un cambio sobre el último estado guardado (evita perder ediciones rápidas).
+     * Devuelve el estado antes y después del cambio (null si no hay entreno activo).
+     */
+    suspend fun updateActive(block: (Workout) -> Workout): Pair<Workout, Workout>? = activeMutex.withLock {
+        val current = currentActive() ?: return@withLock null
+        val updated = block(current).copy(updatedAtEpochMs = System.currentTimeMillis())
+        write(updated)
+        current to updated
+    }
+
+    /** Lee y quita el entreno activo de una vez (al terminarlo no se pierde ningún cambio de última hora). */
+    suspend fun takeActive(): Workout? = activeMutex.withLock {
+        currentActive()?.also { write(null) }
     }
 
     private suspend fun currentActive(): Workout? =
@@ -131,10 +141,20 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         if (workout == null) dao.deleteValue(KEY_PARTNER) else dao.putValue(KeyValueEntity(KEY_PARTNER, Persistence.encodeWorkout(workout)))
     }
 
-    suspend fun updatePartnerActive(block: (Workout) -> Workout) = activeMutex.withLock {
-        val current = dao.valueOnce(KEY_PARTNER)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } ?: return@withLock
-        dao.putValue(KeyValueEntity(KEY_PARTNER, Persistence.encodeWorkout(block(current).copy(updatedAtEpochMs = System.currentTimeMillis()))))
+    suspend fun updatePartnerActive(block: (Workout) -> Workout): Pair<Workout, Workout>? = activeMutex.withLock {
+        val current = currentPartner() ?: return@withLock null
+        val updated = block(current).copy(updatedAtEpochMs = System.currentTimeMillis())
+        dao.putValue(KeyValueEntity(KEY_PARTNER, Persistence.encodeWorkout(updated)))
+        current to updated
     }
+
+    /** Como [takeActive], para el entreno de la pareja. */
+    suspend fun takePartnerActive(): Workout? = activeMutex.withLock {
+        currentPartner()?.also { dao.deleteValue(KEY_PARTNER) }
+    }
+
+    private suspend fun currentPartner(): Workout? =
+        dao.valueOnce(KEY_PARTNER)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
 
     private val _syncConflicts = MutableSharedFlow<List<WorkoutMerge.SetConflict>>(extraBufferCapacity = 4)
 

@@ -234,8 +234,11 @@ object Strength {
     }
 
     fun weekSummary(history: List<Workout>, day: LocalDate, zone: ZoneId): PeriodSummary {
-        val start = day.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(zone).toInstant().toEpochMilli()
-        return summary(history, start, start + 7 * 86_400_000L)
+        val monday = day.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        // Fin de semana por calendario: con cambio de hora la semana no dura 7 × 24 h
+        val start = monday.atStartOfDay(zone).toInstant().toEpochMilli()
+        val end = monday.plusWeeks(1).atStartOfDay(zone).toInstant().toEpochMilli()
+        return summary(history, start, end)
     }
 
     fun monthSummary(history: List<Workout>, month: YearMonth, zone: ZoneId): PeriodSummary {

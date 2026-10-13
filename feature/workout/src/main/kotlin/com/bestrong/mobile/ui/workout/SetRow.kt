@@ -139,7 +139,9 @@ fun SetRow(
     })
     // Campo con el foco: muestra la barra de ajuste rápido (±) debajo de la fila
     var focusedField by remember { mutableStateOf<StepField?>(null) }
-    var stepSync by remember { mutableIntStateOf(0) }
+    // Un contador por campo: el ± de uno no deja pendiente la sincronización del otro
+    var weightSync by remember { mutableIntStateOf(0) }
+    var repsSync by remember { mutableIntStateOf(0) }
     Column {
         SwipeToDismissBox(
             state = dismissState,
@@ -264,7 +266,7 @@ fun SetRow(
                             Modifier.weight(1f),
                             decimal = true,
                             signed = signed,
-                            syncKey = stepSync,
+                            syncKey = weightSync,
                             onFocus = { f -> focusedField = if (f) StepField.WEIGHT else focusedField.takeIf { it != StepField.WEIGHT } },
                         ) {
                             when {
@@ -288,7 +290,7 @@ fun SetRow(
                                 set.reps.takeIf { it > 0 }?.toString() ?: "",
                                 stringResource(R.string.set_reps),
                                 Modifier.weight(1f),
-                                syncKey = stepSync,
+                                syncKey = repsSync,
                                 onFocus = { f -> focusedField = if (f) StepField.REPS else focusedField.takeIf { it != StepField.REPS } },
                             ) {
                                 if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
@@ -336,8 +338,13 @@ fun SetRow(
                 field = field,
                 stepLabel = if (field == StepField.WEIGHT) unit.format(unit.stepKg() * weightFactor, withUnit = true) else "1",
                 onStep = { sign ->
-                    if (field == StepField.WEIGHT) onStepWeight(sign) else onStepReps(sign)
-                    stepSync++
+                    if (field == StepField.WEIGHT) {
+                        onStepWeight(sign)
+                        weightSync++
+                    } else {
+                        onStepReps(sign)
+                        repsSync++
+                    }
                 },
             )
         }

@@ -55,7 +55,9 @@ object Progression {
         // El cardio no progresa por peso ni repeticiones
         if (last.isEmpty() || exercise.tracking == TrackingType.CARDIO) return null
 
-        if (isStalled(exercise.id, history, stallSessions)) {
+        // Sin carga (peso corporal o tiempo) el 1RM estimado es 0 y no sirve para detectar estancamiento
+        val loaded = exercise.tracking != TrackingType.DURATION && last.any { it.weightKg > 0.0 }
+        if (loaded && isStalled(exercise.id, history, stallSessions)) {
             val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
             return ProgressionSuggestion(SuggestionKind.DELOAD, sets, "Llevas $stallSessions sesiones sin progresar: descarga al 90 %", stallSessions = stallSessions)
         }
@@ -90,6 +92,7 @@ object Progression {
         val points = WorkoutStats.exerciseProgress(exerciseId, history)
         if (points.size < sessions + 1) return false
         val before = points.dropLast(sessions).maxOf { it.bestOneRepMax }
+        if (before <= 0.0) return false
         return points.takeLast(sessions).all { it.bestOneRepMax <= before }
     }
 

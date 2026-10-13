@@ -39,8 +39,21 @@ object WorkoutCsv {
     private val HEADER = listOf(
         "workout_id", "date", "end_date", "workout_name", "workout_notes", "exercise_id", "exercise_name",
         "superset_id", "exercise_notes", "set_index", "set_type", "weight_kg", "reps", "duration_s", "rpe",
+        "reps_right", "distance_m", "assisted", "set_note",
     )
     private val ISO: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
+    /** Los CSV guardados con Excel en español usan coma decimal («82,5»). */
+    private fun num(s: String): Double? = s.replace(',', '.').toDoubleOrNull()
+
+    /** Metros por unidad de distancia de FitNotes (km, mi, ft, yd; m por defecto). */
+    private fun metresPer(unit: String): Double = when (unit.trim().lowercase()) {
+        "km", "kms", "kilometres", "kilometers" -> 1000.0
+        "mi", "mile", "miles" -> 1609.344
+        "ft", "feet", "foot" -> 0.3048
+        "yd", "yds", "yard", "yards" -> 0.9144
+        else -> 1.0
+    }
 
     // --- Exportar ----------------------------------------------------------------------------
 
@@ -50,11 +63,13 @@ object WorkoutCsv {
             val start = ISO.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(w.startedAtEpochMs), zone))
             val end = ISO.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(w.finishedAtEpochMs!!), zone))
             w.exercises.forEach { we ->
-                we.sets.forEachIndexed { i, s ->
+                // Solo lo hecho: al importar, cada fila se toma como serie completada
+                we.completedSets.forEachIndexed { i, s ->
                     rows += listOf(
                         w.id, start, end, w.name, w.notes, we.exercise.id, we.exercise.name,
                         we.supersetId.orEmpty(), we.notes, i.toString(), s.type.name,
                         s.weightKg.toString(), s.reps.toString(), s.durationSec.toString(), s.rpe?.toString().orEmpty(),
+                        s.repsRight?.toString().orEmpty(), s.distanceM.toString(), s.assisted.toString(), s.note,
                     )
                 }
             }
@@ -108,19 +123,23 @@ object WorkoutCsv {
                             notes = r.get("workout_notes"), exercise = ex, exNotes = r.get("exercise_notes"),
                             superset = r.get("superset_id").ifBlank { null },
                             set = WorkoutSet(
-                                weightKg = r.get("weight_kg").toDoubleOrNull() ?: 0.0,
-                                reps = r.get("reps").toDoubleOrNull()?.toInt() ?: 0,
-                                durationSec = r.get("duration_s").toDoubleOrNull()?.toInt() ?: 0,
+                                weightKg = num(r.get("weight_kg")) ?: 0.0,
+                                reps = num(r.get("reps"))?.toInt() ?: 0,
+                                durationSec = num(r.get("duration_s"))?.toInt() ?: 0,
                                 type = runCatching { SetType.valueOf(r.get("set_type")) }.getOrDefault(SetType.NORMAL),
-                                rpe = r.get("rpe").toDoubleOrNull(),
+                                rpe = num(r.get("rpe")),
                                 completed = true,
+                                repsRight = num(r.get("reps_right"))?.toInt(),
+                                distanceM = num(r.get("distance_m")) ?: 0.0,
+                                assisted = r.get("assisted").equals("true", ignoreCase = true),
+                                note = r.get("set_note"),
                             ),
                         )
                     }
                     CsvFormat.HEVY -> {
                         val start = parseHevy(r.get("start_time"), zone)
                         val ex = resolver.resolve(r.get("exercise_title"))
-                        val weightKg = r.get("weight_kg").toDoubleOrNull() ?: r.get("weight_lbs").toDoubleOrNull()?.let { WeightUnit.LB.toKg(it) } ?: 0.0
+                        val weightKg = num(r.get("weight_kg")) ?: num(r.get("weight_lbs"))?.let { WeightUnit.LB.toKg(it) } ?: 0.0
                         Row(
                             key = r.get("title") + "|" + r.get("start_time"), name = r.get("title"),
                             start = start, end = r.get("end_time").takeIf { it.isNotBlank() }?.let { parseHevy(it, zone) },
@@ -128,15 +147,15 @@ object WorkoutCsv {
                             superset = r.get("superset_id").ifBlank { null },
                             set = WorkoutSet(
                                 weightKg = weightKg,
-                                reps = r.get("reps").toDoubleOrNull()?.toInt() ?: 0,
-                                durationSec = r.get("duration_seconds").toDoubleOrNull()?.toInt() ?: 0,
+                                reps = num(r.get("reps"))?.toInt() ?: 0,
+                                durationSec = num(r.get("duration_seconds"))?.toInt() ?: 0,
                                 type = when (r.get("set_type").lowercase()) {
                                     "warmup" -> SetType.WARMUP
                                     "dropset" -> SetType.DROP
                                     "failure" -> SetType.FAILURE
                                     else -> SetType.NORMAL
                                 },
-                                rpe = r.get("rpe").toDoubleOrNull(),
+                                rpe = num(r.get("rpe")),
                                 completed = true,
                             ),
                         )
@@ -153,9 +172,9 @@ object WorkoutCsv {
                             notes = "", exercise = ex, exNotes = r.get("comment"), superset = null,
                             set = WorkoutSet(
                                 weightKg = if (lbs) WeightUnit.LB.toKg(w) else w,
-                                reps = r.get("reps").toDoubleOrNull()?.toInt() ?: 0,
+                                reps = num(r.get("reps"))?.toInt() ?: 0,
                                 durationSec = parseClock(r.get("time")),
-                                distanceM = r.get("distance").replace(',', '.').toDoubleOrNull()?.let { d -> if (r.get("distance unit").lowercase().startsWith("km")) d * 1000 else d } ?: 0.0,
+                                distanceM = num(r.get("distance"))?.let { d -> d * metresPer(r.get("distance unit")) } ?: 0.0,
                                 completed = true,
                             ),
                         )
@@ -171,11 +190,11 @@ object WorkoutCsv {
                             start = start, end = durationMin?.let { start + it * 60_000L },
                             notes = r.get("workout notes"), exercise = ex, exNotes = r.get("notes"), superset = null,
                             set = WorkoutSet(
-                                weightKg = strongUnit.toKg(r.get("weight").replace(',', '.').toDoubleOrNull() ?: 0.0),
-                                reps = r.get("reps").toDoubleOrNull()?.toInt() ?: 0,
-                                durationSec = r.get("seconds").toDoubleOrNull()?.toInt() ?: 0,
+                                weightKg = strongUnit.toKg(num(r.get("weight")) ?: 0.0),
+                                reps = num(r.get("reps"))?.toInt() ?: 0,
+                                durationSec = num(r.get("seconds"))?.toInt() ?: 0,
                                 type = when (order.uppercase()) { "W" -> SetType.WARMUP; "D" -> SetType.DROP; "F" -> SetType.FAILURE; else -> SetType.NORMAL },
-                                rpe = r.get("rpe").toDoubleOrNull(),
+                                rpe = num(r.get("rpe")),
                                 completed = true,
                             ),
                         )

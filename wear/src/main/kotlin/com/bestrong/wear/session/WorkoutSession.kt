@@ -2,6 +2,7 @@ package com.bestrong.wear.session
 
 import android.content.Context
 import android.os.Build
+import android.os.PowerManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -113,6 +114,9 @@ class WorkoutSession @Inject constructor(
     val repCounting: StateFlow<Boolean> = _repCounting.asStateFlow()
 
     private var restJob: Job? = null
+
+    /** Declarado antes de init: el descanso restaurado ya lo usa. */
+    private var restWakeLock: PowerManager.WakeLock? = null
     private var pushJob: Job? = null
     private var lastMetricsSentAt = 0L
 
@@ -123,11 +127,17 @@ class WorkoutSession @Inject constructor(
     private var platformHr: Pair<Int, Int>? = null
 
     init {
-        // Si el proceso murió con un entrenamiento activo, retomamos el servicio
+        // Si el proceso murió con un entrenamiento activo, se retoma. El servicio no se arranca
+        // aquí (en segundo plano Android no lo permite): lo hace MainActivity al volver a la app
         if (_workout.value != null) {
-            ExerciseService.start(context)
             if (_repCounting.value) repCounter.start()
+            // El descanso sigue contando hasta la misma hora si aún no ha terminado
+            store.activeRest?.takeIf { it.endsAtEpochMs > System.currentTimeMillis() }?.let {
+                _rest.value = it
+                scheduleRestEnd()
+            }
         }
+        if (_rest.value == null) store.activeRest = null
         _exerciseIndex.value = _workout.value?.let { w -> WorkoutEditor.nextPendingSet(w)?.first } ?: 0
     }
 
@@ -242,8 +252,9 @@ class WorkoutSession @Inject constructor(
             platformHr = null
             resetHealthSegments()
             _exerciseIndex.value = WorkoutEditor.nextPendingSet(remote)?.first ?: 0
-            // Empezado en el móvil: el reloj mide el pulso automáticamente
-            ExerciseService.start(context)
+            // Empezado en el móvil: el reloj mide el pulso automáticamente (con la app en segundo
+            // plano no se puede arrancar el servicio; lo hará MainActivity al abrirla)
+            if (isInForeground()) ExerciseService.start(context)
             if (_repCounting.value) repCounter.start()
         }
     }
@@ -258,11 +269,21 @@ class WorkoutSession @Inject constructor(
             val data = WorkoutHealthData(w.id, m.avgHeartRate, m.maxHeartRate, m.calories, samples)
             scope.launch { phoneSync.sendWorkoutHealth(data) }
         }
+        // Un envío pendiente devolvería al móvil el entreno que acaba de cerrar
+        pushJob?.cancel()
+        pushJob = null
+        stopTempo()
         stopRest()
         repCounter.stop()
         _workout.value = null
         store.activeWorkout = null
         ExerciseService.stop(context)
+    }
+
+    private fun isInForeground(): Boolean {
+        val info = android.app.ActivityManager.RunningAppProcessInfo()
+        android.app.ActivityManager.getMyMemoryState(info)
+        return info.importance <= android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
     }
 
     // --- Edición -----------------------------------------------------------------------------
@@ -414,14 +435,22 @@ class WorkoutSession @Inject constructor(
     fun stopRest() {
         restJob?.cancel()
         _rest.value = null
+        store.activeRest = null
+        releaseRestWakeLock()
         repCounter.reset()
     }
 
+    /**
+     * Con la pantalla apagada la CPU duerme y el delay() se retrasa: se mantiene despierta
+     * (WakeLock parcial con tope) para que las vibraciones lleguen a su hora.
+     */
     private fun scheduleRestEnd() {
         restJob?.cancel()
+        val r = _rest.value ?: return
+        store.activeRest = r
+        val remaining = r.endsAtEpochMs - System.currentTimeMillis()
+        acquireRestWakeLock(remaining.coerceAtLeast(0) + WAKE_LOCK_MARGIN_MS)
         restJob = scope.launch {
-            val r = _rest.value ?: return@launch
-            val remaining = r.endsAtEpochMs - System.currentTimeMillis()
             if (remaining > 10_000) {
                 delay(remaining - 10_000)
                 haptic(Haptics.REST_WARNING) // aviso: quedan 10 s
@@ -430,9 +459,26 @@ class WorkoutSession @Inject constructor(
                 delay(remaining.coerceAtLeast(0))
             }
             _rest.value = null
+            store.activeRest = null
             repCounter.reset()
             haptic(store.settings.value.restVibration.pattern)
+            releaseRestWakeLock()
         }
+    }
+
+    private fun acquireRestWakeLock(timeoutMs: Long) {
+        releaseRestWakeLock()
+        restWakeLock = ContextCompat.getSystemService(context, PowerManager::class.java)
+            ?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "BeStrong:rest")
+            ?.apply {
+                setReferenceCounted(false)
+                acquire(timeoutMs)
+            }
+    }
+
+    private fun releaseRestWakeLock() {
+        restWakeLock?.takeIf { it.isHeld }?.release()
+        restWakeLock = null
     }
 
     // --- Calentamiento, progreso y tempo ------------------------------------------------------
@@ -673,6 +719,9 @@ class WorkoutSession @Inject constructor(
         scope.launch { phoneSync.sendMetrics(LiveMetrics(w.id, m.heartRate, m.avgHeartRate, m.maxHeartRate, m.calories, now)) }
     }
 }
+
+/** Margen del WakeLock del descanso sobre su duración (vibración final incluida). */
+private const val WAKE_LOCK_MARGIN_MS = 15_000L
 
 /** Función del botón rápido del Galaxy Watch Ultra (y botones físicos asignables). */
 enum class StemAction { COMPLETE_SET, SKIP_REST, NEXT_EXERCISE }

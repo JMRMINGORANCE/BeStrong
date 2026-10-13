@@ -52,6 +52,7 @@ import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.workout.describeSet
+import com.bestrong.mobile.ui.workout.setRemark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -169,6 +170,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
                         w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
                             Text("${i + 1}. ${describeSet(set, s.exercise.tracking, unit)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax)) else "")
+                            setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
                     }
                 }
