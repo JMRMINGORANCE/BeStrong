@@ -165,6 +165,15 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 row.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
                             }
                         }
+                        // Cómo es un entreno típico: duración, series y volumen medios
+                        if (stats.totalWorkouts > 0) {
+                            val n = stats.totalWorkouts
+                            Text(
+                                stringResource(R.string.stat_average_workout, formatDuration(stats.totalDurationSec / n), stats.totalSets / n, unit.formatVolume(stats.totalVolume / n)),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
                 }
             }

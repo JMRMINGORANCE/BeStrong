@@ -64,6 +64,7 @@ data class ProfileStats(
     val topOneRepMax: List<PersonalRecord> = emptyList(),
     /** Series de esta semana por músculo (para el mapa con el objetivo de 10–20). */
     val weeklyMuscles: Map<MuscleGroup, Double> = emptyMap(),
+    val totalSets: Int = 0,
     /** Series por músculo de las últimas 8 semanas (el más trabajado primero). */
     val muscleTrend: Map<MuscleGroup, List<Pair<java.time.LocalDate, Double>>> = emptyMap(),
 )
@@ -119,6 +120,7 @@ class ProfileViewModel @Inject constructor(
             totalWorkouts = history.size,
             totalVolume = history.sumOf { it.totalVolume },
             totalDurationSec = history.sumOf { it.durationSeconds() },
+            totalSets = history.sumOf { it.completedSetCount },
             weeklyStreak = WorkoutStats.weeklyStreak(history, today, zone),
             weeks = WorkoutStats.weeklySummary(history, 12, today, zone),
             muscles30d = WorkoutStats.setsPerMuscle(history, System.currentTimeMillis() - 30L * 24 * 3600 * 1000),

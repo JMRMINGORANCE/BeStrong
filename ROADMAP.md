@@ -179,3 +179,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Biblioteca: última vez y mejor serie en cada ejercicio
 - [x] Deshacer «Descartar entreno»
 - [x] Descanso tras calentamiento configurable (también en el reloj)
+
+## Fase 15 — Más contexto al entrenar ✅
+- [x] Excel con hoja de Medidas
+- [x] Mancuernas más cercanas si el peso no existe en el gimnasio
+- [x] Nota de la serie de la última vez mientras está pendiente
+- [x] Series por músculo de las últimas 8 semanas
+- [x] Entreno medio (duración, series y volumen) en Perfil

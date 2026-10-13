@@ -915,4 +915,5 @@
     <string name="previous_set_note">Da última vez: ✎ %1$s</string>
     <string name="muscle_trend">Séries por músculo (8 semanas)</string>
     <string name="muscle_trend_hint">Séries efetivas por semana (secundários a metade). Recomendado: 10–20.</string>
+    <string name="stat_average_workout">Treino médio: %1$s · %2$d séries · %3$s</string>
 </resources>
