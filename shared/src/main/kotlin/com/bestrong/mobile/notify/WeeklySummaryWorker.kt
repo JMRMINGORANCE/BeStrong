@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.bestrong.core.stats.Strength
+import com.bestrong.core.stats.TrainingLoad
 import com.bestrong.mobile.di.WorkerEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import java.time.DayOfWeek
@@ -22,8 +23,11 @@ class WeeklySummaryWorker(context: Context, params: WorkerParameters) : Coroutin
         try {
             val settings = deps.settings().settings.value
             val zone = ZoneId.systemDefault()
-            val week = Strength.weekSummary(deps.repository().historyOnce(), LocalDate.now(zone), zone)
-            if (week.workouts > 0) Notifier.weeklySummary(applicationContext, week, settings.unit)
+            val history = deps.repository().historyOnce()
+            val week = Strength.weekSummary(history, LocalDate.now(zone), zone)
+            // Si la carga ha subido de golpe, el resumen lo avisa (riesgo de lesión)
+            val loadRatio = TrainingLoad.weekly(history, LocalDate.now(zone), zone).takeIf { it.tooHigh }?.acuteChronicRatio
+            if (week.workouts > 0) Notifier.weeklySummary(applicationContext, week, settings.unit, loadRatio)
         } finally {
             runCatching { schedule(applicationContext, force = true) }.onFailure { Log.w("WeeklySummary", "No se pudo reprogramar", it) }
         }

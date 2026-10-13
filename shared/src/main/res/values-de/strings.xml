@@ -902,4 +902,5 @@
     <string name="plates_use_weight">Gewicht übernehmen</string>
     <string name="rep_max">%1$dRM %2$s</string>
     <string name="home_repeat_last">„%1$s“ wiederholen</string>
+    <string name="notif_weekly_load_high">⚠ Last %1$s× dein Schnitt: plane eine leichtere Woche</string>
 </resources>

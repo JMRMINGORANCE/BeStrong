@@ -85,8 +85,9 @@ object Notifier {
     }
 
     /** Resumen semanal (domingo por la tarde). */
+    /** [highLoadRatio]: relación aguda:crónica si la carga subió demasiado (null = normal). */
     @Suppress("MissingPermission")
-    fun weeklySummary(context: Context, week: PeriodSummary, unit: WeightUnit) {
+    fun weeklySummary(context: Context, week: PeriodSummary, unit: WeightUnit, highLoadRatio: Double? = null) {
         if (!canPost(context)) return
         ensureChannels(context)
         val text = context.getString(R.string.notif_weekly_text, week.workouts, unit.formatVolume(week.volume), week.sets)
@@ -94,6 +95,7 @@ object Notifier {
             text,
             week.records.takeIf { it.isNotEmpty() }?.let { context.getString(R.string.notif_weekly_records, it.size) },
             week.volumeChange?.let { c -> context.getString(R.string.notif_weekly_change, (if (c >= 0) "+" else "−") + "${(kotlin.math.abs(c) * 100).toInt()} %") },
+            highLoadRatio?.let { context.getString(R.string.notif_weekly_load_high, com.bestrong.core.util.formatWeight(it)) },
         )
         val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
