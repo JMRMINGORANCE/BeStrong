@@ -295,6 +295,25 @@ object WorkoutStats {
             .toList().sortedByDescending { (_, l) -> l.sumOf { it.second } }.toMap()
     }
 
+    /**
+     * Media semanal de series de [trend] en las semanas ya cerradas (la actual va a medias) y cómo
+     * queda frente al rango habitual para ganar músculo ([LOW_WEEKLY_SETS]–[HIGH_WEEKLY_SETS]).
+     */
+    fun weeklySetsZone(weeks: List<Pair<LocalDate, Double>>, closedWeeks: Int = 4): Pair<Double, VolumeZone>? {
+        val closed = weeks.dropLast(1).takeLast(closedWeeks)
+        if (closed.isEmpty() || closed.all { it.second == 0.0 }) return null
+        val avg = closed.map { it.second }.average()
+        val zone = when {
+            avg < LOW_WEEKLY_SETS -> VolumeZone.LOW
+            avg > HIGH_WEEKLY_SETS -> VolumeZone.HIGH
+            else -> VolumeZone.OPTIMAL
+        }
+        return avg to zone
+    }
+
+    const val LOW_WEEKLY_SETS = 10
+    const val HIGH_WEEKLY_SETS = 20
+
     /** Series efectivas por grupo muscular (el principal cuenta 1, los secundarios 0,5). */
     fun setsPerMuscle(history: List<Workout>, sinceEpochMs: Long): Map<MuscleGroup, Double> {
         val result = mutableMapOf<MuscleGroup, Double>()
@@ -309,3 +328,6 @@ object WorkoutStats {
         return result.toList().sortedByDescending { it.second }.toMap()
     }
 }
+
+/** Dónde queda el volumen semanal de un músculo frente al rango habitual. */
+enum class VolumeZone { LOW, OPTIMAL, HIGH }

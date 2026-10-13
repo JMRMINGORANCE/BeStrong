@@ -193,3 +193,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Compartir la semana como texto para el entrenador
 - [x] Reloj: duración estimada de cada rutina
 - [x] Apuntar el peso de hoy desde Inicio
+
+## Fase 17 — Ritmo de la sesión ✅
+- [x] «Copiar a las siguientes» en el menú de cada serie
+- [x] Hora estimada de fin junto al tiempo restante (móvil y reloj)
+- [x] Historial: descanso real medio frente al previsto
+- [x] Tendencia por músculo: media semanal frente al rango habitual de 10–20 series
+- [x] Informe al entrenador con unidad, total de mancuernas y decimales coherentes

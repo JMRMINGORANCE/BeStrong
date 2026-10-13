@@ -555,7 +555,6 @@
     <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
     <string name="relative_strength">Fuerza relativa: %1$s</string>
     <string name="relative_strength_hint">1RM estimado dividido por tu peso corporal</string>
-    <string name="remaining_time">≈ %1$d min para terminar</string>
     <string name="reminders">Recordatorios</string>
     <string name="reminders_body">Te avisamos los días elegidos si aún no has entrenado.</string>
     <string name="reminders_off">Desactivados</string>
@@ -923,4 +922,10 @@
     <string name="body_weight_last">Peso: %1$s</string>
     <string name="body_weight_none">Sin peso apuntado</string>
     <string name="body_weight_log">Apuntar peso de hoy</string>
+    <string name="set_copy_following">Copiar a las siguientes (%1$d)</string>
+    <string name="remaining_time_eta">≈ %1$d min para terminar · hacia las %2$s</string>
+    <string name="rest_real_avg">Descanso real medio: %1$s (previsto %2$s)</string>
+    <string name="muscle_zone_low">Media de las últimas semanas: %1$s series — por debajo del rango habitual (10–20)</string>
+    <string name="muscle_zone_ok">Media de las últimas semanas: %1$s series — dentro del rango habitual (10–20)</string>
+    <string name="muscle_zone_high">Media de las últimas semanas: %1$s series — por encima del rango habitual (10–20): vigila la recuperación</string>
 </resources>

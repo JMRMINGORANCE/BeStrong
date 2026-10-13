@@ -121,6 +121,9 @@ fun SetRow(
     onStartTimer: () -> Unit = {},
     onNote: (String) -> Unit = {},
     onAssisted: (Boolean) -> Unit = {},
+    /** Series pendientes posteriores del mismo tipo a las que se puede copiar esta (0 = no se ofrece). */
+    followingCount: Int = 0,
+    onCopyFollowing: () -> Unit = {},
     onStepWeight: (Int) -> Unit = {},
     onStepReps: (Int) -> Unit = {},
     /** 2 = se muestra y escribe el total de las dos mancuernas (se guarda por mancuerna). */
@@ -241,6 +244,9 @@ fun SetRow(
                             onClick = { onAssisted(!set.assisted); menu = false },
                         )
                         DropdownMenuItem(text = { Text(stringResource(R.string.set_note)) }, onClick = { editingNote = true; menu = false })
+                        if (followingCount > 0 && !set.completed) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.set_copy_following, followingCount)) }, onClick = { onCopyFollowing(); menu = false })
+                        }
                     }
                 }
                 val columns = LocalSetColumns.current

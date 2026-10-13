@@ -394,7 +394,21 @@ fun MuscleTrendCard(trend: Map<com.bestrong.core.model.MuscleGroup, List<Pair<ja
                 }
             }
             BarChart(weeks.map { (monday, sets) -> ChartPoint(formatShortDate(monday.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()), sets) })
+            MuscleZoneLine(weeks)
             Text(stringResource(R.string.muscle_trend_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+}
+
+/** Media de las semanas cerradas frente al rango habitual de 10–20 series. */
+@Composable
+private fun MuscleZoneLine(weeks: List<Pair<java.time.LocalDate, Double>>) {
+    val (avg, zone) = com.bestrong.core.stats.WorkoutStats.weeklySetsZone(weeks) ?: return
+    val value = "%.1f".format(avg).removeSuffix(",0").removeSuffix(".0")
+    val (text, color) = when (zone) {
+        com.bestrong.core.stats.VolumeZone.LOW -> stringResource(R.string.muscle_zone_low, value) to MaterialTheme.colorScheme.onSurfaceVariant
+        com.bestrong.core.stats.VolumeZone.OPTIMAL -> stringResource(R.string.muscle_zone_ok, value) to MaterialTheme.colorScheme.primary
+        com.bestrong.core.stats.VolumeZone.HIGH -> stringResource(R.string.muscle_zone_high, value) to MaterialTheme.colorScheme.error
+    }
+    Text(text, style = MaterialTheme.typography.bodyMedium, color = color)
 }

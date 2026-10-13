@@ -64,6 +64,7 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
+import com.bestrong.core.stats.RestStats
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.share.DragShare
@@ -315,6 +316,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                     }
                 }
             }
+            item { RestSummaryLine(w) }
             if (w.notes.isNotBlank()) item { Text(w.notes) }
             items(w.exercises, key = { it.id }) { we ->
                 Card(Modifier.fillMaxWidth()) {
@@ -336,6 +338,20 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
         }
     }
 }
+
+/** Descanso real medio frente al previsto (solo si las series tienen hora de marcado). */
+@Composable
+private fun RestSummaryLine(w: Workout) {
+    val rest = remember(w) { RestStats.summary(w) } ?: return
+    Text(
+        stringResource(R.string.rest_real_avg, formatDuration(rest.realSeconds.toLong()), formatDuration(rest.plannedSeconds.toLong())),
+        style = MaterialTheme.typography.bodySmall,
+        color = if (rest.realSeconds > rest.plannedSeconds * OVERRUN_FACTOR) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+/** Descansar más de un 50 % de lo previsto se resalta. */
+private const val OVERRUN_FACTOR = 1.5
 
 /** Texto del entreno para compartir o arrastrar: nombre, fecha y la mejor serie de cada ejercicio. */
 @Composable

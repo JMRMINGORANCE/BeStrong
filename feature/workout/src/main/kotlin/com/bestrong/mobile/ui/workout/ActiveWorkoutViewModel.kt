@@ -253,6 +253,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             )
         }
     }
+    fun copyToFollowing(weId: String, setId: String) = edit { WorkoutEditor.copyToFollowing(it, weId, setId) }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
     fun setRpe(weId: String, setId: String, rpe: Double?) {
         val current = workout.value ?: return

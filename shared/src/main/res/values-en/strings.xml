@@ -555,7 +555,6 @@
     <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
     <string name="relative_strength">Relative strength: %1$s</string>
     <string name="relative_strength_hint">Estimated 1RM divided by your body weight</string>
-    <string name="remaining_time">≈ %1$d min to finish</string>
     <string name="reminders">Reminders</string>
     <string name="reminders_body">We\'ll remind you on the chosen days if you haven\'t trained yet.</string>
     <string name="reminders_off">Off</string>
@@ -923,4 +922,10 @@
     <string name="body_weight_last">Weight: %1$s</string>
     <string name="body_weight_none">No weight logged</string>
     <string name="body_weight_log">Log today\'s weight</string>
+    <string name="set_copy_following">Copy to next sets (%1$d)</string>
+    <string name="remaining_time_eta">≈ %1$d min left · done around %2$s</string>
+    <string name="rest_real_avg">Average actual rest: %1$s (planned %2$s)</string>
+    <string name="muscle_zone_low">Recent weekly average: %1$s sets — below the usual range (10–20)</string>
+    <string name="muscle_zone_ok">Recent weekly average: %1$s sets — within the usual range (10–20)</string>
+    <string name="muscle_zone_high">Recent weekly average: %1$s sets — above the usual range (10–20): watch your recovery</string>
 </resources>

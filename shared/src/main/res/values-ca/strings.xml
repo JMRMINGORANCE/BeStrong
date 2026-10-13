@@ -555,7 +555,6 @@
     <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
     <string name="relative_strength">Força relativa: %1$s</string>
     <string name="relative_strength_hint">1RM estimat dividit pel teu pes corporal</string>
-    <string name="remaining_time">≈ %1$d min per acabar</string>
     <string name="reminders">Recordatoris</string>
     <string name="reminders_body">T’avisem els dies triats si encara no has entrenat.</string>
     <string name="reminders_off">Desactivats</string>
@@ -923,4 +922,10 @@
     <string name="body_weight_last">Pes: %1$s</string>
     <string name="body_weight_none">Sense pes anotat</string>
     <string name="body_weight_log">Anotar el pes d\'avui</string>
+    <string name="set_copy_following">Copia a les següents (%1$d)</string>
+    <string name="remaining_time_eta">≈ %1$d min per acabar · cap a les %2$s</string>
+    <string name="rest_real_avg">Descans real mitjà: %1$s (previst %2$s)</string>
+    <string name="muscle_zone_low">Mitjana de les darreres setmanes: %1$s sèries — per sota del rang habitual (10–20)</string>
+    <string name="muscle_zone_ok">Mitjana de les darreres setmanes: %1$s sèries — dins del rang habitual (10–20)</string>
+    <string name="muscle_zone_high">Mitjana de les darreres setmanes: %1$s sèries — per sobre del rang habitual (10–20): vigila la recuperació</string>
 </resources>

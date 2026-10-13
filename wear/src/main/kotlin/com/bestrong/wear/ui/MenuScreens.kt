@@ -29,6 +29,7 @@ import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.model.Workout
+import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.util.formatDuration
 import com.bestrong.wear.R
 import com.bestrong.wear.WearContainer
@@ -69,6 +70,15 @@ fun MenuScreen(
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,
                 )
+            }
+            // Lo que queda y a qué hora se acabaría
+            val remaining = WorkoutEditor.estimatedRemainingSeconds(w)
+            if (remaining > 0) {
+                item {
+                    val ends = java.time.format.DateTimeFormatter.ofPattern("HH:mm")
+                        .format(java.time.Instant.ofEpochMilli(System.currentTimeMillis() + remaining * 1000L).atZone(java.time.ZoneId.systemDefault()))
+                    Text(stringResource(R.string.remaining_eta, (remaining + 59) / 60, ends), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
+                }
             }
             item { ListHeader { Text(stringResource(R.string.exercises)) } }
             itemsIndexed(w.exercises, key = { _, we -> we.id }) { i, we ->

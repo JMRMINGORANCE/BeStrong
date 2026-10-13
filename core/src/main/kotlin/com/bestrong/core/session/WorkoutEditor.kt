@@ -136,6 +136,32 @@ object WorkoutEditor {
         we.copy(sets = we.sets.toMutableList().apply { add(index, drop) })
     }
 
+    /**
+     * «Copiar a las siguientes»: las series pendientes posteriores del mismo tipo toman la carga
+     * de esta (peso, reps, tiempo y distancia). Las hechas no se tocan.
+     */
+    fun copyToFollowing(workout: Workout, workoutExerciseId: String, setId: String): Workout = updateExercise(workout, workoutExerciseId) { we ->
+        val i = we.sets.indexOfFirst { it.id == setId }
+        if (i < 0) return@updateExercise we
+        val src = we.sets[i]
+        we.copy(
+            sets = we.sets.mapIndexed { j, s ->
+                if (j > i && !s.completed && s.type == src.type) {
+                    s.copy(weightKg = src.weightKg, reps = src.reps, repsRight = src.repsRight, durationSec = src.durationSec, distanceM = src.distanceM)
+                } else {
+                    s
+                }
+            },
+        )
+    }
+
+    /** Cuántas series recibirían la carga con [copyToFollowing] (0 = no tiene sentido ofrecerlo). */
+    fun followingCount(we: WorkoutExercise, setId: String): Int {
+        val i = we.sets.indexOfFirst { it.id == setId }
+        if (i < 0) return 0
+        return we.sets.drop(i + 1).count { !it.completed && it.type == we.sets[i].type }
+    }
+
     /** Lo que se baja el peso en un drop set. */
     const val DROP_FACTOR = 0.8
 

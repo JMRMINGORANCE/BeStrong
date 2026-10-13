@@ -36,6 +36,10 @@ fun formatDate(epochMs: Long): String =
 fun formatTime(epochMs: Long): String =
     DateTimeFormatter.ofPattern("HH:mm · d MMM", Locale.getDefault()).format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
 
+/** Solo la hora, «18:42». */
+fun formatClock(epochMs: Long): String =
+    DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()).format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
+
 fun formatShortDate(epochMs: Long): String =
     shortDateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
 

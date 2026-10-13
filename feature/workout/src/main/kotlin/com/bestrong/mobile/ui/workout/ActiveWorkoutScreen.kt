@@ -112,6 +112,7 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.RestTimerBar
 import com.bestrong.mobile.ui.components.StatTile
 import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.formatClock
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.rememberNow
@@ -361,11 +362,11 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
             StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}/${w.totalSetCount}", Modifier.weight(1f))
             metrics?.heartRate?.let { StatTile(stringResource(R.string.stat_watch_hr), "$it", Modifier.weight(0.8f)) }
         }
-        // Tiempo aproximado para terminar (series pendientes + descansos)
-        val remaining = WorkoutEditor.estimatedRemainingSeconds(w)
+        // Tiempo aproximado para terminar (series pendientes + descansos) y a qué hora
+        val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now)
         if (remaining > 0) {
             Text(
-                stringResource(R.string.remaining_time, (remaining + 59) / 60),
+                stringResource(R.string.remaining_time_eta, (remaining + 59) / 60, formatClock(now + remaining * 1000L)),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -658,6 +659,8 @@ private fun ExerciseCard(
                         onStartTimer = { vm.startCardio(we.id, set.id) },
                         onNote = { vm.updateSetFields(we.id, set.id) { s -> s.copy(note = it) } },
                         onAssisted = { vm.updateSetFields(we.id, set.id) { s -> s.copy(assisted = it) } },
+                        followingCount = WorkoutEditor.followingCount(we, set.id),
+                        onCopyFollowing = { vm.copyToFollowing(we.id, set.id) },
                         onStepWeight = { vm.stepWeight(we.id, set.id, it) },
                         onStepReps = { vm.stepReps(we.id, set.id, it) },
                         weightFactor = weightFactor,

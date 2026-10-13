@@ -149,4 +149,5 @@
     <string name="undo_last_set">Desfer l\'última sèrie</string>
     <string name="new_record_live">🏆 Rècord!</string>
     <string name="routine_minutes_suffix">%1$s · ≈ %2$d min</string>
+    <string name="remaining_eta">≈ %1$d min · fi %2$s</string>
 </resources>
