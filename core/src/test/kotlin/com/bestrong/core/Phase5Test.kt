@@ -93,6 +93,8 @@ class Phase5Test {
         val plan = Peaking.plan(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 26))
         assertEquals(12, plan.size)
         assertEquals(1, plan.last().weeksOut)
+        assertTrue(Peaking.plan(LocalDate.of(2026, 3, 27), LocalDate.of(2026, 3, 26)).isEmpty())
+        assertEquals(1, Peaking.plan(LocalDate.of(2026, 3, 26), LocalDate.of(2026, 3, 26)).size)
         assertTrue(plan.map { it.percent }.subList(0, 10).zipWithNext().all { (a, b) -> b >= a })
         assertEquals(185.0, Peaking.weight(plan.first { it.weeksOut == 3 }, 200.0), 0.0)
 
