@@ -87,6 +87,7 @@
     <string name="cal_export_ics">Añadir al calendario</string>
     <string name="cal_hint">Toca un día para elegir rutina; mantén pulsado y arrastra para moverla.</string>
     <string name="cal_minutes">~%1$d min</string>
+    <string name="cal_over">Supera el tiempo por sesión</string>
     <string name="cal_rest">Descanso</string>
     <string name="cal_title">Calendario de la semana</string>
     <string name="cal_too_long">⚠ %1$d min más de lo que tienes</string>
@@ -512,6 +513,7 @@
     <string name="program_start">Empezar programa</string>
     <string name="program_stop">Dejar el programa</string>
     <string name="program_tm_help">Training max (TM): el 90 % de tu 1RM. Lo rellenamos con tu historial; ajústalo si hace falta.</string>
+    <string name="program_tm_required">Pon un training max mayor que 0 en cada ejercicio</string>
     <string name="program_tm_label">TM %1$s (%2$s)</string>
     <string name="programs_periodized">Con progresión automática</string>
     <string name="programs_templates">Plantillas de rutinas</string>

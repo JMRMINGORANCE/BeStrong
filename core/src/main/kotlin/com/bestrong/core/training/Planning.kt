@@ -95,9 +95,11 @@ data class PeakWeek(val weeksOut: Int, val focusEs: String, val focusEn: String,
 object Peaking {
     /**
      * Plan hacia una competición o test de 1RM: volumen → fuerza → intensidad → pico → descarga.
-     * Devuelve una semana por cada semana que falta (máximo 12), de la más lejana a la última.
+     * Devuelve una semana por cada semana que falta (máximo 12), de la más lejana a la última;
+     * vacío si la competición ya pasó.
      */
     fun plan(today: LocalDate, meetDate: LocalDate): List<PeakWeek> {
+        if (meetDate.isBefore(today)) return emptyList()
         val weeks = ChronoUnit.WEEKS.between(today, meetDate).toInt().coerceIn(1, 12)
         return (weeks downTo 1).map { out ->
             when {

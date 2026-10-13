@@ -11,9 +11,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -31,9 +32,16 @@ import java.time.Year
  */
 @Composable
 fun BodyDataCard(settings: UserSettings, onUpdate: ((UserSettings) -> UserSettings) -> Unit) {
-    var year by remember(settings.birthYear) { mutableStateOf(settings.birthYear?.toString().orEmpty()) }
-    var height by remember(settings.heightCm) { mutableStateOf(settings.heightCm?.toString().orEmpty()) }
+    // Texto propio de cada campo: se siembra una vez y solo se guarda cuando es válido (o se vacía),
+    // así un valor a medio escribir («19») no borra lo que se está tecleando
+    var year by rememberSaveable { mutableStateOf(settings.birthYear?.toString().orEmpty()) }
+    var height by rememberSaveable { mutableStateOf(settings.heightCm?.toString().orEmpty()) }
     val thisYear = Year.now().value
+    fun validYear(t: String) = t.toIntOrNull()?.takeIf { it in (thisYear - 100)..(thisYear - 10) }
+    fun validHeight(t: String) = t.toIntOrNull()?.takeIf { it in 100..250 }
+    // Cambio desde fuera (ajustes cargados tarde, copia restaurada)
+    LaunchedEffect(settings.birthYear) { if (settings.birthYear != null && validYear(year) != settings.birthYear) year = settings.birthYear.toString() }
+    LaunchedEffect(settings.heightCm) { if (settings.heightCm != null && validHeight(height) != settings.heightCm) height = settings.heightCm.toString() }
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(stringResource(R.string.body_data))
@@ -43,9 +51,10 @@ fun BodyDataCard(settings: UserSettings, onUpdate: ((UserSettings) -> UserSettin
                     value = year,
                     onValueChange = { v ->
                         year = v.filter(Char::isDigit).take(4)
-                        val y = year.toIntOrNull()?.takeIf { it in (thisYear - 100)..(thisYear - 10) }
-                        onUpdate { it.copy(birthYear = y) }
+                        val y = validYear(year)
+                        if (y != null || year.isEmpty()) onUpdate { it.copy(birthYear = y) }
                     },
+                    isError = year.isNotEmpty() && validYear(year) == null,
                     label = { Text(stringResource(R.string.birth_year)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
@@ -55,9 +64,10 @@ fun BodyDataCard(settings: UserSettings, onUpdate: ((UserSettings) -> UserSettin
                     value = height,
                     onValueChange = { v ->
                         height = v.filter(Char::isDigit).take(3)
-                        val h = height.toIntOrNull()?.takeIf { it in 100..250 }
-                        onUpdate { it.copy(heightCm = h) }
+                        val h = validHeight(height)
+                        if (h != null || height.isEmpty()) onUpdate { it.copy(heightCm = h) }
                     },
+                    isError = height.isNotEmpty() && validHeight(height) == null,
                     label = { Text(stringResource(R.string.height_cm)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,

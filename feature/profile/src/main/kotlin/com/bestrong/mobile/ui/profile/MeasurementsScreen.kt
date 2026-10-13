@@ -28,9 +28,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -55,7 +57,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     val unit = LocalBodyUnit.current
     val list by vm.measurements.collectAsStateWithLifecycle()
     val relative by vm.relativeStrength.collectAsStateWithLifecycle()
-    var adding by remember { mutableStateOf(false) }
+    var adding by rememberSaveable { mutableStateOf(false) }
     // Resto de medidas: una gráfica por cada una con al menos dos datos
     val others: List<Pair<String, (BodyMeasurement) -> Double?>> = listOf(
         stringResource(R.string.f_fat) to { m: BodyMeasurement -> m.bodyFatPct },
@@ -133,7 +135,10 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
         }
     }
     if (adding) {
-        val fields = remember { List(6) { mutableStateOf("") } }
+        // Lo escrito sobrevive al giro; al cerrar el diálogo se descarta
+        val fields = rememberSaveable(saver = listSaver<List<MutableState<String>>, String>({ l -> l.map { it.value } }, { l -> l.map { mutableStateOf(it) } })) {
+            List(6) { mutableStateOf("") }
+        }
         val labels = listOf(
             stringResource(R.string.f_weight, unit.label),
             stringResource(R.string.f_fat),
@@ -142,7 +147,9 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             stringResource(R.string.f_arm),
             stringResource(R.string.f_thigh),
         )
-        fun v(i: Int) = fields[i].value.replace(',', '.').toDoubleOrNull()
+
+        // 0 o negativo no es una medida: cuenta como vacío
+        fun v(i: Int) = fields[i].value.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0 }
         AlertDialog(
             onDismissRequest = { adding = false },
             title = { Text(stringResource(R.string.new_measurement)) },
@@ -160,7 +167,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                 }
             },
             confirmButton = {
-                Button(onClick = {
+                Button(enabled = fields.indices.any { v(it) != null }, onClick = {
                     vm.saveMeasurement(BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = v(0)?.let(unit::toKg), bodyFatPct = v(1), waistCm = v(2), chestCm = v(3), armCm = v(4), thighCm = v(5)))
                     adding = false
                 }) { Text(stringResource(R.string.action_save)) }

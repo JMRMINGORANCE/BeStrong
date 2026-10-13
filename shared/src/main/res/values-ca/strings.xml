@@ -87,6 +87,7 @@
     <string name="cal_export_ics">Afegir al calendari</string>
     <string name="cal_hint">Toca un dia per triar rutina; mantén premut i arrossega per moure-la.</string>
     <string name="cal_minutes">~%1$d min</string>
+    <string name="cal_over">Supera el temps per sessió</string>
     <string name="cal_rest">Descans</string>
     <string name="cal_title">Calendari de la setmana</string>
     <string name="cal_too_long">⚠ %1$d min més dels que tens</string>
@@ -512,6 +513,7 @@
     <string name="program_start">Començar programa</string>
     <string name="program_stop">Deixar el programa</string>
     <string name="program_tm_help">Training max (TM): el 90 % del teu 1RM. L’omplim amb el teu historial; ajusta’l si cal.</string>
+    <string name="program_tm_required">Posa un training max més gran que 0 a cada exercici</string>
     <string name="program_tm_label">TM %1$s (%2$s)</string>
     <string name="programs_periodized">Amb progressió automàtica</string>
     <string name="programs_templates">Plantilles de rutines</string>

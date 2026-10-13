@@ -41,7 +41,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -174,6 +177,12 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
     }
 }
 
+/** Guarda un mapa de textos (id → valor escrito) en el estado de la pantalla. */
+private val TextMapSaver = listSaver<SnapshotStateMap<String, String>, String>(
+    save = { m -> m.flatMap { (k, v) -> listOf(k, v) } },
+    restore = { l -> mutableStateMapOf<String, String>().apply { l.chunked(2).forEach { (k, v) -> put(k, v) } } },
+)
+
 /**
  * Preparar un programa con progresión: training max de los ejercicios principales.
  * Pantalla completa (no diálogo): con el teclado abierto en la pantalla exterior del Fold
@@ -183,9 +192,14 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
 @Composable
 fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double?, onConfirm: (Map<String, Double>) -> Unit, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
-    val values = remember(program.id) {
+    val values = rememberSaveable(program.id, saver = TextMapSaver) {
         mutableStateMapOf<String, String>().apply { program.mainLifts.forEach { id -> put(id, suggested(id)?.let { unit.format(it) }.orEmpty()) } }
     }
+
+    // Todos los básicos con un TM válido: si falta uno, el programa no podría calcular sus cargas
+    fun tmOf(id: String) = unit.parseToKg(values[id].orEmpty())?.takeIf { it > 0 }
+    val lifts = program.mainLifts.filter { ExerciseLibrary.byId(it) != null }
+    val valid = lifts.all { tmOf(it) != null }
     val lang = uiLanguage()
     BackHandler(onBack = onDismiss)
     Scaffold(
@@ -197,7 +211,8 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
         },
         bottomBar = {
             Button(
-                onClick = { onConfirm(values.mapNotNull { (id, v) -> unit.parseToKg(v)?.let { id to it } }.toMap()) },
+                onClick = { onConfirm(lifts.associateWith { tmOf(it)!! }) },
+                enabled = valid,
                 modifier = Modifier.fillMaxWidth().navigationBarsPadding().imePadding().padding(16.dp),
             ) { Text(stringResource(R.string.program_start)) }
         },
@@ -208,6 +223,7 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
         ) {
             Text(program.description(lang), style = MaterialTheme.typography.bodyMedium)
             Text(stringResource(R.string.program_tm_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (!valid) Text(stringResource(R.string.program_tm_required), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
             program.mainLifts.forEach { id ->
                 val ex = ExerciseLibrary.byId(id) ?: return@forEach
                 OutlinedTextField(
@@ -215,6 +231,7 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
                     onValueChange = { values[id] = it },
                     label = { Text(stringResource(R.string.program_tm_label, ex.displayName(), unit.label)) },
                     singleLine = true,
+                    isError = tmOf(id) == null,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -264,7 +281,7 @@ fun ReadinessCard(vm: HomeViewModel) {
 fun IntakeCard(vm: HomeViewModel) {
     val intake by vm.intake.collectAsStateWithLifecycle()
     val bw by vm.bodyWeightKg.collectAsStateWithLifecycle()
-    val range = bw?.let { com.bestrong.core.training.Nutrition.proteinRangeGrams(it) }
+    val range = bw?.takeIf { it > 0 }?.let { com.bestrong.core.training.Nutrition.proteinRangeGrams(it) }?.takeIf { it.first > 0 }
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.intake_title), fontWeight = FontWeight.Bold)

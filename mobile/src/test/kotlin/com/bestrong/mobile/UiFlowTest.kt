@@ -1,6 +1,7 @@
 package com.bestrong.mobile
 
 import android.os.Looper
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
@@ -235,7 +236,11 @@ class UiFlowTest {
         settle()
         compose.onNodeWithText("5/3/1 Boring But Big").performClick()
         settle()
-        // TM del press militar; el resto se queda vacío
+        // Sin TM en todos los básicos no se puede empezar
+        compose.onNodeWithText("Empezar programa").assertIsNotEnabled()
+        val tmFields = compose.onAllNodes(hasSetTextAction() and hasText("TM ", substring = true))
+        repeat(tmFields.fetchSemanticsNodes().size) { tmFields[it].performTextReplacement("100") }
+        // TM del press militar
         compose.onNode(hasSetTextAction() and hasText("TM Press militar", substring = true)).performTextReplacement("60")
         settle()
         shot("program_setup_folded")

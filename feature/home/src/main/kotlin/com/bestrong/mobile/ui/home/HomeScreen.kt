@@ -87,9 +87,10 @@ fun HomeScreen(
     val today by vm.today.collectAsStateWithLifecycle()
     val suggested by vm.suggestedRoutine.collectAsStateWithLifecycle()
     val week by vm.week.collectAsStateWithLifecycle()
-    var setupProgram by remember { mutableStateOf<PeriodizedProgram?>(null) }
-    setupProgram?.let { p ->
-        ProgramSetupScreen(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgram = null }, onDismiss = { setupProgram = null })
+    // Se guarda el id (no el programa) para que la preparación sobreviva al giro
+    var setupProgramId by rememberSaveable { mutableStateOf<String?>(null) }
+    setupProgramId?.let { id -> vm.periodizedPrograms.firstOrNull { it.id == id } }?.let { p ->
+        ProgramSetupScreen(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgramId = null }, onDismiss = { setupProgramId = null })
         return
     }
     val snackbar = remember { SnackbarHostState() }
@@ -115,7 +116,7 @@ fun HomeScreen(
         ProgramsDialog(
             periodized = vm.periodizedPrograms,
             programs = vm.programs,
-            onPickPeriodized = { setupProgram = it; showPrograms = false },
+            onPickPeriodized = { setupProgramId = it.id; showPrograms = false },
             onPick = { vm.addProgram(it); showPrograms = false },
             onDismiss = { showPrograms = false },
         )

@@ -165,7 +165,7 @@ class ProfileViewModel @Inject constructor(
 
     /** Fuerza relativa (1RM / peso corporal) del básico con más datos: (ejercicio, [(fecha, peso, 1RM)]). */
     val relativeStrength: StateFlow<Pair<String, List<Triple<Long, Double, Double>>>?> = combine(repo.history, repo.measurements) { history, measures ->
-        val weights = measures.mapNotNull { m -> m.weightKg?.let { m.dateEpochMs to it } }
+        val weights = measures.mapNotNull { m -> m.weightKg?.takeIf { it > 0 }?.let { m.dateEpochMs to it } }
         if (weights.isEmpty()) return@combine null
         Strength.STANDARD_LIFTS.map { id -> id to Strength.bodyWeightVsStrength(WorkoutStats.exerciseProgress(id, history), weights) }
             .filter { it.second.size >= 2 }

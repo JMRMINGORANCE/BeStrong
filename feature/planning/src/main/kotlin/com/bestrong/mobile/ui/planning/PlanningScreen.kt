@@ -197,7 +197,10 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
                             textAlign = TextAlign.Center,
                         )
                         minutes?.let { Text(stringResource(R.string.cal_minutes, it), style = MaterialTheme.typography.labelSmall) }
-                        if (over > 0) Text("⚠", color = MaterialTheme.colorScheme.error, modifier = Modifier.semantics { contentDescription = "over" })
+                        if (over > 0) {
+                            val overLabel = stringResource(R.string.cal_over)
+                            Text("⚠", color = MaterialTheme.colorScheme.error, modifier = Modifier.semantics { contentDescription = overLabel })
+                        }
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.cal_rest)) }, onClick = { menu = false; vm.assign(weekStart, day, null) })
