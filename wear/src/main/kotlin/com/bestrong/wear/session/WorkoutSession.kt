@@ -312,8 +312,8 @@ class WorkoutSession @Inject constructor(
 
     /** Quita la última serie pendiente del ejercicio actual (se puso una de más). */
     fun removePendingSet(): Boolean {
-        val we = currentExercise() ?: return false
-        val set = we.sets.lastOrNull { !it.completed } ?: return false
+        val we = currentExercise()
+        val set = we?.sets?.lastOrNull { !it.completed } ?: return false
         edit { WorkoutEditor.removeSet(it, we.id, set.id) }
         return true
     }
@@ -323,8 +323,7 @@ class WorkoutSession @Inject constructor(
      * el descanso y se vuelve a ese ejercicio.
      */
     fun undoLastSet(): Boolean {
-        val w = _workout.value ?: return false
-        val (index, set) = w.exercises.withIndex()
+        val (index, set) = _workout.value?.exercises.orEmpty().withIndex()
             .flatMap { (i, we) -> we.sets.filter { it.completed }.map { i to it } }
             .maxByOrNull { (_, s) -> s.completedAtEpochMs ?: 0L } ?: return false
         edit { WorkoutEditor.toggleSetCompleted(it, it.exercises[index].id, set.id) }

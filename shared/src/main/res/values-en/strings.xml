@@ -888,4 +888,8 @@
     <string name="next_target">Next time</string>
     <string name="next_target_line">%1$d sets · %2$s</string>
     <string name="set_new_record">personal record</string>
+    <string name="training_load">Training load</string>
+    <string name="training_load_ratio">This week: %1$s× your average of the previous 4</string>
+    <string name="training_load_high">This week: %1$s× your average. Ramping up this fast raises injury risk: consider an easier session.</string>
+    <string name="training_load_hint">Effort (average RPE, 7 if not logged) × minutes of each session.</string>
 </resources>

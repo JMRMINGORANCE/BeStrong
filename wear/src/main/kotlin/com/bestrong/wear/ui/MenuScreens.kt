@@ -13,6 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.ScalingLazyListScope
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.itemsIndexed
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
@@ -27,6 +28,7 @@ import androidx.wear.compose.material3.Text
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
+import com.bestrong.core.model.Workout
 import com.bestrong.core.util.formatDuration
 import com.bestrong.wear.R
 import com.bestrong.wear.WearContainer
@@ -99,16 +101,7 @@ fun MenuScreen(
             item {
                 Button(onClick = { session.addSet(); onBack() }, label = { Text(stringResource(R.string.add_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }
-            if (w.exercises.getOrNull(index)?.sets?.any { !it.completed } == true) {
-                item {
-                    Button(onClick = { if (session.removePendingSet()) onBack() }, label = { Text(stringResource(R.string.remove_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
-                }
-            }
-            if (w.completedSetCount > 0) {
-                item {
-                    Button(onClick = { if (session.undoLastSet()) onBack() }, label = { Text(stringResource(R.string.undo_last_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
-                }
-            }
+            setCorrections(w, index, session, onBack)
             item {
                 Button(onClick = onAddExercise, label = { Text(stringResource(R.string.add_exercise)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }
@@ -266,6 +259,20 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                 }
             }
             item { Text(stringResource(R.string.syncs_with_phone), style = MaterialTheme.typography.labelSmall) }
+        }
+    }
+}
+
+/** Correcciones: quitar una serie pendiente del ejercicio actual y deshacer la última marcada. */
+private fun ScalingLazyListScope.setCorrections(w: Workout, index: Int, session: WorkoutSession, onBack: () -> Unit) {
+    if (w.exercises.getOrNull(index)?.sets?.any { !it.completed } == true) {
+        item {
+            Button(onClick = { if (session.removePendingSet()) onBack() }, label = { Text(stringResource(R.string.remove_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+        }
+    }
+    if (w.completedSetCount > 0) {
+        item {
+            Button(onClick = { if (session.undoLastSet()) onBack() }, label = { Text(stringResource(R.string.undo_last_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
         }
     }
 }

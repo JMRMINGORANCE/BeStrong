@@ -40,6 +40,8 @@ import com.bestrong.core.stats.Sex
 import com.bestrong.core.stats.StrengthLevel
 import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.BarChart
+import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.displayName
@@ -352,4 +354,25 @@ fun MonthlyReportDialog(onShare: (monthsAgo: Int, pdf: Boolean) -> Unit, onDismi
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
+}
+
+/** Carga semanal (esfuerzo × minutos) de las últimas 8 semanas y aviso si sube demasiado de golpe. */
+@Composable
+fun TrainingLoadCard(stats: AdvancedStats) {
+    val load = stats.load ?: return
+    if (load.weeks.all { it.second == 0.0 }) return
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            SectionHeader(stringResource(R.string.training_load))
+            BarChart(load.weeks.map { (monday, value) -> ChartPoint(formatShortDate(monday.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()), value) })
+            load.acuteChronicRatio?.let { r ->
+                Text(
+                    stringResource(if (load.tooHigh) R.string.training_load_high else R.string.training_load_ratio, formatWeight(r)),
+                    color = if (load.tooHigh) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Text(stringResource(R.string.training_load_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
 }

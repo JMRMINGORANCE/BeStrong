@@ -149,3 +149,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Carpetas de rutinas plegables en Inicio
 - [x] Nota fija del ejercicio también en el reloj
 - [x] «Próxima vez» en la ficha de cada ejercicio
+
+## Fase 11 — Más detalle en cada serie ✅
+- [x] Descanso corto (máx. 60 s) tras las series de calentamiento
+- [x] Récord en vivo (🏆) al marcar una serie que supera tu mejor 1RM estimado o peso máximo
+- [x] Reloj: deshacer la última serie y quitar una serie pendiente
+- [x] Health Connect: cada serie como segmento con repeticiones (Samsung Health / Fit)
+- [x] Carga de entrenamiento semanal (RPE × minutos) con aviso de subida brusca (relación aguda:crónica > 1,5)

@@ -888,4 +888,8 @@
     <string name="next_target">La propera vegada</string>
     <string name="next_target_line">%1$d sèries · %2$s</string>
     <string name="set_new_record">rècord personal</string>
+    <string name="training_load">Càrrega d\'entrenament</string>
+    <string name="training_load_ratio">Aquesta setmana: %1$s× la teva mitjana de les 4 anteriors</string>
+    <string name="training_load_high">Aquesta setmana: %1$s× la teva mitjana. Pujar la càrrega tan ràpid augmenta el risc de lesió: valora una sessió més suau.</string>
+    <string name="training_load_hint">Esforç (RPE mitjà, 7 si no l\'anotes) × minuts de cada sessió.</string>
 </resources>

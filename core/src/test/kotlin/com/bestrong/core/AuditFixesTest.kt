@@ -241,3 +241,19 @@ class SetTimelineTest {
         assertEquals(listOf(10_000L to 30_000L, 30_000L to 50_000L, 160_000L to 200_000L), windows.map { it.startEpochMs to it.endEpochMs })
     }
 }
+
+class TrainingLoadTest {
+    @Test fun sessionLoadAndAcuteChronicRatio() {
+        val monday = LocalDate.of(2026, 10, 12)
+        fun w(id: String, day: LocalDate, rpe: Double?) = finishedWorkout(id, day, bench to listOf(done(60.0, 5).copy(rpe = rpe)))
+        // 60 min (18:00–19:00) a RPE 8 → 480
+        assertEquals(480.0, com.bestrong.core.stats.TrainingLoad.session(w("a", monday, 8.0)), 1e-6)
+        assertEquals(420.0, com.bestrong.core.stats.TrainingLoad.session(w("b", monday, null)), 1e-6)
+        val history = (1..4).map { w("p$it", monday.minusWeeks(it.toLong()), null) } + listOf(w("c1", monday, 8.0), w("c2", monday.plusDays(1), 8.0))
+        val weekly = com.bestrong.core.stats.TrainingLoad.weekly(history, monday.plusDays(2), UTC)
+        assertEquals(960.0 / 420.0, weekly.acuteChronicRatio!!, 1e-6)
+        assertTrue(weekly.tooHigh)
+        assertEquals(8, weekly.weeks.size)
+        assertEquals(monday, weekly.weeks.last().first)
+    }
+}

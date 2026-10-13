@@ -888,4 +888,8 @@
     <string name="next_target">Nächstes Mal</string>
     <string name="next_target_line">%1$d Sätze · %2$s</string>
     <string name="set_new_record">persönlicher Rekord</string>
+    <string name="training_load">Trainingslast</string>
+    <string name="training_load_ratio">Diese Woche: %1$s× dein Schnitt der 4 Wochen davor</string>
+    <string name="training_load_high">Diese Woche: %1$s× dein Schnitt. So schnelle Steigerung erhöht das Verletzungsrisiko: plane eine leichtere Einheit.</string>
+    <string name="training_load_hint">Anstrengung (mittlerer RPE, 7 wenn nicht erfasst) × Minuten jeder Einheit.</string>
 </resources>

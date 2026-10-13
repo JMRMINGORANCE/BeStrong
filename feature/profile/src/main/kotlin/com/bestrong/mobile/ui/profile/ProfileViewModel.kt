@@ -18,6 +18,7 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.StrengthStanding
+import com.bestrong.core.stats.TrainingLoad
 import com.bestrong.core.stats.WeekBucket
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.mobile.WatchPush
@@ -78,6 +79,8 @@ data class AdvancedStats(
     val soreness: Map<MuscleGroup, Double> = emptyMap(),
     /** Reto con fecha estimada: (ejercicio, 1RM objetivo, fecha). */
     val challenge: Triple<String, Double, Long>? = null,
+    /** Carga semanal (RPE × minutos) y relación aguda:crónica. */
+    val load: TrainingLoad.Weekly? = null,
 )
 
 @HiltViewModel
@@ -142,6 +145,7 @@ class ProfileViewModel @Inject constructor(
             daysSince = Strength.daysSinceTrained(history, today, zone),
             soreness = Strength.soreness(history, now),
             challenge = challenge(history),
+            load = TrainingLoad.weekly(history, today, zone),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AdvancedStats())
 

@@ -145,24 +145,7 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         }
 
     /** Tipo de segmento de Health Connect para los básicos; el resto, «levantamiento de pesas». */
-    private fun segmentType(exerciseId: String): Int = when (exerciseId) {
-        "bench_press", "incline_bench_press", "decline_bench_press", "close_grip_bench", "db_bench_press" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_BENCH_PRESS
-        "squat", "front_squat", "smith_squat", "goblet_squat", "hack_squat", "air_squat" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_SQUAT
-        "deadlift", "romanian_deadlift" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_DEADLIFT
-        "overhead_press" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_BARBELL_SHOULDER_PRESS
-        "lat_pulldown" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LAT_PULL_DOWN
-        "pull_up", "chin_up", "chest_to_bar", "band_pull_up", "negative_pull_up" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_PULL_UP
-        "leg_press" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_PRESS
-        "leg_curl", "seated_leg_curl" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_CURL
-        "leg_extension" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_EXTENSION
-        "lunge", "bulgarian_split_squat" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LUNGE
-        "lateral_raise", "cable_lateral_raise" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LATERAL_RAISE
-        "db_row" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_DUMBBELL_ROW
-        "front_raise" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_DUMBBELL_FRONT_RAISE
-        "hanging_leg_raise" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_RAISE
-        "plank", "side_plank" -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_PLANK
-        else -> ExerciseSegment.EXERCISE_SEGMENT_TYPE_WEIGHTLIFTING
-    }
+    private fun segmentType(exerciseId: String): Int = SEGMENT_TYPES[exerciseId] ?: ExerciseSegment.EXERCISE_SEGMENT_TYPE_WEIGHTLIFTING
 
     private fun sessionType(workout: Workout): Int {
         val done = workout.exercises.filter { it.completedSets.isNotEmpty() }
@@ -208,3 +191,22 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         val DISPLACEMENT = setOf(CardioKind.RUN, CardioKind.WALK, CardioKind.TREADMILL, CardioKind.BIKE)
     }
 }
+
+/** Tipos de segmento de Health Connect por ejercicio. */
+private val SEGMENT_TYPES: Map<String, Int> = listOf(
+    listOf("bench_press", "incline_bench_press", "decline_bench_press", "close_grip_bench", "db_bench_press") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_BENCH_PRESS,
+    listOf("squat", "front_squat", "smith_squat", "goblet_squat", "hack_squat", "air_squat") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_SQUAT,
+    listOf("deadlift", "romanian_deadlift") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_DEADLIFT,
+    listOf("overhead_press") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_BARBELL_SHOULDER_PRESS,
+    listOf("lat_pulldown") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_LAT_PULL_DOWN,
+    listOf("pull_up", "chin_up", "chest_to_bar", "band_pull_up", "negative_pull_up") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_PULL_UP,
+    listOf("leg_press") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_PRESS,
+    listOf("leg_curl", "seated_leg_curl") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_CURL,
+    listOf("leg_extension") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_EXTENSION,
+    listOf("lunge", "bulgarian_split_squat") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_LUNGE,
+    listOf("lateral_raise", "cable_lateral_raise") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_LATERAL_RAISE,
+    listOf("db_row") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_DUMBBELL_ROW,
+    listOf("front_raise") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_DUMBBELL_FRONT_RAISE,
+    listOf("hanging_leg_raise") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_LEG_RAISE,
+    listOf("plank", "side_plank") to ExerciseSegment.EXERCISE_SEGMENT_TYPE_PLANK,
+).flatMap { (ids, type) -> ids.map { it to type } }.toMap()
