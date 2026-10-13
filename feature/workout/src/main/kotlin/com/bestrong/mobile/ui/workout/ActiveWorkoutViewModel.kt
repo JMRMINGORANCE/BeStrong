@@ -109,7 +109,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                     startedAtEpochMs = now,
                     athlete = name,
                     exercises = w.exercises.map { we ->
-                        we.copy(id = com.bestrong.core.util.newId(), sets = we.sets.map { it.copy(id = com.bestrong.core.util.newId(), completed = false) })
+                        we.copy(id = com.bestrong.core.util.newId(), sets = we.sets.map { it.asPending() })
                     },
                 )
             }
@@ -123,9 +123,19 @@ class ActiveWorkoutViewModel @Inject constructor(
     val restEndedAt: StateFlow<Long?> = restTimer.restEndedAt
     fun dismissOverrun() = restTimer.clearOverrun()
 
-    /** Hora a la que hay que acabar (la pone el usuario); sobrevive a que Android cierre la app. */
-    val deadline: StateFlow<Long?> = savedState.getStateFlow(KEY_DEADLINE, null)
+    /**
+     * Hora a la que hay que acabar (la pone el usuario) del entreno en pantalla; sobrevive a que Android
+     * cierre la app. Va unida a ese entreno: al terminarlo por cualquier vía (Inicio, reloj…) deja de valer.
+     */
+    val deadline: StateFlow<Long?> = combine(
+        savedState.getStateFlow<Long?>(KEY_DEADLINE, null),
+        savedState.getStateFlow<String?>(KEY_DEADLINE_WORKOUT, null),
+        workout,
+    ) { at, id, w -> at.takeIf { id != null && id == w?.id } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
     fun setDeadline(epochMs: Long?) {
+        savedState[KEY_DEADLINE_WORKOUT] = workout.value?.id
         savedState[KEY_DEADLINE] = epochMs
     }
     val watchMetrics: StateFlow<LiveMetrics?> = metricsStore.metrics
@@ -205,7 +215,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         class Undoable(val kind: UndoKind, val partner: Boolean, val workoutId: String, val restore: (Workout) -> Workout) : WorkoutEvent
         data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
     }
-    enum class UndoKind { SET, EXERCISE, COPY }
+    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE }
 
     private val _events = MutableSharedFlow<WorkoutEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<WorkoutEvent> = _events
@@ -278,7 +288,23 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
     fun duplicateSet(weId: String, setId: String) = edit { WorkoutEditor.duplicateSet(it, weId, setId) }
-    fun completeRemaining(weId: String) = edit { WorkoutEditor.completeRemaining(it, weId) }
+
+    /** Marca de golpe las series que faltan; arranca el descanso como una serie normal y se puede deshacer. */
+    fun completeRemaining(weId: String) {
+        val partner = partnerMode.value
+        viewModelScope.launch {
+            val (before, after) = update(partner) { WorkoutEditor.completeRemaining(it, weId) } ?: return@launch
+            val old = before.exercises.firstOrNull { it.id == weId }?.sets?.associateBy { it.id } ?: return@launch
+            val marked = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
+            if (marked.isEmpty()) return@launch
+            onSetCompleted(after, after.exercises.indexOfFirst { it.id == weId })
+            _events.tryEmit(
+                WorkoutEvent.Undoable(UndoKind.COMPLETE, partner, before.id) { w ->
+                    WorkoutEditor.updateExercise(w, weId) { we -> we.copy(sets = we.sets.map { s -> if (marked[s.id] == s) old.getValue(s.id) else s }) }
+                },
+            )
+        }
+    }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
     fun setRpe(weId: String, setId: String, rpe: Double?) {
         val current = workout.value ?: return
@@ -409,7 +435,6 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun skipRest() = restTimer.skip()
 
     fun finish() {
-        setDeadline(null)
         if (partnerMode.value) {
             // Entreno de la pareja: se guarda aparte (no cuenta para tus récords ni estadísticas)
             viewModelScope.launch {
@@ -443,7 +468,6 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     fun discard() = viewModelScope.launch {
-        setDeadline(null)
         if (partnerMode.value) {
             repo.setPartnerActive(null)
             setPartnerMode(false)
@@ -504,8 +528,8 @@ class ActiveWorkoutViewModel @Inject constructor(
         val goal = repo.activeProgram.value?.weeklyGoal ?: settings.value.weeklyGoal
         // Un entreno olvidado abierto desde hace días no cuenta para hoy; uno que cruza la medianoche
         // del domingo sí (se compara con cuándo terminó, no con el lunes)
-        val end = finished.finishedAtEpochMs ?: System.currentTimeMillis()
-        if (end - finished.startedAtEpochMs > STALE_WORKOUT_MS) return null
+        // Las pausas no cuentan (una sesión partida por la comida sigue siendo la de hoy)
+        if (finished.durationSeconds() * 1000L > STALE_WORKOUT_MS) return null
         val others = history.filter { it.id != finished.id }
         val before = Periodization.trainedDaysOfWeek(others, day, zone).size
         val after = Periodization.trainedDaysOfWeek(others + finished, day, zone).size
@@ -530,5 +554,6 @@ class ActiveWorkoutViewModel @Inject constructor(
         const val KEY_PARTNER_MODE = "partner_mode"
         const val KEY_SUMMARY_ID = "summary_workout_id"
         const val KEY_DEADLINE = "deadline"
+        const val KEY_DEADLINE_WORKOUT = "deadline_workout_id"
     }
 }

@@ -69,3 +69,26 @@ class Iteration11ImprovementsTest {
         assertEquals(120, map.getValue(we.id).realSeconds)
     }
 }
+
+class Iteration12Test {
+    @Test fun addedExerciseDoesNotInheritStopwatchOrNotes() {
+        val tread = com.bestrong.core.library.ExerciseLibrary.all.first { it.tracking == com.bestrong.core.model.TrackingType.CARDIO }
+        val prev = listOf(WorkoutSet(durationSec = 600, completed = true, startedAtEpochMs = 5, completedAtEpochMs = 600_005, note = "n", assisted = true))
+        val w = WorkoutEditor.addExercises(Workout(name = "w", startedAtEpochMs = 0), listOf(tread), previousSets = { prev })
+        val s = w.exercises[0].sets[0]
+        assertEquals(false, s.isRunning)
+        assertEquals(null, s.completedAtEpochMs)
+        assertEquals("", s.note)
+        assertEquals(false, s.assisted)
+        assertEquals(600, s.durationSec)
+    }
+
+    @Test fun completeRemainingCountsUnilateralRightSide() {
+        val we = WorkoutExercise(exercise = bench, sets = listOf(WorkoutSet(reps = 0, repsRight = 8)))
+        assertEquals(1, WorkoutEditor.completableCount(we))
+    }
+
+    @Test fun userPartCollapsesSeparators() {
+        assertEquals("a · b", ProgramTexts.userPart("a · X · b", listOf("X")))
+    }
+}

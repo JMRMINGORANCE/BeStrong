@@ -241,7 +241,6 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     }
 }
 
-/** Cómo llegas hoy: sueño y pulso en reposo (Health Connect) y la última valoración. */
 /** «Esta semana vas corto de: Espalda 4 de 10 series». */
 @Composable
 fun LaggingMusclesCard(vm: HomeViewModel) {
@@ -260,6 +259,7 @@ fun LaggingMusclesCard(vm: HomeViewModel) {
     }
 }
 
+/** Cómo llegas hoy: sueño y pulso en reposo (Health Connect) y la última valoración. */
 @Composable
 fun ReadinessCard(vm: HomeViewModel) {
     val r by vm.readiness.collectAsStateWithLifecycle()

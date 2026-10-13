@@ -939,6 +939,7 @@
     <string name="deadline_title">A que hora tes que rematar?</string>
     <string name="deadline_over">Pasaríaste %1$d min da hora límite (%2$s): salta ou acurta algún exercicio</string>
     <string name="deadline_ok">Hora límite %1$s: vas a tempo</string>
-    <string name="deadline_hint">Toca para pór unha hora límite</string>
     <string name="deadline_clear">Quitar</string>
+    <string name="undo_completed_sets">Series marcadas como feitas</string>
+    <string name="deadline_set_action">pór hora límite</string>
 </resources>

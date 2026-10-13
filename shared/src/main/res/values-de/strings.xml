@@ -939,6 +939,7 @@
     <string name="deadline_title">Wann musst du fertig sein?</string>
     <string name="deadline_over">Du würdest dein Limit (%2$s) um %1$d Min. überschreiten: lass eine Übung weg oder kürze sie</string>
     <string name="deadline_ok">Limit %1$s: du liegst gut in der Zeit</string>
-    <string name="deadline_hint">Tippen, um ein Zeitlimit festzulegen</string>
     <string name="deadline_clear">Entfernen</string>
+    <string name="undo_completed_sets">Sätze als erledigt markiert</string>
+    <string name="deadline_set_action">Zeitlimit festlegen</string>
 </resources>

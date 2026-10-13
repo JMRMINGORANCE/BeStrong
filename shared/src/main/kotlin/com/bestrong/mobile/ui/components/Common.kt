@@ -36,9 +36,12 @@ fun formatDate(epochMs: Long): String =
 fun formatTime(epochMs: Long): String =
     DateTimeFormatter.ofPattern("HH:mm · d MMM", Locale.getDefault()).format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
 
-/** Solo la hora, en el formato del idioma («18:42» o «6:42 PM»). */
-fun formatClock(epochMs: Long): String =
-    DateTimeFormatter.ofLocalizedTime(java.time.format.FormatStyle.SHORT).withLocale(Locale.getDefault()).format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
+/** Solo la hora, con el formato de 12/24 h que tenga el sistema («18:42» o «6:42 PM»). */
+fun formatClock(epochMs: Long, is24Hour: Boolean): String {
+    val locale = Locale.getDefault()
+    val pattern = android.text.format.DateFormat.getBestDateTimePattern(locale, if (is24Hour) "Hm" else "hm")
+    return DateTimeFormatter.ofPattern(pattern, locale).format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
+}
 
 fun formatShortDate(epochMs: Long): String =
     shortDateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))

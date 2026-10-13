@@ -10,7 +10,6 @@ import com.bestrong.core.model.WorkoutSource
 import com.bestrong.core.training.RestPolicy
 import com.bestrong.core.training.WarmupGenerator
 import com.bestrong.core.util.WeightUnit
-import com.bestrong.core.util.newId
 
 /**
  * Operaciones inmutables sobre el entrenamiento en curso. Las usan tanto el móvil como el reloj.
@@ -40,7 +39,7 @@ object WorkoutEditor {
             exercises = workout.exercises + exercises.map { ex ->
                 val prev = previousSets(ex.id)
                 val sets = if (prev.isNotEmpty()) {
-                    prev.map { it.copy(id = com.bestrong.core.util.newId(), completed = false, rpe = null) }
+                    prev.map { it.asPending() }
                 } else if (ex.tracking == TrackingType.CARDIO) {
                     listOf(WorkoutSet(durationSec = TrackingType.DEFAULT_CARDIO_SEC))
                 } else {
@@ -177,7 +176,7 @@ object WorkoutEditor {
     fun duplicateSet(workout: Workout, workoutExerciseId: String, setId: String): Workout = updateExercise(workout, workoutExerciseId) { we ->
         val i = we.sets.indexOfFirst { it.id == setId }
         if (i < 0) return@updateExercise we
-        val copy = we.sets[i].copy(id = newId(), completed = false, completedAtEpochMs = null, startedAtEpochMs = null, note = "", rpe = null, assisted = false)
+        val copy = we.sets[i].asPending()
         we.copy(sets = we.sets.toMutableList().apply { add(i + 1, copy) })
     }
 
@@ -194,7 +193,7 @@ object WorkoutEditor {
                         s.completed -> s
                         s.isRunning && started != null ->
                             s.copy(durationSec = ((nowEpochMs - started) / 1000).toInt().coerceAtLeast(1), completed = true, completedAtEpochMs = nowEpochMs)
-                        s.reps > 0 || s.durationSec > 0 || s.distanceM > 0 -> s.copy(completed = true, completedAtEpochMs = nowEpochMs)
+                        s.hasTarget -> s.copy(completed = true, completedAtEpochMs = nowEpochMs)
                         else -> s
                     }
                 },
@@ -202,7 +201,7 @@ object WorkoutEditor {
         }
 
     /** Series que [completeRemaining] marcaría. */
-    fun completableCount(we: WorkoutExercise): Int = we.sets.count { !it.completed && (it.isRunning || it.reps > 0 || it.durationSec > 0 || it.distanceM > 0) }
+    fun completableCount(we: WorkoutExercise): Int = we.sets.count { !it.completed && (it.isRunning || it.hasTarget) }
 
     /** Lo que se baja el peso en un drop set. */
     const val DROP_FACTOR = 0.8

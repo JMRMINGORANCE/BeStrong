@@ -52,6 +52,12 @@ data class WorkoutSet(
     val countsForRecords: Boolean
         get() = type != SetType.WARMUP && type != SetType.PARTIAL && type != SetType.NEGATIVE && !assisted
 
+    /** La misma carga como serie nueva por hacer: sin marcar, sin horas (cronómetro), RPE, nota ni ayuda. */
+    fun asPending(): WorkoutSet = copy(id = newId(), completed = false, rpe = null, completedAtEpochMs = null, startedAtEpochMs = null, note = "", assisted = false)
+
+    /** Tiene algo apuntado (reps, tiempo o distancia): se puede dar por hecha tal cual. */
+    val hasTarget: Boolean get() = totalReps > 0 || durationSec > 0 || distanceM > 0
+
     /** Repeticiones totales (ambos lados si es unilateral). */
     val totalReps: Int get() = reps + (repsRight ?: 0)
 

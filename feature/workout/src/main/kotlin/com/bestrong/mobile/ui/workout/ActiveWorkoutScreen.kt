@@ -182,6 +182,7 @@ fun ActiveWorkoutScreen(
     val undoSet = stringResource(R.string.undo_set_deleted)
     val undoExercise = stringResource(R.string.undo_exercise_deleted)
     val undoCopy = stringResource(R.string.undo_copied_sets)
+    val undoComplete = stringResource(R.string.undo_completed_sets)
     val undoLabel = stringResource(R.string.action_undo)
     val applyLabel = stringResource(R.string.action_apply)
     val rpeDown = stringResource(R.string.rpe_suggest_down)
@@ -202,6 +203,7 @@ fun ActiveWorkoutScreen(
                         ActiveWorkoutViewModel.UndoKind.SET -> undoSet
                         ActiveWorkoutViewModel.UndoKind.EXERCISE -> undoExercise
                         ActiveWorkoutViewModel.UndoKind.COPY -> undoCopy
+                        ActiveWorkoutViewModel.UndoKind.COMPLETE -> undoComplete
                     }
                     if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo(e)
                 }
@@ -264,7 +266,7 @@ fun ActiveWorkoutScreen(
         },
     ) { padding ->
         val content = Modifier.padding(padding).fillMaxSize()
-        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline?.takeIf { it > System.currentTimeMillis() - STALE_DEADLINE_MS }, vm::setDeadline)
+        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline, vm::setDeadline)
         when {
             posture == FoldPosture.TABLETOP -> Column(content) {
                 // Mitad superior: lo que se mira desde el banco
@@ -356,9 +358,6 @@ private fun KeepScreenOn(enabled: Boolean) {
         onDispose { activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
     }
 }
-
-/** Una hora límite de hace más de esto es de otro día: no se muestra. */
-private const val STALE_DEADLINE_MS = 6 * 60 * 60 * 1000L
 
 @Composable
 private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Modifier, eta: EtaInputs = EtaInputs()) {

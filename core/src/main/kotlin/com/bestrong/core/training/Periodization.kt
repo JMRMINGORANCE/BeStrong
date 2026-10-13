@@ -368,6 +368,7 @@ data class ProgramTexts(val amrapNote: String, val weekPrefix: String) {
         fun forLang(lang: String) = if (lang == "en") EN else ES
 
         private val TIER = Regex("^\\s*T\\d\\b")
+        private val REPEATED_DOTS = Regex("\\s*·\\s*(·\\s*)+")
 
         /**
          * Lo que escribió el usuario en la nota de un ejercicio de programa: se quitan el nivel (T1/T2/T3)
@@ -375,7 +376,7 @@ data class ProgramTexts(val amrapNote: String, val weekPrefix: String) {
          */
         fun userPart(note: String, generated: Collection<String>): String {
             var rest = generated.filter { it.isNotBlank() }.fold(note) { acc, g -> acc.replace(g, "") }
-            rest = rest.replace(TIER, "")
+            rest = rest.replace(TIER, "").replace(REPEATED_DOTS, " · ")
             return rest.trim { it.isWhitespace() || it == '·' }
         }
     }

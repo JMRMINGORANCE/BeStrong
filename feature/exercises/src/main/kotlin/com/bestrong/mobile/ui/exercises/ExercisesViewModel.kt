@@ -161,6 +161,14 @@ class ExercisesViewModel @Inject constructor(
      * Una nota es «de ese día» si no es la de ninguna rutina para el ejercicio y cambia respecto a la
      * sesión anterior (las de los programas se copian igual en cada sesión).
      */
+    /** La frase de AMRAP en todos los idiomas de la app: las sesiones pudieron hacerse con otro idioma. */
+    private val amrapNotes: List<String> by lazy {
+        APP_LOCALES.map { tag ->
+            val config = android.content.res.Configuration(context.resources.configuration).apply { setLocale(java.util.Locale.forLanguageTag(tag)) }
+            context.createConfigurationContext(config).getString(com.bestrong.mobile.shared.R.string.program_amrap_note)
+        } + ProgramTexts.ES.amrapNote + ProgramTexts.EN.amrapNote
+    }
+
     private fun sessionNotes(exerciseId: String, history: List<Workout>, routines: List<com.bestrong.core.model.Routine>): Map<String, String> {
         val templates = routines.flatMap { it.exercises }.filter { it.exercise.id == exerciseId }.map { it.notes }.toSet()
         // (id, nota, ¿de programa?), de la sesión más reciente a la más antigua
@@ -170,7 +178,7 @@ class ExercisesViewModel @Inject constructor(
             }
         }
         // En los programas, la nota lleva el nivel (T1/T2/T3) y la frase de AMRAP: solo cuenta lo que añadió el usuario
-        val generated = listOf(context.getString(com.bestrong.mobile.shared.R.string.program_amrap_note), ProgramTexts.ES.amrapNote, ProgramTexts.EN.amrapNote)
+        val generated = amrapNotes
         val cleaned = withNotes.map { (id, note, fromProgram) -> id to if (fromProgram) ProgramTexts.userPart(note, generated) else note }
         return cleaned.withIndex().mapNotNull { (i, t) ->
             val (id, note) = t
@@ -197,3 +205,6 @@ class ExercisesViewModel @Inject constructor(
 
     fun deleteCustom(id: String) = viewModelScope.launch { repo.deleteCustomExercise(id) }
 }
+
+/** Idiomas en los que está traducida la app. */
+private val APP_LOCALES = listOf("es", "en", "ca", "gl", "pt", "fr", "de")
