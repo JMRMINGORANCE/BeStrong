@@ -59,11 +59,15 @@ object IntervalRoute {
         is IntervalPlan.Circuit -> "circuit:${p.workSec}:${p.restSec}:${p.rounds}:" + android.net.Uri.encode(p.stations.joinToString("|"))
     }
 
+    /**
+     * [s] llega ya decodificado por Navigation (no se vuelve a decodificar: un «%» del nombre se
+     * rompería) y los nombres de las estaciones pueden llevar «:», así que se corta en 5 trozos como mucho.
+     */
     fun decode(s: String): IntervalPlan {
-        val parts = s.split(":")
-        val n = parts.drop(1).map { it.toIntOrNull() ?: 1 }
+        val parts = s.split(":", limit = 5)
+        val n = parts.drop(1).take(3).map { it.toIntOrNull() ?: 1 }
         if (parts.firstOrNull() == "circuit") {
-            val stations = android.net.Uri.decode(parts.getOrNull(4).orEmpty()).split('|').filter { it.isNotBlank() }
+            val stations = parts.getOrNull(4).orEmpty().split('|').filter { it.isNotBlank() }
             return IntervalPlan.Circuit(stations.ifEmpty { listOf("1") }, n.getOrElse(0) { 40 }, n.getOrElse(1) { 20 }, n.getOrElse(2) { 3 })
         }
         return when (parts.firstOrNull()) {
