@@ -304,10 +304,14 @@ object WorkoutEditor {
     /**
      * Termina el entrenamiento: descarta las series no completadas y los ejercicios vacíos.
      */
-    fun finish(workout: Workout, nowEpochMs: Long): Workout = resume(workout, nowEpochMs).copy(
-        finishedAtEpochMs = nowEpochMs,
-        exercises = workout.exercises
-            .map { it.copy(sets = it.completedSets) }
-            .filter { it.sets.isNotEmpty() },
-    )
+    fun finish(workout: Workout, nowEpochMs: Long): Workout {
+        // Un cronómetro de cardio en marcha cuenta como hecho hasta ahora (si no, se perdería el bloque)
+        val stopped = runningCardio(workout)?.let { (we, set) -> finishCardio(workout, we.id, set.id, nowEpochMs) } ?: workout
+        return resume(stopped, nowEpochMs).copy(
+            finishedAtEpochMs = nowEpochMs,
+            exercises = stopped.exercises
+                .map { it.copy(sets = it.completedSets) }
+                .filter { it.sets.isNotEmpty() },
+        )
+    }
 }

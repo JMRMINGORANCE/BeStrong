@@ -47,7 +47,11 @@ data class Mesocycle(val startEpochDay: Long, val accumulationWeeks: Int = 4) {
     val length: Int get() = accumulationWeeks + 1
 
     /** Semana del mesociclo (1..length) para [today]. */
-    fun weekOf(today: LocalDate): Int = (ChronoUnit.WEEKS.between(LocalDate.ofEpochDay(startEpochDay), today).toInt().mod(length)) + 1
+    fun weekOf(today: LocalDate): Int {
+        val weeks = ChronoUnit.WEEKS.between(LocalDate.ofEpochDay(startEpochDay), today).toInt()
+        // Antes de empezar se muestra la primera semana, no la de descarga
+        return if (weeks < 0) 1 else weeks.mod(length) + 1
+    }
 
     fun isDeloadWeek(today: LocalDate): Boolean = weekOf(today) == length
 }

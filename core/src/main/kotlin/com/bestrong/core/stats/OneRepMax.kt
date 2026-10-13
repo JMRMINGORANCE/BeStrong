@@ -15,7 +15,7 @@ object OneRepMax {
             Formula.EPLEY -> weightKg * (1 + r / 30.0)
             Formula.BRZYCKI -> if (r >= 37) 0.0 else weightKg * 36.0 / (37.0 - r)
             Formula.LOMBARDI -> weightKg * r.pow(0.10)
-            Formula.LANDER -> 100.0 * weightKg / (101.3 - 2.67123 * r)
+            Formula.LANDER -> if (r >= 37) 0.0 else 100.0 * weightKg / (101.3 - 2.67123 * r)
             Formula.MAYHEW -> 100.0 * weightKg / (52.2 + 41.9 * exp(-0.055 * r))
             Formula.OCONNER -> weightKg * (1 + 0.025 * r)
             Formula.WATHAN -> 100.0 * weightKg / (48.8 + 53.8 * exp(-0.075 * r))
