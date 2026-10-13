@@ -13,6 +13,11 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.longOrNull
 
 data class UserSettings(
     val defaultRestSeconds: Int = 120,
@@ -173,5 +178,40 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putStringSet("dismissed_tips", s.dismissedTips)
         }
         _settings.value = s
+    }
+
+    /** Ajustes para la copia de seguridad (sin la carpeta de copias, que es de este móvil). */
+    fun backupJson(): JsonObject = JsonObject(
+        prefs.all.filterKeys { it !in DEVICE_KEYS }.mapNotNull { (k, v) ->
+            when (v) {
+                is Boolean -> k to JsonPrimitive(v)
+                is Number -> k to JsonPrimitive(v)
+                is String -> k to JsonPrimitive(v)
+                is Set<*> -> k to JsonArray(v.map { JsonPrimitive(it.toString()) })
+                else -> null
+            }
+        }.toMap(),
+    )
+
+    /** Restaura los ajustes de una copia (los que falten se quedan como están). */
+    @Synchronized
+    fun restoreBackup(json: JsonObject) {
+        prefs.edit {
+            json.filterKeys { it !in DEVICE_KEYS }.forEach { (k, v) ->
+                when {
+                    v is JsonArray -> putStringSet(k, v.mapNotNull { (it as? JsonPrimitive)?.content }.toSet())
+                    v !is JsonPrimitive -> Unit
+                    v.isString -> putString(k, v.content)
+                    v.booleanOrNull != null -> putBoolean(k, v.booleanOrNull!!)
+                    // Los números son Int salvo los que ya se guardan como Long
+                    v.longOrNull != null -> if (prefs.all[k] is Long) putLong(k, v.longOrNull!!) else putInt(k, v.longOrNull!!.toInt())
+                }
+            }
+        }
+        _settings.value = read()
+    }
+
+    private companion object {
+        val DEVICE_KEYS = setOf("backup_folder", "backup_last")
     }
 }

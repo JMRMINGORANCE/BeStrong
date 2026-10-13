@@ -22,6 +22,7 @@ import com.bestrong.core.stats.WeekBucket
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.mobile.WatchPush
 import com.bestrong.mobile.backup.AutoBackupWorker
+import com.bestrong.mobile.backup.FullBackup
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.ProgressPhoto
 import com.bestrong.mobile.data.ProgressPhotoStore
@@ -88,6 +89,7 @@ class ProfileViewModel @Inject constructor(
     private val watchPush: WatchPush,
     private val photoStore: ProgressPhotoStore,
     private val healthReader: HealthConnectReader,
+    private val fullBackup: FullBackup,
 ) : ViewModel() {
 
     val healthReadPermissions: Set<String> = healthReader.permissions
@@ -226,7 +228,7 @@ class ProfileViewModel @Inject constructor(
     /** Copia completa cifrada con contraseña (AES-256-GCM). */
     fun exportEncrypted(uri: Uri, password: CharArray) = viewModelScope.launch {
         val result = runCatching {
-            val text = withContext(Dispatchers.Default) { EncryptedBackup.encrypt(Backup.encode(repo.backupData()), password) }
+            val text = withContext(Dispatchers.Default) { EncryptedBackup.encrypt(Backup.encode(fullBackup.data()), password) }
             withContext(Dispatchers.IO) {
                 context.contentResolver.openOutputStream(uri)?.use { it.write(text.toByteArray()) } ?: error(context.getString(R.string.file_open_error))
             }
@@ -253,7 +255,7 @@ class ProfileViewModel @Inject constructor(
     private suspend fun restoreText(text: String) {
         val result = runCatching {
             val data = withContext(Dispatchers.Default) { Backup.decode(text) }
-            data to repo.restore(data)
+            data to fullBackup.restore(data)
         }
         _messages.tryEmit(
             result.fold(
@@ -324,7 +326,7 @@ class ProfileViewModel @Inject constructor(
                 return@launch
             }
             val data = withContext(Dispatchers.Default) { Backup.decode(text) }
-            data to repo.restore(data)
+            data to fullBackup.restore(data)
         }
         _messages.tryEmit(
             result.fold(

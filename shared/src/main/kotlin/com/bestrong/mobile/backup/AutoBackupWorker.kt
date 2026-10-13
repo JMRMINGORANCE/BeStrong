@@ -27,9 +27,8 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         val deps = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val settingsStore = deps.settings()
         val folder = settingsStore.settings.value.backupFolderUri ?: return Result.success()
-        val repo = deps.repository()
         return runCatching {
-            val data = repo.backupData()
+            val data = deps.backup().data()
             val tree = Uri.parse(folder)
             val date = LocalDate.now()
             write(tree, "bestrong-$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())

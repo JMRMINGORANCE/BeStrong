@@ -173,7 +173,11 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         routines = routinesOnce(),
         customExercises = customExercises.first(),
         measurements = measurements.first(),
+        activeProgram = activeProgramOnce(),
     )
+
+    private suspend fun activeProgramOnce(): ActiveProgram? =
+        dao.valueOnce(KEY_PROGRAM)?.let { runCatching { json.decodeFromString(ActiveProgram.serializer(), it) }.getOrNull() }
 
     /** Restaura una copia sin borrar nada: añade lo que no exista (por id). Devuelve cuántos elementos se añadieron. */
     suspend fun restore(data: BackupData): Int {
@@ -186,7 +190,10 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         val measurementIds = measurements.value.map { it.id }.toSet()
         val newMeasurements = data.measurements.filter { it.id !in measurementIds }
         newMeasurements.forEach { saveMeasurement(it) }
-        return workouts + newRoutines.size + newExercises.size + newMeasurements.size
+        // El programa de la copia solo si ahora no se sigue ninguno
+        val program = data.activeProgram?.takeIf { activeProgramOnce() == null }
+        program?.let { setActiveProgram(it) }
+        return workouts + newRoutines.size + newExercises.size + newMeasurements.size + (if (program != null) 1 else 0)
     }
 
     // --- Historial ---------------------------------------------------------------------------

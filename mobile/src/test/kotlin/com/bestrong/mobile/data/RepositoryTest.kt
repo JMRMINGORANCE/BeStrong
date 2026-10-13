@@ -3,6 +3,7 @@ package com.bestrong.mobile.data
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.bestrong.core.io.Backup
 import com.bestrong.core.io.BackupData
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.BodyMeasurement
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -86,5 +89,31 @@ class RepositoryTest {
         assertEquals(p, withTimeout(5_000) { repo.activeProgram.filterNotNull().first() })
         repo.setActiveProgram(null)
         assertNull(withTimeout(5_000) { repo.activeProgram.first { it == null } })
+    }
+
+    @Test fun backupCarriesActiveProgramAndExtras() = runBlocking {
+        val p = ActiveProgram("gzclp", 123, mapOf("squat" to 100.0))
+        repo.setActiveProgram(p)
+        val extras = repo.backupData().copy(
+            planning = JsonObject(mapOf("minutesPerSession" to JsonPrimitive(45))),
+            settings = JsonObject(mapOf("rest" to JsonPrimitive(90))),
+            techniqueNotes = mapOf("squat" to "Rodillas fuera"),
+        )
+        val decoded = Backup.decode(Backup.encode(extras))
+        assertEquals(extras, decoded)
+        // Copia antigua sin los campos nuevos: se lee igual
+        assertNull(Backup.decode("""{"app":"BeStrong","schemaVersion":1}""").activeProgram)
+        // El programa solo se restaura si no hay ninguno activo
+        repo.setActiveProgram(null)
+        assertEquals(1, repo.restore(decoded))
+        assertEquals(p, withTimeout(5_000) { repo.activeProgram.filterNotNull().first() })
+        assertEquals(0, repo.restore(decoded))
+    }
+
+    @Test fun activeOnceReadsDatabase() = runBlocking {
+        assertNull(repo.activeOnce())
+        val w = WorkoutEditor.empty(0)
+        repo.setActive(w)
+        assertEquals(w.id, repo.activeOnce()?.id)
     }
 }
