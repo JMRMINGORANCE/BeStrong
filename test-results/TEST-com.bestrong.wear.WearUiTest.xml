@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.wear.WearUiTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-13T07:17:56.406Z" hostname="runnervmmprz5" time="20.32">
+  <properties/>
+  <testcase name="create_routine_on_watch" classname="com.bestrong.wear.WearUiTest" time="13.12"/>
+  <testcase name="cardio_and_new_routine" classname="com.bestrong.wear.WearUiTest" time="0.978"/>
+  <testcase name="flow" classname="com.bestrong.wear.WearUiTest" time="2.973"/>
+  <testcase name="menu_and_info" classname="com.bestrong.wear.WearUiTest" time="3.249"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Exception in thread "GoogleApiHandler" java.lang.VerifyError: Stack map does not match the one at exception handler 218
+Exception Details:
+  Location:
+    com/google/android/gms/common/data/DataHolder.<init>(Landroid/database/Cursor;ILandroid/os/Bundle;)V @218: aload
+  Reason:
+    Current frame's flags are not assignable to stack map frame's.
+  Current Frame:
+    bci: @28
+    flags: { flagThisUninit }
+    locals: { uninitializedThis, 'android/database/Cursor', integer, 'android/os/Bundle', 'com/google/android/gms/common/sqlite/CursorWrapper', '[Ljava/lang/String;', 'java/util/ArrayList' }
+    stack: { 'java/lang/Throwable' }
+  Stackmap Frame:
+    bci: @218
+    flags: { }
+    locals: { top, top, top, top, 'com/google/android/gms/common/sqlite/CursorWrapper' }
+    stack: { 'java/lang/Throwable' }
+  Bytecode:
+    0000000: bb00 a73a 0419 042b b700 aa19 04b6 00ae
+    0000010: 3a05 bb00 b03a 0619 06b7 00b1 1904 b600
+    0000020: b336 0719 04b6 00b7 4c2b c600 b62b b600
+    0000030: ba36 0815 089a 00a0 2bb6 00bd 1904 01b6
+    0000040: 00c1 1906 2bb6 00c5 572b b600 c83c 1b15
+    0000050: 07a2 0035 1904 1bb6 00cd 3608 1508 9900
+    0000060: 2819 04b6 00b7 3a08 1908 c600 5319 08b6
+    0000070: 00bd 1904 01b6 00c1 1908 4c2b b600 c836
+    0000080: 0815 089a 0020 1904 b600 d02a 1905 1906
+    0000090: 59b6 00d3 bd00 66b6 00d7 c000 d81c 2db7
+    00000a0: 00db b119 062b b600 c557 2bb6 00ba 3608
+    00000b0: 2bb6 00c8 3c15 081b 603c a7ff 9419 04bb
+    00000c0: 0066 5903 b700 dd59 1b5b b600 e15b b600
+    00000d0: e54c a7ff a903 3ca7 ff77 1904 b600 d0bf
+    00000e0: 033c a7ff 6c                           
+  Exception Handler Table:
+    bci [28, 41] => handler: 218
+    bci [45, 51] => handler: 218
+    bci [56, 78] => handler: 218
+    bci [84, 92] => handler: 218
+    bci [97, 104] => handler: 218
+    bci [109, 129] => handler: 218
+    bci [163, 181] => handler: 218
+    bci [189, 213] => handler: 218
+  Stackmap Table:
+    full_frame(@78,{UninitializedThis,Integer,Integer,Object[#96],Object[#167],Object[#201],Object[#176],Integer},{})
+    full_frame(@123,{UninitializedThis,Object[#102],Integer,Object[#96],Object[#167],Object[#201],Object[#176],Integer},{})
+    full_frame(@134,{UninitializedThis,Top,Integer,Object[#96],Object[#167],Object[#201],Object[#176]},{})
+    full_frame(@163,{UninitializedThis,Object[#102],Integer,Object[#96],Object[#167],Object[#201],Object[#176],Integer},{})
+    full_frame(@189,{UninitializedThis,Integer,Integer,Object[#96],Object[#167],Object[#201],Object[#176],Integer},{})
+    full_frame(@213,{UninitializedThis,Top,Integer,Object[#96],Object[#167],Object[#201],Object[#176],Integer},{})
+    full_frame(@218,{Top,Top,Top,Top,Object[#167]},{Object[#231]})
+    full_frame(@224,{UninitializedThis,Top,Integer,Object[#96],Object[#167],Object[#201],Object[#176],Integer},{})
+
+	at com.google.android.gms.wearable.internal.zzcl.createFailedResult(com.google.android.gms:play-services-wearable@@19.0.0:1)
+	at com.google.android.gms.common.api.internal.BaseImplementation$ApiMethodImpl.setFailedResult(com.google.android.gms:play-services-base@@18.4.0:4)
+	at com.google.android.gms.common.api.internal.zae.zad(com.google.android.gms:play-services-base@@18.4.0:1)
+	at com.google.android.gms.common.api.internal.zabq.zaF(com.google.android.gms:play-services-base@@18.4.0:7)
+	at com.google.android.gms.common.api.internal.zabq.zaE(com.google.android.gms:play-services-base@@18.4.0:2)
+	at com.google.android.gms.common.api.internal.zabq.zar(com.google.android.gms:play-services-base@@18.4.0:23)
+	at com.google.android.gms.common.api.internal.zabq.zao(com.google.android.gms:play-services-base@@18.4.0:13)
+	at com.google.android.gms.common.api.internal.zabq.zap(com.google.android.gms:play-services-base@@18.4.0:8)
+	at com.google.android.gms.common.api.internal.GoogleApiManager.handleMessage(com.google.android.gms:play-services-base@@18.4.0:64)
+	at android.os.Handler.dispatchMessage(Handler.java:102)
+	at android.os.Looper.loopOnce(Looper.java:205)
+	at android.os.Looper.loop(Looper.java:294)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at org.robolectric.shadows.ShadowPausedLooper$LooperReflector$$Reflector1.loop(Unknown Source)
+	at org.robolectric.shadows.ShadowPausedLooper.loop(ShadowPausedLooper.java:479)
+	at android.os.Looper.loop(Looper.java)
+	at android.os.HandlerThread.run(HandlerThread.java:67)
+]]></system-err>
+</testsuite>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.mobile.work.WorkersTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-13T07:19:02.528Z" hostname="runnervmmprz5" time="0.462">
+  <properties/>
+  <testcase name="weeklySummaryOnlyWhenTrained" classname="com.bestrong.mobile.work.WorkersTest" time="0.19"/>
+  <testcase name="reminderNotifiesOnChosenDayWhenNotTrained" classname="com.bestrong.mobile.work.WorkersTest" time="0.171"/>
+  <testcase name="reminderSilentOnOtherDays" classname="com.bestrong.mobile.work.WorkersTest" time="0.05"/>
+  <testcase name="backupWithoutFolderDoesNothing" classname="com.bestrong.mobile.work.WorkersTest" time="0.051"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
