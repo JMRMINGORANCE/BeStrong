@@ -27,9 +27,16 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         val deps = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val settingsStore = deps.settings()
         val folder = settingsStore.settings.value.backupFolderUri ?: return Result.success()
+        // Permiso revocado (carpeta borrada, app de archivos desinstalada…): se desactiva en vez de fallar cada semana
+        val tree = Uri.parse(folder)
+        val granted = applicationContext.contentResolver.persistedUriPermissions.any { it.uri == tree && it.isWritePermission }
+        if (!granted) {
+            Log.w("AutoBackup", "Sin permiso sobre la carpeta de copias: se desactiva")
+            settingsStore.update { it.copy(backupFolderUri = null) }
+            return Result.success()
+        }
         return runCatching {
             val data = deps.backup().data()
-            val tree = Uri.parse(folder)
             val date = LocalDate.now()
             write(tree, "bestrong-$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
             write(tree, "bestrong-$date.json", "application/json", Backup.encode(data).toByteArray())
@@ -59,7 +66,8 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
                 wm.cancelUniqueWork(NAME)
                 return
             }
-            val request = PeriodicWorkRequestBuilder<AutoBackupWorker>(7, TimeUnit.DAYS).build()
+            // La primera copia la hace runNow() al elegir la carpeta
+            val request = PeriodicWorkRequestBuilder<AutoBackupWorker>(7, TimeUnit.DAYS).setInitialDelay(7, TimeUnit.DAYS).build()
             wm.enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.KEEP, request)
         }
 
