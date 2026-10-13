@@ -881,4 +881,8 @@
     <string name="sort_recent">Recentes</string>
     <string name="sort_name">A–Z</string>
     <string name="sort_most_used">Mais usados</string>
+    <string name="routine_folder">Pasta (opcional)</string>
+    <string name="routine_folder_hint">Bloco de força, Casa…</string>
+    <string name="folder_collapsed">Recolhida</string>
+    <string name="folder_expanded">Expandida</string>
 </resources>

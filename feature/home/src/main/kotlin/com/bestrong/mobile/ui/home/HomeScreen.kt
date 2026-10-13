@@ -57,6 +57,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -130,6 +132,21 @@ fun HomeScreen(
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         // Rejilla adaptable: 1 columna en el Fold plegado, 2-3 desplegado
+        var collapsed by rememberSaveable { mutableStateOf(setOf<String>()) }
+        val routineCard: @Composable (Routine) -> Unit = { routine ->
+            val last = history.firstOrNull { it.routineId == routine.id }
+            RoutineCard(
+                routine = routine,
+                lastDone = last?.let { formatDate(it.startedAtEpochMs) },
+                onStart = { vm.startRoutine(routine, onOpenWorkout) },
+                onStartWatch = { vm.startOnWatch(routine) },
+                onEdit = { onEditRoutine(routine.id) },
+                onDuplicate = { vm.duplicate(routine) },
+                onDelete = { vm.delete(routine) },
+                onMoveUp = { vm.move(routine, -1) },
+                onMoveDown = { vm.move(routine, 1) },
+            )
+        }
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 320.dp),
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -198,19 +215,16 @@ fun HomeScreen(
                     }
                 }
             }
-            items(routines, key = { it.id }) { routine ->
-                val last = history.firstOrNull { it.routineId == routine.id }
-                RoutineCard(
-                    routine = routine,
-                    lastDone = last?.let { formatDate(it.startedAtEpochMs) },
-                    onStart = { vm.startRoutine(routine, onOpenWorkout) },
-                    onStartWatch = { vm.startOnWatch(routine) },
-                    onEdit = { onEditRoutine(routine.id) },
-                    onDuplicate = { vm.duplicate(routine) },
-                    onDelete = { vm.delete(routine) },
-                    onMoveUp = { vm.move(routine, -1) },
-                    onMoveDown = { vm.move(routine, 1) },
-                )
+            // Sin carpeta primero; después cada carpeta con su cabecera (se puede plegar)
+            val byFolder = routines.groupBy { it.folder?.trim()?.takeIf(String::isNotEmpty) }
+            items(byFolder[null].orEmpty(), key = { it.id }) { routineCard(it) }
+            byFolder.keys.filterNotNull().sorted().forEach { folder ->
+                val list = byFolder.getValue(folder)
+                val folded = folder in collapsed
+                item(key = "folder:$folder", span = { GridItemSpan(maxLineSpan) }) {
+                    FolderHeader(folder, list.size, folded) { collapsed = if (folded) collapsed - folder else collapsed + folder }
+                }
+                if (!folded) items(list, key = { it.id }) { routineCard(it) }
             }
             // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
             item { ReadinessCard(vm) }
@@ -349,5 +363,20 @@ private fun UndoRoutineDelete(vm: HomeViewModel, snackbar: SnackbarHostState) {
             val result = snackbar.showSnackbar(deletedMsg, undoLabel, duration = SnackbarDuration.Short)
             if (result == SnackbarResult.ActionPerformed) vm.undoDelete() else vm.clearDeleted()
         }
+    }
+}
+
+/** Cabecera de una carpeta de rutinas; tocarla la pliega o despliega. */
+@Composable
+private fun FolderHeader(name: String, count: Int, folded: Boolean, onToggle: () -> Unit) {
+    val state = stringResource(if (folded) R.string.folder_collapsed else R.string.folder_expanded)
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(vertical = 8.dp)
+            .semantics { stateDescription = state },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(if (folded) "▸" else "▾", Modifier.padding(end = 8.dp), color = MaterialTheme.colorScheme.primary)
+        Text("📁 $name", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+        Text("$count", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

@@ -31,6 +31,8 @@ data class Routine(
     val position: Int = 0,
     /** Emoji para reconocer la rutina de un vistazo (💪, 🦵…). */
     val emoji: String? = null,
+    /** Carpeta en Inicio («Bloque de fuerza», «Casa»…); null = sin carpeta. */
+    val folder: String? = null,
 ) {
     /** Nombre con su emoji delante, si tiene. */
     val displayName: String get() = emoji?.let { "$it $name" } ?: name

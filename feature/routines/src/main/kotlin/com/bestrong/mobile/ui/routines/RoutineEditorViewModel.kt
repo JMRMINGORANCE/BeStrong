@@ -70,6 +70,10 @@ class RoutineEditorViewModel @Inject constructor(
     fun rename(name: String) = _routine.update { it.copy(name = name) }
     fun setNotes(notes: String) = _routine.update { it.copy(notes = notes) }
     fun setEmoji(emoji: String?) = _routine.update { it.copy(emoji = emoji) }
+    fun setFolder(folder: String) = _routine.update { it.copy(folder = folder.trim().ifEmpty { null }) }
+
+    /** Carpetas que ya existen, para elegirlas sin volver a escribirlas. */
+    val folders: List<String> get() = repo.routines.value.mapNotNull { it.folder?.takeIf(String::isNotBlank) }.distinct().sorted()
 
     fun addExercises(ids: List<String>) {
         val lookup = repo.previousSetsLookup.value

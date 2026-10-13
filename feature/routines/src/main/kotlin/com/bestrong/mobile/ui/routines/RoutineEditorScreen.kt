@@ -103,6 +103,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                     OutlinedTextField(routine.name, vm::rename, label = { Text(stringResource(R.string.routine_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(routine.notes, vm::setNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.fillMaxWidth())
                     EmojiPicker(routine.emoji, vm::setEmoji)
+                    FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
                 }
             }
             itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
@@ -241,6 +242,26 @@ private fun EditorDialogs(
             },
             confirmButton = { TextButton(onClick = { onDismissRest() }) { Text(stringResource(R.string.action_close)) } },
         )
+    }
+}
+
+/** Carpeta de la rutina en Inicio: se escribe o se elige una existente. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun FolderField(folder: String, existing: List<String>, onChange: (String) -> Unit) {
+    var text by remember { mutableStateOf(folder) }
+    OutlinedTextField(
+        text,
+        { text = it.take(40); onChange(text) },
+        label = { Text(stringResource(R.string.routine_folder)) },
+        placeholder = { Text(stringResource(R.string.routine_folder_hint)) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    if (existing.isNotEmpty()) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            existing.forEach { f -> FilterChip(selected = f == text.trim(), onClick = { text = f; onChange(f) }, label = { Text(f) }) }
+        }
     }
 }
 

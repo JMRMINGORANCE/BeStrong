@@ -881,4 +881,8 @@
     <string name="sort_recent">Recent</string>
     <string name="sort_name">A–Z</string>
     <string name="sort_most_used">Most used</string>
+    <string name="routine_folder">Folder (optional)</string>
+    <string name="routine_folder_hint">Strength block, Home…</string>
+    <string name="folder_collapsed">Collapsed</string>
+    <string name="folder_expanded">Expanded</string>
 </resources>
