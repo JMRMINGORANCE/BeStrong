@@ -150,6 +150,8 @@ data class SharedSettings(
     /** Mejores marcas de todo el historial (el reloj solo tiene el reciente): 1RM estimado y peso máximo. */
     val bestOneRepMaxKg: Map<String, Double> = emptyMap(),
     val heaviestKg: Map<String, Double> = emptyMap(),
+    /** Descanso máximo tras una serie de calentamiento (s). */
+    val warmupRestSeconds: Int = 60,
 ) {
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
 }

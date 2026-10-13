@@ -86,6 +86,7 @@ class AppSync @Inject constructor(
                 weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal,
                 exerciseIncrementKg = s.exerciseIncrementKg,
                 pinnedNotes = pinned,
+                warmupRestSeconds = s.warmupRestSeconds,
                 bestOneRepMaxKg = best1rm,
                 heaviestKg = heaviest,
             )

@@ -46,7 +46,7 @@ class WorkoutActions @Inject constructor(
             WorkoutEditor.toggleSetCompleted(w, w.exercises[index].id, set.id)
         } ?: return false
         val (index, _) = WorkoutEditor.nextPendingSet(before) ?: return false
-        val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index)
+        val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index, settings.settings.value.warmupRestSeconds)
         if (rest > 0) restTimer.start(rest) else restTimer.skip()
         return true
     }

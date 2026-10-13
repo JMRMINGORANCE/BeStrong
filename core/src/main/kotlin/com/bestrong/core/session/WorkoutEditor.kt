@@ -298,7 +298,7 @@ object WorkoutEditor {
     /** Descanso máximo tras una serie de calentamiento. */
     const val WARMUP_REST_SECONDS = 60
 
-    fun afterSetCompleted(workout: Workout, index: Int): Pair<Int?, Int> {
+    fun afterSetCompleted(workout: Workout, index: Int, warmupRestSeconds: Int = WARMUP_REST_SECONDS): Pair<Int?, Int> {
         val group = supersetGroup(workout, index)
         val current = workout.exercises.getOrNull(index) ?: return null to 0
         if (group.size > 1) {
@@ -315,7 +315,7 @@ object WorkoutEditor {
         } else if (current.sets.any { !it.completed }) {
             // Tras una serie de aproximación basta un descanso corto (no los 3 min de la serie efectiva)
             val justDone = current.sets.filter { it.completed }.maxByOrNull { it.completedAtEpochMs ?: 0L }
-            val rest = if (justDone?.type == SetType.WARMUP) current.restSeconds.coerceAtMost(WARMUP_REST_SECONDS) else current.restSeconds
+            val rest = if (justDone?.type == SetType.WARMUP) current.restSeconds.coerceAtMost(warmupRestSeconds) else current.restSeconds
             return index to rest
         }
         val next = nextPendingSet(workout)?.first

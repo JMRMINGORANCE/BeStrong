@@ -359,7 +359,7 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Descanso, aviso por voz y desplazamiento al siguiente ejercicio tras completar una serie. */
     private fun onSetCompleted(updated: Workout, index: Int) {
-        val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
+        val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index, settings.value.warmupRestSeconds)
         if (restSeconds > 0) restTimer.start(restSeconds) else restTimer.skip()
         // Aviso por voz: cuánto descansar y qué viene
         WorkoutEditor.nextPendingSet(updated)?.let { (i, s) ->

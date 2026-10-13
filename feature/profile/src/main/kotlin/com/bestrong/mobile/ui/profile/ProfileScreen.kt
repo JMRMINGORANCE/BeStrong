@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
@@ -260,6 +261,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             body = stringResource(R.string.progression_setting_body),
                             checked = settings.progressionEnabled,
                         ) { v -> vm.updateSettings { it.copy(progressionEnabled = v) } }
+                        WarmupRestSetting(settings.warmupRestSeconds) { v -> vm.updateSettings { it.copy(warmupRestSeconds = v) } }
                         SwitchItem(stringResource(R.string.vibrate_rest), checked = settings.vibrateOnRestEnd) { v ->
                             vm.updateSettings { it.copy(vibrateOnRestEnd = v) }
                         }
@@ -438,6 +440,20 @@ private fun MusicAppPicker(selected: String?, onSelect: (String?) -> Unit) {
             androidx.compose.material3.FilterChip(selected = selected == null, onClick = { onSelect(null) }, label = { Text(stringResource(R.string.music_app_auto)) })
             apps.forEach { a ->
                 androidx.compose.material3.FilterChip(selected = selected == a.packageName, onClick = { onSelect(a.packageName) }, label = { Text(a.label) })
+            }
+        }
+    }
+}
+
+/** Descanso tras una serie de calentamiento: basta con cambiar los discos. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun WarmupRestSetting(seconds: Int, onChange: (Int) -> Unit) {
+    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(stringResource(R.string.warmup_rest_setting), style = MaterialTheme.typography.bodyLarge)
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(30, 45, 60, 90, 120).forEach { s ->
+                FilterChip(selected = s == seconds, onClick = { onChange(s) }, label = { Text(com.bestrong.core.util.formatDuration(s.toLong())) })
             }
         }
     }

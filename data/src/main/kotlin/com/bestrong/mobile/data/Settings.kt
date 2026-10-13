@@ -77,6 +77,8 @@ data class UserSettings(
     val dismissedTips: Set<String> = emptySet(),
     /** Incremento propio por ejercicio en kg (mancuernas de 2 kg, máquinas de 5 kg, microdiscos…). */
     val exerciseIncrementKg: Map<String, Double> = emptyMap(),
+    /** Descanso tras una serie de calentamiento (no hace falta el de una serie efectiva). */
+    val warmupRestSeconds: Int = 60,
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
 
@@ -137,6 +139,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         tutorialDone = prefs.getBoolean("tutorial_done", false),
         lastSeenVersion = prefs.getInt("last_seen_version", 0),
         dismissedTips = prefs.getStringSet("dismissed_tips", emptySet()).orEmpty().toSet(),
+        warmupRestSeconds = prefs.getInt("warmup_rest", 60),
         exerciseIncrementKg = prefs.getString("exercise_increments", null)
             ?.let { runCatching { SyncContract.json.decodeFromString(INCREMENTS, it) }.getOrNull() }
             .orEmpty(),
@@ -189,6 +192,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("last_seen_version", s.lastSeenVersion)
             putStringSet("dismissed_tips", s.dismissedTips)
             putString("exercise_increments", SyncContract.json.encodeToString(INCREMENTS, s.exerciseIncrementKg))
+            putInt("warmup_rest", s.warmupRestSeconds)
         }
         _settings.value = s
     }

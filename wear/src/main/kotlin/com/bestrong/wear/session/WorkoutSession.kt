@@ -460,7 +460,7 @@ class WorkoutSession @Inject constructor(
         val updated = _workout.value ?: w0
         val done = updated.exercises.firstOrNull { it.id == we.id }?.sets?.firstOrNull { it.id == s.id }
         if (done != null && isRecord(we.exercise.id, we.exercise.tracking, done)) celebrateRecord() else haptic(Haptics.SET_DONE)
-        val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index)
+        val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index, store.settings.value.warmupRestSeconds)
         next?.let { _exerciseIndex.value = it }
         return if (next != null && restSeconds > 0) {
             startRest(restSeconds)

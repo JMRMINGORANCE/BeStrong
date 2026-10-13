@@ -172,3 +172,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Pruebas de interfaz de las novedades (drop set, registro de entrenos pasados)
 - [x] Resumen semanal con aviso de carga alta
 - [x] Peso corporal: media de 7 días y cambio frente a la semana anterior
+
+## Fase 14 — Menos sorpresas ✅
+- [x] Inicio: duración estimada de cada rutina
+- [x] Health Connect: peso y % de grasa de Medidas
+- [x] Biblioteca: última vez y mejor serie en cada ejercicio
+- [x] Deshacer «Descartar entreno»
+- [x] Descanso tras calentamiento configurable (también en el reloj)

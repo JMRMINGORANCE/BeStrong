@@ -908,4 +908,5 @@
     <string name="routine_estimated">≈ %1$d min</string>
     <string name="exercise_last_time">Última: %1$s · %2$s</string>
     <string name="undo_workout_discarded">Entrenament «%1$s» descartat</string>
+    <string name="warmup_rest_setting">Descans després d\'una sèrie d\'escalfament</string>
 </resources>
