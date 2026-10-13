@@ -898,4 +898,6 @@
     <string name="history_day_filter">%1$s ✕</string>
     <string name="backup_damaged">Die Datei ist beschädigt oder kein verschlüsseltes BeStrong-Backup</string>
     <string name="add_drop_set">Drop-Satz hinzufügen (−20 %)</string>
+    <string name="plates_add_per_side">Pro Seite hinzufügen</string>
+    <string name="plates_use_weight">Gewicht übernehmen</string>
 </resources>

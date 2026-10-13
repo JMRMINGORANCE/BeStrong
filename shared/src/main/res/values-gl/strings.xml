@@ -898,4 +898,6 @@
     <string name="history_day_filter">%1$s ✕</string>
     <string name="backup_damaged">O ficheiro está danado ou non é unha copia cifrada de BeStrong</string>
     <string name="add_drop_set">Engadir drop set (−20 %)</string>
+    <string name="plates_add_per_side">Engadir por lado</string>
+    <string name="plates_use_weight">Usar este peso</string>
 </resources>

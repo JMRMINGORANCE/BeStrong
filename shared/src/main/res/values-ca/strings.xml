@@ -898,4 +898,6 @@
     <string name="history_day_filter">%1$s ✕</string>
     <string name="backup_damaged">El fitxer està malmès o no és una còpia xifrada de BeStrong</string>
     <string name="add_drop_set">Afegir drop set (−20 %)</string>
+    <string name="plates_add_per_side">Afegir per costat</string>
+    <string name="plates_use_weight">Fer servir aquest pes</string>
 </resources>

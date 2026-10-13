@@ -898,4 +898,6 @@
     <string name="history_day_filter">%1$s ✕</string>
     <string name="backup_damaged">Le fichier est endommagé ou n\'est pas une sauvegarde chiffrée BeStrong</string>
     <string name="add_drop_set">Ajouter une série dégressive (−20 %)</string>
+    <string name="plates_add_per_side">Ajouter par côté</string>
+    <string name="plates_use_weight">Utiliser ce poids</string>
 </resources>

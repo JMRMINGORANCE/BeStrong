@@ -770,7 +770,14 @@ private fun ExerciseCard(
     }
     if (showPlates) {
         val target = we.sets.firstOrNull { !it.completed }?.weightKg ?: we.sets.lastOrNull()?.weightKg ?: 0.0
-        PlateCalculatorDialog(initialKg = target, gym = vm.settings.value.activeGym, onDismiss = { showPlates = false })
+        // «Usar este peso» lo pone en la siguiente serie pendiente (y en las siguientes iguales)
+        val pending = we.sets.firstOrNull { !it.completed }
+        PlateCalculatorDialog(
+            initialKg = target,
+            gym = vm.settings.value.activeGym,
+            onApply = pending?.let { set -> { kg: Double -> vm.updateSet(we.id, set.id, weightKg = kg) } },
+            onDismiss = { showPlates = false },
+        )
     }
 }
 

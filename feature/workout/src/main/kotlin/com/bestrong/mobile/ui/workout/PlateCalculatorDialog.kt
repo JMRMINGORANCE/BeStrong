@@ -33,7 +33,7 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 /** Qué discos poner en cada lado de la barra para un peso objetivo. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onDismiss: () -> Unit) {
+fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onApply: ((Double) -> Unit)? = null, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
     var text by remember { mutableStateOf(unit.format(initialKg).takeIf { initialKg > 0 } ?: "") }
     // La barra y los discos del gimnasio activo van primero
@@ -62,8 +62,17 @@ fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onDismiss:
                 }
                 Text(stringResource(R.string.plates_per_side), style = MaterialTheme.typography.labelLarge)
                 if (load.perSide.isEmpty()) Text(stringResource(R.string.plates_only_bar))
+                // Tocar un disco lo quita de cada lado; abajo se añaden (cargar la barra al revés)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    load.perSide.forEach { p -> SuggestionChip(onClick = {}, label = { Text(formatWeight(p), fontWeight = FontWeight.Bold) }) }
+                    load.perSide.forEach { p ->
+                        SuggestionChip(onClick = { text = formatWeight((load.achieved - 2 * p).coerceAtLeast(bar)) }, label = { Text(formatWeight(p), fontWeight = FontWeight.Bold) })
+                    }
+                }
+                Text(stringResource(R.string.plates_add_per_side), style = MaterialTheme.typography.labelLarge)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    plates.sortedDescending().forEach { p ->
+                        SuggestionChip(onClick = { text = formatWeight(maxOf(load.achieved, bar) + 2 * p) }, label = { Text("+" + formatWeight(p)) })
+                    }
                 }
                 Text(stringResource(R.string.plates_total, formatWeight(load.achieved), unit.label), fontWeight = FontWeight.SemiBold)
                 if (load.remainder > 0) {
@@ -75,6 +84,13 @@ fun PlateCalculatorDialog(initialKg: Double, gym: GymProfile? = null, onDismiss:
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
+        confirmButton = {
+            if (onApply != null && load.achieved > 0) {
+                TextButton(onClick = { onApply(unit.toKg(load.achieved)); onDismiss() }) { Text(stringResource(R.string.plates_use_weight)) }
+            } else {
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
+            }
+        },
+        dismissButton = if (onApply != null) ({ TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } }) else null,
     )
 }

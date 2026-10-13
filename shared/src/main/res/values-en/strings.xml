@@ -898,4 +898,6 @@
     <string name="history_day_filter">%1$s ✕</string>
     <string name="backup_damaged">The file is damaged or isn\'t a BeStrong encrypted backup</string>
     <string name="add_drop_set">Add drop set (−20 %)</string>
+    <string name="plates_add_per_side">Add per side</string>
+    <string name="plates_use_weight">Use this weight</string>
 </resources>
