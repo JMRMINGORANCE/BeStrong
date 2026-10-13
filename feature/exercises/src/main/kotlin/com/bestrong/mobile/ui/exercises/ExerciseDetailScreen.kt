@@ -200,7 +200,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                             val repMaxes = REP_MAXES.mapNotNull { r -> s.strengthCurve[r]?.let { r to it } }
                             if (repMaxes.isNotEmpty()) {
                                 Text(
-                                    repMaxes.joinToString("  ·  ") { (r, kg) -> stringResource(R.string.rep_max, r, unit.format(kg, withUnit = true)) },
+                                    repMaxes.map { (r, kg) -> stringResource(R.string.rep_max, r, unit.format(kg, withUnit = true)) }.joinToString("  ·  "),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     modifier = Modifier.padding(top = 8.dp),
