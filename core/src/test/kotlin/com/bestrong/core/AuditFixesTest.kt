@@ -207,3 +207,23 @@ class RecordsTieTest {
         }
     }
 }
+
+class WarmupRestTest {
+    @Test fun shortRestAfterWarmupSet() {
+        val w = Workout(
+            name = "W", startedAtEpochMs = 0,
+            exercises = listOf(
+                WorkoutExercise(
+                    exercise = squat, restSeconds = 180,
+                    sets = listOf(WorkoutSet(weightKg = 60.0, reps = 5, type = SetType.WARMUP), WorkoutSet(weightKg = 100.0, reps = 5)),
+                ),
+            ),
+        )
+        val we = w.exercises.single()
+        val afterWarm = WorkoutEditor.toggleSetCompleted(w, we.id, we.sets[0].id, 1_000)
+        assertEquals(0 to WorkoutEditor.WARMUP_REST_SECONDS, WorkoutEditor.afterSetCompleted(afterWarm, 0))
+        val withMore = afterWarm.copy(exercises = listOf(afterWarm.exercises[0].copy(sets = afterWarm.exercises[0].sets + WorkoutSet(weightKg = 100.0, reps = 5))))
+        val afterWork = WorkoutEditor.toggleSetCompleted(withMore, we.id, we.sets[1].id, 2_000)
+        assertEquals(0 to 180, WorkoutEditor.afterSetCompleted(afterWork, 0))
+    }
+}
