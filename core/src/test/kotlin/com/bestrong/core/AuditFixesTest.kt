@@ -362,3 +362,13 @@ class EstimateRoundsTest {
         assertEquals(5 * 40 + 90 + 90, WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = 0))
     }
 }
+
+class DropSetRestTest {
+    @Test fun noRestBeforeADropSet() {
+        val w0 = Workout(name = "W", startedAtEpochMs = 0, exercises = listOf(WorkoutExercise(exercise = bench, restSeconds = 120, sets = listOf(WorkoutSet(weightKg = 100.0, reps = 8)))))
+        val we = w0.exercises.single()
+        val w = WorkoutEditor.addDropSet(w0, we.id, 2.5)
+        val after = WorkoutEditor.toggleSetCompleted(w, we.id, we.sets[0].id, 1_000)
+        assertEquals(0 to 0, WorkoutEditor.afterSetCompleted(after, 0))
+    }
+}

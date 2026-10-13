@@ -325,7 +325,12 @@ object WorkoutEditor {
         } else if (current.sets.any { !it.completed }) {
             // Tras una serie de aproximación basta un descanso corto (no los 3 min de la serie efectiva)
             val justDone = current.sets.filter { it.completed }.maxByOrNull { it.completedAtEpochMs ?: 0L }
-            val rest = if (justDone?.type == SetType.WARMUP) current.restSeconds.coerceAtMost(warmupRestSeconds) else current.restSeconds
+            val rest = when {
+                // Un drop set se hace seguido, sin descanso: solo el tiempo de quitar discos
+                current.sets.firstOrNull { !it.completed }?.type == SetType.DROP -> 0
+                justDone?.type == SetType.WARMUP -> current.restSeconds.coerceAtMost(warmupRestSeconds)
+                else -> current.restSeconds
+            }
             return index to rest
         }
         val next = nextPendingSet(workout)?.first
