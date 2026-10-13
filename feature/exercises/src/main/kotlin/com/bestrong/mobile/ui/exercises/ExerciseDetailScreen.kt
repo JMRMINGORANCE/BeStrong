@@ -43,6 +43,7 @@ import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bestrong.core.model.SetType
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.shared.R
@@ -55,6 +56,7 @@ import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.workout.describeSet
 import com.bestrong.mobile.ui.workout.setRemark
 
@@ -167,6 +169,22 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                                     fontWeight = FontWeight.Bold,
                                 )
                             }
+                        }
+                    }
+                }
+            }
+            s.nextTarget?.let { t ->
+                item {
+                    val work = t.sets.firstOrNull { it.type != SetType.WARMUP } ?: t.sets.first()
+                    Card(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            SectionHeader(stringResource(R.string.next_target))
+                            Text(
+                                stringResource(R.string.next_target_line, t.sets.count { it.type != SetType.WARMUP }, describeSet(work, s.exercise.tracking, unit)),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            Text(t.reasonText(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }

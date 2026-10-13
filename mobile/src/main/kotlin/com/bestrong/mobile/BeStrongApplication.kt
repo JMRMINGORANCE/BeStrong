@@ -55,6 +55,23 @@ class AppSync @Inject constructor(
     /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
     suspend fun pushToWatchNow() = watchPush.pushToWatchNow()
 
+    /**
+     * Ajustes compartidos con el reloj. Objetivo semanal: el del programa activo si lo hay, como en
+     * la pantalla de inicio. Notas fijas: se releen cuando cambia alguna (cortas, para el reloj).
+     */
+    private suspend fun syncSettings() {
+        val notes = media.version.map { media.allNotes().mapValues { (_, n) -> n.trim().take(MAX_WATCH_NOTE) } }
+        combine(settings.settings, repository.activeProgram, notes) { s, program, pinned ->
+            SharedSettings(
+                s.unit, s.progressionEnabled, s.restVibration,
+                weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal,
+                exerciseIncrementKg = s.exerciseIncrementKg,
+                pinnedNotes = pinned,
+            )
+        }.distinctUntilChanged()
+            .collect { watchSync.pushSettings(it) }
+    }
+
     @OptIn(FlowPreview::class)
     fun start() {
         scope.launch {
@@ -70,20 +87,7 @@ class AppSync @Inject constructor(
         scope.launch {
             merge(repository.history, repository.routines).debounce(2_000).collect { BeStrongWidget.refresh(context) }
         }
-        scope.launch {
-            // Objetivo semanal: el del programa activo si lo hay, como en la pantalla de inicio
-            // Notas fijas: se releen cuando cambia alguna (cortas, para que quepan en la pantalla del reloj)
-            val notes = media.version.map { media.allNotes().mapValues { (_, n) -> n.trim().take(MAX_WATCH_NOTE) } }
-            combine(settings.settings, repository.activeProgram, notes) { s, program, pinned ->
-                SharedSettings(
-                    s.unit, s.progressionEnabled, s.restVibration,
-                    weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal,
-                    exerciseIncrementKg = s.exerciseIncrementKg,
-                    pinnedNotes = pinned,
-                )
-            }.distinctUntilChanged()
-                .collect { watchSync.pushSettings(it) }
-        }
+        scope.launch { syncSettings() }
         // Entreno en curso compartido en vivo con el reloj + servicio en primer plano
         scope.launch {
             repository.activeWorkout.drop(1).debounce(300).collect { w ->

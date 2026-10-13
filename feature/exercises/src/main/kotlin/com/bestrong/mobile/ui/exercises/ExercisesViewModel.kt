@@ -15,6 +15,8 @@ import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.training.Injuries
+import com.bestrong.core.training.Progression
+import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.util.newId
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.ExerciseImage
@@ -59,6 +61,8 @@ data class ExerciseDetailState(
     val includeVariants: Boolean = false,
     /** Mejor peso por número de reps (curva de fuerza). */
     val strengthCurve: Map<Int, Double> = emptyMap(),
+    /** Qué toca la próxima vez (sobrecarga progresiva con el incremento de este ejercicio). */
+    val nextTarget: ProgressionSuggestion? = null,
 )
 
 @HiltViewModel
@@ -130,6 +134,7 @@ class ExercisesViewModel @Inject constructor(
             records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
+            nextTarget = Progression.suggest(ex, fullHistory, settingsStore.settings.value.stepKgFor(ex.id)),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

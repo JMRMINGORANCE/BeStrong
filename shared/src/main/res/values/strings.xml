@@ -885,4 +885,6 @@
     <string name="routine_folder_hint">Bloque de fuerza, Casa…</string>
     <string name="folder_collapsed">Plegada</string>
     <string name="folder_expanded">Desplegada</string>
+    <string name="next_target">Próxima vez</string>
+    <string name="next_target_line">%1$d series · %2$s</string>
 </resources>

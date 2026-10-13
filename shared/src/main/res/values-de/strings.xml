@@ -885,4 +885,6 @@
     <string name="routine_folder_hint">Kraftblock, Zuhause…</string>
     <string name="folder_collapsed">Eingeklappt</string>
     <string name="folder_expanded">Ausgeklappt</string>
+    <string name="next_target">Nächstes Mal</string>
+    <string name="next_target_line">%1$d Sätze · %2$s</string>
 </resources>

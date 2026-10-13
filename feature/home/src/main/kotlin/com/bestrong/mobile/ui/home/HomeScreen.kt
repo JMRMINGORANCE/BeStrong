@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -133,20 +134,6 @@ fun HomeScreen(
     ) { padding ->
         // Rejilla adaptable: 1 columna en el Fold plegado, 2-3 desplegado
         var collapsed by rememberSaveable { mutableStateOf(setOf<String>()) }
-        val routineCard: @Composable (Routine) -> Unit = { routine ->
-            val last = history.firstOrNull { it.routineId == routine.id }
-            RoutineCard(
-                routine = routine,
-                lastDone = last?.let { formatDate(it.startedAtEpochMs) },
-                onStart = { vm.startRoutine(routine, onOpenWorkout) },
-                onStartWatch = { vm.startOnWatch(routine) },
-                onEdit = { onEditRoutine(routine.id) },
-                onDuplicate = { vm.duplicate(routine) },
-                onDelete = { vm.delete(routine) },
-                onMoveUp = { vm.move(routine, -1) },
-                onMoveDown = { vm.move(routine, 1) },
-            )
-        }
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 320.dp),
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -215,16 +202,19 @@ fun HomeScreen(
                     }
                 }
             }
-            // Sin carpeta primero; después cada carpeta con su cabecera (se puede plegar)
-            val byFolder = routines.groupBy { it.folder?.trim()?.takeIf(String::isNotEmpty) }
-            items(byFolder[null].orEmpty(), key = { it.id }) { routineCard(it) }
-            byFolder.keys.filterNotNull().sorted().forEach { folder ->
-                val list = byFolder.getValue(folder)
-                val folded = folder in collapsed
-                item(key = "folder:$folder", span = { GridItemSpan(maxLineSpan) }) {
-                    FolderHeader(folder, list.size, folded) { collapsed = if (folded) collapsed - folder else collapsed + folder }
-                }
-                if (!folded) items(list, key = { it.id }) { routineCard(it) }
+            routineItems(routines, collapsed, onToggleFolder = { f -> collapsed = if (f in collapsed) collapsed - f else collapsed + f }) { routine ->
+                val last = history.firstOrNull { it.routineId == routine.id }
+                RoutineCard(
+                    routine = routine,
+                    lastDone = last?.let { formatDate(it.startedAtEpochMs) },
+                    onStart = { vm.startRoutine(routine, onOpenWorkout) },
+                    onStartWatch = { vm.startOnWatch(routine) },
+                    onEdit = { onEditRoutine(routine.id) },
+                    onDuplicate = { vm.duplicate(routine) },
+                    onDelete = { vm.delete(routine) },
+                    onMoveUp = { vm.move(routine, -1) },
+                    onMoveDown = { vm.move(routine, 1) },
+                )
             }
             // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
             item { ReadinessCard(vm) }
@@ -378,5 +368,24 @@ private fun FolderHeader(name: String, count: Int, folded: Boolean, onToggle: ()
         Text(if (folded) "▸" else "▾", Modifier.padding(end = 8.dp), color = MaterialTheme.colorScheme.primary)
         Text("📁 $name", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
         Text("$count", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** Rutinas sin carpeta primero; después cada carpeta con su cabecera (se puede plegar). */
+private fun LazyGridScope.routineItems(
+    routines: List<Routine>,
+    collapsed: Set<String>,
+    onToggleFolder: (String) -> Unit,
+    card: @Composable (Routine) -> Unit,
+) {
+    val byFolder = routines.groupBy { it.folder?.trim()?.takeIf(String::isNotEmpty) }
+    items(byFolder[null].orEmpty(), key = { it.id }) { card(it) }
+    byFolder.keys.filterNotNull().sorted().forEach { folder ->
+        val list = byFolder.getValue(folder)
+        val folded = folder in collapsed
+        item(key = "folder:$folder", span = { GridItemSpan(maxLineSpan) }) {
+            FolderHeader(folder, list.size, folded) { onToggleFolder(folder) }
+        }
+        if (!folded) items(list, key = { it.id }) { card(it) }
     }
 }

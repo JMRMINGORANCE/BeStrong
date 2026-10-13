@@ -885,4 +885,6 @@
     <string name="routine_folder_hint">Strength block, Home…</string>
     <string name="folder_collapsed">Collapsed</string>
     <string name="folder_expanded">Expanded</string>
+    <string name="next_target">Next time</string>
+    <string name="next_target_line">%1$d sets · %2$s</string>
 </resources>

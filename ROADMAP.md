@@ -139,3 +139,13 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Editar ejercicios personalizados (músculos secundarios, unilateral, distancia)
 - [x] Cuenta atrás para series por tiempo
 - [x] Deshacer al borrar una rutina; confirmación al borrar rutinas y ejercicios personalizados
+
+## Fase 10 — Rendimiento y organización ✅
+- [x] Historial grande: decodificación incremental, estadísticas fuera del hilo principal, récords en una sola pasada
+- [x] Reloj: historial que siempre cabe en la Data Layer y archivo propio para el entreno activo
+- [x] Copias automáticas con rotación (8 últimas) y sin duplicados; borrado masivo en una consulta
+- [x] Discos por lado en la tarjeta del ejercicio con barra
+- [x] Biblioteca ordenable (recientes, A–Z, más usados)
+- [x] Carpetas de rutinas plegables en Inicio
+- [x] Nota fija del ejercicio también en el reloj
+- [x] «Próxima vez» en la ficha de cada ejercicio
