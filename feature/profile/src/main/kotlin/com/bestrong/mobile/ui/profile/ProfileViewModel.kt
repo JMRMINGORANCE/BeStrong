@@ -547,6 +547,14 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /** Entrenos borrados en los últimos 30 días. */
+    val trash: StateFlow<List<com.bestrong.core.model.TrashedWorkout>> = repo.trash
+
+    fun restoreFromTrash(id: String) = viewModelScope.launch {
+        repo.restoreFromTrash(id)
+        _messages.tryEmit(context.getString(R.string.trash_restored))
+    }
+
     /** Borra un perfil de gimnasio y lo quita de las rutinas que lo tenían como suyo. */
     fun deleteGym(id: String) {
         settingsStore.update { s -> s.copy(gyms = s.gyms.filterNot { it.id == id }) }

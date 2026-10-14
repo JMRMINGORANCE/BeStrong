@@ -157,13 +157,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                             }
                             item { GymFilterRow(vm) }
                             if (partnerWorkouts.isNotEmpty()) {
-                                item {
-                                    FilterChip(
-                                        selected = showPartner,
-                                        onClick = { vm.showPartner.value = !showPartner },
-                                        label = { Text(stringResource(R.string.partner_history, partnerWorkouts.first().athlete.orEmpty())) },
-                                    )
-                                }
+                                item { AthleteFilterRow(vm, partnerWorkouts.first().athlete.orEmpty()) }
                             }
                             if (query.isBlank()) {
                                 item { YearHeatmap(heatmap, Modifier.padding(vertical = 4.dp)) }
@@ -531,5 +525,17 @@ private fun WorkoutGymLine(w: Workout, vm: HistoryViewModel) {
             },
             confirmButton = { TextButton(onClick = { picking = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
+    }
+}
+
+/** De quién se ven los entrenos: los tuyos, los de tu pareja o los de los dos. */
+@Composable
+private fun AthleteFilterRow(vm: HistoryViewModel, partner: String) {
+    val both by vm.showPartner.collectAsStateWithLifecycle()
+    val onlyPartner by vm.onlyPartner.collectAsStateWithLifecycle()
+    androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        FilterChip(selected = !both && !onlyPartner, onClick = { vm.showPartner.value = false; vm.onlyPartner.value = false }, label = { Text(stringResource(R.string.athlete_me)) })
+        FilterChip(selected = onlyPartner, onClick = { vm.showPartner.value = false; vm.onlyPartner.value = true }, label = { Text(partner) })
+        FilterChip(selected = both && !onlyPartner, onClick = { vm.showPartner.value = true; vm.onlyPartner.value = false }, label = { Text(stringResource(R.string.athlete_both)) })
     }
 }

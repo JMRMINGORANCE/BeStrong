@@ -1146,4 +1146,11 @@
     <string name="metric_distance">Distància</string>
     <string name="metric_time">Temps</string>
     <string name="auto_backup_item">%1$s · %2$d entrenaments</string>
+    <string name="trash_title">Paperera (%1$d)</string>
+    <string name="trash_body">Entrenaments esborrats els darrers 30 dies</string>
+    <string name="trash_open">Veure</string>
+    <string name="trash_restored">Entrenament recuperat</string>
+    <string name="cardio_week_goal_min">Cardio aquesta setmana: %1$d de %2$d min</string>
+    <string name="athlete_me">Jo</string>
+    <string name="athlete_both">Tots dos</string>
 </resources>

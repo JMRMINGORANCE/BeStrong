@@ -6,6 +6,7 @@ import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
+import com.bestrong.core.model.TrashedWorkout
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.stats.WorkoutStats
@@ -38,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
 
 @Singleton
 class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @ApplicationScope private val scope: CoroutineScope) {
@@ -329,6 +331,33 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
+    private val trashSerializer = ListSerializer(TrashedWorkout.serializer())
+
+    /** Entrenos borrados en los últimos 30 días, el último primero (para recuperarlos desde Perfil). */
+    val trash: StateFlow<List<TrashedWorkout>> = dao.value(KEY_TRASH)
+        .map { raw -> raw?.let { runCatching { json.decodeFromString(trashSerializer, it) }.getOrNull() }.orEmpty() }
+        .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    private suspend fun saveTrash(list: List<TrashedWorkout>) =
+        dao.putValue(KeyValueEntity(KEY_TRASH, json.encodeToString(trashSerializer, list)))
+
+    private suspend fun trashOnce(): List<TrashedWorkout> =
+        dao.valueOnce(KEY_TRASH)?.let { runCatching { json.decodeFromString(trashSerializer, it) }.getOrNull() }.orEmpty()
+
+    /** Borra un entreno dejándolo 30 días en la papelera. */
+    suspend fun trashWorkout(workout: Workout) {
+        val now = System.currentTimeMillis()
+        saveTrash(TrashedWorkout.keep(trashOnce(), listOf(TrashedWorkout(now, workout)), now))
+        dao.deleteWorkout(workout.id)
+    }
+
+    /** Vuelve a poner un entreno de la papelera en el historial. */
+    suspend fun restoreFromTrash(id: String) {
+        val list = trashOnce()
+        list.firstOrNull { it.workout.id == id }?.let { saveWorkout(it.workout) }
+        saveTrash(list.filterNot { it.workout.id == id })
+    }
+
     /** Borrado masivo: una consulta por bloque en vez de una transacción (y un recálculo) por entreno. */
     suspend fun deleteWorkouts(ids: List<String>) = ids.chunked(500).forEach { dao.deleteWorkouts(it) }
 
@@ -391,6 +420,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         const val KEY_ACTIVE = "active_workout"
         const val KEY_PARTNER = "partner_workout"
         const val KEY_PROGRAM = "active_program"
+        const val KEY_TRASH = "trash"
     }
 }
 

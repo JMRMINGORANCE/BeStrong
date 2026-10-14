@@ -149,7 +149,18 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         fun listJson(context: Context, tree: Uri): List<Pair<String, Uri>> =
             children(context, tree).filterKeys { it.startsWith(PREFIX) && it.endsWith(".json") }
                 .entries.sortedByDescending { it.key }
-                .map { (name, uri) -> name.removePrefix(PREFIX).removeSuffix(".json") to uri }
+                .map { (name, uri) -> withTime(context, uri, name.removePrefix(PREFIX).removeSuffix(".json")) to uri }
+
+        /** «2026-10-12 08:15»: la fecha del nombre y la hora en que se guardó (dos del mismo día se distinguen). */
+        private fun withTime(context: Context, uri: Uri, name: String): String {
+            val modified = runCatching {
+                context.contentResolver.query(uri, arrayOf(DocumentsContract.Document.COLUMN_LAST_MODIFIED), null, null, null)?.use { c ->
+                    if (c.moveToFirst()) c.getLong(0) else null
+                }
+            }.getOrNull()?.takeIf { it > 0 }
+            val time = modified?.let { java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalTime().withSecond(0).withNano(0) }
+            return name.substringBefore(" (") + (time?.let { " $it" } ?: "")
+        }
 
         private val writeLock = kotlinx.coroutines.sync.Mutex()
 

@@ -1146,4 +1146,11 @@
     <string name="metric_distance">Distancia</string>
     <string name="metric_time">Tiempo</string>
     <string name="auto_backup_item">%1$s · %2$d entrenos</string>
+    <string name="trash_title">Papelera (%1$d)</string>
+    <string name="trash_body">Entrenos borrados en los últimos 30 días</string>
+    <string name="trash_open">Ver</string>
+    <string name="trash_restored">Entreno recuperado</string>
+    <string name="cardio_week_goal_min">Cardio esta semana: %1$d de %2$d min</string>
+    <string name="athlete_me">Yo</string>
+    <string name="athlete_both">Los dos</string>
 </resources>

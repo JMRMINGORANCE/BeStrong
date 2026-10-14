@@ -780,4 +780,14 @@ class CollarTest {
         assertEquals(5000.0, b.week.first, 1e-9)
         assertEquals(13000.0, b.month.first, 1e-9)
     }
+
+    @Test
+    fun trashKeepsRecentNewestFirstWithoutDuplicates() {
+        val day = 86_400_000L
+        val now = 100 * day
+        fun t(id: String, at: Long) = com.bestrong.core.model.TrashedWorkout(at, Workout(id = id, name = id, startedAtEpochMs = 0))
+        val kept = com.bestrong.core.model.TrashedWorkout.keep(listOf(t("old", now - 31 * day), t("a", now - day)), listOf(t("a", now), t("b", now - 2 * day)), now)
+        assertEquals(listOf("a", "b"), kept.map { it.workout.id })
+        assertEquals(now, kept.first().deletedAtEpochMs)
+    }
 }

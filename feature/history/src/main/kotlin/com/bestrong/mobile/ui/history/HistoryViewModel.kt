@@ -53,6 +53,9 @@ class HistoryViewModel @Inject constructor(
     /** Día elegido en el calendario (null = todos). */
     val selectedDay = MutableStateFlow<LocalDate?>(null)
 
+    /** Solo los entrenos de la pareja (el chip «Pareja»; «Los dos» es [showPartner]). */
+    val onlyPartner = MutableStateFlow(false)
+
     /** Gimnasio elegido (null = todos). */
     val gymFilter = MutableStateFlow<String?>(null)
 
@@ -66,13 +69,17 @@ class HistoryViewModel @Inject constructor(
     val filtered: StateFlow<List<Workout>> = combine(
         repo.history,
         repo.partnerHistory,
-        combine(query.debounce { if (it.isEmpty()) 0L else 150L }, gymFilter) { q, g -> q to g },
+        combine(query.debounce { if (it.isEmpty()) 0L else 150L }, gymFilter, onlyPartner) { q, g, op -> Triple(q, g, op) },
         showPartner,
         selectedDay,
-    ) { h, p, (q, gym), sp, day ->
+    ) { h, p, (q, gym, op), sp, day ->
         // Buscando su nombre salen sus entrenos aunque no se estén enseñando los de la pareja
         val partnerSearched = q.isNotBlank() && p.any { it.athlete?.contains(q.trim(), ignoreCase = true) == true }
-        val mine = if (sp || partnerSearched) (h + p).sortedByDescending { it.startedAtEpochMs } else h
+        val mine = when {
+            op -> p.sortedByDescending { it.startedAtEpochMs }
+            sp || partnerSearched -> (h + p).sortedByDescending { it.startedAtEpochMs }
+            else -> h
+        }
         val all = if (gym == null) mine else mine.filter { it.gymName == gym }
         val zone = ZoneId.systemDefault()
         val ofDay = if (day == null) all else all.filter { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == day }
@@ -102,8 +109,10 @@ class HistoryViewModel @Inject constructor(
     val deleted: StateFlow<Workout?> = _deleted
 
     fun delete(id: String) = viewModelScope.launch {
-        _deleted.value = repo.history.value.firstOrNull { it.id == id }
-        repo.deleteWorkout(id)
+        // A la papelera (30 días) además del «deshacer» del aviso
+        val workout = (repo.history.value + repo.partnerHistory.value).firstOrNull { it.id == id } ?: return@launch
+        _deleted.value = workout
+        repo.trashWorkout(workout)
     }
 
     /** Entreno tal como estaba antes de cambiarle el gimnasio (para deshacerlo); null = nada que deshacer. */
@@ -134,7 +143,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun undoDelete() = viewModelScope.launch {
-        _deleted.value?.let { repo.saveWorkout(it) }
+        _deleted.value?.let { repo.restoreFromTrash(it.id) }
         _deleted.value = null
     }
 

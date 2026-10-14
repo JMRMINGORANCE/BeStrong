@@ -1146,4 +1146,11 @@
     <string name="metric_distance">Distance</string>
     <string name="metric_time">Durée</string>
     <string name="auto_backup_item">%1$s · %2$d séances</string>
+    <string name="trash_title">Corbeille (%1$d)</string>
+    <string name="trash_body">Séances supprimées ces 30 derniers jours</string>
+    <string name="trash_open">Voir</string>
+    <string name="trash_restored">Séance restaurée</string>
+    <string name="cardio_week_goal_min">Cardio cette semaine : %1$d sur %2$d min</string>
+    <string name="athlete_me">Moi</string>
+    <string name="athlete_both">Les deux</string>
 </resources>

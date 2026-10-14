@@ -353,3 +353,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Al elegir una copia automática, cuántos entrenos trae cada una
 - [x] Deshacer el cambio de gimnasio de un entreno pasado
 - [x] Buscar en el historial por el nombre de la pareja
+
+## Fase 40 — Papelera y cardio en minutos ✅
+- [x] Papelera: los entrenos borrados se guardan 30 días y se pueden recuperar desde Perfil
+- [x] Objetivo semanal de cardio en minutos (75/150/300) además de km
+- [x] Cardio de la semana en el widget
+- [x] Filtro Yo / Pareja / Los dos en el historial
+- [x] Fecha y hora de cada copia automática al elegir cuál restaurar

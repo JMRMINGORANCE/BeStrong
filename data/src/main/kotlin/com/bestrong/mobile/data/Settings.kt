@@ -89,6 +89,8 @@ data class UserSettings(
     val bodyWeightGoalDateMs: Long? = null,
     /** Kilómetros de cardio por semana que se buscan (Inicio); null = sin objetivo. */
     val weeklyCardioKm: Double? = null,
+    /** O minutos de cardio por semana (elíptica, bici sin distancia…; la OMS recomienda 150); solo uno de los dos. */
+    val weeklyCardioMin: Int? = null,
     /** Cintura objetivo (cm); null = sin objetivo. */
     val waistGoalCm: Double? = null,
     /** Series semanales por músculo que se quiere alcanzar como mínimo (mapa, Inicio, widget). */
@@ -216,6 +218,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         bodyWeightGoalDateMs = prefs.getString("body_weight_goal_date", null)?.toLongOrNull(),
         waistGoalCm = prefs.getString("waist_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         weeklyCardioKm = prefs.getString("weekly_cardio_km", null)?.toDoubleOrNull()?.takeIf { it > 0 },
+        weeklyCardioMin = prefs.getString("weekly_cardio_min", null)?.toIntOrNull()?.takeIf { it > 0 },
         weeklySetsTarget = prefs.getInt("weekly_sets_target", 10).coerceIn(1, 30),
         weighInDay = prefs.getInt("weigh_in_day", 0).takeIf { it in 1..7 },
         measureReminder = prefs.getBoolean("measure_reminder", false),
@@ -235,6 +238,16 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         prefs.getString(key, null)?.let { v -> enumValues<E>().firstOrNull { it.name == v } } ?: default
 
     /** Estado de la copia automática (propio de este móvil: no viaja en las copias). */
+    private fun android.content.SharedPreferences.Editor.putGoals(s: UserSettings) {
+        putString("body_unit", s.bodyUnit?.name)
+        putString("body_weight_goal", s.bodyWeightGoalKg?.toString())
+        putString("body_weight_goal_start", s.bodyWeightGoalStartKg?.toString())
+        putString("body_weight_goal_date", s.bodyWeightGoalDateMs?.toString())
+        putString("waist_goal", s.waistGoalCm?.toString())
+        putString("weekly_cardio_km", s.weeklyCardioKm?.toString())
+        putString("weekly_cardio_min", s.weeklyCardioMin?.toString())
+    }
+
     private fun android.content.SharedPreferences.Editor.putBackupState(s: UserSettings) {
         putString("backup_folder", s.backupFolderUri)
         putLong("backup_last", s.lastBackupEpochMs)
@@ -281,12 +294,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBoolean("colorblind", s.appearance.colorblind)
             putString("font", s.appearance.font.name)
             putString("rest_vibration", s.restVibration.name)
-            putString("body_unit", s.bodyUnit?.name)
-            putString("body_weight_goal", s.bodyWeightGoalKg?.toString())
-            putString("body_weight_goal_start", s.bodyWeightGoalStartKg?.toString())
-            putString("body_weight_goal_date", s.bodyWeightGoalDateMs?.toString())
-            putString("waist_goal", s.waistGoalCm?.toString())
-            putString("weekly_cardio_km", s.weeklyCardioKm?.toString())
+            putGoals(s)
             putInt("weekly_sets_target", s.weeklySetsTarget)
             putInt("weigh_in_day", s.weighInDay ?: 0)
             putBoolean("measure_reminder", s.measureReminder)
@@ -353,7 +361,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "backup_fail_notified", "backup_folder_set", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km", "partner_history_name")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km", "weekly_cardio_min", "partner_history_name")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())
     }

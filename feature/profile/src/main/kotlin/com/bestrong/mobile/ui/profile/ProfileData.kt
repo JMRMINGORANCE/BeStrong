@@ -7,9 +7,11 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
@@ -106,6 +108,7 @@ fun DataToolsSection(vm: ProfileViewModel) {
         )
     }
     RestorePreviewDialog(vm)
+    TrashItem(vm)
     if (deleting) {
         AlertDialog(
             onDismissRequest = { deleting = false },
@@ -182,4 +185,34 @@ private fun RestorePreviewDialog(vm: ProfileViewModel) {
         confirmButton = { TextButton(onClick = { vm.confirmRestore(withSettings) }) { Text(stringResource(R.string.action_restore)) } },
         dismissButton = { TextButton(onClick = { vm.pendingRestore.value = null }) { Text(stringResource(R.string.action_cancel)) } },
     )
+}
+
+/** «Papelera (3)»: los entrenos borrados de los últimos 30 días, para recuperar el que se borró sin querer. */
+@Composable
+private fun TrashItem(vm: ProfileViewModel) {
+    val trash by vm.trash.collectAsStateWithLifecycle()
+    if (trash.isEmpty()) return
+    var open by remember { mutableStateOf(false) }
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.trash_title, trash.size)) },
+        supportingContent = { Text(stringResource(R.string.trash_body)) },
+        trailingContent = { TextButton(onClick = { open = true }) { Text(stringResource(R.string.trash_open)) } },
+    )
+    if (open) {
+        AlertDialog(
+            onDismissRequest = { open = false },
+            title = { Text(stringResource(R.string.trash_title, trash.size)) },
+            text = {
+                Column(Modifier.heightIn(max = 400.dp).verticalScroll(rememberScrollState())) {
+                    trash.forEach { t ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(t.workout.name + " · " + com.bestrong.mobile.ui.components.formatDate(t.workout.startedAtEpochMs), Modifier.weight(1f))
+                            TextButton(onClick = { vm.restoreFromTrash(t.workout.id) }) { Text(stringResource(R.string.action_restore)) }
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.action_close)) } },
+        )
+    }
 }

@@ -58,11 +58,19 @@ class BeStrongWidget : GlanceAppWidget() {
         val routines = com.bestrong.core.training.QuickRoutines.pick(repo.routinesOnce(), history, plannedToday, today.atStartOfDay(zone).toInstant().toEpochMilli())
         val week = WorkoutStats.weeklySummary(history, 1, today, zone).first().workouts
         val streak = WorkoutStats.weeklyStreak(history, today, zone)
-        provideContent { GlanceTheme { Content(context, week, streak, routines) } }
+        // Cardio de la semana frente al objetivo (si se puso uno)
+        val s = entry.settings().settings.value
+        val (meters, seconds) = com.bestrong.core.stats.CardioTotals.since(history, weekStart.atStartOfDay(zone).toInstant().toEpochMilli())
+        val cardio = when {
+            s.weeklyCardioMin != null -> context.getString(R.string.cardio_week_goal_min, (seconds / 60).toInt(), s.weeklyCardioMin)
+            s.weeklyCardioKm != null -> context.getString(R.string.cardio_week_goal, "%.1f".format(meters / 1000), "%.0f".format(s.weeklyCardioKm))
+            else -> null
+        }
+        provideContent { GlanceTheme { Content(context, week, streak, routines, cardio) } }
     }
 
     @Composable
-    private fun Content(context: Context, week: Int, streak: Int, routines: List<Routine>) {
+    private fun Content(context: Context, week: Int, streak: Int, routines: List<Routine>, cardio: String? = null) {
         val brand = ColorProvider(Color(0xFFFF6B1A))
         val onBrand = ColorProvider(Color.Black)
         Column(
@@ -77,6 +85,7 @@ class BeStrongWidget : GlanceAppWidget() {
                 context.getString(R.string.widget_week, week),
                 style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp),
             )
+            cardio?.let { Text(it, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp), maxLines = 1) }
             Spacer(GlanceModifier.height(8.dp))
             WidgetButton(context.getString(R.string.nav_train), context.getString(R.string.widget_start, context.getString(R.string.nav_train)), brand, onBrand, Intent(context, MainActivity::class.java).setAction(MainActivity.ACTION_START_EMPTY))
             routines.forEach { r ->

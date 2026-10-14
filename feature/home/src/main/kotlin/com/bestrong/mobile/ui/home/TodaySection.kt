@@ -459,6 +459,26 @@ private fun BodyWeightQuickEntry(lastKg: Double?, onSave: (Double) -> Unit) {
 /** Objetivos de km de cardio por semana que se pueden elegir. */
 private val CARDIO_GOALS_KM = listOf(5.0, 10.0, 20.0, 30.0, 50.0)
 
+/** Objetivos en minutos por semana: la mitad, lo recomendado por la OMS (150) y el doble. */
+private val CARDIO_GOALS_MIN = listOf(75, 150, 300)
+
+/** «12,3 de 20 km» o «95 de 150 min» con su barra, o lo hecho si no hay objetivo. */
+@Composable
+private fun CardioWeekProgress(week: HomeViewModel.CardioWeek) {
+    val km = week.meters / 1000
+    val minutes = (week.seconds / 60).toInt()
+    val goalKm = week.goalKm
+    val goalMin = week.goalMin
+    val (text, progress) = when {
+        goalMin != null -> stringResource(R.string.cardio_week_goal_min, minutes, goalMin) to minutes.toFloat() / goalMin
+        goalKm != null -> stringResource(R.string.cardio_week_goal, "%.1f".format(km), "%.0f".format(goalKm)) to (km / goalKm).toFloat()
+        else -> stringResource(R.string.cardio_week, "%.1f".format(km)) to null
+    }
+    Text(text, fontWeight = FontWeight.Bold)
+    progress?.let { p -> androidx.compose.material3.LinearProgressIndicator(progress = { p.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
+    if (week.seconds > 0 && goalMin == null) Text(com.bestrong.core.util.formatDuration(week.seconds), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
 /**
  * «Cardio esta semana: 12,3 / 20 km» (solo si hay cardio esta semana o un objetivo puesto); tocarla deja poner o
  * quitar el objetivo.
@@ -467,18 +487,11 @@ private val CARDIO_GOALS_KM = listOf(5.0, 10.0, 20.0, 30.0, 50.0)
 @Composable
 fun CardioWeekCard(vm: HomeViewModel) {
     val week by vm.cardioWeek.collectAsStateWithLifecycle()
-    if (week.goalKm == null && week.meters <= 0 && week.seconds <= 0) return
+    if (!week.worthShowing) return
     var editing by remember { mutableStateOf(false) }
-    val km = week.meters / 1000
     Card(Modifier.fillMaxWidth().clickable { editing = true }) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            val goal = week.goalKm
-            Text(
-                if (goal != null) stringResource(R.string.cardio_week_goal, "%.1f".format(km), "%.0f".format(goal)) else stringResource(R.string.cardio_week, "%.1f".format(km)),
-                fontWeight = FontWeight.Bold,
-            )
-            if (goal != null) androidx.compose.material3.LinearProgressIndicator(progress = { (km / goal).toFloat().coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-            if (week.seconds > 0) Text(com.bestrong.core.util.formatDuration(week.seconds), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            CardioWeekProgress(week)
         }
     }
     if (editing) {
@@ -487,9 +500,13 @@ fun CardioWeekCard(vm: HomeViewModel) {
             title = { Text(stringResource(R.string.cardio_goal_title)) },
             text = {
                 androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    androidx.compose.material3.FilterChip(selected = week.goalKm == null, onClick = { vm.setWeeklyCardioKm(null); editing = false }, label = { Text("—") })
+                    androidx.compose.material3.FilterChip(selected = week.goalKm == null && week.goalMin == null, onClick = { vm.setWeeklyCardioGoal(null, null); editing = false }, label = { Text("—") })
                     CARDIO_GOALS_KM.forEach { g ->
-                        androidx.compose.material3.FilterChip(selected = week.goalKm == g, onClick = { vm.setWeeklyCardioKm(g); editing = false }, label = { Text("${g.toInt()} km") })
+                        androidx.compose.material3.FilterChip(selected = week.goalKm == g, onClick = { vm.setWeeklyCardioGoal(g, null); editing = false }, label = { Text("${g.toInt()} km") })
+                    }
+                    // En minutos, para el cardio sin distancia (elíptica, bici estática, HIIT)
+                    CARDIO_GOALS_MIN.forEach { g ->
+                        androidx.compose.material3.FilterChip(selected = week.goalMin == g, onClick = { vm.setWeeklyCardioGoal(null, g); editing = false }, label = { Text("$g min") })
                     }
                 }
             },
