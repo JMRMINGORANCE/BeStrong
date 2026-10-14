@@ -477,6 +477,27 @@ private fun CardioWeekProgress(week: HomeViewModel.CardioWeek) {
     Text(text, fontWeight = FontWeight.Bold)
     progress?.let { p -> androidx.compose.material3.LinearProgressIndicator(progress = { p.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
     if (week.seconds > 0 && goalMin == null) Text(com.bestrong.core.util.formatDuration(week.seconds), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (week.streak >= 2) Text(stringResource(R.string.cardio_streak, week.streak), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+}
+
+/** Objetivo a medida: el número y luego km o min (un número que no vale no cambia nada). */
+@Composable
+private fun CustomCardioGoal(vm: HomeViewModel, onDone: () -> Unit) {
+    var text by remember { mutableStateOf("") }
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(stringResource(R.string.cardio_goal_custom), style = MaterialTheme.typography.bodySmall)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            androidx.compose.material3.OutlinedTextField(
+                value = text,
+                onValueChange = { text = it.take(6) },
+                singleLine = true,
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                modifier = Modifier.weight(1f),
+            )
+            androidx.compose.material3.TextButton(onClick = { if (vm.setCustomCardioGoal(text, inMinutes = false)) onDone() }) { Text("km") }
+            androidx.compose.material3.TextButton(onClick = { if (vm.setCustomCardioGoal(text, inMinutes = true)) onDone() }) { Text("min") }
+        }
+    }
 }
 
 /**
@@ -499,15 +520,18 @@ fun CardioWeekCard(vm: HomeViewModel) {
             onDismissRequest = { editing = false },
             title = { Text(stringResource(R.string.cardio_goal_title)) },
             text = {
-                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    androidx.compose.material3.FilterChip(selected = week.goalKm == null && week.goalMin == null, onClick = { vm.setWeeklyCardioGoal(null, null); editing = false }, label = { Text("—") })
-                    CARDIO_GOALS_KM.forEach { g ->
-                        androidx.compose.material3.FilterChip(selected = week.goalKm == g, onClick = { vm.setWeeklyCardioGoal(g, null); editing = false }, label = { Text("${g.toInt()} km") })
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        androidx.compose.material3.FilterChip(selected = week.goalKm == null && week.goalMin == null, onClick = { vm.setWeeklyCardioGoal(null, null); editing = false }, label = { Text("—") })
+                        CARDIO_GOALS_KM.forEach { g ->
+                            androidx.compose.material3.FilterChip(selected = week.goalKm == g, onClick = { vm.setWeeklyCardioGoal(g, null); editing = false }, label = { Text("${g.toInt()} km") })
+                        }
+                        // En minutos, para el cardio sin distancia (elíptica, bici estática, HIIT)
+                        CARDIO_GOALS_MIN.forEach { g ->
+                            androidx.compose.material3.FilterChip(selected = week.goalMin == g, onClick = { vm.setWeeklyCardioGoal(null, g); editing = false }, label = { Text("$g min") })
+                        }
                     }
-                    // En minutos, para el cardio sin distancia (elíptica, bici estática, HIIT)
-                    CARDIO_GOALS_MIN.forEach { g ->
-                        androidx.compose.material3.FilterChip(selected = week.goalMin == g, onClick = { vm.setWeeklyCardioGoal(null, g); editing = false }, label = { Text("$g min") })
-                    }
+                    CustomCardioGoal(vm) { editing = false }
                 }
             },
             confirmButton = { androidx.compose.material3.TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_close)) } },

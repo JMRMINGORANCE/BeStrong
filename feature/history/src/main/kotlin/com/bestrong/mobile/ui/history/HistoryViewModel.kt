@@ -39,30 +39,41 @@ class HistoryViewModel @Inject constructor(
 ) : ViewModel() {
     val history: StateFlow<List<Workout>> = repo.history
 
-    val trainingDays: StateFlow<Set<LocalDate>> = repo.history
+    /** Modo pareja: mostrar también los entrenos de la otra persona. */
+    val showPartner = MutableStateFlow(false)
+
+    /** Solo los entrenos de la pareja (el chip «Pareja»; «Los dos» es [showPartner]). */
+    val onlyPartner = MutableStateFlow(false)
+
+    /** Los entrenos según el chip Yo / Pareja / Los dos (calendario, mapa de calor y gimnasios lo siguen). */
+    private val viewed: kotlinx.coroutines.flow.Flow<List<Workout>> = combine(repo.history, repo.partnerHistory, showPartner, onlyPartner) { h, p, sp, op ->
+        when {
+            // Sin entrenos de la pareja (p. ej. se borró el último) el chip ya no sale: vuelve a los tuyos
+            op && p.isNotEmpty() -> p
+            sp -> h + p
+            else -> h
+        }
+    }
+
+    val trainingDays: StateFlow<Set<LocalDate>> = viewed
         .map { WorkoutStats.trainingDays(it, ZoneId.systemDefault()) }
         .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     /** Búsqueda por entreno, ejercicio o nota. */
     val query = MutableStateFlow("")
 
-    /** Modo pareja: mostrar también los entrenos de la otra persona. */
-    val showPartner = MutableStateFlow(false)
     val partnerHistory: StateFlow<List<Workout>> = repo.partnerHistory
 
     /** Día elegido en el calendario (null = todos). */
     val selectedDay = MutableStateFlow<LocalDate?>(null)
 
-    /** Solo los entrenos de la pareja (el chip «Pareja»; «Los dos» es [showPartner]). */
-    val onlyPartner = MutableStateFlow(false)
-
     /** Gimnasio elegido (null = todos). */
     val gymFilter = MutableStateFlow<String?>(null)
 
     /** Gimnasios que aparecen en el historial (el filtro solo sale con dos o más). */
-    val gymNames: StateFlow<List<String>> = combine(repo.history, repo.partnerHistory, showPartner) { h, p, sp ->
-        // Con los de la pareja a la vista, también sus gimnasios
-        (if (sp) h + p else h).mapNotNull { it.gymName }.distinct().sorted()
+    val gymNames: StateFlow<List<String>> = viewed.map { list ->
+        // Los gimnasios de los entrenos que se ven (con la pareja, también los suyos)
+        list.mapNotNull { it.gymName }.distinct().sorted()
     }
         .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
@@ -76,7 +87,7 @@ class HistoryViewModel @Inject constructor(
         // Buscando su nombre salen sus entrenos aunque no se estén enseñando los de la pareja
         val partnerSearched = q.isNotBlank() && p.any { it.athlete?.contains(q.trim(), ignoreCase = true) == true }
         val mine = when {
-            op -> p.sortedByDescending { it.startedAtEpochMs }
+            op && p.isNotEmpty() -> p.sortedByDescending { it.startedAtEpochMs }
             sp || partnerSearched -> (h + p).sortedByDescending { it.startedAtEpochMs }
             else -> h
         }
@@ -87,7 +98,7 @@ class HistoryViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Entrenos por día del año actual (mapa de calor). */
-    val heatmap: StateFlow<Map<LocalDate, Int>> = repo.history
+    val heatmap: StateFlow<Map<LocalDate, Int>> = viewed
         .map { WorkoutStats.dailyCounts(it, LocalDate.now().year, ZoneId.systemDefault()) }
         .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
@@ -113,6 +124,7 @@ class HistoryViewModel @Inject constructor(
         val workout = (repo.history.value + repo.partnerHistory.value).firstOrNull { it.id == id } ?: return@launch
         _deleted.value = workout
         repo.trashWorkout(workout)
+        actions.deleteFromHealthConnectIfEnabled(workout)
     }
 
     /** Entreno tal como estaba antes de cambiarle el gimnasio (para deshacerlo); null = nada que deshacer. */
@@ -143,7 +155,11 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun undoDelete() = viewModelScope.launch {
-        _deleted.value?.let { repo.restoreFromTrash(it.id) }
+        _deleted.value?.let { w ->
+            // Si la papelera ya no lo tiene (se vació entre medias), se guarda el del aviso
+            val restored = repo.restoreFromTrash(w.id) ?: w.also { repo.saveWorkout(it) }
+            if (restored.athlete == null) actions.exportToHealthConnectIfEnabled(restored)
+        }
         _deleted.value = null
     }
 
@@ -156,7 +172,8 @@ class HistoryViewModel @Inject constructor(
         val edited = WorkoutEditor.cleanupFinished(block(workout)).copy(updatedAtEpochMs = System.currentTimeMillis())
         if (edited.exercises.isEmpty()) {
             _deleted.value = workout
-            repo.deleteWorkout(workout.id)
+            repo.trashWorkout(workout)
+            actions.deleteFromHealthConnectIfEnabled(workout)
         } else {
             repo.saveWorkout(edited)
         }

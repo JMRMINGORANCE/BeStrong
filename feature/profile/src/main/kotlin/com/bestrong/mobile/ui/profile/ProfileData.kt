@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -33,6 +37,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.formatDate
 
 /** Periodo de exportación, Excel, copia cifrada y borrado selectivo. */
 @Composable
@@ -206,13 +211,33 @@ private fun TrashItem(vm: ProfileViewModel) {
                 Column(Modifier.heightIn(max = 400.dp).verticalScroll(rememberScrollState())) {
                     trash.forEach { t ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(t.workout.name + " · " + com.bestrong.mobile.ui.components.formatDate(t.workout.startedAtEpochMs), Modifier.weight(1f))
+                            Column(Modifier.weight(1f)) {
+                                // De quién es (si es de la pareja) y cuándo se borró: sale de la papelera a los 30 días
+                                Text(listOfNotNull(t.workout.name, t.workout.athlete).joinToString(" · ") + " · " + formatDate(t.workout.startedAtEpochMs))
+                                Text(
+                                    stringResource(R.string.trash_deleted_on, formatDate(t.deletedAtEpochMs)),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                             TextButton(onClick = { vm.restoreFromTrash(t.workout.id) }) { Text(stringResource(R.string.action_restore)) }
+                            IconButton(onClick = { vm.purgeTrash(t.workout.id) }) { Icon(Icons.Default.Delete, stringResource(R.string.trash_delete_forever)) }
                         }
                     }
                 }
             },
             confirmButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.action_close)) } },
+            dismissButton = {
+                // Vaciarla no tiene vuelta atrás: el primer toque pide confirmarlo
+                var sure by remember { mutableStateOf(false) }
+                TextButton(onClick = {
+                    if (sure) {
+                        vm.purgeTrash(null)
+                        open = false
+                    }
+                    sure = !sure
+                }) { Text(stringResource(if (sure) R.string.trash_empty_confirm else R.string.trash_empty)) }
+            },
         )
     }
 }

@@ -1153,4 +1153,10 @@
     <string name="cardio_week_goal_min">Cardio diese Woche: %1$d von %2$d Min.</string>
     <string name="athlete_me">Ich</string>
     <string name="athlete_both">Beide</string>
+    <string name="trash_deleted_on">Gelöscht am %1$s</string>
+    <string name="trash_delete_forever">Endgültig löschen</string>
+    <string name="trash_empty">Leeren</string>
+    <string name="trash_empty_confirm">Sicher? Leeren</string>
+    <string name="cardio_streak">%1$d Wochen in Folge Ziel erreicht</string>
+    <string name="cardio_goal_custom">Andere: Zahl eingeben und km oder min tippen</string>
 </resources>

@@ -237,7 +237,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private inline fun <reified E : Enum<E>> enumOr(key: String, default: E): E =
         prefs.getString(key, null)?.let { v -> enumValues<E>().firstOrNull { it.name == v } } ?: default
 
-    /** Estado de la copia automática (propio de este móvil: no viaja en las copias). */
+    /** Objetivos de peso, cintura y cardio (los vacíos no quedan guardados). */
     private fun android.content.SharedPreferences.Editor.putGoals(s: UserSettings) {
         putString("body_unit", s.bodyUnit?.name)
         putString("body_weight_goal", s.bodyWeightGoalKg?.toString())
@@ -248,6 +248,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         putString("weekly_cardio_min", s.weeklyCardioMin?.toString())
     }
 
+    /** Estado de la copia automática (propio de este móvil: no viaja en las copias). */
     private fun android.content.SharedPreferences.Editor.putBackupState(s: UserSettings) {
         putString("backup_folder", s.backupFolderUri)
         putLong("backup_last", s.lastBackupEpochMs)
@@ -337,6 +338,8 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         val current = NULLABLE_STRING_KEYS.associateWith { "" } + prefs.all
         prefs.edit {
             json.filterKeys { it !in DEVICE_KEYS && it in current }.forEach { (k, v) -> putTyped(k, current[k], v) }
+            // El objetivo de cardio es uno (en km o en minutos): si la copia trae uno, el otro de ahora sobra
+            if (CARDIO_GOAL_KEYS.any { it in json }) CARDIO_GOAL_KEYS.filterNot { it in json }.forEach { remove(it) }
         }
         _settings.value = runCatching { read() }.getOrDefault(_settings.value)
     }
@@ -362,6 +365,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "backup_fail_notified", "backup_folder_set", "lock_photos")
         val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km", "weekly_cardio_min", "partner_history_name")
+        val CARDIO_GOAL_KEYS = setOf("weekly_cardio_km", "weekly_cardio_min")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())
     }

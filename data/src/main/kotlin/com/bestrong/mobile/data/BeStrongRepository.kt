@@ -274,6 +274,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
             newExercises.map { customExerciseEntity(it) } to fresh.map { WorkoutEntity(it.id, it.startedAtEpochMs, Persistence.encodeWorkout(it)) }
         }
         dao.upsertAll(exerciseRows, workoutRows)
+        untrash(fresh.map { it.id }.toSet())
         return fresh.size
     }
 
@@ -309,8 +310,11 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     // --- Historial ---------------------------------------------------------------------------
 
-    suspend fun saveWorkout(workout: Workout) =
+    suspend fun saveWorkout(workout: Workout) {
         dao.upsertWorkout(WorkoutEntity(workout.id, workout.startedAtEpochMs, Persistence.encodeWorkout(workout)))
+        // Si vuelve por otro camino (el reloj lo reenvía, una copia…), ya no está en la papelera
+        untrash(setOf(workout.id))
+    }
 
     /**
      * Cambia de una vez (una transacción) los entrenos que cumplen [match], tuyos y de la pareja, con la hora de
@@ -333,29 +337,46 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     private val trashSerializer = ListSerializer(TrashedWorkout.serializer())
 
+    /** Una sola lectura-escritura de la papelera a la vez: dos borrados seguidos no se pisan. */
+    private val trashMutex = Mutex()
+
     /** Entrenos borrados en los últimos 30 días, el último primero (para recuperarlos desde Perfil). */
     val trash: StateFlow<List<TrashedWorkout>> = dao.value(KEY_TRASH)
-        .map { raw -> raw?.let { runCatching { json.decodeFromString(trashSerializer, it) }.getOrNull() }.orEmpty() }
+        .map { raw -> TrashedWorkout.fresh(decodeTrash(raw), System.currentTimeMillis()) }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
+
+    private fun decodeTrash(raw: String?): List<TrashedWorkout> =
+        raw?.let { runCatching { json.decodeFromString(trashSerializer, it) }.getOrNull() }.orEmpty()
 
     private suspend fun saveTrash(list: List<TrashedWorkout>) =
         dao.putValue(KeyValueEntity(KEY_TRASH, json.encodeToString(trashSerializer, list)))
 
-    private suspend fun trashOnce(): List<TrashedWorkout> =
-        dao.valueOnce(KEY_TRASH)?.let { runCatching { json.decodeFromString(trashSerializer, it) }.getOrNull() }.orEmpty()
+    private suspend fun trashOnce(): List<TrashedWorkout> = TrashedWorkout.fresh(decodeTrash(dao.valueOnce(KEY_TRASH)), System.currentTimeMillis())
 
     /** Borra un entreno dejándolo 30 días en la papelera. */
-    suspend fun trashWorkout(workout: Workout) {
+    suspend fun trashWorkout(workout: Workout) = trashMutex.withLock {
         val now = System.currentTimeMillis()
         saveTrash(TrashedWorkout.keep(trashOnce(), listOf(TrashedWorkout(now, workout)), now))
         dao.deleteWorkout(workout.id)
     }
 
-    /** Vuelve a poner un entreno de la papelera en el historial. */
-    suspend fun restoreFromTrash(id: String) {
+    /** Vuelve a poner un entreno de la papelera en el historial; devuelve el entreno (null si ya no estaba). */
+    suspend fun restoreFromTrash(id: String): Workout? = trashMutex.withLock {
         val list = trashOnce()
-        list.firstOrNull { it.workout.id == id }?.let { saveWorkout(it.workout) }
+        val workout = list.firstOrNull { it.workout.id == id }?.workout
+        workout?.let { dao.upsertWorkout(WorkoutEntity(it.id, it.startedAtEpochMs, Persistence.encodeWorkout(it))) }
         saveTrash(list.filterNot { it.workout.id == id })
+        workout
+    }
+
+    /** Quita de la papelera sin recuperar: «Borrar para siempre» (o todo, con [ids] null). */
+    suspend fun purgeTrash(ids: Set<String>?) = trashMutex.withLock {
+        saveTrash(if (ids == null) emptyList() else trashOnce().filterNot { it.workout.id in ids })
+    }
+
+    private suspend fun untrash(ids: Set<String>) {
+        if (trash.value.none { it.workout.id in ids }) return
+        trashMutex.withLock { saveTrash(trashOnce().filterNot { it.workout.id in ids }) }
     }
 
     /** Borrado masivo: una consulta por bloque en vez de una transacción (y un recálculo) por entreno. */

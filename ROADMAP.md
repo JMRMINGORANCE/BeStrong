@@ -360,3 +360,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Cardio de la semana en el widget
 - [x] Filtro Yo / Pareja / Los dos en el historial
 - [x] Fecha y hora de cada copia automática al elegir cuál restaurar
+
+## Fase 41 — Papelera completa y racha de cardio ✅
+- [x] Papelera: fecha de borrado, de quién es, borrar para siempre y vaciar (con confirmación)
+- [x] Calendario, mapa de calor y gimnasios siguen el filtro Yo / Pareja / Los dos
+- [x] Health Connect al día: borrar un entreno quita su sesión y recuperarlo la vuelve a exportar
+- [x] Racha de semanas cumpliendo el objetivo de cardio
+- [x] Objetivo de cardio a medida (cualquier número de km o minutos)

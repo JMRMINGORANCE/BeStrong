@@ -110,7 +110,7 @@ class HomeViewModel @Inject constructor(
     }
 
     /** Cardio de esta semana (metros, segundos) y el objetivo de km, para la tarjeta de Inicio. */
-    data class CardioWeek(val meters: Double, val seconds: Long, val goalKm: Double?, val goalMin: Int? = null) {
+    data class CardioWeek(val meters: Double, val seconds: Long, val goalKm: Double?, val goalMin: Int? = null, val streak: Int = 0) {
         /** Se enseña si hay cardio esta semana o un objetivo puesto. */
         val worthShowing: Boolean get() = goalKm != null || goalMin != null || meters > 0 || seconds > 0
     }
@@ -119,11 +119,30 @@ class HomeViewModel @Inject constructor(
         val zone = ZoneId.systemDefault()
         val monday = LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         val (m, sec) = com.bestrong.core.stats.CardioTotals.since(history, monday.atStartOfDay(zone).toInstant().toEpochMilli())
-        CardioWeek(m, sec, s.weeklyCardioKm, s.weeklyCardioMin)
+        // Racha de semanas cumpliendo el objetivo (hasta un año atrás)
+        val goalKm = s.weeklyCardioKm
+        val goalMin = s.weeklyCardioMin
+        val streak = if (goalKm == null && goalMin == null) {
+            0
+        } else {
+            val starts = (0L until 52L).map { monday.minusWeeks(it).atStartOfDay(zone).toInstant().toEpochMilli() }
+            com.bestrong.core.stats.CardioTotals.goalStreak(history, starts) { meters, seconds ->
+                if (goalMin != null) seconds / 60 >= goalMin else meters / 1000 >= (goalKm ?: 0.0)
+            }
+        }
+        CardioWeek(m, sec, goalKm, goalMin, streak)
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardioWeek(0.0, 0, null))
 
     /** Objetivo de cardio: en km o en minutos (poner uno quita el otro); los dos null = sin objetivo. */
     fun setWeeklyCardioGoal(km: Double?, minutes: Int?) = settingsStore.update { it.copy(weeklyCardioKm = km, weeklyCardioMin = minutes) }
+
+    /** Objetivo escrito a mano («12,5» km o «200» min); devuelve false si el número no vale. */
+    fun setCustomCardioGoal(text: String, inMinutes: Boolean): Boolean {
+        val value = text.trim().replace(',', '.').toDoubleOrNull() ?: return false
+        val valid = if (inMinutes) value in 5.0..10_000.0 else value in 0.5..1_000.0
+        if (valid) setWeeklyCardioGoal(value.takeUnless { inMinutes }, value.toInt().takeIf { inMinutes })
+        return valid
+    }
 
     /** Id → nombre de los gimnasios (para enseñar el de cada rutina; los borrados no salen). */
     val gymNames: StateFlow<Map<String, String>> = settingsStore.settings.map { s -> s.gyms.associate { it.id to it.name } }

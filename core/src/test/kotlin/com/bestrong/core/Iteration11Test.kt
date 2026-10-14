@@ -790,4 +790,21 @@ class CollarTest {
         assertEquals(listOf("a", "b"), kept.map { it.workout.id })
         assertEquals(now, kept.first().deletedAtEpochMs)
     }
+
+    @Test
+    fun cardioGoalStreakCountsFinishedWeeksAndSkipsCurrentIfNotYetMet() {
+        val week = 7 * 86_400_000L
+        val run = com.bestrong.core.model.Exercise(id = "run", name = "run", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST, tracking = com.bestrong.core.model.TrackingType.CARDIO)
+        fun w(at: Long, meters: Double) = Workout(
+            name = "w",
+            startedAtEpochMs = at,
+            finishedAtEpochMs = at + 1,
+            exercises = listOf(WorkoutExercise(exercise = run, sets = listOf(WorkoutSet(distanceM = meters, durationSec = 600, completed = true)))),
+        )
+        val starts = listOf(4 * week, 3 * week, 2 * week, week, 0L)
+        // Esta semana aún no (2 km), las dos anteriores sí (10 y 12 km), la de antes no
+        val history = listOf(w(4 * week + 1, 2000.0), w(3 * week + 1, 10_000.0), w(2 * week + 1, 12_000.0), w(week + 1, 1000.0))
+        assertEquals(2, com.bestrong.core.stats.CardioTotals.goalStreak(history, starts) { m, _ -> m >= 10_000 })
+        assertEquals(3, com.bestrong.core.stats.CardioTotals.goalStreak(history + w(4 * week + 2, 9000.0), starts) { m, _ -> m >= 10_000 })
+    }
 }

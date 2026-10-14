@@ -551,9 +551,15 @@ class ProfileViewModel @Inject constructor(
     val trash: StateFlow<List<com.bestrong.core.model.TrashedWorkout>> = repo.trash
 
     fun restoreFromTrash(id: String) = viewModelScope.launch {
-        repo.restoreFromTrash(id)
+        val workout = repo.restoreFromTrash(id) ?: return@launch
+        if (workout.athlete == null && settingsStore.settings.value.healthConnectExport) {
+            runCatching { healthConnect.export(workout) }.onFailure { android.util.Log.w("Profile", "Entreno no exportado", it) }
+        }
         _messages.tryEmit(context.getString(R.string.trash_restored))
     }
+
+    /** «Borrar para siempre» uno de la papelera, o vaciarla entera (con [id] null). */
+    fun purgeTrash(id: String?) = viewModelScope.launch { repo.purgeTrash(id?.let { setOf(it) }) }
 
     /** Borra un perfil de gimnasio y lo quita de las rutinas que lo tenían como suyo. */
     fun deleteGym(id: String) {

@@ -72,6 +72,20 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
      * Cada registro lleva un id de cliente estable (id del entreno + tipo): si se exporta otra vez
      * (reenvío del reloj, reintento), Health Connect lo sustituye en lugar de duplicarlo.
      */
+    /** Quita lo exportado de un entreno (sesión, calorías, pulso y distancias) por sus ids de cliente. */
+    suspend fun deleteWorkout(workout: Workout) {
+        val granted = granted()
+        fun ids(vararg suffix: String) = suffix.map { "${workout.id}-$it" }
+        if (sessionPermission in granted) runCatching { client.deleteRecords(ExerciseSessionRecord::class, emptyList(), ids("session")) }
+        if (caloriesPermission in granted) runCatching { client.deleteRecords(TotalCaloriesBurnedRecord::class, emptyList(), ids("kcal")) }
+        if (activeCaloriesPermission in granted) runCatching { client.deleteRecords(ActiveCaloriesBurnedRecord::class, emptyList(), ids("active-kcal")) }
+        if (heartRatePermission in granted) runCatching { client.deleteRecords(HeartRateRecord::class, emptyList(), ids("hr")) }
+        if (distancePermission in granted) {
+            val blocks = com.bestrong.core.training.Energy.cardioBlocks(workout).size
+            if (blocks > 0) runCatching { client.deleteRecords(DistanceRecord::class, emptyList(), (0 until blocks).map { "${workout.id}-dist-$it" }) }
+        }
+    }
+
     private fun meta(workout: Workout, suffix: String) =
         Metadata(clientRecordId = "${workout.id}-$suffix", clientRecordVersion = System.currentTimeMillis())
 

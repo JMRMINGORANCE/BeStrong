@@ -1153,4 +1153,10 @@
     <string name="cardio_week_goal_min">Cardio aquesta setmana: %1$d de %2$d min</string>
     <string name="athlete_me">Jo</string>
     <string name="athlete_both">Tots dos</string>
+    <string name="trash_deleted_on">Esborrat el %1$s</string>
+    <string name="trash_delete_forever">Esborrar per sempre</string>
+    <string name="trash_empty">Buidar</string>
+    <string name="trash_empty_confirm">Segur? Buidar</string>
+    <string name="cardio_streak">%1$d setmanes seguides complint l\'objectiu</string>
+    <string name="cardio_goal_custom">Un altre: escriu el número i toca km o min</string>
 </resources>

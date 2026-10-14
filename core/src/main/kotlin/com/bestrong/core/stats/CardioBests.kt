@@ -39,8 +39,28 @@ object CardioBestsCalc {
 
 /** Cardio hecho desde una fecha (todos los ejercicios de cardio y de distancia sin peso): metros y segundos. */
 object CardioTotals {
-    fun since(history: List<Workout>, fromEpochMs: Long): Pair<Double, Long> {
-        val sets = history.filter { it.isFinished && it.startedAtEpochMs >= fromEpochMs }.flatMap { w ->
+    fun since(history: List<Workout>, fromEpochMs: Long): Pair<Double, Long> = between(history, fromEpochMs, Long.MAX_VALUE)
+
+    /**
+     * Semanas seguidas cumpliendo el objetivo ([met] con metros y segundos de cada semana). [weekStarts] son los
+     * inicios de semana de la actual hacia atrás: la actual suma si ya se cumple, pero si aún no, no rompe la racha.
+     */
+    fun goalStreak(history: List<Workout>, weekStarts: List<Long>, met: (meters: Double, seconds: Long) -> Boolean): Int {
+        val recent = history.filter { it.isFinished && it.startedAtEpochMs >= (weekStarts.lastOrNull() ?: 0L) }
+        var streak = 0
+        for ((i, start) in weekStarts.withIndex()) {
+            val (m, s) = between(recent, start, if (i == 0) Long.MAX_VALUE else weekStarts[i - 1])
+            if (met(m, s)) {
+                streak++
+            } else if (i > 0) {
+                break
+            }
+        }
+        return streak
+    }
+
+    private fun between(history: List<Workout>, fromEpochMs: Long, toEpochMs: Long): Pair<Double, Long> {
+        val sets = history.filter { it.isFinished && it.startedAtEpochMs >= fromEpochMs && it.startedAtEpochMs < toEpochMs }.flatMap { w ->
             w.exercises.flatMap { we ->
                 when (we.exercise.tracking) {
                     com.bestrong.core.model.TrackingType.CARDIO -> we.completedSets

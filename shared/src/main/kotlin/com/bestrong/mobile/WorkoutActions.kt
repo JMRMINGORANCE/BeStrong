@@ -133,6 +133,12 @@ class WorkoutActions @Inject constructor(
         runCatching { healthConnect.exportHeartRate(workout) }.onFailure { Log.w("HealthConnect", "Exportación del pulso fallida", it) }
     }
 
+    /** Al borrar un entreno, también su sesión en Health Connect (si se exportaba). */
+    suspend fun deleteFromHealthConnectIfEnabled(workout: Workout) {
+        if (!settings.settings.value.healthConnectExport) return
+        runCatching { healthConnect.deleteWorkout(workout) }.onFailure { Log.w("HealthConnect", "Borrado fallido", it) }
+    }
+
     suspend fun exportToHealthConnectIfEnabled(workout: Workout) {
         if (!settings.settings.value.healthConnectExport) return
         runCatching { healthConnect.export(workout) }.onFailure { Log.w("HealthConnect", "Exportación fallida", it) }
