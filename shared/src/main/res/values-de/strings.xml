@@ -1033,4 +1033,18 @@
     <string name="rep_range_body">Doppelte Progression: gleiches Gewicht, pro Satz eine Wiederholung mehr bis zur Obergrenze; schaffen alle Sätze sie, mehr Gewicht und zurück zur Untergrenze.</string>
     <string name="rep_range_none">Kein Bereich</string>
     <string name="prog_range_add_rep">Gleiches Gewicht: +1 Wdh. pro Satz (bis %1$d)</string>
+    <string name="notif_weigh_in_reply">Gewicht eintragen</string>
+    <string name="notif_weigh_in_reply_hint">Dein Gewicht, z. B. 80,4</string>
+    <string name="notif_weigh_in_saved">Gewicht gespeichert</string>
+    <string name="notif_weigh_in_invalid">Gewicht nicht erkannt: öffne die App</string>
+    <string name="day_part_title">Deine beste Tageszeit</string>
+    <string name="day_part_best">Am stärksten bist du am %1$s</string>
+    <string name="day_part_line">%1$s: %2$d %% deiner Bestleistung · %3$d Trainings</string>
+    <string name="day_part_hint">Letzte 12 Wochen: geschätztes 1RM jeder Übung im Vergleich zu deinem Bestwert im Zeitraum.</string>
+    <string name="day_part_morning">Morgen</string>
+    <string name="day_part_afternoon">Nachmittag</string>
+    <string name="day_part_evening">Abend</string>
+    <string name="share_progress">Fortschritt teilen</string>
+    <string name="share_progress_title">📏 Mein Körperfortschritt</string>
+    <string name="cal_add_to_calendar">Zum Kalender hinzufügen</string>
 </resources>

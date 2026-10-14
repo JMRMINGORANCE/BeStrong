@@ -248,3 +248,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Barra propia por ejercicio (EZ, hexagonal…) para discos y calentamiento
 - [x] Recordatorio semanal para pesarse
 - [x] Doble progresión con rango de repeticiones (p. ej. 8–12)
+
+## Fase 25 — Fuera del gimnasio ✅
+- [x] Reloj: drop set y series de descarga; calentamiento con la barra del gimnasio o del ejercicio
+- [x] Apuntar el peso respondiendo a la notificación de pesarse
+- [x] «Tu mejor hora»: rendimiento según la hora a la que entrenas
+- [x] Compartir el progreso corporal (peso, objetivo y medidas)
+- [x] Añadir una sesión planificada al calendario del móvil

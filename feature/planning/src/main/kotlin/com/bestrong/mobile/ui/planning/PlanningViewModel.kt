@@ -71,6 +71,9 @@ class PlanningViewModel @Inject constructor(
     /** Ejercicios ocultos en la biblioteca: el selector de programas tampoco los propone. */
     val hiddenExercises: Set<String> get() = settings.settings.value.hiddenExercises
 
+    /** Hora de entrenar habitual (la de los recordatorios): la que se propone al añadir al calendario. */
+    val usualHour: Int get() = settings.settings.value.reminderHour
+
     val ui: StateFlow<PlanningUi> = combine(store.state, repo.history, repo.routines) { s, history, routines ->
         val today = LocalDate.now(ZoneId.systemDefault())
         val calis = Calisthenics.chains.map { (name, chain) ->

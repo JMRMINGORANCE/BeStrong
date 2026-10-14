@@ -1033,4 +1033,18 @@
     <string name="rep_range_body">Dobre progresión: co mesmo peso, unha repetición máis por serie ata o tope; ao chegar en todas, sobe o peso e volve ao mínimo.</string>
     <string name="rep_range_none">Sen rango</string>
     <string name="prog_range_add_rep">Mesmo peso: +1 rep por serie (ata %1$d)</string>
+    <string name="notif_weigh_in_reply">Apuntar peso</string>
+    <string name="notif_weigh_in_reply_hint">O teu peso, p. ex. 80,4</string>
+    <string name="notif_weigh_in_saved">Peso gardado</string>
+    <string name="notif_weigh_in_invalid">Non se entendeu o peso: ábreo na app</string>
+    <string name="day_part_title">A túa mellor hora</string>
+    <string name="day_part_best">Rendes mellor pola %1$s</string>
+    <string name="day_part_line">%1$s: %2$d %% da túa mellor marca · %3$d adestramentos</string>
+    <string name="day_part_hint">Media das últimas 12 semanas: 1RM estimado de cada exercicio fronte ao teu mellor do período.</string>
+    <string name="day_part_morning">mañá</string>
+    <string name="day_part_afternoon">tarde</string>
+    <string name="day_part_evening">noite</string>
+    <string name="share_progress">Compartir progreso</string>
+    <string name="share_progress_title">📏 O meu progreso corporal</string>
+    <string name="cal_add_to_calendar">Engadir ao calendario</string>
 </resources>

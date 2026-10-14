@@ -414,3 +414,31 @@ private fun MuscleZoneLine(weeks: List<Pair<java.time.LocalDate, Double>>, targe
     }
     Text(text, style = MaterialTheme.typography.bodyMedium, color = color)
 }
+
+/** «Rindes mejor por la tarde»: % medio de tu mejor 1RM estimado según la hora a la que entrenas. */
+@Composable
+fun DayPartCard(parts: List<com.bestrong.core.stats.DayPartStat>) {
+    val best = parts.first()
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            SectionHeader(stringResource(R.string.day_part_title))
+            Text(stringResource(R.string.day_part_best, best.part.label()), fontWeight = FontWeight.SemiBold)
+            parts.forEach { p ->
+                Text(
+                    stringResource(R.string.day_part_line, p.part.label().replaceFirstChar { it.uppercase() }, (p.relativeStrength * 100).toInt(), p.sessions),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Text(stringResource(R.string.day_part_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun com.bestrong.core.stats.DayPart.label(): String = stringResource(
+    when (this) {
+        com.bestrong.core.stats.DayPart.MORNING -> R.string.day_part_morning
+        com.bestrong.core.stats.DayPart.AFTERNOON -> R.string.day_part_afternoon
+        com.bestrong.core.stats.DayPart.EVENING -> R.string.day_part_evening
+    },
+)

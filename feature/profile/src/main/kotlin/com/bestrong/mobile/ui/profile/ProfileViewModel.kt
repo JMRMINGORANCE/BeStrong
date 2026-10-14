@@ -75,6 +75,8 @@ data class ProfileStats(
 
 /** Estadísticas de la fase 3 (niveles, equilibrio, logros, recuperación…). */
 data class AdvancedStats(
+    /** Rendimiento por franja del día (mañana, tarde, noche), la mejor primero. */
+    val dayParts: List<com.bestrong.core.stats.DayPartStat> = emptyList(),
     val bodyWeightKg: Double? = null,
     val standings: List<StrengthStanding> = emptyList(),
     val balance: Balance = Balance(0.0, 0.0, 0.0, 0.0),
@@ -158,6 +160,7 @@ class ProfileViewModel @Inject constructor(
             soreness = Strength.soreness(history, now),
             challenge = challenge(history),
             load = TrainingLoad.weekly(history, today, zone),
+            dayParts = com.bestrong.core.stats.TimeOfDay.stats(history, zone, System.currentTimeMillis()),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AdvancedStats())
 

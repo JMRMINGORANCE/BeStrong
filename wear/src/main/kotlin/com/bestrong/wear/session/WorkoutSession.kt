@@ -562,7 +562,22 @@ class WorkoutSession @Inject constructor(
     /** Series de aproximación para el ejercicio actual (barra, 40 %, 60 %, 80 %). */
     fun addWarmup() {
         val we = currentExercise() ?: return
-        edit { WorkoutEditor.addWarmup(it, we.id, store.settings.value.unit) }
+        // Con la barra del ejercicio (o la del gimnasio), como en el móvil
+        val s = store.settings.value
+        val bar = s.unit.toKg(com.bestrong.core.training.GymProfile.barIn(s.unit, s.barKgFor(we.exercise.id)))
+        edit { WorkoutEditor.addWarmup(it, we.id, s.unit, bar) }
+    }
+
+    /** Drop set (−20 %) tras la última serie efectiva del ejercicio actual. */
+    fun addDropSet() {
+        val we = currentExercise() ?: return
+        edit { WorkoutEditor.addDropSet(it, we.id, store.settings.value.stepKgFor(we.exercise.id)) }
+    }
+
+    /** Dos series de descarga (−10 %) tras la más pesada. */
+    fun addBackOff() {
+        val we = currentExercise() ?: return
+        edit { WorkoutEditor.addBackOff(it, we.id, store.settings.value.stepKgFor(we.exercise.id)) }
     }
 
     /** Evolución del 1RM estimado y demás marcas del ejercicio (historial del móvil + del reloj). */

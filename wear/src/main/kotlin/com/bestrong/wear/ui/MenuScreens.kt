@@ -102,6 +102,15 @@ fun MenuScreen(
             item {
                 Button(onClick = { session.addWarmup(); onBack() }, label = { Text(stringResource(R.string.menu_warmup)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }
+            // Drop set y series de descarga, como en el móvil (solo ejercicios con peso)
+            if (w.exercises.getOrNull(index)?.exercise?.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) {
+                item {
+                    Button(onClick = { session.addDropSet(); onBack() }, label = { Text(stringResource(R.string.menu_drop_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                }
+                item {
+                    Button(onClick = { session.addBackOff(); onBack() }, label = { Text(stringResource(R.string.menu_back_off)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                }
+            }
             item {
                 Button(onClick = { session.addSet(); onBack() }, label = { Text(stringResource(R.string.add_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
             }

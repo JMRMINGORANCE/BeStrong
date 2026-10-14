@@ -1033,4 +1033,18 @@
     <string name="rep_range_body">Double progression: same weight, one more rep per set up to the top; once every set gets there, add weight and drop back to the bottom.</string>
     <string name="rep_range_none">No range</string>
     <string name="prog_range_add_rep">Same weight: +1 rep per set (up to %1$d)</string>
+    <string name="notif_weigh_in_reply">Log weight</string>
+    <string name="notif_weigh_in_reply_hint">Your weight, e.g. 80.4</string>
+    <string name="notif_weigh_in_saved">Weight saved</string>
+    <string name="notif_weigh_in_invalid">Couldn\'t read that weight: open the app</string>
+    <string name="day_part_title">Your best time</string>
+    <string name="day_part_best">You perform best in the %1$s</string>
+    <string name="day_part_line">%1$s: %2$d%% of your best · %3$d workouts</string>
+    <string name="day_part_hint">Last 12 weeks: each exercise\'s estimated 1RM against your best in that period.</string>
+    <string name="day_part_morning">morning</string>
+    <string name="day_part_afternoon">afternoon</string>
+    <string name="day_part_evening">evening</string>
+    <string name="share_progress">Share progress</string>
+    <string name="share_progress_title">📏 My body progress</string>
+    <string name="cal_add_to_calendar">Add to calendar</string>
 </resources>

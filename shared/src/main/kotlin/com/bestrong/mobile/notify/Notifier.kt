@@ -85,11 +85,24 @@ object Notifier {
         NotificationManagerCompat.from(context).notify(ID_REMINDER, n)
     }
 
-    /** Recordatorio semanal de pesarse (abre Inicio, donde se apunta el peso de hoy). */
+    /** Recordatorio semanal de pesarse: se puede contestar con el peso sin abrir la app (o tocar para abrirla). */
     @Suppress("MissingPermission")
     fun weighIn(context: Context) {
         if (!canPost(context)) return
         ensureChannels(context)
+        val input = androidx.core.app.RemoteInput.Builder(WeighInReplyReceiver.KEY_WEIGHT)
+            .setLabel(context.getString(R.string.notif_weigh_in_reply_hint))
+            .build()
+        // Mutable: el sistema añade la respuesta al intent
+        val reply = android.app.PendingIntent.getBroadcast(
+            context, ID_WEIGH_IN,
+            android.content.Intent(context, WeighInReplyReceiver::class.java).setPackage(context.packageName),
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE,
+        )
+        val action = NotificationCompat.Action.Builder(0, context.getString(R.string.notif_weigh_in_reply), reply)
+            .addRemoteInput(input)
+            .setAllowGeneratedReplies(false)
+            .build()
         val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
             .setContentTitle(context.getString(R.string.notif_weigh_in_title))
@@ -97,9 +110,27 @@ object Notifier {
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(openApp(context))
+            .addAction(action)
             .build()
         NotificationManagerCompat.from(context).notify(ID_WEIGH_IN, n)
     }
+
+    /** Tras contestar: confirmación con el peso guardado (o aviso si no se entendió); se quita sola. */
+    @Suppress("MissingPermission")
+    fun weighInResult(context: Context, saved: String?) {
+        if (!canPost(context)) return
+        val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
+            .setSmallIcon(R.drawable.ic_stat_dumbbell)
+            .setContentTitle(context.getString(if (saved != null) R.string.notif_weigh_in_saved else R.string.notif_weigh_in_invalid))
+            .apply { saved?.let { setContentText(it) } }
+            .setContentIntent(openApp(context))
+            .setAutoCancel(true)
+            .setTimeoutAfter(RESULT_TIMEOUT_MS)
+            .build()
+        NotificationManagerCompat.from(context).notify(ID_WEIGH_IN, n)
+    }
+
+    private const val RESULT_TIMEOUT_MS = 8_000L
 
     /** Resumen semanal (domingo por la tarde). */
     /** [highLoadRatio]: relación aguda:crónica si la carga subió demasiado (null = normal). */

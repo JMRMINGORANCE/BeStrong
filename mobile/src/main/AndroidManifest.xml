@@ -152,6 +152,10 @@
                 android:value="false" />
         </service>
 
+        <!-- Respuesta directa a la notificación de pesarse (solo desde la propia app) -->
+        <receiver
+            android:name=".notify.WeighInReplyReceiver"
+            android:exported="false" />
         <receiver
             android:name=".widget.BeStrongWidgetReceiver"
             android:exported="true"

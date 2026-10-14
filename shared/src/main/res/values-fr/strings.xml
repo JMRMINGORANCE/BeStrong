@@ -1033,4 +1033,18 @@
     <string name="rep_range_body">Double progression : même charge, une répétition de plus par série jusqu\'au haut de la fourchette ; quand toutes y arrivent, augmente la charge et repars du bas.</string>
     <string name="rep_range_none">Aucune</string>
     <string name="prog_range_add_rep">Même charge : +1 rép. par série (jusqu\'à %1$d)</string>
+    <string name="notif_weigh_in_reply">Noter le poids</string>
+    <string name="notif_weigh_in_reply_hint">Ton poids, ex. 80,4</string>
+    <string name="notif_weigh_in_saved">Poids enregistré</string>
+    <string name="notif_weigh_in_invalid">Poids non reconnu : ouvre l\'appli</string>
+    <string name="day_part_title">Ton meilleur moment</string>
+    <string name="day_part_best">Tu es plus performant le %1$s</string>
+    <string name="day_part_line">%1$s : %2$d %% de ton meilleur · %3$d séances</string>
+    <string name="day_part_hint">Moyenne des 12 dernières semaines : 1RM estimé de chaque exercice face à ton meilleur sur la période.</string>
+    <string name="day_part_morning">matin</string>
+    <string name="day_part_afternoon">après-midi</string>
+    <string name="day_part_evening">soir</string>
+    <string name="share_progress">Partager la progression</string>
+    <string name="share_progress_title">📏 Ma progression corporelle</string>
+    <string name="cal_add_to_calendar">Ajouter à l\'agenda</string>
 </resources>

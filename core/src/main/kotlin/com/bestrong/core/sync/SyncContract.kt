@@ -155,7 +155,11 @@ data class SharedSettings(
     val warmupRestSeconds: Int = 60,
     /** Rango de repeticiones por ejercicio («8-12»): la misma doble progresión que en el móvil. */
     val exerciseRepRange: Map<String, String> = emptyMap(),
+    /** Barra del gimnasio activo y las propias de cada ejercicio (kg), para el calentamiento del reloj. */
+    val gymBarKg: Double = 20.0,
+    val exerciseBarKg: Map<String, Double> = emptyMap(),
 ) {
+    fun barKgFor(exerciseId: String): Double = exerciseBarKg[exerciseId] ?: gymBarKg
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
     fun repRangeFor(exerciseId: String): IntRange? = com.bestrong.core.training.Progression.parseRepRange(exerciseRepRange[exerciseId])
 }

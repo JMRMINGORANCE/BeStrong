@@ -367,3 +367,19 @@ class Iteration18Test {
         assertEquals(null, com.bestrong.core.training.Progression.parseRepRange(null))
     }
 }
+
+class TimeOfDayTest {
+    @Test fun eveningStrongerThanMorning() {
+        val zone = java.time.ZoneOffset.UTC
+        val base = java.time.LocalDate.of(2026, 3, 2)
+        fun at(day: Long, hour: Int, kg: Double, id: String) = finishedWorkout(id, base.plusDays(day), bench to listOf(done(kg, 5))).let { w ->
+            val start = base.plusDays(day).atTime(hour, 0).toInstant(zone).toEpochMilli()
+            w.copy(startedAtEpochMs = start, finishedAtEpochMs = start + 3_600_000)
+        }
+        val history = (0L until 3L).map { at(it * 2, 8, 90.0, "m$it") } + (0L until 3L).map { at(it * 2 + 1, 19, 100.0, "e$it") }
+        val now = base.plusDays(10).atStartOfDay(zone).toInstant().toEpochMilli()
+        val stats = com.bestrong.core.stats.TimeOfDay.stats(history, zone, now)
+        assertEquals(com.bestrong.core.stats.DayPart.EVENING, stats.first().part)
+        assertEquals(2, stats.size)
+    }
+}

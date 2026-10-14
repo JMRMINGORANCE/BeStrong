@@ -1033,4 +1033,18 @@
     <string name="rep_range_body">Doble progressió: amb el mateix pes, una repetició més per sèrie fins al màxim; quan hi arribes a totes, puja el pes i torna al mínim.</string>
     <string name="rep_range_none">Sense rang</string>
     <string name="prog_range_add_rep">Mateix pes: +1 rep per sèrie (fins a %1$d)</string>
+    <string name="notif_weigh_in_reply">Apunta el pes</string>
+    <string name="notif_weigh_in_reply_hint">El teu pes, p. ex. 80,4</string>
+    <string name="notif_weigh_in_saved">Pes desat</string>
+    <string name="notif_weigh_in_invalid">No s\'ha entès el pes: obre-ho a l\'app</string>
+    <string name="day_part_title">La teva millor hora</string>
+    <string name="day_part_best">Rendeixes millor en aquesta franja: %1$s</string>
+    <string name="day_part_line">%1$s: %2$d %% de la teva millor marca · %3$d entrenaments</string>
+    <string name="day_part_hint">Mitjana de les darreres 12 setmanes: 1RM estimat de cada exercici davant el teu millor del període.</string>
+    <string name="day_part_morning">matí</string>
+    <string name="day_part_afternoon">tarda</string>
+    <string name="day_part_evening">nit</string>
+    <string name="share_progress">Comparteix el progrés</string>
+    <string name="share_progress_title">📏 El meu progrés corporal</string>
+    <string name="cal_add_to_calendar">Afegeix al calendari</string>
 </resources>

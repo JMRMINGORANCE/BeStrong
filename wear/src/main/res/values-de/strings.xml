@@ -157,4 +157,6 @@
         <item quantity="one">🏆 %1$d Wdh. = Rekord</item>
         <item quantity="other">🏆 %1$d Wdh. = Rekord</item>
     </plurals>
+    <string name="menu_drop_set">Drop-Satz (−20 %)</string>
+    <string name="menu_back_off">2 Back-off-Sätze (−10 %)</string>
 </resources>

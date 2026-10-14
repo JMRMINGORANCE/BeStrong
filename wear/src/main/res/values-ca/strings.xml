@@ -157,4 +157,6 @@
         <item quantity="one">🏆 %1$d rep = rècord</item>
         <item quantity="other">🏆 %1$d reps = rècord</item>
     </plurals>
+    <string name="menu_drop_set">Drop set (−20 %)</string>
+    <string name="menu_back_off">2 sèries de descàrrega (−10 %)</string>
 </resources>

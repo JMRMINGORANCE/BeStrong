@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -76,6 +77,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             TopAppBar(
                 title = { Text(stringResource(R.string.measurements)) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
+                actions = { ShareProgressButton(vm, list, unit) },
             )
         },
         floatingActionButton = { FloatingActionButton(onClick = { adding = true }) { Icon(Icons.Default.Add, stringResource(R.string.add_measurement)) } },
@@ -287,4 +289,61 @@ private fun WeightGoalDialog(vm: ProfileViewModel, goal: Double?, points: List<P
             }
         },
     )
+}
+
+/**
+ * Comparte el progreso corporal en texto (para el entrenador o un amigo): media de 7 días y cambio,
+ * objetivo de peso con lo que falta, y el cambio de cada medida desde la primera.
+ */
+@Composable
+private fun ShareProgressButton(vm: ProfileViewModel, list: List<BodyMeasurement>, unit: WeightUnit) {
+    if (list.isEmpty()) return
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val title = stringResource(R.string.share_progress_title)
+    val weights = list.filter { it.weightKg != null }.sortedBy { it.dateEpochMs }.map { it.dateEpochMs to it.weightKg!! }
+    val trend = remember(weights) { BodyWeightTrend.of(weights, System.currentTimeMillis()) }
+    val goal = settings.bodyWeightGoalKg
+    val progress = remember(weights, goal) { goal?.let { com.bestrong.core.stats.BodyWeightGoal.progress(weights, it, settings.bodyWeightGoalStartKg) } }
+    val labels = listOf(
+        stringResource(R.string.f_waist) to { m: BodyMeasurement -> m.waistCm },
+        stringResource(R.string.f_chest) to { m: BodyMeasurement -> m.chestCm },
+        stringResource(R.string.f_arm) to { m: BodyMeasurement -> m.armCm },
+        stringResource(R.string.f_thigh) to { m: BodyMeasurement -> m.thighCm },
+    )
+    val lines = buildList {
+        trend?.let { t ->
+            val change = t.changeKg?.let { c -> (if (c >= 0) "+" else "−") + unit.format(kotlin.math.abs(c), withUnit = true) }
+            add(if (change != null) stringResource(R.string.weight_trend_change, unit.format(t.averageKg, withUnit = true), change) else stringResource(R.string.weight_trend, unit.format(t.averageKg, withUnit = true)))
+        }
+        if (goal != null && progress != null) {
+            add(
+                if (progress.reached) {
+                    stringResource(R.string.weight_goal_reached, unit.format(goal, withUnit = true))
+                } else {
+                    stringResource(R.string.weight_goal_left, unit.format(progress.remainingKg, withUnit = true), unit.format(goal, withUnit = true))
+                },
+            )
+        }
+        addAll(measurementChanges(list, labels))
+    }
+    IconButton(
+        onClick = {
+            val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, (listOf(title) + lines).joinToString("\n"))
+            context.startActivity(android.content.Intent.createChooser(send, null))
+        },
+    ) { Icon(Icons.Default.Share, stringResource(R.string.share_progress)) }
+}
+
+/** «Cintura (cm): 84 (−2)»: cada medida, la última y su cambio desde la primera. */
+private fun measurementChanges(list: List<BodyMeasurement>, labels: List<Pair<String, (BodyMeasurement) -> Double?>>): List<String> {
+    val sorted = list.sortedBy { it.dateEpochMs }
+    return labels.mapNotNull { (label, value) ->
+        val first = sorted.firstNotNullOfOrNull(value)
+        val last = sorted.lastOrNull { value(it) != null }?.let(value)
+        if (first == null || last == null || first == last) return@mapNotNull null
+        val diff = last - first
+        // La etiqueta ya lleva la unidad («Cintura (cm)»)
+        "$label: ${formatWeight(last)} (" + (if (diff >= 0) "+" else "−") + formatWeight(kotlin.math.abs(diff)) + ")"
+    }
 }
