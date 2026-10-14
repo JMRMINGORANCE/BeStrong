@@ -63,14 +63,17 @@ object Progression {
         // Sin carga (peso corporal o tiempo) el 1RM estimado es 0 y no sirve para detectar estancamiento
         val loaded = exercise.tracking != TrackingType.DURATION && last.any { it.weightKg > 0.0 }
         val easy = last.all { (it.rpe ?: 8.0) <= 9.0 }
+        val useRange = repRange != null && loaded && exercise.tracking == TrackingType.WEIGHT_REPS
+        // Con rango, el 1RM estimado baja a propósito al subir peso y volver al mínimo: el estancamiento se mide
+        // por reps con el mismo peso; sin rango, por el 1RM
+        val stalled = loaded && if (useRange) isStalledInRange(exercise.id, history, stallSessions) else isStalled(exercise.id, history, stallSessions)
         return when {
-            // Con rango, el 1RM estimado baja a propósito al subir peso y volver al mínimo: no es estancamiento
-            repRange == null && loaded && isStalled(exercise.id, history, stallSessions) -> {
+            stalled -> {
                 val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
                 ProgressionSuggestion(SuggestionKind.DELOAD, sets, "Llevas $stallSessions sesiones sin progresar: descarga al 90 %", stallSessions = stallSessions)
             }
             isUnloaded(exercise.tracking, last) -> unloaded(exercise.tracking, last)
-            repRange != null && loaded && exercise.tracking == TrackingType.WEIGHT_REPS -> byRange(last, repRange, incrementKg, easy)
+            useRange -> byRange(last, repRange!!, incrementKg, easy)
             else -> fixedReps(last, incrementKg, easy)
         }
     }
@@ -122,6 +125,20 @@ object Progression {
                 ProgressionSuggestion(SuggestionKind.RANGE_ADD_REP, sets, "Mismo peso: +1 rep por serie hasta ${range.last}", targetReps = range.last)
             }
         }
+    }
+
+    /**
+     * Estancado con rango: [sessions] sesiones seguidas con el mismo peso máximo sin sumar más repeticiones
+     * que la sesión anterior a ellas.
+     */
+    fun isStalledInRange(exerciseId: String, history: List<Workout>, sessions: Int = 3): Boolean {
+        val points = history.filter { it.isFinished }.sortedBy { it.startedAtEpochMs }.mapNotNull { w ->
+            val sets = w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.completedSets }.filter { it.type != SetType.WARMUP }
+            if (sets.isEmpty()) null else sets.maxOf { it.weightKg } to sets.sumOf { it.reps }
+        }.takeLast(sessions + 1)
+        if (points.size < sessions + 1) return false
+        val (weight, before) = points.first()
+        return points.all { it.first == weight } && points.drop(1).all { it.second <= before }
     }
 
     /** True si el mejor 1RM estimado no ha mejorado en las últimas [sessions] sesiones. */

@@ -422,7 +422,9 @@ fun DayPartCard(parts: List<com.bestrong.core.stats.DayPartStat>) {
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.day_part_title))
-            Text(stringResource(R.string.day_part_best, best.part.label()), fontWeight = FontWeight.SemiBold)
+            // Solo hay «mejor hora» si la diferencia se nota (3 puntos); si no, da igual cuándo entrenes
+            val clear = best.relativeStrength - parts[1].relativeStrength >= CLEAR_DIFFERENCE
+            Text(if (clear) stringResource(R.string.day_part_best, best.part.label()) else stringResource(R.string.day_part_no_difference), fontWeight = FontWeight.SemiBold)
             parts.forEach { p ->
                 Text(
                     stringResource(R.string.day_part_line, p.part.label().replaceFirstChar { it.uppercase() }, (p.relativeStrength * 100).toInt(), p.sessions),
@@ -442,3 +444,6 @@ private fun com.bestrong.core.stats.DayPart.label(): String = stringResource(
         com.bestrong.core.stats.DayPart.EVENING -> R.string.day_part_evening
     },
 )
+
+/** Diferencia mínima (fracción de tu mejor marca) para decir que una franja es mejor. */
+private const val CLEAR_DIFFERENCE = 0.03

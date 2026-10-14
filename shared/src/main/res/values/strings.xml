@@ -1036,7 +1036,7 @@
     <string name="notif_weigh_in_reply">Apuntar peso</string>
     <string name="notif_weigh_in_reply_hint">Tu peso, p. ej. 80,4</string>
     <string name="notif_weigh_in_saved">Peso guardado</string>
-    <string name="notif_weigh_in_invalid">No se entendió el peso: ábrelo en la app</string>
+    <string name="notif_weigh_in_invalid">No se entendió el peso: contesta solo con el número, p. ej. 80,4</string>
     <string name="day_part_title">Tu mejor hora</string>
     <string name="day_part_best">Rindes mejor por la %1$s</string>
     <string name="day_part_line">%1$s: %2$d %% de tu mejor marca · %3$d entrenos</string>
@@ -1047,4 +1047,6 @@
     <string name="share_progress">Compartir progreso</string>
     <string name="share_progress_title">📏 Mi progreso corporal</string>
     <string name="cal_add_to_calendar">Añadir al calendario</string>
+    <string name="day_part_no_difference">Rindes parecido a cualquier hora</string>
+    <string name="no_calendar_app">No hay ninguna app de calendario</string>
 </resources>

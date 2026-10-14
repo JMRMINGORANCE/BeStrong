@@ -1036,9 +1036,9 @@
     <string name="notif_weigh_in_reply">Noter le poids</string>
     <string name="notif_weigh_in_reply_hint">Ton poids, ex. 80,4</string>
     <string name="notif_weigh_in_saved">Poids enregistré</string>
-    <string name="notif_weigh_in_invalid">Poids non reconnu : ouvre l\'appli</string>
+    <string name="notif_weigh_in_invalid">Poids non reconnu : réponds avec le nombre seul, ex. 80,4</string>
     <string name="day_part_title">Ton meilleur moment</string>
-    <string name="day_part_best">Tu es plus performant le %1$s</string>
+    <string name="day_part_best">Ton meilleur moment : %1$s</string>
     <string name="day_part_line">%1$s : %2$d %% de ton meilleur · %3$d séances</string>
     <string name="day_part_hint">Moyenne des 12 dernières semaines : 1RM estimé de chaque exercice face à ton meilleur sur la période.</string>
     <string name="day_part_morning">matin</string>
@@ -1047,4 +1047,6 @@
     <string name="share_progress">Partager la progression</string>
     <string name="share_progress_title">📏 Ma progression corporelle</string>
     <string name="cal_add_to_calendar">Ajouter à l\'agenda</string>
+    <string name="day_part_no_difference">Tes performances sont proches à toute heure</string>
+    <string name="no_calendar_app">Aucune appli d\'agenda</string>
 </resources>

@@ -175,6 +175,8 @@ object WorkoutEditor {
         val base = we.sets.lastOrNull { it.type != SetType.WARMUP } ?: return@updateExercise we
         val raw = base.weightKg * DROP_FACTOR
         val weight = if (stepKg > 0) (Math.round(raw / stepKg) * stepKg).coerceAtMost(base.weightKg - stepKg).coerceAtLeast(0.0) else raw
+        // Bajar de un peso real a 0 kg no tiene sentido (barra casi vacía); sin peso aún, se añade y se rellena luego
+        if (base.weightKg > 0.0 && weight <= 0.0) return@updateExercise we
         val index = we.sets.indexOf(base) + 1
         val drop = WorkoutSet(weightKg = weight, reps = base.reps, durationSec = base.durationSec, type = SetType.DROP)
         we.copy(sets = we.sets.toMutableList().apply { add(index, drop) })

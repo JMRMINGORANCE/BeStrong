@@ -71,8 +71,8 @@ class PlanningViewModel @Inject constructor(
     /** Ejercicios ocultos en la biblioteca: el selector de programas tampoco los propone. */
     val hiddenExercises: Set<String> get() = settings.settings.value.hiddenExercises
 
-    /** Hora de entrenar habitual (la de los recordatorios): la que se propone al añadir al calendario. */
-    val usualHour: Int get() = settings.settings.value.reminderHour
+    /** Hora de entrenar habitual (la de los recordatorios): la que se usa al añadir al calendario o exportar. */
+    val usualTime: java.time.LocalTime get() = settings.settings.value.let { java.time.LocalTime.of(it.reminderHour, it.reminderMinute) }
 
     val ui: StateFlow<PlanningUi> = combine(store.state, repo.history, repo.routines) { s, history, routines ->
         val today = LocalDate.now(ZoneId.systemDefault())
@@ -139,7 +139,7 @@ class PlanningViewModel @Inject constructor(
         }
         if (events.isEmpty()) return
         runCatching {
-            val text = Ics.generate(events, java.time.LocalTime.of(18, 0), ZoneId.systemDefault())
+            val text = Ics.generate(events, usualTime, ZoneId.systemDefault())
             val dir = java.io.File(context.cacheDir, "share").apply { mkdirs() }
             val file = java.io.File(dir, "bestrong-semana.ics").apply { writeText(text) }
             val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.files", file)

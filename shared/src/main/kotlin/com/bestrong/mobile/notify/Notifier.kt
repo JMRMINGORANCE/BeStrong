@@ -87,7 +87,7 @@ object Notifier {
 
     /** Recordatorio semanal de pesarse: se puede contestar con el peso sin abrir la app (o tocar para abrirla). */
     @Suppress("MissingPermission")
-    fun weighIn(context: Context) {
+    fun weighIn(context: Context, retry: Boolean = false) {
         if (!canPost(context)) return
         ensureChannels(context)
         val input = androidx.core.app.RemoteInput.Builder(WeighInReplyReceiver.KEY_WEIGHT)
@@ -99,14 +99,16 @@ object Notifier {
             android.content.Intent(context, WeighInReplyReceiver::class.java).setPackage(context.packageName),
             android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_MUTABLE,
         )
-        val action = NotificationCompat.Action.Builder(0, context.getString(R.string.notif_weigh_in_reply), reply)
+        val action = NotificationCompat.Action.Builder(R.drawable.ic_stat_dumbbell, context.getString(R.string.notif_weigh_in_reply), reply)
             .addRemoteInput(input)
             .setAllowGeneratedReplies(false)
             .build()
         val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
             .setContentTitle(context.getString(R.string.notif_weigh_in_title))
-            .setContentText(context.getString(R.string.notif_weigh_in_text))
+            .setContentText(context.getString(if (retry) R.string.notif_weigh_in_invalid else R.string.notif_weigh_in_text))
+            // Al volver tras una respuesta no entendida no vuelve a sonar
+            .setOnlyAlertOnce(retry)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(openApp(context))
@@ -115,14 +117,16 @@ object Notifier {
         NotificationManagerCompat.from(context).notify(ID_WEIGH_IN, n)
     }
 
-    /** Tras contestar: confirmación con el peso guardado (o aviso si no se entendió); se quita sola. */
+    /** Tras contestar: confirmación con el peso guardado; se quita sola y sin volver a sonar. */
     @Suppress("MissingPermission")
-    fun weighInResult(context: Context, saved: String?) {
+    fun weighInResult(context: Context, saved: String) {
         if (!canPost(context)) return
         val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
-            .setContentTitle(context.getString(if (saved != null) R.string.notif_weigh_in_saved else R.string.notif_weigh_in_invalid))
-            .apply { saved?.let { setContentText(it) } }
+            .setContentTitle(context.getString(R.string.notif_weigh_in_saved))
+            .setContentText(saved)
+            .setOnlyAlertOnce(true)
+            .setSilent(true)
             .setContentIntent(openApp(context))
             .setAutoCancel(true)
             .setTimeoutAfter(RESULT_TIMEOUT_MS)

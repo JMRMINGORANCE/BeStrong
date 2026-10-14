@@ -29,13 +29,18 @@ object BodyWeightGoal {
      * [points] (fecha, kg) ordenados. Sirve para bajar y para subir: la dirección la marca [startKg], el peso
      * cuando se puso el objetivo (si no se guardó, el actual). Cumplido al cruzarlo o quedarse a menos de 0,3 kg.
      */
+    /**
+     * Peso de partida cuando no se guardó (objetivos antiguos): el primero de las últimas semanas, no el de
+     * ahora, que tras pasarse del objetivo invertiría la dirección.
+     */
+    fun inferStart(points: List<Pair<Long, Double>>, nowEpochMs: Long = System.currentTimeMillis()): Double? =
+        points.firstOrNull { it.first >= nowEpochMs - TREND_WEEKS * 7 * 86_400_000L }?.second ?: points.firstOrNull()?.second
+
     fun progress(points: List<Pair<Long, Double>>, goalKg: Double, startKg: Double? = null, nowEpochMs: Long = System.currentTimeMillis()): BodyWeightGoalProgress? {
         if (points.isEmpty()) return null
         val current = points.last().second
         val recent = points.filter { it.first >= nowEpochMs - TREND_WEEKS * 7 * 86_400_000L }
-        // Objetivos de antes de guardar el peso inicial: el primero de las últimas semanas (no el de ahora,
-        // que tras pasarse del objetivo invertiría la dirección)
-        val losing = (startKg ?: recent.firstOrNull()?.second ?: points.first().second) > goalKg
+        val losing = (startKg ?: inferStart(points, nowEpochMs)!!) > goalKg
         val crossed = if (losing) current <= goalKg else current >= goalKg
         val reached = crossed || kotlin.math.abs(current - goalKg) <= TOLERANCE_KG
         // Para bajar se invierte el signo: la predicción busca una línea que sube

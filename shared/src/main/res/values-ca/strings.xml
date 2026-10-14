@@ -1036,15 +1036,17 @@
     <string name="notif_weigh_in_reply">Apunta el pes</string>
     <string name="notif_weigh_in_reply_hint">El teu pes, p. ex. 80,4</string>
     <string name="notif_weigh_in_saved">Pes desat</string>
-    <string name="notif_weigh_in_invalid">No s\'ha entès el pes: obre-ho a l\'app</string>
+    <string name="notif_weigh_in_invalid">No s\'ha entès el pes: respon només amb el número, p. ex. 80,4</string>
     <string name="day_part_title">La teva millor hora</string>
     <string name="day_part_best">Rendeixes millor en aquesta franja: %1$s</string>
     <string name="day_part_line">%1$s: %2$d %% de la teva millor marca · %3$d entrenaments</string>
     <string name="day_part_hint">Mitjana de les darreres 12 setmanes: 1RM estimat de cada exercici davant el teu millor del període.</string>
     <string name="day_part_morning">matí</string>
     <string name="day_part_afternoon">tarda</string>
-    <string name="day_part_evening">nit</string>
+    <string name="day_part_evening">vespre</string>
     <string name="share_progress">Comparteix el progrés</string>
     <string name="share_progress_title">📏 El meu progrés corporal</string>
     <string name="cal_add_to_calendar">Afegeix al calendari</string>
+    <string name="day_part_no_difference">Rendeixes semblant a qualsevol hora</string>
+    <string name="no_calendar_app">No hi ha cap app de calendari</string>
 </resources>

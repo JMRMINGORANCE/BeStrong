@@ -383,3 +383,18 @@ class TimeOfDayTest {
         assertEquals(2, stats.size)
     }
 }
+
+class Iteration19Test {
+    @Test fun rangeStallDeloadsWhenRepsDoNotGrow() {
+        val d = java.time.LocalDate.of(2026, 3, 2)
+        val history = (0..3).map { i -> finishedWorkout("w$i", d.plusDays(i * 3L), bench to listOf(done(82.5, 9), done(82.5, 9), done(82.5, 8))) }
+        val s = com.bestrong.core.training.Progression.suggest(bench, history, 2.5, repRange = 8..12)!!
+        assertEquals(com.bestrong.core.training.SuggestionKind.DELOAD, s.kind)
+    }
+
+    @Test fun dropSetNeverZero() {
+        val we = WorkoutExercise(exercise = bench, sets = listOf(WorkoutSet(weightKg = 2.5, reps = 10)))
+        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(we))
+        assertEquals(1, WorkoutEditor.addDropSet(w, we.id, 2.5).exercises[0].sets.size)
+    }
+}

@@ -254,6 +254,10 @@ class ExercisesViewModel @Inject constructor(
         if (previous != null && (previous.tracking != ex.tracking || dumbbellChange)) {
             settingsStore.update { s -> if (ex.id in s.exerciseGoalsKg) s.copy(exerciseGoalsKg = s.exerciseGoalsKg - ex.id) else s }
         }
+        // El rango de repeticiones solo se usa con peso × reps
+        if (previous?.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS && ex.tracking != com.bestrong.core.model.TrackingType.WEIGHT_REPS) {
+            settingsStore.update { s -> if (ex.id in s.exerciseRepRange) s.copy(exerciseRepRange = s.exerciseRepRange - ex.id) else s }
+        }
         // La barra propia solo tiene sentido con barra
         if (previous?.equipment == Equipment.BARBELL && ex.equipment != Equipment.BARBELL) {
             settingsStore.update { s -> if (ex.id in s.exerciseBarKg) s.copy(exerciseBarKg = s.exerciseBarKg - ex.id) else s }

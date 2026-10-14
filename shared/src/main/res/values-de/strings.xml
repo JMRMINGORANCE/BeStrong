@@ -1036,7 +1036,7 @@
     <string name="notif_weigh_in_reply">Gewicht eintragen</string>
     <string name="notif_weigh_in_reply_hint">Dein Gewicht, z. B. 80,4</string>
     <string name="notif_weigh_in_saved">Gewicht gespeichert</string>
-    <string name="notif_weigh_in_invalid">Gewicht nicht erkannt: öffne die App</string>
+    <string name="notif_weigh_in_invalid">Gewicht nicht erkannt: antworte nur mit der Zahl, z. B. 80,4</string>
     <string name="day_part_title">Deine beste Tageszeit</string>
     <string name="day_part_best">Am stärksten bist du am %1$s</string>
     <string name="day_part_line">%1$s: %2$d %% deiner Bestleistung · %3$d Trainings</string>
@@ -1047,4 +1047,6 @@
     <string name="share_progress">Fortschritt teilen</string>
     <string name="share_progress_title">📏 Mein Körperfortschritt</string>
     <string name="cal_add_to_calendar">Zum Kalender hinzufügen</string>
+    <string name="day_part_no_difference">Du bist zu jeder Tageszeit ähnlich stark</string>
+    <string name="no_calendar_app">Keine Kalender-App gefunden</string>
 </resources>

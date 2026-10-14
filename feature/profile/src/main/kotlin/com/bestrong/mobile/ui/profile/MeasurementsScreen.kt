@@ -274,9 +274,14 @@ private fun WeightGoalDialog(vm: ProfileViewModel, goal: Double?, points: List<P
         confirmButton = {
             TextButton(onClick = {
                 vm.updateSettings {
-                    // Guardar sin cambiar el objetivo conserva el peso de partida
-                    val start = if (kg == it.bodyWeightGoalKg) it.bodyWeightGoalStartKg ?: points.lastOrNull()?.second else points.lastOrNull()?.second
-                    it.copy(bodyWeightGoalKg = kg, bodyWeightGoalStartKg = start)
+                    // Guardar sin cambiar el objetivo (salvo redondeos de la unidad) lo deja todo como estaba;
+                    // los antiguos sin peso de partida toman el mismo que se deduce al mostrarlos
+                    val old = it.bodyWeightGoalKg
+                    if (old != null && kg != null && kotlin.math.abs(kg - old) < unit.toKg(SAME_GOAL_TOLERANCE)) {
+                        it.copy(bodyWeightGoalStartKg = it.bodyWeightGoalStartKg ?: com.bestrong.core.stats.BodyWeightGoal.inferStart(points))
+                    } else {
+                        it.copy(bodyWeightGoalKg = kg, bodyWeightGoalStartKg = points.lastOrNull()?.second)
+                    }
                 }; onClose()
             }, enabled = kg != null) {
                 Text(stringResource(R.string.action_save))
@@ -304,8 +309,10 @@ private fun ShareProgressButton(vm: ProfileViewModel, list: List<BodyMeasurement
     val weights = list.filter { it.weightKg != null }.sortedBy { it.dateEpochMs }.map { it.dateEpochMs to it.weightKg!! }
     val trend = remember(weights) { BodyWeightTrend.of(weights, System.currentTimeMillis()) }
     val goal = settings.bodyWeightGoalKg
-    val progress = remember(weights, goal) { goal?.let { com.bestrong.core.stats.BodyWeightGoal.progress(weights, it, settings.bodyWeightGoalStartKg) } }
+    val start = settings.bodyWeightGoalStartKg
+    val progress = remember(weights, goal, start) { goal?.let { com.bestrong.core.stats.BodyWeightGoal.progress(weights, it, start) } }
     val labels = listOf(
+        stringResource(R.string.f_fat) to { m: BodyMeasurement -> m.bodyFatPct },
         stringResource(R.string.f_waist) to { m: BodyMeasurement -> m.waistCm },
         stringResource(R.string.f_chest) to { m: BodyMeasurement -> m.chestCm },
         stringResource(R.string.f_arm) to { m: BodyMeasurement -> m.armCm },
@@ -347,3 +354,6 @@ private fun measurementChanges(list: List<BodyMeasurement>, labels: List<Pair<St
         "$label: ${formatWeight(last)} (" + (if (diff >= 0) "+" else "−") + formatWeight(kotlin.math.abs(diff)) + ")"
     }
 }
+
+/** Diferencia (en la unidad) por debajo de la cual se considera el mismo objetivo: el texto va con un decimal. */
+private const val SAME_GOAL_TOLERANCE = 0.05

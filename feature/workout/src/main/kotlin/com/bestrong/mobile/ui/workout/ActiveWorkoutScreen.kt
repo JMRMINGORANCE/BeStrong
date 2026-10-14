@@ -674,10 +674,12 @@ private fun ExerciseCard(
                         SuggestionKind.DELOAD -> "🔻"
                         else -> "💡"
                     }
+                    // Con «suma de las dos mancuernas», igual que en las filas
+                    val chipFactor = if (we.exercise.equipment == Equipment.DUMBBELL && vm.settings.collectAsStateWithLifecycle().value.dumbbellTotal) 2 else 1
                     AssistChip(
                         onClick = { vm.applySuggestion(we.id, s) },
                         enabled = differs,
-                        label = { Text(stringResource(if (differs) R.string.suggestion_apply else R.string.suggestion_applied, icon, describeSet(first, we.exercise.tracking, unit), s.reasonText()), maxLines = 2) },
+                        label = { Text(stringResource(if (differs) R.string.suggestion_apply else R.string.suggestion_applied, icon, describeSet(first, we.exercise.tracking, unit, chipFactor), s.reasonText()), maxLines = 2) },
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
                 }

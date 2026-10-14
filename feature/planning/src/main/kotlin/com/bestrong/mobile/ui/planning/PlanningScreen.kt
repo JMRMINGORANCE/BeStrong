@@ -204,7 +204,7 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.cal_rest)) }, onClick = { menu = false; vm.assign(weekStart, day, null) })
-                        routine?.let { r -> AddToCalendarItem(r, weekStart.plusDays(day.ordinal.toLong()), vm.usualHour, minutes ?: DEFAULT_SESSION_MIN) { menu = false } }
+                        routine?.let { r -> AddToCalendarItem(r, weekStart.plusDays(day.ordinal.toLong()), vm.usualTime, minutes ?: DEFAULT_SESSION_MIN) { menu = false } }
                         // Las archivadas no se ofrecen (las ya asignadas se siguen viendo en el calendario)
                         ui.routines.filterNot { it.archived }.forEach { r ->
                             DropdownMenuItem(
@@ -471,20 +471,21 @@ private const val DEFAULT_SESSION_MIN = 60
 
 /** Añade la sesión al calendario del móvil (Google Calendar, Samsung…) a la hora habitual de entrenar. */
 @Composable
-private fun AddToCalendarItem(routine: com.bestrong.core.model.Routine, date: java.time.LocalDate, hour: Int, minutes: Int, onDone: () -> Unit) {
+private fun AddToCalendarItem(routine: com.bestrong.core.model.Routine, date: java.time.LocalDate, time: java.time.LocalTime, minutes: Int, onDone: () -> Unit) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val noApp = stringResource(R.string.no_calendar_app)
     DropdownMenuItem(
         text = { Text(stringResource(R.string.cal_add_to_calendar)) },
         onClick = {
             onDone()
-            val begin = date.atTime(hour, 0).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+            val begin = date.atTime(time).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
             val intent = android.content.Intent(android.content.Intent.ACTION_INSERT)
                 .setData(android.provider.CalendarContract.Events.CONTENT_URI)
                 .putExtra(android.provider.CalendarContract.Events.TITLE, "🏋 " + routine.displayName)
                 .putExtra(android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin)
                 .putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, begin + minutes * 60_000L)
-            // Sin app de calendario no hay nada que abrir
-            runCatching { context.startActivity(intent) }
+            // Sin app de calendario no hay nada que abrir: se avisa
+            runCatching { context.startActivity(intent) }.onFailure { android.widget.Toast.makeText(context, noApp, android.widget.Toast.LENGTH_SHORT).show() }
         },
     )
 }

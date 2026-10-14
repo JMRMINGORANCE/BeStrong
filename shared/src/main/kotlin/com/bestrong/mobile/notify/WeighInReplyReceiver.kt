@@ -23,12 +23,15 @@ class WeighInReplyReceiver : BroadcastReceiver() {
         val settings = deps.settings().settings.value
         val unit = settings.bodyUnit ?: settings.unit
         // Un peso corporal razonable (evita guardar un «8» por error al teclear)
-        val kg = unit.parseToKg(text.trim())?.takeIf { it in MIN_KG..MAX_KG }
+        // El primer número de la respuesta («80,4 kg», «80.4 kilos» dictado en el reloj…)
+        val number = NUMBER.find(text)?.value
+        val kg = number?.let { unit.parseToKg(it) }?.takeIf { it in MIN_KG..MAX_KG }
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 if (kg != null) deps.actions().saveMeasurement(BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = kg))
-                Notifier.weighInResult(app, kg?.let { unit.format(it, withUnit = true) })
+                // Si no se entendió, vuelve el recordatorio con el aviso para poder contestar otra vez
+                if (kg != null) Notifier.weighInResult(app, unit.format(kg, withUnit = true)) else Notifier.weighIn(app, retry = true)
             } finally {
                 pending.finish()
             }
@@ -39,5 +42,6 @@ class WeighInReplyReceiver : BroadcastReceiver() {
         const val KEY_WEIGHT = "weight"
         private const val MIN_KG = 20.0
         private const val MAX_KG = 400.0
+        private val NUMBER = Regex("""\d+(?:[.,]\d+)?""")
     }
 }

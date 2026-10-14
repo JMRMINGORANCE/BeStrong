@@ -1,5 +1,6 @@
 package com.bestrong.core.stats
 
+import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
 import java.time.Instant
 import java.time.ZoneId
@@ -31,13 +32,14 @@ object TimeOfDay {
         val recent = history.filter { it.isFinished && it.startedAtEpochMs >= since }
         val best = mutableMapOf<String, Double>()
         recent.forEach { w ->
-            w.exercises.forEach { we ->
+            w.exercises.filter { it.exercise.tracking == TrackingType.WEIGHT_REPS }.forEach { we ->
                 val e = we.completedSets.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0
                 if (e > 0) best.merge(we.exercise.id, e, ::maxOf)
             }
         }
         return recent.mapNotNull { w ->
-            val ratios = w.exercises.mapNotNull { we ->
+            // Solo peso × reps: en dominadas lastradas el «1RM» saldría del lastre
+            val ratios = w.exercises.filter { it.exercise.tracking == TrackingType.WEIGHT_REPS }.mapNotNull { we ->
                 val e = we.completedSets.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0
                 best[we.exercise.id]?.takeIf { e > 0 && it > 0 }?.let { e / it }
             }
