@@ -961,9 +961,7 @@
     <string name="duplicate_named">Duplicar %1$s</string>
     <string name="export_exercise_csv">Exportar histórico do exercício (CSV)</string>
     <string name="year_title">O teu %1$d</string>
-    <string name="year_workouts">%1$d treinos em %2$d dias · %3$d h</string>
     <string name="year_volume">Volume total: %1$s</string>
-    <string name="year_records">🏆 %1$d recordes</string>
     <string name="year_top_muscle">Músculo mais trabalhado: %1$s</string>
     <string name="year_gain">📈 %1$s: 1RM %2$s → %3$s</string>
     <plurals name="year_streak">
@@ -977,4 +975,18 @@
     <string name="widget_muscles_title">Músculos esta semana</string>
     <string name="widget_muscles_empty">Ainda não treinaste esta semana</string>
     <string name="widget_muscles_description">Séries de cada músculo esta semana face ao objetivo de 10</string>
+    <plurals name="year_workouts_n">
+        <item quantity="one">%1$d treino</item>
+        <item quantity="other">%1$d treinos</item>
+    </plurals>
+    <plurals name="year_days">
+        <item quantity="one">%1$d dia</item>
+        <item quantity="other">%1$d dias</item>
+    </plurals>
+    <plurals name="year_records_n">
+        <item quantity="one">🏆 %1$d recorde</item>
+        <item quantity="other">🏆 %1$d recordes</item>
+    </plurals>
+    <string name="routine_not_found">A rotina já não existe</string>
+    <string name="export_failed">Não foi possível exportar</string>
 </resources>

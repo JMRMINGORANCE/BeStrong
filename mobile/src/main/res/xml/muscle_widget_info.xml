@@ -3,9 +3,9 @@
     android:description="@string/widget_muscles_description"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:minWidth="180dp"
-    android:minHeight="110dp"
+    android:minHeight="160dp"
     android:targetCellWidth="3"
-    android:targetCellHeight="2"
+    android:targetCellHeight="3"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:updatePeriodMillis="3600000" />

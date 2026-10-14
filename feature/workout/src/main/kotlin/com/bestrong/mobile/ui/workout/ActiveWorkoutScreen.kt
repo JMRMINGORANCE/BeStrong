@@ -667,7 +667,8 @@ private fun ExerciseCard(
             // Mejor 1RM estimado y peso máximo hasta hoy (sin historial no hay récord que batir)
             val bestBefore = vm.bests.collectAsStateWithLifecycle().value[we.exercise.id]?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS }
             // Para la pista «N reps = récord»: lo que ya batiste hoy también cuenta
-            val bestNow = bestBefore?.let { b -> maxOf(b.first, we.completedSets.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0) }
+            val doneToday = vm.workout.collectAsStateWithLifecycle().value?.exercises.orEmpty().filter { it.exercise.id == we.exercise.id }.flatMap { it.completedSets }
+            val bestNow = bestBefore?.let { b -> maxOf(b.first, doneToday.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0) }
             val firstPendingId = we.sets.firstOrNull { !it.completed && it.countsForRecords }?.id
             we.sets.forEachIndexed { i, set ->
                 val displayIndex = if (set.type == SetType.NORMAL) normalIndex++ else -1

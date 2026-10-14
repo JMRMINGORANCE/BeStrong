@@ -961,9 +961,7 @@
     <string name="duplicate_named">Duplicate %1$s</string>
     <string name="export_exercise_csv">Export exercise history (CSV)</string>
     <string name="year_title">Your %1$d</string>
-    <string name="year_workouts">%1$d workouts on %2$d days · %3$d h</string>
     <string name="year_volume">Total volume: %1$s</string>
-    <string name="year_records">🏆 %1$d records</string>
     <string name="year_top_muscle">Most trained muscle: %1$s</string>
     <string name="year_gain">📈 %1$s: 1RM %2$s → %3$s</string>
     <plurals name="year_streak">
@@ -977,4 +975,18 @@
     <string name="widget_muscles_title">Muscles this week</string>
     <string name="widget_muscles_empty">No training yet this week</string>
     <string name="widget_muscles_description">Sets per muscle this week against the 10-set target</string>
+    <plurals name="year_workouts_n">
+        <item quantity="one">%1$d workout</item>
+        <item quantity="other">%1$d workouts</item>
+    </plurals>
+    <plurals name="year_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="year_records_n">
+        <item quantity="one">🏆 %1$d record</item>
+        <item quantity="other">🏆 %1$d records</item>
+    </plurals>
+    <string name="routine_not_found">That routine no longer exists</string>
+    <string name="export_failed">Couldn\'t export</string>
 </resources>

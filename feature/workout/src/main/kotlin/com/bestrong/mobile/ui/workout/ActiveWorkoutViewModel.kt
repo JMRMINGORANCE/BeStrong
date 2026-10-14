@@ -244,10 +244,10 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Conflictos de sincronización con el reloj (misma serie con valores distintos). */
     val syncConflicts = repo.syncConflicts
 
-    /** Deshace el borrado de ese aviso: se recupera lo borrado sin perder lo que haya cambiado después. */
     /** Fin del descanso que arrancó el último «marcar las que faltan» (para pararlo si se deshace). */
     private var pendingRestUndo: Long? = null
 
+    /** Deshace el borrado de ese aviso: se recupera lo borrado sin perder lo que haya cambiado después. */
     fun undo(event: WorkoutEvent.Undoable) {
         if (event.kind == UndoKind.COMPLETE) {
             pendingRestUndo?.let { end -> if (restTimer.rest.value?.endsAtEpochMs == end) restTimer.skip() }

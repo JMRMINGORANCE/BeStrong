@@ -31,9 +31,14 @@ fun YearInReviewCard(y: YearSummary) {
     val unit = LocalWeightUnit.current
     val context = LocalContext.current
     val lines = buildList {
-        add(stringResource(R.string.year_workouts, y.period.workouts, y.trainingDays, y.period.durationSec / 3600))
+        // Horas redondeadas; por debajo de una hora, en minutos
+        val time = if (y.period.durationSec >= 3600) "${Math.round(y.period.durationSec / 3600.0)} h" else "${y.period.durationSec / 60} min"
+        add(
+            pluralStringResource(R.plurals.year_workouts_n, y.period.workouts, y.period.workouts) + " · " +
+                pluralStringResource(R.plurals.year_days, y.trainingDays, y.trainingDays) + " · " + time,
+        )
         add(stringResource(R.string.year_volume, unit.formatVolume(y.period.volume)))
-        add(stringResource(R.string.year_records, y.period.records.size) + " · " + pluralStringResource(R.plurals.year_streak, y.longestWeeklyStreak, y.longestWeeklyStreak))
+        add(pluralStringResource(R.plurals.year_records_n, y.period.records.size, y.period.records.size) + " · " + pluralStringResource(R.plurals.year_streak, y.longestWeeklyStreak, y.longestWeeklyStreak))
         y.topMuscle?.let { add(stringResource(R.string.year_top_muscle, it.label())) }
         y.biggestGains.forEach { (ex, from, to) ->
             add(stringResource(R.string.year_gain, ex.displayName(), unit.format(from), unit.format(to, withUnit = true)))

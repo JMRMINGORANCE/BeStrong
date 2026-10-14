@@ -9,6 +9,7 @@ import com.bestrong.core.model.RoutineExercise
 import com.bestrong.core.model.RoutineSet
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
+import com.bestrong.core.model.moveKeepingSupersets
 import com.bestrong.core.model.normalizedSupersets
 import com.bestrong.core.training.Tempo
 import com.bestrong.mobile.data.BeStrongRepository
@@ -64,8 +65,12 @@ class RoutineEditorViewModel @Inject constructor(
             val newGroup = com.bestrong.core.util.newId()
             r.copy(exercises = r.exercises.mapIndexed { j, e -> if (j > i && e.supersetId == a.supersetId) e.copy(supersetId = newGroup) else e }).normalizedSupersets()
         } else {
+            // Unir: si los dos ya tenían superserie, el grupo de b entero pasa al de a (no se queda nadie suelto)
             val group = a.supersetId ?: b.supersetId ?: com.bestrong.core.util.newId()
-            r.copy(exercises = r.exercises.map { if (it.id == a.id || it.id == b.id) it.copy(supersetId = group) else it }).normalizedSupersets()
+            val joining = setOfNotNull(a.supersetId, b.supersetId)
+            r.copy(
+                exercises = r.exercises.map { if (it.id == a.id || it.id == b.id || it.supersetId in joining) it.copy(supersetId = group) else it },
+            ).normalizedSupersets()
         }
     }
 
@@ -111,13 +116,8 @@ class RoutineEditorViewModel @Inject constructor(
         r.copy(exercises = r.exercises.toMutableList().apply { add(end + 1, src.copy(id = com.bestrong.core.util.newId(), supersetId = null)) })
     }
 
-    fun moveExercise(from: Int, to: Int) = _routine.update { r ->
-        if (from !in r.exercises.indices || to !in r.exercises.indices) {
-            r
-        } else {
-            r.copy(exercises = r.exercises.toMutableList().apply { add(to, removeAt(from)) }).normalizedSupersets()
-        }
-    }
+    /** Flechas ↑/↓: un puesto, sin partir superseries (se mueven como bloque). */
+    fun moveExercise(from: Int, to: Int) = _routine.update { r -> r.moveKeepingSupersets(from, down = to > from).normalizedSupersets() }
 
     fun addSet(id: String) = updateExercise(id) { re -> re.copy(sets = re.sets + (re.sets.lastOrNull() ?: RoutineSet())) }
     fun removeSet(id: String, index: Int) = updateExercise(id) { re -> re.copy(sets = re.sets.filterIndexed { i, _ -> i != index }) }

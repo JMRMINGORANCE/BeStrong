@@ -378,10 +378,11 @@ private fun ExerciseRestLine(w: Workout, we: com.bestrong.core.model.WorkoutExer
         if (planned != null && planned != r.suggestedSeconds) {
             val context = androidx.compose.ui.platform.LocalContext.current
             val done = stringResource(R.string.rest_use_real_done, formatDuration(r.suggestedSeconds.toLong()))
+            val notFound = stringResource(R.string.routine_not_found)
             TextButton(
                 onClick = {
                     vm.useRealRest(w, we.exercise.id, occurrence, r.suggestedSeconds) { ok ->
-                        if (ok) android.widget.Toast.makeText(context, done, android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(context, if (ok) done else notFound, android.widget.Toast.LENGTH_SHORT).show()
                     }
                 },
             ) {

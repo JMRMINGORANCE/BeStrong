@@ -74,6 +74,8 @@ fun WorkoutScreen(
     val metrics by session.metrics.collectAsStateWithLifecycle()
     val target by session.rotaryTarget.collectAsStateWithLifecycle()
     val repCounting by session.repCounting.collectAsStateWithLifecycle()
+    // Marcas del móvil: si llegan nuevas, la pista «N reps = récord» se recalcula
+    val records by session.recordsVersion.collectAsStateWithLifecycle(initialValue = Unit to Unit)
     val countedReps by session.repCounter.reps.collectAsStateWithLifecycle()
     val pinnedNotes = session.settings.collectAsStateWithLifecycle().value.pinnedNotes
     val velocity by session.velocityInfo.collectAsStateWithLifecycle()
@@ -207,7 +209,7 @@ fun WorkoutScreen(
                 }
                 // Reps que batirían tu récord con este peso (solo series que cuentan)
                 if (we.exercise.tracking == TrackingType.WEIGHT_REPS && set.countsForRecords) {
-                    val best = remember(we.exercise.id, w.completedSetCount) { session.bestOneRepMax(we.exercise.id) }
+                    val best = remember(we.exercise.id, w, records) { session.bestOneRepMax(we.exercise.id) }
                     best?.let { com.bestrong.core.stats.OneRepMax.repsToBeat(it, set.weightKg) }?.let { reps ->
                         Text(pluralStringResource(R.plurals.record_hint, reps, reps), style = MaterialTheme.typography.labelSmall, color = Done)
                     }

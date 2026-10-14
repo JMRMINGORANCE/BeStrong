@@ -276,7 +276,7 @@ object Strength {
         val byId = mutableMapOf<String, com.bestrong.core.model.Exercise>()
         inYear.forEach { w ->
             w.exercises.forEach { we ->
-                val e1rm = we.completedSets.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0
+                val e1rm = we.completedSets.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0
                 if (e1rm <= 0) return@forEach
                 byId[we.exercise.id] = we.exercise
                 val cur = firstAndBest[we.exercise.id]

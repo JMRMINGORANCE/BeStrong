@@ -416,11 +416,9 @@ class WorkoutSession @Inject constructor(
     val record: StateFlow<Boolean> = _record.asStateFlow()
     private var recordJob: Job? = null
 
-    /**
-     * Supera tu mejor 1RM estimado o peso máximo en ese ejercicio: las marcas de todo el historial
-     * (llegan del móvil), las de lo hecho solo en el reloj y las series anteriores de esta sesión.
-     * Sin ninguna marca previa no hay récord que batir.
-     */
+    /** Cambia cuando llegan marcas o historial del móvil (para recalcular la pista de récord). */
+    val recordsVersion: kotlinx.coroutines.flow.Flow<Pair<Any, Any>> = kotlinx.coroutines.flow.combine(store.settings, store.history) { s, h -> s to h }
+
     /** Mejor 1RM estimado hasta ahora (historial, reloj y lo hecho hoy); null si no hay marca previa. */
     fun bestOneRepMax(exerciseId: String): Double? {
         val local = WorkoutStats.personalRecords(store.history.value)[exerciseId]
@@ -430,6 +428,11 @@ class WorkoutSession @Inject constructor(
             .maxOrNull()?.takeIf { it > 0 }
     }
 
+    /**
+     * Supera tu mejor 1RM estimado o peso máximo en ese ejercicio: las marcas de todo el historial
+     * (llegan del móvil), las de lo hecho solo en el reloj y las series anteriores de esta sesión.
+     * Sin ninguna marca previa no hay récord que batir.
+     */
     private fun isRecord(exerciseId: String, tracking: TrackingType, set: WorkoutSet): Boolean {
         val s = store.settings.value
         val local = WorkoutStats.personalRecords(store.history.value)[exerciseId]

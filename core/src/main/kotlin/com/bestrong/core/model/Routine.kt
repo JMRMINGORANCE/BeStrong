@@ -141,3 +141,35 @@ fun Routine.normalizedSupersets(): Routine {
     val fixed = exercises.mapIndexed { i, re -> if (re.supersetId == ids[i]) re else re.copy(supersetId = ids[i]) }
     return if (fixed == exercises) this else copy(exercises = fixed)
 }
+
+/** Índices del tramo seguido de la misma superserie que contiene [index] (solo él si no tiene). */
+private fun Routine.blockAt(index: Int): IntRange {
+    val id = exercises[index].supersetId ?: return index..index
+    var start = index
+    var end = index
+    while (start > 0 && exercises[start - 1].supersetId == id) start--
+    while (end < exercises.lastIndex && exercises[end + 1].supersetId == id) end++
+    return start..end
+}
+
+/**
+ * Mueve el ejercicio [from] un puesto arriba ([down] = false) o abajo sin romper superseries: dentro de
+ * su superserie cambia de orden con el vecino; si no, se mueve su bloque entero (él o toda su superserie)
+ * al otro lado del bloque vecino.
+ */
+fun Routine.moveKeepingSupersets(from: Int, down: Boolean): Routine {
+    val neighbour = if (down) from + 1 else from - 1
+    if (from !in exercises.indices || neighbour !in exercises.indices) return this
+    val list = exercises.toMutableList()
+    val own = blockAt(from)
+    if (neighbour in own) {
+        list.add(neighbour, list.removeAt(from))
+    } else {
+        val other = blockAt(neighbour)
+        val moved = exercises.slice(own)
+        val passed = exercises.slice(other)
+        val reordered = if (down) passed + moved else moved + passed
+        reordered.forEachIndexed { k, re -> list[minOf(own.first, other.first) + k] = re }
+    }
+    return copy(exercises = list)
+}

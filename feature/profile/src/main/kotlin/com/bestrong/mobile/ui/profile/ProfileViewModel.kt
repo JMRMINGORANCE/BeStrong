@@ -134,7 +134,9 @@ class ProfileViewModel @Inject constructor(
                 .take(8),
             weeklyMuscles = WorkoutStats.weeklySetsPerMuscle(history, today, zone),
             muscleTrend = WorkoutStats.muscleTrend(history, today, zone),
-            year = Strength.yearSummary(history, if (today.monthValue == 1) today.year - 1 else today.year, zone),
+            // En enero se resume el año que acaba de terminar (si entrenaste); si no, el actual
+            year = (if (today.monthValue == 1) Strength.yearSummary(history, today.year - 1, zone) else null)
+                ?: Strength.yearSummary(history, today.year, zone),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 

@@ -47,6 +47,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
@@ -92,7 +93,10 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
     LaunchedEffect(showList) {
         if (showList) {
             // Se vacía la pila de paneles: «atrás» no debe volver a la ficha anterior
-            while (navigator.canNavigateBack()) navigator.navigateBack()
+            // PopLatest: en dos paneles todos los destinos tienen el mismo aspecto y el modo por defecto no retrocede
+            while (navigator.canNavigateBack(BackNavigationBehavior.PopLatest)) navigator.navigateBack(BackNavigationBehavior.PopLatest)
+            // Si aún queda una ficha (era el destino inicial), se cambia a la lista sin ficha
+            if (navigator.currentDestination?.contentKey != null) navigator.navigateTo(ListDetailPaneScaffoldRole.List)
             vm.listShown()
         }
     }

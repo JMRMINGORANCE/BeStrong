@@ -4,6 +4,7 @@ import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
+import com.bestrong.core.model.moveKeepingSupersets
 import com.bestrong.core.model.normalizedSupersets
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.training.ProgramTexts
@@ -201,7 +202,7 @@ class Iteration14Test {
     @Test fun coachReportShowsBothSides() {
         val w = finishedWorkout("w", java.time.LocalDate.of(2026, 3, 2), bench to listOf(done(20.0, 8).copy(repsRight = 7)))
         val text = com.bestrong.core.io.CoachReport.text(listOf(w), 0, com.bestrong.core.util.WeightUnit.KG, UTC, java.util.Locale.ROOT)
-        assertEquals(true, text.contains("20×8/7"))
+        assertEquals(true, text.contains("20×8+7"))
     }
 }
 
@@ -220,5 +221,21 @@ class YearSummaryTest {
         assertEquals(2, y.longestWeeklyStreak)
         assertEquals(bench.id, y.biggestGains.single().first.id)
         assertEquals(null, com.bestrong.core.stats.Strength.yearSummary(history, 2024, UTC))
+    }
+}
+
+class MoveKeepingSupersetsTest {
+    private fun re(id: String, ss: String?) = com.bestrong.core.model.RoutineExercise(id = id, exercise = bench, supersetId = ss)
+
+    @Test fun movingPastASupersetJumpsTheWholeBlock() {
+        val r = com.bestrong.core.model.Routine(name = "r", exercises = listOf(re("a", "x"), re("b", "x"), re("c", null)))
+        val up = r.moveKeepingSupersets(2, down = false).normalizedSupersets()
+        assertEquals(listOf("c", "a", "b"), up.exercises.map { it.id })
+        assertEquals(listOf(null, "x", "x"), up.exercises.map { it.supersetId })
+        // Mover un miembro de la superserie hacia fuera mueve el bloque entero
+        val down = r.moveKeepingSupersets(1, down = true).normalizedSupersets()
+        assertEquals(listOf("c", "a", "b"), down.exercises.map { it.id })
+        // Dentro de la superserie, solo cambian de orden
+        assertEquals(listOf("b", "a", "c"), r.moveKeepingSupersets(1, down = false).exercises.map { it.id })
     }
 }
