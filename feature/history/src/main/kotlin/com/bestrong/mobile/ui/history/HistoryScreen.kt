@@ -485,9 +485,11 @@ private fun caloriesSourceLine(w: Workout): String? {
 private fun GymFilterRow(vm: HistoryViewModel) {
     val gyms by vm.gymNames.collectAsStateWithLifecycle()
     val selected by vm.gymFilter.collectAsStateWithLifecycle()
-    if (gyms.size < 2) return
+    // Con un filtro puesto la fila siempre sale (aunque ya no queden entrenos de ese gimnasio), para poder quitarlo
+    val shown = (gyms + listOfNotNull(selected)).distinct()
+    if (shown.size < 2 && selected == null) return
     androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        gyms.forEach { g ->
+        shown.forEach { g ->
             FilterChip(selected = selected == g, onClick = { vm.gymFilter.value = if (selected == g) null else g }, label = { Text("🏋️ $g") })
         }
     }

@@ -124,10 +124,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             gym = g,
             canDelete = settings.gyms.size > 1 && settings.gyms.any { it.id == g.id },
             onSave = { updated ->
-                vm.updateSettings { s ->
-                    val exists = s.gyms.any { it.id == updated.id }
-                    s.copy(gyms = if (exists) s.gyms.map { if (it.id == updated.id) updated else it } else s.gyms + updated)
-                }
+                vm.saveGym(updated)
                 editingGym = null
             },
             onDelete = {

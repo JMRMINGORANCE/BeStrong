@@ -59,7 +59,8 @@ class WatchSyncService : WearableListenerService() {
                         // Calorías del reloj + activas (sin el gasto en reposo) con tus datos corporales
                         // Ejercicios con los datos completos del móvil (el reloj puede traerlos recortados)
                         val full = received.copy(exercises = received.exercises.map { we -> we.copy(exercise = repository.exercise(we.exercise.id) ?: we.exercise) })
-                        val workout = energy.complete(full, watchKcal = received.calories)
+                        // El reloj no sabe en qué gimnasio se está: el activo del móvil
+                        val workout = actions.withGym(energy.complete(full, watchKcal = received.calories))
                         val isNew = repository.historyOnce().none { it.id == workout.id }
                         repository.saveWorkout(workout)
                         repository.clearRemoteActive(workout.id)

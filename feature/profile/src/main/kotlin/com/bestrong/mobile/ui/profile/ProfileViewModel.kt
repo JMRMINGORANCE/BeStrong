@@ -439,13 +439,31 @@ class ProfileViewModel @Inject constructor(
 
     /** Copia ahora en la carpeta elegida y dice cómo ha ido (con reintentos, puede tardar un poco). */
     fun backupNow() {
-        val id = AutoBackupWorker.runNow(context)
         _messages.tryEmit(context.getString(R.string.backup_started))
         viewModelScope.launch {
-            // Con otra copia ya en marcha, esta petición no se encola: no hay nada que esperar
-            val done = androidx.work.WorkManager.getInstance(context).getWorkInfoByIdFlow(id)
-                .first { it == null || it.state.isFinished } ?: return@launch
-            _messages.tryEmit(context.getString(if (done.state == androidx.work.WorkInfo.State.SUCCEEDED) R.string.backup_now_done else R.string.backup_now_failed))
+            val message = when (AutoBackupWorker.runNowAndWait(context)) {
+                true -> R.string.backup_now_done
+                false -> R.string.backup_now_failed
+                null -> R.string.auto_backup_lost
+            }
+            _messages.tryEmit(context.getString(message))
+        }
+    }
+
+    /**
+     * Guarda un perfil de gimnasio (nuevo o editado). Si cambia de nombre, también en los entrenos hechos allí:
+     * el historial, su filtro y el relleno «en este gimnasio» van por el nombre.
+     */
+    fun saveGym(updated: com.bestrong.core.training.GymProfile) {
+        val oldName = settings.value.gyms.firstOrNull { it.id == updated.id }?.name
+        settingsStore.update { s ->
+            val exists = s.gyms.any { it.id == updated.id }
+            s.copy(gyms = if (exists) s.gyms.map { if (it.id == updated.id) updated else it } else s.gyms + updated)
+        }
+        if (oldName == null || oldName == updated.name) return
+        viewModelScope.launch {
+            repo.historyOnce(includePartner = true).filter { it.gymName == oldName }
+                .forEach { repo.saveWorkout(it.copy(gymName = updated.name)) }
         }
     }
 

@@ -123,7 +123,21 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
         setPartnerMode(partner)
     }
-    val previousSets: StateFlow<(String) -> List<WorkoutSet>> = repo.previousSetsLookup
+
+    /** «La vez anterior» de cada ejercicio: en este gimnasio si allí ya se hizo (como el relleno), si no la última. */
+    val previousSets: StateFlow<(String) -> List<WorkoutSet>> = combine(
+        repo.previousSetsLookup,
+        repo.history,
+        settingsStore.settings.map { s -> s.activeGym.name.takeIf { s.gyms.size > 1 } }.distinctUntilChanged(),
+    ) { all, history, gym ->
+        if (gym == null) {
+            all
+        } else {
+            val there = WorkoutStats.lastSetsByExercise(history.filter { it.gymName == gym })
+            val lookup: (String) -> List<WorkoutSet> = { id -> there[id] ?: all(id) }
+            lookup
+        }
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, repo.previousSetsLookup.value)
     val settings: StateFlow<UserSettings> = settingsStore.settings
     val rest: StateFlow<RestState?> = restTimer.rest
     val restEndedAt: StateFlow<Long?> = restTimer.restEndedAt
@@ -174,9 +188,15 @@ class ActiveWorkoutViewModel @Inject constructor(
             emptyMap()
         } else {
             // Con los mismos ajustes que el relleno (discos, tope semanal, subida que no se pierde), para no contradecirlo
+            // Lo hecho en este gimnasio, como el relleno (si allí ya se hizo el ejercicio)
+            val gym = s.activeGym.name.takeIf { s.gyms.size > 1 }
             exercises.mapNotNull { ex ->
-                Progression.suggest(ex, history, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id))
-                    ?.let { sug -> ex.id to sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, history = history), cappedByWeek = actions.cappedByWeek(ex, sug.sets, history)) }
+                val base = WorkoutStats.atGym(history, gym, ex.id)
+                Progression.suggest(ex, base, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id))
+                    ?.let { sug ->
+                        val previous = WorkoutStats.previousSets(ex.id, base)
+                        ex.id to sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, previous, history), cappedByWeek = actions.cappedByWeek(ex, sug.sets, history))
+                    }
             }.toMap()
         }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
@@ -212,18 +232,19 @@ class ActiveWorkoutViewModel @Inject constructor(
         if (settings.value.activeGym.id == id) return
         settingsStore.update { it.copy(activeGymId = id) }
         // Los dos entrenos (el tuyo y el de la pareja) están en el mismo gimnasio
-        refitActive(partnerMode.value)
-        refitActive(!partnerMode.value)
+        refitActive(partnerMode.value, undoable = true)
+        refitActive(!partnerMode.value, undoable = false)
     }
 
-    private fun refitActive(partner: Boolean) {
+    /** Ajusta lo pendiente de uno de los dos entrenos; el que no se ve, sin aviso (dos «deshacer» seguidos confunden). */
+    private fun refitActive(partner: Boolean, undoable: Boolean) {
         viewModelScope.launch {
             val (before, after) = update(partner) { w ->
                 w.copy(exercises = w.exercises.map { e -> refitToGym(e) })
             } ?: return@launch
             val old = before.exercises.flatMap { it.sets }.associateBy { it.id }
             val changed = after.exercises.flatMap { it.sets }.filter { old[it.id] != null && old[it.id] != it }.associateBy { it.id }
-            if (changed.isEmpty()) return@launch
+            if (changed.isEmpty() || !undoable) return@launch
             _events.tryEmit(
                 WorkoutEvent.Undoable(UndoKind.GYM, partner, before.id) { w ->
                     w.copy(exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { s -> if (changed[s.id] == s) old.getValue(s.id) else s }) })
@@ -521,7 +542,7 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     fun substitute(weId: String, exerciseId: String) {
         val to = repo.exercise(exerciseId) ?: return
-        val previousOfNew = WorkoutStats.previousSets(exerciseId, repo.history.value)
+        val previousOfNew = previousSets.value(exerciseId)
         val step = settings.value.stepKgFor(exerciseId)
         edit { WorkoutEditor.substitute(it, weId, to, previousOfNew, step) }
     }
@@ -712,7 +733,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                     R.string.tts_next,
                     formatDuration(restSeconds.toLong()),
                     we.exercise.displayName(appContext),
-                    describeSet(s, we.exercise.tracking, settings.value.unit),
+                    describeSet(s, we.exercise.tracking, settings.value.unit, withPace = false),
                 ),
             )
         }
@@ -727,8 +748,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             // Entreno de la pareja: se guarda aparte (no cuenta para tus récords ni estadísticas)
             viewModelScope.launch {
                 val current = repo.takePartnerActive() ?: return@launch
-                val finished = WorkoutEditor.finish(current, System.currentTimeMillis())
-                    .copy(gymName = current.gymName ?: settings.value.takeIf { it.gyms.size > 1 }?.activeGym?.name)
+                val finished = actions.withGym(WorkoutEditor.finish(current, System.currentTimeMillis()))
                 setPartnerMode(false)
                 if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
             }
@@ -741,9 +761,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             val ended = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
                 avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
                 maxHeartRate = metrics?.maxHeartRate ?: current.maxHeartRate,
-                // Dónde se entrenó (con varios perfiles; con uno solo no aporta nada)
-                gymName = current.gymName ?: settings.value.takeIf { it.gyms.size > 1 }?.activeGym?.name,
-            )
+            ).let(actions::withGym)
             // Calorías totales y activas: las del reloj si las hay; si no, pulso o estimación personalizada
             val finished = energy.complete(ended, watchKcal = metrics?.calories ?: current.calories)
             restTimer.skip()

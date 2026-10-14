@@ -160,6 +160,8 @@ data class SharedSettings(
     val exerciseBarKg: Map<String, Double> = emptyMap(),
     /** Gimnasio activo (discos, mancuernas, cierres): el reloj redondea la sugerencia a lo que se puede montar. */
     val activeGym: com.bestrong.core.training.GymProfile? = null,
+    /** Hay más de un gimnasio: el reloj rellena con lo hecho en el activo (con uno solo no hace falta). */
+    val multiGym: Boolean = false,
     /** Subida máxima semanal de Planificación (0,05 = 5 %); null = sin tope. */
     val weeklyCap: Double? = null,
 ) {

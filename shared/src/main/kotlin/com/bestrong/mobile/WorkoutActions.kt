@@ -111,12 +111,21 @@ class WorkoutActions @Inject constructor(
 
     /**
      * Si la rutina tiene gimnasio (y sigue existiendo), pasa a ser el activo: antes de rellenar, para que los
-     * pesos salgan con su material. Para empezarla, repetirla o repetir un entreno que salió de ella.
+     * pesos salgan con su material. Para empezarla, repetirla o repetir un entreno que salió de ella
+     * ([doneAtGymName]: dónde se hizo ese entreno, que manda sobre el de la rutina).
      */
-    fun useRoutineGym(routine: com.bestrong.core.model.Routine?) {
-        val id = routine?.gymId ?: return
-        if (settings.settings.value.gyms.any { it.id == id }) settings.update { it.copy(activeGymId = id) }
+    fun useRoutineGym(routine: com.bestrong.core.model.Routine?, doneAtGymName: String? = null) {
+        val gyms = settings.settings.value.gyms
+        // Al repetir un entreno: el gimnasio donde se hizo (si sigue con ese nombre); si no, el de la rutina
+        val id = gyms.firstOrNull { it.name == doneAtGymName }?.id ?: routine?.gymId?.takeIf { id -> gyms.any { it.id == id } } ?: return
+        settings.update { it.copy(activeGymId = id) }
     }
+
+    /** Nombre del gimnasio activo para guardarlo en el entreno (solo con varios perfiles: con uno no aporta). */
+    fun currentGymName(): String? = settings.settings.value.takeIf { it.gyms.size > 1 }?.activeGym?.name
+
+    /** El entreno con el gimnasio donde se ha hecho, si aún no lo tiene (al terminarlo en el móvil o en el reloj). */
+    fun withGym(workout: Workout): Workout = if (workout.gymName != null) workout else workout.copy(gymName = currentGymName())
 
     suspend fun exportHeartRateIfEnabled(workout: Workout) {
         if (!settings.settings.value.healthConnectExport) return

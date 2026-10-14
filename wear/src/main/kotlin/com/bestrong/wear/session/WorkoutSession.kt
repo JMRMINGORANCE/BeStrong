@@ -170,17 +170,20 @@ class WorkoutSession @Inject constructor(
     /** Rellena con la sugerencia de progresión (si está activada en el móvil) o con la última sesión. */
     private fun prefill(exerciseId: String): List<WorkoutSet> {
         val s = store.settings.value
+        // Como en el móvil: con varios gimnasios, lo hecho en el activo si allí ya se hizo el ejercicio
+        val base = WorkoutStats.atGym(store.history.value, s.activeGym?.name?.takeIf { s.multiGym }, exerciseId)
+        val previous = WorkoutStats.previousSets(exerciseId, base)
         if (s.progressionEnabled) {
             val ex = exerciseFor(exerciseId)
             if (ex != null) {
-                Progression.suggest(ex, store.history.value, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { sug ->
+                Progression.suggest(ex, base, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { sug ->
                     val weekAgo = System.currentTimeMillis() - 7 * 86_400_000L
                     val lastWeekBest = WorkoutStats.bestWeightBetween(exerciseId, store.history.value, weekAgo, Long.MAX_VALUE)
-                    return s.loadable(ex, sug, previous(exerciseId), lastWeekBest)
+                    return s.loadable(ex, sug, previous, lastWeekBest)
                 }
             }
         }
-        return previous(exerciseId)
+        return previous
     }
 
     private fun exerciseFor(id: String): Exercise? =

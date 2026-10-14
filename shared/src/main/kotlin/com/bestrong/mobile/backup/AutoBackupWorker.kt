@@ -15,6 +15,7 @@ import com.bestrong.mobile.di.WorkerEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.flow.first
 
 /**
  * Copia de seguridad semanal en la carpeta que elija el usuario (Drive, almacenamiento local…):
@@ -31,13 +32,15 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         val granted = tree != null && applicationContext.contentResolver.persistedUriPermissions.any { it.uri == tree && it.isWritePermission }
         if (tree == null || !granted) {
             // Se vuelve a mirar: si el usuario acaba de quitar la carpeta él mismo, no es una carpeta perdida
-            if (tree != null && settingsStore.settings.value.backupFolderUri == tree.toString()) {
+            val lost = tree != null && settingsStore.settings.value.backupFolderUri == tree.toString()
+            if (lost) {
                 Log.w("AutoBackup", "Sin permiso sobre la carpeta de copias: se desactiva")
                 // Se avisa en Perfil: sin esto las copias se paraban sin que nadie lo supiera
                 settingsStore.update { it.copy(backupFolderUri = null, backupFolderLost = true) }
                 com.bestrong.mobile.notify.Notifier.backupStopped(applicationContext, folderLost = true)
             }
-            return Result.success()
+            // Sin carpeta no hay nada que hacer; con la carpeta perdida no se ha copiado nada («Copiar ahora» lo dice)
+            return if (lost) Result.failure(androidx.work.workDataOf(OUT_FOLDER_LOST to true)) else Result.success()
         }
         return runCatching {
             val data = deps.backup().data()
@@ -134,13 +137,32 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             wm.enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.KEEP, request)
         }
 
-        /** Copia inmediata (al elegir la carpeta). */
-        /** Lanza una copia ya (si no hay otra en marcha) y devuelve el id de la petición, para seguirla. */
-        fun runNow(context: Context): java.util.UUID {
-            val request = androidx.work.OneTimeWorkRequestBuilder<AutoBackupWorker>().build()
+        /** En el resultado de una copia fallida: la carpeta ya no estaba disponible. */
+        const val OUT_FOLDER_LOST = "folder_lost"
+
+        /** Lanza una copia ya, si no hay otra en marcha (al elegir la carpeta, «Copiar ahora»). */
+        fun runNow(context: Context): androidx.work.Operation =
             // Única: varios toques seguidos no escriben a la vez el mismo archivo del día
-            WorkManager.getInstance(context).enqueueUniqueWork(NOW_NAME, androidx.work.ExistingWorkPolicy.KEEP, request)
-            return request.id
+            WorkManager.getInstance(context).enqueueUniqueWork(NOW_NAME, androidx.work.ExistingWorkPolicy.KEEP, androidx.work.OneTimeWorkRequestBuilder<AutoBackupWorker>().build())
+
+        /**
+         * Copia ya y espera a que acabe: la pedida o, si ya había una en marcha (no se lanza otra), esa. Devuelve
+         * true si salió bien, false si falló y null si la carpeta ya no estaba.
+         */
+        suspend fun runNowAndWait(context: Context): Boolean? {
+            val wm = WorkManager.getInstance(context)
+            val request = androidx.work.OneTimeWorkRequestBuilder<AutoBackupWorker>().build()
+            val running = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                wm.enqueueUniqueWork(NOW_NAME, androidx.work.ExistingWorkPolicy.KEEP, request).result.get()
+                wm.getWorkInfosForUniqueWork(NOW_NAME).get()
+            }
+            val target = running.firstOrNull { it.id == request.id }?.id ?: running.firstOrNull { !it.state.isFinished }?.id ?: request.id
+            val info = wm.getWorkInfoByIdFlow(target).first { it == null || it.state.isFinished }
+            return when {
+                info?.state == androidx.work.WorkInfo.State.SUCCEEDED -> true
+                info?.outputData?.getBoolean(OUT_FOLDER_LOST, false) == true -> null
+                else -> false
+            }
         }
     }
 }

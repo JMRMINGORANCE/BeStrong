@@ -137,7 +137,15 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
 
     // Si algún valor guardado no se puede leer, mejor los ajustes por defecto que no arrancar
     private val _settings = MutableStateFlow(runCatching { read() }.getOrElse { UserSettings() })
+
     val settings: StateFlow<UserSettings> = _settings
+
+    init {
+        // Carpeta de copias elegida antes de guardar cuándo: se cuenta desde hoy (si no, nunca avisaría)
+        if (_settings.value.backupFolderUri != null && _settings.value.backupFolderSetEpochMs == 0L) {
+            update { it.copy(backupFolderSetEpochMs = System.currentTimeMillis()) }
+        }
+    }
 
     /** Perfiles de gimnasio guardados; si no hay (o no se leen), el de gimnasio y el de casa por defecto. */
     private fun readGyms(): List<GymProfile> = prefs.getString("gyms", null)

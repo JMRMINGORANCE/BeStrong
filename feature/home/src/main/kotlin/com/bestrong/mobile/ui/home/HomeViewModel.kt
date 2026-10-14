@@ -146,7 +146,7 @@ class HomeViewModel @Inject constructor(
     /** Lo termina a la hora del último cambio y lo guarda en el historial. */
     fun finishForgotten() = viewModelScope.launch {
         val w = repo.activeWorkout.value ?: return@launch
-        val finished = WorkoutEditor.finishAtLastActivity(w)
+        val finished = actions.withGym(WorkoutEditor.finishAtLastActivity(w))
         repo.setActive(null)
         if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
         _messages.tryEmit(context.getString(R.string.msg_forgotten_saved))
@@ -208,7 +208,7 @@ class HomeViewModel @Inject constructor(
         val last = repo.history.value.firstOrNull { it.isFinished } ?: return@launch
         if (repo.activeOnce() == null) {
             val template = last.routineId?.let { repo.routine(it) }
-            actions.useRoutineGym(template)
+            actions.useRoutineGym(template, last.gymName)
             val fromProgram = last.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
             // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
             // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya

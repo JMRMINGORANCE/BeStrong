@@ -57,7 +57,10 @@ class HistoryViewModel @Inject constructor(
     val gymFilter = MutableStateFlow<String?>(null)
 
     /** Gimnasios que aparecen en el historial (el filtro solo sale con dos o más). */
-    val gymNames: StateFlow<List<String>> = repo.history.map { h -> h.mapNotNull { it.gymName }.distinct().sorted() }
+    val gymNames: StateFlow<List<String>> = combine(repo.history, repo.partnerHistory, showPartner) { h, p, sp ->
+        // Con los de la pareja a la vista, también sus gimnasios
+        (if (sp) h + p else h).mapNotNull { it.gymName }.distinct().sorted()
+    }
         .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val filtered: StateFlow<List<Workout>> = combine(
@@ -197,7 +200,7 @@ class HistoryViewModel @Inject constructor(
     fun repeat(workout: Workout, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() == null) {
             val template = workout.routineId?.let { repo.routine(it) }
-            actions.useRoutineGym(template)
+            actions.useRoutineGym(template, workout.gymName)
             val fromProgram = workout.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
             // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
             // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya

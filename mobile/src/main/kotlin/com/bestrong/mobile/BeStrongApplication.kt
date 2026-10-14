@@ -94,6 +94,7 @@ class AppSync @Inject constructor(
                 gymBarKg = s.activeGym.loadedBarKg,
                 exerciseBarKg = s.exerciseBarKg,
                 activeGym = s.activeGym,
+                multiGym = s.gyms.size > 1,
                 weeklyCap = cap,
                 pinnedNotes = pinned,
                 warmupRestSeconds = s.warmupRestSeconds,
