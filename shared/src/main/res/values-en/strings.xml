@@ -913,7 +913,7 @@
     <string name="dumbbells_nearest">Closest dumbbells in your gym: %1$s</string>
     <string name="previous_set_note">Last time: ✎ %1$s</string>
     <string name="muscle_trend">Sets per muscle (8 weeks)</string>
-    <string name="muscle_trend_hint">Effective sets per week (secondary muscles count half). Recommended: 10–20.</string>
+    <string name="muscle_trend_hint">Effective sets per week (secondary muscles count half). Recommended: %1$d–%2$d.</string>
     <string name="stat_average_workout">Average workout: %1$s · %2$d sets · %3$s</string>
     <string name="weekly_goal_reached">🎯 Weekly goal reached! (%1$d days)</string>
     <string name="tool_share_week">Share the week (text for your coach)</string>
@@ -925,9 +925,9 @@
     <string name="set_copy_following">Copy to next sets (%1$d)</string>
     <string name="remaining_time_eta">≈ %1$d min left · done around %2$s</string>
     <string name="rest_real_avg">Average actual rest: %1$s (planned %2$s)</string>
-    <string name="muscle_zone_low">Recent weekly average: %1$s sets — below the usual range (10–20)</string>
-    <string name="muscle_zone_ok">Recent weekly average: %1$s sets — within the usual range (10–20)</string>
-    <string name="muscle_zone_high">Recent weekly average: %1$s sets — above the usual range (10–20): watch your recovery</string>
+    <string name="muscle_zone_low">Recent weekly average: %1$s sets — below the usual range (%2$d–%3$d)</string>
+    <string name="muscle_zone_ok">Recent weekly average: %1$s sets — within the usual range (%2$d–%3$d)</string>
+    <string name="muscle_zone_high">Recent weekly average: %1$s sets — above the usual range (%2$d–%3$d): watch your recovery</string>
     <string name="undo_copied_sets">Load copied to the next sets</string>
     <string name="program_amrap_note">Last set: as many reps as possible (+)</string>
     <string name="program_week_prefix">W</string>
@@ -1017,4 +1017,6 @@
     <string name="goal_progress_now">Your best: %1$s of %2$s</string>
     <string name="goal_progress_now_eta">Your best: %1$s of %2$s · at this pace, around %3$s</string>
     <string name="weekly_sets_target">Minimum:</string>
+    <string name="goal_hint_reps">Set a reps-in-one-set target (e.g. 15) to see how far you are.</string>
+    <string name="goal_hint_time">Set a time target in seconds (e.g. 120) to see how far you are.</string>
 </resources>

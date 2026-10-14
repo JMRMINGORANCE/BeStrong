@@ -60,7 +60,7 @@
     <ID>ReturnCount:Planning.kt$Calisthenics$fun next(exerciseId: String, history: List&lt;Workout&gt;): String?</ID>
     <ID>ReturnCount:ProfileViewModel.kt$ProfileViewModel$private fun challenge(history: List&lt;com.bestrong.core.model.Workout&gt;): Triple&lt;String, Double, Long&gt;?</ID>
     <ID>ReturnCount:Progression.kt$Progression$fun suggest( exercise: Exercise, history: List&lt;Workout&gt;, incrementKg: Double = 2.5, stallSessions: Int = 3, ): ProgressionSuggestion?</ID>
-    <ID>ReturnCount:Strength.kt$Strength$fun predictDate(points: List&lt;Pair&lt;Long, Double&gt;&gt;, target: Double): Long?</ID>
+    <ID>ReturnCount:Strength.kt$Strength$fun predictDate(points: List&lt;Pair&lt;Long, Double&gt;&gt;, target: Double, nowEpochMs: Long = System.currentTimeMillis()): Long?</ID>
     <ID>ReturnCount:Strength.kt$Strength$fun standing(exerciseId: String, oneRepMaxKg: Double, bodyWeightKg: Double, sex: Sex): StrengthStanding?</ID>
     <ID>ReturnCount:Tempo.kt$Tempo.Companion$fun parse(text: String?): Tempo?</ID>
     <ID>ReturnCount:WorkoutActions.kt$WorkoutActions$suspend fun completeNextSet(): Boolean</ID>

@@ -323,11 +323,6 @@ class ActiveWorkoutViewModel @Inject constructor(
             val marked = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
             if (marked.isEmpty()) return@launch
             // Si ya hay un descanso en marcha (p. ej. se completa un ejercicio olvidado), no se reinicia
-            // El objetivo también se celebra si se llega marcando de golpe (con la mejor de las marcadas)
-            if (!partner) {
-                val tracking = after.exercises.firstOrNull { it.id == weId }?.exercise?.tracking
-                tracking?.let { t -> marked.values.maxByOrNull { ExerciseGoals.valueOf(it, t) }?.let { checkGoal(after, weId, it.id) } }
-            }
             val startsRest = restTimer.rest.value == null
             if (startsRest) onSetCompleted(after, after.exercises.indexOfFirst { it.id == weId })
             // Al deshacer solo se para el descanso que arrancó esto (no otro que vino después)
@@ -338,6 +333,12 @@ class ActiveWorkoutViewModel @Inject constructor(
                 },
             )
             pendingRestUndo = startedEnd
+            // El objetivo también se celebra si se llega marcando de golpe (después del aviso de deshacer:
+            // las marcadas a la vez no cuentan como «ya lo tenías»)
+            if (!partner) {
+                val tracking = after.exercises.firstOrNull { it.id == weId }?.exercise?.tracking
+                tracking?.let { t -> marked.values.maxByOrNull { ExerciseGoals.valueOf(it, t) }?.let { checkGoal(after, weId, it.id, marked.keys) } }
+            }
         }
     }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
@@ -454,7 +455,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /** Celebra la primera serie que llega al objetivo de 1RM del ejercicio (no si ya lo tenías). */
-    private fun checkGoal(w: Workout, weId: String, setId: String) {
+    private fun checkGoal(w: Workout, weId: String, setId: String, markedTogether: Set<String> = setOf(setId)) {
         val we = w.exercises.firstOrNull { it.id == weId }
         val set = we?.sets?.firstOrNull { it.id == setId }
         // Sin las marcas cargadas todavía no se sabe si ya lo tenías: mejor no celebrar de más
@@ -469,7 +470,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             ExerciseGoals.points(repo.history.value, we.exercise.id, tracking).maxOfOrNull { it.second } ?: 0.0
         }
         val todayBest = w.exercises.filter { it.exercise.id == we.exercise.id }.flatMap { it.completedSets }
-            .filter { it.id != setId }.maxOfOrNull { ExerciseGoals.valueOf(it, tracking) } ?: 0.0
+            .filter { it.id != setId && it.id !in markedTogether }.maxOfOrNull { ExerciseGoals.valueOf(it, tracking) } ?: 0.0
         if (value >= goal && maxOf(historyBest, todayBest) < goal) _events.tryEmit(WorkoutEvent.GoalReached(we.exercise, goalText(we.exercise, goal)))
     }
 

@@ -913,7 +913,7 @@
     <string name="dumbbells_nearest">Halteres mais próximos no teu ginásio: %1$s</string>
     <string name="previous_set_note">Da última vez: ✎ %1$s</string>
     <string name="muscle_trend">Séries por músculo (8 semanas)</string>
-    <string name="muscle_trend_hint">Séries efetivas por semana (secundários a metade). Recomendado: 10–20.</string>
+    <string name="muscle_trend_hint">Séries efetivas por semana (secundários a metade). Recomendado: %1$d–%2$d.</string>
     <string name="stat_average_workout">Treino médio: %1$s · %2$d séries · %3$s</string>
     <string name="weekly_goal_reached">🎯 Objetivo semanal cumprido! (%1$d dias)</string>
     <string name="tool_share_week">Partilhar a semana (texto para o teu treinador)</string>
@@ -925,9 +925,9 @@
     <string name="set_copy_following">Copiar para as seguintes (%1$d)</string>
     <string name="remaining_time_eta">≈ %1$d min para terminar · por volta das %2$s</string>
     <string name="rest_real_avg">Descanso real médio: %1$s (previsto %2$s)</string>
-    <string name="muscle_zone_low">Média das últimas semanas: %1$s séries — abaixo do intervalo habitual (10–20)</string>
-    <string name="muscle_zone_ok">Média das últimas semanas: %1$s séries — dentro do intervalo habitual (10–20)</string>
-    <string name="muscle_zone_high">Média das últimas semanas: %1$s séries — acima do intervalo habitual (10–20): atenção à recuperação</string>
+    <string name="muscle_zone_low">Média das últimas semanas: %1$s séries — abaixo do intervalo habitual (%2$d–%3$d)</string>
+    <string name="muscle_zone_ok">Média das últimas semanas: %1$s séries — dentro do intervalo habitual (%2$d–%3$d)</string>
+    <string name="muscle_zone_high">Média das últimas semanas: %1$s séries — acima do intervalo habitual (%2$d–%3$d): atenção à recuperação</string>
     <string name="undo_copied_sets">Carga copiada para as séries seguintes</string>
     <string name="program_amrap_note">Última série: máximo de repetições (+)</string>
     <string name="program_week_prefix">S</string>
@@ -1017,4 +1017,6 @@
     <string name="goal_progress_now">A tua melhor marca: %1$s de %2$s</string>
     <string name="goal_progress_now_eta">A tua melhor marca: %1$s de %2$s · a este ritmo, por volta de %3$s</string>
     <string name="weekly_sets_target">Mínimo:</string>
+    <string name="goal_hint_reps">Define uma meta de repetições numa série (p. ex. 15) e vês quanto falta.</string>
+    <string name="goal_hint_time">Define uma meta de tempo em segundos (p. ex. 120) e vês quanto falta.</string>
 </resources>

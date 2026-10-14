@@ -325,7 +325,8 @@ class HomeViewModel @Inject constructor(
         // Se mueve dentro de su carpeta (en Inicio cada carpeta se ve aparte): el vecino es el de la misma carpeta
         fun folderOf(r: Routine) = r.folder?.trim()?.takeIf(String::isNotEmpty)
         // Las archivadas van en su propia sección: no se intercambia con una que no se ve
-        val sameFolder = list.indices.filter { folderOf(list[it]) == folderOf(routine) && list[it].archived == routine.archived }
+        // (las archivadas se ven todas juntas, sin carpetas)
+        val sameFolder = list.indices.filter { list[it].archived == routine.archived && (routine.archived || folderOf(list[it]) == folderOf(routine)) }
         val j = sameFolder.getOrNull(sameFolder.indexOf(i) + delta) ?: return@launch
         if (i < 0) return@launch
         list[i] = list[j].also { list[j] = list[i] }

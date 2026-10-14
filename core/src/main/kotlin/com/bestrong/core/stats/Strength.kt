@@ -205,9 +205,8 @@ object Strength {
      * Predicción por regresión lineal de cuándo se alcanzará [target] (p. ej. un 1RM de 100 kg)
      * a partir de puntos (fecha, valor). Null si no hay progreso o pocos datos.
      */
-    fun predictDate(points: List<Pair<Long, Double>>, target: Double): Long? {
+    fun predictDate(points: List<Pair<Long, Double>>, target: Double, nowEpochMs: Long = System.currentTimeMillis()): Long? {
         if (points.size < 3) return null
-        if (points.maxOf { it.second } >= target) return points.first { it.second >= target }.first
         val x0 = points.first().first.toDouble()
         val xs = points.map { (it.first - x0) / 86_400_000.0 }
         val ys = points.map { it.second }
@@ -220,8 +219,8 @@ object Strength {
         val intercept = my - slope * mx
         val day = (target - intercept) / slope
         val eta = (x0 + day * 86_400_000.0).toLong()
-        // Demasiado lejos, o antes de la última sesión (la recta va por delante de un estancamiento): no sirve
-        return eta.takeIf { day <= 3 * 365 && it > points.last().first }
+        // Demasiado lejos, o una fecha ya pasada (la recta va por delante de un estancamiento, o los datos son viejos): no sirve
+        return eta.takeIf { day <= 3 * 365 && it > maxOf(points.last().first, nowEpochMs) }
     }
 
     /** Resumen de un periodo [from, to) frente al periodo anterior de la misma duración. */

@@ -209,7 +209,11 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         Column(Modifier.padding(16.dp)) {
                             SectionHeader(stringResource(R.string.strength_curve))
                             Text(stringResource(R.string.strength_curve_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            BarChart(s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps", unit.fromKg(kg)) })
+                            val repsLabel = stringResource(R.string.reps_short)
+                            BarChart(
+                                s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps", unit.fromKg(kg)) },
+                                describe = { "${it.label} $repsLabel: ${unit.format(unit.toKg(it.value), withUnit = true)}" },
+                            )
                             // Mejores marcas por repeticiones (1RM, 3RM, 5RM…), las que se suelen buscar
                             // N RM = lo más pesado movido al menos N veces (100 kg × 6 también vale como 5RM)
                             val repMaxes = REP_MAXES.mapNotNull { r -> s.strengthCurve.filterKeys { it >= r }.values.maxOrNull()?.let { r to it } }

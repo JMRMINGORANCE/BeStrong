@@ -317,7 +317,8 @@ object WorkoutStats {
     fun laggingMuscles(history: List<Workout>, today: LocalDate, zone: ZoneId, limit: Int = 3, minSets: Double = MuscleTargets.MIN_WEEKLY_SETS): List<Pair<MuscleGroup, Double>> {
         if (today.dayOfWeek < DayOfWeek.THURSDAY) return emptyList()
         return muscleTrend(history, today, zone).mapNotNull { (m, weeks) ->
-            val usual = weeklySetsZone(weeks, minSets = minSets)?.second ?: return@mapNotNull null
+            // «Lo entrenas normalmente» con el criterio general; tu mínimo solo decide si esta semana vas corto
+            val usual = weeklySetsZone(weeks, minSets = minOf(minSets, MuscleTargets.MIN_WEEKLY_SETS))?.second ?: return@mapNotNull null
             val now = weeks.last().second
             (m to now).takeIf { usual >= VolumeStatus.OPTIMAL && now < minSets }
         }.sortedBy { it.second }.take(limit)

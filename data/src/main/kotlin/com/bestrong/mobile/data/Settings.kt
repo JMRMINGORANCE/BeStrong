@@ -72,6 +72,8 @@ data class UserSettings(
     val bodyUnit: WeightUnit? = null,
     /** Peso corporal objetivo (kg); sirve para bajar o para subir. */
     val bodyWeightGoalKg: Double? = null,
+    /** Peso que tenías al ponerte el objetivo: marca si es para bajar o para subir. */
+    val bodyWeightGoalStartKg: Double? = null,
     /** Series semanales por músculo que se quiere alcanzar como mínimo (mapa, Inicio, widget). */
     val weeklySetsTarget: Int = 10,
     /** Columnas visibles en la tabla de series. */
@@ -147,6 +149,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         restVibration = enumOr("rest_vibration", VibrationStyle.TRIPLE),
         bodyUnit = prefs.getString("body_unit", null)?.let { runCatching { WeightUnit.valueOf(it) }.getOrNull() },
         bodyWeightGoalKg = prefs.getString("body_weight_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
+        bodyWeightGoalStartKg = prefs.getString("body_weight_goal_start", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         weeklySetsTarget = prefs.getInt("weekly_sets_target", 10).coerceIn(1, 30),
         showPreviousColumn = prefs.getBoolean("col_previous", true),
         showComparison = prefs.getBoolean("col_comparison", true),
@@ -205,6 +208,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("rest_vibration", s.restVibration.name)
             putString("body_unit", s.bodyUnit?.name)
             putString("body_weight_goal", s.bodyWeightGoalKg?.toString())
+            putString("body_weight_goal_start", s.bodyWeightGoalStartKg?.toString())
             putInt("weekly_sets_target", s.weeklySetsTarget)
             putBoolean("col_previous", s.showPreviousColumn)
             putBoolean("col_comparison", s.showComparison)
@@ -263,7 +267,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "body_weight_goal")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "body_weight_goal", "body_weight_goal_start")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
     }
 }

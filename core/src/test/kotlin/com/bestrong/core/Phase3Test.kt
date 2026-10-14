@@ -79,7 +79,7 @@ class Phase3Test {
         assertFalse(a.first { it.id == "workouts_50" }.unlocked)
         assertNotNull(a.firstOrNull { it.id == "bench_bw" })
         val points = history.map { it.startedAtEpochMs to (it.exercises[0].sets[0].weightKg) }
-        val eta = Strength.predictDate(points, 100.0)!!
+        val eta = Strength.predictDate(points, 100.0, nowEpochMs = history.last().startedAtEpochMs)!!
         assertTrue(eta > history.last().startedAtEpochMs)
         assertNull(Strength.predictDate(points.map { it.first to 60.0 }, 100.0))
         val week = Strength.weekSummary(history, today, zone)

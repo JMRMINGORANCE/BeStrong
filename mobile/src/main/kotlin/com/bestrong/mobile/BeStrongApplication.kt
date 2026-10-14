@@ -107,9 +107,10 @@ class AppSync @Inject constructor(
         scope.launch {
             repository.history.debounce(2_000).collect { watchSync.pushHistory(it) }
         }
-        // El widget muestra la semana y la rutina que toca: se redibuja si cambia el historial o las rutinas
+        // El widget muestra la semana y la rutina que toca: se redibuja si cambia el historial, las rutinas
+        // o el mínimo de series por músculo
         scope.launch {
-            merge(repository.history, repository.routines).debounce(2_000).collect {
+            merge(repository.history, repository.routines, settings.settings.map { it.weeklySetsTarget }.distinctUntilChanged()).debounce(2_000).collect {
                 BeStrongWidget.refresh(context)
                 com.bestrong.mobile.widget.MuscleWidget.refresh(context)
             }

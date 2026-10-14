@@ -913,7 +913,7 @@
     <string name="dumbbells_nearest">Nächste Kurzhanteln in deinem Studio: %1$s</string>
     <string name="previous_set_note">Letztes Mal: ✎ %1$s</string>
     <string name="muscle_trend">Sätze pro Muskel (8 Wochen)</string>
-    <string name="muscle_trend_hint">Effektive Sätze pro Woche (Nebenmuskeln halb). Empfohlen: 10–20.</string>
+    <string name="muscle_trend_hint">Effektive Sätze pro Woche (Nebenmuskeln halb). Empfohlen: %1$d–%2$d.</string>
     <string name="stat_average_workout">Durchschnittliches Training: %1$s · %2$d Sätze · %3$s</string>
     <string name="weekly_goal_reached">🎯 Wochenziel erreicht! (%1$d Tage)</string>
     <string name="tool_share_week">Woche teilen (Text für deinen Coach)</string>
@@ -925,9 +925,9 @@
     <string name="set_copy_following">Auf folgende Sätze übertragen (%1$d)</string>
     <string name="remaining_time_eta">≈ %1$d Min. übrig · fertig gegen %2$s</string>
     <string name="rest_real_avg">Tatsächliche Pause im Schnitt: %1$s (geplant %2$s)</string>
-    <string name="muscle_zone_low">Wochenschnitt zuletzt: %1$s Sätze — unter dem üblichen Bereich (10–20)</string>
-    <string name="muscle_zone_ok">Wochenschnitt zuletzt: %1$s Sätze — im üblichen Bereich (10–20)</string>
-    <string name="muscle_zone_high">Wochenschnitt zuletzt: %1$s Sätze — über dem üblichen Bereich (10–20): achte auf die Erholung</string>
+    <string name="muscle_zone_low">Wochenschnitt zuletzt: %1$s Sätze — unter dem üblichen Bereich (%2$d–%3$d)</string>
+    <string name="muscle_zone_ok">Wochenschnitt zuletzt: %1$s Sätze — im üblichen Bereich (%2$d–%3$d)</string>
+    <string name="muscle_zone_high">Wochenschnitt zuletzt: %1$s Sätze — über dem üblichen Bereich (%2$d–%3$d): achte auf die Erholung</string>
     <string name="undo_copied_sets">Last auf die folgenden Sätze übertragen</string>
     <string name="program_amrap_note">Letzter Satz: so viele Wdh. wie möglich (+)</string>
     <string name="program_week_prefix">W</string>
@@ -1017,4 +1017,6 @@
     <string name="goal_progress_now">Deine Bestleistung: %1$s von %2$s</string>
     <string name="goal_progress_now_eta">Deine Bestleistung: %1$s von %2$s · in diesem Tempo um den %3$s</string>
     <string name="weekly_sets_target">Minimum:</string>
+    <string name="goal_hint_reps">Setz dir ein Ziel an Wiederholungen in einem Satz (z. B. 15) und sieh, wie viel fehlt.</string>
+    <string name="goal_hint_time">Setz dir ein Zeitziel in Sekunden (z. B. 120) und sieh, wie viel fehlt.</string>
 </resources>

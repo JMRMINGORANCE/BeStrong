@@ -220,16 +220,22 @@ private fun WeightGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>
                     keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                 )
             },
-            confirmButton = { TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = kg) }; editing = false }, enabled = kg != null) { Text(stringResource(R.string.action_save)) } },
+            // Se guarda también el peso de ahora: decide si el objetivo es bajar o subir
+            confirmButton = {
+                TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = kg, bodyWeightGoalStartKg = points.lastOrNull()?.second) }; editing = false }, enabled = kg != null) {
+                    Text(stringResource(R.string.action_save))
+                }
+            },
             dismissButton = {
                 Row {
-                    if (goal != null) TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = null) }; editing = false }) { Text(stringResource(R.string.goal_remove)) }
+                    if (goal != null) TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = null, bodyWeightGoalStartKg = null) }; editing = false }) { Text(stringResource(R.string.goal_remove)) }
                     TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_cancel)) }
                 }
             },
         )
     }
-    val progress = remember(points, goal) { goal?.let { com.bestrong.core.stats.BodyWeightGoal.progress(points, it) } }
+    val start = settings.bodyWeightGoalStartKg
+    val progress = remember(points, goal, start) { goal?.let { com.bestrong.core.stats.BodyWeightGoal.progress(points, it, start) } }
     Row(verticalAlignment = Alignment.CenterVertically) {
         val text = when {
             goal == null || progress == null -> stringResource(R.string.weight_goal_none)

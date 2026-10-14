@@ -15,7 +15,8 @@ object ExerciseGoals {
     fun valueOf(set: WorkoutSet, tracking: TrackingType): Double = when {
         !set.countsForRecords -> 0.0
         tracking == TrackingType.WEIGHT_REPS -> set.estimatedOneRepMax
-        tracking == TrackingType.REPS_ONLY -> set.totalReps.toDouble()
+        // Como el récord de reps: por lado (el peor si es unilateral) y sin asistencia (peso negativo)
+        tracking == TrackingType.REPS_ONLY -> if (set.weightKg < 0) 0.0 else (set.repsRight?.let { minOf(set.reps, it) } ?: set.reps).toDouble()
         tracking == TrackingType.DURATION -> set.durationSec.toDouble()
         else -> 0.0
     }

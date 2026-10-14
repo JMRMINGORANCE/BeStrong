@@ -381,7 +381,7 @@ fun TrainingLoadCard(stats: AdvancedStats) {
 /** Series por semana de un músculo (8 semanas) frente a la recomendación de 10–20. */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun MuscleTrendCard(trend: Map<com.bestrong.core.model.MuscleGroup, List<Pair<java.time.LocalDate, Double>>>) {
+fun MuscleTrendCard(trend: Map<com.bestrong.core.model.MuscleGroup, List<Pair<java.time.LocalDate, Double>>>, target: Int = com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()) {
     if (trend.isEmpty()) return
     var selected by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(trend.keys.first()) }
     val weeks = trend[selected] ?: trend.values.first()
@@ -394,21 +394,23 @@ fun MuscleTrendCard(trend: Map<com.bestrong.core.model.MuscleGroup, List<Pair<ja
                 }
             }
             BarChart(weeks.map { (monday, sets) -> ChartPoint(formatShortDate(monday.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()), sets) })
-            MuscleZoneLine(weeks)
-            Text(stringResource(R.string.muscle_trend_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            MuscleZoneLine(weeks, target)
+            Text(stringResource(R.string.muscle_trend_hint, target, com.bestrong.core.stats.MuscleTargets.MAX_WEEKLY_SETS.toInt()), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 /** Media de las semanas cerradas frente al rango habitual de 10–20 series. */
 @Composable
-private fun MuscleZoneLine(weeks: List<Pair<java.time.LocalDate, Double>>) {
-    val (avg, zone) = com.bestrong.core.stats.WorkoutStats.weeklySetsZone(weeks) ?: return
+private fun MuscleZoneLine(weeks: List<Pair<java.time.LocalDate, Double>>, target: Int) {
+    // Tu mínimo semanal (Perfil › mapa muscular), el mismo que usan el mapa, Inicio y el widget
+    val (avg, zone) = com.bestrong.core.stats.WorkoutStats.weeklySetsZone(weeks, minSets = target.toDouble()) ?: return
+    val max = com.bestrong.core.stats.MuscleTargets.MAX_WEEKLY_SETS.toInt()
     val value = "%.1f".format(avg).removeSuffix(",0").removeSuffix(".0")
     val (text, color) = when (zone) {
-        com.bestrong.core.stats.VolumeStatus.NONE, com.bestrong.core.stats.VolumeStatus.LOW -> stringResource(R.string.muscle_zone_low, value) to MaterialTheme.colorScheme.onSurfaceVariant
-        com.bestrong.core.stats.VolumeStatus.OPTIMAL -> stringResource(R.string.muscle_zone_ok, value) to MaterialTheme.colorScheme.primary
-        com.bestrong.core.stats.VolumeStatus.HIGH -> stringResource(R.string.muscle_zone_high, value) to MaterialTheme.colorScheme.error
+        com.bestrong.core.stats.VolumeStatus.NONE, com.bestrong.core.stats.VolumeStatus.LOW -> stringResource(R.string.muscle_zone_low, value, target, max) to MaterialTheme.colorScheme.onSurfaceVariant
+        com.bestrong.core.stats.VolumeStatus.OPTIMAL -> stringResource(R.string.muscle_zone_ok, value, target, max) to MaterialTheme.colorScheme.primary
+        com.bestrong.core.stats.VolumeStatus.HIGH -> stringResource(R.string.muscle_zone_high, value, target, max) to MaterialTheme.colorScheme.error
     }
     Text(text, style = MaterialTheme.typography.bodyMedium, color = color)
 }

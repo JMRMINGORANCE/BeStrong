@@ -913,7 +913,7 @@
     <string name="dumbbells_nearest">Manuelles més properes al teu gimnàs: %1$s</string>
     <string name="previous_set_note">L\'última vegada: ✎ %1$s</string>
     <string name="muscle_trend">Sèries per múscul (8 setmanes)</string>
-    <string name="muscle_trend_hint">Sèries efectives per setmana (secundaris a la meitat). Recomanat: 10–20.</string>
+    <string name="muscle_trend_hint">Sèries efectives per setmana (secundaris a la meitat). Recomanat: %1$d–%2$d.</string>
     <string name="stat_average_workout">Entrenament mitjà: %1$s · %2$d sèries · %3$s</string>
     <string name="weekly_goal_reached">🎯 Objectiu setmanal assolit! (%1$d dies)</string>
     <string name="tool_share_week">Compartir la setmana (text per al teu entrenador)</string>
@@ -925,9 +925,9 @@
     <string name="set_copy_following">Copia a les següents (%1$d)</string>
     <string name="remaining_time_eta">≈ %1$d min per acabar · cap a les %2$s</string>
     <string name="rest_real_avg">Descans real mitjà: %1$s (previst %2$s)</string>
-    <string name="muscle_zone_low">Mitjana de les darreres setmanes: %1$s sèries — per sota del rang habitual (10–20)</string>
-    <string name="muscle_zone_ok">Mitjana de les darreres setmanes: %1$s sèries — dins del rang habitual (10–20)</string>
-    <string name="muscle_zone_high">Mitjana de les darreres setmanes: %1$s sèries — per sobre del rang habitual (10–20): vigila la recuperació</string>
+    <string name="muscle_zone_low">Mitjana de les darreres setmanes: %1$s sèries — per sota del rang habitual (%2$d–%3$d)</string>
+    <string name="muscle_zone_ok">Mitjana de les darreres setmanes: %1$s sèries — dins del rang habitual (%2$d–%3$d)</string>
+    <string name="muscle_zone_high">Mitjana de les darreres setmanes: %1$s sèries — per sobre del rang habitual (%2$d–%3$d): vigila la recuperació</string>
     <string name="undo_copied_sets">Càrrega copiada a les sèries següents</string>
     <string name="program_amrap_note">Última sèrie: màximes repeticions (+)</string>
     <string name="program_week_prefix">S</string>
@@ -1017,4 +1017,6 @@
     <string name="goal_progress_now">La teva millor marca: %1$s de %2$s</string>
     <string name="goal_progress_now_eta">La teva millor marca: %1$s de %2$s · a aquest ritme, cap al %3$s</string>
     <string name="weekly_sets_target">Mínim:</string>
+    <string name="goal_hint_reps">Posa\'t una meta de repeticions en una sèrie (p. ex. 15) i veuràs quant et falta.</string>
+    <string name="goal_hint_time">Posa\'t una meta de temps en segons (p. ex. 120) i veuràs quant et falta.</string>
 </resources>

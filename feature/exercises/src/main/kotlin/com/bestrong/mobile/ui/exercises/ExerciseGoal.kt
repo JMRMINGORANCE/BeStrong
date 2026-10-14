@@ -56,7 +56,12 @@ fun ExerciseGoalCard(vm: ExercisesViewModel, s: ExerciseDetailState) {
                 TextButton(onClick = { editing = true }) { Text(stringResource(if (goal == null) R.string.goal_set else R.string.action_edit)) }
             }
             if (goal == null) {
-                Text(stringResource(R.string.goal_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                val hint = when (tracking) {
+                    TrackingType.WEIGHT_REPS -> R.string.goal_hint
+                    TrackingType.DURATION -> R.string.goal_hint_time
+                    else -> R.string.goal_hint_reps
+                }
+                Text(stringResource(hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 return@Column
             }
             LinearProgressIndicator(progress = { (best / goal).toFloat().coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())

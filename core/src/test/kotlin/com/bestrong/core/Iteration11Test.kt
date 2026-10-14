@@ -257,8 +257,11 @@ class Iteration16Test {
     @Test fun predictDateNeverInThePast() {
         val day = 86_400_000L
         val points = listOf(0L to 50.0, day to 100.0, 2 * day to 100.0, 3 * day to 100.0)
-        val eta = com.bestrong.core.stats.Strength.predictDate(points, 105.0)
+        val eta = com.bestrong.core.stats.Strength.predictDate(points, 105.0, nowEpochMs = 3 * day)
         assertEquals(true, eta == null || eta > 3 * day)
+        // Datos viejos: nunca una fecha anterior a hoy
+        val old = com.bestrong.core.stats.Strength.predictDate(listOf(0L to 50.0, day to 60.0, 2 * day to 70.0), 80.0, nowEpochMs = 400 * day)
+        assertEquals(null, old)
     }
 
     @Test fun noFatigueWarningWithoutWeight() {
@@ -277,11 +280,15 @@ class BodyWeightGoalTest {
     @Test fun losingWeightGoalPredictsDate() {
         val day = 86_400_000L
         val points = (0..9).map { it * 7 * day to 85.0 - it * 0.5 }
-        val p = com.bestrong.core.stats.BodyWeightGoal.progress(points, 78.0)!!
+        val now = points.last().first
+        val p = com.bestrong.core.stats.BodyWeightGoal.progress(points, 78.0, startKg = 85.0, nowEpochMs = now)!!
         assertEquals(2.5, p.remainingKg, 1e-6)
         assertEquals(false, p.reached)
-        assertEquals(true, p.etaEpochMs != null && p.etaEpochMs!! > points.last().first)
-        assertEquals(true, com.bestrong.core.stats.BodyWeightGoal.progress(points, 82.0)!!.reached)
+        assertEquals(true, p.etaEpochMs != null && p.etaEpochMs!! > now)
+        assertEquals(true, com.bestrong.core.stats.BodyWeightGoal.progress(points, 82.0, startKg = 85.0, nowEpochMs = now)!!.reached)
+        // Primer pesaje de hace años a 70, ahora 80,5 y objetivo 80 para bajar: no está cumplido
+        val bulked = listOf(0L to 70.0) + points.map { it.first + day to it.second }
+        assertEquals(false, com.bestrong.core.stats.BodyWeightGoal.progress(bulked, 79.0, startKg = 81.0, nowEpochMs = now)!!.reached)
     }
 }
 
@@ -293,5 +300,13 @@ class ExerciseGoalsTest {
         val pts = com.bestrong.core.stats.ExerciseGoals.points(h, plank.id, plank.tracking)
         assertEquals(90.0, pts.single().second, 0.0)
         assertEquals(false, com.bestrong.core.stats.ExerciseGoals.supports(com.bestrong.core.model.TrackingType.CARDIO))
+    }
+}
+
+class Iteration17Test {
+    @Test fun repsGoalCountsPerSideAndIgnoresAssistance() {
+        val t = com.bestrong.core.model.TrackingType.REPS_ONLY
+        assertEquals(8.0, com.bestrong.core.stats.ExerciseGoals.valueOf(WorkoutSet(reps = 8, repsRight = 9, completed = true), t), 0.0)
+        assertEquals(0.0, com.bestrong.core.stats.ExerciseGoals.valueOf(WorkoutSet(reps = 15, weightKg = -30.0, completed = true), t), 0.0)
     }
 }

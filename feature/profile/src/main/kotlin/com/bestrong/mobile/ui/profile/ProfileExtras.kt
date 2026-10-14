@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,7 +96,10 @@ fun WeeklyMuscleMap(weekly: Map<MuscleGroup, Double>, target: Int = MuscleTarget
             // FlowRow: con letra grande los chips bajan de línea en vez de salirse
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.Center) {
                 Text(stringResource(R.string.weekly_sets_target), style = MaterialTheme.typography.labelMedium, modifier = Modifier.align(Alignment.CenterVertically))
-                for (n in WEEKLY_TARGET_CHOICES) FilterChip(selected = n == target, onClick = { onTarget(n) }, label = { Text("$n") })
+                for (n in WEEKLY_TARGET_CHOICES) {
+                    val described = stringResource(R.string.n_sets_value, "$n")
+                    FilterChip(selected = n == target, onClick = { onTarget(n) }, label = { Text("$n") }, modifier = Modifier.semantics { contentDescription = described })
+                }
             }
             MAP_MUSCLES.forEach { m ->
                 val sets = weekly[m] ?: 0.0

@@ -82,9 +82,15 @@ fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: D
 
 /** Gráfica de barras (volumen semanal, entrenamientos por semana...). */
 @Composable
-fun BarChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: Dp = 160.dp) {
+fun BarChart(
+    points: List<ChartPoint>,
+    modifier: Modifier = Modifier,
+    height: Dp = 160.dp,
+    /** Cómo lee TalkBack cada barra (por defecto «etiqueta: valor»). */
+    describe: (ChartPoint) -> String = { "${it.label}: ${"%.1f".format(it.value).removeSuffix(",0").removeSuffix(".0")}" },
+) {
     if (points.isNotEmpty()) {
-        val summary = points.joinToString(", ") { "${it.label}: ${"%.1f".format(it.value).removeSuffix(",0").removeSuffix(".0")}" }
+        val summary = points.joinToString(", ", transform = describe)
         BarChartContent(points, modifier.clearAndSetSemantics { contentDescription = summary }, height)
     }
 }

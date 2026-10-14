@@ -247,7 +247,12 @@ class ExercisesViewModel @Inject constructor(
 
     /** Corrige un ejercicio personalizado; las rutinas que lo usan se actualizan (el historial guarda lo que se hizo). */
     fun updateCustom(ex: Exercise) = viewModelScope.launch {
+        val previous = repo.exercises.value.firstOrNull { it.id == ex.id }
         repo.saveCustomExercise(ex)
+        // El objetivo cambia de significado (kg ↔ reps ↔ segundos, o par ↔ una mancuerna): se quita
+        if (previous != null && (previous.tracking != ex.tracking || previous.equipment != ex.equipment)) {
+            settingsStore.update { s -> if (ex.id in s.exerciseGoalsKg) s.copy(exerciseGoalsKg = s.exerciseGoalsKg - ex.id) else s }
+        }
         repo.routinesOnce().filter { r -> r.exercises.any { it.exercise.id == ex.id } }.forEach { r ->
             repo.saveRoutine(r.copy(exercises = r.exercises.map { if (it.exercise.id == ex.id) it.copy(exercise = ex) else it }))
         }

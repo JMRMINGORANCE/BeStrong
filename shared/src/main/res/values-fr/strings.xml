@@ -913,7 +913,7 @@
     <string name="dumbbells_nearest">Haltères les plus proches dans ta salle : %1$s</string>
     <string name="previous_set_note">La dernière fois : ✎ %1$s</string>
     <string name="muscle_trend">Séries par muscle (8 semaines)</string>
-    <string name="muscle_trend_hint">Séries efficaces par semaine (secondaires pour moitié). Recommandé : 10–20.</string>
+    <string name="muscle_trend_hint">Séries efficaces par semaine (secondaires pour moitié). Recommandé : %1$d–%2$d.</string>
     <string name="stat_average_workout">Séance moyenne : %1$s · %2$d séries · %3$s</string>
     <string name="weekly_goal_reached">🎯 Objectif hebdomadaire atteint ! (%1$d jours)</string>
     <string name="tool_share_week">Partager la semaine (texte pour ton coach)</string>
@@ -925,9 +925,9 @@
     <string name="set_copy_following">Copier aux suivantes (%1$d)</string>
     <string name="remaining_time_eta">≈ %1$d min restantes · fin vers %2$s</string>
     <string name="rest_real_avg">Repos réel moyen : %1$s (prévu %2$s)</string>
-    <string name="muscle_zone_low">Moyenne des dernières semaines : %1$s séries — sous la fourchette habituelle (10–20)</string>
-    <string name="muscle_zone_ok">Moyenne des dernières semaines : %1$s séries — dans la fourchette habituelle (10–20)</string>
-    <string name="muscle_zone_high">Moyenne des dernières semaines : %1$s séries — au-dessus de la fourchette habituelle (10–20) : surveille ta récupération</string>
+    <string name="muscle_zone_low">Moyenne des dernières semaines : %1$s séries — sous la fourchette habituelle (%2$d–%3$d)</string>
+    <string name="muscle_zone_ok">Moyenne des dernières semaines : %1$s séries — dans la fourchette habituelle (%2$d–%3$d)</string>
+    <string name="muscle_zone_high">Moyenne des dernières semaines : %1$s séries — au-dessus de la fourchette habituelle (%2$d–%3$d) : surveille ta récupération</string>
     <string name="undo_copied_sets">Charge copiée sur les séries suivantes</string>
     <string name="program_amrap_note">Dernière série : max. de répétitions (+)</string>
     <string name="program_week_prefix">S</string>
@@ -1017,4 +1017,6 @@
     <string name="goal_progress_now">Ton meilleur : %1$s sur %2$s</string>
     <string name="goal_progress_now_eta">Ton meilleur : %1$s sur %2$s · à ce rythme, vers le %3$s</string>
     <string name="weekly_sets_target">Minimum :</string>
+    <string name="goal_hint_reps">Fixe un objectif de répétitions en une série (ex. 15) pour voir ce qui te manque.</string>
+    <string name="goal_hint_time">Fixe un objectif de temps en secondes (ex. 120) pour voir ce qui te manque.</string>
 </resources>
