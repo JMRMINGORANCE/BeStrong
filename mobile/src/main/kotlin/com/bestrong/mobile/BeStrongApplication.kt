@@ -47,12 +47,15 @@ import kotlinx.coroutines.launch
 private const val MAX_WATCH_NOTE = 140
 
 /** Replica rutinas, historial, ajustes y el entreno en curso al reloj; mantiene el widget al día. */
+// Hilt: las dependencias de la sincronización con el reloj, una por almacén
+@Suppress("LongParameterList")
 @Singleton
 class AppSync @Inject constructor(
     @ApplicationContext private val context: Context,
     @ApplicationScope private val scope: CoroutineScope,
     private val repository: BeStrongRepository,
     private val settings: SettingsStore,
+    private val planning: com.bestrong.mobile.data.PlanningStore,
     private val watchSync: WatchSync,
     private val restTimer: RestTimerController,
     private val watchMetrics: WatchMetricsStore,
@@ -82,7 +85,7 @@ class AppSync @Inject constructor(
             // La lista en memoria empieza vacía hasta que carga: se salta solo ese arranque
             emitAll(repository.history.dropWhile { it.isEmpty() }.map(::bestsOf))
         }.flowOn(Dispatchers.Default)
-        combine(settings.settings, repository.activeProgram, notes, bests) { s, program, pinned, (best1rm, heaviest) ->
+        combine(settings.settings, repository.activeProgram, notes, bests, planning.state.map { it.weeklyCap }.distinctUntilChanged()) { s, program, pinned, (best1rm, heaviest), cap ->
             SharedSettings(
                 s.unit, s.progressionEnabled, s.restVibration,
                 weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal,
@@ -91,6 +94,7 @@ class AppSync @Inject constructor(
                 gymBarKg = s.activeGym.loadedBarKg,
                 exerciseBarKg = s.exerciseBarKg,
                 activeGym = s.activeGym,
+                weeklyCap = cap,
                 pinnedNotes = pinned,
                 warmupRestSeconds = s.warmupRestSeconds,
                 bestOneRepMaxKg = best1rm,

@@ -67,6 +67,14 @@ object WorkoutStats {
             .firstOrNull()
             .orEmpty()
 
+    /** El ejercicio tal como se hizo la última vez (con series completadas): su RPE objetivo, notas… */
+    fun previousExercise(exerciseId: String, history: List<Workout>): WorkoutExercise? =
+        history.asSequence()
+            .filter { it.isFinished }
+            .sortedByDescending { it.startedAtEpochMs }
+            .mapNotNull { w -> w.exercises.firstOrNull { it.exercise.id == exerciseId }?.takeIf { it.completedSets.isNotEmpty() } }
+            .firstOrNull()
+
     /**
      * [previousSets] de todos los ejercicios a la vez: id de ejercicio → series completadas de la
      * última sesión en que se hizo. Una sola pasada por el historial.

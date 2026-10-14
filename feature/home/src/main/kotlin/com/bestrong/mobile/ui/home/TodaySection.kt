@@ -243,19 +243,20 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     }
 }
 
-/** «Hace un año: Press banca 70×8 → 85×8 (+21 %)»; se puede descartar (vuelve con otra fecha). */
+/** «Hace un año: Press banca 70×8 → 85×8 (+21 %)»; se puede descartar (vuelve el mes que viene). */
 @Composable
 fun YearAgoCard(vm: HomeViewModel) {
     val items by vm.yearAgo.collectAsStateWithLifecycle()
     val tips = com.bestrong.mobile.ui.help.LocalTips.current
     val unit = com.bestrong.mobile.ui.components.LocalWeightUnit.current
-    val tipId = "year_ago:" + java.time.LocalDate.now()
+    // Por mes: la ventana de ±7 días repite las mismas comparaciones varios días seguidos
+    val tipId = "year_ago:" + java.time.YearMonth.now()
     if (items.isEmpty() || tipId in tips.dismissed) return
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.year_ago_title), fontWeight = FontWeight.Bold)
             items.forEach { c ->
-                val pct = (c.change * 100).toInt()
+                val pct = kotlin.math.round(c.change * 100).toInt()
                 Text(
                     stringResource(
                         R.string.year_ago_line,

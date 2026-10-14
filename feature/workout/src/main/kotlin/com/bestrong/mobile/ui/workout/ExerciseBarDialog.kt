@@ -41,7 +41,7 @@ fun ExerciseBarDialog(vm: ActiveWorkoutViewModel, exerciseId: String, onDismiss:
                     FilterChip(
                         selected = own == null,
                         onClick = { vm.setExerciseBar(exerciseId, null) },
-                        label = { Text(stringResource(R.string.exercise_bar_gym, unit.format(unit.toKg(GymProfile.barIn(unit, settings.activeGym.barKg)), withUnit = true))) },
+                        label = { Text(stringResource(R.string.exercise_bar_gym, unit.format(unit.toKg(GymProfile.barIn(unit, settings.activeGym.barKg) + unit.fromKg(settings.activeGym.collarKg)), withUnit = true))) },
                     )
                     BAR_CHOICES_KG.forEach { kg ->
                         FilterChip(selected = own == kg, onClick = { vm.setExerciseBar(exerciseId, kg) }, label = { Text(unit.format(unit.toKg(GymProfile.barIn(unit, kg)), withUnit = true)) })

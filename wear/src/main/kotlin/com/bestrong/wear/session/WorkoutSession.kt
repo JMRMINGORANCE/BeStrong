@@ -171,7 +171,13 @@ class WorkoutSession @Inject constructor(
         val s = store.settings.value
         if (s.progressionEnabled) {
             val ex = exerciseFor(exerciseId)
-            if (ex != null) Progression.suggest(ex, store.history.value, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { return s.loadable(ex, it, previous(exerciseId)) }
+            if (ex != null) {
+                Progression.suggest(ex, store.history.value, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { sug ->
+                    val weekAgo = System.currentTimeMillis() - 7 * 86_400_000L
+                    val lastWeekBest = WorkoutStats.bestWeightBetween(exerciseId, store.history.value, weekAgo, Long.MAX_VALUE)
+                    return s.loadable(ex, sug, previous(exerciseId), lastWeekBest)
+                }
+            }
         }
         return previous(exerciseId)
     }
@@ -564,7 +570,7 @@ class WorkoutSession @Inject constructor(
         val we = currentExercise() ?: return
         // Con la barra del ejercicio (o la del gimnasio), como en el móvil
         val s = store.settings.value
-        val bar = s.unit.toKg(com.bestrong.core.training.GymProfile.barIn(s.unit, s.barKgFor(we.exercise.id)))
+        val bar = s.unit.toKg(s.barInUnit(we.exercise.id))
         edit { WorkoutEditor.addWarmup(it, we.id, s.unit, bar) }
     }
 

@@ -419,12 +419,13 @@ private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.body_comp_title))
+            // La cintura objetivo no necesita la altura
+            waist?.let { WaistGoalLine(vm, it, settings.waistGoalCm) }
             if (height == null) {
                 Text(stringResource(R.string.body_comp_need_height), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 return@Column
             }
             waist?.let { com.bestrong.core.stats.BodyComposition.waistToHeight(it, height) }?.let { WaistToHeightLine(it) }
-            waist?.let { WaistGoalLine(vm, it, settings.waistGoalCm) }
             if (weight != null && fat != null) {
                 com.bestrong.core.stats.BodyComposition.ffmi(weight, fat, height)?.let { f ->
                     Text(stringResource(R.string.body_comp_ffmi, "%.1f".format(f)))

@@ -141,7 +141,7 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                         name = name.ifBlank { gym.name },
                         equipment = equipment,
                         barKg = unit.parseToKg(bar) ?: gym.barKg,
-                        collarKg = unit.parseToKg(collars)?.coerceIn(0.0, MAX_COLLARS_KG) ?: gym.collarKg,
+                        collarKg = if (collars.isBlank()) 0.0 else unit.parseToKg(collars)?.coerceIn(0.0, MAX_COLLARS_KG) ?: gym.collarKg,
                         platesKg = plates.sortedDescending().ifEmpty { gym.platesKg },
                         dumbbellsKg = dumbbells,
                     ),

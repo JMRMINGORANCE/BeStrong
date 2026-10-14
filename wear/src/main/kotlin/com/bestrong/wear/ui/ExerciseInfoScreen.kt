@@ -42,7 +42,6 @@ import androidx.wear.compose.material3.TextButton
 import androidx.wear.compose.material3.TextButtonDefaults
 import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.SetType
-import com.bestrong.core.training.PlateCalculator
 import com.bestrong.core.training.Tempo
 import com.bestrong.wear.R
 import com.bestrong.wear.session.WorkoutSession
@@ -63,6 +62,7 @@ fun ExerciseInfoScreen(session: WorkoutSession) {
     val set = session.currentSet()
     val listState = rememberScalingLazyListState()
     val brand = MaterialTheme.colorScheme.primary
+    val settings by session.settings.collectAsStateWithLifecycle()
 
     ScreenScaffold(scrollState = listState) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
@@ -107,7 +107,8 @@ fun ExerciseInfoScreen(session: WorkoutSession) {
             }
             if (we.exercise.equipment == Equipment.BARBELL && set != null && set.weightKg > 0) {
                 item {
-                    val load = PlateCalculator.calculate(unit.fromKg(set.weightKg), unit)
+                    // Con la barra, los cierres y los discos del gimnasio activo, como en el móvil
+                    val load = settings.plateLoad(we.exercise.id, set.weightKg)
                     val plates = load.perSide.joinToString(" · ") { unit.format(unit.toKg(it)) }.ifEmpty { "—" }
                     Text(
                         stringResource(R.string.info_plates, plates, unit.format(unit.toKg(load.barWeight))),

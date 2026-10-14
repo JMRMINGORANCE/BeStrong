@@ -160,6 +160,8 @@ data class SharedSettings(
     val exerciseBarKg: Map<String, Double> = emptyMap(),
     /** Gimnasio activo (discos, mancuernas, cierres): el reloj redondea la sugerencia a lo que se puede montar. */
     val activeGym: com.bestrong.core.training.GymProfile? = null,
+    /** Subida máxima semanal de Planificación (0,05 = 5 %); null = sin tope. */
+    val weeklyCap: Double? = null,
 ) {
     /** El gimnasio activo con la barra propia del ejercicio, si la tiene (como en el móvil). */
     fun gymFor(exerciseId: String): com.bestrong.core.training.GymProfile? =
@@ -167,19 +169,39 @@ data class SharedSettings(
 
     fun barKgFor(exerciseId: String): Double = gymFor(exerciseId)?.loadedBarKg ?: exerciseBarKg[exerciseId] ?: gymBarKg
 
+    /** Barra (con cierres) del ejercicio en la unidad, como en el móvil: la de 20 kg es la de 45 lb. */
+    fun barInUnit(exerciseId: String): Double = gymFor(exerciseId)
+        ?.let { com.bestrong.core.training.GymProfile.barIn(unit, it.barKg) + unit.fromKg(it.collarKg) }
+        ?: com.bestrong.core.training.GymProfile.barIn(unit, barKgFor(exerciseId))
+
+    /** Discos por lado para [kg] con el gimnasio activo (o los estándar si el móvil aún no lo envía). */
+    fun plateLoad(exerciseId: String, kg: Double): com.bestrong.core.training.PlateLoad =
+        gymFor(exerciseId)?.plateLoad(kg, unit) ?: com.bestrong.core.training.PlateCalculator.calculate(unit.fromKg(kg), unit)
+
     /**
      * Series sugeridas ajustadas al material del gimnasio activo (solo en kg, como en el móvil): si tocaba
      * subir y el redondeo deja el peso de la última vez, el siguiente que se pueda montar.
      */
-    fun loadable(exercise: com.bestrong.core.model.Exercise, suggestion: com.bestrong.core.training.ProgressionSuggestion, previous: List<com.bestrong.core.model.WorkoutSet>): List<com.bestrong.core.model.WorkoutSet> {
-        val gym = gymFor(exercise.id)?.takeIf { unit == WeightUnit.KG } ?: return suggestion.sets
+    fun loadable(
+        exercise: com.bestrong.core.model.Exercise,
+        suggestion: com.bestrong.core.training.ProgressionSuggestion,
+        previous: List<com.bestrong.core.model.WorkoutSet>,
+        /** Mejor peso de los últimos 7 días, para el tope semanal (el reloj tiene el historial reciente). */
+        lastWeekBestKg: Double? = null,
+    ): List<com.bestrong.core.model.WorkoutSet> {
+        val cap = weeklyCap
+        fun capped(kg: Double) = if (cap == null) kg else com.bestrong.core.training.ProgressionCap.limit(kg, lastWeekBestKg, cap)
+        val gym = gymFor(exercise.id)?.takeIf { unit == WeightUnit.KG } ?: return suggestion.sets.map { it.copy(weightKg = capped(it.weightKg)) }
         val raise = suggestion.kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
         val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
         return suggestion.sets.mapIndexed { i, set ->
-            val rounded = if (set.weightKg > 0) gym.nearestLoad(set.weightKg, exercise.equipment) else set.weightKg
+            val target = capped(set.weightKg)
+            val rounded = if (target > 0) gym.nearestLoad(target, exercise.equipment) else target
             val prev = before.getOrNull(i)?.weightKg
             val lost = raise && prev != null && prev > 0 && rounded <= prev + 1e-6
-            set.copy(weightKg = if (lost) gym.loadAbove(prev!!, exercise.equipment) else rounded)
+            // La subida que no se pierde al redondear, si el tope semanal la permite
+            val above = if (lost) gym.loadAbove(prev!!, exercise.equipment).takeIf { it <= capped(it) + 1e-6 } else null
+            set.copy(weightKg = above ?: rounded)
         }
     }
 

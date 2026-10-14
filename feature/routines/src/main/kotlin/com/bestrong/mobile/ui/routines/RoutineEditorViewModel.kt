@@ -145,8 +145,10 @@ class RoutineEditorViewModel @Inject constructor(
     fun setRest(id: String, seconds: Int) = updateExercise(id) { it.copy(restSeconds = seconds) }
     fun setExerciseNotes(id: String, notes: String) = updateExercise(id) { it.copy(notes = notes) }
 
-    /** Tempo («3-1-1-0»); vacío o no válido lo quita. */
+    /** RPE objetivo de las series efectivas; null lo quita. */
     fun setTargetRpe(id: String, rpe: Double?) = updateExercise(id) { it.copy(targetRpe = rpe) }
+
+    /** Tempo («3-1-1-0»); vacío o no válido lo quita. */
     fun setTempo(id: String, tempo: String) = updateExercise(id) { it.copy(tempo = Tempo.parse(tempo)?.toString()) }
 
     /** Tipo de serie como en el entreno: normal → calentamiento → drop → al fallo → normal. */

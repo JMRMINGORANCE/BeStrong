@@ -177,7 +177,7 @@ fun WorkoutScreen(
                     else -> ""
                 }
                 Text(stringResource(R.string.set_of, setNumber, we.sets.size, typeLabel), style = MaterialTheme.typography.labelSmall)
-                we.targetRpe?.let { rpe ->
+                we.targetRpe?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS && set.type != SetType.WARMUP }?.let { rpe ->
                     Text(stringResource(R.string.target_rpe_short, rpe.toString().removeSuffix(".0")), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
                 }
                 // Rango de la doble progresión (lo elige el móvil)

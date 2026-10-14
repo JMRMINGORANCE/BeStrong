@@ -516,4 +516,19 @@ class CollarTest {
         // Sin gimnasio sincronizado se deja la sugerencia tal cual
         assertEquals(61.25, com.bestrong.core.sync.SharedSettings().loadable(ex, up, prev).single().weightKg, 1e-9)
     }
+
+    @Test
+    fun autoregulationFollowsTargetRpe() {
+        val ex = com.bestrong.core.model.Exercise(id = "sq", name = "Sentadilla", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val done = WorkoutSet(id = "a", weightKg = 100.0, reps = 5, completed = true, rpe = 7.0)
+        val pending = WorkoutSet(id = "b", weightKg = 100.0, reps = 5)
+        val we = WorkoutExercise(exercise = ex, sets = listOf(done, pending))
+        // Sin objetivo (8): RPE 7 es fácil → subir
+        assertEquals(1, com.bestrong.core.training.Autoregulation.suggest(we, "a", 2.5)?.direction)
+        // Con objetivo 6 (técnica): RPE 7 ya es duro, pero no tanto como para bajar
+        assertEquals(null, com.bestrong.core.training.Autoregulation.suggest(we.copy(targetRpe = 6.0), "a", 2.5))
+        // Con objetivo 10 un RPE 10 es lo buscado: no se baja
+        val top = we.copy(targetRpe = 10.0, sets = listOf(done.copy(rpe = 10.0), pending))
+        assertEquals(null, com.bestrong.core.training.Autoregulation.suggest(top, "a", 2.5))
+    }
 }

@@ -113,7 +113,7 @@ object WorkoutEditor {
     /** Sustituye un ejercicio por una alternativa conservando el descanso y adaptando los pesos. */
     fun substitute(workout: Workout, workoutExerciseId: String, to: Exercise, previousOfNew: List<WorkoutSet>, stepKg: Double): Workout =
         updateExercise(workout, workoutExerciseId) { we ->
-            we.copy(exercise = to, sets = com.bestrong.core.library.Alternatives.convertSets(we.exercise, to, we.sets, previousOfNew, stepKg))
+            we.copy(exercise = to, sets = com.bestrong.core.library.Alternatives.convertSets(we.exercise, to, we.sets, previousOfNew, stepKg), targetRpe = we.targetRpe.takeIf { to.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS })
         }
 
     fun removeExercise(workout: Workout, workoutExerciseId: String): Workout =
@@ -161,7 +161,7 @@ object WorkoutEditor {
     }
 
     fun replaceExercise(workout: Workout, workoutExerciseId: String, exercise: Exercise): Workout =
-        updateExercise(workout, workoutExerciseId) { it.copy(exercise = exercise) }
+        updateExercise(workout, workoutExerciseId) { it.copy(exercise = exercise, targetRpe = it.targetRpe.takeIf { exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }) }
 
     fun updateExercise(workout: Workout, workoutExerciseId: String, block: (WorkoutExercise) -> WorkoutExercise): Workout =
         workout.copy(exercises = workout.exercises.map { if (it.id == workoutExerciseId) block(it) else it })

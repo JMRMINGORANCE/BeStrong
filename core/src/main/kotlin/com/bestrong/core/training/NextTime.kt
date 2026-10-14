@@ -24,9 +24,10 @@ object NextTime {
         val maxRpe = work.mapNotNull { it.rpe }.maxOrNull()
         val allReps = work.all { it.reps >= target }
         val name = we.exercise.name
+        val high = Autoregulation.high(we.targetRpe)
         return when {
-            allReps && (maxRpe == null || maxRpe < Autoregulation.HIGH) -> NextTimeSuggestion(we.exercise.id, name, top + stepKg, target, 1)
-            !allReps && maxRpe != null && maxRpe >= Autoregulation.HIGH -> {
+            allReps && (maxRpe == null || maxRpe < high) -> NextTimeSuggestion(we.exercise.id, name, top + stepKg, target, 1)
+            !allReps && maxRpe != null && maxRpe >= high -> {
                 val lower = if (stepKg > 0) Math.floor(top * 0.95 / stepKg + 0.5) * stepKg else top * 0.95
                 NextTimeSuggestion(we.exercise.id, name, lower.coerceAtMost(top - stepKg).coerceAtLeast(0.0), target, -1)
             }

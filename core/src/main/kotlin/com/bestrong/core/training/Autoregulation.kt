@@ -8,14 +8,19 @@ import kotlin.math.floor
 data class RpeAdjustment(val newWeightKg: Double, val direction: Int)
 
 /**
- * Autorregulación por RPE (objetivo ≈ 8, es decir, 2 reps en recámara):
- * - RPE ≥ 9,5 → bajar un 5 % las series pendientes,
- * - RPE ≤ 7 → subir un escalón (2,5 kg / 5 lb).
+ * Autorregulación por RPE respecto al objetivo del ejercicio (8 si no tiene, es decir, 2 reps en recámara):
+ * - RPE ≥ objetivo + 1,5 (9,5) → bajar un 5 % las series pendientes,
+ * - RPE ≤ objetivo − 1 (7) → subir un escalón (2,5 kg / 5 lb).
  * Devuelve null si no hay nada que ajustar.
  */
 object Autoregulation {
+    const val TARGET = 8.0
     const val HIGH = 9.5
     const val LOW = 7.0
+
+    /** RPE a partir del cual se baja, con el objetivo [target] (con 10 nunca: es una serie a tope buscada). */
+    fun high(target: Double?): Double = HIGH + ((target ?: TARGET) - TARGET)
+    fun low(target: Double?): Double = LOW + ((target ?: TARGET) - TARGET)
 
     fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double): RpeAdjustment? {
         val done = exercise.sets.firstOrNull { it.id == completedSetId } ?: return null
@@ -25,8 +30,8 @@ object Autoregulation {
         if (pending.isEmpty()) return null
         val current = done.weightKg
         return when {
-            rpe >= HIGH -> RpeAdjustment(round(current * 0.95, stepKg).coerceAtLeast(0.0), -1).takeIf { it.newWeightKg < current }
-            rpe <= LOW -> RpeAdjustment(current + stepKg, 1)
+            rpe >= high(exercise.targetRpe) -> RpeAdjustment(round(current * 0.95, stepKg).coerceAtLeast(0.0), -1).takeIf { it.newWeightKg < current }
+            rpe <= low(exercise.targetRpe) -> RpeAdjustment(current + stepKg, 1)
             else -> null
         }
     }

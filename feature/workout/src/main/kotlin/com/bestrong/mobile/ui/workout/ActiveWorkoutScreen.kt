@@ -701,9 +701,10 @@ private fun ExerciseCard(
                 }
             }
             MissingEquipmentLine(vm, we) { substituting = true }
-            we.targetRpe?.let { rpe ->
+            we.targetRpe?.takeIf { we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }?.let { rpe ->
                 Text(
-                    stringResource(R.string.target_rpe_line, rpe.toString().removeSuffix(".0").replace('.', ',')),
+                    // Como el RPE de las series («@8.5»)
+                    stringResource(R.string.target_rpe_line, rpe.toString().removeSuffix(".0")),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.padding(horizontal = 12.dp),
