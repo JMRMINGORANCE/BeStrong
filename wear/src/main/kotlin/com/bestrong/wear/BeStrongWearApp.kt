@@ -62,7 +62,7 @@ class WearContainer @Inject constructor(
         for (tile in listOf(BeStrongTileService::class.java, TodayTileService::class.java)) {
             runCatching { TileService.getUpdater(app).requestUpdate(tile) }
         }
-        for (complication in listOf(WeeklyComplicationService::class.java, TodayComplicationService::class.java, com.bestrong.wear.complication.RestComplicationService::class.java)) {
+        for (complication in listOf(WeeklyComplicationService::class.java, TodayComplicationService::class.java, com.bestrong.wear.complication.RestComplicationService::class.java, com.bestrong.wear.complication.CardioComplicationService::class.java)) {
             runCatching {
                 ComplicationDataSourceUpdateRequester
                     .create(app, ComponentName(app, complication))

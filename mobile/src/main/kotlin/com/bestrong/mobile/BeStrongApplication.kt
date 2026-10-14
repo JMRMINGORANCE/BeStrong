@@ -65,39 +65,52 @@ class AppSync @Inject constructor(
     /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
     suspend fun pushToWatchNow() = watchPush.pushToWatchNow()
 
+    /** Cómo va el objetivo de cardio de esta semana: [goal] identifica el objetivo puesto («km:20», «min:150»). */
+    private data class CardioGoalState(val week: Long, val goal: String, val met: Boolean, val text: String)
+
     /**
-     * Ajustes compartidos con el reloj. Objetivo semanal: el del programa activo si lo hay, como en
-     * la pantalla de inicio. Notas fijas: se releen cuando cambia alguna (cortas, para el reloj).
+     * Aviso al cumplir el objetivo semanal de cardio: solo cuando se cruza entrenando (no al arrancar la app, ni
+     * al bajar el objetivo por debajo de lo hecho) y una vez por semana y objetivo (si se sube, vuelve a avisar).
      */
-    /** Aviso al cumplir el objetivo semanal de cardio: una vez por semana (la que se avisó queda apuntada). */
     private suspend fun notifyCardioGoal() {
         val prefs = context.getSharedPreferences("notify_state", Context.MODE_PRIVATE)
-        combine(repository.history, settings.settings) { history, s -> cardioGoalMet(history, s) }
-            .debounce(2_000).distinctUntilChanged().collect { met ->
-                val (week, text) = met ?: return@collect
-                if (prefs.getLong("cardio_goal_week", -1) == week) return@collect
-                prefs.edit().putLong("cardio_goal_week", week).apply()
-                com.bestrong.mobile.notify.Notifier.cardioGoal(context, text)
+        var previous: CardioGoalState? = null
+        // La lista en memoria empieza vacía hasta que carga: ese arranque no cuenta como «antes»
+        combine(repository.history.dropWhile { it.isEmpty() }, settings.settings) { history, s -> cardioGoalState(history, s) }
+            .debounce(2_000).distinctUntilChanged().collect { cur ->
+                val prev = previous
+                previous = cur
+                val crossed = cur != null && cur.met && prev != null && !prev.met && prev.goal == cur.goal && prev.week == cur.week
+                val key = cur?.let { "${it.week}:${it.goal}" }
+                if (crossed && prefs.getString("cardio_goal_notified", null) != key) {
+                    prefs.edit().putString("cardio_goal_notified", key).apply()
+                    com.bestrong.mobile.notify.Notifier.cardioGoal(context, cur?.text.orEmpty())
+                }
             }
     }
 
-    /** (lunes de esta semana como día, «150 de 150 min») si ya se cumple el objetivo; null si no hay o no se cumple. */
-    private fun cardioGoalMet(history: List<com.bestrong.core.model.Workout>, s: com.bestrong.mobile.data.UserSettings): Pair<Long, String>? {
+    /** El objetivo de cardio de esta semana y lo hecho («150 de 150 min»); null si no hay objetivo. */
+    private fun cardioGoalState(history: List<com.bestrong.core.model.Workout>, s: com.bestrong.mobile.data.UserSettings): CardioGoalState? {
         val goalKm = s.weeklyCardioKm
         val goalMin = s.weeklyCardioMin
         if (goalKm == null && goalMin == null) return null
         val zone = java.time.ZoneId.systemDefault()
         val monday = java.time.LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
         val (meters, seconds) = com.bestrong.core.stats.CardioTotals.since(history, monday.atStartOfDay(zone).toInstant().toEpochMilli())
-        val text = if (goalMin != null) {
-            context.getString(R.string.cardio_week_goal_min, (seconds / 60).toInt(), goalMin).takeIf { seconds / 60 >= goalMin }
+        return if (goalMin != null) {
+            val minutes = (seconds / 60).toInt()
+            CardioGoalState(monday.toEpochDay(), "min:$goalMin", minutes >= goalMin, context.getString(R.string.cardio_week_goal_min, minutes, goalMin))
         } else {
             val km = meters / 1000
-            context.getString(R.string.cardio_week_goal, "%.1f".format(km), com.bestrong.core.util.formatGoalKm(goalKm ?: 0.0)).takeIf { km >= (goalKm ?: 0.0) }
+            val goal = goalKm ?: 0.0
+            CardioGoalState(monday.toEpochDay(), "km:$goal", km >= goal, context.getString(R.string.cardio_week_goal, "%.1f".format(km), com.bestrong.core.util.formatGoalKm(goal)))
         }
-        return text?.let { monday.toEpochDay() to it }
     }
 
+    /**
+     * Ajustes compartidos con el reloj. Objetivo semanal: el del programa activo si lo hay, como en
+     * la pantalla de inicio. Notas fijas: se releen cuando cambia alguna (cortas, para el reloj).
+     */
     private suspend fun syncSettings() {
         val notes = media.version.map { media.allNotes().mapValues { (_, n) -> n.trim().take(MAX_WATCH_NOTE) } }
 
@@ -124,6 +137,8 @@ class AppSync @Inject constructor(
                 exerciseBarKg = s.exerciseBarKg,
                 activeGym = s.activeGym,
                 multiGym = s.gyms.size > 1,
+                weeklyCardioKm = s.weeklyCardioKm,
+                weeklyCardioMin = s.weeklyCardioMin,
                 weeklyCap = cap,
                 pinnedNotes = pinned,
                 warmupRestSeconds = s.warmupRestSeconds,

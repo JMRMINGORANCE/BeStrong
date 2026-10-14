@@ -169,4 +169,6 @@
     <string name="complication_rest_desc">Temps de repos restant</string>
     <string name="complication_rest_none">Aucun repos en cours</string>
     <string name="vs_reps">%1$s reps</string>
+    <string name="cardio_complication_label">Cardio cette semaine</string>
+    <string name="cardio_complication_desc">Cardio cette semaine : %1$s %2$s</string>
 </resources>

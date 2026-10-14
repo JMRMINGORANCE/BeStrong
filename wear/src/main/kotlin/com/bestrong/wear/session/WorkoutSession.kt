@@ -246,9 +246,24 @@ class WorkoutSession @Inject constructor(
 
     private fun end() {
         stopRest()
+        // Terminar o descartar en mitad de una guía de tempo no la deja vibrando
+        stopTempo()
         repCounter.stop()
         set(null)
         ExerciseService.stop(context)
+    }
+
+    private fun sendReplaced(local: Workout) {
+        val m = _metrics.value
+        val finished = WorkoutEditor.finish(local, System.currentTimeMillis()).copy(
+            avgHeartRate = m.avgHeartRate,
+            maxHeartRate = m.maxHeartRate,
+            calories = m.calories,
+            heartRateSamples = hr.samples(),
+        )
+        stopRest()
+        stopTempo()
+        if (finished.exercises.isNotEmpty()) scope.launch { phoneSync.sendFinishedWorkout(finished) }
     }
 
     fun dismissSummary() {
@@ -263,6 +278,9 @@ class WorkoutSession @Inject constructor(
         val remote = if (local == null) incoming else WorkoutMerge.merge(local, incoming)
         if (remote == local) return
         val isNew = local == null || local.id != remote.id
+        // Dos entrenos distintos (empezados a la vez sin conexión) y gana el del móvil: lo hecho en el reloj no se
+        // pierde, se le manda al móvil como entreno terminado
+        if (local != null && isNew && local.exercises.any { we -> we.sets.any { it.completed } }) sendReplaced(local)
         _workout.value = remote
         store.activeWorkout = remote
         if (isNew) {

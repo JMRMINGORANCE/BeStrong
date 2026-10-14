@@ -18,10 +18,14 @@ fun formatVolume(kg: Double): String {
     return n.toString().reversed().chunked(3).joinToString(".").reversed()
 }
 
-/** 3725 s → "1h 02m", 125 s → "2:05" */
-/** Objetivo en km sin decimales si es entero («20»), con uno si no («12.5», en el idioma del móvil). */
-fun formatGoalKm(km: Double): String = if (km % 1.0 == 0.0) "%.0f".format(km) else "%.1f".format(km)
+/** Objetivo en km con los decimales que tenga, hasta dos: «20», «12,5», «12,04» (en el idioma del móvil). */
+fun formatGoalKm(km: Double): String = when {
+    km % 1.0 == 0.0 -> "%.0f".format(km)
+    Math.round(km * 100) % 10 == 0L -> "%.1f".format(km)
+    else -> "%.2f".format(km)
+}
 
+/** 3725 s → "1h 02m", 125 s → "2:05" */
 fun formatDuration(seconds: Long): String {
     val h = seconds / 3600
     val m = (seconds % 3600) / 60

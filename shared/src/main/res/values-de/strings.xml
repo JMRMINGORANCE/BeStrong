@@ -1163,4 +1163,8 @@
     <string name="trash_restored_n">Wiederhergestellte Trainings: %1$d</string>
     <string name="history_filtered_summary">Trainings: %1$d · %2$s</string>
     <string name="notif_cardio_goal">Wöchentliches Cardio-Ziel erreicht!</string>
+    <string name="notif_channel_goals">Erreichte Ziele</string>
+    <string name="history_filtered_empty">Keine Trainings mit diesen Filtern</string>
+    <string name="history_clear_filters">Filter löschen</string>
+    <string name="history_export_csv">CSV exportieren</string>
 </resources>

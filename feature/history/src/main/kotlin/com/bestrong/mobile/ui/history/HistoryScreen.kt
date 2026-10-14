@@ -93,6 +93,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     val heatmap by vm.heatmap.collectAsStateWithLifecycle()
     val partnerWorkouts by vm.partnerHistory.collectAsStateWithLifecycle()
     val showPartner by vm.showPartner.collectAsStateWithLifecycle()
+    val onlyPartner by vm.onlyPartner.collectAsStateWithLifecycle()
     val selectedDay by vm.selectedDay.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val view = LocalView.current
@@ -122,12 +123,14 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
         val routines by vm.routines.collectAsStateWithLifecycle()
         LogPastWorkoutDialog(
             routines = routines,
-            onLog = { r, start, end ->
+            onLog = { r, start, end, forPartner ->
                 logging = false
-                vm.logPast(r, start, end) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
+                vm.logPast(r, start, end, forPartner) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
             },
             onDismiss = { logging = false },
             startEpochMs = logStart,
+            partner = vm.partnerName(),
+            forPartnerInitially = onlyPartner,
         )
     }
 
@@ -172,10 +175,11 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                                         days,
                                         Modifier.padding(bottom = 8.dp),
                                         selectedDay,
-                                        onEmptyDay = { day ->
+                                        // Con «Pareja» un día vacío puede ser uno tuyo entrenado: ahí no se apunta nada
+                                        onEmptyDay = { day: java.time.LocalDate ->
                                             logStart = pastWorkoutStart(day)
                                             logging = true
-                                        },
+                                        }.takeUnless { onlyPartner },
                                     ) { vm.selectedDay.value = it }
                                 }
                             }
@@ -189,7 +193,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                                     )
                                 }
                             }
-                            item { FilteredSummary(filtered) }
+                            item { FilteredSummary(vm, filtered) }
                             items(filtered, key = { it.id }) { w ->
                                 // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
                                 val dragText = workoutText(w)
@@ -558,23 +562,45 @@ private fun AthleteFilterRow(vm: HistoryViewModel, partner: String) {
     }
 }
 
-/** Hora con que empieza un entreno apuntado en [day]: hace una hora si es hoy; si no, a las 18:00 de ese día. */
+/**
+ * Hora con que empieza un entreno apuntado en [day]: hace una hora si es hoy (sin pasar a ayer justo después de
+ * medianoche); si no, a las 18:00 de ese día.
+ */
 private fun pastWorkoutStart(day: java.time.LocalDate): Long {
     val zone = java.time.ZoneId.systemDefault()
     return if (day == java.time.LocalDate.now(zone)) {
-        System.currentTimeMillis() - 60 * 60_000L
+        maxOf(System.currentTimeMillis() - 60 * 60_000L, day.atStartOfDay(zone).toInstant().toEpochMilli())
     } else {
         day.atTime(18, 0).atZone(zone).toInstant().toEpochMilli()
     }
 }
 
-/** Lo que hay en la lista con los filtros puestos (persona, gimnasio, día, búsqueda): entrenos y tiempo. */
+/**
+ * Lo que hay en la lista con los filtros puestos (persona, gimnasio, día, búsqueda): entrenos y tiempo, y
+ * exportarlo en CSV. Si los filtros lo dejan vacío, lo dice y deja quitarlos.
+ */
 @Composable
-private fun FilteredSummary(filtered: List<Workout>) {
-    if (filtered.isEmpty()) return
-    Text(
-        stringResource(R.string.history_filtered_summary, filtered.size, com.bestrong.core.util.formatDuration(filtered.sumOf { it.durationSeconds() })),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+private fun FilteredSummary(vm: HistoryViewModel, filtered: List<Workout>) {
+    if (filtered.isEmpty()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.history_filtered_empty), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+            TextButton(onClick = vm::clearFilters) { Text(stringResource(R.string.history_clear_filters)) }
+        }
+        return
+    }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val failed = stringResource(R.string.export_failed)
+    val saved = stringResource(R.string.export_done)
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        uri?.let { vm.exportFiltered(it) { ok -> android.widget.Toast.makeText(context, if (ok) saved else failed, android.widget.Toast.LENGTH_SHORT).show() } }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(R.string.history_filtered_summary, filtered.size, com.bestrong.core.util.formatDuration(filtered.sumOf { it.durationSeconds() })),
+            Modifier.weight(1f),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        TextButton(onClick = { launcher.launch("bestrong-historial.csv") }) { Text(stringResource(R.string.history_export_csv)) }
+    }
 }

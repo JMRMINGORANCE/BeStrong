@@ -71,7 +71,7 @@ class WatchSyncService : WearableListenerService() {
                     path.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
                         val received = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
-                        val stored = repository.historyOnce().firstOrNull { it.id == received.id }
+                        val stored = repository.storedWorkout(received.id)
                         val workout = completeFromWatch(received, stored)
                         val isNew = stored == null
                         repository.saveWorkout(workout)
@@ -89,20 +89,7 @@ class WatchSyncService : WearableListenerService() {
                     path.startsWith(SyncContract.PATH_WORKOUT_HEALTH_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
                         val health = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeHealth(it) }.getOrNull() }
-                        val saved = health?.let { h -> repository.historyOnce().firstOrNull { it.id == h.workoutId } }
-                        if (health != null && saved != null) {
-                            val merged = energy.complete(
-                                saved.copy(
-                                    avgHeartRate = health.avgHeartRate ?: saved.avgHeartRate,
-                                    maxHeartRate = health.maxHeartRate ?: saved.maxHeartRate,
-                                    heartRateSamples = health.heartRateSamples.ifEmpty { saved.heartRateSamples },
-                                ),
-                                watchKcal = health.calories ?: saved.calories?.takeIf { saved.caloriesSource == CaloriesSource.WATCH },
-                            )
-                            repository.saveWorkout(merged)
-                            // La sesión ya se exportó al terminar: ahora solo se añade la gráfica de pulso
-                            if (saved.heartRateSamples.isEmpty()) appScope.launch { actions.exportHeartRateIfEnabled(merged) }
-                        }
+                        health?.let { mergeHealth(it) }
                         runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
                     }
                     // Rutina creada en el reloj: se guarda y se borra el DataItem
@@ -130,6 +117,24 @@ class WatchSyncService : WearableListenerService() {
         if (event.path == SyncContract.PATH_METRICS) {
             runCatching { SyncContract.decodeMetrics(event.data) }.onSuccess { watchMetrics.metrics.value = it }
         }
+    }
+
+    /** Pulso y calorías finales del reloj sobre lo guardado, sin pisar la valoración que se pone a la vez en el resumen. */
+    private suspend fun mergeHealth(h: com.bestrong.core.sync.WorkoutHealthData) {
+        var hadSamples = true
+        val merged = repository.updateWorkout(h.workoutId) { saved ->
+            hadSamples = saved.heartRateSamples.isNotEmpty()
+            energy.complete(
+                saved.copy(
+                    avgHeartRate = h.avgHeartRate ?: saved.avgHeartRate,
+                    maxHeartRate = h.maxHeartRate ?: saved.maxHeartRate,
+                    heartRateSamples = h.heartRateSamples.ifEmpty { saved.heartRateSamples },
+                ),
+                watchKcal = h.calories ?: saved.calories?.takeIf { saved.caloriesSource == CaloriesSource.WATCH },
+            )
+        }
+        // La sesión ya se exportó al terminar: ahora solo se añade la gráfica de pulso
+        if (merged != null && !hadSamples) appScope.launch { actions.exportHeartRateIfEnabled(merged) }
     }
 
     private fun isFromOtherNode(host: String?): Boolean {

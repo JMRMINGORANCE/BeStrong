@@ -162,6 +162,9 @@ data class SharedSettings(
     val activeGym: com.bestrong.core.training.GymProfile? = null,
     /** Hay más de un gimnasio: el reloj rellena con lo hecho en el activo (con uno solo no hace falta). */
     val multiGym: Boolean = false,
+    /** Objetivo semanal de cardio elegido en el móvil (km o minutos), para la complicación del reloj. */
+    val weeklyCardioKm: Double? = null,
+    val weeklyCardioMin: Int? = null,
     /** Subida máxima semanal de Planificación (0,05 = 5 %); null = sin tope. */
     val weeklyCap: Double? = null,
 ) {

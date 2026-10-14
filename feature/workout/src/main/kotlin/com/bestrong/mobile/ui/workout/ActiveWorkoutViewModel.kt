@@ -799,7 +799,8 @@ class ActiveWorkoutViewModel @Inject constructor(
         val rated = s.workout.copy(rating = rating)
         _summary.value = s.copy(workout = rated)
         // Sobre lo guardado: el reloj puede haber añadido el pulso y las calorías después de terminar
-        viewModelScope.launch { repo.saveWorkout(repo.storedWorkout(rated.id)?.copy(rating = rating) ?: rated) }
+        // (si se borró desde el historial con el resumen abierto, no vuelve)
+        viewModelScope.launch { repo.updateWorkout(rated.id) { it.copy(rating = rating) } }
     }
 
     fun skipExercise(weId: String) = edit { WorkoutEditor.skipExercise(it, weId) }

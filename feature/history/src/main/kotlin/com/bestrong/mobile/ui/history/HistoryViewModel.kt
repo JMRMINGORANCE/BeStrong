@@ -182,12 +182,19 @@ class HistoryViewModel @Inject constructor(
         val edited = WorkoutEditor.cleanupFinished(block(workout)).copy(updatedAtEpochMs = System.currentTimeMillis())
         if (edited.exercises.isEmpty()) {
             _deleted.value = workout
-            repo.trashWorkout(workout)
-            actions.deleteFromHealthConnectIfEnabled(workout)
+            // «Deshacer» espera a este borrado, como al borrar desde la lista
+            deleteJob = launch {
+                repo.trashWorkout(workout)
+                actions.deleteFromHealthConnectIfEnabled(workout)
+            }
         } else {
             repo.saveWorkout(edited)
-            // Corregido aquí, corregido en Health Connect (mismos ids: se sustituye)
-            if (edited.athlete == null) actions.exportToHealthConnectIfEnabled(edited)
+            // Corregido aquí, corregido en Health Connect: se quita lo de antes (un bloque de cardio borrado no
+            // dejaría su distancia) y se exporta de nuevo
+            if (edited.athlete == null) {
+                actions.deleteFromHealthConnectIfEnabled(workout)
+                actions.exportToHealthConnectIfEnabled(edited)
+            }
         }
     }
 
@@ -197,11 +204,35 @@ class HistoryViewModel @Inject constructor(
      * Registra un entreno pasado a partir de una rutina: series completadas con los pesos de la
      * última vez (o los de la rutina). Devuelve el id para abrirlo y ajustar lo que haga falta.
      */
-    fun logPast(routine: Routine, startMs: Long, endMs: Long, onLogged: (String) -> Unit) = viewModelScope.launch {
-        // Pesos de la última sesión anterior a esa fecha (no la sugerencia de progresión de hoy)
-        val before = repo.historyOnce().filter { it.isFinished && it.startedAtEpochMs < startMs }
+    /** Quita todos los filtros del historial (búsqueda, gimnasio, día y «solo la pareja»). */
+    fun clearFilters() {
+        query.value = ""
+        gymFilter.value = null
+        selectedDay.value = null
+        onlyPartner.value = false
+    }
+
+    /** Guarda en [uri] los entrenos de la lista tal como se ven (con sus filtros) en CSV; [onDone] dice si salió bien. */
+    fun exportFiltered(uri: android.net.Uri, onDone: (Boolean) -> Unit) = viewModelScope.launch {
+        val list = filtered.value
+        val ok = runCatching {
+            val csv = withContext(Dispatchers.Default) { com.bestrong.core.io.WorkoutCsv.export(list) }
+            withContext(Dispatchers.IO) { context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error("no stream") }
+        }.isSuccess
+        onDone(ok)
+    }
+
+    /** Nombre de la pareja si hay entrenos suyos (para apuntar uno pasado a su nombre). */
+    fun partnerName(): String? = repo.partnerHistory.value.firstOrNull()?.athlete
+
+    fun logPast(routine: Routine, startMs: Long, endMs: Long, forPartner: Boolean, onLogged: (String) -> Unit) = viewModelScope.launch {
+        val athlete = partnerName().takeIf { forPartner }
+        // Pesos de la última sesión anterior a esa fecha de quien lo hizo (no la sugerencia de progresión de hoy)
+        val own = if (athlete != null) repo.partnerHistory.value.filter { it.athlete == athlete } else repo.historyOnce()
+        val before = own.filter { it.isFinished && it.startedAtEpochMs < startMs }
         val w = routine.toWorkout(startMs, { id -> WorkoutStats.previousSets(id, before) })
         val done = w.copy(
+            athlete = athlete,
             finishedAtEpochMs = endMs,
             updatedAtEpochMs = System.currentTimeMillis(),
             exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { it.copy(completed = true, completedAtEpochMs = endMs) }) },

@@ -169,4 +169,6 @@
     <string name="complication_rest_desc">Verbleibende Pausenzeit</string>
     <string name="complication_rest_none">Keine laufende Pause</string>
     <string name="vs_reps">%1$s Wdh.</string>
+    <string name="cardio_complication_label">Cardio diese Woche</string>
+    <string name="cardio_complication_desc">Cardio diese Woche: %1$s %2$s</string>
 </resources>

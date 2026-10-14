@@ -1163,4 +1163,8 @@
     <string name="trash_restored_n">Entrenaments recuperats: %1$d</string>
     <string name="history_filtered_summary">Entrenaments: %1$d · %2$s</string>
     <string name="notif_cardio_goal">Objectiu de cardio de la setmana complert!</string>
+    <string name="notif_channel_goals">Objectius complerts</string>
+    <string name="history_filtered_empty">Cap entrenament amb aquests filtres</string>
+    <string name="history_clear_filters">Treure filtres</string>
+    <string name="history_export_csv">Exportar CSV</string>
 </resources>

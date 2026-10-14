@@ -123,8 +123,16 @@ fun WorkoutTimeFields(state: WorkoutTimeState) {
  * se elige la rutina, la fecha y la duración; las series salen completadas con los pesos de la última vez.
  */
 @Composable
-fun LogPastWorkoutDialog(routines: List<Routine>, onLog: (Routine, Long, Long) -> Unit, onDismiss: () -> Unit, startEpochMs: Long? = null) {
+fun LogPastWorkoutDialog(
+    routines: List<Routine>,
+    onLog: (routine: Routine, startMs: Long, endMs: Long, forPartner: Boolean) -> Unit,
+    onDismiss: () -> Unit,
+    startEpochMs: Long? = null,
+    partner: String? = null,
+    forPartnerInitially: Boolean = false,
+) {
     var selected by remember { mutableStateOf(routines.firstOrNull()) }
+    var forPartner by remember { mutableStateOf(forPartnerInitially && partner != null) }
     // Sin clave: el estado no se reinicia si la lista de rutinas cambia mientras se escribe
     val time = remember { WorkoutTimeState(startEpochMs ?: (System.currentTimeMillis() - 60 * 60_000L), 60) }
     AlertDialog(
@@ -143,6 +151,13 @@ fun LogPastWorkoutDialog(routines: List<Routine>, onLog: (Routine, Long, Long) -
                             label = { Text(listOfNotNull(r.emoji, r.name).joinToString(" ")) },
                         )
                     }
+                    // Con pareja: para quién se apunta (sus pesos de la última vez, en su historial)
+                    partner?.let { name ->
+                        androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            FilterChip(selected = !forPartner, onClick = { forPartner = false }, label = { Text(stringResource(R.string.athlete_me)) })
+                            FilterChip(selected = forPartner, onClick = { forPartner = true }, label = { Text(name) })
+                        }
+                    }
                     WorkoutTimeFields(time)
                     Text(stringResource(R.string.log_past_hint), style = MaterialTheme.typography.bodySmall)
                 }
@@ -151,7 +166,7 @@ fun LogPastWorkoutDialog(routines: List<Routine>, onLog: (Routine, Long, Long) -
         confirmButton = {
             val range = time.range
             TextButton(
-                onClick = { selected?.let { r -> range?.let { (s, e) -> onLog(r, s, e) } } },
+                onClick = { selected?.let { r -> range?.let { (s, e) -> onLog(r, s, e, forPartner) } } },
                 enabled = selected != null && range != null,
             ) { Text(stringResource(R.string.action_save)) }
         },

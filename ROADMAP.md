@@ -374,3 +374,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Papelera: días que le quedan a cada entreno y «Recuperar todos»
 - [x] Aviso al cumplir el objetivo semanal de cardio (una vez por semana)
 - [x] Objetivo de cardio a medida con el actual ya escrito y aviso si el número no vale
+
+## Fase 43 — Pareja al apuntar y cardio en el reloj ✅
+- [x] Apuntar un entreno pasado para ti o para tu pareja (con sus pesos de la última vez)
+- [x] Complicación del reloj con el cardio de la semana frente al objetivo
+- [x] Avisos de objetivos en su propio canal (se silencian sin perder los de récords)
+- [x] Historial vacío por los filtros: lo dice y deja quitarlos de un toque
+- [x] Exportar a CSV lo que se ve en el historial (con sus filtros)

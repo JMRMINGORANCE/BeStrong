@@ -335,6 +335,17 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
+    /** Un cambio de un entreno guardado a la vez (valorarlo y el pulso que llega del reloj no se pisan). */
+    private val updateMutex = Mutex()
+
+    /**
+     * Cambia el entreno [id] sobre lo guardado ahora mismo, sin pisar otro cambio a la vez; si ya no existe (se
+     * borró), no hace nada. Devuelve el entreno guardado o null.
+     */
+    suspend fun updateWorkout(id: String, change: suspend (Workout) -> Workout): Workout? = updateMutex.withLock {
+        storedWorkout(id)?.let { change(it) }?.also { saveWorkout(it) }
+    }
+
     /** El entreno tal como está guardado ahora (p. ej. con el pulso que el reloj añadió después). */
     suspend fun storedWorkout(id: String): Workout? =
         dao.workoutJson(id)?.let { raw -> withContext(Dispatchers.Default) { runCatching { Persistence.decodeWorkout(raw) }.getOrNull() } }

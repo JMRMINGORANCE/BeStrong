@@ -169,4 +169,6 @@
     <string name="complication_rest_desc">Tiempo que queda de descanso</string>
     <string name="complication_rest_none">Sin descanso en curso</string>
     <string name="vs_reps">%1$s reps</string>
+    <string name="cardio_complication_label">Cardio esta semana</string>
+    <string name="cardio_complication_desc">Cardio esta semana: %1$s %2$s</string>
 </resources>

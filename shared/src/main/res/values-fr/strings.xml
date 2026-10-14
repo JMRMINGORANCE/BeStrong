@@ -1163,4 +1163,8 @@
     <string name="trash_restored_n">Séances restaurées : %1$d</string>
     <string name="history_filtered_summary">Séances : %1$d · %2$s</string>
     <string name="notif_cardio_goal">Objectif cardio de la semaine atteint !</string>
+    <string name="notif_channel_goals">Objectifs atteints</string>
+    <string name="history_filtered_empty">Aucune séance avec ces filtres</string>
+    <string name="history_clear_filters">Effacer les filtres</string>
+    <string name="history_export_csv">Exporter CSV</string>
 </resources>

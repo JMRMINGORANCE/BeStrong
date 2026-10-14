@@ -22,6 +22,7 @@ import com.bestrong.mobile.ui.components.labelRes
 object Notifier {
     private const val CHANNEL_RECORDS = "records"
     private const val CHANNEL_REMINDERS = "reminders"
+    private const val CHANNEL_GOALS = "goals"
     private const val ID_REMINDER = 20
     private const val ID_WEEKLY = 21
     private const val ID_WEIGH_IN = 22
@@ -37,6 +38,10 @@ object Notifier {
         )
         nm.createNotificationChannel(
             NotificationChannel(CHANNEL_REMINDERS, context.getString(R.string.notif_channel_reminders), NotificationManager.IMPORTANCE_DEFAULT),
+        )
+        // Objetivos cumplidos (cardio de la semana): se pueden silenciar sin perder los récords
+        nm.createNotificationChannel(
+            NotificationChannel(CHANNEL_GOALS, context.getString(R.string.notif_channel_goals), NotificationManager.IMPORTANCE_DEFAULT),
         )
     }
 
@@ -208,7 +213,7 @@ object Notifier {
     @Suppress("MissingPermission")
     fun cardioGoal(context: Context, progress: String) {
         if (!canPost(context)) return
-        val n = NotificationCompat.Builder(context, CHANNEL_RECORDS)
+        val n = NotificationCompat.Builder(context, CHANNEL_GOALS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
             .setContentTitle(context.getString(R.string.notif_cardio_goal))
             .setContentText(progress)
