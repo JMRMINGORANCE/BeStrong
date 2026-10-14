@@ -209,13 +209,19 @@ private fun TrashItem(vm: ProfileViewModel) {
             title = { Text(stringResource(R.string.trash_title, trash.size)) },
             text = {
                 Column(Modifier.heightIn(max = 400.dp).verticalScroll(rememberScrollState())) {
+                    if (trash.size > 1) {
+                        TextButton(onClick = {
+                            vm.restoreAllFromTrash()
+                            open = false
+                        }) { Text(stringResource(R.string.trash_restore_all)) }
+                    }
                     trash.forEach { t ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
                                 // De quién es (si es de la pareja) y cuándo se borró: sale de la papelera a los 30 días
                                 Text(listOfNotNull(t.workout.name, t.workout.athlete).joinToString(" · ") + " · " + formatDate(t.workout.startedAtEpochMs))
                                 Text(
-                                    stringResource(R.string.trash_deleted_on, formatDate(t.deletedAtEpochMs)),
+                                    stringResource(R.string.trash_deleted_left, formatDate(t.deletedAtEpochMs), t.daysLeft(System.currentTimeMillis())),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )

@@ -104,7 +104,11 @@ class HistoryViewModel @Inject constructor(
 
     /** Récords de ese entreno: recorre todo el historial, así que fuera del hilo principal. */
     suspend fun recordsIn(workout: Workout): List<PersonalRecord> =
-        withContext(Dispatchers.Default) { WorkoutStats.newRecordsIn(workout, history.value) }
+        withContext(Dispatchers.Default) {
+            // Frente al historial de quien lo hizo (tus marcas no son las de tu pareja)
+            val same = if (workout.athlete != null) repo.partnerHistory.value.filter { it.athlete == workout.athlete } else history.value
+            WorkoutStats.newRecordsIn(workout, same)
+        }
 
     /**
      * Ejercicio a ejercicio, frente a la sesión anterior del mismo atleta (la tuya o la de tu pareja), por id de
@@ -119,12 +123,17 @@ class HistoryViewModel @Inject constructor(
     private val _deleted = MutableStateFlow<Workout?>(null)
     val deleted: StateFlow<Workout?> = _deleted
 
-    fun delete(id: String) = viewModelScope.launch {
+    /** Borrado en curso: «deshacer» espera a que acabe (si no, Health Connect podría quedarse sin la sesión). */
+    private var deleteJob: kotlinx.coroutines.Job? = null
+
+    fun delete(id: String) {
         // A la papelera (30 días) además del «deshacer» del aviso
-        val workout = (repo.history.value + repo.partnerHistory.value).firstOrNull { it.id == id } ?: return@launch
+        val workout = (repo.history.value + repo.partnerHistory.value).firstOrNull { it.id == id } ?: return
         _deleted.value = workout
-        repo.trashWorkout(workout)
-        actions.deleteFromHealthConnectIfEnabled(workout)
+        deleteJob = viewModelScope.launch {
+            repo.trashWorkout(workout)
+            actions.deleteFromHealthConnectIfEnabled(workout)
+        }
     }
 
     /** Entreno tal como estaba antes de cambiarle el gimnasio (para deshacerlo); null = nada que deshacer. */
@@ -155,6 +164,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun undoDelete() = viewModelScope.launch {
+        deleteJob?.join()
         _deleted.value?.let { w ->
             // Si la papelera ya no lo tiene (se vació entre medias), se guarda el del aviso
             val restored = repo.restoreFromTrash(w.id) ?: w.also { repo.saveWorkout(it) }
@@ -176,6 +186,8 @@ class HistoryViewModel @Inject constructor(
             actions.deleteFromHealthConnectIfEnabled(workout)
         } else {
             repo.saveWorkout(edited)
+            // Corregido aquí, corregido en Health Connect (mismos ids: se sustituye)
+            if (edited.athlete == null) actions.exportToHealthConnectIfEnabled(edited)
         }
     }
 

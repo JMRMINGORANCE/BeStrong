@@ -1153,10 +1153,14 @@
     <string name="cardio_week_goal_min">Cardio this week: %1$d of %2$d min</string>
     <string name="athlete_me">Me</string>
     <string name="athlete_both">Both</string>
-    <string name="trash_deleted_on">Deleted on %1$s</string>
     <string name="trash_delete_forever">Delete forever</string>
     <string name="trash_empty">Empty</string>
     <string name="trash_empty_confirm">Sure? Empty</string>
     <string name="cardio_streak">%1$d weeks in a row meeting the goal</string>
     <string name="cardio_goal_custom">Other: type a number and tap km or min</string>
+    <string name="trash_deleted_left">Deleted on %1$s · %2$d days left</string>
+    <string name="trash_restore_all">Restore all</string>
+    <string name="trash_restored_n">Workouts restored: %1$d</string>
+    <string name="history_filtered_summary">Workouts: %1$d · %2$s</string>
+    <string name="notif_cardio_goal">Weekly cardio goal reached!</string>
 </resources>

@@ -335,6 +335,10 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
+    /** El entreno tal como está guardado ahora (p. ej. con el pulso que el reloj añadió después). */
+    suspend fun storedWorkout(id: String): Workout? =
+        dao.workoutJson(id)?.let { raw -> withContext(Dispatchers.Default) { runCatching { Persistence.decodeWorkout(raw) }.getOrNull() } }
+
     private val trashSerializer = ListSerializer(TrashedWorkout.serializer())
 
     /** Una sola lectura-escritura de la papelera a la vez: dos borrados seguidos no se pisan. */
@@ -363,8 +367,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     /** Vuelve a poner un entreno de la papelera en el historial; devuelve el entreno (null si ya no estaba). */
     suspend fun restoreFromTrash(id: String): Workout? = trashMutex.withLock {
         val list = trashOnce()
-        val workout = list.firstOrNull { it.workout.id == id }?.workout
-        workout?.let { dao.upsertWorkout(WorkoutEntity(it.id, it.startedAtEpochMs, Persistence.encodeWorkout(it))) }
+        val trashed = list.firstOrNull { it.workout.id == id }?.workout
+        // Si ya volvió al historial por otro camino (el reloj, una copia), se queda esa versión, que es más nueva
+        val workout = storedWorkout(id) ?: trashed?.also { dao.upsertWorkout(WorkoutEntity(it.id, it.startedAtEpochMs, Persistence.encodeWorkout(it))) }
         saveTrash(list.filterNot { it.workout.id == id })
         workout
     }
@@ -375,7 +380,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     }
 
     private suspend fun untrash(ids: Set<String>) {
-        if (trash.value.none { it.workout.id in ids }) return
+        // Mirando lo guardado (no [trash], que al arrancar aún puede estar vacío) y sin decodificar si no hace falta
+        val raw = dao.valueOnce(KEY_TRASH) ?: return
+        if (ids.none { raw.contains(it) }) return
         trashMutex.withLock { saveTrash(trashOnce().filterNot { it.workout.id in ids }) }
     }
 

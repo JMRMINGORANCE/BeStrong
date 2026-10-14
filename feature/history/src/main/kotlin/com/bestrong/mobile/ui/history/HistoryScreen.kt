@@ -116,6 +116,8 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     }
 
     var logging by remember { mutableStateOf(false) }
+    // Día tocado en el calendario (sin entreno): el diálogo empieza en él
+    var logStart by remember { mutableStateOf<Long?>(null) }
     if (logging) {
         val routines by vm.routines.collectAsStateWithLifecycle()
         LogPastWorkoutDialog(
@@ -125,6 +127,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                 vm.logPast(r, start, end) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
             },
             onDismiss = { logging = false },
+            startEpochMs = logStart,
         )
     }
 
@@ -137,10 +140,13 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                         TopAppBar(
                             title = { Text(stringResource(R.string.nav_history)) },
                             actions = {
-                                IconButton(onClick = { logging = true }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
+                                IconButton(onClick = {
+                                    logStart = null
+                                    logging = true
+                                }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
                             },
                         )
-                        if (history.isEmpty()) {
+                        if (history.isEmpty() && partnerWorkouts.isEmpty()) {
                             EmptyState(Icons.Default.History, stringResource(R.string.history_empty_title), stringResource(R.string.history_empty_body))
                             return@Column
                         }
@@ -161,7 +167,17 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                             }
                             if (query.isBlank()) {
                                 item { YearHeatmap(heatmap, Modifier.padding(vertical = 4.dp)) }
-                                item { CalendarMonth(days, Modifier.padding(bottom = 8.dp), selectedDay) { vm.selectedDay.value = it } }
+                                item {
+                                    CalendarMonth(
+                                        days,
+                                        Modifier.padding(bottom = 8.dp),
+                                        selectedDay,
+                                        onEmptyDay = { day ->
+                                            logStart = pastWorkoutStart(day)
+                                            logging = true
+                                        },
+                                    ) { vm.selectedDay.value = it }
+                                }
                             }
                             selectedDay?.let { day ->
                                 item {
@@ -173,6 +189,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                                     )
                                 }
                             }
+                            item { FilteredSummary(filtered) }
                             items(filtered, key = { it.id }) { w ->
                                 // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
                                 val dragText = workoutText(w)
@@ -191,7 +208,8 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
             detailPane = {
                 AnimatedPane {
                     val id = (navigator.currentDestination?.contentKey as? String)
-                    val w = history.firstOrNull { it.id == id }
+                    // También los de la pareja (con el chip Pareja o Los dos)
+                    val w = history.firstOrNull { it.id == id } ?: partnerWorkouts.firstOrNull { it.id == id }
                     if (w == null) {
                         EmptyState(Icons.Default.FitnessCenter, stringResource(R.string.history_pick_title), stringResource(R.string.history_pick_body))
                     } else {
@@ -538,4 +556,25 @@ private fun AthleteFilterRow(vm: HistoryViewModel, partner: String) {
         FilterChip(selected = onlyPartner, onClick = { vm.showPartner.value = false; vm.onlyPartner.value = true }, label = { Text(partner) })
         FilterChip(selected = both && !onlyPartner, onClick = { vm.showPartner.value = true; vm.onlyPartner.value = false }, label = { Text(stringResource(R.string.athlete_both)) })
     }
+}
+
+/** Hora con que empieza un entreno apuntado en [day]: hace una hora si es hoy; si no, a las 18:00 de ese día. */
+private fun pastWorkoutStart(day: java.time.LocalDate): Long {
+    val zone = java.time.ZoneId.systemDefault()
+    return if (day == java.time.LocalDate.now(zone)) {
+        System.currentTimeMillis() - 60 * 60_000L
+    } else {
+        day.atTime(18, 0).atZone(zone).toInstant().toEpochMilli()
+    }
+}
+
+/** Lo que hay en la lista con los filtros puestos (persona, gimnasio, día, búsqueda): entrenos y tiempo. */
+@Composable
+private fun FilteredSummary(filtered: List<Workout>) {
+    if (filtered.isEmpty()) return
+    Text(
+        stringResource(R.string.history_filtered_summary, filtered.size, com.bestrong.core.util.formatDuration(filtered.sumOf { it.durationSeconds() })),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }

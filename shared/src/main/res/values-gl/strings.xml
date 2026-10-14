@@ -1153,10 +1153,14 @@
     <string name="cardio_week_goal_min">Cardio esta semana: %1$d de %2$d min</string>
     <string name="athlete_me">Eu</string>
     <string name="athlete_both">Os dous</string>
-    <string name="trash_deleted_on">Borrado o %1$s</string>
     <string name="trash_delete_forever">Borrar para sempre</string>
     <string name="trash_empty">Baleirar</string>
     <string name="trash_empty_confirm">Seguro? Baleirar</string>
     <string name="cardio_streak">%1$d semanas seguidas cumprindo o obxectivo</string>
     <string name="cardio_goal_custom">Outro: escribe o número e toca km ou min</string>
+    <string name="trash_deleted_left">Borrado o %1$s · quedan %2$d días</string>
+    <string name="trash_restore_all">Recuperar todos</string>
+    <string name="trash_restored_n">Adestramentos recuperados: %1$d</string>
+    <string name="history_filtered_summary">Adestramentos: %1$d · %2$s</string>
+    <string name="notif_cardio_goal">Obxectivo de cardio da semana cumprido!</string>
 </resources>

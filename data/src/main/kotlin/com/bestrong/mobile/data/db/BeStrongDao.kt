@@ -20,6 +20,9 @@ interface BeStrongDao {
     @Upsert
     suspend fun upsertAll(exercises: List<CustomExerciseEntity>, workouts: List<WorkoutEntity>)
 
+    @Query("SELECT json FROM workouts WHERE id = :id")
+    suspend fun workoutJson(id: String): String?
+
     @Query("DELETE FROM workouts WHERE id = :id")
     suspend fun deleteWorkout(id: String)
 

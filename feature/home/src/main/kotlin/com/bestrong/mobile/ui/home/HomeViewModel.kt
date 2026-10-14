@@ -138,9 +138,11 @@ class HomeViewModel @Inject constructor(
 
     /** Objetivo escrito a mano («12,5» km o «200» min); devuelve false si el número no vale. */
     fun setCustomCardioGoal(text: String, inMinutes: Boolean): Boolean {
-        val value = text.trim().replace(',', '.').toDoubleOrNull() ?: return false
-        val valid = if (inMinutes) value in 5.0..10_000.0 else value in 0.5..1_000.0
-        if (valid) setWeeklyCardioGoal(value.takeUnless { inMinutes }, value.toInt().takeIf { inMinutes })
+        // Solo números normales: «12,5» o «12.5» km, minutos enteros (nada de «1e3» ni separadores de miles)
+        val pattern = if (inMinutes) Regex("\\d{1,5}") else Regex("\\d{1,4}([.,]\\d{1,2})?")
+        val value = text.trim().takeIf { pattern.matches(it) }?.replace(',', '.')?.toDoubleOrNull()
+        val valid = value != null && (if (inMinutes) value in 5.0..10_000.0 else value in 0.5..1_000.0)
+        if (valid) setWeeklyCardioGoal(value.takeUnless { inMinutes }, value?.toInt()?.takeIf { inMinutes })
         return valid
     }
 

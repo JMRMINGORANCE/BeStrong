@@ -5,12 +5,16 @@ import kotlinx.serialization.Serializable
 /** Entreno borrado que se guarda un tiempo en la papelera por si se quiere recuperar. */
 @Serializable
 data class TrashedWorkout(val deletedAtEpochMs: Long, val workout: Workout) {
+    /** Días que le quedan en la papelera (1 el último día). */
+    fun daysLeft(nowEpochMs: Long): Int =
+        ((deletedAtEpochMs + KEEP_DAYS * 86_400_000L - nowEpochMs + 86_399_999L) / 86_400_000L).toInt().coerceAtLeast(1)
+
     companion object {
         /** Días que se guarda un entreno borrado. */
         const val KEEP_DAYS = 30L
 
         /** Como mucho estos (cada uno guarda el entreno entero, con su pulso): los más antiguos salen antes. */
-        const val MAX_ITEMS = 100
+        const val MAX_ITEMS = 40
 
         /** Sin los de hace más de [KEEP_DAYS] días (aunque no se haya vuelto a borrar nada desde entonces). */
         fun fresh(list: List<TrashedWorkout>, nowEpochMs: Long): List<TrashedWorkout> =

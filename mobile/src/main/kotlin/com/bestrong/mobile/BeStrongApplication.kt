@@ -69,6 +69,35 @@ class AppSync @Inject constructor(
      * Ajustes compartidos con el reloj. Objetivo semanal: el del programa activo si lo hay, como en
      * la pantalla de inicio. Notas fijas: se releen cuando cambia alguna (cortas, para el reloj).
      */
+    /** Aviso al cumplir el objetivo semanal de cardio: una vez por semana (la que se avisó queda apuntada). */
+    private suspend fun notifyCardioGoal() {
+        val prefs = context.getSharedPreferences("notify_state", Context.MODE_PRIVATE)
+        combine(repository.history, settings.settings) { history, s -> cardioGoalMet(history, s) }
+            .debounce(2_000).distinctUntilChanged().collect { met ->
+                val (week, text) = met ?: return@collect
+                if (prefs.getLong("cardio_goal_week", -1) == week) return@collect
+                prefs.edit().putLong("cardio_goal_week", week).apply()
+                com.bestrong.mobile.notify.Notifier.cardioGoal(context, text)
+            }
+    }
+
+    /** (lunes de esta semana como día, «150 de 150 min») si ya se cumple el objetivo; null si no hay o no se cumple. */
+    private fun cardioGoalMet(history: List<com.bestrong.core.model.Workout>, s: com.bestrong.mobile.data.UserSettings): Pair<Long, String>? {
+        val goalKm = s.weeklyCardioKm
+        val goalMin = s.weeklyCardioMin
+        if (goalKm == null && goalMin == null) return null
+        val zone = java.time.ZoneId.systemDefault()
+        val monday = java.time.LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        val (meters, seconds) = com.bestrong.core.stats.CardioTotals.since(history, monday.atStartOfDay(zone).toInstant().toEpochMilli())
+        val text = if (goalMin != null) {
+            context.getString(R.string.cardio_week_goal_min, (seconds / 60).toInt(), goalMin).takeIf { seconds / 60 >= goalMin }
+        } else {
+            val km = meters / 1000
+            context.getString(R.string.cardio_week_goal, "%.1f".format(km), com.bestrong.core.util.formatGoalKm(goalKm ?: 0.0)).takeIf { km >= (goalKm ?: 0.0) }
+        }
+        return text?.let { monday.toEpochDay() to it }
+    }
+
     private suspend fun syncSettings() {
         val notes = media.version.map { media.allNotes().mapValues { (_, n) -> n.trim().take(MAX_WATCH_NOTE) } }
 
@@ -141,6 +170,7 @@ class AppSync @Inject constructor(
         runCatching { ImagePrefetchWorker.schedule(context) }
         // Resumen de la semana el domingo por la tarde
         runCatching { WeeklySummaryWorker.schedule(context) }
+        scope.launch { notifyCardioGoal() }
         // Atajos dinámicos con las tres primeras rutinas (icono de la app, Bixby Routines)
         scope.launch {
             repository.routines.map { list -> list.filter { it.exercises.isNotEmpty() && !it.archived }.take(3) }.distinctUntilChanged().collect { list ->

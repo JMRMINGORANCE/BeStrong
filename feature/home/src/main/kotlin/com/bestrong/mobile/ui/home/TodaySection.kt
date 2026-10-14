@@ -471,7 +471,7 @@ private fun CardioWeekProgress(week: HomeViewModel.CardioWeek) {
     val goalMin = week.goalMin
     val (text, progress) = when {
         goalMin != null -> stringResource(R.string.cardio_week_goal_min, minutes, goalMin) to minutes.toFloat() / goalMin
-        goalKm != null -> stringResource(R.string.cardio_week_goal, "%.1f".format(km), "%.0f".format(goalKm)) to (km / goalKm).toFloat()
+        goalKm != null -> stringResource(R.string.cardio_week_goal, "%.1f".format(km), com.bestrong.core.util.formatGoalKm(goalKm)) to (km / goalKm).toFloat()
         else -> stringResource(R.string.cardio_week, "%.1f".format(km)) to null
     }
     Text(text, fontWeight = FontWeight.Bold)
@@ -482,20 +482,26 @@ private fun CardioWeekProgress(week: HomeViewModel.CardioWeek) {
 
 /** Objetivo a medida: el número y luego km o min (un número que no vale no cambia nada). */
 @Composable
-private fun CustomCardioGoal(vm: HomeViewModel, onDone: () -> Unit) {
-    var text by remember { mutableStateOf("") }
+private fun CustomCardioGoal(vm: HomeViewModel, current: HomeViewModel.CardioWeek, onDone: () -> Unit) {
+    // Empieza con el objetivo de ahora, para retocarlo
+    var text by remember { mutableStateOf(current.goalMin?.toString() ?: current.goalKm?.let { com.bestrong.core.util.formatGoalKm(it) }.orEmpty()) }
+    var invalid by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(stringResource(R.string.cardio_goal_custom), style = MaterialTheme.typography.bodySmall)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             androidx.compose.material3.OutlinedTextField(
                 value = text,
-                onValueChange = { text = it.take(6) },
+                onValueChange = { v ->
+                    text = v.filter { it.isDigit() || it == ',' || it == '.' }.take(7)
+                    invalid = false
+                },
+                isError = invalid,
                 singleLine = true,
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
             )
-            androidx.compose.material3.TextButton(onClick = { if (vm.setCustomCardioGoal(text, inMinutes = false)) onDone() }) { Text("km") }
-            androidx.compose.material3.TextButton(onClick = { if (vm.setCustomCardioGoal(text, inMinutes = true)) onDone() }) { Text("min") }
+            androidx.compose.material3.TextButton(onClick = { if (vm.setCustomCardioGoal(text, inMinutes = false)) onDone() else invalid = true }) { Text("km") }
+            androidx.compose.material3.TextButton(onClick = { if (vm.setCustomCardioGoal(text, inMinutes = true)) onDone() else invalid = true }) { Text("min") }
         }
     }
 }
@@ -531,7 +537,7 @@ fun CardioWeekCard(vm: HomeViewModel) {
                             androidx.compose.material3.FilterChip(selected = week.goalMin == g, onClick = { vm.setWeeklyCardioGoal(null, g); editing = false }, label = { Text("$g min") })
                         }
                     }
-                    CustomCardioGoal(vm) { editing = false }
+                    CustomCardioGoal(vm, week) { editing = false }
                 }
             },
             confirmButton = { androidx.compose.material3.TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_close)) } },

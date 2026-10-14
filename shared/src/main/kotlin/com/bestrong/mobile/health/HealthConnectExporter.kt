@@ -68,10 +68,6 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         if (bodyFatPermission in granted) runCatching { client.deleteRecords(BodyFatRecord::class, emptyList(), listOf("$id-fat")) }
     }
 
-    /**
-     * Cada registro lleva un id de cliente estable (id del entreno + tipo): si se exporta otra vez
-     * (reenvío del reloj, reintento), Health Connect lo sustituye en lugar de duplicarlo.
-     */
     /** Quita lo exportado de un entreno (sesión, calorías, pulso y distancias) por sus ids de cliente. */
     suspend fun deleteWorkout(workout: Workout) {
         val granted = granted()
@@ -86,6 +82,26 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         }
     }
 
+    /**
+     * Borrado masivo: todo lo que esta app exportó de entrenos antes de [before] (null = todo). Health Connect
+     * solo deja borrar lo propio, así que no toca lo de otras apps.
+     */
+    suspend fun deleteWorkoutsBefore(before: Instant?) {
+        val granted = granted()
+        val range = androidx.health.connect.client.time.TimeRangeFilter.before(before ?: Instant.now().plusSeconds(86_400))
+        listOf(
+            sessionPermission to ExerciseSessionRecord::class,
+            caloriesPermission to TotalCaloriesBurnedRecord::class,
+            activeCaloriesPermission to ActiveCaloriesBurnedRecord::class,
+            heartRatePermission to HeartRateRecord::class,
+            distancePermission to DistanceRecord::class,
+        ).forEach { (permission, type) -> if (permission in granted) runCatching { client.deleteRecords(type, range) } }
+    }
+
+    /**
+     * Cada registro lleva un id de cliente estable (id del entreno + tipo): si se exporta otra vez
+     * (reenvío del reloj, reintento), Health Connect lo sustituye en lugar de duplicarlo.
+     */
     private fun meta(workout: Workout, suffix: String) =
         Metadata(clientRecordId = "${workout.id}-$suffix", clientRecordVersion = System.currentTimeMillis())
 

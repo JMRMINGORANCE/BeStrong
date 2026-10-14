@@ -63,7 +63,7 @@ class BeStrongWidget : GlanceAppWidget() {
         val (meters, seconds) = com.bestrong.core.stats.CardioTotals.since(history, weekStart.atStartOfDay(zone).toInstant().toEpochMilli())
         val cardio = when {
             s.weeklyCardioMin != null -> context.getString(R.string.cardio_week_goal_min, (seconds / 60).toInt(), s.weeklyCardioMin)
-            s.weeklyCardioKm != null -> context.getString(R.string.cardio_week_goal, "%.1f".format(meters / 1000), "%.0f".format(s.weeklyCardioKm))
+            s.weeklyCardioKm != null -> context.getString(R.string.cardio_week_goal, "%.1f".format(meters / 1000), com.bestrong.core.util.formatGoalKm(s.weeklyCardioKm ?: 0.0))
             else -> null
         }
         provideContent { GlanceTheme { Content(context, week, streak, routines, cardio) } }

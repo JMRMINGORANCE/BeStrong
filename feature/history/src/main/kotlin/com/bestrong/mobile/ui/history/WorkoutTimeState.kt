@@ -123,10 +123,10 @@ fun WorkoutTimeFields(state: WorkoutTimeState) {
  * se elige la rutina, la fecha y la duración; las series salen completadas con los pesos de la última vez.
  */
 @Composable
-fun LogPastWorkoutDialog(routines: List<Routine>, onLog: (Routine, Long, Long) -> Unit, onDismiss: () -> Unit) {
+fun LogPastWorkoutDialog(routines: List<Routine>, onLog: (Routine, Long, Long) -> Unit, onDismiss: () -> Unit, startEpochMs: Long? = null) {
     var selected by remember { mutableStateOf(routines.firstOrNull()) }
     // Sin clave: el estado no se reinicia si la lista de rutinas cambia mientras se escribe
-    val time = remember { WorkoutTimeState(System.currentTimeMillis() - 60 * 60_000L, 60) }
+    val time = remember { WorkoutTimeState(startEpochMs ?: (System.currentTimeMillis() - 60 * 60_000L), 60) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.log_past_title)) },

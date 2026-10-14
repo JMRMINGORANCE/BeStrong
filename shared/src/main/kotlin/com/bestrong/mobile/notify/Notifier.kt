@@ -27,6 +27,7 @@ object Notifier {
     private const val ID_WEIGH_IN = 22
     private const val ID_MEASURE = 23
     private const val ID_BACKUP = 24
+    private const val ID_CARDIO_GOAL = 25
     private const val ID_RECORDS_BASE = 100
 
     private fun ensureChannels(context: Context) {
@@ -202,6 +203,20 @@ object Notifier {
     }
 
     private const val RESULT_TIMEOUT_MS = 8_000L
+
+    /** Objetivo semanal de cardio cumplido (una vez por semana). */
+    @Suppress("MissingPermission")
+    fun cardioGoal(context: Context, progress: String) {
+        if (!canPost(context)) return
+        val n = NotificationCompat.Builder(context, CHANNEL_RECORDS)
+            .setSmallIcon(R.drawable.ic_stat_dumbbell)
+            .setContentTitle(context.getString(R.string.notif_cardio_goal))
+            .setContentText(progress)
+            .setContentIntent(openApp(context))
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(context).notify(ID_CARDIO_GOAL, n)
+    }
 
     /** Resumen semanal (domingo por la tarde). */
     /** [highLoadRatio]: relación aguda:crónica si la carga subió demasiado (null = normal). */

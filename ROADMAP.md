@@ -367,3 +367,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Health Connect al día: borrar un entreno quita su sesión y recuperarlo la vuelve a exportar
 - [x] Racha de semanas cumpliendo el objetivo de cardio
 - [x] Objetivo de cardio a medida (cualquier número de km o minutos)
+
+## Fase 42 — Calendario útil y avisos de cardio ✅
+- [x] Tocar un día pasado sin entreno en el calendario para apuntar el que se hizo
+- [x] Resumen de lo que se ve en el historial (entrenos y tiempo con los filtros puestos)
+- [x] Papelera: días que le quedan a cada entreno y «Recuperar todos»
+- [x] Aviso al cumplir el objetivo semanal de cardio (una vez por semana)
+- [x] Objetivo de cardio a medida con el actual ya escrito y aviso si el número no vale

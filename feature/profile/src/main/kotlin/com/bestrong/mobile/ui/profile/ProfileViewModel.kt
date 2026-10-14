@@ -367,13 +367,22 @@ class ProfileViewModel @Inject constructor(
         } ?: error(context.getString(R.string.file_open_error))
 
     /** Borrado selectivo: entrenos antiguos, medidas, fotos o todo el historial. */
+    /** Lo exportado a Health Connect de los entrenos que se borran (si se exportaba). */
+    private suspend fun deleteFromHealth(before: java.time.Instant?) {
+        if (settingsStore.settings.value.healthConnectExport) runCatching { healthConnect.deleteWorkoutsBefore(before) }
+    }
+
     fun deleteData(kind: DeleteKind) = viewModelScope.launch {
         val count = when (kind) {
             DeleteKind.OLD_HISTORY -> {
                 val limit = System.currentTimeMillis() - 365L * 86_400_000L
+                deleteFromHealth(java.time.Instant.ofEpochMilli(limit))
                 repo.historyOnce().filter { it.startedAtEpochMs < limit }.map { it.id }.also { repo.deleteWorkouts(it) }.size
             }
-            DeleteKind.ALL_HISTORY -> repo.historyOnce(includePartner = true).map { it.id }.also { repo.deleteWorkouts(it) }.size
+            DeleteKind.ALL_HISTORY -> {
+                deleteFromHealth(null)
+                repo.historyOnce(includePartner = true).map { it.id }.also { repo.deleteWorkouts(it) }.size
+            }
             DeleteKind.MEASUREMENTS -> repo.measurements.value.onEach {
                 repo.deleteMeasurement(it.id)
                 runCatching { healthConnect.deleteMeasurement(it.id) }
@@ -551,11 +560,21 @@ class ProfileViewModel @Inject constructor(
     val trash: StateFlow<List<com.bestrong.core.model.TrashedWorkout>> = repo.trash
 
     fun restoreFromTrash(id: String) = viewModelScope.launch {
-        val workout = repo.restoreFromTrash(id) ?: return@launch
+        if (restoreOne(id)) _messages.tryEmit(context.getString(R.string.trash_restored))
+    }
+
+    /** Todos los de la papelera de vuelta al historial. */
+    fun restoreAllFromTrash() = viewModelScope.launch {
+        val restored = repo.trash.value.map { it.workout.id }.count { restoreOne(it) }
+        if (restored > 0) _messages.tryEmit(context.getString(R.string.trash_restored_n, restored))
+    }
+
+    private suspend fun restoreOne(id: String): Boolean {
+        val workout = repo.restoreFromTrash(id) ?: return false
         if (workout.athlete == null && settingsStore.settings.value.healthConnectExport) {
             runCatching { healthConnect.export(workout) }.onFailure { android.util.Log.w("Profile", "Entreno no exportado", it) }
         }
-        _messages.tryEmit(context.getString(R.string.trash_restored))
+        return true
     }
 
     /** «Borrar para siempre» uno de la papelera, o vaciarla entera (con [id] null). */

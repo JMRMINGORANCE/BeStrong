@@ -35,9 +35,18 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-/** Calendario mensual con los días entrenados marcados; tocar uno filtra el historial por ese día. */
+/**
+ * Calendario mensual con los días entrenados marcados; tocar uno filtra el historial por ese día y tocar un día
+ * pasado sin entreno ([onEmptyDay]) deja apuntar el que se hizo sin registrar.
+ */
 @Composable
-fun CalendarMonth(trainingDays: Set<LocalDate>, modifier: Modifier = Modifier, selected: LocalDate? = null, onSelect: (LocalDate?) -> Unit = {}) {
+fun CalendarMonth(
+    trainingDays: Set<LocalDate>,
+    modifier: Modifier = Modifier,
+    selected: LocalDate? = null,
+    onEmptyDay: ((LocalDate) -> Unit)? = null,
+    onSelect: (LocalDate?) -> Unit = {},
+) {
     var monthOffset by rememberSaveable { mutableStateOf(0L) }
     val month = YearMonth.now().plusMonths(monthOffset)
     val locale = Locale.getDefault()
@@ -76,7 +85,13 @@ fun CalendarMonth(trainingDays: Set<LocalDate>, modifier: Modifier = Modifier, s
                                 Modifier.fillMaxWidth(0.8f).aspectRatio(1f).clip(CircleShape)
                                     .background(if (trained) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
                                     .then(if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.tertiary, CircleShape) else Modifier)
-                                    .then(if (trained) Modifier.clickable { onSelect(if (isSelected) null else date) } else Modifier),
+                                    .then(
+                                        when {
+                                            trained -> Modifier.clickable { onSelect(if (isSelected) null else date) }
+                                            onEmptyDay != null && !date.isAfter(today) -> Modifier.clickable { onEmptyDay(date) }
+                                            else -> Modifier
+                                        },
+                                    ),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(

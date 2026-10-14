@@ -807,4 +807,14 @@ class CollarTest {
         assertEquals(2, com.bestrong.core.stats.CardioTotals.goalStreak(history, starts) { m, _ -> m >= 10_000 })
         assertEquals(3, com.bestrong.core.stats.CardioTotals.goalStreak(history + w(4 * week + 2, 9000.0), starts) { m, _ -> m >= 10_000 })
     }
+
+    @Test
+    fun trashDaysLeftCountsDownToOne() {
+        val day = 86_400_000L
+        val t = com.bestrong.core.model.TrashedWorkout(0, Workout(name = "w", startedAtEpochMs = 0))
+        assertEquals(30, t.daysLeft(0))
+        assertEquals(29, t.daysLeft(day))
+        assertEquals(1, t.daysLeft(29 * day + 1))
+        assertEquals(1, t.daysLeft(40 * day))
+    }
 }
