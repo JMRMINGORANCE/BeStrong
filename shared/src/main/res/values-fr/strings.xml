@@ -1002,4 +1002,5 @@
     <string name="rpe_trend_title">Effort (RPE moyen par séance)</string>
     <string name="rpe_trend_rising">⚠ C\'est de plus en plus dur sans progrès du 1RM : peut-être de la fatigue. Envisage une semaine de décharge.</string>
     <string name="goal_reached_live">🎯 %1$s : objectif de %2$s atteint !</string>
+    <string name="goal_remove">Retirer l\'objectif</string>
 </resources>

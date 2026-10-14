@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.library.Alternatives
+import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.SessionRating
@@ -320,6 +321,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             val marked = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
             if (marked.isEmpty()) return@launch
             // Si ya hay un descanso en marcha (p. ej. se completa un ejercicio olvidado), no se reinicia
+            // El objetivo también se celebra si se llega marcando de golpe (con la mejor de las marcadas)
+            if (!partner) marked.values.filter { it.countsForRecords }.maxByOrNull { it.estimatedOneRepMax }?.let { checkGoal(after, weId, it.id) }
             val startsRest = restTimer.rest.value == null
             if (startsRest) onSetCompleted(after, after.exercises.indexOfFirst { it.id == weId })
             // Al deshacer solo se para el descanso que arrancó esto (no otro que vino después)
@@ -431,6 +434,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     fun toggleSet(weId: String, setId: String) {
+        // El objetivo es tuyo: con el compañero en pantalla no se celebra
+        val partner = partnerMode.value
         viewModelScope.launch {
             // Se decide con el estado real del cambio (bajo el cerrojo), no con una copia que puede ir atrasada
             val (before, updated) = update { WorkoutEditor.toggleSetCompleted(it, weId, setId) } ?: return@launch
@@ -438,7 +443,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             fun done(w: Workout) = w.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId }?.completed == true
             if (index >= 0 && !done(before) && done(updated)) {
                 onSetCompleted(updated, index)
-                checkGoal(updated, weId, setId)
+                if (!partner) checkGoal(updated, weId, setId)
             }
         }
     }
@@ -447,14 +452,18 @@ class ActiveWorkoutViewModel @Inject constructor(
     private fun checkGoal(w: Workout, weId: String, setId: String) {
         val we = w.exercises.firstOrNull { it.id == weId }
         val set = we?.sets?.firstOrNull { it.id == setId }?.takeIf { it.countsForRecords }
-        val goal = we?.let { settings.value.exerciseGoalsKg[it.exercise.id] }
+        // Sin las marcas cargadas todavía no se sabe si ya lo tenías: mejor no celebrar de más
+        val loaded = bests.value.isNotEmpty() || repo.history.value.isEmpty()
+        val goal = we?.takeIf { loaded }?.let { settings.value.exerciseGoalsKg[it.exercise.id] }
         if (we == null || set == null || goal == null) return
         val before = maxOf(
             bests.value[we.exercise.id]?.first ?: 0.0,
             w.exercises.filter { it.exercise.id == we.exercise.id }.flatMap { it.completedSets }
                 .filter { it.id != setId && it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0,
         )
-        if (set.estimatedOneRepMax >= goal && before < goal) _events.tryEmit(WorkoutEvent.GoalReached(we.exercise, goal))
+        // Con «suma de las dos mancuernas» el objetivo se muestra igual que los pesos de la fila
+        val factor = if (settings.value.dumbbellTotal && we.exercise.equipment == Equipment.DUMBBELL) 2 else 1
+        if (set.estimatedOneRepMax >= goal && before < goal) _events.tryEmit(WorkoutEvent.GoalReached(we.exercise, goal * factor))
     }
 
     /** Descanso, aviso por voz y desplazamiento al siguiente ejercicio tras completar una serie. */

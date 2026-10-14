@@ -202,7 +202,7 @@ fun HomeScreen(
                     }
                 }
             }
-            if (routines.isEmpty()) {
+            if (routines.none { !it.archived }) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
@@ -262,7 +262,8 @@ private fun RoutineCard(
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.routine_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_edit)) }, onClick = { menu = false; onEdit() })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.routine_start_on_watch)) }, onClick = { menu = false; onStartWatch() })
+                        // El reloj no recibe las archivadas: empezarla allí abriría un entreno vacío
+                        if (!routine.archived) DropdownMenuItem(text = { Text(stringResource(R.string.routine_start_on_watch)) }, onClick = { menu = false; onStartWatch() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_duplicate)) }, onClick = { menu = false; onDuplicate() })
                         DropdownMenuItem(
                             text = { Text(stringResource(if (routine.archived) R.string.routine_unarchive else R.string.routine_archive)) },

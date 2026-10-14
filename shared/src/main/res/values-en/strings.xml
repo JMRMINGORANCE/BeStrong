@@ -1002,4 +1002,5 @@
     <string name="rpe_trend_title">Effort (average RPE per session)</string>
     <string name="rpe_trend_rising">⚠ It\'s getting harder without your 1RM going up: possibly fatigue. Consider a deload week.</string>
     <string name="goal_reached_live">🎯 %1$s: %2$s goal reached!</string>
+    <string name="goal_remove">Remove goal</string>
 </resources>

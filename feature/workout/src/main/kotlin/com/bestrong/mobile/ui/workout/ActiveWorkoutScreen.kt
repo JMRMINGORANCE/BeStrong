@@ -212,7 +212,7 @@ fun ActiveWorkoutScreen(
                     if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo(e)
                 }
                 is ActiveWorkoutViewModel.WorkoutEvent.GoalReached -> {
-                    snackbar.showSnackbar(goalMsg.format(e.exercise.displayName(appContext), unitForShare.format(e.goalKg, withUnit = true)), duration = SnackbarDuration.Long)
+                    snackbar.showSnackbar(goalMsg.format(e.exercise.displayName(appContext), unitForShare.format(e.goalKg, withUnit = true)), duration = SnackbarDuration.Short)
                 }
                 is ActiveWorkoutViewModel.WorkoutEvent.RpeSuggestion -> {
                     val template = if (e.adjustment.direction < 0) rpeDown else rpeUp

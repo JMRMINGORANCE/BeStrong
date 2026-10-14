@@ -204,7 +204,8 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.cal_rest)) }, onClick = { menu = false; vm.assign(weekStart, day, null) })
-                        ui.routines.forEach { r ->
+                        // Las archivadas no se ofrecen (las ya asignadas se siguen viendo en el calendario)
+                        ui.routines.filterNot { it.archived }.forEach { r ->
                             DropdownMenuItem(
                                 text = { Text(r.name + " · " + stringResource(R.string.cal_minutes, RoutineTime.estimateMinutes(r))) },
                                 onClick = { menu = false; vm.assign(weekStart, day, r.id) },

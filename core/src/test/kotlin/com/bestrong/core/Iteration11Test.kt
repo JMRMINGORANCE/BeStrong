@@ -202,7 +202,7 @@ class Iteration14Test {
     @Test fun coachReportShowsBothSides() {
         val w = finishedWorkout("w", java.time.LocalDate.of(2026, 3, 2), bench to listOf(done(20.0, 8).copy(repsRight = 7)))
         val text = com.bestrong.core.io.CoachReport.text(listOf(w), 0, com.bestrong.core.util.WeightUnit.KG, UTC, java.util.Locale.ROOT)
-        assertEquals(true, text.contains("20×8+7"))
+        assertEquals(true, text.contains("20×8|7"))
     }
 }
 
@@ -250,5 +250,25 @@ class RpeTrendTest {
         assertEquals(true, com.bestrong.core.stats.Strength.effortRising(trend))
         val progressing = history.mapIndexed { i, w -> if (i == 5) finishedWorkout("p", d.plusDays(20), bench to listOf(done(110.0, 5).copy(rpe = 9.0))) else w }
         assertEquals(false, com.bestrong.core.stats.Strength.effortRising(com.bestrong.core.stats.Strength.rpeTrend(progressing, setOf(bench.id))))
+    }
+}
+
+class Iteration16Test {
+    @Test fun predictDateNeverInThePast() {
+        val day = 86_400_000L
+        val points = listOf(0L to 50.0, day to 100.0, 2 * day to 100.0, 3 * day to 100.0)
+        val eta = com.bestrong.core.stats.Strength.predictDate(points, 105.0)
+        assertEquals(true, eta == null || eta > 3 * day)
+    }
+
+    @Test fun noFatigueWarningWithoutWeight() {
+        val trend = listOf(7.0, 7.0, 7.0, 8.0, 8.5, 9.0).mapIndexed { i, r -> Triple(i.toLong(), r, 0.0) }
+        assertEquals(false, com.bestrong.core.stats.Strength.effortRising(trend))
+    }
+
+    @Test fun sharedRoutineIsNeverArchived() {
+        val r = com.bestrong.core.model.Routine(name = "r", archived = true, exercises = listOf(com.bestrong.core.model.RoutineExercise(exercise = bench)))
+        val back = com.bestrong.core.io.RoutineLink.decode(com.bestrong.core.io.RoutineLink.encode(r))!!
+        assertEquals(false, back.archived)
     }
 }

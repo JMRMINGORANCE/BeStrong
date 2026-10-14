@@ -1002,4 +1002,5 @@
     <string name="rpe_trend_title">Esforzo (RPE medio por sesión)</string>
     <string name="rpe_trend_rising">⚠ Cada vez cústache máis sen subir o 1RM: pode ser fatiga. Valora unha semana de descarga.</string>
     <string name="goal_reached_live">🎯 %1$s: obxectivo de %2$s conseguido!</string>
+    <string name="goal_remove">Quitar obxectivo</string>
 </resources>

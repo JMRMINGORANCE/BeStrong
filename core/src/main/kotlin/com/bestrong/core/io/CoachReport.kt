@@ -41,8 +41,8 @@ object CoachReport {
     }
 
     private fun set(s: WorkoutSet, tracking: TrackingType, unit: WeightUnit): String {
-        // Unilaterales: izquierda+derecha («/» ya separa series)
-        val reps = s.repsRight?.let { "${s.reps}+$it" } ?: "${s.reps}"
+        // Unilaterales: izquierda|derecha, como en la app («/» ya separa series)
+        val reps = s.repsRight?.let { "${s.reps}|$it" } ?: "${s.reps}"
         val body = when (tracking) {
             TrackingType.WEIGHT_REPS -> "${unit.format(s.weightKg)}×$reps"
             // Lastre (+) o asistencia (−): sin peso, solo las reps

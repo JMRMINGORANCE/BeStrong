@@ -261,7 +261,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun duplicate(routine: Routine) = viewModelScope.launch {
-        repo.saveRoutine(routine.copy(id = com.bestrong.core.util.newId(), name = context.getString(R.string.routine_copy_name, routine.name)))
+        repo.saveRoutine(routine.copy(id = com.bestrong.core.util.newId(), name = context.getString(R.string.routine_copy_name, routine.name), archived = false))
     }
 
     val programs: List<TrainingProgram> = Programs.all
@@ -308,7 +308,8 @@ class HomeViewModel @Inject constructor(
 
         // Se mueve dentro de su carpeta (en Inicio cada carpeta se ve aparte): el vecino es el de la misma carpeta
         fun folderOf(r: Routine) = r.folder?.trim()?.takeIf(String::isNotEmpty)
-        val sameFolder = list.indices.filter { folderOf(list[it]) == folderOf(routine) }
+        // Las archivadas van en su propia sección: no se intercambia con una que no se ve
+        val sameFolder = list.indices.filter { folderOf(list[it]) == folderOf(routine) && list[it].archived == routine.archived }
         val j = sameFolder.getOrNull(sameFolder.indexOf(i) + delta) ?: return@launch
         if (i < 0) return@launch
         list[i] = list[j].also { list[j] = list[i] }

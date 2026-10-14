@@ -133,7 +133,7 @@ class AppSync @Inject constructor(
         runCatching { WeeklySummaryWorker.schedule(context) }
         // Atajos dinámicos con las tres primeras rutinas (icono de la app, Bixby Routines)
         scope.launch {
-            repository.routines.map { list -> list.filter { it.exercises.isNotEmpty() }.take(3) }.distinctUntilChanged().collect { list ->
+            repository.routines.map { list -> list.filter { it.exercises.isNotEmpty() && !it.archived }.take(3) }.distinctUntilChanged().collect { list ->
                 runCatching {
                     val shortcuts = list.map { r ->
                         ShortcutInfoCompat.Builder(context, "routine_" + r.id)

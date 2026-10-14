@@ -23,7 +23,7 @@ object RoutineLink {
     const val PARAM = "d"
 
     fun encode(routine: Routine): String {
-        val json = SyncContract.json.encodeToString(Routine.serializer(), routine.copy(id = "shared", position = 0))
+        val json = SyncContract.json.encodeToString(Routine.serializer(), routine.copy(id = "shared", position = 0, archived = false))
         val deflater = Deflater(Deflater.BEST_COMPRESSION)
         deflater.setInput(json.encodeToByteArray())
         deflater.finish()
@@ -57,6 +57,6 @@ object RoutineLink {
         }
         SyncContract.json.decodeFromString(Routine.serializer(), out.toByteArray().decodeToString())
             .also { require(it.exercises.size <= MAX_EXERCISES && it.exercises.all { e -> e.sets.size <= MAX_SETS }) }
-            .copy(id = newId())
+            .copy(id = newId(), archived = false)
     }.getOrNull()
 }

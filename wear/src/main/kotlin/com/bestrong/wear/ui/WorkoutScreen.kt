@@ -209,7 +209,9 @@ fun WorkoutScreen(
                 }
                 // Reps que batirían tu récord con este peso (solo series que cuentan)
                 if (we.exercise.tracking == TrackingType.WEIGHT_REPS && set.countsForRecords) {
-                    val best = remember(we.exercise.id, w, records) { session.bestOneRepMax(we.exercise.id) }
+                    // Solo cambia con las series hechas (no a cada giro de la corona)
+                    val doneSignature = w.exercises.sumOf { e -> e.completedSets.sumOf { it.estimatedOneRepMax } }
+                    val best = remember(we.exercise.id, doneSignature, records) { session.bestOneRepMax(we.exercise.id) }
                     best?.let { com.bestrong.core.stats.OneRepMax.repsToBeat(it, set.weightKg) }?.let { reps ->
                         Text(pluralStringResource(R.plurals.record_hint, reps, reps), style = MaterialTheme.typography.labelSmall, color = Done)
                     }

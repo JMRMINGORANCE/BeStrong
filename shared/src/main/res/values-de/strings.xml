@@ -1002,4 +1002,5 @@
     <string name="rpe_trend_title">Anstrengung (durchschnittliche RPE pro Einheit)</string>
     <string name="rpe_trend_rising">⚠ Es wird immer schwerer, ohne dass dein 1RM steigt: vielleicht Ermüdung. Erwäge eine Deload-Woche.</string>
     <string name="goal_reached_live">🎯 %1$s: Ziel von %2$s erreicht!</string>
+    <string name="goal_remove">Ziel entfernen</string>
 </resources>

@@ -219,8 +219,9 @@ object Strength {
         if (slope <= 1e-6) return null
         val intercept = my - slope * mx
         val day = (target - intercept) / slope
-        if (day > 3 * 365) return null // demasiado lejos para ser útil
-        return (x0 + day * 86_400_000.0).toLong()
+        val eta = (x0 + day * 86_400_000.0).toLong()
+        // Demasiado lejos, o antes de la última sesión (la recta va por delante de un estancamiento): no sirve
+        return eta.takeIf { day <= 3 * 365 && it > points.last().first }
     }
 
     /** Resumen de un periodo [from, to) frente al periodo anterior de la misma duración. */
@@ -312,9 +313,10 @@ object Strength {
      * frente a las [window] anteriores sin que el 1RM estimado mejorase. Señal de fatiga acumulada.
      */
     fun effortRising(trend: List<Triple<Long, Double, Double>>, window: Int = 3, minRise: Double = 0.5): Boolean {
-        if (trend.size < window * 2) return false
         val recent = trend.takeLast(window)
         val before = trend.dropLast(window).takeLast(window)
+        // Sin peso (dominadas, plancha…) no hay 1RM con el que comparar: no se puede hablar de fatiga
+        if (trend.size < window * 2 || before.maxOf { it.third } <= 0.0) return false
         val rpeUp = recent.map { it.second }.average() - before.map { it.second }.average() >= minRise
         val noGain = recent.maxOf { it.third } <= before.maxOf { it.third } + 1e-6
         return rpeUp && noGain

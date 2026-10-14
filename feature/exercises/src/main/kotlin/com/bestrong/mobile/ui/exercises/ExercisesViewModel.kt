@@ -119,10 +119,12 @@ class ExercisesViewModel @Inject constructor(
         _showList.value = true
     }
 
-    /** Ejercicios usados recientemente, primero (como Hevy). */
     /** Objetivos de 1RM por ejercicio (kg). */
     val goals: StateFlow<Map<String, Double>> = settingsStore.settings.map { it.exerciseGoalsKg }
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.exerciseGoalsKg)
+
+    /** Mancuernas con «suma de las dos»: el objetivo se ve y se escribe como el total del par. */
+    fun weightFactor(exercise: Exercise): Int = if (settingsStore.settings.value.dumbbellTotal && exercise.equipment == Equipment.DUMBBELL) 2 else 1
 
     /** null quita el objetivo. */
     fun setGoal(exerciseId: String, kg: Double?) = settingsStore.update { s ->
@@ -143,6 +145,7 @@ class ExercisesViewModel @Inject constructor(
 
     private val marks = combine(favorites, hidden) { f, h -> f to h }
 
+    /** Ejercicios usados recientemente, primero (como Hevy). */
     val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, marks, planning.state) { all, f, history, (favs, hiddenIds), plan ->
         val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }
             .filter { !f.favoritesOnly || it.id in favs }

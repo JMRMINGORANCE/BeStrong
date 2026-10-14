@@ -40,7 +40,8 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         val trainedToday = history.any { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == today }
         if (trainedToday || repo.activeOnce() != null) return
         val lastDone = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
-        val next = repo.routinesOnce().minByOrNull { lastDone[it.id] ?: 0L }
+        // Las archivadas no se proponen (suelen ser las que más tiempo llevan sin hacerse)
+        val next = repo.routinesOnce().filter { !it.archived && it.exercises.isNotEmpty() }.minByOrNull { lastDone[it.id] ?: 0L }
         Notifier.reminder(applicationContext, next?.name)
     }
 

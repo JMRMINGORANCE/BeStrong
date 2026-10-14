@@ -42,7 +42,16 @@ fun ExerciseGoalCard(vm: ExercisesViewModel, s: ExerciseDetailState) {
     val goals by vm.goals.collectAsStateWithLifecycle()
     val goal = goals[s.exercise.id]
     var editing by rememberSaveable { mutableStateOf(false) }
-    if (editing) GoalDialog(goal?.let { unit.format(it) }.orEmpty(), { text -> vm.setGoal(s.exercise.id, unit.parseToKg(text)?.takeIf { it > 0 }); editing = false }) { editing = false }
+    // Mancuernas con «suma de las dos»: todo se ve y se escribe como el total (se guarda por mancuerna)
+    val factor = vm.weightFactor(s.exercise)
+    if (editing) {
+        GoalDialog(
+            initial = goal?.let { unit.format(it * factor) }.orEmpty(),
+            hasGoal = goal != null,
+            onSave = { kg -> vm.setGoal(s.exercise.id, kg?.let { it / factor }); editing = false },
+            onDismiss = { editing = false },
+        )
+    }
     val best = s.records[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -57,19 +66,21 @@ fun ExerciseGoalCard(vm: ExercisesViewModel, s: ExerciseDetailState) {
             LinearProgressIndicator(progress = { (best / goal).toFloat().coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
             val eta = remember(s.progress, goal) { Strength.predictDate(s.progress.map { it.dateEpochMs to it.bestOneRepMax }, goal) }
             val line = when {
-                best >= goal -> stringResource(R.string.goal_reached, unit.format(goal, withUnit = true))
-                eta != null -> stringResource(R.string.goal_progress_eta, unit.format(best), unit.format(goal, withUnit = true), formatDate(eta))
-                else -> stringResource(R.string.goal_progress, unit.format(best), unit.format(goal, withUnit = true))
+                best >= goal -> stringResource(R.string.goal_reached, unit.format(goal * factor, withUnit = true))
+                eta != null -> stringResource(R.string.goal_progress_eta, unit.format(best * factor), unit.format(goal * factor, withUnit = true), formatDate(eta))
+                else -> stringResource(R.string.goal_progress, unit.format(best * factor), unit.format(goal * factor, withUnit = true))
             }
             Text(line, style = MaterialTheme.typography.bodyMedium, color = if (best >= goal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
         }
     }
 }
 
+/** [onSave] recibe el objetivo en kg (null = quitarlo). Guardar solo se puede con un número válido. */
 @Composable
-private fun GoalDialog(initial: String, onSave: (String) -> Unit, onDismiss: () -> Unit) {
+private fun GoalDialog(initial: String, hasGoal: Boolean, onSave: (Double?) -> Unit, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
     var text by rememberSaveable { mutableStateOf(initial) }
+    val kg = unit.parseToKg(text)?.takeIf { it > 0 }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.goal_title)) },
@@ -79,11 +90,16 @@ private fun GoalDialog(initial: String, onSave: (String) -> Unit, onDismiss: () 
                 { t -> text = t.filter { it.isDigit() || it == ',' || it == '.' }.take(6) },
                 label = { Text(stringResource(R.string.goal_field, unit.label)) },
                 singleLine = true,
+                isError = text.isNotEmpty() && kg == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             )
         },
-        confirmButton = { TextButton(onClick = { onSave(text) }) { Text(stringResource(R.string.action_save)) } },
-        // Guardar vacío quita el objetivo
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+        confirmButton = { TextButton(onClick = { onSave(kg) }, enabled = kg != null) { Text(stringResource(R.string.action_save)) } },
+        dismissButton = {
+            Row {
+                if (hasGoal) TextButton(onClick = { onSave(null) }) { Text(stringResource(R.string.goal_remove)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
+            }
+        },
     )
 }
