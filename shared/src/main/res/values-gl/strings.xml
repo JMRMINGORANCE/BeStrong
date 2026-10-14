@@ -1121,4 +1121,7 @@
     <string name="history_vs_previous_time">Fronte á vez anterior: %1$s</string>
     <string name="history_vs_previous_reps_short">%1$s reps</string>
     <string name="undo_gym_loads">Pesos pendentes axustados ao ximnasio</string>
+    <string name="routine_gym">Ximnasio da rutina</string>
+    <string name="routine_gym_any">O que estea activo</string>
+    <string name="notif_backup_now">Copiar agora</string>
 </resources>

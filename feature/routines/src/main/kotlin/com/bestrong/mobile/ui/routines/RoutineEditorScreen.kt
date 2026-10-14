@@ -107,6 +107,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                     OutlinedTextField(routine.notes, vm::setNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.fillMaxWidth())
                     EmojiPicker(routine.emoji, vm::setEmoji)
                     FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
+                    RoutineGymRow(vm, routine)
                     RoutineRangeRow(vm, routine)
                     RoutineRpeRow(vm, routine)
                     RoutineTempoRow(vm, routine)
@@ -318,6 +319,19 @@ private fun EmojiPicker(selected: String?, onPick: (String?) -> Unit) {
             val e = ROUTINE_EMOJIS[i]
             FilterChip(selected = selected == e, onClick = { onPick(e) }, label = { Text(e) })
         }
+    }
+}
+
+/** Gimnasio de la rutina (solo con más de un perfil): al empezarla pasa a ser el activo. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun RoutineGymRow(vm: RoutineEditorViewModel, routine: com.bestrong.core.model.Routine) {
+    val gyms = vm.gyms
+    if (gyms.size < 2) return
+    Text(stringResource(R.string.routine_gym), style = MaterialTheme.typography.labelLarge)
+    androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        FilterChip(selected = routine.gymId == null, onClick = { vm.setGym(null) }, label = { Text(stringResource(R.string.routine_gym_any)) })
+        gyms.forEach { g -> FilterChip(selected = routine.gymId == g.id, onClick = { vm.setGym(g.id) }, label = { Text(g.name) }) }
     }
 }
 

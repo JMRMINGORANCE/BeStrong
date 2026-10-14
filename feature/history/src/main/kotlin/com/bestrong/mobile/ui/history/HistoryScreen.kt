@@ -329,6 +329,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                 }
             }
             item { RestSummaryLine(w) }
+            w.gymName?.let { gym -> item { Text("🏋️ $gym", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
             if (w.notes.isNotBlank()) item { Text(w.notes) }
             items(w.exercises, key = { it.id }) { we ->
                 Card(Modifier.fillMaxWidth()) {
@@ -359,7 +360,7 @@ private const val NO_CHANGE_KG = 0.5
 
 /** Línea de comparación de una sola cifra (reps o tiempo), en verde si subió. */
 @Composable
-private fun SimpleComparisonLine(delta: Int, text: String) {
+private fun SimpleComparisonLine(delta: Double, text: String) {
     Text(
         text,
         style = MaterialTheme.typography.bodySmall,
@@ -371,14 +372,17 @@ private fun SimpleComparisonLine(delta: Int, text: String) {
 /** «Frente a la vez anterior: +250 kg de volumen · 1RM +2,5 kg», en verde si mejoró. */
 @Composable
 private fun ComparisonLine(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison, tracking: com.bestrong.core.model.TrackingType) {
-    when (tracking) {
-        com.bestrong.core.model.TrackingType.WEIGHT_REPS -> WeightComparisonLine(c)
-        // Sin peso: reps totales; de tiempo: segundos totales (más es mejor en los dos)
-        com.bestrong.core.model.TrackingType.REPS_ONLY ->
-            SimpleComparisonLine(c.repsDelta, stringResource(R.string.history_vs_previous_reps, com.bestrong.core.util.signedCount(c.repsDelta)))
-        com.bestrong.core.model.TrackingType.DURATION ->
-            SimpleComparisonLine(c.durationDelta, stringResource(R.string.history_vs_previous_time, com.bestrong.core.util.signedDuration(c.durationDelta)))
-        else -> Unit
+    when (com.bestrong.core.util.ComparisonKind.of(tracking)) {
+        com.bestrong.core.util.ComparisonKind.VOLUME -> WeightComparisonLine(c)
+        // Sin peso: reps totales; de tiempo: segundos totales; cardio: distancia (más es mejor en todos)
+        com.bestrong.core.util.ComparisonKind.REPS ->
+            SimpleComparisonLine(c.repsDelta.toDouble(), stringResource(R.string.history_vs_previous_reps, com.bestrong.core.util.signedCount(c.repsDelta)))
+        com.bestrong.core.util.ComparisonKind.TIME ->
+            SimpleComparisonLine(c.durationDelta.toDouble(), stringResource(R.string.history_vs_previous_time, com.bestrong.core.util.signedDuration(c.durationDelta)))
+        com.bestrong.core.util.ComparisonKind.DISTANCE -> com.bestrong.core.util.distanceComparison(c).let { (delta, text) ->
+            SimpleComparisonLine(delta, stringResource(R.string.history_vs_previous_time, text))
+        }
+        com.bestrong.core.util.ComparisonKind.NONE -> Unit
     }
 }
 

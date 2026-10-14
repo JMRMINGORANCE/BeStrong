@@ -45,6 +45,9 @@ enum class ComparisonKind {
     VOLUME,
     REPS,
     TIME,
+
+    /** Distancia (y, si no se anotó, el tiempo): ejercicios de distancia y cardio. */
+    DISTANCE,
     NONE,
     ;
 
@@ -53,7 +56,19 @@ enum class ComparisonKind {
             com.bestrong.core.model.TrackingType.REPS_ONLY -> REPS
             com.bestrong.core.model.TrackingType.DURATION -> TIME
             com.bestrong.core.model.TrackingType.WEIGHT_REPS, null -> VOLUME
+            com.bestrong.core.model.TrackingType.DISTANCE, com.bestrong.core.model.TrackingType.CARDIO -> DISTANCE
             else -> NONE
         }
     }
 }
+
+/** Distancia con signo en km: «+0.50 km», «−1.20 km», «±0 km». */
+fun signedDistance(deltaMeters: Double): String = when {
+    kotlin.math.abs(deltaMeters) < 5 -> "±0 km"
+    deltaMeters > 0 -> "+" + "%.2f km".format(deltaMeters / 1000)
+    else -> "−" + "%.2f km".format(-deltaMeters / 1000)
+}
+
+/** Cardio o distancia frente a la vez anterior: (cambio para el color, texto); por tiempo si no hay distancia. */
+fun distanceComparison(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison): Pair<Double, String> =
+    if (c.hasDistance) c.distanceDelta to signedDistance(c.distanceDelta) else c.durationDelta.toDouble() to signedDuration(c.durationDelta)

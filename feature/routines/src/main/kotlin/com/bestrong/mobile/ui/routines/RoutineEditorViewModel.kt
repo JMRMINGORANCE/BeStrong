@@ -94,6 +94,10 @@ class RoutineEditorViewModel @Inject constructor(
     }
 
     fun rename(name: String) = _routine.update { it.copy(name = name) }
+
+    /** Gimnasios para elegir el de la rutina. */
+    val gyms: List<com.bestrong.core.training.GymProfile> get() = settingsStore.settings.value.gyms
+    fun setGym(id: String?) = _routine.update { it.copy(gymId = id) }
     fun setNotes(notes: String) = _routine.update { it.copy(notes = notes) }
     fun setEmoji(emoji: String?) = _routine.update { it.copy(emoji = emoji) }
     fun setFolder(folder: String) = _routine.update { it.copy(folder = folder.trim().ifEmpty { null }) }

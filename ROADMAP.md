@@ -318,3 +318,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Historial: comparación también en ejercicios sin peso (reps) y de tiempo
 - [x] Cambiar de gimnasio desde el entreno (menú) y desde Inicio
 - [x] Resumen del reloj: reps o tiempo frente a la última vez en ejercicios sin peso
+
+## Fase 35 — Cada gimnasio en su sitio ✅
+- [x] Cada entreno guarda el gimnasio donde se hizo: se ve en el historial
+- [x] Buscar en el historial por gimnasio
+- [x] Gimnasio por defecto de cada rutina (al empezarla pasa a ser el activo)
+- [x] «Copiar ahora» en el aviso de copia automática fallida
+- [x] Cardio y distancia frente a la vez anterior (km, o tiempo si no hay distancia), en el móvil y el reloj

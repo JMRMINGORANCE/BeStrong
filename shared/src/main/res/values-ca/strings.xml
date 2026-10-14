@@ -1121,4 +1121,7 @@
     <string name="history_vs_previous_time">Davant de la vegada anterior: %1$s</string>
     <string name="history_vs_previous_reps_short">%1$s reps</string>
     <string name="undo_gym_loads">Pesos pendents ajustats al gimnàs</string>
+    <string name="routine_gym">Gimnàs de la rutina</string>
+    <string name="routine_gym_any">El que estigui actiu</string>
+    <string name="notif_backup_now">Copiar ara</string>
 </resources>

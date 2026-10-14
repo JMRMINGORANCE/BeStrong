@@ -1121,4 +1121,7 @@
     <string name="history_vs_previous_time">Par rapport à la dernière fois : %1$s</string>
     <string name="history_vs_previous_reps_short">%1$s reps</string>
     <string name="undo_gym_loads">Charges restantes ajustées à la salle</string>
+    <string name="routine_gym">Salle de la routine</string>
+    <string name="routine_gym_any">Celle qui est active</string>
+    <string name="notif_backup_now">Sauvegarder</string>
 </resources>

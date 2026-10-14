@@ -223,6 +223,8 @@ class HomeViewModel @Inject constructor(
             onStarted()
             return@launch
         }
+        // Su gimnasio pasa a ser el activo antes de rellenar: los pesos salen con su material
+        routine.gymId?.takeIf { id -> settingsStore.settings.value.gyms.any { it.id == id } }?.let { id -> settingsStore.update { it.copy(activeGymId = id) } }
         repo.setActive(routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup()))
         onStarted()
     }

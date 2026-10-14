@@ -994,6 +994,7 @@ private fun SummaryComparisons(summary: FinishedSummary) {
         val (up, text) = when (kinds[c.exerciseId]) {
             com.bestrong.core.util.ComparisonKind.REPS -> (c.repsDelta > 0) to stringResource(R.string.history_vs_previous_reps_short, com.bestrong.core.util.signedCount(c.repsDelta))
             com.bestrong.core.util.ComparisonKind.TIME -> (c.durationDelta > 0) to com.bestrong.core.util.signedDuration(c.durationDelta)
+            com.bestrong.core.util.ComparisonKind.DISTANCE -> com.bestrong.core.util.distanceComparison(c).let { (d, t) -> (d > 0) to t }
             else -> (c.best1rmDelta > 0.01 || (c.best1rmDelta >= -0.01 && c.volumeDelta > 0)) to
                 (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta))
         }

@@ -273,7 +273,7 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
             item { Text(stringResource(R.string.summary_volume, unit.formatVolume(w.totalVolume), w.completedSetCount)) }
             w.avgHeartRate?.let { item { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--"), color = HeartRed) } }
             w.calories?.let { item { Text(stringResource(R.string.summary_kcal, it)) } }
-            // Cardio y distancia no tienen comparación (todavía)
+            // Solo los ejercicios que tienen con qué compararse (ComparisonKind.NONE no sale)
             fun kindOf(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison) =
                 com.bestrong.core.util.ComparisonKind.of(w.exercises.firstOrNull { it.exercise.id == c.exerciseId }?.exercise?.tracking)
             val shown = s.comparisons.filter { kindOf(it) != com.bestrong.core.util.ComparisonKind.NONE }
@@ -285,6 +285,7 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                     val (delta, text) = when (kindOf(c)) {
                         com.bestrong.core.util.ComparisonKind.REPS -> c.repsDelta.toDouble() to stringResource(R.string.vs_reps, com.bestrong.core.util.signedCount(c.repsDelta))
                         com.bestrong.core.util.ComparisonKind.TIME -> c.durationDelta.toDouble() to com.bestrong.core.util.signedDuration(c.durationDelta)
+                        com.bestrong.core.util.ComparisonKind.DISTANCE -> com.bestrong.core.util.distanceComparison(c)
                         else -> c.volumeDelta to signedVolume(c.volumeDelta, unit)
                     }
                     Text(

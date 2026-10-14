@@ -147,7 +147,7 @@ object Notifier {
     fun backupStopped(context: Context, folderLost: Boolean) {
         if (!canPost(context)) return
         ensureChannels(context)
-        val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
+        val b = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
             .setContentTitle(context.getString(R.string.notif_backup_title))
             .setContentText(context.getString(if (folderLost) R.string.auto_backup_lost else R.string.notif_backup_failing))
@@ -155,8 +155,17 @@ object Notifier {
             .setCategory(NotificationCompat.CATEGORY_ERROR)
             .setAutoCancel(true)
             .setContentIntent(openApp(context))
-            .build()
-        NotificationManagerCompat.from(context).notify(ID_BACKUP, n)
+        // Si la carpeta sigue ahí (falló por la conexión, Drive…), se puede reintentar sin abrir la app
+        if (!folderLost) {
+            val now = PendingIntent.getBroadcast(
+                context, ID_BACKUP,
+                Intent(context, com.bestrong.mobile.backup.BackupNowReceiver::class.java).setPackage(context.packageName)
+                    .putExtra(com.bestrong.mobile.backup.BackupNowReceiver.EXTRA_NOTIFICATION_ID, ID_BACKUP),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+            b.addAction(R.drawable.ic_stat_dumbbell, context.getString(R.string.notif_backup_now), now)
+        }
+        NotificationManagerCompat.from(context).notify(ID_BACKUP, b.build())
     }
 
     /** Recordatorio mensual de medirse con cinta (cintura, pecho, brazo, muslo). */

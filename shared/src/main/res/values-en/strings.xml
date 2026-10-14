@@ -1121,4 +1121,7 @@
     <string name="history_vs_previous_time">Vs. last time: %1$s</string>
     <string name="history_vs_previous_reps_short">%1$s reps</string>
     <string name="undo_gym_loads">Pending loads adjusted to the gym</string>
+    <string name="routine_gym">Routine gym</string>
+    <string name="routine_gym_any">Whichever is active</string>
+    <string name="notif_backup_now">Back up now</string>
 </resources>

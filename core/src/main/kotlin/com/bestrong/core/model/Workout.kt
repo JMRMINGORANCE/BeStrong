@@ -129,6 +129,8 @@ data class Workout(
     val rating: SessionRating? = null,
     /** Modo pareja: entreno de otra persona en el mismo móvil (null = el tuyo). */
     val athlete: String? = null,
+    /** Gimnasio donde se hizo (su nombre, para el historial y la búsqueda); null si no se sabe (reloj, antiguos). */
+    val gymName: String? = null,
     /** Pulso a lo largo del entreno (una muestra cada ~10 s, medido por el reloj). */
     val heartRateSamples: List<HeartRateSample> = emptyList(),
     /** De dónde salen las calorías (null = no hay). */

@@ -692,6 +692,22 @@ class CollarTest {
         )
         // Una serie de aproximación de más no cuenta como reps ganadas
         assertEquals(0, com.bestrong.core.stats.WorkoutStats.compareWithPrevious(w("b", 10, true), listOf(w("a", 1, false))).single().repsDelta)
-        assertEquals(com.bestrong.core.util.ComparisonKind.NONE, com.bestrong.core.util.ComparisonKind.of(com.bestrong.core.model.TrackingType.CARDIO))
+        assertEquals(com.bestrong.core.util.ComparisonKind.DISTANCE, com.bestrong.core.util.ComparisonKind.of(com.bestrong.core.model.TrackingType.CARDIO))
+    }
+
+    @Test
+    fun cardioComparesDistanceOrTime() {
+        val run = com.bestrong.core.model.Exercise(id = "run", name = "Carrera", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST, tracking = com.bestrong.core.model.TrackingType.CARDIO)
+        fun w(id: String, t: Long, m: Double, sec: Int) = Workout(
+            id = id, name = id, startedAtEpochMs = t, finishedAtEpochMs = t + 1, gymName = "Casa",
+            exercises = listOf(WorkoutExercise(exercise = run, sets = listOf(WorkoutSet(durationSec = sec, distanceM = m, completed = true)))),
+        )
+        val withKm = com.bestrong.core.stats.WorkoutStats.compareWithPrevious(w("b", 10, 5500.0, 1800), listOf(w("a", 1, 5000.0, 1800))).single()
+        assertEquals("+0.50 km", com.bestrong.core.util.distanceComparison(withKm).second.replace(',', '.'))
+        // Sin distancia en ninguna: por tiempo
+        val timeOnly = com.bestrong.core.stats.WorkoutStats.compareWithPrevious(w("b", 10, 0.0, 1860), listOf(w("a", 1, 0.0, 1800))).single()
+        assertEquals(60.0, com.bestrong.core.util.distanceComparison(timeOnly).first, 1e-9)
+        // Se encuentra buscando el gimnasio
+        assertEquals(1, com.bestrong.core.stats.WorkoutStats.search(listOf(w("a", 1, 0.0, 60)), "casa").size)
     }
 }

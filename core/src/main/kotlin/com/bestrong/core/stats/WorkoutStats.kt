@@ -144,8 +144,12 @@ object WorkoutStats {
         val volumeDelta: Double,
         val best1rmDelta: Double,
         val repsDelta: Int,
-        /** Segundos totales (ejercicios de tiempo). */
+        /** Segundos totales (ejercicios de tiempo y cardio). */
         val durationDelta: Int = 0,
+        /** Metros totales (distancia y cardio). */
+        val distanceDelta: Double = 0.0,
+        /** Si alguna de las dos sesiones registró distancia (si no, el cardio se compara por tiempo). */
+        val hasDistance: Boolean = false,
     )
 
     /** Ejercicio a ejercicio, qué cambió frente a la sesión anterior en que se hizo. */
@@ -167,6 +171,8 @@ object WorkoutStats {
                 best1rmDelta = (now.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0) - (prev.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0),
                 repsDelta = now.sumOf { it.totalReps } - prev.sumOf { it.totalReps },
                 durationDelta = now.sumOf { it.durationSec } - prev.sumOf { it.durationSec },
+                distanceDelta = now.sumOf { it.distanceM } - prev.sumOf { it.distanceM },
+                hasDistance = (now + prev).any { it.distanceM > 0 },
             )
         }
     }
@@ -182,7 +188,7 @@ object WorkoutStats {
         val q = query.trim().lowercase()
         if (q.isEmpty()) return history
         return history.filter { w ->
-            w.name.lowercase().contains(q) || w.notes.lowercase().contains(q) ||
+            w.name.lowercase().contains(q) || w.notes.lowercase().contains(q) || w.gymName?.lowercase()?.contains(q) == true ||
                 w.exercises.any { we -> nameOf(we.exercise).lowercase().contains(q) || we.notes.lowercase().contains(q) || we.sets.any { it.note.lowercase().contains(q) } }
         }
     }

@@ -726,6 +726,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             val ended = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
                 avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
                 maxHeartRate = metrics?.maxHeartRate ?: current.maxHeartRate,
+                // Dónde se entrenó (con varios perfiles; con uno solo no aporta nada)
+                gymName = current.gymName ?: settings.value.takeIf { it.gyms.size > 1 }?.activeGym?.name,
             )
             // Calorías totales y activas: las del reloj si las hay; si no, pulso o estimación personalizada
             val finished = energy.complete(ended, watchKcal = metrics?.calories ?: current.calories)

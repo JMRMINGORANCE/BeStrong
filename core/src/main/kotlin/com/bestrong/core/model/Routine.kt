@@ -37,6 +37,8 @@ data class Routine(
     val folder: String? = null,
     /** Archivada: no sale en Inicio, el reloj ni el widget, pero se conserva (y se puede recuperar). */
     val archived: Boolean = false,
+    /** Gimnasio en el que se suele hacer: al empezarla en el móvil pasa a ser el activo (null = el que haya). */
+    val gymId: String? = null,
 ) {
     /** Nombre con su emoji delante, si tiene. */
     val displayName: String get() = emoji?.let { "$it $name" } ?: name

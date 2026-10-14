@@ -1121,4 +1121,7 @@
     <string name="history_vs_previous_time">Im Vergleich zum letzten Mal: %1$s</string>
     <string name="history_vs_previous_reps_short">%1$s Wdh.</string>
     <string name="undo_gym_loads">Offene Gewichte ans Studio angepasst</string>
+    <string name="routine_gym">Studio der Routine</string>
+    <string name="routine_gym_any">Das aktive</string>
+    <string name="notif_backup_now">Jetzt sichern</string>
 </resources>
