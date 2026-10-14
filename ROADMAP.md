@@ -290,3 +290,9 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Tabla de cargas por RPE en la ficha del ejercicio
 - [x] RPE objetivo y tempo en el CSV (exportar e importar)
 - [x] Aviso cuando el tope semanal recorta la sugerencia
+
+## Fase 31 — RPE en la mano ✅
+- [x] Tocar el peso orientativo del RPE lo pone en las series pendientes (móvil) o en la serie actual (reloj)
+- [x] El 1RM reciente cuenta las reps en recámara de las series con RPE
+- [x] Tempo para toda la rutina de una vez
+- [x] RPE de la última serie desde el menú del reloj

@@ -1100,4 +1100,5 @@
     <string name="rpe_table_title">Cargas por RPE</string>
     <string name="rpe_table_hint">Co teu 1RM estimado recente (%1$s): o peso para cada número de reps segundo o que che quede na recámara.</string>
     <string name="prog_capped_suffix">" · limitado polo tope semanal"</string>
+    <string name="tempo_all">Tempo de toda a rutina</string>
 </resources>

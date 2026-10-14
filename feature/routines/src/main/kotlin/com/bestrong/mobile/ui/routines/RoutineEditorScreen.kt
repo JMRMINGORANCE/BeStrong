@@ -63,6 +63,7 @@ import com.bestrong.mobile.ui.components.displayName
 fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, onClose: () -> Unit) {
     val unit = LocalWeightUnit.current
     val routine by vm.routine.collectAsStateWithLifecycle()
+    val tempoVersion by vm.tempoVersion.collectAsStateWithLifecycle()
     var confirmLeave by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     var restFor by remember { mutableStateOf<String?>(null) }
@@ -108,6 +109,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                     FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
                     RoutineRangeRow(vm, routine)
                     RoutineRpeRow(vm, routine)
+                    RoutineTempoRow(vm, routine)
                 }
             }
             itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
@@ -142,6 +144,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                             showTempo = re.exercise.tracking != TrackingType.CARDIO,
                             onNotes = { vm.setExerciseNotes(re.id, it) },
                             onTempo = { vm.setTempo(re.id, it) },
+                            resetKey = tempoVersion,
                         )
                         com.bestrong.mobile.ui.components.TargetRpeChips(re.exercise.tracking, re.targetRpe) { vm.setTargetRpe(re.id, it) }
                         re.sets.forEachIndexed { i, set ->
@@ -278,8 +281,9 @@ private val REST_OPTIONS = listOf(0, 30, 45, 60, 90, 120, 150, 180, 240, 300)
 
 /** Notas y tempo del ejercicio dentro de la rutina (se copian al empezar el entreno). */
 @Composable
-private fun ExerciseExtras(notes: String, tempo: String, showTempo: Boolean, onNotes: (String) -> Unit, onTempo: (String) -> Unit) {
-    var tempoText by remember { mutableStateOf(tempo) }
+private fun ExerciseExtras(notes: String, tempo: String, showTempo: Boolean, onNotes: (String) -> Unit, onTempo: (String) -> Unit, resetKey: Int = 0) {
+    // Se vuelve a leer al poner el tempo a toda la rutina ([resetKey]); si no, se respeta lo que se escribe
+    var tempoText by remember(resetKey) { mutableStateOf(tempo) }
     val tempoValid = tempoText.isBlank() || Tempo.parse(tempoText) != null
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
         OutlinedTextField(notes, onNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.weight(2f))
@@ -327,6 +331,27 @@ private fun RoutineRpeRow(vm: RoutineEditorViewModel, routine: com.bestrong.core
     val common = if (distinct.size == 1) distinct.single() else MIXED_RPE
     Text(stringResource(R.string.target_rpe_all), style = MaterialTheme.typography.labelLarge)
     com.bestrong.mobile.ui.components.TargetRpeChips(TrackingType.WEIGHT_REPS, common) { vm.setTargetRpeForAll(it) }
+}
+
+/** Tempos habituales: controlado, bajada en 3 s, con pausa abajo (hipertrofia) y excéntrico lento. */
+private val ROUTINE_TEMPOS = listOf("2-0-1-0", "3-0-1-0", "3-1-1-0", "4-0-1-0")
+
+/** Mismo tempo para toda la rutina (p. ej. un día de hipertrofia a 3-1-1-0); «—» lo quita. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun RoutineTempoRow(vm: RoutineEditorViewModel, routine: com.bestrong.core.model.Routine) {
+    val eligible = routine.exercises.filter { it.exercise.tracking != TrackingType.CARDIO }
+    if (eligible.size < 2) return
+    val distinct = eligible.map { it.tempo }.distinct()
+    val common = distinct.singleOrNull().takeIf { distinct.size == 1 }
+    Text(stringResource(R.string.tempo_all), style = MaterialTheme.typography.labelLarge)
+    androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        FilterChip(selected = distinct.size == 1 && common == null, onClick = { vm.setTempoForAll(null) }, label = { Text("—") })
+        for (t in ROUTINE_TEMPOS) {
+            val normalized = Tempo.parse(t)?.toString()
+            FilterChip(selected = common != null && common == normalized, onClick = { vm.setTempoForAll(t) }, label = { Text(t) })
+        }
+    }
 }
 
 /** RPE imposible: objetivos distintos en la rutina, no coincide con ningún chip (ni con «—»). */

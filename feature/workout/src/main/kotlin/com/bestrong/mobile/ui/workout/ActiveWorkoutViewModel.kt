@@ -467,6 +467,11 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
 
+    /** Pone [kg] en las series normales pendientes del ejercicio (el peso orientativo del RPE objetivo). */
+    fun applyWeightToPending(weId: String, kg: Double) = edit { w ->
+        WorkoutEditor.updateExercise(w, weId) { e -> e.copy(sets = e.sets.map { if (!it.completed && it.type == SetType.NORMAL) it.copy(weightKg = kg) else it }) }
+    }
+
     /** Añade series de aproximación antes de la primera serie de trabajo. */
     fun addWarmup(weId: String) = edit { w ->
         // Con la barra del ejercicio (EZ, hexagonal…) si tiene una propia

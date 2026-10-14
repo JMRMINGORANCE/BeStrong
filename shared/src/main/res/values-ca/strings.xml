@@ -1100,4 +1100,5 @@
     <string name="rpe_table_title">Càrregues per RPE</string>
     <string name="rpe_table_hint">Amb el teu 1RM estimat recent (%1$s): el pes per a cada nombre de reps segons el que et quedi a la recambra.</string>
     <string name="prog_capped_suffix">" · limitat pel límit setmanal"</string>
+    <string name="tempo_all">Tempo de tota la rutina</string>
 </resources>

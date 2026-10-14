@@ -145,6 +145,20 @@ class RoutineEditorViewModel @Inject constructor(
     fun setRest(id: String, seconds: Int) = updateExercise(id) { it.copy(restSeconds = seconds) }
     fun setExerciseNotes(id: String, notes: String) = updateExercise(id) { it.copy(notes = notes) }
 
+    private val _tempoVersion = MutableStateFlow(0)
+
+    /** Cambia al poner el tempo a toda la rutina: los campos de cada ejercicio vuelven a leerlo. */
+    val tempoVersion: StateFlow<Int> = _tempoVersion
+
+    /** El mismo tempo (o ninguno, con null) en todos los ejercicios que no son de cardio. */
+    fun setTempoForAll(tempo: String?) {
+        val normalized = tempo?.let { Tempo.parse(it)?.toString() }
+        _routine.update { r ->
+            r.copy(exercises = r.exercises.map { if (it.exercise.tracking != com.bestrong.core.model.TrackingType.CARDIO) it.copy(tempo = normalized) else it })
+        }
+        _tempoVersion.value++
+    }
+
     /** El mismo RPE objetivo (o ninguno) en todos los ejercicios de peso × reps de la rutina. */
     fun setTargetRpeForAll(rpe: Double?) = _routine.update { r ->
         r.copy(exercises = r.exercises.map { if (it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) it.copy(targetRpe = rpe) else it })

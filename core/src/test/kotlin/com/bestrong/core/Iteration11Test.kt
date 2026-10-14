@@ -601,4 +601,12 @@ class CollarTest {
         // Polea: el gimnasio no la redondea, se usa el incremento del ejercicio
         assertEquals(62.5, com.bestrong.core.stats.RpeLoad.roundToLoadable(63.7, com.bestrong.core.util.WeightUnit.KG, 2.5, gym, com.bestrong.core.model.Equipment.CABLE), 1e-9)
     }
+
+    @Test
+    fun oneRepMaxCountsRepsInReserve() {
+        // 5 × 100 a RPE 8 = 7 al fallo; sin RPE, Epley con 5; con RPE muy bajo no se fía
+        assertEquals(100.0 * (1 + 7 / 30.0), com.bestrong.core.stats.RpeLoad.oneRepMaxOf(WorkoutSet(weightKg = 100.0, reps = 5, completed = true, rpe = 8.0)), 1e-9)
+        assertEquals(100.0 * (1 + 5 / 30.0), com.bestrong.core.stats.RpeLoad.oneRepMaxOf(WorkoutSet(weightKg = 100.0, reps = 5, completed = true)), 1e-9)
+        assertEquals(100.0 * (1 + 5 / 30.0), com.bestrong.core.stats.RpeLoad.oneRepMaxOf(WorkoutSet(weightKg = 100.0, reps = 5, completed = true, rpe = 4.0)), 1e-9)
+    }
 }

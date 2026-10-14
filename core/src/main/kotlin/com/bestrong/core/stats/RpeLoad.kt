@@ -13,6 +13,19 @@ object RpeLoad {
     private const val RECENT_WEEKS = 8L
     private const val WEEK_MS = 7 * 86_400_000L
 
+    /** RPE por debajo del cual no se usa para el 1RM: con tantas reps en recámara la estimación no es fiable. */
+    private const val MIN_RELIABLE_RPE = 6.0
+
+    /**
+     * 1RM estimado de una serie contando las reps en recámara si se anotó el RPE (5 × 100 kg a RPE 8 equivale
+     * a 7 al fallo); sin RPE, el de siempre. Las series que no cuentan para récords dan 0.
+     */
+    fun oneRepMaxOf(set: com.bestrong.core.model.WorkoutSet): Double {
+        val rpe = set.rpe?.takeIf { it in MIN_RELIABLE_RPE..MAX_RPE }
+        val usable = set.countsForRecords && set.reps > 0 && set.weightKg > 0
+        return if (rpe != null && usable) set.weightKg / fraction(set.reps, rpe) else set.estimatedOneRepMax
+    }
+
     /** Fracción del 1RM para [reps] a [rpe] (1 rep a RPE 10 = 100 %). */
     fun fraction(reps: Int, rpe: Double): Double {
         val toFailure = reps + (MAX_RPE - rpe).coerceAtLeast(0.0)
@@ -44,7 +57,7 @@ object RpeLoad {
     fun recentOneRepMax(exerciseId: String, history: List<Workout>, nowEpochMs: Long): Double? {
         val best = { ws: List<Workout> ->
             ws.flatMap { w -> w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.completedSets } }
-                .maxOfOrNull { it.estimatedOneRepMax }?.takeIf { it > 0 }
+                .maxOfOrNull { oneRepMaxOf(it) }?.takeIf { it > 0 }
         }
         val finished = history.filter { it.isFinished }
         return best(finished.filter { it.startedAtEpochMs >= nowEpochMs - RECENT_WEEKS * WEEK_MS }) ?: best(finished)

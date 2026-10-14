@@ -184,6 +184,8 @@ fun WorkoutScreen(
                         stringResource(R.string.target_rpe_short, rpe.toString().removeSuffix(".0")) + load?.let { " · ≈" + unit.format(it) }.orEmpty(),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.secondary,
+                        // Tocar pone ese peso en la serie actual
+                        modifier = if (load != null) Modifier.clickable(onClickLabel = stringResource(R.string.use_this_weight)) { session.setCurrentWeight(load) } else Modifier,
                     )
                 }
                 // Rango de la doble progresión (lo elige el móvil)

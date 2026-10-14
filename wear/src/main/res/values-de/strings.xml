@@ -163,4 +163,6 @@
     <string name="cannot_go_lighter">Leichter geht es mit diesem Gewicht nicht</string>
     <string name="enter_weight_first">Trag zuerst das Gewicht des Satzes ein</string>
     <string name="target_rpe_short">🎯 RPE %1$s</string>
+    <string name="use_this_weight">Dieses Gewicht verwenden</string>
+    <string name="last_set_rpe">RPE letzter Satz: %1$s</string>
 </resources>

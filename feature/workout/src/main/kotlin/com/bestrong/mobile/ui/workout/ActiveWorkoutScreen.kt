@@ -916,7 +916,7 @@ private fun ExerciseCard(
     }
 }
 
-/** «🎯 RPE objetivo 8 en las series efectivas · ≈ 72,5 kg para 8 reps» (el peso, con historial). */
+/** «🎯 RPE objetivo 8 en las series efectivas · ≈ 72,5 kg para 8 reps» (el peso, con historial; tocarlo lo aplica). */
 @Composable
 private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.model.WorkoutExercise) {
     val rpe = we.targetRpe?.takeIf { we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS } ?: return
@@ -933,7 +933,9 @@ private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.mode
         stringResource(R.string.target_rpe_line, rpe.toString().removeSuffix(".0")) + hint,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.padding(horizontal = 12.dp),
+        // Tocar pone ese peso en las series pendientes
+        modifier = Modifier.padding(horizontal = 12.dp)
+            .then(if (load != null) Modifier.clickable(onClickLabel = stringResource(R.string.plates_use_weight)) { vm.applyWeightToPending(we.id, load.first) } else Modifier),
     )
 }
 

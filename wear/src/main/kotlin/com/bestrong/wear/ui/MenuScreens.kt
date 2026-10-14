@@ -300,13 +300,25 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
     }
 }
 
-/** Correcciones: quitar una serie pendiente del ejercicio actual y deshacer la última marcada. */
+/** Correcciones: quitar una serie pendiente, el RPE de la última serie y deshacer la última marcada. */
 private fun ScalingLazyListScope.setCorrections(w: Workout, index: Int, session: WorkoutSession, onBack: () -> Unit) {
     if (w.exercises.getOrNull(index)?.sets?.any { !it.completed } == true) {
         item {
             Button(onClick = { if (session.removePendingSet()) onBack() }, label = { Text(stringResource(R.string.remove_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
         }
     }
+    // RPE de la última serie normal del ejercicio: cada toque pasa al siguiente (6…10 y «—»)
+    w.exercises.getOrNull(index)?.takeIf { it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }
+        ?.sets?.lastOrNull { it.completed && it.type == com.bestrong.core.model.SetType.NORMAL }?.let { last ->
+            item {
+                Button(
+                    onClick = { session.cycleLastSetRpe() },
+                    label = { Text(stringResource(R.string.last_set_rpe, last.rpe?.toString()?.removeSuffix(".0") ?: "—")) },
+                    colors = ButtonDefaults.filledTonalButtonColors(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        }
     if (w.completedSetCount > 0) {
         item {
             Button(onClick = { if (session.undoLastSet()) onBack() }, label = { Text(stringResource(R.string.undo_last_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())

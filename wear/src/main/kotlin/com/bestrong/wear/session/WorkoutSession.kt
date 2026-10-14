@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.RoutineExercise
+import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
@@ -735,6 +736,21 @@ class WorkoutSession @Inject constructor(
             .distinct()
             .take(3)
             .toList()
+
+    /**
+     * RPE de la última serie normal completada del ejercicio actual: pasa al siguiente de 6…10 y luego a sin
+     * RPE (corrige el que se estima por la velocidad o lo pone si no se contó). Se sincroniza con el móvil.
+     */
+    fun cycleLastSetRpe() {
+        val we = currentExercise() ?: return
+        val last = we.sets.lastOrNull { it.completed && it.type == SetType.NORMAL } ?: return
+        val choices = listOf(6.0, 7.0, 8.0, 9.0, 10.0)
+        val next = when (val r = last.rpe) {
+            null -> choices.first()
+            else -> choices.firstOrNull { it > r + 1e-9 }
+        }
+        edit { w -> WorkoutEditor.updateSet(w, we.id, last.id) { it.copy(rpe = next) } }
+    }
 
     fun setCurrentWeight(kg: Double) {
         val we = currentExercise() ?: return
