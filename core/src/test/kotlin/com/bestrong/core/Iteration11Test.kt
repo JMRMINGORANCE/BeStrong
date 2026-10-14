@@ -884,4 +884,18 @@ class CollarTest {
         assertEquals(100.0, ground!!.weightKg, 1e-9)
         assertEquals(true, ground.needsRpe)
     }
+
+    @Test
+    fun measurementCsvRoundTripsAndReadsSpanishExcel() {
+        val zone = java.time.ZoneOffset.UTC
+        val day = java.time.LocalDate.of(2026, 3, 2).atTime(12, 0).toInstant(zone).toEpochMilli()
+        val m = com.bestrong.core.model.BodyMeasurement(dateEpochMs = day, weightKg = 80.5, waistCm = 85.0)
+        val back = com.bestrong.core.io.MeasurementCsv.parse(com.bestrong.core.io.MeasurementCsv.export(listOf(m), zone), zone).single()
+        assertEquals(80.5, back.weightKg!!, 1e-9)
+        assertEquals(85.0, back.waistCm!!, 1e-9)
+        assertEquals(null, back.bodyFatPct)
+        val excel = com.bestrong.core.io.MeasurementCsv.parse("date;weight_kg;body_fat_pct\n2026-03-02;80,5;18,2\nfoo;1;2\n2026-03-03;;", zone)
+        assertEquals(1, excel.size)
+        assertEquals(18.2, excel.single().bodyFatPct!!, 1e-9)
+    }
 }

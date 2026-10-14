@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -87,6 +88,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                 title = { Text(stringResource(R.string.measurements)) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
                 actions = {
+                    ImportMeasurementsButton(vm)
                     ExportMeasurementsButton(vm, list)
                     ShareProgressButton(vm, list, unit)
                 },
@@ -187,6 +189,24 @@ private fun MeasurementItem(m: BodyMeasurement, delta: Double?, unit: WeightUnit
             supportingContent = { Text(parts.joinToString(" · ")) },
             trailingContent = { IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, stringResource(R.string.action_delete)) } },
         )
+    }
+}
+
+/** Trae medidas de un CSV (de una hoja de cálculo o del nutricionista). */
+@Composable
+private fun ImportMeasurementsButton(vm: ProfileViewModel) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val failed = stringResource(R.string.import_failed)
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let {
+            vm.importMeasurementsCsv(it) { n ->
+                val text = n?.let { c -> context.getString(R.string.import_measurements_done, c) } ?: failed
+                android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    IconButton(onClick = { launcher.launch(arrayOf("text/*", "text/csv", "text/comma-separated-values")) }) {
+        Icon(Icons.Default.FileUpload, stringResource(R.string.import_measurements))
     }
 }
 
@@ -305,7 +325,7 @@ private fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) 
         modifier = Modifier.padding(top = 8.dp),
     )
     // Y en el último mes (la tendencia que de verdad cuenta)
-    remember(points) { BodyWeightTrend.monthChange(points, System.currentTimeMillis()) }?.let { c ->
+    remember(points) { BodyWeightTrend.monthChange(points, System.currentTimeMillis()) }?.takeIf { unit.format(kotlin.math.abs(it)) != "0" }?.let { c ->
         Text(
             stringResource(R.string.weight_month_change, (if (c >= 0) "+" else "−") + unit.format(kotlin.math.abs(c), withUnit = true)),
             style = MaterialTheme.typography.bodySmall,

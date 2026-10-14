@@ -1186,4 +1186,8 @@
     <string name="weight_month_change">Sur le dernier mois : %1$s</string>
     <string name="export_measurements">Exporter les mesures (CSV)</string>
     <string name="export_measurements_done">Mesures exportées</string>
+    <string name="routine_search">Chercher une routine</string>
+    <string name="import_failed">Import impossible</string>
+    <string name="import_measurements">Importer des mesures (CSV)</string>
+    <string name="import_measurements_done">Mesures importées : %1$d</string>
 </resources>

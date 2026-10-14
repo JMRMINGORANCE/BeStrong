@@ -130,6 +130,15 @@ class ExercisesViewModel @Inject constructor(
     val repRanges: StateFlow<Map<String, String>> = settingsStore.settings.map { it.exerciseRepRange }
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.exerciseRepRange)
 
+    val plateauSnoozed: StateFlow<Map<String, Double>> = settingsStore.settings.map { it.plateauSnoozed }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.plateauSnoozed)
+
+    /** Probar otro rango por estancamiento: el aviso descansa hasta dar tiempo al nuevo rango ([sessions]: las que hay). */
+    fun tryRangeForPlateau(exerciseId: String, range: String, sessions: Int) {
+        setRepRange(exerciseId, range)
+        settingsStore.update { s -> s.copy(plateauSnoozed = s.plateauSnoozed + (exerciseId to sessions.toDouble())) }
+    }
+
     fun setRepRange(exerciseId: String, range: String?) = settingsStore.update { s ->
         s.copy(exerciseRepRange = if (range == null) s.exerciseRepRange - exerciseId else s.exerciseRepRange + (exerciseId to range))
     }

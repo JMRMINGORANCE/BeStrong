@@ -266,7 +266,9 @@ object ExerciseLibrary {
             .filter { ex ->
                 q.isBlank() ||
                     q.split(' ').all { token -> nameOf(ex).normalized().contains(token) } ||
-                    synonyms[ex.id].orEmpty().any { syn -> syn.normalized().contains(q) || q.contains(syn.normalized()) }
+                    // Un sinónimo vale si contiene lo buscado o todas sus palabras («remo con barra» ya no saca el
+                    // remo ergómetro por «remo»)
+                    synonyms[ex.id].orEmpty().any { syn -> syn.normalized().let { s -> s.contains(q) || q.split(' ').all { token -> s.contains(token) } } }
             }
             .sortedWith(compareBy({ !nameOf(it).normalized().startsWith(q) }, { nameOf(it) }))
     }

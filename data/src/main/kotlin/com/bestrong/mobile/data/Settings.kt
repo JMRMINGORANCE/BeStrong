@@ -121,6 +121,8 @@ data class UserSettings(
      * repeticiones / segundos en los ejercicios sin peso o de tiempo (ver ExerciseGoals).
      */
     val exerciseGoalsKg: Map<String, Double> = emptyMap(),
+    /** Ejercicio → nº de sesiones que tenía al probar otro rango por estancamiento (el aviso descansa unas sesiones). */
+    val plateauSnoozed: Map<String, Double> = emptyMap(),
     /** Descanso tras una serie de calentamiento (no hace falta el de una serie efectiva). */
     val warmupRestSeconds: Int = 60,
 ) {
@@ -169,7 +171,20 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         ?.takeIf { it.isNotEmpty() }
         ?: listOf(GymProfile.gym(), GymProfile.home())
 
-    private fun read() = readBackupState(readBase())
+    private fun read() = readGoals(readBackupState(readBase()))
+
+    /** Objetivos (peso, cintura, cardio) y su aviso, aparte como el estado de la copia. */
+    private fun readGoals(s: UserSettings) = s.copy(
+        bodyWeightGoalKg = prefs.getString("body_weight_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
+        bodyWeightGoalStartKg = prefs.getString("body_weight_goal_start", null)?.toDoubleOrNull()?.takeIf { it > 0 },
+        bodyWeightGoalDateMs = prefs.getString("body_weight_goal_date", null)?.toLongOrNull(),
+        waistGoalCm = prefs.getString("waist_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
+        weeklyCardioKm = prefs.getString("weekly_cardio_km", null)?.toDoubleOrNull()?.takeIf { it > 0 },
+        weeklyCardioMin = prefs.getString("weekly_cardio_min", null)?.toIntOrNull()?.takeIf { it > 0 },
+        cardioNudge = prefs.getBoolean("cardio_nudge", true),
+        cardioNudgeDay = prefs.getInt("cardio_nudge_day", 4).coerceIn(1, 7),
+        plateauSnoozed = prefs.decodeMap("plateau_snoozed", INCREMENTS),
+    )
 
     /** Estado de la copia automática (propio de este móvil), aparte para que la lectura no sea un bloque enorme. */
     private fun readBackupState(s: UserSettings) = s.copy(
@@ -217,14 +232,6 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         ),
         restVibration = enumOr("rest_vibration", VibrationStyle.TRIPLE),
         bodyUnit = prefs.getString("body_unit", null)?.let { runCatching { WeightUnit.valueOf(it) }.getOrNull() },
-        bodyWeightGoalKg = prefs.getString("body_weight_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
-        bodyWeightGoalStartKg = prefs.getString("body_weight_goal_start", null)?.toDoubleOrNull()?.takeIf { it > 0 },
-        bodyWeightGoalDateMs = prefs.getString("body_weight_goal_date", null)?.toLongOrNull(),
-        waistGoalCm = prefs.getString("waist_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
-        weeklyCardioKm = prefs.getString("weekly_cardio_km", null)?.toDoubleOrNull()?.takeIf { it > 0 },
-        weeklyCardioMin = prefs.getString("weekly_cardio_min", null)?.toIntOrNull()?.takeIf { it > 0 },
-        cardioNudge = prefs.getBoolean("cardio_nudge", true),
-        cardioNudgeDay = prefs.getInt("cardio_nudge_day", 4).coerceIn(1, 7),
         weeklySetsTarget = prefs.getInt("weekly_sets_target", 10).coerceIn(1, 30),
         weighInDay = prefs.getInt("weigh_in_day", 0).takeIf { it in 1..7 },
         measureReminder = prefs.getBoolean("measure_reminder", false),
@@ -253,6 +260,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         putString("weekly_cardio_km", s.weeklyCardioKm?.toString())
         putString("weekly_cardio_min", s.weeklyCardioMin?.toString())
         putBoolean("cardio_nudge", s.cardioNudge)
+        putString("plateau_snoozed", SyncContract.json.encodeToString(INCREMENTS, s.plateauSnoozed))
         putInt("cardio_nudge_day", s.cardioNudgeDay)
     }
 
@@ -372,7 +380,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "backup_fail_notified", "backup_folder_set", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km", "weekly_cardio_min", "partner_history_name")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km", "weekly_cardio_min", "partner_history_name", "plateau_snoozed")
         val CARDIO_GOAL_KEYS = setOf("weekly_cardio_km", "weekly_cardio_min")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())

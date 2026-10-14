@@ -143,6 +143,9 @@ fun HomeScreen(
     ) { padding ->
         // Rejilla adaptable: 1 columna en el Fold plegado, 2-3 desplegado
         var collapsed by rememberSaveable { mutableStateOf(setOf<String>()) }
+        // Buscar rutina (sale con muchas): mientras se busca, se ven todas las que coinciden con sus carpetas abiertas
+        var routineQuery by rememberSaveable { mutableStateOf("") }
+        val shownRoutines = remember(routines, routineQuery) { filterRoutines(routines, routineQuery) }
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 320.dp),
             modifier = Modifier.padding(padding).fillMaxSize(),
@@ -204,6 +207,7 @@ fun HomeScreen(
                         TextButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_programs)) }
                         TextButton(onClick = onOpenPlanning) { Text(stringResource(R.string.planning_open)) }
                     }
+                    RoutineSearchField(routines.size, routineQuery) { routineQuery = it }
                 }
             }
             if (routines.none { !it.archived }) {
@@ -217,7 +221,7 @@ fun HomeScreen(
                     }
                 }
             }
-            routineItems(routines, collapsed, onToggleFolder = { f -> collapsed = if (f in collapsed) collapsed - f else collapsed + f }) { routine ->
+            routineItems(shownRoutines, collapsed.takeIf { routineQuery.isBlank() }.orEmpty(), onToggleFolder = { f -> collapsed = if (f in collapsed) collapsed - f else collapsed + f }) { routine ->
                 val last = history.firstOrNull { it.routineId == routine.id }
                 RoutineCard(
                     routine = routine,
@@ -470,3 +474,27 @@ private fun GymChip(vm: HomeViewModel) {
     }
     if (open) com.bestrong.mobile.ui.components.GymPickerDialog(settings.gyms, settings.activeGym.id, vm::setActiveGym) { open = false }
 }
+
+/** Con muchas rutinas, una búsqueda por nombre o carpeta (sin acentos ni mayúsculas). */
+@Composable
+private fun RoutineSearchField(count: Int, query: String, onChange: (String) -> Unit) {
+    if (count < ROUTINE_SEARCH_MIN && query.isBlank()) return
+    androidx.compose.material3.OutlinedTextField(
+        value = query,
+        onValueChange = onChange,
+        placeholder = { Text(stringResource(R.string.routine_search)) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+    )
+}
+
+/** Las rutinas cuyo nombre o carpeta contienen lo buscado (todas si no se busca nada). */
+private fun filterRoutines(routines: List<Routine>, query: String): List<Routine> {
+    fun String.plain() = java.text.Normalizer.normalize(lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
+    val q = query.trim().plain()
+    if (q.isEmpty()) return routines
+    return routines.filter { r -> r.name.plain().contains(q) || r.folder?.plain()?.contains(q) == true }
+}
+
+/** A partir de cuántas rutinas sale el buscador. */
+private const val ROUTINE_SEARCH_MIN = 8

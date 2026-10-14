@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -379,8 +380,12 @@ class HomeViewModel @Inject constructor(
 
     /** Archivar (o recuperar) sin borrar: el historial y la rutina se conservan. */
     fun setArchived(routine: Routine, archived: Boolean) = viewModelScope.launch {
-        repo.saveRoutine(routine.copy(archived = archived), keepPosition = true)
+        // Sobre la guardada: un cambio llegado del reloj mientras tanto no se pierde
+        repo.saveRoutine((repo.routine(routine.id) ?: routine).copy(archived = archived), keepPosition = true)
     }
+
+    /** Un cambio de orden a la vez, sobre lo guardado: dos toques rápidos no se pisan. */
+    private val moveMutex = kotlinx.coroutines.sync.Mutex()
 
     fun duplicate(routine: Routine) = viewModelScope.launch {
         repo.saveRoutine(routine.copy(id = com.bestrong.core.util.newId(), name = context.getString(R.string.routine_copy_name, routine.name), archived = false))
@@ -424,8 +429,10 @@ class HomeViewModel @Inject constructor(
         _deletedRoutine.value = null
     }
 
-    fun move(routine: Routine, delta: Int) = viewModelScope.launch {
-        val list = repo.routines.value.toMutableList()
+    fun move(routine: Routine, delta: Int) = viewModelScope.launch { moveMutex.withLock { moveNow(routine, delta) } }
+
+    private suspend fun moveNow(routine: Routine, delta: Int) {
+        val list = repo.routinesOnce().toMutableList()
         val i = list.indexOfFirst { it.id == routine.id }
 
         // Se mueve dentro de su carpeta (en Inicio cada carpeta se ve aparte): el vecino es el de la misma carpeta
@@ -433,8 +440,8 @@ class HomeViewModel @Inject constructor(
         // Las archivadas van en su propia sección: no se intercambia con una que no se ve
         // (las archivadas se ven todas juntas, sin carpetas)
         val sameFolder = list.indices.filter { list[it].archived == routine.archived && (routine.archived || folderOf(list[it]) == folderOf(routine)) }
-        val j = sameFolder.getOrNull(sameFolder.indexOf(i) + delta) ?: return@launch
-        if (i < 0) return@launch
+        val j = sameFolder.getOrNull(sameFolder.indexOf(i) + delta) ?: return
+        if (i < 0) return
         list[i] = list[j].also { list[j] = list[i] }
         list.forEachIndexed { pos, r -> repo.saveRoutine(r.copy(position = pos)) }
     }

@@ -430,3 +430,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Cambio de peso en el último mes junto a la tendencia semanal
 - [x] El peso de Inicio completa la medida de hoy (como el del aviso)
 - [x] Estancamiento: siempre propone otro rango, también desde los rangos altos
+
+## Fase 51 — Buscar rutinas e importar medidas ✅
+- [x] Buscar rutinas en Inicio (con 8 o más), sin acentos y por carpeta
+- [x] Importar medidas desde un CSV (también con «;» y coma decimal), completando los días que ya había
+- [x] El aviso de estancamiento descansa unas sesiones tras probar otro rango
+- [x] Los pesos de la báscula borrados aquí no vuelven al importar de Health Connect
+- [x] Buscar en el historial sin acentos («biceps» encuentra «bíceps»)

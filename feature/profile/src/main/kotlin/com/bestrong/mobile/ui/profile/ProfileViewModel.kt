@@ -113,12 +113,23 @@ class ProfileViewModel @Inject constructor(
     fun importHealthWeights() = viewModelScope.launch {
         val snap = runCatching { healthReader.read() }.getOrNull() ?: return@launch
         val zone = ZoneId.systemDefault()
-        val have = repo.measurements.value.filter { it.weightKg != null }
-            .map { java.time.Instant.ofEpochMilli(it.dateEpochMs).atZone(zone).toLocalDate() }.toSet()
-        val fresh = snap.weights.groupBy { (t, _) -> java.time.Instant.ofEpochMilli(t).atZone(zone).toLocalDate() }
-            .filterKeys { it !in have }
-            .map { (_, list) -> list.maxBy { it.first } }
-        fresh.forEach { (t, kg) -> repo.saveMeasurement(BodyMeasurement(dateEpochMs = t, weightKg = kg, weightFromHealth = true)) }
+        fun day(t: Long) = java.time.Instant.ofEpochMilli(t).atZone(zone).toLocalDate()
+        // De la base de datos (con la app recién abierta la lista en memoria aún está vacía)
+        val current = repo.measurementsOnce()
+        // Las traídas antes de marcar el origen: misma hora y mismo peso que en Health Connect
+        current.filter { m -> !m.weightFromHealth && snap.weights.any { (t, kg) -> t == m.dateEpochMs && kotlin.math.abs(kg - (m.weightKg ?: -1.0)) < 0.01 } }
+            .forEach { repo.saveMeasurement(it.copy(weightFromHealth = true)) }
+        val ignored = repo.ignoredHealthWeights()
+        val byDay = current.groupBy { day(it.dateEpochMs) }
+        val fresh = snap.weights.filter { (t, _) -> t !in ignored }.groupBy { (t, _) -> day(t) }
+            // Un día que ya tiene peso no se toca; si tiene otra medida (la cintura), el peso va en ella
+            .filterKeys { d -> byDay[d].orEmpty().none { it.weightKg != null } }
+            .map { (d, list) -> d to list.maxBy { it.first } }
+        fresh.forEach { (d, w) ->
+            val (t, kg) = w
+            val sameDay = byDay[d]?.firstOrNull()
+            repo.saveMeasurement(sameDay?.copy(weightKg = kg, weightFromHealth = true) ?: BodyMeasurement(dateEpochMs = t, weightKg = kg, weightFromHealth = true))
+        }
         _messages.tryEmit(context.getString(R.string.hc_import_weight_done, fresh.size))
     }
 
@@ -226,11 +237,12 @@ class ProfileViewModel @Inject constructor(
 
     /**
      * Guarda la medida; a Health Connect solo si cambian el peso o la grasa ([force]: siempre, al deshacer un
-     * borrado). Corregido a mano, el peso ya es de la app (aunque viniera de la báscula).
+     * borrado).
      */
     private suspend fun saveMeasurementNow(m: BodyMeasurement, force: Boolean) {
         val before = repo.measurementsOnce().firstOrNull { it.id == m.id }
-        val saved = if (before != null && before.weightKg != m.weightKg) m.copy(weightFromHealth = false) else m
+        // Un peso de la báscula corregido a mano sigue sin exportarse: allí ya está el de la báscula (saldría doble)
+        val saved = m
         repo.saveMeasurement(saved)
         val healthChanged = force || before == null || before.weightKg != saved.weightKg || before.bodyFatPct != saved.bodyFatPct
         if (!healthChanged || !settingsStore.settings.value.healthConnectExport) return
@@ -248,6 +260,41 @@ class ProfileViewModel @Inject constructor(
         onDone(ok)
     }
 
+    /**
+     * Medidas desde un CSV ([uri]): el día que ya tiene medida solo se le rellena lo que le falta; [onDone] recibe
+     * cuántas se añadieron o completaron (null si no se pudo leer).
+     */
+    fun importMeasurementsCsv(uri: Uri, onDone: (Int?) -> Unit) = viewModelScope.launch {
+        val rows = runCatching {
+            val text = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error("no stream") }
+            withContext(Dispatchers.Default) { com.bestrong.core.io.MeasurementCsv.parse(text) }
+        }.getOrNull()
+        if (rows == null) {
+            onDone(null)
+            return@launch
+        }
+        val zone = ZoneId.systemDefault()
+        fun day(t: Long) = java.time.Instant.ofEpochMilli(t).atZone(zone).toLocalDate()
+        val byDay = repo.measurementsOnce().associateBy { day(it.dateEpochMs) }
+        var count = 0
+        rows.forEach { row ->
+            val old = byDay[day(row.dateEpochMs)]
+            val merged = old?.copy(
+                weightKg = old.weightKg ?: row.weightKg,
+                bodyFatPct = old.bodyFatPct ?: row.bodyFatPct,
+                waistCm = old.waistCm ?: row.waistCm,
+                chestCm = old.chestCm ?: row.chestCm,
+                armCm = old.armCm ?: row.armCm,
+                thighCm = old.thighCm ?: row.thighCm,
+            ) ?: row
+            if (merged != old) {
+                repo.saveMeasurement(merged)
+                count++
+            }
+        }
+        onDone(count)
+    }
+
     /** Última medida borrada, para «Deshacer». */
     private val _deletedMeasurement = MutableStateFlow<BodyMeasurement?>(null)
     val deletedMeasurement: StateFlow<BodyMeasurement?> = _deletedMeasurement
@@ -256,11 +303,14 @@ class ProfileViewModel @Inject constructor(
     private var deleteMeasurementJob: kotlinx.coroutines.Job? = null
 
     fun deleteMeasurement(id: String) {
+        val m = repo.measurements.value.firstOrNull { it.id == id }
+        // El aviso sale ya (y en orden si se borran varias seguidas); el borrado sigue después
+        _deletedMeasurement.value = m
         deleteMeasurementJob = viewModelScope.launch {
-            val m = repo.measurementsOnce().firstOrNull { it.id == id } ?: return@launch
             repo.deleteMeasurement(id)
+            // Una de la báscula no vuelve al importar de nuevo
+            if (m?.weightFromHealth == true) repo.ignoreHealthWeight(m.dateEpochMs)
             runCatching { healthConnect.deleteMeasurement(id) }
-            _deletedMeasurement.value = m
         }
     }
 

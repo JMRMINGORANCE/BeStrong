@@ -404,7 +404,10 @@ private val TIMED_TRACKING = setOf(com.bestrong.core.model.TrackingType.CARDIO, 
 @Composable
 private fun PlateauHint(vm: ExercisesViewModel, exerciseId: String, progress: List<com.bestrong.core.stats.ExerciseProgressPoint>) {
     val stalled = remember(progress) { com.bestrong.core.stats.WorkoutStats.sessionsSinceBest(progress) }
-    if (stalled < PLATEAU_SESSIONS) return
+    // Tras probar otro rango, el aviso espera unas sesiones para darle tiempo
+    val snoozed by vm.plateauSnoozed.collectAsStateWithLifecycle()
+    val resting = snoozed[exerciseId]?.let { progress.size < it + PLATEAU_SESSIONS } == true
+    if (stalled < PLATEAU_SESSIONS || resting) return
     val ranges by vm.repRanges.collectAsStateWithLifecycle()
     // Siempre otro estímulo: de los rangos altos a uno más pesado y de los bajos (o sin rango, o uno antiguo como
     // «4-6») a hipertrofia
@@ -417,7 +420,7 @@ private fun PlateauHint(vm: ExercisesViewModel, exerciseId: String, progress: Li
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp)) {
             Text(stringResource(R.string.plateau_hint, stalled), style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = { vm.setRepRange(exerciseId, next) }) { Text(stringResource(R.string.plateau_try_range, next.replace("-", "–"))) }
+            TextButton(onClick = { vm.tryRangeForPlateau(exerciseId, next, progress.size) }) { Text(stringResource(R.string.plateau_try_range, next.replace("-", "–"))) }
         }
     }
 }

@@ -214,12 +214,14 @@ object WorkoutStats {
 
     /** Búsqueda en el historial por nombre de entreno, ejercicio o nota. */
     fun search(history: List<Workout>, query: String, nameOf: (com.bestrong.core.model.Exercise) -> String = { it.name }): List<Workout> {
-        val q = query.trim().lowercase()
+        // Sin acentos ni mayúsculas: «biceps» encuentra «Curl de bíceps»
+        fun String.plain() = java.text.Normalizer.normalize(lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
+        val q = query.trim().plain()
         if (q.isEmpty()) return history
         return history.filter { w ->
-            w.name.lowercase().contains(q) || w.notes.lowercase().contains(q) || w.gymName?.lowercase()?.contains(q) == true ||
-                w.athlete?.lowercase()?.contains(q) == true ||
-                w.exercises.any { we -> nameOf(we.exercise).lowercase().contains(q) || we.notes.lowercase().contains(q) || we.sets.any { it.note.lowercase().contains(q) } }
+            w.name.plain().contains(q) || w.notes.plain().contains(q) || w.gymName?.plain()?.contains(q) == true ||
+                w.athlete?.plain()?.contains(q) == true ||
+                w.exercises.any { we -> nameOf(we.exercise).plain().contains(q) || we.notes.plain().contains(q) || we.sets.any { it.note.plain().contains(q) } }
         }
     }
 
