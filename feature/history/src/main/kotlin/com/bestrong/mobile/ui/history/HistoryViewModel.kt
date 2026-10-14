@@ -35,6 +35,7 @@ class HistoryViewModel @Inject constructor(
     private val repo: BeStrongRepository,
     private val actions: WorkoutActions,
     @ApplicationContext private val context: Context,
+    private val settingsStore: com.bestrong.mobile.data.SettingsStore,
 ) : ViewModel() {
     val history: StateFlow<List<Workout>> = repo.history
 
@@ -151,6 +152,17 @@ class HistoryViewModel @Inject constructor(
         repo.saveRoutine(
             routine.copy(exercises = routine.exercises.map { if (it.id == target.id) it.copy(restSeconds = seconds) else it }),
             keepPosition = true,
+        )
+    }
+
+    /** El entreno en texto (series, RPE y notas), como el informe semanal para el entrenador. */
+    fun shareText(workout: Workout): String = settingsStore.settings.value.let { prefs ->
+        com.bestrong.core.io.CoachReport.text(
+            listOf(workout.copy(finishedAtEpochMs = workout.finishedAtEpochMs ?: workout.startedAtEpochMs)),
+            fromEpochMs = 0,
+            unit = prefs.unit,
+            exerciseName = { it.displayName(context) },
+            dumbbellTotal = prefs.dumbbellTotal,
         )
     }
 

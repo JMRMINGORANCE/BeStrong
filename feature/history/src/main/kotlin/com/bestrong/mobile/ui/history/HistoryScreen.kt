@@ -282,6 +282,14 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                         DropdownMenuItem(text = { Text(stringResource(R.string.history_edit_info)) }, onClick = { menu = false; editInfo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.repeat_workout)) }, onClick = { menu = false; vm.repeat(w, onWorkoutStarted) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.save_as_routine)) }, onClick = { menu = false; vm.saveAsRoutine(w) })
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.share_as_text)) },
+                            onClick = {
+                                menu = false
+                                val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, vm.shareText(w))
+                                context.startActivity(android.content.Intent.createChooser(send, null))
+                            },
+                        )
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; vm.delete(w.id); onBack?.invoke() })
                     }
                 }

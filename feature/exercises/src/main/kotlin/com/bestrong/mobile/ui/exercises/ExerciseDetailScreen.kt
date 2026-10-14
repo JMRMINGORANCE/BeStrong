@@ -14,6 +14,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -90,6 +92,14 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             title = { Text(s.exercise.displayName()) },
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
+                val hidden by vm.hidden.collectAsStateWithLifecycle()
+                val isHidden = s.exercise.id in hidden
+                IconButton(onClick = { vm.toggleHidden(s.exercise.id) }) {
+                    Icon(
+                        if (isHidden) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        stringResource(if (isHidden) R.string.exercise_unhide else R.string.exercise_hide),
+                    )
+                }
                 if (s.exercise.isCustom) {
                     IconButton(onClick = { editing = true }) { Icon(Icons.Default.Edit, stringResource(R.string.edit_exercise)) }
                     IconButton(onClick = { confirmDelete = true }) {

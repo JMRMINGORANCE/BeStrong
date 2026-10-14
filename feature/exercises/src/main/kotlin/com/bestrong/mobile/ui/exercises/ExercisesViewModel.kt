@@ -48,6 +48,8 @@ data class ExerciseFilter(
     val favoritesOnly: Boolean = false,
     /** Solo peso corporal o bandas (entrenar en casa sin material). */
     val noEquipment: Boolean = false,
+    /** Ver también los ejercicios ocultos (para volver a mostrarlos). */
+    val showHidden: Boolean = false,
     val sort: ExerciseSort = ExerciseSort.RECENT,
 )
 
@@ -105,14 +107,25 @@ class ExercisesViewModel @Inject constructor(
     /** Abre la biblioteca con solo ese músculo (nombre del enum; se ignora si no existe). Se mantiene el orden elegido. */
     fun showMuscle(name: String) {
         val muscle = MuscleGroup.entries.firstOrNull { it.name == name } ?: return
-        filter.value = filter.value.copy(query = "", muscle = muscle, equipment = null, favoritesOnly = false, noEquipment = false)
+        filter.value = filter.value.copy(query = "", muscle = muscle, equipment = null, favoritesOnly = false, noEquipment = false, showHidden = false)
         _showList.tryEmit(Unit)
     }
 
     /** Ejercicios usados recientemente, primero (como Hevy). */
-    val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, favorites, planning.state) { all, f, history, favs, plan ->
+    /** Ejercicios ocultos por el usuario. */
+    val hidden: StateFlow<Set<String>> = settingsStore.settings.map { it.hiddenExercises }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.hiddenExercises)
+
+    fun toggleHidden(id: String) = settingsStore.update { s ->
+        s.copy(hiddenExercises = if (id in s.hiddenExercises) s.hiddenExercises - id else s.hiddenExercises + id)
+    }
+
+    private val marks = combine(favorites, hidden) { f, h -> f to h }
+
+    val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, marks, planning.state) { all, f, history, (favs, hiddenIds), plan ->
         val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }
             .filter { !f.favoritesOnly || it.id in favs }
+            .filter { if (f.showHidden) it.id in hiddenIds else it.id !in hiddenIds }
             // Lesiones marcadas en Planificación: fuera los ejercicios que cargan esas zonas
             .filter { Injuries.isSafe(it, plan.injuries) }
             .filter { !f.noEquipment || it.equipment == Equipment.BODYWEIGHT || it.equipment == Equipment.BAND }

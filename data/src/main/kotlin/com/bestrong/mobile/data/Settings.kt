@@ -45,6 +45,8 @@ data class UserSettings(
     val activeGymId: String? = null,
     /** Ejercicios marcados como favoritos. */
     val favoriteExercises: Set<String> = emptySet(),
+    /** Ejercicios que no se quieren ver en la biblioteca ni en el selector (se pueden volver a mostrar). */
+    val hiddenExercises: Set<String> = emptySet(),
     /** En ejercicios con mancuernas se anota la suma de las dos (se guarda por mancuerna). */
     val dumbbellTotal: Boolean = false,
     /** Para niveles de fuerza y puntuaciones (DOTS, Wilks, IPF GL). */
@@ -114,6 +116,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             ?: listOf(GymProfile.gym(), GymProfile.home()),
         activeGymId = prefs.getString("active_gym", null),
         favoriteExercises = prefs.getStringSet("favorites", emptySet()).orEmpty().toSet(),
+        hiddenExercises = prefs.getStringSet("hidden_exercises", emptySet()).orEmpty().toSet(),
         dumbbellTotal = prefs.getBoolean("dumbbell_total", false),
         lockProgressPhotos = prefs.getBoolean("lock_photos", true),
         volumeKeys = prefs.getBoolean("volume_keys", false),
@@ -168,6 +171,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))
             putString("active_gym", s.activeGymId)
             putStringSet("favorites", s.favoriteExercises)
+            putStringSet("hidden_exercises", s.hiddenExercises)
             putBoolean("dumbbell_total", s.dumbbellTotal)
             putString("sex", s.sex.name)
             putBoolean("lock_photos", s.lockProgressPhotos)

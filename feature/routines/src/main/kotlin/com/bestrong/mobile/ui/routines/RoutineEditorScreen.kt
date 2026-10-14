@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -122,6 +123,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                             }
                             IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.action_move_up)) }
                             IconButton(onClick = { vm.moveExercise(index, index + 1) }, enabled = index < routine.exercises.lastIndex) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.action_move_down)) }
+                            IconButton(onClick = { vm.duplicateExercise(re.id) }) { Icon(Icons.Default.ContentCopy, stringResource(R.string.duplicate_named, re.exercise.displayName())) }
                             IconButton(onClick = { vm.removeExercise(re.id) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_named, re.exercise.displayName())) }
                         }
                         if (index < routine.exercises.lastIndex) {
@@ -169,6 +171,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                     }
                 }
             }
+            item { RoutineMusclesCard(routine, content) }
             item {
                 Button(onClick = onAddExercises, modifier = content) {
                     Icon(Icons.Default.Add, null)

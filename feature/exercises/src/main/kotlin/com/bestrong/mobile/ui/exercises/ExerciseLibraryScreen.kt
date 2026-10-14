@@ -151,6 +151,27 @@ fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (
     }
 }
 
+/** Filtros de la biblioteca (músculo, material, orden, favoritos, ocultos…). [onCreate] = chip de crear ejercicio. */
+@Composable
+private fun FilterChips(vm: ExercisesViewModel, filter: ExerciseFilter, onCreate: (() -> Unit)?) {
+    Row(
+        Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, filter.muscle, { it.label() }) { vm.filter.value = filter.copy(muscle = it) }
+        EnumFilter(stringResource(R.string.filter_equipment), Equipment.entries, filter.equipment, { it.label() }) { vm.filter.value = filter.copy(equipment = it) }
+        SortChip(filter.sort) { vm.filter.value = filter.copy(sort = it) }
+        FilterChip(selected = filter.favoritesOnly, onClick = { vm.filter.value = filter.copy(favoritesOnly = !filter.favoritesOnly) }, label = { Text(stringResource(R.string.filter_favorites)) })
+        FilterChip(selected = filter.noEquipment, onClick = { vm.filter.value = filter.copy(noEquipment = !filter.noEquipment) }, label = { Text(stringResource(R.string.filter_no_equipment)) })
+        // Solo si hay alguno oculto: para encontrarlos y volver a mostrarlos
+        val hidden by vm.hidden.collectAsStateWithLifecycle()
+        if (hidden.isNotEmpty() || filter.showHidden) {
+            FilterChip(selected = filter.showHidden, onClick = { vm.filter.value = filter.copy(showHidden = !filter.showHidden) }, label = { Text(stringResource(R.string.filter_hidden, hidden.size)) })
+        }
+        onCreate?.let { FilterChip(selected = false, onClick = it, label = { Text(stringResource(R.string.create_short)) }) }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseSearchList(
@@ -185,17 +206,7 @@ fun ExerciseSearchList(
             singleLine = true,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
         )
-        Row(
-            Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, filter.muscle, { it.label() }) { vm.filter.value = filter.copy(muscle = it) }
-            EnumFilter(stringResource(R.string.filter_equipment), Equipment.entries, filter.equipment, { it.label() }) { vm.filter.value = filter.copy(equipment = it) }
-            SortChip(filter.sort) { vm.filter.value = filter.copy(sort = it) }
-            FilterChip(selected = filter.favoritesOnly, onClick = { vm.filter.value = filter.copy(favoritesOnly = !filter.favoritesOnly) }, label = { Text(stringResource(R.string.filter_favorites)) })
-            FilterChip(selected = filter.noEquipment, onClick = { vm.filter.value = filter.copy(noEquipment = !filter.noEquipment) }, label = { Text(stringResource(R.string.filter_no_equipment)) })
-            if (title == null) FilterChip(selected = false, onClick = { creating = true }, label = { Text(stringResource(R.string.create_short)) })
-        }
+        FilterChips(vm, filter, onCreate = if (title == null) ({ creating = true }) else null)
         LazyColumn(Modifier.fillMaxSize()) {
             items(results, key = { it.id }) { ex ->
                 ListItem(

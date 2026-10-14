@@ -38,4 +38,16 @@ object OneRepMax {
         if (weightKg <= 0 || oneRepMaxKg <= 0 || weightKg > oneRepMaxKg) return 0
         return Math.round(30.0 * (oneRepMaxKg / weightKg - 1)).toInt().coerceAtLeast(1)
     }
+
+    /**
+     * Repeticiones mínimas con [weightKg] para superar un 1RM estimado de [bestOneRepMaxKg] (con la misma
+     * fórmula que las series: 1 rep = el peso; más, Epley). null si harían falta más de [maxReps].
+     */
+    fun repsToBeat(bestOneRepMaxKg: Double, weightKg: Double, maxReps: Int = 20): Int? {
+        return when {
+            weightKg <= 0 || bestOneRepMaxKg <= 0 -> null
+            weightKg > bestOneRepMaxKg + 1e-6 -> 1
+            else -> (2..maxReps).firstOrNull { weightKg * (1 + it / 30.0) > bestOneRepMaxKg + 1e-6 }
+        }
+    }
 }

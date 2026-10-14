@@ -948,4 +948,12 @@
     <string name="lagging_muscle_open">see exercises</string>
     <string name="notif_progress_eta">%1$d/%2$d sets · ≈ %3$d min, done %4$s</string>
     <string name="rest_use_real_done">Routine updated: %1$s rest</string>
+    <string name="record_hint">🏆 %1$d reps at %2$s = new record</string>
+    <string name="share_as_text">Share as text</string>
+    <string name="routine_muscles_title">Sets per muscle</string>
+    <string name="routine_muscles_hint">Secondary muscles count half. Recommended: 10–20 sets per muscle per week.</string>
+    <string name="filter_hidden">Hidden (%1$d)</string>
+    <string name="exercise_hide">Hide from library</string>
+    <string name="exercise_unhide">Show in library again</string>
+    <string name="duplicate_named">Duplicate %1$s</string>
 </resources>

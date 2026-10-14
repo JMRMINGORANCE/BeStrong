@@ -214,3 +214,9 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Inicio: tocar un músculo atrasado abre la biblioteca filtrada
 - [x] Notificación del entreno con tiempo restante y hora de fin
 - [x] Resumen final con descanso real frente al previsto
+
+## Fase 20 — Biblioteca y rutinas a tu medida ✅
+- [x] Reps necesarias para batir tu récord en la siguiente serie
+- [x] Compartir un entreno del historial como texto
+- [x] Ocultar ejercicios de la biblioteca (y volver a mostrarlos)
+- [x] Editor de rutinas: series por músculo y duplicar ejercicio

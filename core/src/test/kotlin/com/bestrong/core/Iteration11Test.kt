@@ -151,3 +151,31 @@ class Iteration13Test {
         assertEquals(null, com.bestrong.core.stats.RestStats.summary(Workout(name = "w", startedAtEpochMs = 0, finishedAtEpochMs = t0 + 600_000, exercises = listOf(we))))
     }
 }
+
+class RepsToBeatTest {
+    @Test fun repsToBeatUsesSameFormulaAsSets() {
+        val best = WorkoutSet(weightKg = 100.0, reps = 5, completed = true).estimatedOneRepMax // 116,67
+        val r = com.bestrong.core.stats.OneRepMax.repsToBeat(best, 100.0)!!
+        assertEquals(6, r)
+        assertEquals(true, WorkoutSet(weightKg = 100.0, reps = r).estimatedOneRepMax > best)
+        assertEquals(1, com.bestrong.core.stats.OneRepMax.repsToBeat(best, 120.0))
+        assertEquals(null, com.bestrong.core.stats.OneRepMax.repsToBeat(best, 20.0))
+    }
+}
+
+class RoutineMuscleTest {
+    @Test fun countsWorkingSetsPerMuscle() {
+        val r = com.bestrong.core.model.Routine(
+            name = "r",
+            exercises = listOf(
+                com.bestrong.core.model.RoutineExercise(
+                    exercise = bench,
+                    sets = listOf(com.bestrong.core.model.RoutineSet(type = SetType.WARMUP), com.bestrong.core.model.RoutineSet(), com.bestrong.core.model.RoutineSet()),
+                ),
+            ),
+        )
+        val m = com.bestrong.core.stats.WorkoutStats.routineSetsPerMuscle(r)
+        assertEquals(2.0, m.getValue(bench.primaryMuscle), 0.0)
+        bench.secondaryMuscles.forEach { assertEquals(1.0, m.getValue(it), 0.0) }
+    }
+}

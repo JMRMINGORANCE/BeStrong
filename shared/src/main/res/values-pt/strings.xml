@@ -948,4 +948,12 @@
     <string name="lagging_muscle_open">ver exercícios</string>
     <string name="notif_progress_eta">%1$d/%2$d séries · ≈ %3$d min, fim %4$s</string>
     <string name="rest_use_real_done">Rotina atualizada: descanso de %1$s</string>
+    <string name="record_hint">🏆 %1$d reps com %2$s = recorde</string>
+    <string name="share_as_text">Partilhar como texto</string>
+    <string name="routine_muscles_title">Séries por músculo</string>
+    <string name="routine_muscles_hint">Os secundários contam metade. Recomendado: 10–20 séries por músculo por semana.</string>
+    <string name="filter_hidden">Ocultos (%1$d)</string>
+    <string name="exercise_hide">Ocultar da biblioteca</string>
+    <string name="exercise_unhide">Voltar a mostrar na biblioteca</string>
+    <string name="duplicate_named">Duplicar %1$s</string>
 </resources>

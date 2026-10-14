@@ -361,6 +361,19 @@ private fun KeepScreenOn(enabled: Boolean) {
     }
 }
 
+/** «🏆 6 reps con 100 kg = récord»: lo que hace falta en esta serie para superar tu mejor 1RM estimado. */
+@Composable
+private fun RecordHint(set: WorkoutSet, bestOneRepMaxKg: Double, weightFactor: Int) {
+    val reps = com.bestrong.core.stats.OneRepMax.repsToBeat(bestOneRepMaxKg, set.weightKg) ?: return
+    val unit = LocalWeightUnit.current
+    Text(
+        stringResource(R.string.record_hint, reps, unit.format(set.weightKg * weightFactor, withUnit = true)),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.tertiary,
+        modifier = Modifier.padding(start = 48.dp, bottom = 4.dp),
+    )
+}
+
 @Composable
 private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Modifier, eta: EtaInputs = EtaInputs()) {
     val now = rememberNow()
@@ -651,7 +664,8 @@ private fun ExerciseCard(
             SetHeader(we.exercise.tracking, dumbbell, prefs.dumbbellTotal)
             var normalIndex = 0
             // Mejor 1RM estimado y peso máximo hasta hoy (sin historial no hay récord que batir)
-            val best = vm.bests.collectAsStateWithLifecycle().value[we.exercise.id]
+            val best = vm.bests.collectAsStateWithLifecycle().value[we.exercise.id]?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS }
+            val firstPendingId = we.sets.firstOrNull { !it.completed && it.countsForRecords }?.id
             we.sets.forEachIndexed { i, set ->
                 val displayIndex = if (set.type == SetType.NORMAL) normalIndex++ else -1
                 key(set.id) {
@@ -683,6 +697,8 @@ private fun ExerciseCard(
                         isRecord = best != null && set.completed && set.countsForRecords && we.exercise.tracking == TrackingType.WEIGHT_REPS &&
                             (set.estimatedOneRepMax > best.first + 1e-6 || set.weightKg > best.second + 1e-6),
                     )
+                    // En la siguiente serie: cuántas reps con ese peso serían récord
+                    if (set.id == firstPendingId && best != null) RecordHint(set, best.first, weightFactor)
                 }
             }
             OutlinedButton(

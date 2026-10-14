@@ -322,6 +322,18 @@ object WorkoutStats {
         }.sortedBy { it.second }.take(limit)
     }
 
+    /** Series efectivas por músculo que tiene una rutina (como [setsPerMuscle], sin calentamientos). */
+    fun routineSetsPerMuscle(routine: com.bestrong.core.model.Routine): Map<MuscleGroup, Double> {
+        val result = mutableMapOf<MuscleGroup, Double>()
+        routine.exercises.forEach { re ->
+            val n = re.sets.count { it.type != SetType.WARMUP }.toDouble()
+            if (n == 0.0) return@forEach
+            result.merge(re.exercise.primaryMuscle, n, Double::plus)
+            re.exercise.secondaryMuscles.forEach { result.merge(it, n * 0.5, Double::plus) }
+        }
+        return result.toList().sortedByDescending { it.second }.toMap()
+    }
+
     /** Series efectivas por grupo muscular (el principal cuenta 1, los secundarios 0,5). */
     fun setsPerMuscle(history: List<Workout>, sinceEpochMs: Long): Map<MuscleGroup, Double> {
         val result = mutableMapOf<MuscleGroup, Double>()

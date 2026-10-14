@@ -99,6 +99,13 @@ class RoutineEditorViewModel @Inject constructor(
 
     fun removeExercise(id: String) = _routine.update { r -> r.copy(exercises = r.exercises.filterNot { it.id == id }) }
 
+    /** Copia del ejercicio justo debajo (p. ej. un bloque de series de descarga), fuera de superserie. */
+    fun duplicateExercise(id: String) = _routine.update { r ->
+        val i = r.exercises.indexOfFirst { it.id == id }
+        if (i < 0) return@update r
+        r.copy(exercises = r.exercises.toMutableList().apply { add(i + 1, r.exercises[i].copy(id = com.bestrong.core.util.newId(), supersetId = null)) })
+    }
+
     fun moveExercise(from: Int, to: Int) = _routine.update { r ->
         if (from !in r.exercises.indices || to !in r.exercises.indices) {
             r
