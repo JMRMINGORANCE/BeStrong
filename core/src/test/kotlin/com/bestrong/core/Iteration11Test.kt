@@ -310,3 +310,28 @@ class Iteration17Test {
         assertEquals(0.0, com.bestrong.core.stats.ExerciseGoals.valueOf(WorkoutSet(reps = 15, weightKg = -30.0, completed = true), t), 0.0)
     }
 }
+
+class BackOffTest {
+    @Test fun backOffAfterLastWorkingSetAtNinetyPercent() {
+        val sets = listOf(WorkoutSet(weightKg = 60.0, reps = 5, type = SetType.WARMUP), WorkoutSet(weightKg = 100.0, reps = 5), WorkoutSet(weightKg = 70.0, reps = 10, type = SetType.DROP))
+        val we = WorkoutExercise(exercise = bench, sets = sets)
+        val out = WorkoutEditor.addBackOff(Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(we)), we.id, 2.5).exercises[0].sets
+        assertEquals(5, out.size)
+        assertEquals(listOf(60.0, 100.0, 90.0, 90.0, 70.0), out.map { it.weightKg })
+        assertEquals(5, out[2].reps)
+    }
+}
+
+class RepRangeProgressionTest {
+    @Test fun doubleProgressionWithinRange() {
+        val d = java.time.LocalDate.of(2026, 3, 2)
+        val mid = listOf(finishedWorkout("a", d, bench to listOf(done(80.0, 10), done(80.0, 9), done(80.0, 8))))
+        val s1 = com.bestrong.core.training.Progression.suggest(bench, mid, 2.5, repRange = 8..12)!!
+        assertEquals(listOf(11, 10, 9), s1.sets.map { it.reps })
+        assertEquals(80.0, s1.sets[0].weightKg, 0.0)
+        val top = listOf(finishedWorkout("b", d, bench to listOf(done(80.0, 12), done(80.0, 12), done(80.0, 12))))
+        val s2 = com.bestrong.core.training.Progression.suggest(bench, top, 2.5, repRange = 8..12)!!
+        assertEquals(82.5, s2.sets[0].weightKg, 0.0)
+        assertEquals(8, s2.sets[0].reps)
+    }
+}

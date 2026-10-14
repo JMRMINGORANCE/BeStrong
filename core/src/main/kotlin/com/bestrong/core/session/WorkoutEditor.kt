@@ -261,6 +261,23 @@ object WorkoutEditor {
         return if (w === workout) workout else dropLoneSupersets(w)
     }
 
+    /**
+     * Series de descarga («back-off»): [count] series al [BACK_OFF_FACTOR] de la serie más pesada (las
+     * mismas reps), redondeadas al salto del ejercicio, tras la última serie efectiva.
+     */
+    fun addBackOff(workout: Workout, workoutExerciseId: String, stepKg: Double, count: Int = 2): Workout = updateExercise(workout, workoutExerciseId) { we ->
+        val working = we.sets.filter { it.type == SetType.NORMAL || it.type == SetType.FAILURE }
+        val top = working.maxByOrNull { it.weightKg }?.takeIf { it.weightKg > 0 } ?: return@updateExercise we
+        val raw = top.weightKg * BACK_OFF_FACTOR
+        val weight = if (stepKg > 0) (Math.round(raw / stepKg) * stepKg).coerceAtMost(top.weightKg - stepKg).coerceAtLeast(0.0) else raw
+        val at = we.sets.indexOf(working.last()) + 1
+        val added = List(count) { WorkoutSet(weightKg = weight, reps = top.reps, repsRight = top.repsRight) }
+        we.copy(sets = we.sets.toMutableList().apply { addAll(at, added) })
+    }
+
+    /** Lo que se baja el peso en las series de descarga. */
+    const val BACK_OFF_FACTOR = 0.9
+
     /** Lo que se baja el peso en un drop set. */
     const val DROP_FACTOR = 0.8
 

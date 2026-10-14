@@ -241,3 +241,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Propuesta de archivar rutinas sin usar en 60 días
 - [x] Objetivos de repeticiones o tiempo en ejercicios sin peso o isométricos
 - [x] Mínimo semanal de series por músculo configurable (mapa, Inicio y widget)
+
+## Fase 24 — Herramientas de entrenador ✅
+- [x] Series de descarga (−10 %) desde el menú del ejercicio
+- [x] Historial del ejercicio sin salir del entreno
+- [x] Barra propia por ejercicio (EZ, hexagonal…) para discos y calentamiento
+- [x] Recordatorio semanal para pesarse
+- [x] Doble progresión con rango de repeticiones (p. ej. 8–12)

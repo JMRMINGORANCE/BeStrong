@@ -1019,4 +1019,17 @@
     <string name="weekly_sets_target">Mínim:</string>
     <string name="goal_hint_reps">Posa\'t una meta de repeticions en una sèrie (p. ex. 15) i veuràs quant et falta.</string>
     <string name="goal_hint_time">Posa\'t una meta de temps en segons (p. ex. 120) i veuràs quant et falta.</string>
+    <string name="add_back_off">Afegeix 2 sèries de descàrrega (−10 %)</string>
+    <string name="exercise_history">Historial de l\'exercici</string>
+    <string name="exercise_history_empty">Encara no l\'has fet en cap entrenament acabat.</string>
+    <string name="exercise_bar">Barra d\'aquest exercici</string>
+    <string name="exercise_bar_body">S\'usa per als discos per costat, la calculadora i l\'escalfament (p. ex. barra EZ al curl).</string>
+    <string name="exercise_bar_gym">La del gimnàs (%1$s)</string>
+    <string name="notif_weigh_in_title">Hora de pesar-te</string>
+    <string name="notif_weigh_in_text">Apunta el pes d\'avui: en dejú i en les mateixes condicions cada setmana.</string>
+    <string name="weigh_in_reminder">Recorda\'m pesar-me (a les %1$d:00)</string>
+    <string name="weigh_in_off">No</string>
+    <string name="rep_range">Rang de repeticions</string>
+    <string name="rep_range_body">Doble progressió: amb el mateix pes, una repetició més per sèrie fins al màxim; quan hi arribes a totes, puja el pes i torna al mínim.</string>
+    <string name="rep_range_none">Sense rang</string>
 </resources>

@@ -1019,4 +1019,17 @@
     <string name="weekly_sets_target">Minimum :</string>
     <string name="goal_hint_reps">Fixe un objectif de répétitions en une série (ex. 15) pour voir ce qui te manque.</string>
     <string name="goal_hint_time">Fixe un objectif de temps en secondes (ex. 120) pour voir ce qui te manque.</string>
+    <string name="add_back_off">Ajouter 2 séries dégressives (−10 %)</string>
+    <string name="exercise_history">Historique de l\'exercice</string>
+    <string name="exercise_history_empty">Tu ne l\'as encore fait dans aucune séance terminée.</string>
+    <string name="exercise_bar">Barre de cet exercice</string>
+    <string name="exercise_bar_body">Utilisée pour les disques par côté, la calculatrice et l\'échauffement (ex. barre EZ pour le curl).</string>
+    <string name="exercise_bar_gym">Celle de la salle (%1$s)</string>
+    <string name="notif_weigh_in_title">C\'est l\'heure de la pesée</string>
+    <string name="notif_weigh_in_text">Note ton poids du jour : à jeun et dans les mêmes conditions chaque semaine.</string>
+    <string name="weigh_in_reminder">Me rappeler de me peser (à %1$d h)</string>
+    <string name="weigh_in_off">Non</string>
+    <string name="rep_range">Fourchette de répétitions</string>
+    <string name="rep_range_body">Double progression : même charge, une répétition de plus par série jusqu\'au haut de la fourchette ; quand toutes y arrivent, augmente la charge et repars du bas.</string>
+    <string name="rep_range_none">Aucune</string>
 </resources>

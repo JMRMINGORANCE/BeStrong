@@ -1019,4 +1019,17 @@
     <string name="weekly_sets_target">Minimum:</string>
     <string name="goal_hint_reps">Set a reps-in-one-set target (e.g. 15) to see how far you are.</string>
     <string name="goal_hint_time">Set a time target in seconds (e.g. 120) to see how far you are.</string>
+    <string name="add_back_off">Add 2 back-off sets (−10%)</string>
+    <string name="exercise_history">Exercise history</string>
+    <string name="exercise_history_empty">You haven\'t done it in any finished workout yet.</string>
+    <string name="exercise_bar">Bar for this exercise</string>
+    <string name="exercise_bar_body">Used for plates per side, the calculator and warm-ups (e.g. an EZ bar for curls).</string>
+    <string name="exercise_bar_gym">Gym\'s bar (%1$s)</string>
+    <string name="notif_weigh_in_title">Time to weigh in</string>
+    <string name="notif_weigh_in_text">Log today\'s weight: fasted and under the same conditions each week.</string>
+    <string name="weigh_in_reminder">Remind me to weigh in (at %1$d:00)</string>
+    <string name="weigh_in_off">Off</string>
+    <string name="rep_range">Rep range</string>
+    <string name="rep_range_body">Double progression: same weight, one more rep per set up to the top; once every set gets there, add weight and drop back to the bottom.</string>
+    <string name="rep_range_none">No range</string>
 </resources>

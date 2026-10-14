@@ -76,6 +76,8 @@ data class UserSettings(
     val bodyWeightGoalStartKg: Double? = null,
     /** Series semanales por músculo que se quiere alcanzar como mínimo (mapa, Inicio, widget). */
     val weeklySetsTarget: Int = 10,
+    /** Día de la semana (1 = lunes … 7) para recordar pesarse; null = sin recordatorio. A las [WEIGH_IN_HOUR]. */
+    val weighInDay: Int? = null,
     /** Columnas visibles en la tabla de series. */
     val showPreviousColumn: Boolean = true,
     val showComparison: Boolean = true,
@@ -85,6 +87,10 @@ data class UserSettings(
     val dismissedTips: Set<String> = emptySet(),
     /** Incremento propio por ejercicio en kg (mancuernas de 2 kg, máquinas de 5 kg, microdiscos…). */
     val exerciseIncrementKg: Map<String, Double> = emptyMap(),
+    /** Barra propia de un ejercicio (EZ de 10 kg, hexagonal de 25…); si no, la del gimnasio. */
+    val exerciseBarKg: Map<String, Double> = emptyMap(),
+    /** Rango de repeticiones por ejercicio para la doble progresión («8-12»). */
+    val exerciseRepRange: Map<String, String> = emptyMap(),
     /**
      * Objetivo que el usuario se pone en un ejercicio: 1RM estimado en kg («press banca a 100»), o
      * repeticiones / segundos en los ejercicios sin peso o de tiempo (ver ExerciseGoals).
@@ -97,6 +103,13 @@ data class UserSettings(
 
     /** Salto de peso de ese ejercicio: el suyo propio o el de la unidad (2,5 kg / 5 lb). */
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
+
+    /** Rango de repeticiones de ese ejercicio, si tiene (para la progresión). */
+    fun repRangeFor(exerciseId: String): IntRange? = exerciseRepRange[exerciseId]?.split('-')
+        ?.mapNotNull { it.trim().toIntOrNull() }?.takeIf { it.size == 2 && it[0] in 1..it[1] }?.let { it[0]..it[1] }
+
+    /** El gimnasio activo con la barra de ese ejercicio (para discos y calentamiento). */
+    fun gymFor(exerciseId: String): GymProfile = exerciseBarKg[exerciseId]?.let { activeGym.copy(barKg = it) } ?: activeGym
 }
 
 @Singleton
@@ -151,18 +164,17 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         bodyWeightGoalKg = prefs.getString("body_weight_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         bodyWeightGoalStartKg = prefs.getString("body_weight_goal_start", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         weeklySetsTarget = prefs.getInt("weekly_sets_target", 10).coerceIn(1, 30),
+        weighInDay = prefs.getInt("weigh_in_day", 0).takeIf { it in 1..7 },
         showPreviousColumn = prefs.getBoolean("col_previous", true),
         showComparison = prefs.getBoolean("col_comparison", true),
         tutorialDone = prefs.getBoolean("tutorial_done", false),
         lastSeenVersion = prefs.getInt("last_seen_version", 0),
         dismissedTips = prefs.getStringSet("dismissed_tips", emptySet()).orEmpty().toSet(),
         warmupRestSeconds = prefs.getInt("warmup_rest", 60),
-        exerciseIncrementKg = prefs.getString("exercise_increments", null)
-            ?.let { runCatching { SyncContract.json.decodeFromString(INCREMENTS, it) }.getOrNull() }
-            .orEmpty(),
-        exerciseGoalsKg = prefs.getString("exercise_goals", null)
-            ?.let { runCatching { SyncContract.json.decodeFromString(INCREMENTS, it) }.getOrNull() }
-            .orEmpty(),
+        exerciseIncrementKg = prefs.decodeMap("exercise_increments", INCREMENTS),
+        exerciseRepRange = prefs.decodeMap("exercise_rep_ranges", REP_RANGES),
+        exerciseBarKg = prefs.decodeMap("exercise_bars", INCREMENTS),
+        exerciseGoalsKg = prefs.decodeMap("exercise_goals", INCREMENTS),
     )
 
     private inline fun <reified E : Enum<E>> enumOr(key: String, default: E): E =
@@ -210,6 +222,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("body_weight_goal", s.bodyWeightGoalKg?.toString())
             putString("body_weight_goal_start", s.bodyWeightGoalStartKg?.toString())
             putInt("weekly_sets_target", s.weeklySetsTarget)
+            putInt("weigh_in_day", s.weighInDay ?: 0)
             putBoolean("col_previous", s.showPreviousColumn)
             putBoolean("col_comparison", s.showComparison)
             putBoolean("tutorial_done", s.tutorialDone)
@@ -217,6 +230,8 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putStringSet("dismissed_tips", s.dismissedTips)
             putString("exercise_increments", SyncContract.json.encodeToString(INCREMENTS, s.exerciseIncrementKg))
             putString("exercise_goals", SyncContract.json.encodeToString(INCREMENTS, s.exerciseGoalsKg))
+            putString("exercise_bars", SyncContract.json.encodeToString(INCREMENTS, s.exerciseBarKg))
+            putString("exercise_rep_ranges", SyncContract.json.encodeToString(REP_RANGES, s.exerciseRepRange))
             putInt("warmup_rest", s.warmupRestSeconds)
         }
         _settings.value = s
@@ -264,10 +279,18 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         }
     }
 
+    /** Un mapa guardado como JSON (vacío si falta o está dañado). */
+    private fun <V> android.content.SharedPreferences.decodeMap(key: String, serializer: kotlinx.serialization.KSerializer<Map<String, V>>): Map<String, V> =
+        getString(key, null)?.let { runCatching { SyncContract.json.decodeFromString(serializer, it) }.getOrNull() }.orEmpty()
+
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "body_weight_goal", "body_weight_goal_start")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
+        val REP_RANGES = MapSerializer(String.serializer(), String.serializer())
     }
 }
+
+/** Hora del recordatorio de pesarse (por la mañana, en ayunas). */
+const val WEIGH_IN_HOUR = 8

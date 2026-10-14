@@ -24,6 +24,7 @@ object Notifier {
     private const val CHANNEL_REMINDERS = "reminders"
     private const val ID_REMINDER = 20
     private const val ID_WEEKLY = 21
+    private const val ID_WEIGH_IN = 22
     private const val ID_RECORDS_BASE = 100
 
     private fun ensureChannels(context: Context) {
@@ -82,6 +83,22 @@ object Notifier {
             .setContentIntent(openApp(context))
             .build()
         NotificationManagerCompat.from(context).notify(ID_REMINDER, n)
+    }
+
+    /** Recordatorio semanal de pesarse (abre Inicio, donde se apunta el peso de hoy). */
+    @Suppress("MissingPermission")
+    fun weighIn(context: Context) {
+        if (!canPost(context)) return
+        ensureChannels(context)
+        val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
+            .setSmallIcon(R.drawable.ic_stat_dumbbell)
+            .setContentTitle(context.getString(R.string.notif_weigh_in_title))
+            .setContentText(context.getString(R.string.notif_weigh_in_text))
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setAutoCancel(true)
+            .setContentIntent(openApp(context))
+            .build()
+        NotificationManagerCompat.from(context).notify(ID_WEIGH_IN, n)
     }
 
     /** Resumen semanal (domingo por la tarde). */

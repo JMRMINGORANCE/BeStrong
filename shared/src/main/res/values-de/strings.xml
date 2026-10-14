@@ -1019,4 +1019,17 @@
     <string name="weekly_sets_target">Minimum:</string>
     <string name="goal_hint_reps">Setz dir ein Ziel an Wiederholungen in einem Satz (z. B. 15) und sieh, wie viel fehlt.</string>
     <string name="goal_hint_time">Setz dir ein Zeitziel in Sekunden (z. B. 120) und sieh, wie viel fehlt.</string>
+    <string name="add_back_off">2 Back-off-Sätze hinzufügen (−10 %)</string>
+    <string name="exercise_history">Übungsverlauf</string>
+    <string name="exercise_history_empty">Du hast sie noch in keinem abgeschlossenen Training gemacht.</string>
+    <string name="exercise_bar">Stange für diese Übung</string>
+    <string name="exercise_bar_body">Gilt für Scheiben pro Seite, den Rechner und das Aufwärmen (z. B. SZ-Stange beim Curl).</string>
+    <string name="exercise_bar_gym">Die des Studios (%1$s)</string>
+    <string name="notif_weigh_in_title">Zeit zum Wiegen</string>
+    <string name="notif_weigh_in_text">Trag dein heutiges Gewicht ein: nüchtern und jede Woche unter gleichen Bedingungen.</string>
+    <string name="weigh_in_reminder">Ans Wiegen erinnern (um %1$d:00)</string>
+    <string name="weigh_in_off">Aus</string>
+    <string name="rep_range">Wiederholungsbereich</string>
+    <string name="rep_range_body">Doppelte Progression: gleiches Gewicht, pro Satz eine Wiederholung mehr bis zur Obergrenze; schaffen alle Sätze sie, mehr Gewicht und zurück zur Untergrenze.</string>
+    <string name="rep_range_none">Kein Bereich</string>
 </resources>

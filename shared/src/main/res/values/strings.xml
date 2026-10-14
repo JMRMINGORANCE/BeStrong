@@ -1019,4 +1019,17 @@
     <string name="weekly_sets_target">Mínimo:</string>
     <string name="goal_hint_reps">Ponte una meta de repeticiones en una serie (p. ej. 15) y verás cuánto te falta.</string>
     <string name="goal_hint_time">Ponte una meta de tiempo en segundos (p. ej. 120) y verás cuánto te falta.</string>
+    <string name="add_back_off">Añadir 2 series de descarga (−10 %)</string>
+    <string name="exercise_history">Historial del ejercicio</string>
+    <string name="exercise_history_empty">Aún no lo has hecho en ningún entreno terminado.</string>
+    <string name="exercise_bar">Barra de este ejercicio</string>
+    <string name="exercise_bar_body">Se usa para los discos por lado, la calculadora y el calentamiento (p. ej. barra EZ en el curl).</string>
+    <string name="exercise_bar_gym">La del gimnasio (%1$s)</string>
+    <string name="notif_weigh_in_title">Hora de pesarte</string>
+    <string name="notif_weigh_in_text">Apunta el peso de hoy: en ayunas y en las mismas condiciones cada semana.</string>
+    <string name="weigh_in_reminder">Recordarme pesarme (a las %1$d:00)</string>
+    <string name="weigh_in_off">No</string>
+    <string name="rep_range">Rango de repeticiones</string>
+    <string name="rep_range_body">Doble progresión: con el mismo peso, una repetición más por serie hasta el tope; al llegar en todas, sube el peso y vuelve al mínimo.</string>
+    <string name="rep_range_none">Sin rango</string>
 </resources>

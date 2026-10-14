@@ -62,7 +62,7 @@ class WorkoutActions @Inject constructor(
         val weekAgo = System.currentTimeMillis() - 7 * 86_400_000L
         return { id ->
             val ex = repository.exercise(id)
-            val sets = (if (s.progressionEnabled && ex != null) Progression.suggest(ex, history, s.stepKgFor(ex.id))?.sets else null)
+            val sets = (if (s.progressionEnabled && ex != null) Progression.suggest(ex, history, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id))?.sets else null)
                 ?: WorkoutStats.previousSets(id, history)
             // Límite de subida semanal (Planificación): no más de un x % sobre lo mejor de la semana pasada
             val cap = planning.state.value.weeklyCap

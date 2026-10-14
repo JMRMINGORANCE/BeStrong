@@ -90,6 +90,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                             LineChart(weights.map { ChartPoint(formatShortDate(it.dateEpochMs), it.weightKg!!) }, valueFormatter = { unit.format(it) })
                             WeightTrendLine(weights.map { it.dateEpochMs to it.weightKg!! }, unit)
                             WeightGoalLine(vm, weights.map { it.dateEpochMs to it.weightKg!! }, unit)
+                            WeighInReminder(vm)
                         }
                     }
                 }
@@ -245,5 +246,30 @@ private fun WeightGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>
         }
         Text(text, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
         TextButton(onClick = { editing = true }) { Text(stringResource(if (goal == null) R.string.goal_set else R.string.action_edit)) }
+    }
+}
+
+/** Recordatorio semanal de pesarse: el día elegido a las 8 (mejor siempre en las mismas condiciones). */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun WeighInReminder(vm: ProfileViewModel) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    Column(Modifier.padding(top = 8.dp)) {
+        Text(stringResource(R.string.weigh_in_reminder, com.bestrong.mobile.data.WEIGH_IN_HOUR), style = MaterialTheme.typography.labelMedium)
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            androidx.compose.material3.FilterChip(
+                selected = settings.weighInDay == null,
+                onClick = { vm.updateSettings { it.copy(weighInDay = null) } },
+                label = { Text(stringResource(R.string.weigh_in_off)) },
+            )
+            java.time.DayOfWeek.entries.forEach { d ->
+                androidx.compose.material3.FilterChip(
+                    selected = settings.weighInDay == d.value,
+                    onClick = { vm.updateSettings { it.copy(weighInDay = d.value) } },
+                    label = { Text(d.getDisplayName(java.time.format.TextStyle.SHORT, locale)) },
+                )
+            }
+        }
     }
 }

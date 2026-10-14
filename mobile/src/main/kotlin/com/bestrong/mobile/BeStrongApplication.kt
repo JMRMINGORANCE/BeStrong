@@ -153,13 +153,22 @@ class AppSync @Inject constructor(
             }
         }
         // Recordatorios y copia de seguridad semanal (WorkManager)
+        scheduleReminders()
+        scope.launch {
+            settings.settings.map { it.backupFolderUri != null }.distinctUntilChanged()
+                .collect { on -> runCatching { AutoBackupWorker.schedule(context, on) }.onFailure { Log.w("AppSync", "Copia de seguridad", it) } }
+        }
+    }
+
+    /** Recordatorio de entreno y de pesarse: se reprograman cuando cambian sus ajustes. */
+    private fun scheduleReminders() {
         scope.launch {
             settings.settings.map { Triple(it.reminderDays, it.reminderHour, it.reminderMinute) }.distinctUntilChanged()
                 .collect { (days, h, m) -> runCatching { ReminderWorker.schedule(context, days, h, m) }.onFailure { Log.w("AppSync", "Recordatorios", it) } }
         }
         scope.launch {
-            settings.settings.map { it.backupFolderUri != null }.distinctUntilChanged()
-                .collect { on -> runCatching { AutoBackupWorker.schedule(context, on) }.onFailure { Log.w("AppSync", "Copia de seguridad", it) } }
+            settings.settings.map { it.weighInDay }.distinctUntilChanged()
+                .collect { day -> runCatching { com.bestrong.mobile.notify.WeighInWorker.schedule(context, day) }.onFailure { Log.w("AppSync", "Pesarse", it) } }
         }
     }
 }

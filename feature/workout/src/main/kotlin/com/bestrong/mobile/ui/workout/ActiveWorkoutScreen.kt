@@ -508,6 +508,15 @@ private fun ExerciseCard(
     val pinnedNote = vm.pinnedNotes.collectAsStateWithLifecycle().value[we.exercise.id].orEmpty()
     var editTempo by remember { mutableStateOf(false) }
     var substituting by remember { mutableStateOf(false) }
+    var showHistory by remember { mutableStateOf(false) }
+    var editBar by remember { mutableStateOf(false) }
+    var editRange by remember { mutableStateOf(false) }
+    if (editRange) RepRangeDialog(vm, we.exercise.id) { editRange = false }
+    if (editBar) ExerciseBarDialog(vm, we.exercise.id) { editBar = false }
+    if (showHistory) {
+        val factor = if (we.exercise.equipment == Equipment.DUMBBELL && vm.settings.collectAsStateWithLifecycle().value.dumbbellTotal) 2 else 1
+        ExerciseHistorySheet(vm, we.exercise, factor) { showHistory = false }
+    }
     if (substituting) SubstituteDialog(vm, we.id) { substituting = false }
     var showInfo by remember { mutableStateOf(false) }
     var showPlates by remember { mutableStateOf(false) }
@@ -566,6 +575,7 @@ private fun ExerciseCard(
                         if (we.exercise.tracking == TrackingType.WEIGHT_REPS) {
                             DropdownMenuItem(text = { Text(stringResource(R.string.add_warmup)) }, onClick = { menu = false; vm.addWarmup(we.id) })
                             DropdownMenuItem(text = { Text(stringResource(R.string.plates_title)) }, onClick = { menu = false; showPlates = true })
+                            if (we.exercise.equipment == Equipment.BARBELL) DropdownMenuItem(text = { Text(stringResource(R.string.exercise_bar)) }, onClick = { menu = false; editBar = true })
                         }
                         if (index < count - 1) DropdownMenuItem(text = { Text(stringResource(R.string.superset_with_next)) }, onClick = { menu = false; vm.linkWithNext(we.id) })
                         if (we.supersetId != null) DropdownMenuItem(text = { Text(stringResource(R.string.superset_remove)) }, onClick = { menu = false; vm.unlinkSuperset(we.id) })
@@ -574,9 +584,12 @@ private fun ExerciseCard(
                         DropdownMenuItem(text = { Text(stringResource(R.string.pinned_note)) }, onClick = { menu = false; editPinned = true })
                         if (we.exercise.tracking == TrackingType.WEIGHT_REPS) {
                             DropdownMenuItem(text = { Text(stringResource(R.string.weight_increment)) }, onClick = { menu = false; editIncrement = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.rep_range)) }, onClick = { menu = false; editRange = true })
                             DropdownMenuItem(text = { Text(stringResource(R.string.add_drop_set)) }, onClick = { menu = false; vm.addDropSet(we.id) })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.add_back_off)) }, onClick = { menu = false; vm.addBackOff(we.id) })
                         }
                         DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.exercise_history)) }, onClick = { menu = false; showHistory = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.substitute_title)) }, onClick = { menu = false; substituting = true })
                         val completable = WorkoutEditor.completableCount(we)
                         if (completable > 0) DropdownMenuItem(text = { Text(stringResource(R.string.complete_remaining, completable)) }, onClick = { menu = false; vm.completeRemaining(we.id) })
@@ -599,7 +612,7 @@ private fun ExerciseCard(
             // Barra: discos por lado de la siguiente serie, sin abrir la calculadora
             if (we.exercise.equipment == Equipment.BARBELL && we.exercise.tracking == TrackingType.WEIGHT_REPS) {
                 val next = we.sets.firstOrNull { !it.completed }?.weightKg ?: 0.0
-                val gym = vm.settings.collectAsStateWithLifecycle().value.activeGym
+                val gym = vm.settings.collectAsStateWithLifecycle().value.gymFor(we.exercise.id)
                 if (next > 0) {
                     val load = remember(next, gym, unit) { gym.plateLoad(next, unit) }
                     Text(
@@ -835,7 +848,7 @@ private fun ExerciseCard(
         val pending = we.sets.firstOrNull { !it.completed }
         PlateCalculatorDialog(
             initialKg = target,
-            gym = vm.settings.value.activeGym,
+            gym = vm.settings.value.gymFor(we.exercise.id),
             onApply = pending?.let { set -> { kg: Double -> vm.updateSet(we.id, set.id, weightKg = kg) } },
             onDismiss = { showPlates = false },
         )

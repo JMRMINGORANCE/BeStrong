@@ -203,7 +203,7 @@ class ExercisesViewModel @Inject constructor(
             records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
-            nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id)),
+            nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id), repRange = settings.repRangeFor(ex.id)),
             sessionNotes = sessionNotes(exerciseId, history, routines),
             rpeTrend = Strength.rpeTrend(history, setOf(exerciseId)),
             goalPoints = com.bestrong.core.stats.ExerciseGoals.points(history, exerciseId, ex.tracking),

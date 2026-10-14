@@ -50,6 +50,8 @@ object Progression {
         history: List<Workout>,
         incrementKg: Double = 2.5,
         stallSessions: Int = 3,
+        /** Rango de repeticiones (p. ej. 8..12): sube peso al llegar al tope en todas y vuelve al mínimo. */
+        repRange: IntRange? = null,
     ): ProgressionSuggestion? {
         val last = WorkoutStats.previousSets(exercise.id, history).filter { it.type != SetType.WARMUP }
         // El cardio no progresa por peso ni repeticiones
@@ -57,24 +59,31 @@ object Progression {
 
         // Sin carga (peso corporal o tiempo) el 1RM estimado es 0 y no sirve para detectar estancamiento
         val loaded = exercise.tracking != TrackingType.DURATION && last.any { it.weightKg > 0.0 }
-        if (loaded && isStalled(exercise.id, history, stallSessions)) {
-            val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
-            return ProgressionSuggestion(SuggestionKind.DELOAD, sets, "Llevas $stallSessions sesiones sin progresar: descarga al 90 %", stallSessions = stallSessions)
+        val easy = last.all { (it.rpe ?: 8.0) <= 9.0 }
+        return when {
+            loaded && isStalled(exercise.id, history, stallSessions) -> {
+                val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
+                ProgressionSuggestion(SuggestionKind.DELOAD, sets, "Llevas $stallSessions sesiones sin progresar: descarga al 90 %", stallSessions = stallSessions)
+            }
+            exercise.tracking == TrackingType.DURATION || (exercise.tracking == TrackingType.REPS_ONLY && last.all { it.weightKg == 0.0 }) -> unloaded(exercise.tracking, last)
+            repRange != null && loaded && exercise.tracking == TrackingType.WEIGHT_REPS -> byRange(last, repRange, incrementKg, easy)
+            else -> fixedReps(last, incrementKg, easy)
+        }
+    }
+
+    /** Sin peso: +5 s por serie si es por tiempo, +1 repetición si no. */
+    private fun unloaded(tracking: TrackingType, last: List<WorkoutSet>): ProgressionSuggestion =
+        if (tracking == TrackingType.DURATION) {
+            ProgressionSuggestion(SuggestionKind.ADD_TIME, last.map { it.copy(durationSec = it.durationSec + 5, completed = false, rpe = null) }, "+5 s por serie")
+        } else {
+            ProgressionSuggestion(SuggestionKind.ADD_ONE_REP, last.map { it.copy(reps = it.reps + 1, completed = false, rpe = null) }, "+1 repetición por serie")
         }
 
+    /** Doble progresión clásica: las reps de la primera serie en todas → más peso; si no, igualarlas. */
+    private fun fixedReps(last: List<WorkoutSet>, incrementKg: Double, easy: Boolean): ProgressionSuggestion {
         val targetReps = last.first().reps
         val hitAll = last.all { it.reps >= targetReps }
-        val easy = last.all { (it.rpe ?: 8.0) <= 9.0 }
-
         return when {
-            exercise.tracking == TrackingType.DURATION -> {
-                val sets = last.map { it.copy(durationSec = it.durationSec + 5, completed = false, rpe = null) }
-                ProgressionSuggestion(SuggestionKind.ADD_TIME, sets, "+5 s por serie")
-            }
-            exercise.tracking == TrackingType.REPS_ONLY && last.all { it.weightKg == 0.0 } -> {
-                val sets = last.map { it.copy(reps = it.reps + 1, completed = false, rpe = null) }
-                ProgressionSuggestion(SuggestionKind.ADD_ONE_REP, sets, "+1 repetición por serie")
-            }
             hitAll && easy -> {
                 val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = targetReps, completed = false, rpe = null) }
                 ProgressionSuggestion(SuggestionKind.INCREASE_WEIGHT, sets, "Completaste todas las series: sube el peso")
@@ -84,6 +93,21 @@ object Progression {
                 ProgressionSuggestion(SuggestionKind.ADD_REPS, sets, "Mismo peso: intenta $targetReps reps en todas las series", targetReps = targetReps)
             }
             else -> ProgressionSuggestion(SuggestionKind.REPEAT, last.map { it.copy(completed = false, rpe = null) }, "RPE alto: repite y consolida")
+        }
+    }
+
+    /**
+     * Doble progresión con rango: si todas las series llegaron al tope del rango (y no fue al límite de RPE),
+     * más peso y vuelta al mínimo; si no, mismo peso y una repetición más en cada serie (sin pasar del tope).
+     */
+    private fun byRange(last: List<WorkoutSet>, range: IntRange, incrementKg: Double, easy: Boolean): ProgressionSuggestion {
+        val atTop = last.all { it.reps >= range.last }
+        return if (atTop && easy) {
+            val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = range.first, completed = false, rpe = null) }
+            ProgressionSuggestion(SuggestionKind.INCREASE_WEIGHT, sets, "Tope del rango en todas: sube el peso y vuelve a ${range.first}")
+        } else {
+            val sets = last.map { it.copy(reps = (it.reps + 1).coerceIn(range.first, range.last), completed = false, rpe = null) }
+            ProgressionSuggestion(SuggestionKind.ADD_REPS, sets, "Mismo peso: +1 rep por serie hasta ${range.last}", targetReps = range.last)
         }
     }
 

@@ -365,6 +365,10 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun deleteMeasurement(id: String) = dao.deleteMeasurement(id)
 
+    /** Medidas leídas de la base de datos ahora mismo (para trabajos en segundo plano, sin esperar al StateFlow). */
+    suspend fun measurementsOnce(): List<BodyMeasurement> =
+        dao.measurements().first().mapNotNull { runCatching { json.decodeFromString(BodyMeasurement.serializer(), it.json) }.getOrNull() }
+
     private companion object {
         const val KEY_ACTIVE = "active_workout"
         const val KEY_PARTNER = "partner_workout"

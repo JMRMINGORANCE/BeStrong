@@ -173,7 +173,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         if (!s.progressionEnabled) {
             emptyMap()
         } else {
-            exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.stepKgFor(ex.id))?.let { ex.id to it } }.toMap()
+            exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id))?.let { ex.id to it } }.toMap()
         }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
@@ -274,6 +274,19 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun setRestSeconds(weId: String, seconds: Int) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(restSeconds = seconds) } }
     fun setExerciseNotes(weId: String, notes: String) = edit { w -> WorkoutEditor.updateExercise(w, weId) { it.copy(notes = notes) } }
     fun addSet(weId: String) = edit { WorkoutEditor.addSet(it, weId) }
+
+    /** Las últimas [limit] sesiones con ese ejercicio (la más reciente primero), del atleta en pantalla. */
+    fun historyFor(exerciseId: String, limit: Int = 5): List<Pair<Workout, com.bestrong.core.model.WorkoutExercise>> {
+        val history = if (partnerMode.value) repo.partnerHistory.value.filter { it.athlete == settings.value.partnerName } else repo.history.value
+        return history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
+            w.exercises.firstOrNull { it.exercise.id == exerciseId && it.completedSets.isNotEmpty() }?.let { w to it }
+        }.take(limit)
+    }
+
+    fun addBackOff(weId: String) = edit { w ->
+        val exerciseId = w.exercises.firstOrNull { it.id == weId }?.exercise?.id ?: return@edit w
+        WorkoutEditor.addBackOff(w, weId, settings.value.stepKgFor(exerciseId))
+    }
     fun addDropSet(weId: String) = edit { w ->
         val exerciseId = w.exercises.firstOrNull { it.id == weId }?.exercise?.id ?: return@edit w
         WorkoutEditor.addDropSet(w, weId, settings.value.stepKgFor(exerciseId))
@@ -410,7 +423,22 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /** Añade series de aproximación antes de la primera serie de trabajo. */
-    fun addWarmup(weId: String) = edit { w -> WorkoutEditor.addWarmup(w, weId, settings.value.unit, settings.value.unit.toKg(com.bestrong.core.training.GymProfile.barIn(settings.value.unit, settings.value.activeGym.barKg))) }
+    fun addWarmup(weId: String) = edit { w ->
+        // Con la barra del ejercicio (EZ, hexagonal…) si tiene una propia
+        val exerciseId = w.exercises.firstOrNull { it.id == weId }?.exercise?.id.orEmpty()
+        val bar = com.bestrong.core.training.GymProfile.barIn(settings.value.unit, settings.value.gymFor(exerciseId).barKg)
+        WorkoutEditor.addWarmup(w, weId, settings.value.unit, settings.value.unit.toKg(bar))
+    }
+
+    /** «8-12» o null (sin rango: progresión normal). */
+    fun setRepRange(exerciseId: String, range: String?) = settingsStore.update { s ->
+        s.copy(exerciseRepRange = if (range == null) s.exerciseRepRange - exerciseId else s.exerciseRepRange + (exerciseId to range))
+    }
+
+    /** null = la barra del gimnasio. */
+    fun setExerciseBar(exerciseId: String, kg: Double?) = settingsStore.update { s ->
+        s.copy(exerciseBarKg = if (kg == null) s.exerciseBarKg - exerciseId else s.exerciseBarKg + (exerciseId to kg))
+    }
 
     /** Tempo de la repetición (p. ej. "3-1-1-0"); vacío lo quita. */
     fun setTempo(weId: String, tempo: String) = edit { w ->
