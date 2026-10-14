@@ -1167,4 +1167,9 @@
     <string name="history_filtered_empty">Cap entrenament amb aquests filtres</string>
     <string name="history_clear_filters">Treure filtres</string>
     <string name="history_export_csv">Exportar CSV</string>
+    <string name="copy_to_day">Copiar a un altre dia</string>
+    <string name="copy_to_day_hint">Les mateixes sèries i pesos; el pols i les calories d\'aquell dia no es copien.</string>
+    <string name="cardio_pace_km">Falten %1$s km · %2$s km al dia</string>
+    <string name="cardio_pace_min">Falten %1$d min · %2$d min al dia</string>
+    <string name="cardio_streak_short">%1$d set. seguides</string>
 </resources>

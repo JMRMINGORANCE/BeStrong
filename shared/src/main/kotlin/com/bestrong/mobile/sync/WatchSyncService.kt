@@ -1,7 +1,6 @@
 package com.bestrong.mobile.sync
 
 import android.util.Log
-import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SyncContract
 import com.bestrong.mobile.WatchMetricsStore
@@ -89,7 +88,7 @@ class WatchSyncService : WearableListenerService() {
                     path.startsWith(SyncContract.PATH_WORKOUT_HEALTH_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
                         val health = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeHealth(it) }.getOrNull() }
-                        health?.let { mergeHealth(it) }
+                        health?.let { actions.mergeWatchHealth(it) }
                         runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
                     }
                     // Rutina creada en el reloj: se guarda y se borra el DataItem
@@ -117,24 +116,6 @@ class WatchSyncService : WearableListenerService() {
         if (event.path == SyncContract.PATH_METRICS) {
             runCatching { SyncContract.decodeMetrics(event.data) }.onSuccess { watchMetrics.metrics.value = it }
         }
-    }
-
-    /** Pulso y calorías finales del reloj sobre lo guardado, sin pisar la valoración que se pone a la vez en el resumen. */
-    private suspend fun mergeHealth(h: com.bestrong.core.sync.WorkoutHealthData) {
-        var hadSamples = true
-        val merged = repository.updateWorkout(h.workoutId) { saved ->
-            hadSamples = saved.heartRateSamples.isNotEmpty()
-            energy.complete(
-                saved.copy(
-                    avgHeartRate = h.avgHeartRate ?: saved.avgHeartRate,
-                    maxHeartRate = h.maxHeartRate ?: saved.maxHeartRate,
-                    heartRateSamples = h.heartRateSamples.ifEmpty { saved.heartRateSamples },
-                ),
-                watchKcal = h.calories ?: saved.calories?.takeIf { saved.caloriesSource == CaloriesSource.WATCH },
-            )
-        }
-        // La sesión ya se exportó al terminar: ahora solo se añade la gráfica de pulso
-        if (merged != null && !hadSamples) appScope.launch { actions.exportHeartRateIfEnabled(merged) }
     }
 
     private fun isFromOtherNode(host: String?): Boolean {

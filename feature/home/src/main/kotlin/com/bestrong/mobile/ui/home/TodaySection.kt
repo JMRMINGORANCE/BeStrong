@@ -471,13 +471,31 @@ private fun CardioWeekProgress(week: HomeViewModel.CardioWeek) {
     val goalMin = week.goalMin
     val (text, progress) = when {
         goalMin != null -> stringResource(R.string.cardio_week_goal_min, minutes, goalMin) to minutes.toFloat() / goalMin
-        goalKm != null -> stringResource(R.string.cardio_week_goal, "%.1f".format(km), com.bestrong.core.util.formatGoalKm(goalKm)) to (km / goalKm).toFloat()
+        goalKm != null -> stringResource(R.string.cardio_week_goal, com.bestrong.core.util.formatKmLike(km, goalKm), com.bestrong.core.util.formatGoalKm(goalKm)) to (km / goalKm).toFloat()
         else -> stringResource(R.string.cardio_week, "%.1f".format(km)) to null
     }
     Text(text, fontWeight = FontWeight.Bold)
     progress?.let { p -> androidx.compose.material3.LinearProgressIndicator(progress = { p.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
     if (week.seconds > 0 && goalMin == null) Text(com.bestrong.core.util.formatDuration(week.seconds), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     if (week.streak >= 2) Text(stringResource(R.string.cardio_streak, week.streak), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+    cardioPace(week)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+}
+
+/** «Faltan 4,3 km · 2,2 km al día» hasta el domingo (hoy incluido); null sin objetivo o ya cumplido. */
+@Composable
+private fun cardioPace(week: HomeViewModel.CardioWeek): String? {
+    val daysLeft = 8 - java.time.LocalDate.now().dayOfWeek.value
+    val goalMin = week.goalMin
+    val goalKm = week.goalKm
+    return when {
+        goalMin != null -> (goalMin - (week.seconds / 60).toInt()).takeIf { it > 0 }?.let { left ->
+            stringResource(R.string.cardio_pace_min, left, (left + daysLeft - 1) / daysLeft)
+        }
+        goalKm != null -> (goalKm - week.meters / 1000).takeIf { it > 0.05 }?.let { left ->
+            stringResource(R.string.cardio_pace_km, "%.1f".format(left), "%.1f".format(left / daysLeft))
+        }
+        else -> null
+    }
 }
 
 /** Objetivo a medida: el número y luego km o min (un número que no vale no cambia nada). */

@@ -173,3 +173,24 @@ fun LogPastWorkoutDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }
+
+/** «Copiar a otro día»: se elige la fecha, la hora y la duración (la de aquel entreno para empezar). */
+@Composable
+fun CopyToDayDialog(durationMin: Long, onCopy: (Long, Long) -> Unit, onDismiss: () -> Unit) {
+    val time = remember { WorkoutTimeState(System.currentTimeMillis() - durationMin * 60_000L, durationMin) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.copy_to_day)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                WorkoutTimeFields(time)
+                Text(stringResource(R.string.copy_to_day_hint), style = MaterialTheme.typography.bodySmall)
+            }
+        },
+        confirmButton = {
+            val range = time.range
+            TextButton(onClick = { range?.let { (s, e) -> onCopy(s, e) } }, enabled = range != null) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}

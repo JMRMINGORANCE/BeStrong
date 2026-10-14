@@ -67,6 +67,11 @@ class HistoryViewModel @Inject constructor(
     /** Día elegido en el calendario (null = todos). */
     val selectedDay = MutableStateFlow<LocalDate?>(null)
 
+    init {
+        // Sin entrenos de la pareja el chip desaparece: «solo la pareja» no puede quedarse puesto
+        viewModelScope.launch { repo.partnerHistory.collect { if (it.isEmpty()) onlyPartner.value = false } }
+    }
+
     /** Gimnasio elegido (null = todos). */
     val gymFilter = MutableStateFlow<String?>(null)
 
@@ -188,7 +193,8 @@ class HistoryViewModel @Inject constructor(
                 actions.deleteFromHealthConnectIfEnabled(workout)
             }
         } else {
-            repo.saveWorkout(edited)
+            // Sobre lo guardado (el pulso del reloj o la valoración pueden haber llegado después de abrirlo)
+            repo.updateWorkout(workout.id) { WorkoutEditor.cleanupFinished(block(it)).copy(updatedAtEpochMs = edited.updatedAtEpochMs) }
             // Corregido aquí, corregido en Health Connect: se quita lo de antes (un bloque de cardio borrado no
             // dejaría su distancia) y se exporta de nuevo
             if (edited.athlete == null) {
@@ -223,7 +229,7 @@ class HistoryViewModel @Inject constructor(
     }
 
     /** Nombre de la pareja si hay entrenos suyos (para apuntar uno pasado a su nombre). */
-    fun partnerName(): String? = repo.partnerHistory.value.firstOrNull()?.athlete
+    fun partnerName(): String? = settingsStore.settings.value.partnerAthlete.takeIf { repo.partnerHistory.value.isNotEmpty() }
 
     fun logPast(routine: Routine, startMs: Long, endMs: Long, forPartner: Boolean, onLogged: (String) -> Unit) = viewModelScope.launch {
         val athlete = partnerName().takeIf { forPartner }
@@ -233,12 +239,22 @@ class HistoryViewModel @Inject constructor(
         val w = routine.toWorkout(startMs, { id -> WorkoutStats.previousSets(id, before) })
         val done = w.copy(
             athlete = athlete,
+            // Como los de la pareja empezados en directo: «Ana · Pierna»
+            name = athlete?.let { "$it · ${w.name}" } ?: w.name,
             finishedAtEpochMs = endMs,
             updatedAtEpochMs = System.currentTimeMillis(),
             exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { it.copy(completed = true, completedAtEpochMs = endMs) }) },
         )
         repo.saveWorkout(done)
         onLogged(done.id)
+    }
+
+    /** Copia un entreno pasado, tal cual, a otro día (el que se hizo igual y no se apuntó). */
+    fun copyToDay(workout: Workout, startMs: Long, endMs: Long, onCopied: (String) -> Unit) = viewModelScope.launch {
+        val copy = WorkoutEditor.copyToDay(workout, startMs, endMs, System.currentTimeMillis())
+        repo.saveWorkout(copy)
+        if (copy.athlete == null) actions.exportToHealthConnectIfEnabled(copy)
+        onCopied(copy.id)
     }
 
     /** Cambia la fecha, la hora y la duración de un entreno pasado. */

@@ -1167,4 +1167,9 @@
     <string name="history_filtered_empty">Aucune séance avec ces filtres</string>
     <string name="history_clear_filters">Effacer les filtres</string>
     <string name="history_export_csv">Exporter CSV</string>
+    <string name="copy_to_day">Copier à un autre jour</string>
+    <string name="copy_to_day_hint">Mêmes séries et charges ; le pouls et les calories de ce jour-là ne sont pas copiés.</string>
+    <string name="cardio_pace_km">Encore %1$s km · %2$s km par jour</string>
+    <string name="cardio_pace_min">Encore %1$d min · %2$d min par jour</string>
+    <string name="cardio_streak_short">%1$d sem. d\'affilée</string>
 </resources>

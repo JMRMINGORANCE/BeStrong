@@ -817,4 +817,30 @@ class CollarTest {
         assertEquals(1, t.daysLeft(29 * day + 1))
         assertEquals(1, t.daysLeft(40 * day))
     }
+
+    @Test
+    fun copyToDayShiftsSetTimesAndDropsMeasuredData() {
+        val bench = com.bestrong.core.model.Exercise(id = "bench", name = "bench", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val set = WorkoutSet(weightKg = 60.0, reps = 5, completed = true, completedAtEpochMs = 1_500)
+        val w = Workout(name = "w", startedAtEpochMs = 1_000, finishedAtEpochMs = 4_000, calories = 300, avgHeartRate = 120, exercises = listOf(WorkoutExercise(exercise = bench, sets = listOf(set))))
+        val copy = WorkoutEditor.copyToDay(w, 10_000, 13_000, 20_000)
+        assertEquals(10_500L, copy.exercises[0].sets[0].completedAtEpochMs)
+        assertEquals(60.0, copy.exercises[0].sets[0].weightKg, 1e-9)
+        assertEquals(null, copy.calories)
+        assertEquals(null, copy.avgHeartRate)
+        assert(copy.id != w.id && copy.exercises[0].sets[0].id != set.id)
+    }
+
+    @Test
+    fun nextTimeIgnoresLighterBackOffSets() {
+        val bench = com.bestrong.core.model.Exercise(id = "bench", name = "bench", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val sets = listOf(
+            WorkoutSet(weightKg = 100.0, reps = 3, completed = true),
+            WorkoutSet(weightKg = 80.0, reps = 8, completed = true),
+            WorkoutSet(weightKg = 80.0, reps = 8, completed = true),
+        )
+        val s = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets), 2.5)
+        assertEquals(102.5, s!!.weightKg, 1e-9)
+        assertEquals(3, s.reps)
+    }
 }

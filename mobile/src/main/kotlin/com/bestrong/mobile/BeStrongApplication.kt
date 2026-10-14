@@ -74,13 +74,18 @@ class AppSync @Inject constructor(
      */
     private suspend fun notifyCardioGoal() {
         val prefs = context.getSharedPreferences("notify_state", Context.MODE_PRIVATE)
-        var previous: CardioGoalState? = null
+        // El estado anterior se guarda: un entreno del reloj puede llegar con la app cerrada (proceso nuevo)
+        var previous: Triple<Long, String, Boolean>? = prefs.getString("cardio_goal_prev", null)?.split('|')?.takeIf { it.size == 3 }?.let {
+            Triple(it[0].toLongOrNull() ?: -1, it[1], it[2] == "1")
+        }
         // La lista en memoria empieza vacía hasta que carga: ese arranque no cuenta como «antes»
         combine(repository.history.dropWhile { it.isEmpty() }, settings.settings) { history, s -> cardioGoalState(history, s) }
             .debounce(2_000).distinctUntilChanged().collect { cur ->
                 val prev = previous
-                previous = cur
-                val crossed = cur != null && cur.met && prev != null && !prev.met && prev.goal == cur.goal && prev.week == cur.week
+                previous = cur?.let { Triple(it.week, it.goal, it.met) }
+                cur?.let { prefs.edit().putString("cardio_goal_prev", "${it.week}|${it.goal}|${if (it.met) 1 else 0}").apply() }
+                // Cruzado entrenando: antes sin cumplir con el mismo objetivo (o la semana pasada: esta empezó en cero)
+                val crossed = cur != null && cur.met && prev != null && prev.second == cur.goal && (prev.first != cur.week || !prev.third)
                 val key = cur?.let { "${it.week}:${it.goal}" }
                 if (crossed && prefs.getString("cardio_goal_notified", null) != key) {
                     prefs.edit().putString("cardio_goal_notified", key).apply()
@@ -103,7 +108,7 @@ class AppSync @Inject constructor(
         } else {
             val km = meters / 1000
             val goal = goalKm ?: 0.0
-            CardioGoalState(monday.toEpochDay(), "km:$goal", km >= goal, context.getString(R.string.cardio_week_goal, "%.1f".format(km), com.bestrong.core.util.formatGoalKm(goal)))
+            CardioGoalState(monday.toEpochDay(), "km:$goal", km >= goal, context.getString(R.string.cardio_week_goal, com.bestrong.core.util.formatKmLike(km, goal), com.bestrong.core.util.formatGoalKm(goal)))
         }
     }
 

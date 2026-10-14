@@ -754,6 +754,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             restTimer.skip()
             if (finished.exercises.isEmpty()) return@launch
             repo.saveWorkout(finished)
+            // El pulso y las calorías del reloj pueden haber llegado mientras se terminaba
+            actions.applyPendingWatchHealth(finished.id)
             savedState[KEY_SUMMARY_ID] = finished.id
             val history = repo.historyOnce()
             _summary.value = withContext(Dispatchers.Default) { buildSummary(finished, history) }

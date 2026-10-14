@@ -10,7 +10,8 @@ data class NextTimeSuggestion(val exerciseId: String, val exerciseName: String, 
 
 /**
  * Doble progresión sencilla al terminar el entreno:
- * - todas las series de trabajo con las reps de la primera y RPE < 9,5 → subir un escalón;
+ * - todas las series con el peso más alto con las reps de la primera de ellas y RPE < 9,5 → subir un escalón
+ *   (las de descarga, más ligeras, no cuentan);
  * - alguna serie a RPE ≥ 9,5 con menos reps que la primera → bajar un 5 %;
  * - en otro caso, repetir el mismo peso e intentar sumar reps.
  */
@@ -20,9 +21,11 @@ object NextTime {
         val work = we.sets.filter { it.completed && it.type != SetType.WARMUP && it.countsForRecords && it.weightKg > 0 }
         if (work.isEmpty()) return null
         val top = work.maxOf { it.weightKg }
-        val target = work.first().reps
-        val maxRpe = work.mapNotNull { it.rpe }.maxOrNull()
-        val allReps = work.all { it.reps >= target }
+        // Solo las series con el peso más alto: las de descarga (más ligeras, más o menos reps) no marcan el objetivo
+        val topSets = work.filter { it.weightKg >= top }
+        val target = topSets.first().reps
+        val maxRpe = topSets.mapNotNull { it.rpe }.maxOrNull()
+        val allReps = topSets.all { it.reps >= target }
         val name = we.exercise.name
         val high = Autoregulation.high(we.targetRpe)
         return when {

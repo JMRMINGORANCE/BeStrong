@@ -32,7 +32,40 @@ class WorkoutActions @Inject constructor(
     private val healthConnect: HealthConnectExporter,
     private val restTimer: RestTimerController,
     private val planning: PlanningStore,
+    private val energy: com.bestrong.mobile.health.EnergyCalculator,
 ) {
+    /**
+     * Pulso y calorías finales del reloj sobre lo guardado, sin pisar la valoración que se pone a la vez. Si el
+     * entreno aún no está guardado (el móvil lo está terminando), se dejan pendientes para [applyPendingWatchHealth].
+     */
+    suspend fun mergeWatchHealth(h: com.bestrong.core.sync.WorkoutHealthData) {
+        var hadSamples = true
+        val merged = repository.updateWorkout(h.workoutId) { saved ->
+            hadSamples = saved.heartRateSamples.isNotEmpty()
+            energy.complete(
+                saved.copy(
+                    avgHeartRate = h.avgHeartRate ?: saved.avgHeartRate,
+                    maxHeartRate = h.maxHeartRate ?: saved.maxHeartRate,
+                    heartRateSamples = h.heartRateSamples.ifEmpty { saved.heartRateSamples },
+                ),
+                watchKcal = h.calories ?: saved.calories?.takeIf { saved.caloriesSource == com.bestrong.core.model.CaloriesSource.WATCH },
+            )
+        }
+        if (merged == null) {
+            repository.savePendingHealth(com.bestrong.core.sync.SyncContract.encodeHealth(h).decodeToString())
+            return
+        }
+        // La sesión ya se exportó al terminar: ahora solo se añade la gráfica de pulso
+        if (!hadSamples) exportHeartRateIfEnabled(merged)
+    }
+
+    /** Tras guardar un entreno terminado en el móvil: lo del reloj que llegó antes, si es de ese entreno. */
+    suspend fun applyPendingWatchHealth(workoutId: String) {
+        val raw = repository.takePendingHealth() ?: return
+        val h = runCatching { com.bestrong.core.sync.SyncContract.decodeHealth(raw.encodeToByteArray()) }.getOrNull() ?: return
+        if (h.workoutId == workoutId) mergeWatchHealth(h)
+    }
+
     /**
      * Completa la siguiente serie pendiente y arranca su descanso (botón de la notificación,
      * botones de volumen). Devuelve false si no queda ninguna.

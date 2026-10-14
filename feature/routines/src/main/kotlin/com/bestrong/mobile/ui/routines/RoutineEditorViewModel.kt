@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class RoutineEditorViewModel @Inject constructor(
     private val repo: BeStrongRepository,
-    savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
     private val settingsStore: com.bestrong.mobile.data.SettingsStore,
 ) : ViewModel() {
@@ -46,31 +46,51 @@ class RoutineEditorViewModel @Inject constructor(
     companion object {
         /** Ejercicios con rangos distintos: no coincide con ningún chip. */
         const val MIXED_RANGE = "mixed"
+        private const val KEY_DRAFT = "routine_draft"
+        private const val KEY_ORIGINAL = "routine_original"
     }
 
     /** Argumento de navegación "id" (null = rutina nueva). */
     private val routineId: String? = savedStateHandle.get<String>("id")
 
+    /** Lo que se estaba editando si Android cerró la app en segundo plano (se recupera tal cual). */
+    private fun savedRoutine(key: String): Routine? =
+        savedStateHandle.get<String>(key)?.let { runCatching { com.bestrong.core.io.Persistence.decodeRoutine(it) }.getOrNull() }
+
+    private val draft: Routine? = savedRoutine(KEY_DRAFT)
+
     private val _routine = MutableStateFlow(
-        routineId?.let { id -> repo.routines.value.firstOrNull { it.id == id } } ?: Routine(name = ""),
+        draft ?: routineId?.let { id -> repo.routines.value.firstOrNull { it.id == id } } ?: Routine(name = ""),
     )
     val routine: StateFlow<Routine> = _routine.asStateFlow()
     val isNew = routineId == null
 
     /** Rutina tal y como se abrió, para saber si hay cambios sin guardar al salir. */
-    private var original: Routine = _routine.value
+    private var original: Routine = savedRoutine(KEY_ORIGINAL) ?: _routine.value
+        set(value) {
+            field = value
+            savedStateHandle[KEY_ORIGINAL] = com.bestrong.core.io.Persistence.encodeRoutine(value)
+        }
     val hasChanges: Boolean get() = _routine.value != original
 
+    /** La rutina pedida ya no existe (borrada, enlace antiguo): la pantalla se cierra en vez de crear otra vacía. */
+    private val _missing = MutableStateFlow(false)
+    val missing: StateFlow<Boolean> = _missing.asStateFlow()
+
     init {
+        savedStateHandle[KEY_ORIGINAL] = com.bestrong.core.io.Persistence.encodeRoutine(original)
         // Si la app se reabrió desde cero, las rutinas aún no estaban cargadas: las leemos de la BD
-        if (routineId != null && _routine.value.id != routineId) {
+        if (draft == null && routineId != null && _routine.value.id != routineId) {
             viewModelScope.launch {
-                repo.routine(routineId)?.let {
+                val stored = repo.routine(routineId)
+                if (stored == null) _missing.value = true
+                stored?.let {
                     _routine.value = it
                     original = it
                 }
             }
         }
+        viewModelScope.launch { _routine.collect { savedStateHandle[KEY_DRAFT] = com.bestrong.core.io.Persistence.encodeRoutine(it) } }
     }
 
     /** Une el ejercicio con el siguiente en superserie (o lo saca si ya lo está). */

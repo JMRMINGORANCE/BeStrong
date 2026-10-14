@@ -64,6 +64,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
     val unit = LocalWeightUnit.current
     val routine by vm.routine.collectAsStateWithLifecycle()
     val tempoVersion by vm.tempoVersion.collectAsStateWithLifecycle()
+    CloseIfMissing(vm, onClose)
     var confirmLeave by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     var restFor by remember { mutableStateOf<String?>(null) }
@@ -383,4 +384,11 @@ private fun RoutineRangeRow(vm: RoutineEditorViewModel, routine: com.bestrong.co
     // El rango es de cada ejercicio: también cambia en las demás rutinas que lo usan
     Text(stringResource(R.string.rep_range_all_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     com.bestrong.mobile.ui.components.RepRangeChips(common) { vm.setRangeForAll(it); common = it }
+}
+
+/** La rutina ya no existe (borrada desde otro sitio, enlace antiguo): se cierra en vez de editar una vacía. */
+@Composable
+private fun CloseIfMissing(vm: RoutineEditorViewModel, onClose: () -> Unit) {
+    val missing by vm.missing.collectAsStateWithLifecycle()
+    LaunchedEffect(missing) { if (missing) onClose() }
 }

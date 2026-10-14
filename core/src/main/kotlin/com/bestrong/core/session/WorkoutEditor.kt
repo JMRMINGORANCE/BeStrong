@@ -501,6 +501,34 @@ object WorkoutEditor {
     /**
      * Termina el entrenamiento: descarta las series no completadas y los ejercicios vacíos.
      */
+    /**
+     * El mismo entreno, serie a serie, en otro día ([startMs]–[endMs]): ids nuevos, horas de las series movidas
+     * y sin lo medido aquel día (pulso, calorías, valoración).
+     */
+    fun copyToDay(workout: Workout, startMs: Long, endMs: Long, nowEpochMs: Long): Workout {
+        val shift = startMs - workout.startedAtEpochMs
+        return workout.copy(
+            id = com.bestrong.core.util.newId(),
+            startedAtEpochMs = startMs,
+            finishedAtEpochMs = endMs,
+            updatedAtEpochMs = nowEpochMs,
+            pausedAtEpochMs = null,
+            exercises = workout.exercises.map { we ->
+                we.copy(
+                    id = com.bestrong.core.util.newId(),
+                    sets = we.sets.map { s -> s.copy(id = com.bestrong.core.util.newId(), completedAtEpochMs = s.completedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) }) },
+                )
+            },
+            avgHeartRate = null,
+            maxHeartRate = null,
+            calories = null,
+            activeCalories = null,
+            caloriesSource = null,
+            heartRateSamples = emptyList(),
+            rating = null,
+        )
+    }
+
     fun finish(workout: Workout, nowEpochMs: Long): Workout {
         // Un cronómetro de cardio en marcha cuenta como hecho hasta ahora (si no, se perdería el bloque)
         val stopped = runningCardio(workout)?.let { (we, set) -> finishCardio(workout, we.id, set.id, nowEpochMs) } ?: workout

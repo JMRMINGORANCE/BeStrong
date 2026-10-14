@@ -262,6 +262,17 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     var editing by remember(w.id) { mutableStateOf(false) }
     var editInfo by remember { mutableStateOf(false) }
     var editSet by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var copying by remember { mutableStateOf(false) }
+    if (copying) {
+        CopyToDayDialog(
+            durationMin = w.durationSeconds() / 60,
+            onCopy = { s, e ->
+                copying = false
+                vm.copyToDay(w, s, e) {}
+            },
+            onDismiss = { copying = false },
+        )
+    }
     val records by produceState(emptyList<PersonalRecord>(), w) { value = vm.recordsIn(w) }
     val comparisons by produceState(emptyMap<String, com.bestrong.core.stats.WorkoutStats.ExerciseComparison>(), w) { value = vm.comparisonsFor(w) }
     val restByExercise = remember(w) { RestStats.byExercise(w) }
@@ -307,6 +318,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                         DropdownMenuItem(text = { Text(stringResource(R.string.history_edit)) }, onClick = { menu = false; editing = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.history_edit_info)) }, onClick = { menu = false; editInfo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.repeat_workout)) }, onClick = { menu = false; vm.repeat(w, onWorkoutStarted) })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.copy_to_day)) }, onClick = { menu = false; copying = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.save_as_routine)) }, onClick = { menu = false; vm.saveAsRoutine(w) })
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.share_as_text)) },

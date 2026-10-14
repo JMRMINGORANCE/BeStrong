@@ -381,3 +381,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Avisos de objetivos en su propio canal (se silencian sin perder los de récords)
 - [x] Historial vacío por los filtros: lo dice y deja quitarlos de un toque
 - [x] Exportar a CSV lo que se ve en el historial (con sus filtros)
+
+## Fase 44 — Copiar entrenos y ritmo de cardio ✅
+- [x] Copiar un entreno pasado a otro día (serie a serie)
+- [x] Cuánto falta para el objetivo de cardio y a qué ritmo diario
+- [x] Racha de cardio en el widget
+- [x] La rutina que se está editando no se pierde si Android cierra la app
+- [x] «La próxima vez» se fija en las series más pesadas (las de descarga no cuentan)

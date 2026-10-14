@@ -25,6 +25,10 @@ fun formatGoalKm(km: Double): String = when {
     else -> "%.2f".format(km)
 }
 
+/** Km hechos con los mismos decimales que el objetivo (al menos uno): «12,04 de 12,04» y no «12,0 de 12,04». */
+fun formatKmLike(km: Double, goalKm: Double?): String =
+    if (goalKm != null && Math.round(goalKm * 100) % 10 != 0L) "%.2f".format(km) else "%.1f".format(km)
+
 /** 3725 s → "1h 02m", 125 s → "2:05" */
 fun formatDuration(seconds: Long): String {
     val h = seconds / 3600

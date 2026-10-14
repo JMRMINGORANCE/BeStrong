@@ -61,10 +61,20 @@ class BeStrongWidget : GlanceAppWidget() {
         // Cardio de la semana frente al objetivo (si se puso uno)
         val s = entry.settings().settings.value
         val (meters, seconds) = com.bestrong.core.stats.CardioTotals.since(history, weekStart.atStartOfDay(zone).toInstant().toEpochMilli())
-        val cardio = when {
+        val cardioLine = when {
             s.weeklyCardioMin != null -> context.getString(R.string.cardio_week_goal_min, (seconds / 60).toInt(), s.weeklyCardioMin)
-            s.weeklyCardioKm != null -> context.getString(R.string.cardio_week_goal, "%.1f".format(meters / 1000), com.bestrong.core.util.formatGoalKm(s.weeklyCardioKm ?: 0.0))
+            s.weeklyCardioKm != null -> context.getString(R.string.cardio_week_goal, com.bestrong.core.util.formatKmLike(meters / 1000, s.weeklyCardioKm), com.bestrong.core.util.formatGoalKm(s.weeklyCardioKm ?: 0.0))
             else -> null
+        }
+        // Con racha de semanas cumpliéndolo, se añade («· 3 semanas seguidas»)
+        val cardio = cardioLine?.let { line ->
+            val goalKm = s.weeklyCardioKm
+            val goalMin = s.weeklyCardioMin
+            val starts = (0L until 52L).map { weekStart.minusWeeks(it).atStartOfDay(zone).toInstant().toEpochMilli() }
+            val cardioStreak = com.bestrong.core.stats.CardioTotals.goalStreak(history, starts) { m, sec ->
+                if (goalMin != null) sec / 60 >= goalMin else m / 1000 >= (goalKm ?: Double.MAX_VALUE)
+            }
+            if (cardioStreak >= 2) line + " · " + context.getString(R.string.cardio_streak_short, cardioStreak) else line
         }
         provideContent { GlanceTheme { Content(context, week, streak, routines, cardio) } }
     }
