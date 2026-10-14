@@ -252,10 +252,15 @@ object Strength {
         )
     }
 
-    /** Series hechas de cardio y distancia (para los totales de cardio del periodo). */
+    /** Series hechas de cardio y de distancia sin peso (un paseo del granjero no es cardio) para los totales. */
     private fun cardioSets(workouts: List<Workout>) = workouts.flatMap { w ->
-        w.exercises.filter { it.exercise.tracking == com.bestrong.core.model.TrackingType.CARDIO || it.exercise.tracking == com.bestrong.core.model.TrackingType.DISTANCE }
-            .flatMap { it.completedSets }
+        w.exercises.flatMap { we ->
+            when (we.exercise.tracking) {
+                com.bestrong.core.model.TrackingType.CARDIO -> we.completedSets
+                com.bestrong.core.model.TrackingType.DISTANCE -> we.completedSets.filter { it.weightKg == 0.0 }
+                else -> emptyList()
+            }
+        }
     }
 
     fun weekSummary(history: List<Workout>, day: LocalDate, zone: ZoneId): PeriodSummary {

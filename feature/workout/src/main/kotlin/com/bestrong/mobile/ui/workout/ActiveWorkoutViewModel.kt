@@ -131,8 +131,16 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Historial de quien entrena ahora: el tuyo o, en modo pareja, el suyo (con el nombre de su entreno en curso). */
     private val athleteHistory: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, partnerMode, repo.partnerWorkout) { me, partner, isPartner, pw ->
+        historyOf(isPartner, me, partner, pw)
+    }.flowOn(Dispatchers.Default).stateIn(
+        viewModelScope,
+        SharingStarted.Eagerly,
+        // Ya el primer valor de quien entrena (tras reiniciar en modo pareja, el suyo)
+        historyOf(partnerMode.value, repo.history.value, repo.partnerHistory.value, repo.partnerWorkout.value),
+    )
+
+    private fun historyOf(isPartner: Boolean, me: List<Workout>, partner: List<Workout>, pw: Workout?): List<Workout> =
         if (isPartner) partner.filter { it.athlete == (pw?.athlete ?: settingsStore.settings.value.partnerName) } else me
-    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, repo.history.value)
 
     /** «La vez anterior» de cada ejercicio: en este gimnasio si allí ya se hizo (como el relleno), si no la última. */
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = combine(
@@ -249,16 +257,20 @@ class ActiveWorkoutViewModel @Inject constructor(
             // Los dos entrenos (el tuyo y el de la pareja) están en el mismo gimnasio: un solo «deshacer» para todo
             val visible = refitActive(partner)
             val hidden = refitActive(!partner)
-            val workoutId = workout.value?.id ?: return@launch
             if (visible == null && hidden == null) return@launch
+            // Sin entreno a la vista (solo el otro), el aviso va sobre el otro
+            val onVisible = visible != null || workout.value != null
+            val target = if (onVisible) partner else !partner
+            val workoutId = (if (target) repo.partnerWorkout.value else repo.activeWorkout.value)?.id ?: return@launch
             _events.tryEmit(
                 WorkoutEvent.Undoable(
-                    UndoKind.GYM, partner, workoutId,
+                    UndoKind.GYM, target, workoutId,
                     alsoUndo = {
-                        hidden?.let { restore -> update(!partner) { w -> restore(w) } }
-                        settingsStore.update { it.copy(activeGymId = previousGym) }
+                        if (onVisible) hidden?.let { restore -> update(!partner) { w -> restore(w) } }
+                        // Solo si sigue en este gimnasio (si después se cambió a otro, no se vuelve atrás dos veces)
+                        settingsStore.update { if (it.activeGymId == id) it.copy(activeGymId = previousGym) else it }
                     },
-                    restore = { w -> visible?.invoke(w) ?: w },
+                    restore = { w -> (if (onVisible) visible else hidden)?.invoke(w) ?: w },
                 ),
             )
         }
@@ -380,8 +392,7 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Las últimas [limit] sesiones con ese ejercicio (la más reciente primero), del atleta en pantalla. */
     fun historyFor(exerciseId: String, limit: Int = 5): List<Pair<Workout, com.bestrong.core.model.WorkoutExercise>> {
-        val history = if (partnerMode.value) repo.partnerHistory.value.filter { it.athlete == settings.value.partnerName } else repo.history.value
-        return history.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
+        return athleteHistory.value.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
             w.exercises.firstOrNull { it.exercise.id == exerciseId && it.completedSets.isNotEmpty() }?.let { w to it }
         }.take(limit)
     }
@@ -595,7 +606,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         val partner = partnerMode.value
         val s = settings.value
         val e1rms = recentOneRepMax.value
-        val history = if (partner) repo.partnerHistory.value.filter { it.athlete == s.partnerName } else repo.history.value
+        val history = athleteHistory.value
         viewModelScope.launch {
             val (before, after) = update(partner) { w ->
                 WorkoutEditor.updateExercise(w, weId) { e -> withRpeLoads(e, e1rms[e.exercise.id], s, history, actions) }

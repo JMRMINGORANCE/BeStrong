@@ -1138,4 +1138,5 @@
     <string name="cardio_total_month">Últimos 30 días: %1$s</string>
     <string name="history_gym_unknown">Sen ximnasio</string>
     <string name="history_gym_change">Onde se fixo?</string>
+    <string name="partner_name_taken">«%1$s» xa ten adestramentos no historial: escolle outro nome para non mesturalos</string>
 </resources>

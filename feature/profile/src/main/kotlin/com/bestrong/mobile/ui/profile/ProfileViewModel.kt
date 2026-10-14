@@ -481,10 +481,8 @@ class ProfileViewModel @Inject constructor(
             s.copy(gyms = if (exists) s.gyms.map { if (it.id == updated.id) updated else it } else s.gyms + updated)
         }
         if (oldName != null && oldName != updated.name) {
-            viewModelScope.launch {
-                // De una vez (una transacción): no se redibuja ni se envía al reloj por cada entreno
-                repo.saveWorkouts(repo.historyOnce(includePartner = true).filter { it.gymName == oldName }.map { it.copy(gymName = updated.name) })
-            }
+            // De una vez (una transacción) y aunque se salga de la pantalla
+            repo.rewriteHistory({ it.gymName == oldName }) { it.copy(gymName = updated.name) }
         }
         return true
     }
@@ -493,15 +491,34 @@ class ProfileViewModel @Inject constructor(
      * Cambia el nombre de la pareja y, con él, el de sus entrenos (pasados y el que está en curso): su historial
      * va por el nombre, y sin esto dejaría de usarse para sus pesos y marcas.
      */
-    fun renamePartner(name: String) {
-        val old = settings.value.partnerName
-        val new = name.trim()
-        if (new == old) return
-        settingsStore.update { it.copy(partnerName = new) }
-        if (old.isBlank() || new.isBlank()) return
+    fun setPartnerName(name: String) {
+        // El nombre de antes de empezar a escribir: es el que se renombra al terminar (commitPartnerName)
+        if (partnerNameBeforeEdit == null) partnerNameBeforeEdit = settings.value.partnerName
+        settingsStore.update { it.copy(partnerName = name.trim()) }
+    }
+
+    /** Nombre de la pareja antes de la edición en curso (null = no se está editando). */
+    private var partnerNameBeforeEdit: String? = null
+
+    /**
+     * Al terminar de escribir (Hecho o al salir del campo): sus entrenos pasan al nombre nuevo. El nombre se guarda
+     * con cada letra (si la app se cierra no se pierde); el historial, solo aquí. Un nombre que ya tiene otra
+     * persona en el historial se rechaza: mezclaría los dos para siempre.
+     */
+    fun commitPartnerName() {
+        val old = partnerNameBeforeEdit ?: return
+        partnerNameBeforeEdit = null
+        val new = settings.value.partnerName
+        if (new == old || new.isBlank()) return
         viewModelScope.launch {
-            repo.saveWorkouts(repo.historyOnce(includePartner = true).filter { it.athlete == old }.map { it.copy(athlete = new) })
-            repo.updatePartnerActive { w -> if (w.athlete == old) w.copy(athlete = new) else w }
+            if (old.isNotBlank() && repo.historyOnce(includePartner = true).any { it.athlete == new }) {
+                settingsStore.update { it.copy(partnerName = old) }
+                _messages.tryEmit(context.getString(R.string.partner_name_taken, new))
+                return@launch
+            }
+            if (old.isNotBlank()) repo.rewriteHistory({ it.athlete == old }) { it.copy(athlete = new) }
+            // Su entreno en curso, también si se empezó sin nombre
+            repo.updatePartnerActive { w -> if (w.athlete == old || w.athlete.isNullOrBlank()) w.copy(athlete = new) else w }
         }
     }
 

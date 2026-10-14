@@ -1138,4 +1138,5 @@
     <string name="cardio_total_month">30 derniers jours : %1$s</string>
     <string name="history_gym_unknown">Sans salle</string>
     <string name="history_gym_change">Où a-t-elle eu lieu ?</string>
+    <string name="partner_name_taken">« %1$s » a déjà des séances dans l’historique : choisis un autre nom pour ne pas les mélanger</string>
 </resources>

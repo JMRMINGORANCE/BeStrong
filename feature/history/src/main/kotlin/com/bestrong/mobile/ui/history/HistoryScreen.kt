@@ -499,9 +499,9 @@ private fun GymFilterRow(vm: HistoryViewModel) {
 /** «🏋️ Hotel» (con varios gimnasios): tocarlo deja corregir dónde se hizo (p. ej. si se guardó con otro activo). */
 @Composable
 private fun WorkoutGymLine(w: Workout, vm: HistoryViewModel) {
-    val gyms = remember { vm.gymProfileNames() }
+    val gyms by vm.gymProfileNames.collectAsStateWithLifecycle()
     if (w.gymName == null && gyms.size < 2) return
-    var picking by remember { mutableStateOf(false) }
+    var picking by remember(w.id) { mutableStateOf(false) }
     Text(
         "🏋️ " + (w.gymName ?: stringResource(R.string.history_gym_unknown)),
         style = MaterialTheme.typography.bodySmall,

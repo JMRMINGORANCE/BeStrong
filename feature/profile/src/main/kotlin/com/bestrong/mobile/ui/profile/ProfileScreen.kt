@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
@@ -315,16 +317,16 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.partner_name)) },
                                 supportingContent = {
-                                    // Se guarda al terminar (Hecho o al salir del campo), no con cada letra: renombrar
-                                    // también cambia su historial
+                                    // El nombre se guarda con cada letra; su historial se renombra al terminar (Hecho o al
+                                    // salir del campo)
                                     OutlinedTextField(
                                         partner,
-                                        { partner = it.take(20) },
+                                        { partner = it.take(20); vm.setPartnerName(partner) },
                                         placeholder = { Text(stringResource(R.string.partner_name_body)) },
                                         singleLine = true,
                                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
-                                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { vm.renamePartner(partner) }),
-                                        modifier = Modifier.onFocusChanged { if (!it.isFocused) vm.renamePartner(partner) },
+                                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { vm.commitPartnerName() }),
+                                        modifier = Modifier.onFocusChanged { if (!it.isFocused) vm.commitPartnerName() },
                                     )
                                 },
                             )
@@ -531,6 +533,8 @@ private fun AutoBackupStatus(settings: com.bestrong.mobile.data.UserSettings) {
     }
 }
 
+private val BACKUP_LIST_MAX_HEIGHT = 360.dp
+
 /** Las copias automáticas de la carpeta (la más reciente primero): elegir una la lleva a la vista previa. */
 @Composable
 private fun AutoBackupPicker(vm: ProfileViewModel) {
@@ -540,10 +544,11 @@ private fun AutoBackupPicker(vm: ProfileViewModel) {
         onDismissRequest = { vm.autoBackups.value = null },
         title = { Text(stringResource(R.string.restore_latest)) },
         text = {
-            Column {
+            Column(Modifier.heightIn(max = BACKUP_LIST_MAX_HEIGHT).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
                 copies.forEach { (date, uri) ->
                     TextButton(onClick = { vm.autoBackups.value = null; vm.restoreBackup(uri) }, modifier = Modifier.fillMaxWidth()) {
-                        Text(date, Modifier.fillMaxWidth())
+                        // «2026-10-12 (1)»: copia repetida del mismo día, se enseña la fecha
+                        Text(date.substringBefore(" ("), Modifier.fillMaxWidth())
                     }
                 }
             }

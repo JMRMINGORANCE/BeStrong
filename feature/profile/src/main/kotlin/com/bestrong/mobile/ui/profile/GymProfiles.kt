@@ -138,7 +138,7 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                 }
                 onSave(
                     gym.copy(
-                        name = name.ifBlank { gym.name },
+                        name = name.trim().ifBlank { gym.name },
                         equipment = equipment,
                         barKg = unit.parseToKg(bar) ?: gym.barKg,
                         collarKg = if (collars.isBlank()) 0.0 else unit.parseToKg(collars)?.coerceIn(0.0, MAX_COLLARS_KG) ?: gym.collarKg,

@@ -31,11 +31,16 @@ fun describeSet(
 
 /** «20 min · 3,20 km» (o «12:30» si no son minutos exactos). */
 fun cardioText(durationSec: Int, distanceM: Double, withPace: Boolean = true, pace: com.bestrong.core.util.PaceStyle = com.bestrong.core.util.PaceStyle.PER_KM): String {
+    val km = "${"%.2f".format(distanceM / 1000)} km"
     val time = if (durationSec % 60 == 0) "${durationSec / 60} min" else "%d:%02d".format(durationSec / 60, durationSec % 60)
-    if (distanceM <= 0) return time
-    // Ritmo (min/km) con tiempo y distancia: lo que se compara en carrera, remo o bici
-    val pace = com.bestrong.core.util.paceText(durationSec, distanceM, pace)?.takeIf { withPace }?.let { " · $it" }.orEmpty()
-    return "$time · ${"%.2f".format(distanceM / 1000)} km$pace"
+    // Ritmo (min/km…) con tiempo y distancia: lo que se compara en carrera, remo o bici
+    val paceSuffix = com.bestrong.core.util.paceText(durationSec, distanceM, pace)?.takeIf { withPace }?.let { " · $it" }.orEmpty()
+    return when {
+        // Solo distancia (sin tiempo anotado): sin «0 min» delante
+        durationSec <= 0 && distanceM > 0 -> km
+        distanceM <= 0 -> time
+        else -> "$time · $km$paceSuffix"
+    }
 }
 
 /** Línea secundaria de una serie en el historial: su nota y una marca si fue con ayuda (null si no hay nada). */

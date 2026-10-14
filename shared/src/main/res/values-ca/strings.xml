@@ -1138,4 +1138,5 @@
     <string name="cardio_total_month">Darrers 30 dies: %1$s</string>
     <string name="history_gym_unknown">Sense gimnàs</string>
     <string name="history_gym_change">On es va fer?</string>
+    <string name="partner_name_taken">«%1$s» ja té entrenaments a l’historial: tria un altre nom per no barrejar-los</string>
 </resources>

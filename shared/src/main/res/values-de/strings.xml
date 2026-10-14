@@ -1138,4 +1138,5 @@
     <string name="cardio_total_month">Letzte 30 Tage: %1$s</string>
     <string name="history_gym_unknown">Kein Studio</string>
     <string name="history_gym_change">Wo wurde es gemacht?</string>
+    <string name="partner_name_taken">„%1$s“ hat schon Trainings im Verlauf: wähle einen anderen Namen, damit sie sich nicht vermischen</string>
 </resources>

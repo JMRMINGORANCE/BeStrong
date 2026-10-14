@@ -34,12 +34,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 @Singleton
-class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @ApplicationScope scope: CoroutineScope) {
+class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @ApplicationScope private val scope: CoroutineScope) {
 
     /**
      * Entrenos ya decodificados por id (con el JSON del que salieron): cada escritura en la tabla
@@ -308,6 +309,16 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun saveWorkout(workout: Workout) =
         dao.upsertWorkout(WorkoutEntity(workout.id, workout.startedAtEpochMs, Persistence.encodeWorkout(workout)))
+
+    /**
+     * Cambia de una vez (una transacción) los entrenos que cumplen [match], tuyos y de la pareja, con la hora de
+     * cambio al día (si no, una copia más antigua podría ganar al combinar). En el ámbito de la app: sigue aunque
+     * se cierre la pantalla desde la que se pidió (renombrar un gimnasio o a la pareja y salir con Atrás).
+     */
+    fun rewriteHistory(match: (Workout) -> Boolean, change: (Workout) -> Workout) = scope.launch {
+        val now = System.currentTimeMillis()
+        saveWorkouts(historyOnce(includePartner = true).filter(match).map { change(it).copy(updatedAtEpochMs = now) })
+    }
 
     /** Varios entrenos de una vez (una transacción): p. ej. al renombrar un gimnasio. */
     suspend fun saveWorkouts(workouts: List<Workout>) {
