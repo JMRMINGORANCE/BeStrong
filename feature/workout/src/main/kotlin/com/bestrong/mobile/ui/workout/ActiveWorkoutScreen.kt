@@ -500,8 +500,8 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
                 Column(Modifier.padding(12.dp)) {
                     Text(stringResource(R.string.next_up), style = MaterialTheme.typography.labelMedium)
                     Text(we.exercise.displayName(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text(describeSet(set, we.exercise.tracking, unit), style = MaterialTheme.typography.headlineMedium)
-                    prev?.let { Text(stringResource(R.string.previous_value, describeSet(it, we.exercise.tracking, unit)), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    Text(describeSet(set, we.exercise, unit), style = MaterialTheme.typography.headlineMedium)
+                    prev?.let { Text(stringResource(R.string.previous_value, describeSet(it, we.exercise, unit)), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
             }
         }
@@ -737,7 +737,7 @@ private fun ExerciseCard(
                     AssistChip(
                         onClick = { vm.applySuggestion(we.id, s) },
                         enabled = differs,
-                        label = { Text(stringResource(if (differs) R.string.suggestion_apply else R.string.suggestion_applied, icon, describeSet(first, we.exercise.tracking, unit, chipFactor), s.reasonText()), maxLines = 2) },
+                        label = { Text(stringResource(if (differs) R.string.suggestion_apply else R.string.suggestion_applied, icon, describeSet(first, we.exercise, unit, chipFactor), s.reasonText()), maxLines = 2) },
                         modifier = Modifier.padding(horizontal = 12.dp),
                     )
                 }
@@ -762,6 +762,7 @@ private fun ExerciseCard(
                         set = set,
                         previous = previous.getOrNull(i),
                         tracking = we.exercise.tracking,
+                        pace = com.bestrong.core.util.PaceStyle.of(we.exercise.id),
                         onWeightKg = { vm.updateSet(we.id, set.id, weightKg = it) },
                         onReps = { vm.updateSet(we.id, set.id, reps = it) },
                         onDuration = { vm.updateSet(we.id, set.id, duration = it) },
@@ -930,7 +931,7 @@ private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.mode
     val e1rms by vm.recentOneRepMax.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
     val e1rm = e1rms[we.exercise.id]
-    val load = remember(we.sets, rpe, e1rm, settings) { vm.targetRpeLoad(we, e1rm, settings) }
+    val load = remember(we.sets, rpe, e1rm, settings) { targetRpeLoad(we, e1rm, settings) }
     // Solo se puede aplicar si queda alguna serie normal por hacer
     val pending = we.sets.any { !it.completed && it.type == SetType.NORMAL }
     // Con «suma de las dos mancuernas», igual que en las filas

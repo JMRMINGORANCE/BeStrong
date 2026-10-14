@@ -34,14 +34,14 @@ object CoachReport {
                 val lines = w.exercises.filter { it.completedSets.isNotEmpty() }.map { we ->
                     // Con «suma de las dos» el peso se da como en la app (se guarda por mancuerna)
                     val factor = if (dumbbellTotal && we.exercise.equipment == Equipment.DUMBBELL && we.exercise.tracking == TrackingType.WEIGHT_REPS) 2 else 1
-                    val sets = we.completedSets.joinToString(" / ") { set(it.copy(weightKg = it.weightKg * factor), we.exercise.tracking, unit) }
+                    val sets = we.completedSets.joinToString(" / ") { set(it.copy(weightKg = it.weightKg * factor), we.exercise.tracking, unit, com.bestrong.core.util.PaceStyle.of(we.exercise.id)) }
                     "• " + exerciseName(we.exercise) + ": " + sets + we.notes.takeIf { it.isNotBlank() }?.let { " — $it" }.orEmpty()
                 }
                 (listOf(header) + lines + listOfNotNull(w.notes.takeIf { it.isNotBlank() }?.let { "✎ $it" })).joinToString("\n")
             }
     }
 
-    private fun set(s: WorkoutSet, tracking: TrackingType, unit: WeightUnit): String {
+    private fun set(s: WorkoutSet, tracking: TrackingType, unit: WeightUnit, pace: com.bestrong.core.util.PaceStyle = com.bestrong.core.util.PaceStyle.PER_KM): String {
         // Unilaterales: izquierda|derecha, como en la app («/» ya separa series)
         val reps = s.repsRight?.let { "${s.reps}|$it" } ?: "${s.reps}"
         val body = when (tracking) {
@@ -55,7 +55,7 @@ object CoachReport {
             TrackingType.DURATION -> "${s.durationSec}s"
             TrackingType.DISTANCE -> "${s.distanceM.toInt()}m"
             // Con distancia, también el ritmo (min/km): lo que mira quien entrena a alguien que corre
-            TrackingType.CARDIO -> "${s.durationSec / 60}min" + if (s.distanceM > 0) " " + decimal(s.distanceM / 1000) + "km" + com.bestrong.core.util.paceText(s.durationSec, s.distanceM)?.let { " ($it)" }.orEmpty() else ""
+            TrackingType.CARDIO -> "${s.durationSec / 60}min" + if (s.distanceM > 0) " " + decimal(s.distanceM / 1000) + "km" + com.bestrong.core.util.paceText(s.durationSec, s.distanceM, pace)?.let { " · $it" }.orEmpty() else ""
         }
         // Misma abreviatura que en el historial de la app
         val warm = if (s.type == SetType.WARMUP) SetType.WARMUP.short + ":" else ""

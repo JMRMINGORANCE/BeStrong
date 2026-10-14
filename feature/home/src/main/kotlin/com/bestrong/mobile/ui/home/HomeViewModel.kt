@@ -146,7 +146,8 @@ class HomeViewModel @Inject constructor(
     /** Lo termina a la hora del último cambio y lo guarda en el historial. */
     fun finishForgotten() = viewModelScope.launch {
         val w = repo.activeWorkout.value ?: return@launch
-        val finished = actions.withGym(WorkoutEditor.finishAtLastActivity(w))
+        // Sin sello de gimnasio: pudo quedar abierto días y el activo de ahora no tiene por qué ser aquel
+        val finished = WorkoutEditor.finishAtLastActivity(w)
         repo.setActive(null)
         if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
         _messages.tryEmit(context.getString(R.string.msg_forgotten_saved))

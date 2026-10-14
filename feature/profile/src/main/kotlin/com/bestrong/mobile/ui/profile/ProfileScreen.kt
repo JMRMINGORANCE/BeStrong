@@ -124,8 +124,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             gym = g,
             canDelete = settings.gyms.size > 1 && settings.gyms.any { it.id == g.id },
             onSave = { updated ->
-                vm.saveGym(updated)
-                editingGym = null
+                // Con un nombre repetido se queda abierto (sale el aviso) para cambiarlo
+                if (vm.saveGym(updated)) editingGym = null
             },
             onDelete = {
                 vm.deleteGym(g.id)

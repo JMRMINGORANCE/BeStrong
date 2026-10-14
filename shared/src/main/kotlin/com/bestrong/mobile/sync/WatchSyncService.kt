@@ -46,6 +46,17 @@ class WatchSyncService : WearableListenerService() {
 
     @Inject @ApplicationScope lateinit var appScope: CoroutineScope
 
+    /**
+     * Entreno terminado en el reloj, listo para guardar: ejercicios con los datos completos del móvil (el reloj
+     * puede traerlos recortados), calorías del reloj + activas con tus datos corporales y el gimnasio: el ya
+     * guardado si es un reenvío ([stored]; aunque luego se cambiara de gimnasio), si no el que trae o el activo.
+     */
+    private suspend fun completeFromWatch(received: com.bestrong.core.model.Workout, stored: com.bestrong.core.model.Workout?): com.bestrong.core.model.Workout {
+        val full = received.copy(exercises = received.exercises.map { we -> we.copy(exercise = repository.exercise(we.exercise.id) ?: we.exercise) })
+        val completed = energy.complete(full, watchKcal = received.calories)
+        return if (stored?.gymName != null) completed.copy(gymName = stored.gymName) else actions.withGym(completed)
+    }
+
     override fun onDataChanged(events: DataEventBuffer) {
         // El servicio se destruye al volver de onDataChanged: procesamos de forma síncrona.
         runBlocking {
@@ -56,12 +67,9 @@ class WatchSyncService : WearableListenerService() {
                     path.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
                         val received = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
-                        // Calorías del reloj + activas (sin el gasto en reposo) con tus datos corporales
-                        // Ejercicios con los datos completos del móvil (el reloj puede traerlos recortados)
-                        val full = received.copy(exercises = received.exercises.map { we -> we.copy(exercise = repository.exercise(we.exercise.id) ?: we.exercise) })
-                        // El reloj no sabe en qué gimnasio se está: el activo del móvil
-                        val workout = actions.withGym(energy.complete(full, watchKcal = received.calories))
-                        val isNew = repository.historyOnce().none { it.id == workout.id }
+                        val stored = repository.historyOnce().firstOrNull { it.id == received.id }
+                        val workout = completeFromWatch(received, stored)
+                        val isNew = stored == null
                         repository.saveWorkout(workout)
                         repository.clearRemoteActive(workout.id)
                         if (isNew) {

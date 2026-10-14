@@ -1132,4 +1132,5 @@
     <string name="cardio_best_pace">Millor ritme (des d’1 km): %1$s</string>
     <string name="restore_latest">Restaurar la darrera còpia automàtica</string>
     <string name="restore_latest_none">No hi ha cap còpia automàtica a la carpeta</string>
+    <string name="gym_name_taken">Ja hi ha un gimnàs anomenat «%1$s»: tria un altre nom</string>
 </resources>

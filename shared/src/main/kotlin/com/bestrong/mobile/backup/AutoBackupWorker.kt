@@ -16,6 +16,7 @@ import dagger.hilt.android.EntryPointAccessors
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Copia de seguridad semanal en la carpeta que elija el usuario (Drive, almacenamiento local…):
@@ -42,6 +43,11 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             // Sin carpeta no hay nada que hacer; con la carpeta perdida no se ha copiado nada («Copiar ahora» lo dice)
             return if (lost) Result.failure(androidx.work.workDataOf(OUT_FOLDER_LOST to true)) else Result.success()
         }
+        // La semanal y «Copiar ahora» van con nombres distintos: que no escriban a la vez el archivo del día
+        return writeLock.withLock { backUp(deps, settingsStore, tree) }
+    }
+
+    private suspend fun backUp(deps: WorkerEntryPoint, settingsStore: com.bestrong.mobile.data.SettingsStore, tree: Uri): Result {
         return runCatching {
             val data = deps.backup().data()
             val date = LocalDate.now()
@@ -142,6 +148,8 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         /** La copia automática completa (JSON) más reciente de la carpeta [tree], para restaurarla sin buscarla. */
         fun latestJson(context: Context, tree: Uri): Uri? =
             children(context, tree).filterKeys { it.startsWith(PREFIX) && it.endsWith(".json") }.maxByOrNull { it.key }?.value
+
+        private val writeLock = kotlinx.coroutines.sync.Mutex()
 
         /** En el resultado de una copia fallida: la carpeta ya no estaba disponible. */
         const val OUT_FOLDER_LOST = "folder_lost"

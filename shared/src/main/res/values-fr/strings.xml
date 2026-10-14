@@ -1132,4 +1132,5 @@
     <string name="cardio_best_pace">Meilleure allure (dès 1 km) : %1$s</string>
     <string name="restore_latest">Restaurer la dernière sauvegarde automatique</string>
     <string name="restore_latest_none">Aucune sauvegarde automatique dans le dossier</string>
+    <string name="gym_name_taken">Il existe déjà une salle nommée « %1$s » : choisis un autre nom</string>
 </resources>

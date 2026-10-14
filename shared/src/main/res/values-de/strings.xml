@@ -1132,4 +1132,5 @@
     <string name="cardio_best_pace">Bestes Tempo (ab 1 km): %1$s</string>
     <string name="restore_latest">Letzte automatische Sicherung wiederherstellen</string>
     <string name="restore_latest_none">Keine automatische Sicherung im Ordner</string>
+    <string name="gym_name_taken">Es gibt schon ein Studio namens „%1$s“: wähle einen anderen Namen</string>
 </resources>

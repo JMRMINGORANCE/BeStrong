@@ -129,12 +129,20 @@ class ActiveWorkoutViewModel @Inject constructor(
         setPartnerMode(partner)
     }
 
+    /** Historial de quien entrena ahora: el tuyo o, en modo pareja, el suyo (con el nombre de su entreno en curso). */
+    private val athleteHistory: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, partnerMode, repo.partnerWorkout) { me, partner, isPartner, pw ->
+        if (isPartner) partner.filter { it.athlete == (pw?.athlete ?: settingsStore.settings.value.partnerName) } else me
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, repo.history.value)
+
     /** «La vez anterior» de cada ejercicio: en este gimnasio si allí ya se hizo (como el relleno), si no la última. */
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = combine(
         repo.previousSetsLookup,
-        repo.history,
+        athleteHistory,
+        partnerMode,
         settingsStore.settings.map { s -> s.activeGym.name.takeIf { s.gyms.size > 1 } }.distinctUntilChanged(),
-    ) { all, history, gym ->
+    ) { mine, history, isPartner, gym ->
+        // En modo pareja, la suya (tu búsqueda ya preparada solo vale para ti)
+        val all: (String) -> List<WorkoutSet> = if (isPartner) WorkoutStats.lastSetsByExercise(history).let { last -> { id: String -> last[id].orEmpty() } } else mine
         if (gym == null) {
             all
         } else {
@@ -186,7 +194,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Sugerencia de progresión por ejercicio (id de ejercicio → sugerencia). */
     val suggestions: StateFlow<Map<String, ProgressionSuggestion>> = combine(
         workout.map { w -> w?.exercises?.map { it.exercise }.orEmpty() }.distinctUntilChanged(),
-        repo.history,
+        athleteHistory,
         settings,
     ) { exercises, history, s ->
         if (!s.progressionEnabled) {
@@ -228,53 +236,45 @@ class ActiveWorkoutViewModel @Inject constructor(
         .flowOn(Dispatchers.IO)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    /** Incremento propio del ejercicio en kg; null vuelve al de la unidad. */
     /**
      * Cambia el gimnasio activo: las sugerencias y el peso por RPE se recalculan con su material, y las series
      * pendientes con peso se ajustan a lo que hay en el nuevo (se puede deshacer).
      */
     fun setActiveGym(id: String) {
-        if (settings.value.activeGym.id == id) return
+        val previousGym = settings.value.activeGym.id
+        if (previousGym == id) return
         settingsStore.update { it.copy(activeGymId = id) }
-        // Los dos entrenos (el tuyo y el de la pareja) están en el mismo gimnasio
-        refitActive(partnerMode.value, undoable = true)
-        refitActive(!partnerMode.value, undoable = false)
-    }
-
-    /** Ajusta lo pendiente de uno de los dos entrenos; el que no se ve, sin aviso (dos «deshacer» seguidos confunden). */
-    private fun refitActive(partner: Boolean, undoable: Boolean) {
+        val partner = partnerMode.value
         viewModelScope.launch {
-            val (before, after) = update(partner) { w ->
-                w.copy(exercises = w.exercises.map { e -> refitToGym(e) })
-            } ?: return@launch
-            val old = before.exercises.flatMap { it.sets }.associateBy { it.id }
-            val changed = after.exercises.flatMap { it.sets }.filter { old[it.id] != null && old[it.id] != it }.associateBy { it.id }
-            if (changed.isEmpty() || !undoable) return@launch
+            // Los dos entrenos (el tuyo y el de la pareja) están en el mismo gimnasio: un solo «deshacer» para todo
+            val visible = refitActive(partner)
+            val hidden = refitActive(!partner)
+            val workoutId = workout.value?.id ?: return@launch
+            if (visible == null && hidden == null) return@launch
             _events.tryEmit(
-                WorkoutEvent.Undoable(UndoKind.GYM, partner, before.id) { w ->
-                    w.copy(exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { s -> if (changed[s.id] == s) old.getValue(s.id) else s }) })
-                },
+                WorkoutEvent.Undoable(
+                    UndoKind.GYM, partner, workoutId,
+                    alsoUndo = {
+                        hidden?.let { restore -> update(!partner) { w -> restore(w) } }
+                        settingsStore.update { it.copy(activeGymId = previousGym) }
+                    },
+                    restore = { w -> visible?.invoke(w) ?: w },
+                ),
             )
         }
     }
 
-    /** Series pendientes con peso de un ejercicio, al peso más cercano que se puede montar en el gimnasio activo. */
-    private fun refitToGym(e: com.bestrong.core.model.WorkoutExercise): com.bestrong.core.model.WorkoutExercise {
-        val s = settings.value
-        val gym = s.gymFor(e.exercise.id)
-        // En libras no hay discos del perfil; si el gimnasio nuevo no tiene ese material no hay a qué ajustar
-        // (se verá el aviso de material)
-        if (s.unit != com.bestrong.core.util.WeightUnit.KG || e.exercise.equipment !in gym.equipment) return e
-        val barbell = e.exercise.equipment == com.bestrong.core.model.Equipment.BARBELL || e.exercise.equipment == com.bestrong.core.model.Equipment.SMITH
-        return e.copy(
-            sets = e.sets.map { set ->
-                // Por debajo de la barra (técnica con barra ligera) no se sube a la barra
-                val fits = set.weightKg > 0 && !(barbell && set.weightKg < gym.loadedBarKg)
-                if (!set.completed && fits) set.copy(weightKg = gym.nearestLoad(set.weightKg, e.exercise.equipment)) else set
-            },
-        )
+    /** Ajusta lo pendiente de uno de los dos entrenos; devuelve cómo deshacerlo (null si no cambió nada). */
+    private suspend fun refitActive(partner: Boolean): ((Workout) -> Workout)? {
+        val (before, after) = update(partner) { w -> w.copy(exercises = w.exercises.map { e -> refitToGym(e, settings.value) }) } ?: return null
+        val old = before.exercises.flatMap { it.sets }.associateBy { it.id }
+        val changed = after.exercises.flatMap { it.sets }.filter { old[it.id] != null && old[it.id] != it }.associateBy { it.id }
+        return changed.takeIf { it.isNotEmpty() }?.let { c ->
+            { w: Workout -> w.copy(exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { s -> if (c[s.id] == s) old.getValue(s.id) else s }) }) }
+        }
     }
 
+    /** Incremento propio del ejercicio en kg; null vuelve al de la unidad. */
     fun setIncrement(exerciseId: String, kg: Double?) = settingsStore.update { s ->
         s.copy(exerciseIncrementKg = if (kg == null) s.exerciseIncrementKg - exerciseId else s.exerciseIncrementKg + (exerciseId to kg))
     }
@@ -315,7 +315,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun addExercises(ids: List<String>) {
         val exercises = ids.mapNotNull { repo.exercise(it) }
         // En modo pareja, con su historial
-        val lookup = actions.prefillLookup(athlete = settings.value.partnerName.takeIf { partnerMode.value })
+        val athlete = (repo.partnerWorkout.value?.athlete ?: settings.value.partnerName).takeIf { partnerMode.value && it.isNotBlank() }
+        val lookup = actions.prefillLookup(athlete = athlete)
         val history = repo.history.value
         // Descanso automático según el tipo de ejercicio (o el que usaste la última vez)
         edit { WorkoutEditor.addExercises(it, exercises, lookup, restFor = { ex -> RestPolicy.restFor(ex, history) }) }
@@ -332,6 +333,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             val workoutId: String,
             /** Aviso que va detrás (p. ej. objetivo conseguido) y que solo se muestra si no se deshace. */
             val followUp: WorkoutEvent? = null,
+            /** Lo demás que se deshace a la vez (el otro entreno, el gimnasio activo…). */
+            val alsoUndo: (suspend () -> Unit)? = null,
             val restore: (Workout) -> Workout,
         ) : WorkoutEvent
         data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
@@ -356,7 +359,10 @@ class ActiveWorkoutViewModel @Inject constructor(
             pendingRestUndo?.let { end -> if (restTimer.rest.value?.endsAtEpochMs == end) restTimer.skip() }
             pendingRestUndo = null
         }
-        viewModelScope.launch { update(event.partner) { w -> if (w.id == event.workoutId) event.restore(w) else w } }
+        viewModelScope.launch {
+            update(event.partner) { w -> if (w.id == event.workoutId) event.restore(w) else w }
+            event.alsoUndo?.invoke()
+        }
     }
 
     fun removeExercise(weId: String) {
@@ -582,20 +588,6 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /**
-     * Peso orientativo para el RPE objetivo del ejercicio (kg) y las reps de su siguiente serie, con el 1RM
-     * estimado reciente [oneRepMaxKg] y redondeado al material del gimnasio; null sin objetivo, sin reps o sin historial.
-     */
-    fun targetRpeLoad(we: com.bestrong.core.model.WorkoutExercise, oneRepMaxKg: Double?, s: com.bestrong.mobile.data.UserSettings): Pair<Double, Int>? {
-        val set = we.sets.firstOrNull { !it.completed && it.type == SetType.NORMAL } ?: we.sets.firstOrNull { it.type == SetType.NORMAL }
-        val reps = set?.reps ?: 0
-        val rpe = we.targetRpe?.takeIf { reps > 0 } ?: return null
-        return oneRepMaxKg?.let {
-            val kg = com.bestrong.core.stats.RpeLoad.weightFor(it, reps, rpe)
-            com.bestrong.core.stats.RpeLoad.roundToLoadable(kg, s.unit, s.stepKgFor(we.exercise.id), s.gymFor(we.exercise.id), we.exercise.equipment) to reps
-        }
-    }
-
-    /**
      * Pone en cada serie normal pendiente el peso para sus reps al RPE objetivo (una pirámide 12/10/8 lleva tres
      * pesos), redondeado al material y con el tope semanal, como el relleno. Se puede deshacer.
      */
@@ -606,7 +598,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         val history = if (partner) repo.partnerHistory.value.filter { it.athlete == s.partnerName } else repo.history.value
         viewModelScope.launch {
             val (before, after) = update(partner) { w ->
-                WorkoutEditor.updateExercise(w, weId) { e -> withRpeLoads(e, e1rms[e.exercise.id], s, history) }
+                WorkoutEditor.updateExercise(w, weId) { e -> withRpeLoads(e, e1rms[e.exercise.id], s, history, actions) }
             } ?: return@launch
             val old = before.exercises.firstOrNull { it.id == weId }?.sets?.associateBy { it.id } ?: return@launch
             val changed = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
@@ -617,23 +609,6 @@ class ActiveWorkoutViewModel @Inject constructor(
                 },
             )
         }
-    }
-
-    private fun withRpeLoads(
-        e: com.bestrong.core.model.WorkoutExercise,
-        e1rm: Double?,
-        s: com.bestrong.mobile.data.UserSettings,
-        history: List<Workout>,
-    ): com.bestrong.core.model.WorkoutExercise {
-        val rpe = e.targetRpe
-        if (rpe == null || e1rm == null) return e
-        val pending = e.sets.filter { !it.completed && it.type == SetType.NORMAL && it.reps > 0 }
-        val raw = pending.map { set ->
-            val kg = com.bestrong.core.stats.RpeLoad.weightFor(e1rm, set.reps, rpe)
-            set.copy(weightKg = com.bestrong.core.stats.RpeLoad.roundToLoadable(kg, s.unit, s.stepKgFor(e.exercise.id), s.gymFor(e.exercise.id), e.exercise.equipment))
-        }
-        val loaded = actions.loadable(e.exercise, raw, null, history = history).associateBy { it.id }
-        return e.copy(sets = e.sets.map { loaded[it.id] ?: it })
     }
 
     /** Añade series de aproximación antes de la primera serie de trabajo. */

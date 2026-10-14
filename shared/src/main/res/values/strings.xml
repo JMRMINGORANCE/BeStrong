@@ -1132,4 +1132,5 @@
     <string name="cardio_best_pace">Mejor ritmo (desde 1 km): %1$s</string>
     <string name="restore_latest">Restaurar la última copia automática</string>
     <string name="restore_latest_none">No hay ninguna copia automática en la carpeta</string>
+    <string name="gym_name_taken">Ya hay un gimnasio llamado «%1$s»: elige otro nombre</string>
 </resources>

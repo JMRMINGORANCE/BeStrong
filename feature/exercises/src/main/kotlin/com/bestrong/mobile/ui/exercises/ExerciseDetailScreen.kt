@@ -195,7 +195,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             SectionHeader(stringResource(R.string.next_target))
                             Text(
-                                stringResource(R.string.next_target_line, t.sets.count { it.type != SetType.WARMUP }, describeSet(work, s.exercise.tracking, unit)),
+                                stringResource(R.string.next_target_line, t.sets.count { it.type != SetType.WARMUP }, describeSet(work, s.exercise, unit)),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -345,7 +345,7 @@ private fun CardioBestsCard(exercise: com.bestrong.core.model.Exercise, b: com.b
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.cardio_bests))
             b.longestDistance?.let { Text(stringResource(R.string.cardio_best_distance, com.bestrong.mobile.ui.workout.cardioText(it.durationSec, it.distanceM, pace = style))) }
-            b.longestTime?.let { Text(stringResource(R.string.cardio_best_time, com.bestrong.mobile.ui.workout.cardioText(it.durationSec, it.distanceM, pace = style))) }
+            b.longestTime?.takeIf { it !== b.longestDistance }?.let { Text(stringResource(R.string.cardio_best_time, com.bestrong.mobile.ui.workout.cardioText(it.durationSec, it.distanceM, pace = style))) }
             b.bestPace?.let { set ->
                 com.bestrong.core.util.paceText(set.durationSec, set.distanceM, style)?.let { Text(stringResource(R.string.cardio_best_pace, it), fontWeight = FontWeight.Bold) }
             }

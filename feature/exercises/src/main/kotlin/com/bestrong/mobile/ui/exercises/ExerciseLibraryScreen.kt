@@ -235,7 +235,7 @@ fun ExerciseSearchList(
                             // Última vez y su mejor serie, para elegir sin abrir la ficha
                             last[ex.id]?.let { (date, set) ->
                                 Text(
-                                    stringResource(R.string.exercise_last_time, formatShortDate(date), describeSet(set, ex.tracking, unit)),
+                                    stringResource(R.string.exercise_last_time, formatShortDate(date), describeSet(set, ex, unit)),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.primary,
                                 )

@@ -110,6 +110,8 @@ fun SetRow(
     set: WorkoutSet,
     previous: WorkoutSet?,
     tracking: TrackingType,
+    /** Medida del ritmo del cardio (min/km, /500 m, km/h). */
+    pace: com.bestrong.core.util.PaceStyle = com.bestrong.core.util.PaceStyle.PER_KM,
     onWeightKg: (Double) -> Unit,
     onReps: (Int) -> Unit,
     onDuration: (Int) -> Unit,
@@ -262,7 +264,7 @@ fun SetRow(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            previous?.let { describeSet(it, tracking, unit, weightFactor) } ?: "—",
+                            previous?.let { describeSet(it, tracking, unit, weightFactor, pace = pace) } ?: "—",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,

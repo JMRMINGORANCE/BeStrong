@@ -48,7 +48,7 @@ fun RestPip(repository: BeStrongRepository, restTimer: RestTimerController) {
                 WorkoutEditor.nextPendingSet(wk)?.let { (i, s) ->
                     val we = wk.exercises[i]
                     Text(
-                        stringResource(R.string.pip_next, we.exercise.displayName() + " · " + describeSet(s, we.exercise.tracking, com.bestrong.mobile.ui.components.LocalWeightUnit.current)),
+                        stringResource(R.string.pip_next, we.exercise.displayName() + " · " + describeSet(s, we.exercise, com.bestrong.mobile.ui.components.LocalWeightUnit.current)),
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,

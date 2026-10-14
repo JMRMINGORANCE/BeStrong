@@ -1132,4 +1132,5 @@
     <string name="cardio_best_pace">Best pace (1 km or more): %1$s</string>
     <string name="restore_latest">Restore the latest automatic backup</string>
     <string name="restore_latest_none">There’s no automatic backup in the folder</string>
+    <string name="gym_name_taken">There’s already a gym called “%1$s”: choose another name</string>
 </resources>

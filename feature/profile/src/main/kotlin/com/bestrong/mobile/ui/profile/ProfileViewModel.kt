@@ -422,12 +422,17 @@ class ProfileViewModel @Inject constructor(
     /** La última copia automática de la carpeta elegida, a la vista previa (sin buscar el archivo a mano). */
     fun restoreLatestAuto() = viewModelScope.launch {
         val tree = settings.value.backupFolderUri?.let(Uri::parse) ?: return@launch
-        val latest = runCatching { withContext(Dispatchers.IO) { AutoBackupWorker.latestJson(context, tree) } }.getOrNull()
-        if (latest == null) {
+        val latest = runCatching { withContext(Dispatchers.IO) { AutoBackupWorker.latestJson(context, tree) } }
+        // Sin permiso sobre la carpeta no es que no haya copias: la carpeta ya no está disponible
+        val uri = latest.getOrElse { e ->
+            _messages.tryEmit(context.getString(if (e is SecurityException) R.string.auto_backup_lost else R.string.restore_latest_none))
+            return@launch
+        }
+        if (uri == null) {
             _messages.tryEmit(context.getString(R.string.restore_latest_none))
             return@launch
         }
-        restoreBackup(latest)
+        restoreBackup(uri)
     }
 
     /** Lee una copia JSON de BeStrong y la deja pendiente de confirmar (añade lo que falte, no borra nada). */
@@ -465,17 +470,24 @@ class ProfileViewModel @Inject constructor(
      * Guarda un perfil de gimnasio (nuevo o editado). Si cambia de nombre, también en los entrenos hechos allí:
      * el historial, su filtro y el relleno «en este gimnasio» van por el nombre.
      */
-    fun saveGym(updated: com.bestrong.core.training.GymProfile) {
+    fun saveGym(updated: com.bestrong.core.training.GymProfile): Boolean {
+        // Dos con el mismo nombre mezclarían sus entrenos (el historial va por el nombre)
+        if (settings.value.gyms.any { it.id != updated.id && it.name.trim().equals(updated.name.trim(), ignoreCase = true) }) {
+            _messages.tryEmit(context.getString(R.string.gym_name_taken, updated.name))
+            return false
+        }
         val oldName = settings.value.gyms.firstOrNull { it.id == updated.id }?.name
         settingsStore.update { s ->
             val exists = s.gyms.any { it.id == updated.id }
             s.copy(gyms = if (exists) s.gyms.map { if (it.id == updated.id) updated else it } else s.gyms + updated)
         }
-        if (oldName == null || oldName == updated.name) return
-        viewModelScope.launch {
-            repo.historyOnce(includePartner = true).filter { it.gymName == oldName }
-                .forEach { repo.saveWorkout(it.copy(gymName = updated.name)) }
+        if (oldName != null && oldName != updated.name) {
+            viewModelScope.launch {
+                // De una vez (una transacción): no se redibuja ni se envía al reloj por cada entreno
+                repo.saveWorkouts(repo.historyOnce(includePartner = true).filter { it.gymName == oldName }.map { it.copy(gymName = updated.name) })
+            }
         }
+        return true
     }
 
     /** Borra un perfil de gimnasio y lo quita de las rutinas que lo tenían como suyo. */

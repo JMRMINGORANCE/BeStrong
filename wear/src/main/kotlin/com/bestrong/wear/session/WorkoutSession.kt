@@ -208,7 +208,10 @@ class WorkoutSession @Inject constructor(
         begin(routine.toWorkout(System.currentTimeMillis(), lookup, WorkoutSource.WATCH))
     }
 
-    private fun begin(w: Workout) {
+    private fun begin(start: Workout) {
+        // Dónde se empieza (con varios gimnasios): así no depende del que tenga el móvil cuando llegue
+        val s = store.settings.value
+        val w = if (start.gymName == null && s.multiGym) start.copy(gymName = s.activeGym?.name) else start
         _summary.value = null
         _exerciseIndex.value = 0
         _metrics.value = HealthMetrics()

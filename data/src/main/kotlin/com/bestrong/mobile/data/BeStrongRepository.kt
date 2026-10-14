@@ -309,6 +309,13 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     suspend fun saveWorkout(workout: Workout) =
         dao.upsertWorkout(WorkoutEntity(workout.id, workout.startedAtEpochMs, Persistence.encodeWorkout(workout)))
 
+    /** Varios entrenos de una vez (una transacción): p. ej. al renombrar un gimnasio. */
+    suspend fun saveWorkouts(workouts: List<Workout>) {
+        if (workouts.isEmpty()) return
+        val rows = withContext(Dispatchers.Default) { workouts.map { WorkoutEntity(it.id, it.startedAtEpochMs, Persistence.encodeWorkout(it)) } }
+        dao.upsertAll(emptyList(), rows)
+    }
+
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
     /** Borrado masivo: una consulta por bloque en vez de una transacción (y un recálculo) por entreno. */
