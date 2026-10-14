@@ -44,7 +44,14 @@ sealed interface LoadScheme {
 }
 
 @Serializable
-data class PeriodizedItem(val exerciseId: String, val scheme: LoadScheme, val restSeconds: Int = 120, val tier: String? = null)
+data class PeriodizedItem(
+    val exerciseId: String,
+    val scheme: LoadScheme,
+    val restSeconds: Int = 120,
+    val tier: String? = null,
+    /** RPE objetivo de las series (programas propios); pasa a la sesión como en una rutina. */
+    val targetRpe: Double? = null,
+)
 
 @Serializable
 data class ProgramDay(val nameEs: String, val nameEn: String, val items: List<PeriodizedItem>)
@@ -137,7 +144,7 @@ object Periodization {
             val sets = setsFor(item, program, active, cycle, week, done)
             val amrapNote = if (sets.second) texts.amrapNote else ""
             val tier = item.tier?.let { "$it · " }.orEmpty()
-            RoutineExercise(exercise = ex, sets = sets.first, restSeconds = item.restSeconds, notes = (tier + amrapNote).trimEnd(' ', '·'))
+            RoutineExercise(exercise = ex, sets = sets.first, restSeconds = item.restSeconds, notes = (tier + amrapNote).trimEnd(' ', '·'), targetRpe = item.targetRpe)
         }
         val weekLabel = if (program.weeksPerCycle > 1) " · ${texts.weekPrefix}${week + 1}" else ""
         val routine = Routine(

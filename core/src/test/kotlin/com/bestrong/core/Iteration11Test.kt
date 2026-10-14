@@ -531,4 +531,21 @@ class CollarTest {
         val top = we.copy(targetRpe = 10.0, sets = listOf(done.copy(rpe = 10.0), pending))
         assertEquals(null, com.bestrong.core.training.Autoregulation.suggest(top, "a", 2.5))
     }
+
+    @Test
+    fun rpeVsTargetAveragesWorkingSets() {
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val sets = listOf(
+            WorkoutSet(weightKg = 40.0, reps = 8, completed = true, type = SetType.WARMUP, rpe = 5.0),
+            WorkoutSet(weightKg = 80.0, reps = 8, completed = true, rpe = 9.0),
+            WorkoutSet(weightKg = 80.0, reps = 8, completed = true, rpe = 10.0),
+        )
+        val w = Workout(name = "W", startedAtEpochMs = 0, exercises = listOf(WorkoutExercise(exercise = ex, sets = sets, targetRpe = 8.0)))
+        val r = com.bestrong.core.stats.RpeTarget.vsTarget(w).single()
+        // El calentamiento no cuenta: media 9,5 frente a 8 → más duro de lo previsto
+        assertEquals(9.5, r.averageRpe, 1e-9)
+        assertEquals(1, r.direction)
+        // Sin objetivo no sale
+        assertEquals(0, com.bestrong.core.stats.RpeTarget.vsTarget(w.copy(exercises = w.exercises.map { it.copy(targetRpe = null) })).size)
+    }
 }

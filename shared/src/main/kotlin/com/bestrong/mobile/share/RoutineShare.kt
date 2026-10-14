@@ -40,7 +40,7 @@ object RoutineShare {
         context.startActivity(Intent.createChooser(send, context.getString(R.string.share_routine_send)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    /** PDF A4 con los ejercicios, series × reps y descansos, para imprimir o enviar. */
+    /** PDF A4 con los ejercicios, series × reps, descansos, RPE objetivo y tempo, para imprimir o enviar. */
     fun sharePdf(context: Context, routines: List<Routine>, title: String) {
         val doc = PdfDocument()
         val w = 595
@@ -69,7 +69,12 @@ object RoutineShare {
                 val work = re.sets.filter { it.type != SetType.WARMUP }
                 val reps = targetText(re.exercise.tracking, work.firstOrNull())
                 val line = "• " + re.exercise.displayName(context) + "  —  " + context.getString(R.string.pdf_routine_sets, work.size, reps) +
-                    "  ·  " + context.getString(R.string.pdf_rest, formatDuration(re.restSeconds.toLong()))
+                    "  ·  " + context.getString(R.string.pdf_rest, formatDuration(re.restSeconds.toLong())) +
+                    // RPE objetivo y tempo, si los tiene: forman parte de la prescripción
+                    listOfNotNull(
+                        re.targetRpe?.takeIf { re.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { "RPE " + it.toString().removeSuffix(".0") },
+                        re.tempo?.let { context.getString(R.string.tempo) + " " + it },
+                    ).joinToString("") { "  ·  $it" }
                 page.canvas.drawText(line, 52f, y, bodyP)
                 y += 16f
             }

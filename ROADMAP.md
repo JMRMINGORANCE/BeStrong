@@ -276,3 +276,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] RPE objetivo por ejercicio en la rutina (móvil y reloj)
 - [x] Cintura objetivo con lo que falta
 - [x] El reloj redondea la sugerencia a los discos y mancuernas del gimnasio activo
+
+## Fase 29 — Objetivos que se cumplen ✅
+- [x] RPE medio frente al objetivo en el resumen del entreno
+- [x] RPE objetivo y tempo en el PDF de la rutina
+- [x] «Hace un año»: tocar un ejercicio abre su ficha y su progreso
+- [x] Cintura objetivo con fecha estimada según la tendencia
+- [x] RPE objetivo en los programas propios

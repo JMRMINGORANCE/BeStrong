@@ -924,6 +924,30 @@ private fun ExerciseCard(
     }
 }
 
+/** «Press banca: RPE 8.5 de media (objetivo 8)»: más duro en rojo, en el objetivo en verde. */
+@Composable
+private fun RpeVsTargetLines(w: com.bestrong.core.model.Workout) {
+    val items = remember(w) { com.bestrong.core.stats.RpeTarget.vsTarget(w) }
+    if (items.isEmpty()) return
+    Text(stringResource(R.string.summary_rpe_title), fontWeight = FontWeight.Bold)
+    items.forEach { r ->
+        Text(
+            stringResource(
+                R.string.summary_rpe_line,
+                ExerciseLibrary.byId(r.exerciseId)?.displayName() ?: r.exerciseName,
+                "%.1f".format(java.util.Locale.ROOT, r.averageRpe).removeSuffix(".0"),
+                r.targetRpe.toString().removeSuffix(".0"),
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = when (r.direction) {
+                1 -> MaterialTheme.colorScheme.error
+                0 -> statusColors.good
+                else -> MaterialTheme.colorScheme.onSurfaceVariant
+            },
+        )
+    }
+}
+
 @Composable
 fun WorkoutSummaryDialog(
     summary: FinishedSummary,
@@ -977,6 +1001,7 @@ fun WorkoutSummaryDialog(
                         )
                     }
                 }
+                RpeVsTargetLines(w)
                 summary.imbalances.forEach { (id, ratio) ->
                     Text(
                         stringResource(R.string.summary_imbalance, ExerciseLibrary.byId(id)?.displayName() ?: id, (ratio * 100).toInt()),

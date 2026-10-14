@@ -142,7 +142,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                             onNotes = { vm.setExerciseNotes(re.id, it) },
                             onTempo = { vm.setTempo(re.id, it) },
                         )
-                        TargetRpeChips(re.exercise.tracking, re.targetRpe) { vm.setTargetRpe(re.id, it) }
+                        com.bestrong.mobile.ui.components.TargetRpeChips(re.exercise.tracking, re.targetRpe) { vm.setTargetRpe(re.id, it) }
                         re.sets.forEachIndexed { i, set ->
                             key(re.id, i, re.sets.size) {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -326,17 +326,3 @@ private fun RoutineRangeRow(vm: RoutineEditorViewModel, routine: com.bestrong.co
     Text(stringResource(R.string.rep_range_all_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     com.bestrong.mobile.ui.components.RepRangeChips(common) { vm.setRangeForAll(it); common = it }
 }
-
-/** RPE objetivo de las series efectivas («—» = sin objetivo); solo en los ejercicios de peso × reps. */
-@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
-@Composable
-private fun TargetRpeChips(tracking: TrackingType, current: Double?, onPick: (Double?) -> Unit) {
-    if (tracking != TrackingType.WEIGHT_REPS) return
-    androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(R.string.target_rpe), style = MaterialTheme.typography.labelMedium, modifier = Modifier.align(Alignment.CenterVertically))
-        FilterChip(selected = current == null, onClick = { onPick(null) }, label = { Text("—") })
-        for (r in TARGET_RPES) FilterChip(selected = current == r, onClick = { onPick(r) }, label = { Text(r.toString().removeSuffix(".0")) })
-    }
-}
-
-private val TARGET_RPES = listOf(6.0, 7.0, 8.0, 8.5, 9.0, 10.0)

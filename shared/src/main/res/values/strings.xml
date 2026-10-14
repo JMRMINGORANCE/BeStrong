@@ -1093,4 +1093,6 @@
     <string name="waist_goal_none">Sin cintura objetivo</string>
     <string name="waist_goal_reached">Cintura objetivo (%1$s cm) conseguida 🎉</string>
     <string name="waist_goal_left">Cintura objetivo: %1$s cm · faltan %2$s cm</string>
+    <string name="summary_rpe_title">RPE frente al objetivo</string>
+    <string name="summary_rpe_line">%1$s: RPE %2$s de media (objetivo %3$s)</string>
 </resources>

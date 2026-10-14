@@ -1093,4 +1093,6 @@
     <string name="waist_goal_none">Pas d’objectif de tour de taille</string>
     <string name="waist_goal_reached">Objectif de tour de taille (%1$s cm) atteint 🎉</string>
     <string name="waist_goal_left">Tour de taille visé : %1$s cm · encore %2$s cm</string>
+    <string name="summary_rpe_title">RPE par rapport à l’objectif</string>
+    <string name="summary_rpe_line">%1$s : RPE moyen %2$s (objectif %3$s)</string>
 </resources>

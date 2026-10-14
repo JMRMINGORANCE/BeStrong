@@ -65,6 +65,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.double
+import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -82,6 +83,7 @@ data class ItemDraft(
     val percent: Int = 75,
     val incrementKg: Double = 2.5,
     val rest: Int = 120,
+    val targetRpe: Double? = null,
 )
 
 data class DayDraft(val name: String, val items: List<ItemDraft> = emptyList())
@@ -95,13 +97,13 @@ fun buildProgram(id: String, name: String, days: List<DayDraft>): PeriodizedProg
         ProgramDay(
             d.name,
             d.name,
-            d.items.map { it ->
-                val scheme: LoadScheme = when (it.kind) {
-                    SchemeKind.LINEAR -> LoadScheme.Linear(it.sets, it.reps, it.incrementKg, 0.0)
-                    SchemeKind.FIXED -> LoadScheme.Fixed(List(it.sets) { _ -> PercentSet(it.percent / 100.0, it.reps) })
+            d.items.map { draft ->
+                val scheme: LoadScheme = when (draft.kind) {
+                    SchemeKind.LINEAR -> LoadScheme.Linear(draft.sets, draft.reps, draft.incrementKg, 0.0)
+                    SchemeKind.FIXED -> LoadScheme.Fixed(List(draft.sets) { PercentSet(draft.percent / 100.0, draft.reps) })
                     SchemeKind.FIVE_THREE_ONE -> five31
                 }
-                PeriodizedItem(it.exerciseId, scheme, it.rest)
+                PeriodizedItem(draft.exerciseId, scheme, draft.rest, targetRpe = draft.targetRpe)
             },
         )
     }
@@ -139,6 +141,7 @@ internal fun encodeDrafts(days: List<DayDraft>): String = buildJsonArray {
                                     put("percent", i.percent)
                                     put("inc", i.incrementKg)
                                     put("rest", i.rest)
+                                    i.targetRpe?.let { put("rpe", it) }
                                 },
                             )
                         }
@@ -164,6 +167,7 @@ internal fun decodeDrafts(json: String): List<DayDraft> = runCatching {
                     percent = i.getValue("percent").jsonPrimitive.int,
                     incrementKg = i.getValue("inc").jsonPrimitive.double,
                     rest = i.getValue("rest").jsonPrimitive.int,
+                    targetRpe = i["rpe"]?.jsonPrimitive?.doubleOrNull,
                 )
             },
         )
@@ -183,7 +187,7 @@ private fun draftsOf(p: PeriodizedProgram): List<DayDraft> = p.days.map { d ->
                 is LoadScheme.Linear -> ItemDraft(item.exerciseId, SchemeKind.LINEAR, s.sets, s.reps, incrementKg = s.incrementKg, rest = item.restSeconds)
                 is LoadScheme.Fixed -> ItemDraft(item.exerciseId, SchemeKind.FIXED, s.sets.size, s.sets.firstOrNull()?.reps ?: 5, ((s.sets.firstOrNull()?.percent ?: 0.75) * 100).roundToInt(), rest = item.restSeconds)
                 is LoadScheme.Weekly -> ItemDraft(item.exerciseId, SchemeKind.FIVE_THREE_ONE, rest = item.restSeconds)
-            }
+            }.copy(targetRpe = item.targetRpe)
         },
     )
 }
@@ -286,6 +290,8 @@ private fun ItemEditor(item: ItemDraft, name: String, onChange: (ItemDraft) -> U
                 NumberBox(stringResource(R.string.prog_rest), item.rest, 15..600, Modifier.weight(1f)) { onChange(item.copy(rest = it)) }
             }
         }
+        val tracking = remember(item.exerciseId) { ExerciseLibrary.byId(item.exerciseId)?.tracking ?: com.bestrong.core.model.TrackingType.WEIGHT_REPS }
+        com.bestrong.mobile.ui.components.TargetRpeChips(tracking, item.targetRpe) { onChange(item.copy(targetRpe = it)) }
     }
 }
 

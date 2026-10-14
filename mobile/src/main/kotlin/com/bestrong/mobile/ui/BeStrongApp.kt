@@ -200,6 +200,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         onEditRoutine = { nav.navigate(Routes.routine(it)) },
                         onOpenPlanning = { nav.navigate(Routes.PLANNING) },
                         onOpenMuscle = { muscle -> nav.openMuscle(muscle.name) },
+                        onOpenExercise = { nav.navigate(Routes.exercise(it)) },
                     )
                 }
                 composable(TopLevel.HISTORY.route) {

@@ -243,9 +243,12 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     }
 }
 
-/** «Hace un año: Press banca 70×8 → 85×8 (+21 %)»; se puede descartar (vuelve el mes que viene). */
+/**
+ * «Hace un año: Press banca 70×8 → 85×8 (+21 %)»; tocar una línea abre la ficha del ejercicio (su progreso
+ * del año). Se puede descartar (vuelve el mes que viene).
+ */
 @Composable
-fun YearAgoCard(vm: HomeViewModel) {
+fun YearAgoCard(vm: HomeViewModel, onOpenExercise: (String) -> Unit = {}) {
     val items by vm.yearAgo.collectAsStateWithLifecycle()
     val tips = com.bestrong.mobile.ui.help.LocalTips.current
     val unit = com.bestrong.mobile.ui.components.LocalWeightUnit.current
@@ -266,6 +269,7 @@ fun YearAgoCard(vm: HomeViewModel) {
                         (if (pct >= 0) "+" else "") + pct,
                     ),
                     style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth().clickable(onClickLabel = c.exercise.displayName()) { onOpenExercise(c.exercise.id) }.padding(vertical = 4.dp),
                 )
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {

@@ -420,7 +420,7 @@ private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.body_comp_title))
             // La cintura objetivo no necesita la altura
-            waist?.let { WaistGoalLine(vm, it, settings.waistGoalCm) }
+            waist?.let { WaistGoalLine(vm, sorted.mapNotNull { m -> m.waistCm?.let { m.dateEpochMs to it } }.reversed(), settings.waistGoalCm) }
             if (height == null) {
                 Text(stringResource(R.string.body_comp_need_height), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 return@Column
@@ -449,14 +449,21 @@ private fun WaistToHeightLine(ratio: Double) {
     Text(stringResource(R.string.body_comp_whtr, "%.2f".format(ratio), label))
 }
 
-/** «Cintura objetivo: 80 cm · faltan 4 cm» y el botón para fijarla o cambiarla. */
+/**
+ * «Cintura objetivo: 80 cm · faltan 4 cm» (con fecha estimada si la tendencia de las medidas lo permite) y el
+ * botón para fijarla o cambiarla. [points]: (fecha, cm) de la más antigua a la última.
+ */
 @Composable
-private fun WaistGoalLine(vm: ProfileViewModel, waistCm: Double, goalCm: Double?) {
+private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>, goalCm: Double?) {
     var editing by remember { mutableStateOf(false) }
+    val waistCm = points.last().second
     Row(verticalAlignment = Alignment.CenterVertically) {
+        // La misma estimación que el peso objetivo, con la tendencia de las medidas de cintura
+        val eta = remember(points, goalCm) { goalCm?.let { com.bestrong.core.stats.BodyWeightGoal.progress(points, it)?.etaEpochMs } }
         val text = when {
             goalCm == null -> stringResource(R.string.waist_goal_none)
             waistCm <= goalCm + WAIST_GOAL_TOLERANCE_CM -> stringResource(R.string.waist_goal_reached, formatWeight(goalCm))
+            eta != null -> stringResource(R.string.weight_goal_eta, formatWeight(waistCm - goalCm) + " cm", formatWeight(goalCm) + " cm", formatDate(eta))
             else -> stringResource(R.string.waist_goal_left, formatWeight(goalCm), formatWeight(waistCm - goalCm))
         }
         Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)

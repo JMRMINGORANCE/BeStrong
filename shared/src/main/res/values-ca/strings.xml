@@ -1093,4 +1093,6 @@
     <string name="waist_goal_none">Sense cintura objectiu</string>
     <string name="waist_goal_reached">Cintura objectiu (%1$s cm) aconseguida 🎉</string>
     <string name="waist_goal_left">Cintura objectiu: %1$s cm · en falten %2$s cm</string>
+    <string name="summary_rpe_title">RPE davant de l’objectiu</string>
+    <string name="summary_rpe_line">%1$s: RPE %2$s de mitjana (objectiu %3$s)</string>
 </resources>

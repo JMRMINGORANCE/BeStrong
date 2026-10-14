@@ -1093,4 +1093,6 @@
     <string name="waist_goal_none">No waist goal</string>
     <string name="waist_goal_reached">Waist goal (%1$s cm) reached 🎉</string>
     <string name="waist_goal_left">Waist goal: %1$s cm · %2$s cm to go</string>
+    <string name="summary_rpe_title">RPE vs. target</string>
+    <string name="summary_rpe_line">%1$s: average RPE %2$s (target %3$s)</string>
 </resources>
