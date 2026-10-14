@@ -176,7 +176,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             // Con los mismos ajustes que el relleno (discos, tope semanal, subida que no se pierde), para no contradecirlo
             exercises.mapNotNull { ex ->
                 Progression.suggest(ex, history, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id))
-                    ?.let { sug -> ex.id to sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, history = history)) }
+                    ?.let { sug -> ex.id to sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, history = history), cappedByWeek = actions.cappedByWeek(ex, sug.sets, history)) }
             }.toMap()
         }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
@@ -442,6 +442,28 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Cambios de otros campos de la serie (nota, lado derecho, distancia, con ayuda). */
     fun updateSetFields(weId: String, setId: String, block: (WorkoutSet) -> WorkoutSet) = edit { w ->
         WorkoutEditor.updateSet(w, weId, setId, block)
+    }
+
+    /**
+     * Peso orientativo para el RPE objetivo del ejercicio (kg) y las reps de su siguiente serie, con el 1RM
+     * estimado reciente y redondeado al material del gimnasio; null sin objetivo, sin reps o sin historial.
+     */
+    fun targetRpeLoad(we: com.bestrong.core.model.WorkoutExercise): Pair<Double, Int>? {
+        val set = we.sets.firstOrNull { !it.completed && it.type == SetType.NORMAL } ?: we.sets.firstOrNull { it.type == SetType.NORMAL }
+        val reps = set?.reps ?: 0
+        val rpe = we.targetRpe?.takeIf { reps > 0 } ?: return null
+        val e1rm = com.bestrong.core.stats.RpeLoad.recentOneRepMax(we.exercise.id, repo.history.value, System.currentTimeMillis())
+        return e1rm?.let { roundToLoadable(we.exercise, com.bestrong.core.stats.RpeLoad.weightFor(it, reps, rpe)) to reps }
+    }
+
+    /** Al material del gimnasio en kg; en libras, al incremento de la unidad. */
+    private fun roundToLoadable(exercise: com.bestrong.core.model.Exercise, kg: Double): Double {
+        val s = settings.value
+        return if (s.unit == com.bestrong.core.util.WeightUnit.KG) {
+            s.gymFor(exercise.id).nearestLoad(kg, exercise.equipment)
+        } else {
+            s.unit.toKg(kotlin.math.round(s.unit.fromKg(kg) / s.unit.defaultIncrement) * s.unit.defaultIncrement)
+        }
     }
 
     /** Añade series de aproximación antes de la primera serie de trabajo. */

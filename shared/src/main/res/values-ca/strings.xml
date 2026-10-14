@@ -1095,4 +1095,9 @@
     <string name="waist_goal_left">Cintura objectiu: %1$s cm · en falten %2$s cm</string>
     <string name="summary_rpe_title">RPE davant de l’objectiu</string>
     <string name="summary_rpe_line">%1$s: RPE %2$s de mitjana (objectiu %3$s)</string>
+    <string name="target_rpe_all">RPE objectiu de tota la rutina</string>
+    <string name="target_rpe_hint">≈ %1$s per a %2$d reps</string>
+    <string name="rpe_table_title">Càrregues per RPE</string>
+    <string name="rpe_table_hint">Amb el teu 1RM estimat recent (%1$s): el pes per a cada nombre de reps segons el que et quedi a la recambra.</string>
+    <string name="prog_capped_suffix">" · limitat pel límit setmanal"</string>
 </resources>

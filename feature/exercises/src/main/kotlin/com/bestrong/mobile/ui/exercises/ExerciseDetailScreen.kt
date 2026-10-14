@@ -204,6 +204,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     }
                 }
             }
+            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RpeLoadCard(s.progress) }
             if (s.strengthCurve.size >= 2) {
                 item {
                     Card(Modifier.fillMaxWidth()) {
@@ -297,6 +298,43 @@ private fun RepRangeCard(vm: ExercisesViewModel, exerciseId: String) {
             Text(stringResource(R.string.rep_range), fontWeight = FontWeight.SemiBold)
             Text(stringResource(R.string.rep_range_body), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             com.bestrong.mobile.ui.components.RepRangeChips(ranges[exerciseId]) { vm.setRepRange(exerciseId, it) }
+        }
+    }
+}
+
+/** Reps y RPE de la tabla de cargas: fuerza, hipertrofia y resistencia, de 7 (3 en recámara) al fallo. */
+private val RPE_TABLE_REPS = listOf(3, 5, 8, 10, 12)
+private val RPE_TABLE_RPES = listOf(7.0, 8.0, 9.0, 10.0)
+private const val RPE_TABLE_RECENT_MS = 8 * 7 * 86_400_000L
+
+/**
+ * «Cargas por RPE»: qué peso usar para N reps a un RPE, con el 1RM estimado de las últimas 8 semanas (o el
+ * mejor, si no hay recientes). Redondeado al incremento de la unidad.
+ */
+@Composable
+private fun RpeLoadCard(progress: List<com.bestrong.core.stats.ExerciseProgressPoint>) {
+    val unit = LocalWeightUnit.current
+    val now = remember { System.currentTimeMillis() }
+    val e1rm = (progress.filter { it.dateEpochMs >= now - RPE_TABLE_RECENT_MS }.takeIf { it.isNotEmpty() } ?: progress)
+        .maxOfOrNull { it.bestOneRepMax }?.takeIf { it > 0 } ?: return
+    fun load(reps: Int, rpe: Double): String {
+        val inUnit = unit.fromKg(com.bestrong.core.stats.RpeLoad.weightFor(e1rm, reps, rpe))
+        return unit.format(unit.toKg(kotlin.math.round(inUnit / unit.defaultIncrement) * unit.defaultIncrement))
+    }
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            SectionHeader(stringResource(R.string.rpe_table_title))
+            Text(stringResource(R.string.rpe_table_hint, unit.format(e1rm, withUnit = true)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.reps_short), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                RPE_TABLE_RPES.forEach { Text("@" + it.toString().removeSuffix(".0"), Modifier.weight(1f), fontWeight = FontWeight.Bold) }
+            }
+            RPE_TABLE_REPS.forEach { reps ->
+                Row(Modifier.fillMaxWidth()) {
+                    Text("$reps", Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
+                    RPE_TABLE_RPES.forEach { Text(load(reps, it), Modifier.weight(1f)) }
+                }
+            }
         }
     }
 }

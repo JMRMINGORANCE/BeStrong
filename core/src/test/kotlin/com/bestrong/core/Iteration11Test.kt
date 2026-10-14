@@ -567,4 +567,23 @@ class CollarTest {
         // El tope (≈ 92 lb) se baja al escalón de 5 lb, sin bajar de las 90 de la semana pasada
         assertEquals(90.0, lb.fromKg(capped), 1e-6)
     }
+
+    @Test
+    fun rpeLoadInvertsEpley() {
+        // 1 rep a RPE 10 = el 1RM; 5 reps a RPE 8 = una serie de 7 al fallo
+        assertEquals(100.0, com.bestrong.core.stats.RpeLoad.weightFor(100.0, 1, 10.0), 1e-9)
+        assertEquals(100.0 / (1 + 7 / 30.0), com.bestrong.core.stats.RpeLoad.weightFor(100.0, 5, 8.0), 1e-9)
+    }
+
+    @Test
+    fun csvKeepsTargetRpeAndTempo() {
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val w = Workout(
+            name = "W", startedAtEpochMs = 1_700_000_000_000, finishedAtEpochMs = 1_700_003_600_000,
+            exercises = listOf(WorkoutExercise(exercise = ex, sets = listOf(WorkoutSet(weightKg = 80.0, reps = 5, completed = true)), targetRpe = 8.5, tempo = "3-1-1-0")),
+        )
+        val back = com.bestrong.core.io.WorkoutCsv.import(com.bestrong.core.io.WorkoutCsv.export(listOf(w)), listOf(ex)).workouts.single().exercises.single()
+        assertEquals(8.5, back.targetRpe!!, 1e-9)
+        assertEquals("3-1-1-0", back.tempo)
+    }
 }

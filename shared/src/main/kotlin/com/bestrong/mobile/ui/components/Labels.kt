@@ -88,8 +88,12 @@ fun Exercise.displayName(): String = ExerciseLibrary.displayName(this, uiLanguag
 
 fun Exercise.displayName(context: Context): String = ExerciseLibrary.displayName(this, context.uiLanguage())
 
+/** Por qué se propone esto; con « · limitado por el tope semanal» si Planificación recortó la subida. */
 @Composable @ReadOnlyComposable
-fun ProgressionSuggestion.reasonText(): String = when (kind) {
+fun ProgressionSuggestion.reasonText(): String = kindText() + if (cappedByWeek) stringResource(R.string.prog_capped_suffix) else ""
+
+@Composable @ReadOnlyComposable
+private fun ProgressionSuggestion.kindText(): String = when (kind) {
     SuggestionKind.INCREASE_WEIGHT -> stringResource(R.string.prog_increase)
     SuggestionKind.ADD_REPS -> stringResource(R.string.prog_add_reps, targetReps)
     SuggestionKind.ADD_ONE_REP -> stringResource(R.string.prog_add_one_rep)

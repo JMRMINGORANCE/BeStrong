@@ -701,15 +701,7 @@ private fun ExerciseCard(
                 }
             }
             MissingEquipmentLine(vm, we) { substituting = true }
-            we.targetRpe?.takeIf { we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }?.let { rpe ->
-                Text(
-                    // Como el RPE de las series («@8.5»)
-                    stringResource(R.string.target_rpe_line, rpe.toString().removeSuffix(".0")),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                )
-            }
+            TargetRpeLine(vm, we)
             RepRangeLine(vm, we)
             // Nota fija del ejercicio (se guarda para siempre, no solo en este entreno)
             if (pinnedNote.isNotBlank()) {
@@ -922,6 +914,22 @@ private fun ExerciseCard(
             onDismiss = { showPlates = false },
         )
     }
+}
+
+/** «🎯 RPE objetivo 8 en las series efectivas · ≈ 72,5 kg para 8 reps» (el peso, con historial). */
+@Composable
+private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.model.WorkoutExercise) {
+    val rpe = we.targetRpe?.takeIf { we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS } ?: return
+    val unit = LocalWeightUnit.current
+    val load = remember(we.sets, rpe) { vm.targetRpeLoad(we) }
+    val hint = load?.let { (kg, reps) -> " · " + stringResource(R.string.target_rpe_hint, unit.format(kg, withUnit = true), reps) }.orEmpty()
+    Text(
+        // Como el RPE de las series («@8.5»)
+        stringResource(R.string.target_rpe_line, rpe.toString().removeSuffix(".0")) + hint,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.padding(horizontal = 12.dp),
+    )
 }
 
 /** «Press banca: RPE 8.5 de media (objetivo 8)»: más duro en rojo, en el objetivo en verde. */

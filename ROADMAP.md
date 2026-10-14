@@ -283,3 +283,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] «Hace un año»: tocar un ejercicio abre su ficha y su progreso
 - [x] Cintura objetivo con fecha estimada según la tendencia
 - [x] RPE objetivo en los programas propios
+
+## Fase 30 — Entrenar por RPE ✅
+- [x] RPE objetivo para toda la rutina de una vez
+- [x] Peso orientativo para el RPE objetivo en el entreno (móvil y reloj)
+- [x] Tabla de cargas por RPE en la ficha del ejercicio
+- [x] RPE objetivo y tempo en el CSV (exportar e importar)
+- [x] Aviso cuando el tope semanal recorta la sugerencia

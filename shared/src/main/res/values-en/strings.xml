@@ -1095,4 +1095,9 @@
     <string name="waist_goal_left">Waist goal: %1$s cm · %2$s cm to go</string>
     <string name="summary_rpe_title">RPE vs. target</string>
     <string name="summary_rpe_line">%1$s: average RPE %2$s (target %3$s)</string>
+    <string name="target_rpe_all">Target RPE for the whole routine</string>
+    <string name="target_rpe_hint">≈ %1$s for %2$d reps</string>
+    <string name="rpe_table_title">Loads by RPE</string>
+    <string name="rpe_table_hint">From your recent estimated 1RM (%1$s): the weight for each rep count by how many reps you leave in the tank.</string>
+    <string name="prog_capped_suffix">" · limited by the weekly cap"</string>
 </resources>

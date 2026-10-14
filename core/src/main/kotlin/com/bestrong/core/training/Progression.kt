@@ -38,6 +38,8 @@ data class ProgressionSuggestion(
     val reason: String,
     val targetReps: Int = 0,
     val stallSessions: Int = 0,
+    /** La subida se quedó corta por el tope semanal de Planificación (para explicarlo). */
+    val cappedByWeek: Boolean = false,
 )
 
 /**

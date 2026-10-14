@@ -145,6 +145,11 @@ class RoutineEditorViewModel @Inject constructor(
     fun setRest(id: String, seconds: Int) = updateExercise(id) { it.copy(restSeconds = seconds) }
     fun setExerciseNotes(id: String, notes: String) = updateExercise(id) { it.copy(notes = notes) }
 
+    /** El mismo RPE objetivo (o ninguno) en todos los ejercicios de peso × reps de la rutina. */
+    fun setTargetRpeForAll(rpe: Double?) = _routine.update { r ->
+        r.copy(exercises = r.exercises.map { if (it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) it.copy(targetRpe = rpe) else it })
+    }
+
     /** RPE objetivo de las series efectivas; null lo quita. */
     fun setTargetRpe(id: String, rpe: Double?) = updateExercise(id) { it.copy(targetRpe = rpe) }
 

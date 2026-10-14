@@ -39,7 +39,7 @@ object WorkoutCsv {
     private val HEADER = listOf(
         "workout_id", "date", "end_date", "workout_name", "workout_notes", "exercise_id", "exercise_name",
         "superset_id", "exercise_notes", "set_index", "set_type", "weight_kg", "reps", "duration_s", "rpe",
-        "reps_right", "distance_m", "assisted", "set_note",
+        "reps_right", "distance_m", "assisted", "set_note", "target_rpe", "tempo",
     )
     private val ISO: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
@@ -77,6 +77,8 @@ object WorkoutCsv {
                         we.supersetId.orEmpty(), we.notes, i.toString(), s.type.name,
                         s.weightKg.toString(), s.reps.toString(), s.durationSec.toString(), s.rpe?.toString().orEmpty(),
                         s.repsRight?.toString().orEmpty(), s.distanceM.toString(), s.assisted.toString(), s.note,
+                        // La prescripción del ejercicio (se repite en cada serie, como sus notas)
+                        we.targetRpe?.toString().orEmpty(), we.tempo.orEmpty(),
                     )
                 }
             }
@@ -117,6 +119,7 @@ object WorkoutCsv {
         data class Row(
             val key: String, val name: String, val start: Long, val end: Long?, val notes: String, val exercise: Exercise,
             val exNotes: String, val superset: String?, val set: WorkoutSet,
+            val targetRpe: Double? = null, val tempo: String? = null,
         )
 
         val parsed = rows.drop(1).mapNotNull { r ->
@@ -141,6 +144,9 @@ object WorkoutCsv {
                                 assisted = r.get("assisted").equals("true", ignoreCase = true),
                                 note = r.get("set_note"),
                             ),
+                            // Columnas nuevas: los CSV antiguos no las tienen y quedan vacías
+                            targetRpe = num(r.get("target_rpe"))?.takeIf { it in 1.0..10.0 },
+                            tempo = r.get("tempo").ifBlank { null }?.let { com.bestrong.core.training.Tempo.parse(it)?.toString() },
                         )
                     }
                     CsvFormat.HEVY -> {
@@ -222,7 +228,7 @@ object WorkoutCsv {
                 if (last != null && last.exercise.id == row.exercise.id) {
                     exercises[exercises.lastIndex] = last.copy(sets = last.sets + row.set)
                 } else {
-                    exercises += WorkoutExercise(exercise = row.exercise, sets = listOf(row.set), notes = row.exNotes, supersetId = row.superset)
+                    exercises += WorkoutExercise(exercise = row.exercise, sets = listOf(row.set), notes = row.exNotes, supersetId = row.superset, targetRpe = row.targetRpe, tempo = row.tempo)
                 }
             }
             val end = first.end ?: (first.start + 60 * 60_000L)

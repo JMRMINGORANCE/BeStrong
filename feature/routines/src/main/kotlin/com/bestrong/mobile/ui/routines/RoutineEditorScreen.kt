@@ -107,6 +107,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                     EmojiPicker(routine.emoji, vm::setEmoji)
                     FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
                     RoutineRangeRow(vm, routine)
+                    RoutineRpeRow(vm, routine)
                 }
             }
             itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
@@ -315,6 +316,21 @@ private fun EmojiPicker(selected: String?, onPick: (String?) -> Unit) {
         }
     }
 }
+
+/** Mismo RPE objetivo para todos los ejercicios de peso × reps (p. ej. una semana de descarga a RPE 7). */
+@Composable
+private fun RoutineRpeRow(vm: RoutineEditorViewModel, routine: com.bestrong.core.model.Routine) {
+    val weighted = routine.exercises.filter { it.exercise.tracking == TrackingType.WEIGHT_REPS }
+    if (weighted.size < 2) return
+    // Con objetivos distintos no se marca ningún chip; todos sin objetivo marca «—»
+    val distinct = weighted.map { it.targetRpe }.distinct()
+    val common = if (distinct.size == 1) distinct.single() else MIXED_RPE
+    Text(stringResource(R.string.target_rpe_all), style = MaterialTheme.typography.labelLarge)
+    com.bestrong.mobile.ui.components.TargetRpeChips(TrackingType.WEIGHT_REPS, common) { vm.setTargetRpeForAll(it) }
+}
+
+/** RPE imposible: objetivos distintos en la rutina, no coincide con ningún chip (ni con «—»). */
+private const val MIXED_RPE = -1.0
 
 /** Mismo rango de repeticiones para toda la rutina (p. ej. un día de hipertrofia); solo si tiene ejercicios con peso. */
 @Composable

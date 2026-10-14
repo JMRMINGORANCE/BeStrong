@@ -425,6 +425,26 @@ class WorkoutSession @Inject constructor(
     /** Cambia cuando llegan marcas o historial del móvil (para recalcular la pista de récord). */
     val recordsVersion: kotlinx.coroutines.flow.Flow<Pair<Any, Any>> = kotlinx.coroutines.flow.combine(store.settings, store.history) { s, h -> s to h }
 
+    /**
+     * Peso orientativo (kg) para [reps] a [rpe] con el 1RM estimado reciente (historial del reloj o, si no,
+     * el mejor que envía el móvil), ajustado al material del gimnasio activo; null sin reps o sin marca.
+     */
+    fun targetRpeLoadKg(exercise: Exercise, reps: Int, rpe: Double): Double? {
+        val s = store.settings.value
+        val e1rm = if (reps <= 0) {
+            null
+        } else {
+            com.bestrong.core.stats.RpeLoad.recentOneRepMax(exercise.id, store.history.value, System.currentTimeMillis())
+                ?: s.bestOneRepMaxKg[exercise.id]?.takeIf { it > 0 }
+        }
+        return e1rm?.let {
+            val kg = com.bestrong.core.stats.RpeLoad.weightFor(it, reps, rpe)
+            val gym = s.gymFor(exercise.id)?.takeIf { s.unit == com.bestrong.core.util.WeightUnit.KG }
+            gym?.nearestLoad(kg, exercise.equipment)
+                ?: s.unit.toKg(kotlin.math.round(s.unit.fromKg(kg) / s.unit.defaultIncrement) * s.unit.defaultIncrement)
+        }
+    }
+
     /** Mejor 1RM estimado hasta ahora (historial, reloj y lo hecho hoy); null si no hay marca previa. */
     fun bestOneRepMax(exerciseId: String): Double? {
         val local = WorkoutStats.personalRecords(store.history.value)[exerciseId]

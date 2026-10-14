@@ -178,7 +178,13 @@ fun WorkoutScreen(
                 }
                 Text(stringResource(R.string.set_of, setNumber, we.sets.size, typeLabel), style = MaterialTheme.typography.labelSmall)
                 we.targetRpe?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS && set.type != SetType.WARMUP }?.let { rpe ->
-                    Text(stringResource(R.string.target_rpe_short, rpe.toString().removeSuffix(".0")), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    // Con historial, el peso orientativo para las reps de esta serie a ese RPE
+                    val load = remember(we.exercise.id, set.reps, rpe) { session.targetRpeLoadKg(we.exercise, set.reps, rpe) }
+                    Text(
+                        stringResource(R.string.target_rpe_short, rpe.toString().removeSuffix(".0")) + load?.let { " · ≈" + unit.format(it) }.orEmpty(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
                 }
                 // Rango de la doble progresión (lo elige el móvil)
                 if (we.exercise.tracking == TrackingType.WEIGHT_REPS) {

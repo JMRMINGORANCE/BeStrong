@@ -1095,4 +1095,9 @@
     <string name="waist_goal_left">Tour de taille visé : %1$s cm · encore %2$s cm</string>
     <string name="summary_rpe_title">RPE par rapport à l’objectif</string>
     <string name="summary_rpe_line">%1$s : RPE moyen %2$s (objectif %3$s)</string>
+    <string name="target_rpe_all">RPE cible pour toute la routine</string>
+    <string name="target_rpe_hint">≈ %1$s pour %2$d reps</string>
+    <string name="rpe_table_title">Charges par RPE</string>
+    <string name="rpe_table_hint">D’après ton 1RM estimé récent (%1$s) : la charge pour chaque nombre de reps selon les reps en réserve.</string>
+    <string name="prog_capped_suffix">" · limité par le plafond hebdomadaire"</string>
 </resources>

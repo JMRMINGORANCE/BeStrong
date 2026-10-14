@@ -99,6 +99,13 @@ class WorkoutActions @Inject constructor(
         }
     }
 
+    /** Si el tope semanal de Planificación recorta alguna de estas series (para decirlo junto a la sugerencia). */
+    fun cappedByWeek(ex: com.bestrong.core.model.Exercise, sets: List<WorkoutSet>, history: List<Workout> = repository.history.value): Boolean {
+        val cap = planning.state.value.weeklyCap ?: return false
+        val lastWeekBest = WorkoutStats.bestWeightBetween(ex.id, history, System.currentTimeMillis() - 7 * 86_400_000L, Long.MAX_VALUE)
+        return sets.any { it.weightKg > ProgressionCap.limit(it.weightKg, lastWeekBest, cap) + 1e-6 }
+    }
+
     suspend fun exportHeartRateIfEnabled(workout: Workout) {
         if (!settings.settings.value.healthConnectExport) return
         runCatching { healthConnect.exportHeartRate(workout) }.onFailure { Log.w("HealthConnect", "Exportación del pulso fallida", it) }
