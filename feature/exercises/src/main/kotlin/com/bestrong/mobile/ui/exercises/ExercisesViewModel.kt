@@ -238,6 +238,17 @@ class ExercisesViewModel @Inject constructor(
     /** Cuántas rutinas usan el ejercicio (para avisar antes de borrarlo). */
     fun routinesUsing(exerciseId: String): Int = repo.routines.value.count { r -> r.exercises.any { it.exercise.id == exerciseId } }
 
+    /** Guarda en [uri] el historial de ese ejercicio en CSV; [onDone] dice si salió bien. */
+    fun exportExerciseCsv(uri: android.net.Uri, exerciseId: String, onDone: (Boolean) -> Unit) = viewModelScope.launch {
+        val ok = runCatching {
+            val csv = kotlinx.coroutines.withContext(Dispatchers.Default) { com.bestrong.core.io.WorkoutCsv.exportExercise(repo.historyOnce(), exerciseId) }
+            kotlinx.coroutines.withContext(Dispatchers.IO) {
+                context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error("no stream")
+            }
+        }.isSuccess
+        onDone(ok)
+    }
+
     fun deleteCustom(id: String) = viewModelScope.launch {
         repo.deleteCustomExercise(id)
         settingsStore.update { s -> if (id in s.hiddenExercises) s.copy(hiddenExercises = s.hiddenExercises - id) else s }

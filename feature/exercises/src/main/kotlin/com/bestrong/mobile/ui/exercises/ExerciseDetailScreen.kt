@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -92,6 +93,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             title = { Text(s.exercise.displayName()) },
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
+                ExportExerciseButton(vm, s.exercise)
                 val hidden by vm.hidden.collectAsStateWithLifecycle()
                 val isHidden = s.exercise.id in hidden
                 IconButton(onClick = { vm.toggleHidden(s.exercise.id) }) {
@@ -241,3 +243,18 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
 }
 
 private val REP_MAXES = listOf(1, 3, 5, 8, 10, 12)
+
+/** Exporta a CSV el historial de este ejercicio (para una hoja de cálculo o el entrenador). */
+@Composable
+private fun ExportExerciseButton(vm: ExercisesViewModel, exercise: com.bestrong.core.model.Exercise) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val done = stringResource(R.string.export_done)
+    val failed = stringResource(R.string.export_error, "")
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        if (uri != null) {
+            vm.exportExerciseCsv(uri, exercise.id) { ok -> android.widget.Toast.makeText(context, if (ok) done else failed, android.widget.Toast.LENGTH_SHORT).show() }
+        }
+    }
+    val fileName = "bestrong-" + exercise.name.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifEmpty { "ejercicio" } + ".csv"
+    IconButton(onClick = { launcher.launch(fileName) }) { Icon(Icons.Default.FileDownload, stringResource(R.string.export_exercise_csv)) }
+}

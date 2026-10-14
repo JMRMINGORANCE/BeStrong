@@ -220,3 +220,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Compartir un entreno del historial como texto
 - [x] Ocultar ejercicios de la biblioteca (y volver a mostrarlos)
 - [x] Editor de rutinas: series por músculo y duplicar ejercicio
+
+## Fase 21 — Más allá del entreno ✅
+- [x] Reloj: reps que batirían tu récord en la serie actual
+- [x] Exportar a CSV el historial de un ejercicio
+- [x] «Tu año»: entrenos, volumen, récords, mejor racha, músculo estrella y mayores subidas (compartible)
+- [x] Tutorial con página final de configuración (unidad y días por semana)
+- [x] Widget «Músculos esta semana»

@@ -19,17 +19,22 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -133,19 +138,28 @@ private val TUTORIAL = listOf(
 
 /** Tutorial de bienvenida (primer arranque o desde Ayuda). */
 @Composable
-fun TutorialDialog(onDone: () -> Unit) {
+fun TutorialDialog(
+    onDone: () -> Unit,
+    unit: com.bestrong.core.util.WeightUnit = com.bestrong.core.util.WeightUnit.KG,
+    weeklyGoal: Int = 3,
+    /** Última página: lo básico para empezar (unidad y días por semana). */
+    onSetup: (com.bestrong.core.util.WeightUnit, Int) -> Unit = { _, _ -> },
+) {
     var page by rememberSaveable { mutableIntStateOf(0) }
-    val (title, body) = TUTORIAL[page]
-    val last = page == TUTORIAL.lastIndex
+    var chosenUnit by rememberSaveable { mutableStateOf(unit) }
+    var chosenGoal by rememberSaveable { mutableIntStateOf(weeklyGoal) }
+    val pages = TUTORIAL.size + 1
+    val setup = page == TUTORIAL.size
+    val finish = { onSetup(chosenUnit, chosenGoal); onDone() }
     AlertDialog(
         onDismissRequest = {},
-        title = { Text(stringResource(title)) },
+        title = { Text(stringResource(if (setup) R.string.setup_title else TUTORIAL[page].first)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(stringResource(body))
+                if (setup) SetupPage(chosenUnit, chosenGoal, { chosenUnit = it }, { chosenGoal = it }) else Text(stringResource(TUTORIAL[page].second))
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                     Text(
-                        TUTORIAL.indices.joinToString(" ") { if (it == page) "●" else "○" },
+                        (0 until pages).joinToString(" ") { if (it == page) "●" else "○" },
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -153,10 +167,38 @@ fun TutorialDialog(onDone: () -> Unit) {
             }
         },
         confirmButton = {
-            Button(onClick = { if (last) onDone() else page++ }) { Text(stringResource(if (last) R.string.start else R.string.next)) }
+            Button(onClick = { if (setup) finish() else page++ }) { Text(stringResource(if (setup) R.string.start else R.string.next)) }
         },
-        dismissButton = { if (!last) TextButton(onClick = onDone) { Text(stringResource(R.string.skip)) } },
+        // «Saltar» lleva a la configuración (lo único que conviene no saltarse)
+        dismissButton = { if (!setup) TextButton(onClick = { page = TUTORIAL.size }) { Text(stringResource(R.string.skip)) } },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun SetupPage(
+    unit: com.bestrong.core.util.WeightUnit,
+    goal: Int,
+    onUnit: (com.bestrong.core.util.WeightUnit) -> Unit,
+    onGoal: (Int) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.setup_unit), style = MaterialTheme.typography.labelLarge)
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            com.bestrong.core.util.WeightUnit.entries.forEachIndexed { i, u ->
+                SegmentedButton(
+                    selected = u == unit,
+                    onClick = { onUnit(u) },
+                    shape = SegmentedButtonDefaults.itemShape(i, com.bestrong.core.util.WeightUnit.entries.size),
+                ) { Text(u.label) }
+            }
+        }
+        Text(stringResource(R.string.setup_goal), style = MaterialTheme.typography.labelLarge)
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            for (d in 1..7) FilterChip(selected = d == goal, onClick = { onGoal(d) }, label = { Text("$d") })
+        }
+        Text(stringResource(R.string.setup_import_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }
 
 /** Novedades de la versión, una vez tras actualizar. */

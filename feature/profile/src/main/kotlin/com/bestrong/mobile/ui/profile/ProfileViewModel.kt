@@ -69,6 +69,8 @@ data class ProfileStats(
     val totalSets: Int = 0,
     /** Series por músculo de las últimas 8 semanas (el más trabajado primero). */
     val muscleTrend: Map<MuscleGroup, List<Pair<java.time.LocalDate, Double>>> = emptyMap(),
+    /** Tu año (el actual; en enero, el anterior, que es el que tiene sentido resumir). */
+    val year: com.bestrong.core.stats.YearSummary? = null,
 )
 
 /** Estadísticas de la fase 3 (niveles, equilibrio, logros, recuperación…). */
@@ -132,6 +134,7 @@ class ProfileViewModel @Inject constructor(
                 .take(8),
             weeklyMuscles = WorkoutStats.weeklySetsPerMuscle(history, today, zone),
             muscleTrend = WorkoutStats.muscleTrend(history, today, zone),
+            year = Strength.yearSummary(history, if (today.monthValue == 1) today.year - 1 else today.year, zone),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 

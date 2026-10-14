@@ -959,4 +959,22 @@
     <string name="exercise_hide">Amaga de la biblioteca</string>
     <string name="exercise_unhide">Torna a mostrar a la biblioteca</string>
     <string name="duplicate_named">Duplica %1$s</string>
+    <string name="export_exercise_csv">Exporta l\'historial de l\'exercici (CSV)</string>
+    <string name="year_title">El teu %1$d</string>
+    <string name="year_workouts">%1$d entrenaments en %2$d dies · %3$d h</string>
+    <string name="year_volume">Volum total: %1$s</string>
+    <string name="year_records">🏆 %1$d rècords</string>
+    <string name="year_top_muscle">Múscul més treballat: %1$s</string>
+    <string name="year_gain">📈 %1$s: 1RM %2$s → %3$s</string>
+    <plurals name="year_streak">
+        <item quantity="one">millor ratxa: %1$d setmana</item>
+        <item quantity="other">millor ratxa: %1$d setmanes</item>
+    </plurals>
+    <string name="setup_title">Abans de començar</string>
+    <string name="setup_unit">Unitat de pes</string>
+    <string name="setup_goal">Quants dies a la setmana vols entrenar?</string>
+    <string name="setup_import_hint">Véns de Hevy o Strong? Pots importar l\'historial des de Perfil.</string>
+    <string name="widget_muscles_title">Músculs aquesta setmana</string>
+    <string name="widget_muscles_empty">Encara no has entrenat aquesta setmana</string>
+    <string name="widget_muscles_description">Sèries de cada múscul aquesta setmana davant l\'objectiu de 10</string>
 </resources>

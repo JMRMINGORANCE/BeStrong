@@ -153,4 +153,8 @@
     <string name="new_record_live">🏆 ¡Récord!</string>
     <string name="routine_minutes_suffix">%1$s · ≈ %2$d min</string>
     <string name="remaining_eta">≈ %1$d min · fin %2$s</string>
+    <plurals name="record_hint">
+        <item quantity="one">🏆 %1$d rep = récord</item>
+        <item quantity="other">🏆 %1$d reps = récord</item>
+    </plurals>
 </resources>

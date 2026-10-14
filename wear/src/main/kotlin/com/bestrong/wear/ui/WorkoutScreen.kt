@@ -30,6 +30,7 @@ import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -202,6 +203,13 @@ fun WorkoutScreen(
                             stringResource(R.string.velocity_info, "%.2f".format(v.lastVelocity), v.rir?.toString() ?: "?"),
                             style = MaterialTheme.typography.labelSmall,
                         )
+                    }
+                }
+                // Reps que batirían tu récord con este peso (solo series que cuentan)
+                if (we.exercise.tracking == TrackingType.WEIGHT_REPS && set.countsForRecords) {
+                    val best = remember(we.exercise.id, w.completedSetCount) { session.bestOneRepMax(we.exercise.id) }
+                    best?.let { com.bestrong.core.stats.OneRepMax.repsToBeat(it, set.weightKg) }?.let { reps ->
+                        Text(pluralStringResource(R.plurals.record_hint, reps, reps), style = MaterialTheme.typography.labelSmall, color = Done)
                     }
                 }
                 previous?.takeIf { we.exercise.tracking != TrackingType.CARDIO }?.let {

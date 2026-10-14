@@ -204,3 +204,21 @@ class Iteration14Test {
         assertEquals(true, text.contains("20×8/7"))
     }
 }
+
+class YearSummaryTest {
+    @Test fun yearSummaryCountsDaysStreakAndGains() {
+        val d = java.time.LocalDate.of(2026, 1, 5)
+        val history = listOf(
+            finishedWorkout("a", d, bench to listOf(done(80.0, 5))),
+            finishedWorkout("b", d.plusWeeks(1), bench to listOf(done(90.0, 5))),
+            finishedWorkout("c", d.plusWeeks(3), bench to listOf(done(85.0, 5))),
+            finishedWorkout("old", java.time.LocalDate.of(2025, 6, 1), bench to listOf(done(200.0, 1))),
+        )
+        val y = com.bestrong.core.stats.Strength.yearSummary(history, 2026, UTC)!!
+        assertEquals(3, y.period.workouts)
+        assertEquals(3, y.trainingDays)
+        assertEquals(2, y.longestWeeklyStreak)
+        assertEquals(bench.id, y.biggestGains.single().first.id)
+        assertEquals(null, com.bestrong.core.stats.Strength.yearSummary(history, 2024, UTC))
+    }
+}

@@ -421,6 +421,15 @@ class WorkoutSession @Inject constructor(
      * (llegan del móvil), las de lo hecho solo en el reloj y las series anteriores de esta sesión.
      * Sin ninguna marca previa no hay récord que batir.
      */
+    /** Mejor 1RM estimado hasta ahora (historial, reloj y lo hecho hoy); null si no hay marca previa. */
+    fun bestOneRepMax(exerciseId: String): Double? {
+        val local = WorkoutStats.personalRecords(store.history.value)[exerciseId]
+        val today = _workout.value?.exercises.orEmpty().filter { it.exercise.id == exerciseId }
+            .flatMap { it.completedSets }.filter { it.countsForRecords }.map { it.estimatedOneRepMax }
+        return (listOfNotNull(store.settings.value.bestOneRepMaxKg[exerciseId], local?.get(RecordType.BEST_ONE_REP_MAX)?.value) + today)
+            .maxOrNull()?.takeIf { it > 0 }
+    }
+
     private fun isRecord(exerciseId: String, tracking: TrackingType, set: WorkoutSet): Boolean {
         val s = store.settings.value
         val local = WorkoutStats.personalRecords(store.history.value)[exerciseId]

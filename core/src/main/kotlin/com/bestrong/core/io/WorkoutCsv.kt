@@ -57,6 +57,13 @@ object WorkoutCsv {
 
     // --- Exportar ----------------------------------------------------------------------------
 
+    /** Solo un ejercicio (su historial completo, con el mismo formato que el CSV general). */
+    fun exportExercise(workouts: List<Workout>, exerciseId: String, zone: ZoneId = ZoneId.systemDefault()): String =
+        export(
+            workouts.mapNotNull { w -> w.exercises.filter { it.exercise.id == exerciseId }.takeIf { it.isNotEmpty() }?.let { w.copy(exercises = it) } },
+            zone,
+        )
+
     fun export(workouts: List<Workout>, zone: ZoneId = ZoneId.systemDefault()): String {
         val rows = mutableListOf(HEADER)
         workouts.filter { it.isFinished }.sortedBy { it.startedAtEpochMs }.forEach { w ->

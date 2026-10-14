@@ -110,7 +110,14 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     var showHelp by rememberSaveable { mutableStateOf(false) }
     var showTutorial by rememberSaveable { mutableStateOf(false) }
     if (showHelp) HelpDialog(onDismiss = { showHelp = false }, onReplayTutorial = { showHelp = false; showTutorial = true })
-    if (showTutorial) TutorialDialog { showTutorial = false }
+    if (showTutorial) {
+        TutorialDialog(
+            onDone = { showTutorial = false },
+            unit = settings.unit,
+            weeklyGoal = settings.weeklyGoal,
+            onSetup = { unit, goal -> vm.updateSettings { it.copy(unit = unit, weeklyGoal = goal) } },
+        )
+    }
     editingGym?.let { g ->
         GymEditorDialog(
             gym = g,
@@ -215,6 +222,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             }
             item { WeeklyMuscleMap(stats.weeklyMuscles) }
             item { MuscleTrendCard(stats.muscleTrend) }
+            stats.year?.let { y -> item { YearInReviewCard(y) } }
             item { WeekSummaryCard(advanced) }
             item { TrainingLoadCard(advanced) }
             item { StrengthLevelsCard(advanced, settings.sex) { sex -> vm.updateSettings { it.copy(sex = sex) } } }

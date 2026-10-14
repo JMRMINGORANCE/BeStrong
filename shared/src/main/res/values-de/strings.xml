@@ -959,4 +959,22 @@
     <string name="exercise_hide">In der Bibliothek ausblenden</string>
     <string name="exercise_unhide">Wieder in der Bibliothek anzeigen</string>
     <string name="duplicate_named">%1$s duplizieren</string>
+    <string name="export_exercise_csv">Übungsverlauf exportieren (CSV)</string>
+    <string name="year_title">Dein Jahr %1$d</string>
+    <string name="year_workouts">%1$d Trainings an %2$d Tagen · %3$d Std.</string>
+    <string name="year_volume">Gesamtvolumen: %1$s</string>
+    <string name="year_records">🏆 %1$d Rekorde</string>
+    <string name="year_top_muscle">Meisttrainierter Muskel: %1$s</string>
+    <string name="year_gain">📈 %1$s: 1RM %2$s → %3$s</string>
+    <plurals name="year_streak">
+        <item quantity="one">beste Serie: %1$d Woche</item>
+        <item quantity="other">beste Serie: %1$d Wochen</item>
+    </plurals>
+    <string name="setup_title">Bevor du loslegst</string>
+    <string name="setup_unit">Gewichtseinheit</string>
+    <string name="setup_goal">An wie vielen Tagen pro Woche willst du trainieren?</string>
+    <string name="setup_import_hint">Kommst du von Hevy oder Strong? Du kannst deinen Verlauf im Profil importieren.</string>
+    <string name="widget_muscles_title">Muskeln diese Woche</string>
+    <string name="widget_muscles_empty">Diese Woche noch kein Training</string>
+    <string name="widget_muscles_description">Sätze pro Muskel diese Woche im Vergleich zum Ziel von 10</string>
 </resources>

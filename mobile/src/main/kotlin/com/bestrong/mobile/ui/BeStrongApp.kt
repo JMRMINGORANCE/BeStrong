@@ -129,7 +129,12 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
     // Tutorial la primera vez; novedades una vez tras cada actualización
     if (!isRobolectric) {
         if (!settings.tutorialDone) {
-            TutorialDialog { appVm.update { it.copy(tutorialDone = true, lastSeenVersion = BuildConfig.VERSION_CODE) } }
+            TutorialDialog(
+                onDone = { appVm.update { it.copy(tutorialDone = true, lastSeenVersion = BuildConfig.VERSION_CODE) } },
+                unit = settings.unit,
+                weeklyGoal = settings.weeklyGoal,
+                onSetup = { unit, goal -> appVm.update { it.copy(unit = unit, weeklyGoal = goal) } },
+            )
         } else if (settings.lastSeenVersion < BuildConfig.VERSION_CODE) {
             WhatsNewDialog { appVm.update { it.copy(lastSeenVersion = BuildConfig.VERSION_CODE) } }
         }

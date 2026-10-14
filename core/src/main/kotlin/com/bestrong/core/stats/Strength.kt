@@ -50,6 +50,18 @@ data class PeriodSummary(
     val topExercises: List<Pair<String, Double>>,
 )
 
+/** Resumen del año: lo del periodo más días entrenados, mejor racha, músculo estrella y mayores subidas de 1RM. */
+data class YearSummary(
+    val year: Int,
+    val period: PeriodSummary,
+    val trainingDays: Int,
+    /** Semanas seguidas entrenando (la mejor racha dentro del año). */
+    val longestWeeklyStreak: Int,
+    val topMuscle: MuscleGroup?,
+    /** (ejercicio, 1RM estimado de la primera sesión del año, mejor 1RM del año), las mayores subidas primero. */
+    val biggestGains: List<Triple<com.bestrong.core.model.Exercise, Double, Double>>,
+)
+
 /** Estadísticas avanzadas (fase 3): niveles, equilibrio, logros, resúmenes y curvas. */
 object Strength {
     // Umbrales de 1RM / peso corporal para principiante, novato, intermedio, avanzado y élite
@@ -241,6 +253,47 @@ object Strength {
         val start = monday.atStartOfDay(zone).toInstant().toEpochMilli()
         val end = monday.plusWeeks(1).atStartOfDay(zone).toInstant().toEpochMilli()
         return summary(history, start, end)
+    }
+
+    /** Resumen de [year] (null si no entrenaste ese año). */
+    fun yearSummary(history: List<Workout>, year: Int, zone: ZoneId): YearSummary? {
+        val from = LocalDate.of(year, 1, 1).atStartOfDay(zone).toInstant().toEpochMilli()
+        val to = LocalDate.of(year + 1, 1, 1).atStartOfDay(zone).toInstant().toEpochMilli()
+        val inYear = history.filter { it.isFinished && it.startedAtEpochMs in from until to }.sortedBy { it.startedAtEpochMs }
+        if (inYear.isEmpty()) return null
+        val days = inYear.map { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() }.toSet()
+        val weeks = days.map { it.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }.toSortedSet()
+        var best = 0
+        var run = 0
+        var prev: LocalDate? = null
+        weeks.forEach { w ->
+            run = if (prev?.plusWeeks(1) == w) run + 1 else 1
+            best = maxOf(best, run)
+            prev = w
+        }
+        // 1RM de la primera sesión del año frente al mejor del año, por ejercicio
+        val firstAndBest = mutableMapOf<String, Pair<Double, Double>>()
+        val byId = mutableMapOf<String, com.bestrong.core.model.Exercise>()
+        inYear.forEach { w ->
+            w.exercises.forEach { we ->
+                val e1rm = we.completedSets.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0
+                if (e1rm <= 0) return@forEach
+                byId[we.exercise.id] = we.exercise
+                val cur = firstAndBest[we.exercise.id]
+                firstAndBest[we.exercise.id] = if (cur == null) e1rm to e1rm else cur.first to maxOf(cur.second, e1rm)
+            }
+        }
+        val gains = firstAndBest.filter { (_, v) -> v.second > v.first + 1e-6 }
+            .entries.sortedByDescending { it.value.second - it.value.first }.take(3)
+            .map { (id, v) -> Triple(byId.getValue(id), v.first, v.second) }
+        return YearSummary(
+            year = year,
+            period = summary(history, from, to),
+            trainingDays = days.size,
+            longestWeeklyStreak = best,
+            topMuscle = WorkoutStats.setsPerMuscle(inYear, 0).keys.firstOrNull(),
+            biggestGains = gains,
+        )
     }
 
     fun monthSummary(history: List<Workout>, month: YearMonth, zone: ZoneId): PeriodSummary {

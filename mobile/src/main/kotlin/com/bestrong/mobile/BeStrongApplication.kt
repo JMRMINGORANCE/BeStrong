@@ -109,7 +109,10 @@ class AppSync @Inject constructor(
         }
         // El widget muestra la semana y la rutina que toca: se redibuja si cambia el historial o las rutinas
         scope.launch {
-            merge(repository.history, repository.routines).debounce(2_000).collect { BeStrongWidget.refresh(context) }
+            merge(repository.history, repository.routines).debounce(2_000).collect {
+                BeStrongWidget.refresh(context)
+                com.bestrong.mobile.widget.MuscleWidget.refresh(context)
+            }
         }
         scope.launch { syncSettings() }
         // Entreno en curso compartido en vivo con el reloj + servicio en primer plano
