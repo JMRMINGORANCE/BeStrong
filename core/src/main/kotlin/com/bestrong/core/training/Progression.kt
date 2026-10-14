@@ -56,15 +56,17 @@ object Progression {
         /** Rango de repeticiones (p. ej. 8..12): sube peso al llegar al tope en todas y vuelve al mínimo. */
         repRange: IntRange? = null,
     ): ProgressionSuggestion? {
-        val last = WorkoutStats.previousSets(exercise.id, history).filter { it.type != SetType.WARMUP }
+        // Una sola búsqueda en el historial: las series y el RPE objetivo con que se hicieron
+        val previous = WorkoutStats.previousExercise(exercise.id, history)
+        val last = previous?.completedSets.orEmpty().filter { it.type != SetType.WARMUP }
         // El cardio no progresa por peso ni repeticiones
         if (last.isEmpty() || exercise.tracking == TrackingType.CARDIO) return null
 
         // Sin carga (peso corporal o tiempo) el 1RM estimado es 0 y no sirve para detectar estancamiento
         val loaded = exercise.tracking != TrackingType.DURATION && last.any { it.weightKg > 0.0 }
         // «Fácil» respecto al RPE objetivo con que se hizo la última vez (8 si no tenía): hasta un punto por encima
-        val target = WorkoutStats.previousExercise(exercise.id, history)?.targetRpe ?: Autoregulation.TARGET
-        val easy = last.all { (it.rpe ?: target) <= target + 1 }
+        val target = previous?.targetRpe ?: Autoregulation.TARGET
+        val easy = last.all { (it.rpe ?: target) <= Autoregulation.easyUpTo(target) }
         val useRange = repRange != null && loaded && exercise.tracking == TrackingType.WEIGHT_REPS
         // Con rango, el 1RM estimado baja a propósito al subir peso y volver al mínimo: el estancamiento se mide
         // por reps con el mismo peso; sin rango, por el 1RM

@@ -83,7 +83,7 @@ class WorkoutActions @Inject constructor(
         val s = settings.settings.value
         val cap = planning.state.value.weeklyCap
         val lastWeekBest = cap?.let { WorkoutStats.bestWeightBetween(ex.id, history, System.currentTimeMillis() - 7 * 86_400_000L, Long.MAX_VALUE) }
-        fun capped(kg: Double) = if (cap == null) kg else ProgressionCap.limit(kg, lastWeekBest, cap)
+        fun capped(kg: Double) = if (cap == null) kg else ProgressionCap.limitIn(s.unit, kg, lastWeekBest, cap, s.stepKgFor(ex.id))
         if (s.unit != com.bestrong.core.util.WeightUnit.KG) return sets.map { it.copy(weightKg = capped(it.weightKg)) }
         val gym = s.gymFor(ex.id)
         val raise = kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT

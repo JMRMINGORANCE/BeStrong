@@ -245,16 +245,17 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
 
 /**
  * «Hace un año: Press banca 70×8 → 85×8 (+21 %)»; tocar una línea abre la ficha del ejercicio (su progreso
- * del año). Se puede descartar (vuelve el mes que viene).
+ * del año). Se puede descartar (vuelve a los 30 días).
  */
 @Composable
 fun YearAgoCard(vm: HomeViewModel, onOpenExercise: (String) -> Unit = {}) {
     val items by vm.yearAgo.collectAsStateWithLifecycle()
     val tips = com.bestrong.mobile.ui.help.LocalTips.current
     val unit = com.bestrong.mobile.ui.components.LocalWeightUnit.current
-    // Por mes: la ventana de ±7 días repite las mismas comparaciones varios días seguidos
-    val tipId = "year_ago:" + java.time.YearMonth.now()
-    if (items.isEmpty() || tipId in tips.dismissed) return
+    // Descartada, no vuelve en 30 días: la ventana de ±7 días repite las mismas comparaciones muchos días seguidos
+    val today = java.time.LocalDate.now()
+    val tipId = "year_ago:$today"
+    if (items.isEmpty() || yearAgoDismissedRecently(tips.dismissed, today)) return
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.year_ago_title), fontWeight = FontWeight.Bold)
@@ -277,6 +278,15 @@ fun YearAgoCard(vm: HomeViewModel, onOpenExercise: (String) -> Unit = {}) {
             }
         }
     }
+}
+
+/** Días que la tarjeta «Hace un año» no vuelve tras descartarla. */
+private const val YEAR_AGO_SNOOZE_DAYS = 30L
+
+/** Si se descartó «Hace un año» (clave «year_ago:fecha») en los últimos [YEAR_AGO_SNOOZE_DAYS] días. */
+private fun yearAgoDismissedRecently(dismissed: Set<String>, today: java.time.LocalDate): Boolean = dismissed.any { key ->
+    val date = key.removePrefix("year_ago:").takeIf { it != key }?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() }
+    date != null && !date.isBefore(today.minusDays(YEAR_AGO_SNOOZE_DAYS))
 }
 
 /** «Te saltaste «Push» del martes»: hacerla hoy, pasarla a mañana o dejarlo estar. */

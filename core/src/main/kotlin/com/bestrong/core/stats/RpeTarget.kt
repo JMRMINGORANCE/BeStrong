@@ -20,10 +20,11 @@ data class RpeVsTarget(val exerciseId: String, val exerciseName: String, val tar
 }
 
 object RpeTarget {
-    /** Ejercicios de peso × reps con RPE objetivo y alguna serie efectiva completada con RPE anotado. */
+    /** Ejercicios de peso × reps con RPE objetivo y alguna serie normal completada con RPE anotado. */
     fun vsTarget(workout: Workout): List<RpeVsTarget> = workout.exercises.mapNotNull { we ->
         val target = we.targetRpe?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS } ?: return@mapNotNull null
-        val rpes = we.sets.filter { it.completed && it.type != SetType.WARMUP }.mapNotNull { it.rpe }
+        // Solo las series normales: un drop o una al fallo planificados van a RPE 10 a propósito
+        val rpes = we.sets.filter { it.completed && it.type == SetType.NORMAL && it.countsForRecords }.mapNotNull { it.rpe }
         if (rpes.isEmpty()) return@mapNotNull null
         RpeVsTarget(we.exercise.id, we.exercise.name, target, rpes.average())
     }

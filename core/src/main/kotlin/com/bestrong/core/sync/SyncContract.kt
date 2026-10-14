@@ -176,7 +176,7 @@ data class SharedSettings(
 
     /** Discos por lado para [kg] con el gimnasio activo (o los estándar si el móvil aún no lo envía). */
     fun plateLoad(exerciseId: String, kg: Double): com.bestrong.core.training.PlateLoad =
-        gymFor(exerciseId)?.plateLoad(kg, unit) ?: com.bestrong.core.training.PlateCalculator.calculate(unit.fromKg(kg), unit)
+        gymFor(exerciseId)?.plateLoad(kg, unit) ?: com.bestrong.core.training.PlateCalculator.calculate(unit.fromKg(kg), unit, barInUnit(exerciseId))
 
     /**
      * Series sugeridas ajustadas al material del gimnasio activo (solo en kg, como en el móvil): si tocaba
@@ -190,7 +190,7 @@ data class SharedSettings(
         lastWeekBestKg: Double? = null,
     ): List<com.bestrong.core.model.WorkoutSet> {
         val cap = weeklyCap
-        fun capped(kg: Double) = if (cap == null) kg else com.bestrong.core.training.ProgressionCap.limit(kg, lastWeekBestKg, cap)
+        fun capped(kg: Double) = if (cap == null) kg else com.bestrong.core.training.ProgressionCap.limitIn(unit, kg, lastWeekBestKg, cap, stepKgFor(exercise.id))
         val gym = gymFor(exercise.id)?.takeIf { unit == WeightUnit.KG } ?: return suggestion.sets.map { it.copy(weightKg = capped(it.weightKg)) }
         val raise = suggestion.kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
         val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }

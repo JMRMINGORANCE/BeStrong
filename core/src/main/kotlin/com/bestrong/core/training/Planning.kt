@@ -451,6 +451,19 @@ object ProgressionCap {
         val cap = Periodization.round(lastWeekBestKg * (1 + maxWeeklyIncrease))
         return suggestedKg.coerceAtMost(cap.coerceAtLeast(lastWeekBestKg))
     }
+
+    /**
+     * [limit] con un peso que se pueda montar en [unit]: en libras el tope (redondeado en kg) se baja al escalón
+     * [stepKg] de la unidad, sin bajar del mejor de la semana anterior.
+     */
+    fun limitIn(unit: com.bestrong.core.util.WeightUnit, suggestedKg: Double, lastWeekBestKg: Double?, maxWeeklyIncrease: Double, stepKg: Double): Double {
+        val limited = limit(suggestedKg, lastWeekBestKg, maxWeeklyIncrease)
+        val step = unit.fromKg(stepKg)
+        // En kg, sin tope aplicado o sin escalón, el tope ya vale tal cual
+        if (unit == com.bestrong.core.util.WeightUnit.KG || limited >= suggestedKg - 1e-9 || step <= 0) return limited
+        val floored = unit.toKg(kotlin.math.floor(unit.fromKg(limited) / step + 1e-6) * step)
+        return maxOf(floored, lastWeekBestKg ?: 0.0)
+    }
 }
 
 /**

@@ -548,4 +548,23 @@ class CollarTest {
         // Sin objetivo no sale
         assertEquals(0, com.bestrong.core.stats.RpeTarget.vsTarget(w.copy(exercises = w.exercises.map { it.copy(targetRpe = null) })).size)
     }
+
+    @Test
+    fun highTargetRpeThresholdsStayReachable() {
+        // Con objetivo 9 un RPE 10 sí es pasarse; con 10 es lo buscado; sin objetivo, como siempre
+        assertEquals(10.0, com.bestrong.core.training.Autoregulation.high(9.0), 1e-9)
+        assertEquals(9.5, com.bestrong.core.training.Autoregulation.high(null), 1e-9)
+        assertEquals(Double.MAX_VALUE, com.bestrong.core.training.Autoregulation.high(10.0), 1e-9)
+        assertEquals(9.0, com.bestrong.core.training.Autoregulation.easyUpTo(null), 1e-9)
+        assertEquals(9.5, com.bestrong.core.training.Autoregulation.easyUpTo(9.0), 1e-9)
+    }
+
+    @Test
+    fun weeklyCapInPoundsIsLoadable() {
+        val lb = com.bestrong.core.util.WeightUnit.LB
+        val best = lb.toKg(90.0)
+        val capped = com.bestrong.core.training.ProgressionCap.limitIn(lb, lb.toKg(95.0), best, 0.025, lb.stepKg())
+        // El tope (≈ 92 lb) se baja al escalón de 5 lb, sin bajar de las 90 de la semana pasada
+        assertEquals(90.0, lb.fromKg(capped), 1e-6)
+    }
 }

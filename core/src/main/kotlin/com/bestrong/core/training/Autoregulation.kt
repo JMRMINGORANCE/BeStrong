@@ -18,9 +18,23 @@ object Autoregulation {
     const val HIGH = 9.5
     const val LOW = 7.0
 
-    /** RPE a partir del cual se baja, con el objetivo [target] (con 10 nunca: es una serie a tope buscada). */
-    fun high(target: Double?): Double = HIGH + ((target ?: TARGET) - TARGET)
+    const val MAX_RPE = 10.0
+
+    /**
+     * RPE a partir del cual se baja, con el objetivo [target]: como mucho 10 (con objetivo 9 un 10 sí es
+     * pasarse); con objetivo 10 nunca, porque la serie a tope es lo buscado.
+     */
+    fun high(target: Double?): Double {
+        val t = target ?: TARGET
+        return if (t >= MAX_RPE) Double.MAX_VALUE else minOf(MAX_RPE, HIGH + (t - TARGET))
+    }
     fun low(target: Double?): Double = LOW + ((target ?: TARGET) - TARGET)
+
+    /** RPE máximo con el que una serie aún cuenta como «fácil» para subir peso: 9 sin objetivo, nunca 10 salvo buscándolo. */
+    fun easyUpTo(target: Double?): Double {
+        val t = target ?: TARGET
+        return if (t >= MAX_RPE) MAX_RPE else minOf(t + 1, HIGH)
+    }
 
     fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double): RpeAdjustment? {
         val done = exercise.sets.firstOrNull { it.id == completedSetId } ?: return null

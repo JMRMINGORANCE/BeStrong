@@ -69,14 +69,19 @@ object RoutineShare {
                 val work = re.sets.filter { it.type != SetType.WARMUP }
                 val reps = targetText(re.exercise.tracking, work.firstOrNull())
                 val line = "• " + re.exercise.displayName(context) + "  —  " + context.getString(R.string.pdf_routine_sets, work.size, reps) +
-                    "  ·  " + context.getString(R.string.pdf_rest, formatDuration(re.restSeconds.toLong())) +
-                    // RPE objetivo y tempo, si los tiene: forman parte de la prescripción
-                    listOfNotNull(
-                        re.targetRpe?.takeIf { re.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { "RPE " + it.toString().removeSuffix(".0") },
-                        re.tempo?.let { context.getString(R.string.tempo) + " " + it },
-                    ).joinToString("") { "  ·  $it" }
+                    "  ·  " + context.getString(R.string.pdf_rest, formatDuration(re.restSeconds.toLong()))
                 page.canvas.drawText(line, 52f, y, bodyP)
                 y += 16f
+                // RPE objetivo y tempo, si los tiene, en otra línea (drawText no parte el texto)
+                val extras = listOfNotNull(
+                    re.targetRpe?.takeIf { re.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { "RPE " + it.toString().removeSuffix(".0") },
+                    re.tempo?.let { context.getString(R.string.tempo) + " " + it },
+                )
+                if (extras.isNotEmpty()) {
+                    ensure(14f)
+                    page.canvas.drawText(extras.joinToString("  ·  "), 64f, y, bodyP)
+                    y += 14f
+                }
             }
             y += 10f
         }
