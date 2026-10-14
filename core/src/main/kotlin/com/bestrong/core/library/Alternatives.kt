@@ -35,14 +35,15 @@ object Alternatives {
         if (previousOfNew.isNotEmpty()) {
             return sets.mapIndexed { i, s ->
                 val p = previousOfNew.getOrNull(i) ?: previousOfNew.last()
-                if (s.completed) s else s.copy(weightKg = p.weightKg, reps = p.reps, durationSec = p.durationSec)
+                // Las reps planeadas eran del ejercicio de antes: ya no sirven para comparar
+                if (s.completed) s else s.copy(weightKg = p.weightKg, reps = p.reps, durationSec = p.durationSec, targetReps = null)
             }
         }
         val ff = factor(from.equipment)
         val ft = factor(to.equipment)
-        if (ff == 0.0 || ft == 0.0) return sets.map { if (it.completed) it else it.copy(weightKg = 0.0) }
+        if (ff == 0.0 || ft == 0.0) return sets.map { if (it.completed) it else it.copy(weightKg = 0.0, targetReps = null) }
         return sets.map { s ->
-            if (s.completed) s else s.copy(weightKg = (Math.round(s.weightKg * ft / ff / stepKg) * stepKg).coerceAtLeast(0.0))
+            if (s.completed) s else s.copy(weightKg = (Math.round(s.weightKg * ft / ff / stepKg) * stepKg).coerceAtLeast(0.0), targetReps = null)
         }
     }
 }

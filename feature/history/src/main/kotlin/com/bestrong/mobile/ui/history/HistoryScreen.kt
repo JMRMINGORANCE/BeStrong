@@ -60,6 +60,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSource
@@ -623,14 +624,19 @@ private fun FilteredSummary(vm: HistoryViewModel, filtered: List<Workout>) {
 /** «Entreno copiado» con «Abrir» para ir a la copia. */
 @Composable
 private fun CopiedSnackbar(vm: HistoryViewModel, snackbar: SnackbarHostState, onOpen: (String) -> Unit) {
-    val msg = stringResource(R.string.copy_to_day_done)
-    val open = stringResource(R.string.action_open)
-    // Se recoge y se limpia enseguida (si se sale con el aviso a la vista no vuelve a salir), sin reiniciar el efecto
-    LaunchedEffect(Unit) {
-        vm.copied.collect { id ->
-            if (id == null) return@collect
-            vm.clearCopied()
-            if (snackbar.showSnackbar(msg, open, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) onOpen(id)
+    val msg by androidx.compose.runtime.rememberUpdatedState(stringResource(R.string.copy_to_day_done))
+    val open by androidx.compose.runtime.rememberUpdatedState(stringResource(R.string.action_open))
+    val openCopy by androidx.compose.runtime.rememberUpdatedState(onOpen)
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    // Solo con la pantalla a la vista (una copia hecha en segundo plano se avisa al volver); se limpia al
+    // recogerla, así no vuelve a salir si se sale con el aviso a la vista
+    LaunchedEffect(lifecycle) {
+        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            vm.copied.collect { id ->
+                if (id == null) return@collect
+                vm.clearCopied()
+                if (snackbar.showSnackbar(msg, open, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) openCopy(id)
+            }
         }
     }
 }

@@ -161,7 +161,14 @@ object WorkoutEditor {
     }
 
     fun replaceExercise(workout: Workout, workoutExerciseId: String, exercise: Exercise): Workout =
-        updateExercise(workout, workoutExerciseId) { it.copy(exercise = exercise, targetRpe = it.targetRpe.takeIf { exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }) }
+        updateExercise(workout, workoutExerciseId) {
+            it.copy(
+                exercise = exercise,
+                targetRpe = it.targetRpe.takeIf { exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS },
+                // Otro ejercicio: el plan de reps del anterior no vale
+                sets = it.sets.map { s -> if (s.completed) s else s.copy(targetReps = null) },
+            )
+        }
 
     fun updateExercise(workout: Workout, workoutExerciseId: String, block: (WorkoutExercise) -> WorkoutExercise): Workout =
         workout.copy(exercises = workout.exercises.map { if (it.id == workoutExerciseId) block(it) else it })

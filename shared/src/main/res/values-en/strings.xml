@@ -1179,4 +1179,7 @@
     <string name="cardio_nudge_setting">Remind me on Thursday if I\'m behind</string>
     <string name="routine_recovered_as_new">This routine was deleted: saving will create it as new</string>
     <string name="plateau_hint">%1$d sessions without beating your estimated 1RM. Try another rep range or a deload week.</string>
+    <string name="plateau_try_range">Try %1$s reps</string>
+    <string name="planned_reps_line">Routine plan: %1$s reps</string>
+    <string name="edit_measurement">Edit measurement</string>
 </resources>

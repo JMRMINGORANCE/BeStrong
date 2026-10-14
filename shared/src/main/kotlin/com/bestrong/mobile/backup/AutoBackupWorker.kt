@@ -85,18 +85,20 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         // Primero se escribe la copia nueva y solo si sale bien se borra la del mismo día (reintento):
         // así un fallo a medias nunca deja sin la última copia buena. No se trunca con "wt" porque
         // no todos los proveedores lo admiten.
-        val old = children(tree)[name]
         val doc = DocumentsContract.createDocument(resolver, parent, mime, name) ?: error("No se pudo crear $name")
         val written = runCatching { resolver.openOutputStream(doc, "w")?.use { it.write(bytes) } ?: error("No se pudo escribir $name") }
         if (written.isFailure) {
             runCatching { DocumentsContract.deleteDocument(resolver, doc) }
             written.getOrThrow()
         }
-        if (old != null && old != doc) {
-            DocumentsContract.deleteDocument(resolver, old)
-            // El proveedor la habrá creado como «nombre (1)»: se le devuelve el nombre si se puede
-            runCatching { DocumentsContract.renameDocument(resolver, doc, name) }
-        }
+        // Las del mismo día: la de antes y las «nombre (1)» que dejó un proveedor que no deja renombrar
+        val stem = name.substringBeforeLast('.')
+        val ext = name.substring(stem.length)
+        val sameDay = Regex(Regex.escape(stem) + " \\(\\d+\\)" + Regex.escape(ext))
+        val olds = children(tree).filter { (n, uri) -> uri != doc && (n == name || sameDay.matches(n)) }.values
+        olds.forEach { runCatching { DocumentsContract.deleteDocument(resolver, it) } }
+        // El proveedor la habrá creado como «nombre (1)»: se le devuelve el nombre si se puede
+        if (olds.isNotEmpty()) runCatching { DocumentsContract.renameDocument(resolver, doc, name) }
     }
 
     private fun children(tree: Uri): Map<String, Uri> = children(applicationContext, tree)

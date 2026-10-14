@@ -184,7 +184,7 @@ class ProfileViewModel @Inject constructor(
 
     val photos: StateFlow<List<ProgressPhoto>> = photoStore.photos
     fun addPhoto(uri: Uri) = viewModelScope.launch { runCatching { photoStore.add(uri) } }
-    fun deletePhoto(photo: ProgressPhoto) = photoStore.delete(photo)
+    fun deletePhoto(photo: ProgressPhoto) = viewModelScope.launch { photoStore.delete(photo) }
 
     /** Fuerza relativa (1RM / peso corporal) del básico con más datos: (ejercicio, [(fecha, peso, 1RM)]). */
     val relativeStrength: StateFlow<Pair<String, List<Triple<Long, Double, Double>>>?> = combine(repo.history, repo.measurements) { history, measures ->

@@ -64,6 +64,8 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
     val unit = LocalWeightUnit.current
     val routine by vm.routine.collectAsStateWithLifecycle()
     val tempoVersion by vm.tempoVersion.collectAsStateWithLifecycle()
+    // Leído aquí para que el título y el botón de borrar cambien si el borrador pasa a ser rutina nueva
+    val isNew by vm.isNewState.collectAsStateWithLifecycle()
     CloseIfMissing(vm, onClose)
     var confirmLeave by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
@@ -86,10 +88,10 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(if (vm.isNew) R.string.routine_new else R.string.routine_edit)) },
+                title = { Text(stringResource(if (isNew) R.string.routine_new else R.string.routine_edit)) },
                 navigationIcon = { IconButton(onClick = leave) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_cancel)) } },
                 actions = {
-                    if (!vm.isNew) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, stringResource(R.string.routine_delete)) }
+                    if (!isNew) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, stringResource(R.string.routine_delete)) }
                     TextButton(onClick = { vm.save(onClose) }) { Text(stringResource(R.string.action_save)) }
                 },
             )
@@ -395,5 +397,10 @@ private fun CloseIfMissing(vm: RoutineEditorViewModel, onClose: () -> Unit) {
     val recovered by vm.recoveredAsNew.collectAsStateWithLifecycle()
     val context = androidx.compose.ui.platform.LocalContext.current
     val text = stringResource(R.string.routine_recovered_as_new)
-    LaunchedEffect(recovered) { if (recovered) android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_LONG).show() }
+    LaunchedEffect(recovered) {
+        if (recovered && !vm.recoveredNoticeShown) {
+            vm.recoveredNoticeShown = true
+            android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_LONG).show()
+        }
+    }
 }

@@ -1179,4 +1179,7 @@
     <string name="cardio_nudge_setting">Avisar-me à quinta se estiver atrasado</string>
     <string name="routine_recovered_as_new">Esta rotina foi apagada: ao guardar será criada como nova</string>
     <string name="plateau_hint">%1$d sessões sem melhorar o teu 1RM estimado. Experimenta outra gama de reps ou uma semana de descarga.</string>
+    <string name="plateau_try_range">Experimentar %1$s reps</string>
+    <string name="planned_reps_line">Plano da rotina: %1$s reps</string>
+    <string name="edit_measurement">Corrigir medida</string>
 </resources>

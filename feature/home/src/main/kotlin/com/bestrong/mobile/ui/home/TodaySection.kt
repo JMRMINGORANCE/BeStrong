@@ -571,12 +571,13 @@ private fun CardioNudgeSwitch(vm: HomeViewModel) {
     // Qué día (por la tarde) llega el aviso
     if (on) {
         val locale = java.util.Locale.getDefault()
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        // Abreviados («lun», «Mon»): con una letra se repiten (M, T, S); bajan de línea si no caben
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             java.time.DayOfWeek.entries.forEach { d ->
                 androidx.compose.material3.FilterChip(
                     selected = d.value == day,
                     onClick = { vm.setCardioNudgeDay(d.value) },
-                    label = { Text(d.getDisplayName(java.time.format.TextStyle.NARROW_STANDALONE, locale)) },
+                    label = { Text(d.getDisplayName(java.time.format.TextStyle.SHORT_STANDALONE, locale)) },
                 )
             }
         }

@@ -877,8 +877,11 @@ class CollarTest {
         val missed = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets(2)), 2.5)
         assertEquals(100.0, missed!!.weightKg, 1e-9)
         assertEquals(0, missed.direction)
-        // Sin plan ni RPE, una sola serie pesada: no se sube a ciegas
+        // Sin plan: la top a las reps de las descargas sube; corta (100×2 y luego 85×5) se mantiene y pide RPE
         val unplanned = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets(5).map { it.copy(targetReps = null) }), 2.5)
-        assertEquals(true, unplanned!!.needsRpe)
+        assertEquals(102.5, unplanned!!.weightKg, 1e-9)
+        val ground = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets(2).map { it.copy(targetReps = null) }), 2.5)
+        assertEquals(100.0, ground!!.weightKg, 1e-9)
+        assertEquals(true, ground.needsRpe)
     }
 }

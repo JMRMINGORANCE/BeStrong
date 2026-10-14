@@ -180,7 +180,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                 }
             }
             if (s.rpeTrend.size >= RPE_MIN_SESSIONS) item { RpeTrendCard(s.rpeTrend) }
-            if (!timed) item { PlateauHint(s.progress) }
+            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { PlateauHint(vm, exerciseId, s.progress) }
             item { SectionHeader(stringResource(R.string.personal_records)) }
             item {
                 Card(Modifier.fillMaxWidth()) {
@@ -397,15 +397,26 @@ private fun CardioProgressChart(progress: List<com.bestrong.core.stats.ExerciseP
 /** Ejercicios que se siguen por distancia o tiempo (no por peso y reps). */
 private val TIMED_TRACKING = setOf(com.bestrong.core.model.TrackingType.CARDIO, com.bestrong.core.model.TrackingType.DISTANCE, com.bestrong.core.model.TrackingType.DURATION)
 
-/** «4 sesiones sin mejorar tu 1RM estimado»: con una idea para salir del estancamiento. */
+/**
+ * «4 sesiones sin mejorar tu 1RM estimado»: con una idea para salir del estancamiento y un botón para probar otro
+ * rango de reps (el de fuerza si ya se iba a 8-12, si no el de hipertrofia).
+ */
 @Composable
-private fun PlateauHint(progress: List<com.bestrong.core.stats.ExerciseProgressPoint>) {
+private fun PlateauHint(vm: ExercisesViewModel, exerciseId: String, progress: List<com.bestrong.core.stats.ExerciseProgressPoint>) {
     val stalled = remember(progress) { com.bestrong.core.stats.WorkoutStats.sessionsSinceBest(progress) }
     if (stalled < PLATEAU_SESSIONS) return
+    val ranges by vm.repRanges.collectAsStateWithLifecycle()
+    val next = if (ranges[exerciseId] == HYPERTROPHY_RANGE) STRENGTH_RANGE else HYPERTROPHY_RANGE
     Card(Modifier.fillMaxWidth()) {
-        Text(stringResource(R.string.plateau_hint, stalled), Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
+        Column(Modifier.padding(12.dp)) {
+            Text(stringResource(R.string.plateau_hint, stalled), style = MaterialTheme.typography.bodyMedium)
+            TextButton(onClick = { vm.setRepRange(exerciseId, next) }) { Text(stringResource(R.string.plateau_try_range, next)) }
+        }
     }
 }
+
+private const val HYPERTROPHY_RANGE = "8-12"
+private const val STRENGTH_RANGE = "4-6"
 
 /** Sesiones sin récord de 1RM estimado a partir de las que se habla de estancamiento. */
 private const val PLATEAU_SESSIONS = 4

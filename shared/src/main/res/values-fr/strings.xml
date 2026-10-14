@@ -1179,4 +1179,7 @@
     <string name="cardio_nudge_setting">Me prévenir le jeudi si je suis en retard</string>
     <string name="routine_recovered_as_new">Cette routine a été supprimée : l\'enregistrer la recréera</string>
     <string name="plateau_hint">%1$d séances sans battre ton 1RM estimé. Essaie une autre plage de reps ou une semaine de décharge.</string>
+    <string name="plateau_try_range">Essayer %1$s reps</string>
+    <string name="planned_reps_line">Plan de la routine : %1$s reps</string>
+    <string name="edit_measurement">Modifier la mesure</string>
 </resources>

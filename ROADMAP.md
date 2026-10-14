@@ -409,3 +409,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Elegir el día del aviso de cardio
 - [x] Gráficas de reps y volumen de la ficha con su formato (no como peso)
 - [x] Borrador de una rutina borrada: se avisa de que se guardará como nueva
+
+## Fase 48 — Medidas fiables y plan a la vista ✅
+- [x] Corregir una medida pasada (tocándola)
+- [x] Medidas imposibles (grasa 185 %, cintura 0,8) se marcan y no se guardan
+- [x] «Plan de la rutina: 5 reps» en cada ejercicio del entreno
+- [x] Estancamiento con botón para probar otro rango de reps
+- [x] Copias automáticas sin duplicados «(1)» en proveedores que no dejan renombrar

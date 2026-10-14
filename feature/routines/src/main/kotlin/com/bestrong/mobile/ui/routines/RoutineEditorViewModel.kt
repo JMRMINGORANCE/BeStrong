@@ -20,6 +20,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -68,6 +70,13 @@ class RoutineEditorViewModel @Inject constructor(
     private val _recoveredAsNew = MutableStateFlow(false)
     val recoveredAsNew: StateFlow<Boolean> = _recoveredAsNew.asStateFlow()
     val isNew: Boolean get() = routineId == null || _recoveredAsNew.value
+
+    /** [isNew] observable: el título y el botón de borrar cambian si el borrador pasa a ser rutina nueva. */
+    val isNewState: StateFlow<Boolean> = _recoveredAsNew.map { routineId == null || it }
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.Eagerly, routineId == null)
+
+    /** El aviso de «se guardará como nueva» se enseña una vez (no en cada giro). */
+    var recoveredNoticeShown = false
 
     /** Rutina tal y como se abrió, para saber si hay cambios sin guardar al salir. */
     private var original: Routine = savedRoutine(KEY_ORIGINAL) ?: _routine.value

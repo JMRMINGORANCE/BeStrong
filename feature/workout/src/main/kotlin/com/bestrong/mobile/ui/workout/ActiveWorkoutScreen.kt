@@ -709,6 +709,7 @@ private fun ExerciseCard(
             MissingEquipmentLine(vm, we) { substituting = true }
             TargetRpeLine(vm, we)
             RepRangeLine(vm, we)
+            PlannedRepsLine(we)
             // Nota fija del ejercicio (se guarda para siempre, no solo en este entreno)
             if (pinnedNote.isNotBlank()) {
                 Text(
@@ -945,6 +946,20 @@ private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.mode
         // Tocar pone ese peso en las series pendientes
         modifier = Modifier.padding(horizontal = 12.dp)
             .then(if (load != null && pending) Modifier.clickable(onClickLabel = stringResource(R.string.plates_use_weight)) { vm.applyRpeLoads(we.id) } else Modifier),
+    )
+}
+
+/** «Plan de la rutina: 5 reps» (o «5-8» si cambian por serie): lo que «la próxima vez» compara con lo hecho. */
+@Composable
+private fun PlannedRepsLine(we: com.bestrong.core.model.WorkoutExercise) {
+    val planned = we.sets.filter { it.type != SetType.WARMUP }.mapNotNull { it.targetReps }
+    if (planned.isEmpty() || we.exercise.tracking != com.bestrong.core.model.TrackingType.WEIGHT_REPS) return
+    val text = if (planned.min() == planned.max()) "${planned.min()}" else "${planned.min()}-${planned.max()}"
+    Text(
+        stringResource(R.string.planned_reps_line, text),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 12.dp),
     )
 }
 

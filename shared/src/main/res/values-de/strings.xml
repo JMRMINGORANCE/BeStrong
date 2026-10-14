@@ -1179,4 +1179,7 @@
     <string name="cardio_nudge_setting">Donnerstags erinnern, wenn ich hinterher bin</string>
     <string name="routine_recovered_as_new">Diese Routine wurde gelöscht: Speichern legt sie neu an</string>
     <string name="plateau_hint">%1$d Einheiten ohne neues geschätztes 1RM. Probier einen anderen Wiederholungsbereich oder eine Deload-Woche.</string>
+    <string name="plateau_try_range">%1$s Wdh. ausprobieren</string>
+    <string name="planned_reps_line">Routinenplan: %1$s Wdh.</string>
+    <string name="edit_measurement">Messung bearbeiten</string>
 </resources>

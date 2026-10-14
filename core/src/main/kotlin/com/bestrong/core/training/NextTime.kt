@@ -33,7 +33,7 @@ object NextTime {
         val topSets = work.filter { it.weightKg >= top }
         val target = targetOf(topSets)
         val maxRpe = topSets.mapNotNull { it.rpe }.maxOrNull()
-        val evidence = hasEvidence(topSets)
+        val evidence = evidenceFor(work, topSets)
         val allReps = topSets.all { it.reps >= target } && evidence
         val name = we.exercise.name
         val high = Autoregulation.high(we.targetRpe)
@@ -42,6 +42,18 @@ object NextTime {
             !allReps && maxRpe != null && maxRpe >= high -> NextTimeSuggestion(we.exercise.id, name, lowered(top, stepKg), target, -1)
             else -> NextTimeSuggestion(we.exercise.id, name, top, target, 0, needsRpe = !evidence)
         }
+    }
+
+    private fun evidenceFor(work: List<com.bestrong.core.model.WorkoutSet>, topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean =
+        hasEvidence(topSets) || topThenBackOffs(work, topSets)
+
+    /**
+     * Sin plan: una serie top seguida de descargas cuenta si la top llegó a las reps de las descargas (100×5 y
+     * luego 85×5); si se quedó corta (100×2 y luego 85×5), no se sube.
+     */
+    private fun topThenBackOffs(work: List<com.bestrong.core.model.WorkoutSet>, topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean {
+        val backOffs = work.filter { it !in topSets }
+        return work.last() !in topSets && backOffs.isNotEmpty() && topSets.first().reps >= backOffs.minOf { it.reps }
     }
 
     /** Lo planeado en la rutina si lo hay; si no, las reps de la primera serie pesada. */

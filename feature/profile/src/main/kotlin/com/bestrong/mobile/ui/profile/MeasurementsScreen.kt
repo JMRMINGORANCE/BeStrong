@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -64,6 +65,8 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     val list by vm.measurements.collectAsStateWithLifecycle()
     val relative by vm.relativeStrength.collectAsStateWithLifecycle()
     var adding by rememberSaveable { mutableStateOf(false) }
+    // Medida que se está corrigiendo (null = nueva)
+    var editingId by rememberSaveable { mutableStateOf<String?>(null) }
     // Resto de medidas: una gráfica por cada una con al menos dos datos
     val others: List<Pair<String, (BodyMeasurement) -> Double?>> = listOf(
         stringResource(R.string.f_fat) to { m: BodyMeasurement -> m.bodyFatPct },
@@ -125,7 +128,13 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             }
             item(key = "photos") { ProgressPhotosSection(vm) }
             items(list, key = { it.id }) { m ->
-                Card(Modifier.fillMaxWidth()) {
+                // Tocarla deja corregirla (mismo día y misma medida)
+                Card(
+                    Modifier.fillMaxWidth().clickable {
+                        editingId = m.id
+                        adding = true
+                    },
+                ) {
                     ListItem(
                         headlineContent = { Text(formatDate(m.dateEpochMs)) },
                         supportingContent = {
@@ -147,46 +156,79 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
         }
     }
     if (adding) {
-        // Lo escrito sobrevive al giro; al cerrar el diálogo se descarta
-        val fields = rememberSaveable(saver = listSaver<List<MutableState<String>>, String>({ l -> l.map { it.value } }, { l -> l.map { mutableStateOf(it) } })) {
-            List(6) { mutableStateOf("") }
-        }
-        val labels = listOf(
-            stringResource(R.string.f_weight, unit.label),
-            stringResource(R.string.f_fat),
-            stringResource(R.string.f_waist),
-            stringResource(R.string.f_chest),
-            stringResource(R.string.f_arm),
-            stringResource(R.string.f_thigh),
-        )
-
-        // 0 o negativo no es una medida: cuenta como vacío
-        fun v(i: Int) = fields[i].value.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0 }
-        AlertDialog(
-            onDismissRequest = { adding = false },
-            title = { Text(stringResource(R.string.new_measurement)) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    labels.forEachIndexed { i, l ->
-                        OutlinedTextField(
-                            fields[i].value,
-                            { fields[i].value = it },
-                            label = { Text(l) },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        )
-                    }
-                }
+        MeasurementDialog(
+            initial = list.firstOrNull { it.id == editingId },
+            unit = unit,
+            onSave = { m ->
+                vm.saveMeasurement(m)
+                adding = false
+                editingId = null
             },
-            confirmButton = {
-                Button(enabled = fields.indices.any { v(it) != null }, onClick = {
-                    vm.saveMeasurement(BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = v(0)?.let(unit::toKg), bodyFatPct = v(1), waistCm = v(2), chestCm = v(3), armCm = v(4), thighCm = v(5)))
-                    adding = false
-                }) { Text(stringResource(R.string.action_save)) }
+            onDismiss = {
+                adding = false
+                editingId = null
             },
-            dismissButton = { TextButton(onClick = { adding = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
+}
+
+/** Valores posibles de cada medida (peso en kg, grasa en %, perímetros en cm): fuera de ahí es un error al escribir. */
+private val MEASURE_RANGES = listOf(20.0..400.0, 2.0..70.0, 30.0..250.0, 40.0..250.0, 10.0..100.0, 20.0..150.0)
+
+/** El número escrito si es posible para esa medida (el peso se comprueba en kg); null si no lo es o está vacío. */
+private fun measureValue(text: String, index: Int, unit: WeightUnit): Double? {
+    val raw = text.replace(',', '.').toDoubleOrNull()?.takeIf { it.isFinite() } ?: return null
+    val check = if (index == 0) unit.toKg(raw) else raw
+    return raw.takeIf { check in MEASURE_RANGES[index] }
+}
+
+/** Nueva medida o corregir [initial] (mismo id y fecha); un valor imposible se marca y no deja guardar. */
+@Composable
+private fun MeasurementDialog(initial: BodyMeasurement?, unit: WeightUnit, onSave: (BodyMeasurement) -> Unit, onDismiss: () -> Unit) {
+    fun shown(v: Double?) = v?.let { "%.1f".format(it).removeSuffix(".0").removeSuffix(",0") }.orEmpty()
+    // Lo escrito sobrevive al giro; al cerrar el diálogo se descarta
+    val fields = rememberSaveable(initial?.id, saver = listSaver<List<MutableState<String>>, String>({ l -> l.map { it.value } }, { l -> l.map { mutableStateOf(it) } })) {
+        listOf(initial?.weightKg?.let(unit::fromKg), initial?.bodyFatPct, initial?.waistCm, initial?.chestCm, initial?.armCm, initial?.thighCm)
+            .map { mutableStateOf(shown(it)) }
+    }
+    val labels = listOf(
+        stringResource(R.string.f_weight, unit.label),
+        stringResource(R.string.f_fat),
+        stringResource(R.string.f_waist),
+        stringResource(R.string.f_chest),
+        stringResource(R.string.f_arm),
+        stringResource(R.string.f_thigh),
+    )
+
+    fun v(i: Int) = measureValue(fields[i].value, i, unit)
+
+    // Vacío no es error; escrito y fuera de rango, sí
+    fun wrong(i: Int) = fields[i].value.isNotBlank() && v(i) == null
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(if (initial == null) R.string.new_measurement else R.string.edit_measurement)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                labels.forEachIndexed { i, l ->
+                    OutlinedTextField(
+                        fields[i].value,
+                        { fields[i].value = it },
+                        label = { Text(l) },
+                        isError = wrong(i),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(enabled = fields.indices.any { v(it) != null } && fields.indices.none { wrong(it) }, onClick = {
+                val base = initial ?: BodyMeasurement(dateEpochMs = System.currentTimeMillis())
+                onSave(base.copy(weightKg = v(0)?.let(unit::toKg), bodyFatPct = v(1), waistCm = v(2), chestCm = v(3), armCm = v(4), thighCm = v(5)))
+            }) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
 }
 
 /** Media de 7 días y cambio frente a la semana anterior: el peso de un día suelto sube y baja con el agua y la comida. */

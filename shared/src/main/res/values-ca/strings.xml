@@ -1179,4 +1179,7 @@
     <string name="cardio_nudge_setting">Avisa\'m dijous si vaig endarrerit</string>
     <string name="routine_recovered_as_new">Aquesta rutina es va esborrar: en desar es crearà com a nova</string>
     <string name="plateau_hint">%1$d sessions sense millorar el teu 1RM estimat. Prova un altre rang de reps o una setmana de descàrrega.</string>
+    <string name="plateau_try_range">Provar %1$s reps</string>
+    <string name="planned_reps_line">Pla de la rutina: %1$s reps</string>
+    <string name="edit_measurement">Corregir mesura</string>
 </resources>

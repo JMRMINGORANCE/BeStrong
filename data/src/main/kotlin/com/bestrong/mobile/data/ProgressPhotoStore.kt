@@ -27,12 +27,15 @@ class ProgressPhotoStore @Inject constructor(@ApplicationContext private val con
     suspend fun add(uri: Uri, dateEpochMs: Long = System.currentTimeMillis()) = withContext(Dispatchers.IO) {
         dir.mkdirs()
         val target = File(dir, "${dateEpochMs}_${System.nanoTime() % 100000}.jpg")
-        context.contentResolver.openInputStream(uri)?.use { input -> target.outputStream().use { input.copyTo(it) } }
-            ?: error("No se pudo leer la foto")
+        // Si la copia falla a medias, no queda una foto rota
+        runCatching {
+            context.contentResolver.openInputStream(uri)?.use { input -> target.outputStream().use { input.copyTo(it) } }
+                ?: error("No se pudo leer la foto")
+        }.onFailure { target.delete() }.getOrThrow()
         _photos.value = read()
     }
 
-    fun delete(photo: ProgressPhoto) {
+    suspend fun delete(photo: ProgressPhoto) = withContext(Dispatchers.IO) {
         photo.file.delete()
         _photos.value = read()
     }
