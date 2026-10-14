@@ -391,7 +391,36 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
+
+    /** RPE de cada serie completada en la última versión vista del entreno (para ver los que llegan del reloj). */
+    private var seenRpes: Map<String, Double?>? = null
+    private var seenRpeWorkoutId: String? = null
+
+    /** RPE puestos en el móvil (ya avisados al ponerlos): id de serie → valor. */
+    private val localRpes = mutableMapOf<String, Double?>()
+
+    /**
+     * Si llega del reloj un RPE nuevo en la última serie completada de un ejercicio, se propone el mismo ajuste
+     * que al anotarlo en el móvil. La primera versión del entreno solo se recuerda.
+     */
+    private fun onWorkoutForRpe(w: Workout?) {
+        val sets = w?.exercises.orEmpty().flatMap { we -> we.sets.filter { it.completed }.map { we to it } }
+        val now = sets.associate { (_, s) -> s.id to s.rpe }
+        // Otro entreno (pareja, uno nuevo): se empieza a mirar desde cero, sin avisar de lo que ya traía
+        val before = seenRpes.takeIf { w?.id == seenRpeWorkoutId }
+        seenRpes = now
+        seenRpeWorkoutId = w?.id
+        if (before == null) return
+        sets.filter { (we, s) -> s.rpe != null && before[s.id] != s.rpe && localRpes[s.id] != s.rpe && we.sets.lastOrNull { it.completed }?.id == s.id }
+            .forEach { (we, s) ->
+                Autoregulation.suggest(we, s.id, settings.value.stepKgFor(we.exercise.id))?.let {
+                    _events.tryEmit(WorkoutEvent.RpeSuggestion(we.id, we.exercise, it))
+                }
+            }
+    }
+
     fun setRpe(weId: String, setId: String, rpe: Double?) {
+        localRpes[setId] = rpe
         val current = workout.value ?: return
         val updated = WorkoutEditor.updateSet(current, weId, setId) { s -> s.copy(rpe = rpe) }
         edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(rpe = rpe) } }
@@ -731,6 +760,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     init {
+        viewModelScope.launch { workout.collect(::onWorkoutForRpe) }
         // Resumen sin cerrar cuando el sistema mató el proceso: se reconstruye desde el historial
         savedState.get<String>(KEY_SUMMARY_ID)?.let { id ->
             viewModelScope.launch {

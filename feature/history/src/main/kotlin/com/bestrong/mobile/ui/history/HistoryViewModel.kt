@@ -69,6 +69,15 @@ class HistoryViewModel @Inject constructor(
     suspend fun recordsIn(workout: Workout): List<PersonalRecord> =
         withContext(Dispatchers.Default) { WorkoutStats.newRecordsIn(workout, history.value) }
 
+    /**
+     * Ejercicio a ejercicio, frente a la sesión anterior del mismo atleta (la tuya o la de tu pareja), por id de
+     * ejercicio. Fuera del hilo principal.
+     */
+    suspend fun comparisonsFor(workout: Workout): Map<String, WorkoutStats.ExerciseComparison> = withContext(Dispatchers.Default) {
+        val same = if (workout.athlete != null) repo.partnerHistory.value.filter { it.athlete == workout.athlete } else history.value
+        WorkoutStats.compareWithPrevious(workout, same).associateBy { it.exerciseId }
+    }
+
     /** Último entreno borrado, para poder deshacer. */
     private val _deleted = MutableStateFlow<Workout?>(null)
     val deleted: StateFlow<Workout?> = _deleted

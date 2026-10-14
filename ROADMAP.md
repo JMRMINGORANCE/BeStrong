@@ -296,3 +296,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] El 1RM reciente cuenta las reps en recámara de las series con RPE
 - [x] Tempo para toda la rutina de una vez
 - [x] RPE de la última serie desde el menú del reloj
+
+## Fase 32 — Coherencia y atajos ✅
+- [x] Historial: cada ejercicio frente a la vez anterior (volumen y 1RM)
+- [x] 1RM con las reps en recámara del RPE también en el historial y en «frente a la última vez»
+- [x] Widget: la rutina planificada para hoy primero y la que más tiempo lleva sin hacerse
+- [x] El RPE anotado en el reloj propone en el móvil el mismo ajuste de series
+- [x] Los avisos descartados con fecha se olvidan a los 60 días

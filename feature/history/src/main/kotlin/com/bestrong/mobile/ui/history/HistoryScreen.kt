@@ -238,6 +238,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     var editInfo by remember { mutableStateOf(false) }
     var editSet by remember { mutableStateOf<Pair<String, String>?>(null) }
     val records by produceState(emptyList<PersonalRecord>(), w) { value = vm.recordsIn(w) }
+    val comparisons by produceState(emptyMap<String, com.bestrong.core.stats.WorkoutStats.ExerciseComparison>(), w) { value = vm.comparisonsFor(w) }
     val restByExercise = remember(w) { RestStats.byExercise(w) }
     val routinesById by vm.routinesById.collectAsStateWithLifecycle()
     if (editInfo) {
@@ -337,12 +338,15 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             Row(if (editing) Modifier.clickable { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
                                 Text(describeSet(set, we.exercise.tracking, unit), Modifier.weight(1f))
-                                if (set.estimatedOneRepMax > 0) Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax)), style = MaterialTheme.typography.bodySmall)
+                                // Con RPE anotado (7–10) cuenta las reps en recámara, como el entreno
+                                val oneRm = com.bestrong.core.stats.RpeLoad.oneRepMaxOf(set)
+                                if (oneRm > 0) Text(stringResource(R.string.one_rm_value, unit.format(oneRm)), style = MaterialTheme.typography.bodySmall)
                             }
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp)) }
                         }
                         restByExercise[we.id]?.let { r -> ExerciseRestLine(w, we, r, routinesById, vm) }
+                        comparisons[we.exercise.id]?.let { ComparisonLine(it) }
                         if (editing) TextButton(onClick = { vm.addPastSet(w, we.id) }) { Text(stringResource(R.string.add_set)) }
                     }
                 }
@@ -352,6 +356,24 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
 }
 
 /** Descanso real medio frente al previsto (solo si las series tienen hora de marcado). */
+/** «Frente a la vez anterior: +250 kg de volumen · 1RM +2,5 kg», en verde si mejoró. */
+@Composable
+private fun ComparisonLine(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison) {
+    val unit = LocalWeightUnit.current
+    fun signed(v: Double, text: String) = (if (v >= 0) "+" else "−") + text
+    val up = c.best1rmDelta > 0.01 || (c.best1rmDelta >= -0.01 && c.volumeDelta > 0)
+    Text(
+        stringResource(
+            R.string.history_vs_previous,
+            signed(c.volumeDelta, unit.formatVolume(kotlin.math.abs(c.volumeDelta))),
+            signed(c.best1rmDelta, unit.format(kotlin.math.abs(c.best1rmDelta), withUnit = true)),
+        ),
+        style = MaterialTheme.typography.bodySmall,
+        color = if (up) com.bestrong.mobile.ui.theme.statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 4.dp),
+    )
+}
+
 @Composable
 private fun RestSummaryLine(w: Workout) {
     val rest = remember(w) { RestStats.summary(w) } ?: return

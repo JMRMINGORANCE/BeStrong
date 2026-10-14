@@ -624,4 +624,21 @@ class CollarTest {
         assertEquals(1, com.bestrong.core.training.Autoregulation.suggest(we, "f", 2.5)?.direction)
         assertEquals(null, com.bestrong.core.training.Autoregulation.suggest(we.copy(sets = listOf(f.copy(rpe = 10.0), we.sets[1])), "f", 2.5))
     }
+
+    @Test
+    fun dismissedTipsForgetOldDatedKeys() {
+        val today = java.time.LocalDate.of(2026, 10, 14)
+        val kept = com.bestrong.core.util.DismissedTips.prune(setOf("year_ago:2026-01-02", "year_ago:2026-10-01", "tip_plates", "year_ago:2026-10"), today)
+        assertEquals(setOf("year_ago:2026-10-01", "tip_plates", "year_ago:2026-10"), kept)
+    }
+
+    @Test
+    fun quickRoutinesPutTodaysPlanFirst() {
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        fun r(id: String) = com.bestrong.core.model.Routine(id = id, name = id, exercises = listOf(com.bestrong.core.model.RoutineExercise(exercise = ex)))
+        val done = Workout(name = "A", routineId = "a", startedAtEpochMs = 1_000, finishedAtEpochMs = 2_000)
+        val picked = com.bestrong.core.training.QuickRoutines.pick(listOf(r("a"), r("b"), r("c")), listOf(done), plannedTodayId = "c", todayStartEpochMs = 500)
+        // La de hoy primero; luego la que nunca se hizo antes que la hecha
+        assertEquals(listOf("c", "b"), picked.map { it.id })
+    }
 }

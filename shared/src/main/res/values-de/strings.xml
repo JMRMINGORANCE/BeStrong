@@ -1102,4 +1102,5 @@
     <string name="prog_capped_suffix">" · durch das Wochenlimit begrenzt"</string>
     <string name="tempo_all">Tempo für die ganze Routine</string>
     <string name="undo_rpe_loads">RPE-Lasten übernommen</string>
+    <string name="history_vs_previous">Im Vergleich zum letzten Mal: %1$s Volumen · 1RM %2$s</string>
 </resources>

@@ -152,7 +152,8 @@ object WorkoutStats {
                 exerciseId = we.exercise.id,
                 exerciseName = we.exercise.name,
                 volumeDelta = now.sumOf { it.volume } - prev.completedSets.sumOf { it.volume },
-                best1rmDelta = (now.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0) - (prev.completedSets.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0),
+                // Con las reps en recámara del RPE, como el peso orientativo
+                best1rmDelta = (now.maxOfOrNull(RpeLoad::oneRepMaxOf) ?: 0.0) - (prev.completedSets.maxOfOrNull(RpeLoad::oneRepMaxOf) ?: 0.0),
                 repsDelta = now.sumOf { it.totalReps } - prev.completedSets.sumOf { it.totalReps },
             )
         }

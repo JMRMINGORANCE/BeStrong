@@ -177,7 +177,10 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
         LocalBodyUnit provides (settings.bodyUnit ?: settings.unit),
         LocalSetColumns provides SetColumns(settings.showPreviousColumn, settings.showComparison),
         LocalAppInfo provides AppInfo(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.REPO_URL, BuildConfig.DONATION_URL),
-        LocalTips provides Tips(settings.dismissedTips) { id -> appVm.update { it.copy(dismissedTips = it.dismissedTips + id) } },
+        LocalTips provides Tips(settings.dismissedTips) { id ->
+            // Al descartar uno, se olvidan los avisos con fecha que ya no pueden volver
+            appVm.update { it.copy(dismissedTips = com.bestrong.core.util.DismissedTips.prune(it.dismissedTips + id, java.time.LocalDate.now())) }
+        },
     ) {
         NavigationSuiteScaffold(
             layoutType = layoutType,

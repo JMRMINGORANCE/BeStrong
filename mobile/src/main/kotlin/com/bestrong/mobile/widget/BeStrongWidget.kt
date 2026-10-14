@@ -43,15 +43,19 @@ import dagger.hilt.components.SingletonComponent
 import java.time.LocalDate
 import java.time.ZoneId
 
-/** Widget: racha, entrenos de la semana, "Entrenar" y acceso directo a las dos primeras rutinas. */
+/** Widget: racha, entrenos de la semana, "Entrenar" y dos rutinas: la planificada para hoy y la que más tiempo lleva sin hacerse. */
 class BeStrongWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val repo = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java).repository()
+        val entry = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
+        val repo = entry.repository()
         val history = repo.historyOnce()
-        val routines = repo.routinesOnce().filterNot { it.archived }.take(2)
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
+        // La planificada para hoy primero y luego la que más tiempo lleva sin hacerse
+        val weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        val plannedToday = entry.planning().state.value.planFor(weekStart).routineFor(today.dayOfWeek)
+        val routines = com.bestrong.core.training.QuickRoutines.pick(repo.routinesOnce(), history, plannedToday, today.atStartOfDay(zone).toInstant().toEpochMilli())
         val week = WorkoutStats.weeklySummary(history, 1, today, zone).first().workouts
         val streak = WorkoutStats.weeklyStreak(history, today, zone)
         provideContent { GlanceTheme { Content(context, week, streak, routines) } }
@@ -113,6 +117,7 @@ class BeStrongWidget : GlanceAppWidget() {
 interface WidgetEntryPoint {
     fun repository(): BeStrongRepository
     fun settings(): com.bestrong.mobile.data.SettingsStore
+    fun planning(): com.bestrong.mobile.data.PlanningStore
 }
 
 class BeStrongWidgetReceiver : GlanceAppWidgetReceiver() {

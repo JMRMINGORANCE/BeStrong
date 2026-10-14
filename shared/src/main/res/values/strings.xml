@@ -1102,4 +1102,5 @@
     <string name="prog_capped_suffix">" · limitado por el tope semanal"</string>
     <string name="tempo_all">Tempo de toda la rutina</string>
     <string name="undo_rpe_loads">Pesos por RPE aplicados</string>
+    <string name="history_vs_previous">Frente a la vez anterior: %1$s de volumen · 1RM %2$s</string>
 </resources>
