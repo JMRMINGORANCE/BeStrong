@@ -1124,4 +1124,6 @@
     <string name="routine_gym">Routine gym</string>
     <string name="routine_gym_any">Whichever is active</string>
     <string name="notif_backup_now">Back up now</string>
+    <string name="backup_now_done">Backup done</string>
+    <string name="backup_now_failed">Backup failed: check the folder or your connection</string>
 </resources>

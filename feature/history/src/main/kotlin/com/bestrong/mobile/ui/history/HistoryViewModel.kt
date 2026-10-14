@@ -53,8 +53,22 @@ class HistoryViewModel @Inject constructor(
     /** Día elegido en el calendario (null = todos). */
     val selectedDay = MutableStateFlow<LocalDate?>(null)
 
-    val filtered: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, query.debounce { if (it.isEmpty()) 0L else 150L }, showPartner, selectedDay) { h, p, q, sp, day ->
-        val all = if (sp) (h + p).sortedByDescending { it.startedAtEpochMs } else h
+    /** Gimnasio elegido (null = todos). */
+    val gymFilter = MutableStateFlow<String?>(null)
+
+    /** Gimnasios que aparecen en el historial (el filtro solo sale con dos o más). */
+    val gymNames: StateFlow<List<String>> = repo.history.map { h -> h.mapNotNull { it.gymName }.distinct().sorted() }
+        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val filtered: StateFlow<List<Workout>> = combine(
+        repo.history,
+        repo.partnerHistory,
+        combine(query.debounce { if (it.isEmpty()) 0L else 150L }, gymFilter) { q, g -> q to g },
+        showPartner,
+        selectedDay,
+    ) { h, p, (q, gym), sp, day ->
+        val mine = if (sp) (h + p).sortedByDescending { it.startedAtEpochMs } else h
+        val all = if (gym == null) mine else mine.filter { it.gymName == gym }
         val zone = ZoneId.systemDefault()
         val ofDay = if (day == null) all else all.filter { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == day }
         WorkoutStats.search(ofDay, q) { it.displayName(context) }

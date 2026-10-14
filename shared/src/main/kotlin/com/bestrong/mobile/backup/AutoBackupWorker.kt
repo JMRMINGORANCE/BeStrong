@@ -112,6 +112,9 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     }
 
     companion object {
+        /** Copia pedida a mano (una a la vez). */
+        private const val NOW_NAME = "auto-backup-now"
+
         /** Sin copia buena en más de esto (es semanal), un fallo definitivo avisa. */
         private const val STALE_MS = 14 * 86_400_000L
 
@@ -132,13 +135,12 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         }
 
         /** Copia inmediata (al elegir la carpeta). */
-        fun runNow(context: Context) {
+        /** Lanza una copia ya (si no hay otra en marcha) y devuelve el id de la petición, para seguirla. */
+        fun runNow(context: Context): java.util.UUID {
+            val request = androidx.work.OneTimeWorkRequestBuilder<AutoBackupWorker>().build()
             // Única: varios toques seguidos no escriben a la vez el mismo archivo del día
-            WorkManager.getInstance(context).enqueueUniqueWork(
-                "$NAME-now",
-                androidx.work.ExistingWorkPolicy.KEEP,
-                androidx.work.OneTimeWorkRequestBuilder<AutoBackupWorker>().build(),
-            )
+            WorkManager.getInstance(context).enqueueUniqueWork(NOW_NAME, androidx.work.ExistingWorkPolicy.KEEP, request)
+            return request.id
         }
     }
 }

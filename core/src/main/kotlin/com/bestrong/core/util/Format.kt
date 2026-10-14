@@ -83,3 +83,12 @@ fun distanceComparison(c: com.bestrong.core.stats.WorkoutStats.ExerciseCompariso
     kotlin.math.abs(c.distanceDelta) < SAME_DISTANCE_M -> 0.0 to signedDistance(c.distanceDelta)
     else -> c.distanceDelta to signedDistance(c.distanceDelta)
 }
+
+/** Ritmo «5:30/km» con [durationSec] y [distanceM]; null sin alguno de los dos o con menos de 100 m (no es fiable). */
+fun paceText(durationSec: Int, distanceM: Double): String? {
+    if (durationSec <= 0 || distanceM < MIN_PACE_DISTANCE_M) return null
+    val perKm = kotlin.math.round(durationSec / (distanceM / 1000)).toLong()
+    return "%d:%02d/km".format(perKm / 60, perKm % 60)
+}
+
+private const val MIN_PACE_DISTANCE_M = 100.0

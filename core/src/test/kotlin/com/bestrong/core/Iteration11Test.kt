@@ -736,4 +736,19 @@ class CollarTest {
         assertEquals("Hotel", back.gymName)
         assertEquals("Ana", back.athlete)
     }
+
+    @Test
+    fun paceAndSameGymHistory() {
+        assertEquals("5:30/km", com.bestrong.core.util.paceText(1650, 5000.0))
+        assertEquals(null, com.bestrong.core.util.paceText(60, 50.0))
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        fun w(id: String, t: Long, gym: String?) = Workout(
+            id = id, name = id, startedAtEpochMs = t, finishedAtEpochMs = t + 1, gymName = gym,
+            exercises = listOf(WorkoutExercise(exercise = ex, sets = listOf(WorkoutSet(weightKg = 80.0, reps = 5, completed = true)))),
+        )
+        val h = listOf(w("b", 10, "Casa"), w("a", 1, "Hotel"))
+        // En el hotel se usa lo del hotel; en uno sin historial del ejercicio, todo
+        assertEquals(listOf("a"), com.bestrong.core.stats.WorkoutStats.atGym(h, "Hotel", "bp").map { it.id })
+        assertEquals(2, com.bestrong.core.stats.WorkoutStats.atGym(h, "Trabajo", "bp").size)
+    }
 }

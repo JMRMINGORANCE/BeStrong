@@ -1124,4 +1124,6 @@
     <string name="routine_gym">Studio der Routine</string>
     <string name="routine_gym_any">Das aktive</string>
     <string name="notif_backup_now">Jetzt sichern</string>
+    <string name="backup_now_done">Sicherung erstellt</string>
+    <string name="backup_now_failed">Sicherung fehlgeschlagen: prüfe Ordner oder Verbindung</string>
 </resources>

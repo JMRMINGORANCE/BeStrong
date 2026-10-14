@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -434,6 +435,18 @@ class ProfileViewModel @Inject constructor(
         // Se confirma en el diálogo con lo que trae (confirmRestore)
         result.onSuccess { showRestorePreview(it) }
             .onFailure { _messages.tryEmit(context.getString(R.string.restore_error, it.message.orEmpty())) }
+    }
+
+    /** Copia ahora en la carpeta elegida y dice cómo ha ido (con reintentos, puede tardar un poco). */
+    fun backupNow() {
+        val id = AutoBackupWorker.runNow(context)
+        _messages.tryEmit(context.getString(R.string.backup_started))
+        viewModelScope.launch {
+            // Con otra copia ya en marcha, esta petición no se encola: no hay nada que esperar
+            val done = androidx.work.WorkManager.getInstance(context).getWorkInfoByIdFlow(id)
+                .first { it == null || it.state.isFinished } ?: return@launch
+            _messages.tryEmit(context.getString(if (done.state == androidx.work.WorkInfo.State.SUCCEEDED) R.string.backup_now_done else R.string.backup_now_failed))
+        }
     }
 
     /** Borra un perfil de gimnasio y lo quita de las rutinas que lo tenían como suyo. */

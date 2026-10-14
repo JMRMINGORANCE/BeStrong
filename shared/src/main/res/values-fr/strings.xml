@@ -1124,4 +1124,6 @@
     <string name="routine_gym">Salle de la routine</string>
     <string name="routine_gym_any">Celle qui est active</string>
     <string name="notif_backup_now">Sauvegarder</string>
+    <string name="backup_now_done">Sauvegarde terminée</string>
+    <string name="backup_now_failed">Échec de la sauvegarde : vérifie le dossier ou la connexion</string>
 </resources>

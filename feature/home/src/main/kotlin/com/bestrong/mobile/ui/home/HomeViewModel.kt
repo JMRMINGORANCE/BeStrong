@@ -101,6 +101,10 @@ class HomeViewModel @Inject constructor(
 
     fun setActiveGym(id: String) = settingsStore.update { it.copy(activeGymId = id) }
 
+    /** Id → nombre de los gimnasios (para enseñar el de cada rutina; los borrados no salen). */
+    val gymNames: StateFlow<Map<String, String>> = settingsStore.settings.map { s -> s.gyms.associate { it.id to it.name } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), settingsStore.settings.value.gyms.associate { it.id to it.name })
+
     /** Si no hay programa: la rutina que lleva más tiempo sin hacerse. */
     val suggestedRoutine: StateFlow<Routine?> = combine(repo.routines, repo.history) { routines, history ->
         val last = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }

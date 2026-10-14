@@ -1124,4 +1124,6 @@
     <string name="routine_gym">Ximnasio da rutina</string>
     <string name="routine_gym_any">O que estea activo</string>
     <string name="notif_backup_now">Copiar agora</string>
+    <string name="backup_now_done">Copia feita</string>
+    <string name="backup_now_failed">Non se puido facer a copia: revisa o cartafol ou a conexión</string>
 </resources>

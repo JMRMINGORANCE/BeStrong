@@ -178,6 +178,16 @@ object WorkoutStats {
         }
     }
 
+    /**
+     * El historial en [gymName] si allí ya se hizo [exerciseId] (otro material, otras cargas); si no, o sin
+     * gimnasio, todo. Para rellenar y sugerir con lo hecho en el mismo sitio.
+     */
+    fun atGym(history: List<Workout>, gymName: String?, exerciseId: String): List<Workout> {
+        if (gymName == null) return history
+        val there = history.filter { it.gymName == gymName }
+        return if (previousSets(exerciseId, there).isNotEmpty()) there else history
+    }
+
     /** Entrenos por día de un año, para el mapa de calor. */
     fun dailyCounts(history: List<Workout>, year: Int, zone: ZoneId): Map<LocalDate, Int> =
         history.map { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() }

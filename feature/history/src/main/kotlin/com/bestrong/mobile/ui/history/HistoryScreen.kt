@@ -147,6 +147,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                             }
+                            item { GymFilterRow(vm) }
                             if (partnerWorkouts.isNotEmpty()) {
                                 item {
                                     FilterChip(
@@ -476,4 +477,18 @@ private fun caloriesSourceLine(w: Workout): String? {
     }
     val active = w.activeCalories?.let { stringResource(R.string.active_kcal, it) }
     return listOfNotNull(source, active).joinToString(" · ").ifEmpty { null }
+}
+
+/** Filtro por gimnasio (solo con entrenos en dos o más): las cargas de cada sitio no se comparan bien entre sí. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun GymFilterRow(vm: HistoryViewModel) {
+    val gyms by vm.gymNames.collectAsStateWithLifecycle()
+    val selected by vm.gymFilter.collectAsStateWithLifecycle()
+    if (gyms.size < 2) return
+    androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        gyms.forEach { g ->
+            FilterChip(selected = selected == g, onClick = { vm.gymFilter.value = if (selected == g) null else g }, label = { Text("🏋️ $g") })
+        }
+    }
 }

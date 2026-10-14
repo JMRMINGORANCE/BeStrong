@@ -325,3 +325,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Gimnasio por defecto de cada rutina (al empezarla pasa a ser el activo)
 - [x] «Copiar ahora» en el aviso de copia automática fallida
 - [x] Cardio y distancia frente a la vez anterior (km, o tiempo si no hay distancia), en el móvil y el reloj
+
+## Fase 36 — Ritmo y sitio ✅
+- [x] Ritmo (min/km) en las series de cardio con tiempo y distancia
+- [x] Historial filtrado por gimnasio
+- [x] El gimnasio de cada rutina en su tarjeta de Inicio
+- [x] «Copiar ahora» en Perfil, diciendo si salió bien
+- [x] Al rellenar y sugerir, lo último hecho en el mismo gimnasio (si allí ya se hizo el ejercicio)

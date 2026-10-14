@@ -1124,4 +1124,6 @@
     <string name="routine_gym">Gimnàs de la rutina</string>
     <string name="routine_gym_any">El que estigui actiu</string>
     <string name="notif_backup_now">Copiar ara</string>
+    <string name="backup_now_done">Còpia feta</string>
+    <string name="backup_now_failed">No s’ha pogut fer la còpia: revisa la carpeta o la connexió</string>
 </resources>

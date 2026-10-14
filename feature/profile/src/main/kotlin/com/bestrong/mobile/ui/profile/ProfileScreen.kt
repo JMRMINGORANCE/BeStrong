@@ -397,7 +397,12 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.auto_backup)) },
                             supportingContent = {
-                                AutoBackupStatus(settings)
+                                Column {
+                                    AutoBackupStatus(settings)
+                                    if (settings.backupFolderUri != null) {
+                                        TextButton(onClick = vm::backupNow, contentPadding = PaddingValues(0.dp)) { Text(stringResource(R.string.notif_backup_now)) }
+                                    }
+                                }
                             },
                             trailingContent = {
                                 if (settings.backupFolderUri == null) {

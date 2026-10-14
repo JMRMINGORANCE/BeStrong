@@ -21,7 +21,10 @@ fun describeSet(set: WorkoutSet, tracking: TrackingType, unit: WeightUnit, weigh
 /** «20 min · 3,20 km» (o «12:30» si no son minutos exactos). */
 fun cardioText(durationSec: Int, distanceM: Double): String {
     val time = if (durationSec % 60 == 0) "${durationSec / 60} min" else "%d:%02d".format(durationSec / 60, durationSec % 60)
-    return if (distanceM > 0) "$time · ${"%.2f".format(distanceM / 1000)} km" else time
+    if (distanceM <= 0) return time
+    // Ritmo (min/km) con tiempo y distancia: lo que se compara en carrera, remo o bici
+    val pace = com.bestrong.core.util.paceText(durationSec, distanceM)?.let { " · $it" }.orEmpty()
+    return "$time · ${"%.2f".format(distanceM / 1000)} km$pace"
 }
 
 /** Línea secundaria de una serie en el historial: su nota y una marca si fue con ayuda (null si no hay nada). */

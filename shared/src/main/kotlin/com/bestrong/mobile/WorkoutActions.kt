@@ -58,10 +58,13 @@ class WorkoutActions @Inject constructor(
     fun prefillLookup(): (String) -> List<WorkoutSet> {
         val history = repository.history.value
         val s = settings.settings.value
+        // Con varios gimnasios, lo último hecho en este (en el del hotel las mancuernas no son las de siempre)
+        val gymName = s.activeGym.name.takeIf { s.gyms.size > 1 }
         return { id ->
             val ex = repository.exercise(id)
-            val suggestion = if (s.progressionEnabled && ex != null) Progression.suggest(ex, history, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id)) else null
-            val previous = WorkoutStats.previousSets(id, history)
+            val base = WorkoutStats.atGym(history, gymName, id)
+            val suggestion = if (s.progressionEnabled && ex != null) Progression.suggest(ex, base, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id)) else null
+            val previous = WorkoutStats.previousSets(id, base)
             val sets = suggestion?.sets ?: previous
             if (ex == null) sets else loadable(ex, sets, suggestion?.kind, previous, history)
         }

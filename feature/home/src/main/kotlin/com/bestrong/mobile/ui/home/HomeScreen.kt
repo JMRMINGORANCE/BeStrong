@@ -96,6 +96,7 @@ fun HomeScreen(
     val routines by vm.routines.collectAsStateWithLifecycle()
     val active by vm.active.collectAsStateWithLifecycle()
     val history by vm.history.collectAsStateWithLifecycle()
+    val gymNames by vm.gymNames.collectAsStateWithLifecycle()
     val today by vm.today.collectAsStateWithLifecycle()
     val suggested by vm.suggestedRoutine.collectAsStateWithLifecycle()
     val week by vm.week.collectAsStateWithLifecycle()
@@ -221,6 +222,7 @@ fun HomeScreen(
                 RoutineCard(
                     routine = routine,
                     lastDone = last?.let { formatDate(it.startedAtEpochMs) },
+                    gymNames = gymNames,
                     onStart = { vm.startRoutine(routine, onOpenWorkout) },
                     onStartWatch = { vm.startOnWatch(routine) },
                     onEdit = { onEditRoutine(routine.id) },
@@ -255,7 +257,10 @@ private fun RoutineCard(
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onArchive: () -> Unit = {},
+    /** Id → nombre de los gimnasios: se enseña el de la rutina, si tiene (y sigue existiendo). */
+    gymNames: Map<String, String> = emptyMap(),
 ) {
+    val gymName = routine.gymId?.let(gymNames::get)
     var menu by remember { mutableStateOf(false) }
     var sharing by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -295,6 +300,7 @@ private fun RoutineCard(
             val info = listOfNotNull(
                 stringResource(R.string.routine_estimated, minutes).takeIf { minutes > 0 },
                 lastDone?.let { stringResource(R.string.routine_last_done, it) },
+                gymName?.let { "🏋️ $it" },
             )
             if (info.isNotEmpty()) Text(info.joinToString(" · "), style = MaterialTheme.typography.labelSmall)
             Button(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), enabled = routine.exercises.isNotEmpty()) {
