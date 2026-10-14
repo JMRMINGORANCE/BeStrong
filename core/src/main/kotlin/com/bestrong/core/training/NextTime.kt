@@ -6,7 +6,15 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 
 /** Qué hacer la próxima vez con un ejercicio: subir, mantener o bajar la carga. */
-data class NextTimeSuggestion(val exerciseId: String, val exerciseName: String, val weightKg: Double, val reps: Int, val direction: Int)
+data class NextTimeSuggestion(
+    val exerciseId: String,
+    val exerciseName: String,
+    val weightKg: Double,
+    val reps: Int,
+    val direction: Int,
+    /** Se mantiene por falta de datos (una sola serie pesada al final, sin RPE): apuntando el RPE podría subir. */
+    val needsRpe: Boolean = false,
+)
 
 /**
  * Doble progresión sencilla al terminar el entreno:
@@ -25,13 +33,14 @@ object NextTime {
         val topSets = work.filter { it.weightKg >= top }
         val target = topSets.first().reps
         val maxRpe = topSets.mapNotNull { it.rpe }.maxOrNull()
-        val allReps = topSets.all { it.reps >= target } && hasEvidence(topSets)
+        val evidence = hasEvidence(work, topSets)
+        val allReps = topSets.all { it.reps >= target } && evidence
         val name = we.exercise.name
         val high = Autoregulation.high(we.targetRpe)
         return when {
             allReps && (maxRpe == null || maxRpe < high) -> NextTimeSuggestion(we.exercise.id, name, top + stepKg, target, 1)
             !allReps && maxRpe != null && maxRpe >= high -> NextTimeSuggestion(we.exercise.id, name, lowered(top, stepKg), target, -1)
-            else -> NextTimeSuggestion(we.exercise.id, name, top, target, 0)
+            else -> NextTimeSuggestion(we.exercise.id, name, top, target, 0, needsRpe = !evidence)
         }
     }
 
@@ -41,8 +50,12 @@ object NextTime {
         return lower.coerceAtMost(top - stepKg).coerceAtLeast(0.0)
     }
 
-    /** Con una sola serie pesada (subiendo en pirámide) y sin RPE no hay con qué comparar: no se sube a ciegas. */
-    private fun hasEvidence(topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean = topSets.size >= 2 || topSets.any { it.rpe != null }
+    /**
+     * Con una sola serie pesada al final (subiendo en pirámide) y sin RPE no hay con qué comparar: no se sube a
+     * ciegas. Una serie pesada seguida de las de descarga (serie top) sí cuenta: era la planeada.
+     */
+    private fun hasEvidence(work: List<com.bestrong.core.model.WorkoutSet>, topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean =
+        topSets.size >= 2 || topSets.any { it.rpe != null } || work.last() !in topSets
 
     fun forWorkout(workout: Workout, stepKg: Double): List<NextTimeSuggestion> = forWorkout(workout) { stepKg }
 

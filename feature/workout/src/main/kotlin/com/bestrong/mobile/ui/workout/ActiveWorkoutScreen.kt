@@ -1069,6 +1069,10 @@ fun WorkoutSummaryDialog(
                             color = if (n.direction > 0) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    // Por qué se mantiene alguno: le falta el RPE de la serie pesada
+                    if (summary.nextTime.any { it.needsRpe }) {
+                        Text(stringResource(R.string.summary_next_needs_rpe), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
                 SessionRatingPicker(onRate)
                 if (summary.records.isNotEmpty()) {

@@ -1175,4 +1175,6 @@
     <string name="action_open">Abrir</string>
     <string name="copy_to_day_done">Treino copiado</string>
     <string name="notif_cardio_nudge">O cardio da semana está atrasado</string>
+    <string name="summary_next_needs_rpe">Com uma só série pesada no fim, registe o RPE para poder sugerir subir</string>
+    <string name="cardio_nudge_setting">Avisar-me à quinta se estiver atrasado</string>
 </resources>

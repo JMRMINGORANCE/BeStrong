@@ -252,7 +252,21 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         val local = currentActive()
         if (local != null) WorkoutMerge.conflicts(local, remote).takeIf { it.isNotEmpty() }?.let { _syncConflicts.tryEmit(it) }
         val merged = if (local == null) remote else WorkoutMerge.merge(local, remote)
+        keepReplacedLocal(local, merged)
+        if (dao.valueOnce(KEY_WATCH_KNOWN) != remote.id) dao.putValue(KeyValueEntity(KEY_WATCH_KNOWN, remote.id))
         if (merged != local) write(merged)
+    }
+
+    /**
+     * Gana un entreno distinto del reloj (empezados a la vez sin conexión): el del móvil, si tiene series hechas y
+     * el reloj nunca lo mandó (si lo hubiera tenido, ya lo terminó o lo descartó allí), se guarda terminado; si
+     * luego llega el terminado del reloj, lo sustituye.
+     */
+    private suspend fun keepReplacedLocal(local: Workout?, merged: Workout) {
+        if (local == null || local.id == merged.id || dao.valueOnce(KEY_WATCH_KNOWN) == local.id) return
+        if (local.exercises.none { we -> we.sets.any { it.completed } }) return
+        val finished = com.bestrong.core.session.WorkoutEditor.finish(local, System.currentTimeMillis())
+        if (finished.exercises.isNotEmpty()) saveWorkout(finished)
     }
 
     /** El reloj terminó o descartó el entreno: lo quitamos sin guardarlo (el terminado llega aparte). */
@@ -336,7 +350,11 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
     /** Pulso y calorías del reloj que llegaron antes de que el móvil guardase ese entreno (JSON, uno por entreno). */
-    suspend fun savePendingHealth(workoutId: String, raw: String) = dao.putValue(KeyValueEntity(KEY_PENDING_HEALTH + workoutId, raw))
+    suspend fun savePendingHealth(workoutId: String, raw: String) {
+        // Solo sirve unos segundos: las de entrenos descartados (que nunca se guardan) no se acumulan
+        dao.deleteValuesStartingWith(KEY_PENDING_HEALTH)
+        dao.putValue(KeyValueEntity(KEY_PENDING_HEALTH + workoutId, raw))
+    }
 
     suspend fun takePendingHealth(workoutId: String): String? =
         dao.valueOnce(KEY_PENDING_HEALTH + workoutId)?.also { dao.deleteValue(KEY_PENDING_HEALTH + workoutId) }
@@ -467,6 +485,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         const val KEY_PROGRAM = "active_program"
         const val KEY_TRASH = "trash"
         const val KEY_PENDING_HEALTH = "pending_watch_health:"
+        const val KEY_WATCH_KNOWN = "watch_known_workout"
     }
 }
 

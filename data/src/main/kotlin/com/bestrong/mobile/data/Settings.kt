@@ -91,6 +91,8 @@ data class UserSettings(
     val weeklyCardioKm: Double? = null,
     /** O minutos de cardio por semana (elíptica, bici sin distancia…; la OMS recomienda 150); solo uno de los dos. */
     val weeklyCardioMin: Int? = null,
+    /** Aviso del jueves si el cardio de la semana va por detrás del objetivo. */
+    val cardioNudge: Boolean = true,
     /** Cintura objetivo (cm); null = sin objetivo. */
     val waistGoalCm: Double? = null,
     /** Series semanales por músculo que se quiere alcanzar como mínimo (mapa, Inicio, widget). */
@@ -219,6 +221,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         waistGoalCm = prefs.getString("waist_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         weeklyCardioKm = prefs.getString("weekly_cardio_km", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         weeklyCardioMin = prefs.getString("weekly_cardio_min", null)?.toIntOrNull()?.takeIf { it > 0 },
+        cardioNudge = prefs.getBoolean("cardio_nudge", true),
         weeklySetsTarget = prefs.getInt("weekly_sets_target", 10).coerceIn(1, 30),
         weighInDay = prefs.getInt("weigh_in_day", 0).takeIf { it in 1..7 },
         measureReminder = prefs.getBoolean("measure_reminder", false),
@@ -246,6 +249,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         putString("waist_goal", s.waistGoalCm?.toString())
         putString("weekly_cardio_km", s.weeklyCardioKm?.toString())
         putString("weekly_cardio_min", s.weeklyCardioMin?.toString())
+        putBoolean("cardio_nudge", s.cardioNudge)
     }
 
     /** Estado de la copia automática (propio de este móvil: no viaja en las copias). */

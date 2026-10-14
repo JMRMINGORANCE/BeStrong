@@ -136,6 +136,11 @@ class HomeViewModel @Inject constructor(
     /** Objetivo de cardio: en km o en minutos (poner uno quita el otro); los dos null = sin objetivo. */
     fun setWeeklyCardioGoal(km: Double?, minutes: Int?) = settingsStore.update { it.copy(weeklyCardioKm = km, weeklyCardioMin = minutes) }
 
+    val cardioNudge: StateFlow<Boolean> = settingsStore.settings.map { it.cardioNudge }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), settingsStore.settings.value.cardioNudge)
+
+    fun setCardioNudge(on: Boolean) = settingsStore.update { it.copy(cardioNudge = on) }
+
     /** Objetivo escrito a mano («12,5» km o «200» min); devuelve false si el número no vale. */
     fun setCustomCardioGoal(text: String, inMinutes: Boolean): Boolean {
         // Solo números normales: «12,5» o «12.5» km, minutos enteros (nada de «1e3» ni separadores de miles)

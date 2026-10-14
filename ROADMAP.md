@@ -395,3 +395,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Aviso el jueves si el cardio de la semana va por detrás (lo que falta y a qué ritmo)
 - [x] La tile «Hoy toca» del reloj enseña el primer objetivo (ejercicio, peso y reps)
 - [x] La tile «Hoy toca» enseña el cardio de la semana frente al objetivo
+
+## Fase 46 — Explicar y elegir ✅
+- [x] El resumen explica cuándo «la próxima vez» se mantiene por falta de RPE
+- [x] Interruptor para el aviso de cardio del jueves (en el objetivo de cardio)
+- [x] La serie top seguida de descargas cuenta para subir el peso
+- [x] El borrador de una rutina borrada se guarda como rutina nueva en vez de perderse
+- [x] Nombres de ejercicios en tu idioma en la tile del reloj y al copiar un entreno

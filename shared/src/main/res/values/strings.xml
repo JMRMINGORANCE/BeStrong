@@ -1175,4 +1175,6 @@
     <string name="action_open">Abrir</string>
     <string name="copy_to_day_done">Entreno copiado</string>
     <string name="notif_cardio_nudge">El cardio de la semana va por detrás</string>
+    <string name="summary_next_needs_rpe">Con una sola serie pesada al final, apunta su RPE para que pueda sugerir subir</string>
+    <string name="cardio_nudge_setting">Avisarme el jueves si voy por detrás</string>
 </resources>

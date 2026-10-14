@@ -489,7 +489,7 @@ private fun cardioPace(week: HomeViewModel.CardioWeek): String? {
     return if (pace.inMinutes) {
         stringResource(R.string.cardio_pace_min, kotlin.math.ceil(pace.left).toInt(), kotlin.math.ceil(pace.perDay).toInt())
     } else {
-        stringResource(R.string.cardio_pace_km, "%.1f".format(pace.left), "%.1f".format(maxOf(pace.perDay, 0.1)))
+        stringResource(R.string.cardio_pace_km, "%.1f".format(maxOf(pace.left, 0.1)), "%.1f".format(maxOf(pace.perDay, 0.1)))
     }
 }
 
@@ -551,9 +551,20 @@ fun CardioWeekCard(vm: HomeViewModel) {
                         }
                     }
                     CustomCardioGoal(vm, week) { editing = false }
+                    CardioNudgeSwitch(vm)
                 }
             },
             confirmButton = { androidx.compose.material3.TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_close)) } },
         )
+    }
+}
+
+/** «Aviso el jueves si voy por detrás» (lo que falta y a qué ritmo). */
+@Composable
+private fun CardioNudgeSwitch(vm: HomeViewModel) {
+    val on by vm.cardioNudge.collectAsStateWithLifecycle()
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.cardio_nudge_setting), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        androidx.compose.material3.Switch(checked = on, onCheckedChange = vm::setCardioNudge)
     }
 }

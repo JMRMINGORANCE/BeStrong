@@ -94,7 +94,13 @@ class TodayTileService : TileService() {
     private fun firstTarget(routine: Routine): String? {
         val first = routine.exercises.firstOrNull()
         val set = first?.sets?.firstOrNull { it.type != com.bestrong.core.model.SetType.WARMUP && it.weightKg > 0 }
-        return set?.let { "${first.exercise.name} · ${container.store.settings.value.unit.format(it.weightKg)} × ${it.reps}" }
+        return set?.let { "${exerciseName(first.exercise)} · ${container.store.settings.value.unit.format(it.weightKg)} × ${it.reps}" }
+    }
+
+    /** Nombre en el idioma del reloj (como en la app: español para es/ca/gl/eu, si no inglés). */
+    private fun exerciseName(exercise: com.bestrong.core.model.Exercise): String {
+        val lang = resources.configuration.locales[0].language.let { if (it in setOf("es", "ca", "gl", "eu")) "es" else "en" }
+        return com.bestrong.core.library.ExerciseLibrary.displayName(exercise, lang)
     }
 
     /** Cardio de la semana frente al objetivo («Cardio 12,0/20 km»), solo si se puso uno en el móvil. */
@@ -105,7 +111,7 @@ class TodayTileService : TileService() {
         val monday = java.time.LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
         val (meters, seconds) = com.bestrong.core.stats.CardioTotals.since(container.store.history.value, monday.atStartOfDay(zone).toInstant().toEpochMilli())
         val goalMin = s.weeklyCardioMin
-        val progress = if (goalMin != null) "${seconds / 60}/$goalMin min" else "%.1f/%s km".format(meters / 1000, com.bestrong.core.util.formatGoalKm(s.weeklyCardioKm ?: 0.0))
+        val progress = if (goalMin != null) "${seconds / 60}/$goalMin min" else "%s/%s km".format(com.bestrong.core.util.formatKmLike(meters / 1000, s.weeklyCardioKm), com.bestrong.core.util.formatGoalKm(s.weeklyCardioKm ?: 0.0))
         return getString(R.string.tile_cardio, progress)
     }
 

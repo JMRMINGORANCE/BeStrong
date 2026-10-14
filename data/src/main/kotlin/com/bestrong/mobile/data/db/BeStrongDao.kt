@@ -71,4 +71,7 @@ interface BeStrongDao {
 
     @Query("DELETE FROM kv WHERE `key` = :key")
     suspend fun deleteValue(key: String)
+
+    @Query("DELETE FROM kv WHERE `key` LIKE :prefix || '%'")
+    suspend fun deleteValuesStartingWith(prefix: String)
 }

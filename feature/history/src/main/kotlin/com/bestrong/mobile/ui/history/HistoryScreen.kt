@@ -268,7 +268,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     if (copying) {
         CopyToDayDialog(
             durationMin = w.durationSeconds() / 60,
-            exercises = w.exercises.map { it.id to it.exercise.name },
+            exercises = w.exercises.map { it.id to it.exercise.displayName() },
             onCopy = { s, e, ids ->
                 copying = false
                 vm.copyToDay(w, s, e, ids)
@@ -628,7 +628,9 @@ private fun CopiedSnackbar(vm: HistoryViewModel, snackbar: SnackbarHostState, on
     val open = stringResource(R.string.action_open)
     LaunchedEffect(copied) {
         val id = copied ?: return@LaunchedEffect
+        // Se limpia después (como los otros avisos): limpiarlo antes reiniciaría este efecto y cortaría el aviso
+        val result = snackbar.showSnackbar(msg, open, duration = SnackbarDuration.Short)
         vm.clearCopied()
-        if (snackbar.showSnackbar(msg, open, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) onOpen(id)
+        if (result == SnackbarResult.ActionPerformed) onOpen(id)
     }
 }

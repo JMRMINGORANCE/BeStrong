@@ -80,8 +80,8 @@ data class CardioPace(val left: Double, val perDay: Double, val inMinutes: Boole
         fun of(goalKm: Double?, goalMin: Int?, meters: Double, seconds: Long, daysLeft: Int): CardioPace? {
             val days = daysLeft.coerceAtLeast(1)
             return when {
-                goalMin != null -> (goalMin - seconds / 60.0).takeIf { it >= 1 }?.let { CardioPace(it, it / days, inMinutes = true) }
-                goalKm != null -> (goalKm - meters / 1000).takeIf { it > 0.05 }?.let { CardioPace(it, it / days, inMinutes = false) }
+                goalMin != null -> (goalMin - (seconds / 60).toDouble()).takeIf { it > 0 }?.let { CardioPace(it, it / days, inMinutes = true) }
+                goalKm != null -> (goalKm - meters / 1000).takeIf { it > 0.0005 }?.let { CardioPace(it, it / days, inMinutes = false) }
                 else -> null
             }
         }

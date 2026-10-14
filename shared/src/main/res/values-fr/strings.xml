@@ -1175,4 +1175,6 @@
     <string name="action_open">Ouvrir</string>
     <string name="copy_to_day_done">Séance copiée</string>
     <string name="notif_cardio_nudge">Le cardio de la semaine est en retard</string>
+    <string name="summary_next_needs_rpe">Avec une seule série lourde à la fin, note son RPE pour qu\'il puisse proposer d\'augmenter</string>
+    <string name="cardio_nudge_setting">Me prévenir le jeudi si je suis en retard</string>
 </resources>

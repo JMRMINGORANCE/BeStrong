@@ -1175,4 +1175,6 @@
     <string name="action_open">Obrir</string>
     <string name="copy_to_day_done">Entrenament copiat</string>
     <string name="notif_cardio_nudge">El cardio de la setmana va endarrerit</string>
+    <string name="summary_next_needs_rpe">Amb una sola sèrie pesada al final, apunta\'n el RPE perquè pugui suggerir pujar</string>
+    <string name="cardio_nudge_setting">Avisa\'m dijous si vaig endarrerit</string>
 </resources>
