@@ -1189,5 +1189,7 @@
     <string name="routine_search">Chercher une routine</string>
     <string name="import_failed">Import impossible</string>
     <string name="import_measurements">Importer des mesures (CSV)</string>
-    <string name="import_measurements_done">Mesures importées : %1$d</string>
+    <string name="hc_restore_hidden">Récupérer supprimés</string>
+    <string name="routine_search_none">Aucune routine ne correspond</string>
+    <string name="import_measurements_summary">Mesures : %1$d nouvelles, %2$d complétées</string>
 </resources>

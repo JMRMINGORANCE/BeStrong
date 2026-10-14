@@ -200,7 +200,7 @@ private fun ImportMeasurementsButton(vm: ProfileViewModel) {
     val launcher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let {
             vm.importMeasurementsCsv(it) { n ->
-                val text = n?.let { c -> context.getString(R.string.import_measurements_done, c) } ?: failed
+                val text = n?.let { (added, completed) -> context.getString(R.string.import_measurements_summary, added, completed) } ?: failed
                 android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_SHORT).show()
             }
         }

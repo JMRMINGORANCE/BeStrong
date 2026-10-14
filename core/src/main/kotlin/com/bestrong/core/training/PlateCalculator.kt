@@ -22,17 +22,40 @@ object PlateCalculator {
 
     fun calculate(target: Double, unit: WeightUnit, bar: Double = defaultBar(unit), plates: List<Double> = defaultPlates(unit)): PlateLoad {
         if (target <= bar) return PlateLoad(emptyList(), bar, bar, (target - bar).coerceAtLeast(0.0))
-        var remaining = (target - bar) / 2
-        val perSide = mutableListOf<Double>()
-        // Un disco de 0 (o negativo) dejaría el bucle sin terminar
-        plates.filter { it > 0 }.sortedDescending().forEach { p ->
-            // Tolerancia de redondeo (conversiones kg ↔ lb)
-            while (remaining + 1e-3 >= p) {
-                perSide += p
-                remaining -= p
-            }
-        }
+        val perSide = exactSide((target - bar) / 2, plates.filter { it > 0 })
         val achieved = bar + perSide.sum() * 2
         return PlateLoad(perSide, bar, achieved, round((target - achieved) * 100) / 100)
     }
+
+    /**
+     * Discos de un lado que más se acercan a [side] sin pasarse, con los menos discos posibles (no a lo bruto de
+     * mayor a menor: con {15, 10} y 20 por lado son 10 + 10, no 15 y sobran 5). En centésimas, para kg y lb.
+     */
+    private fun exactSide(side: Double, plates: List<Double>): List<Double> {
+        val amount = Math.round(side * 100).toInt().coerceIn(0, MAX_SIDE_CENTS)
+        val units = plates.map { Math.round(it * 100).toInt() }.filter { it > 0 }.distinct().sortedDescending()
+        if (amount == 0 || units.isEmpty()) return emptyList()
+        // Menos discos para llegar justo a cada cantidad (y con qué disco se llegó)
+        val count = IntArray(amount + 1) { Int.MAX_VALUE }
+        val last = IntArray(amount + 1)
+        count[0] = 0
+        for (a in 1..amount) {
+            units.forEach { u ->
+                if (u <= a && count[a - u] != Int.MAX_VALUE && count[a - u] + 1 < count[a]) {
+                    count[a] = count[a - u] + 1
+                    last[a] = u
+                }
+            }
+        }
+        var a = (amount downTo 0).first { count[it] != Int.MAX_VALUE }
+        val out = mutableListOf<Double>()
+        while (a > 0) {
+            out += last[a] / 100.0
+            a -= last[a]
+        }
+        return out.sortedDescending()
+    }
+
+    /** Tope por lado (500 kg o lb): más no cabe en una barra y así la tabla es pequeña. */
+    private const val MAX_SIDE_CENTS = 50_000
 }

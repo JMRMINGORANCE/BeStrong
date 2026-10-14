@@ -16,22 +16,69 @@ object MeasurementCsv {
     }
 
     /**
-     * Lee un CSV como el que se exporta (también con «;» y coma decimal, como lo guarda Excel en español): fecha
-     * (AAAA-MM-DD) y las medidas en el mismo orden. Las filas sin fecha válida o sin ninguna medida se saltan.
+     * Lee un CSV como el que se exporta y los de hojas de cálculo: separador «,» o «;» (con coma decimal), campos
+     * entre comillas, fechas AAAA-MM-DD o DD/MM/AAAA y columnas por su nombre si hay cabecera (fecha, peso, grasa,
+     * cintura, pecho, brazo, muslo, en español o en inglés); sin cabecera, en el orden de la exportación. Las filas
+     * sin fecha válida o sin ninguna medida se saltan.
      */
-    fun parse(text: String, zone: ZoneId = ZoneId.systemDefault()): List<BodyMeasurement> = text.lines()
-        .map { it.trim().removePrefix("\uFEFF") }
-        .filter { it.isNotEmpty() && it.first().isDigit() }
-        .mapNotNull { line -> parseLine(line, zone) }
+    fun parse(text: String, zone: ZoneId = ZoneId.systemDefault()): List<BodyMeasurement> {
+        val lines = text.lines().map { it.trim().removePrefix("\uFEFF") }.filter { it.isNotEmpty() }
+        val first = lines.firstOrNull() ?: return emptyList()
+        val delimiter = if (first.contains(';')) ';' else ','
+        val header = split(first, delimiter)
+        val hasHeader = header.firstOrNull()?.firstOrNull()?.isDigit() == false
+        val columns = if (hasHeader) columnsOf(header) else DEFAULT_COLUMNS
+        return lines.drop(if (hasHeader) 1 else 0).mapNotNull { line -> parseLine(split(line, delimiter), columns, delimiter == ';', zone) }
+    }
 
-    private fun parseLine(line: String, zone: ZoneId): BodyMeasurement? {
-        val semicolon = line.contains(';')
-        val cells = line.split(if (semicolon) ';' else ',').map { it.trim().trim('"') }
-        val date = runCatching { java.time.LocalDate.parse(cells[0]) }.getOrNull() ?: return null
-        fun v(i: Int) = cells.getOrNull(i)?.let { if (semicolon) it.replace(',', '.') else it }?.toDoubleOrNull()?.takeIf { it > 0 && it.isFinite() }
+    /** Campos de una línea, respetando las comillas («"80,5"» es un solo campo). */
+    private fun split(line: String, delimiter: Char): List<String> {
+        val cells = mutableListOf<String>()
+        val cur = StringBuilder()
+        var quoted = false
+        line.forEach { ch ->
+            when {
+                ch == '"' -> quoted = !quoted
+                ch == delimiter && !quoted -> cells += cur.toString().trim().also { cur.clear() }
+                else -> cur.append(ch)
+            }
+        }
+        cells += cur.toString().trim()
+        return cells
+    }
+
+    private val DEFAULT_COLUMNS = listOf("date", "weight", "fat", "waist", "chest", "arm", "thigh")
+
+    /** Nombre de cada columna según la cabecera (las que no se reconocen, vacías). */
+    private fun columnsOf(header: List<String>): List<String> = header.map { h ->
+        val n = java.text.Normalizer.normalize(h.lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
+        KEYWORDS.entries.firstOrNull { (_, words) -> words.any { n.contains(it) } }?.key.orEmpty()
+    }
+
+    private val KEYWORDS = linkedMapOf(
+        "date" to listOf("date", "fecha", "data", "dia"),
+        "fat" to listOf("fat", "grasa", "greix", "graxa", "gordura"),
+        "waist" to listOf("waist", "cintura"),
+        "chest" to listOf("chest", "pecho", "pit", "peito"),
+        "arm" to listOf("arm", "brazo", "brac", "braco"),
+        "thigh" to listOf("thigh", "muslo", "cuixa", "coxa"),
+        "weight" to listOf("weight", "peso", "pes"),
+    )
+
+    private val DAY_FIRST = java.time.format.DateTimeFormatter.ofPattern("d/M/yyyy")
+
+    private fun dateOf(text: String): java.time.LocalDate? =
+        runCatching { java.time.LocalDate.parse(text) }.getOrNull()
+            ?: runCatching { java.time.LocalDate.parse(text.replace('-', '/').replace('.', '/'), DAY_FIRST) }.getOrNull()
+
+    private fun parseLine(cells: List<String>, columns: List<String>, decimalComma: Boolean, zone: ZoneId): BodyMeasurement? {
+        fun cell(name: String) = columns.indexOf(name).takeIf { it >= 0 }?.let { cells.getOrNull(it) }
+        val date = cell("date")?.let(::dateOf) ?: return null
+        fun v(name: String) = cell(name)?.let { if (decimalComma || it.count { c -> c == ',' } == 1 && !it.contains('.')) it.replace(',', '.') else it }
+            ?.toDoubleOrNull()?.takeIf { it > 0 && it.isFinite() }
         val m = BodyMeasurement(
             dateEpochMs = date.atTime(NOON, 0).atZone(zone).toInstant().toEpochMilli(),
-            weightKg = v(1), bodyFatPct = v(2), waistCm = v(3), chestCm = v(4), armCm = v(5), thighCm = v(6),
+            weightKg = v("weight"), bodyFatPct = v("fat"), waistCm = v("waist"), chestCm = v("chest"), armCm = v("arm"), thighCm = v("thigh"),
         )
         return m.takeIf { listOf(it.weightKg, it.bodyFatPct, it.waistCm, it.chestCm, it.armCm, it.thighCm).any { v -> v != null } }
     }

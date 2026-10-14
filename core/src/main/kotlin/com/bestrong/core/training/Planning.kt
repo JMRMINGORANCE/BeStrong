@@ -75,11 +75,15 @@ object Fatigue {
         )
     }
 
+    private const val DELOAD_SUFFIX = " · deload"
+
     /** Versión de descarga de una rutina: 60 % del peso y la mitad de series (mínimo 1). */
     fun deload(routine: Routine): Routine = routine.copy(
-        name = routine.name + " · deload",
+        // Descargar dos veces no repite el sufijo
+        name = if (routine.name.endsWith(DELOAD_SUFFIX)) routine.name else routine.name + DELOAD_SUFFIX,
         exercises = routine.exercises.map { re ->
-            val work = re.sets.filter { it.type != SetType.WARMUP }
+            // Solo calentamientos: se descargan ellos (si no, el ejercicio se quedaría sin series)
+            val work = re.sets.filter { it.type != SetType.WARMUP }.ifEmpty { re.sets }
             val keep = (work.size + 1) / 2
             re.copy(sets = work.take(keep.coerceAtLeast(1)).map { it.copy(weightKg = Periodization.round(it.weightKg * 0.6)) })
         },

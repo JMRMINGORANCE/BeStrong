@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
@@ -207,7 +208,7 @@ fun HomeScreen(
                         TextButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_programs)) }
                         TextButton(onClick = onOpenPlanning) { Text(stringResource(R.string.planning_open)) }
                     }
-                    RoutineSearchField(routines.size, routineQuery) { routineQuery = it }
+                    RoutineSearchField(routines.size, routineQuery, nothingShown = shownRoutines.isEmpty()) { routineQuery = it }
                 }
             }
             if (routines.none { !it.archived }) {
@@ -221,7 +222,13 @@ fun HomeScreen(
                     }
                 }
             }
-            routineItems(shownRoutines, collapsed.takeIf { routineQuery.isBlank() }.orEmpty(), onToggleFolder = { f -> collapsed = if (f in collapsed) collapsed - f else collapsed + f }) { routine ->
+            // Buscando, todo abierto (también las archivadas, cuya clave en el conjunto significa «abierta»), y
+            // tocar una cabecera no cambia las carpetas de verdad
+            routineItems(
+                shownRoutines,
+                foldersFor(routineQuery, collapsed),
+                onToggleFolder = { f -> collapsed = toggledFolder(routineQuery, collapsed, f) },
+            ) { routine ->
                 val last = history.firstOrNull { it.routineId == routine.id }
                 RoutineCard(
                     routine = routine,
@@ -477,24 +484,46 @@ private fun GymChip(vm: HomeViewModel) {
 
 /** Con muchas rutinas, una búsqueda por nombre o carpeta (sin acentos ni mayúsculas). */
 @Composable
-private fun RoutineSearchField(count: Int, query: String, onChange: (String) -> Unit) {
+private fun RoutineSearchField(count: Int, query: String, nothingShown: Boolean, onChange: (String) -> Unit) {
     if (count < ROUTINE_SEARCH_MIN && query.isBlank()) return
     androidx.compose.material3.OutlinedTextField(
         value = query,
         onValueChange = onChange,
         placeholder = { Text(stringResource(R.string.routine_search)) },
         singleLine = true,
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onChange("") }) { Icon(Icons.Default.Close, stringResource(R.string.history_clear_filters)) }
+            }
+        },
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
     )
+    if (query.isNotBlank() && nothingShown) Text(stringResource(R.string.routine_search_none), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 4.dp))
 }
 
-/** Las rutinas cuyo nombre o carpeta contienen lo buscado (todas si no se busca nada). */
+/**
+ * Las rutinas cuyo nombre, carpeta o algún ejercicio (en español o en inglés) contienen lo buscado: «¿en qué rutina
+ * estaba el hip thrust?». Todas si no se busca nada.
+ */
 private fun filterRoutines(routines: List<Routine>, query: String): List<Routine> {
-    fun String.plain() = java.text.Normalizer.normalize(lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
+    fun String.plain() = java.text.Normalizer.normalize(lowercase(), java.text.Normalizer.Form.NFD).replace(MARKS, "")
     val q = query.trim().plain()
     if (q.isEmpty()) return routines
-    return routines.filter { r -> r.name.plain().contains(q) || r.folder?.plain()?.contains(q) == true }
+    fun matches(e: com.bestrong.core.model.Exercise) = listOf(e.name, com.bestrong.core.library.ExerciseLibrary.displayName(e, "en")).any { it.plain().contains(q) }
+    return routines.filter { r -> r.name.plain().contains(q) || r.folder?.plain()?.contains(q) == true || r.exercises.any { matches(it.exercise) } }
 }
+
+/** Carpetas plegadas (y archivo abierto) que se usan: buscando, todo a la vista. */
+private fun foldersFor(query: String, collapsed: Set<String>): Set<String> = if (query.isBlank()) collapsed else setOf(ARCHIVE_KEY)
+
+/** Plegar o desplegar [folder]; buscando no cambia nada (lo que se ve es todo abierto). */
+private fun toggledFolder(query: String, collapsed: Set<String>, folder: String): Set<String> = when {
+    query.isNotBlank() -> collapsed
+    folder in collapsed -> collapsed - folder
+    else -> collapsed + folder
+}
+
+private val MARKS = Regex("\\p{Mn}+")
 
 /** A partir de cuántas rutinas sale el buscador. */
 private const val ROUTINE_SEARCH_MIN = 8

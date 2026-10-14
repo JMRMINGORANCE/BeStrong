@@ -74,6 +74,9 @@ object WorkoutStats {
     private const val PLATEAU_MIN_HISTORY = 6
     private const val PLATEAU_WINDOW = 12
 
+    /** Tildes y diéresis tras separar las letras (compilada una vez: la búsqueda recorre todo el historial). */
+    private val MARKS = Regex("\\p{Mn}+")
+
     private fun Workout.finishedAt(): Long = finishedAtEpochMs ?: startedAtEpochMs
 
     /** Series de la última vez que se hizo el ejercicio (columna "Anterior" de Hevy). */
@@ -215,7 +218,7 @@ object WorkoutStats {
     /** Búsqueda en el historial por nombre de entreno, ejercicio o nota. */
     fun search(history: List<Workout>, query: String, nameOf: (com.bestrong.core.model.Exercise) -> String = { it.name }): List<Workout> {
         // Sin acentos ni mayúsculas: «biceps» encuentra «Curl de bíceps»
-        fun String.plain() = java.text.Normalizer.normalize(lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
+        fun String.plain() = java.text.Normalizer.normalize(lowercase(), java.text.Normalizer.Form.NFD).replace(MARKS, "")
         val q = query.trim().plain()
         if (q.isEmpty()) return history
         return history.filter { w ->

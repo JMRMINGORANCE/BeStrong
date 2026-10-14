@@ -898,4 +898,20 @@ class CollarTest {
         assertEquals(1, excel.size)
         assertEquals(18.2, excel.single().bodyFatPct!!, 1e-9)
     }
+
+    @Test
+    fun measurementCsvReadsHeadersQuotesAndDayFirstDates() {
+        val zone = java.time.ZoneOffset.UTC
+        val rows = com.bestrong.core.io.MeasurementCsv.parse("Fecha,Cintura,Peso\n\"02/03/2026\",\"85\",\"80,5\"", zone)
+        assertEquals(85.0, rows.single().waistCm!!, 1e-9)
+        assertEquals(80.5, rows.single().weightKg!!, 1e-9)
+        assertEquals(java.time.LocalDate.of(2026, 3, 2), java.time.Instant.ofEpochMilli(rows.single().dateEpochMs).atZone(zone).toLocalDate())
+    }
+
+    @Test
+    fun platesAreExactNotGreedy() {
+        val load = com.bestrong.core.training.PlateCalculator.calculate(60.0, com.bestrong.core.util.WeightUnit.KG, 20.0, listOf(15.0, 10.0))
+        assertEquals(listOf(10.0, 10.0), load.perSide)
+        assertEquals(0.0, load.remainder, 1e-9)
+    }
 }

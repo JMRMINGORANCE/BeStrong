@@ -268,7 +268,10 @@ object ExerciseLibrary {
                     q.split(' ').all { token -> nameOf(ex).normalized().contains(token) } ||
                     // Un sinónimo vale si contiene lo buscado o todas sus palabras («remo con barra» ya no saca el
                     // remo ergómetro por «remo»)
-                    synonyms[ex.id].orEmpty().any { syn -> syn.normalized().let { s -> s.contains(q) || q.split(' ').all { token -> s.contains(token) } } }
+                    // y «rdl mancuernas» sí saca el peso muerto rumano con mancuernas: cada palabra en el nombre o el sinónimo)
+                    synonyms[ex.id].orEmpty().any { syn ->
+                        syn.normalized().let { s -> s.contains(q) || q.split(' ').all { token -> s.contains(token) || nameOf(ex).normalized().contains(token) } }
+                    }
             }
             .sortedWith(compareBy({ !nameOf(it).normalized().startsWith(q) }, { nameOf(it) }))
     }

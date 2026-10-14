@@ -349,12 +349,21 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     suspend fun deleteWorkout(id: String) = dao.deleteWorkout(id)
 
-    /** Pesos de Health Connect borrados aquí a propósito (su hora): no se vuelven a traer al importar. */
-    suspend fun ignoredHealthWeights(): Set<Long> =
+    /**
+     * Días (epochDay) cuyo peso de Health Connect se borró aquí a propósito: no se vuelven a traer al importar.
+     * Solo los de los últimos meses (la importación no mira más atrás), así la lista no crece sin fin.
+     */
+    suspend fun ignoredHealthWeightDays(): Set<Long> =
         dao.valueOnce(KEY_IGNORED_HC_WEIGHTS)?.split(',')?.mapNotNull { it.toLongOrNull() }?.toSet().orEmpty()
 
-    suspend fun ignoreHealthWeight(epochMs: Long) =
-        dao.putValue(KeyValueEntity(KEY_IGNORED_HC_WEIGHTS, (ignoredHealthWeights() + epochMs).joinToString(",")))
+    suspend fun ignoreHealthWeightDay(epochDay: Long) {
+        val oldest = java.time.LocalDate.now().toEpochDay() - IGNORED_KEEP_DAYS
+        val days = (ignoredHealthWeightDays() + epochDay).filter { it >= oldest }
+        dao.putValue(KeyValueEntity(KEY_IGNORED_HC_WEIGHTS, days.joinToString(",")))
+    }
+
+    /** Vuelve a traer al importar los pesos de la báscula que se habían borrado aquí. */
+    suspend fun clearIgnoredHealthWeights() = dao.deleteValue(KEY_IGNORED_HC_WEIGHTS)
 
     /** Pulso y calorías del reloj que llegaron antes de que el móvil guardase ese entreno (JSON, uno por entreno). */
     suspend fun savePendingHealth(workoutId: String, raw: String) {
@@ -496,7 +505,8 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         const val KEY_TRASH = "trash"
         const val KEY_PENDING_HEALTH = "pending_watch_health:"
         const val KEY_WATCH_KNOWN = "watch_known_workout"
-        const val KEY_IGNORED_HC_WEIGHTS = "ignored_hc_weights"
+        const val KEY_IGNORED_HC_WEIGHTS = "ignored_hc_weight_days"
+        const val IGNORED_KEEP_DAYS = 180L
         const val PENDING_HEALTH_MS = 86_400_000L
     }
 }

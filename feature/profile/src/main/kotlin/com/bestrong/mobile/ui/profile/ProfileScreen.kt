@@ -397,6 +397,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.hc_import_weight)) },
                                 supportingContent = { Text(stringResource(R.string.readiness_connect)) },
+                                // Los pesos de la báscula borrados aquí no vuelven al importar; con esto, sí
+                                trailingContent = { TextButton(onClick = vm::restoreIgnoredHealthWeights) { Text(stringResource(R.string.hc_restore_hidden)) } },
                                 modifier = Modifier.clickable { hcReadLauncher.launch(vm.healthReadPermissions) },
                             )
                         }

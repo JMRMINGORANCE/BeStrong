@@ -437,3 +437,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] El aviso de estancamiento descansa unas sesiones tras probar otro rango
 - [x] Los pesos de la báscula borrados aquí no vuelven al importar de Health Connect
 - [x] Buscar en el historial sin acentos («biceps» encuentra «bíceps»)
+
+## Fase 52 — Importar bien y buscar mejor ✅
+- [x] CSV de medidas por nombre de columna, con comillas y fechas DD/MM/AAAA
+- [x] Al importar medidas: cuántas nuevas y cuántas completadas
+- [x] Buscar rutinas también por ejercicio, con «sin resultados» y botón para borrar
+- [x] Recuperar los pesos de la báscula borrados aquí (vuelven al importar)
+- [x] Calculadora de discos exacta (con 15 y 10 kg, 20 por lado son 10 + 10)
