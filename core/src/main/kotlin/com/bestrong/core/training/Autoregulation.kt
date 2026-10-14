@@ -56,7 +56,8 @@ object Autoregulation {
 
     /** Aplica el nuevo peso a las series pendientes de trabajo. */
     fun apply(exercise: WorkoutExercise, adjustment: RpeAdjustment): WorkoutExercise =
-        exercise.copy(sets = exercise.sets.map { if (!it.completed && it.type != SetType.WARMUP) it.copy(weightKg = adjustment.newWeightKg) else it })
+        // Los drops van por debajo a propósito: no se tocan
+        exercise.copy(sets = exercise.sets.map { if (!it.completed && it.type in ADJUSTABLE) it.copy(weightKg = adjustment.newWeightKg) else it })
 
     private fun round(kg: Double, step: Double) = if (step <= 0) kg else floor(kg / step + 0.5) * step
 }

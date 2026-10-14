@@ -221,7 +221,8 @@ class ExercisesViewModel @Inject constructor(
             exercise = ex,
             records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
-            recentOneRepMax = com.bestrong.core.stats.RpeLoad.recentOneRepMax(exerciseId, history, System.currentTimeMillis()),
+            // Solo el propio ejercicio (no las variantes), como en el entreno
+            recentOneRepMax = com.bestrong.core.stats.RpeLoad.recentOneRepMax(exerciseId, fullHistory, System.currentTimeMillis()),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
             // Como en el entreno: ajustada al gimnasio y al tope semanal (con su aviso)
             nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id), repRange = settings.repRangeFor(ex.id))

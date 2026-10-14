@@ -143,18 +143,19 @@ object WorkoutStats {
     /** Ejercicio a ejercicio, qué cambió frente a la sesión anterior en que se hizo. */
     fun compareWithPrevious(workout: Workout, history: List<Workout>): List<ExerciseComparison> {
         val earlier = history.filter { it.id != workout.id && it.isFinished && it.startedAtEpochMs < workout.startedAtEpochMs }
-        return workout.exercises.mapNotNull { we ->
-            val prev = earlier.sortedByDescending { it.startedAtEpochMs }
-                .firstNotNullOfOrNull { w -> w.exercises.firstOrNull { it.exercise.id == we.exercise.id }?.takeIf { e -> e.completedSets.isNotEmpty() } }
-                ?: return@mapNotNull null
-            val now = we.completedSets
+        val sorted = earlier.sortedByDescending { it.startedAtEpochMs }
+
+        // Un ejercicio en dos bloques (o dos veces en la sesión anterior) cuenta con todas sus series
+        fun setsOf(w: Workout, id: String) = w.exercises.filter { it.exercise.id == id }.flatMap { it.completedSets }
+        return workout.exercises.distinctBy { it.exercise.id }.mapNotNull { we ->
+            val prev = sorted.firstNotNullOfOrNull { w -> setsOf(w, we.exercise.id).takeIf { it.isNotEmpty() } } ?: return@mapNotNull null
+            val now = setsOf(workout, we.exercise.id)
             ExerciseComparison(
                 exerciseId = we.exercise.id,
                 exerciseName = we.exercise.name,
-                volumeDelta = now.sumOf { it.volume } - prev.completedSets.sumOf { it.volume },
-                // Con las reps en recámara del RPE, como el peso orientativo
-                best1rmDelta = (now.maxOfOrNull(RpeLoad::oneRepMaxOf) ?: 0.0) - (prev.completedSets.maxOfOrNull(RpeLoad::oneRepMaxOf) ?: 0.0),
-                repsDelta = now.sumOf { it.totalReps } - prev.completedSets.sumOf { it.totalReps },
+                volumeDelta = now.sumOf { it.volume } - prev.sumOf { it.volume },
+                best1rmDelta = (now.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0) - (prev.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0),
+                repsDelta = now.sumOf { it.totalReps } - prev.sumOf { it.totalReps },
             )
         }
     }

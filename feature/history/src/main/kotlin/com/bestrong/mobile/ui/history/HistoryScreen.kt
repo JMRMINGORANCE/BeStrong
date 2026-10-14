@@ -338,15 +338,15 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             Row(if (editing) Modifier.clickable { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
                                 Text(describeSet(set, we.exercise.tracking, unit), Modifier.weight(1f))
-                                // Con RPE anotado (7–10) cuenta las reps en recámara, como el entreno
-                                val oneRm = com.bestrong.core.stats.RpeLoad.oneRepMaxOf(set)
-                                if (oneRm > 0) Text(stringResource(R.string.one_rm_value, unit.format(oneRm)), style = MaterialTheme.typography.bodySmall)
+                                if (set.estimatedOneRepMax > 0) Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax)), style = MaterialTheme.typography.bodySmall)
                             }
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp)) }
                         }
                         restByExercise[we.id]?.let { r -> ExerciseRestLine(w, we, r, routinesById, vm) }
-                        comparisons[we.exercise.id]?.let { ComparisonLine(it) }
+                        // Una vez por ejercicio (en su primer bloque) y solo con peso
+                        val firstBlock = w.exercises.firstOrNull { it.exercise.id == we.exercise.id }?.id == we.id
+                        if (firstBlock && we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) comparisons[we.exercise.id]?.let { ComparisonLine(it) }
                         if (editing) TextButton(onClick = { vm.addPastSet(w, we.id) }) { Text(stringResource(R.string.add_set)) }
                     }
                 }
@@ -355,12 +355,15 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     }
 }
 
-/** Descanso real medio frente al previsto (solo si las series tienen hora de marcado). */
+private const val NO_CHANGE_KG = 0.5
+
 /** «Frente a la vez anterior: +250 kg de volumen · 1RM +2,5 kg», en verde si mejoró. */
 @Composable
 private fun ComparisonLine(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison) {
     val unit = LocalWeightUnit.current
-    fun signed(v: Double, text: String) = (if (v >= 0) "+" else "−") + text
+
+    // Sin «−0»: lo que no llega a medio kilo cuenta como sin cambio
+    fun signed(v: Double, text: String) = (if (v > -NO_CHANGE_KG) "+" else "−") + text
     val up = c.best1rmDelta > 0.01 || (c.best1rmDelta >= -0.01 && c.volumeDelta > 0)
     Text(
         stringResource(
@@ -374,6 +377,7 @@ private fun ComparisonLine(c: com.bestrong.core.stats.WorkoutStats.ExerciseCompa
     )
 }
 
+/** Descanso real medio frente al previsto (solo si las series tienen hora de marcado). */
 @Composable
 private fun RestSummaryLine(w: Workout) {
     val rest = remember(w) { RestStats.summary(w) } ?: return

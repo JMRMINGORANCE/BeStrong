@@ -56,7 +56,9 @@ object Progression {
      */
     private fun wasEasy(last: List<WorkoutSet>, targetRpe: Double?): Boolean {
         val target = targetRpe ?: Autoregulation.TARGET
-        val rated = last.filter { (it.type == SetType.NORMAL || it.type == SetType.CLUSTER) && it.countsForRecords }.ifEmpty { last }
+        // Sin normales, las al fallo (los drops van a RPE 10 a propósito y no dicen nada)
+        val rated = last.filter { (it.type == SetType.NORMAL || it.type == SetType.CLUSTER) && it.countsForRecords }
+            .ifEmpty { last.filter { it.type == SetType.FAILURE } }
         // Sin series normales (todo al fallo), el objetivo de esas series es el fallo: RPE 10 es lo buscado
         return rated.all { set ->
             val t = if (set.type == SetType.FAILURE) Autoregulation.MAX_RPE else target

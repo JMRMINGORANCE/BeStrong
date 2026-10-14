@@ -628,8 +628,9 @@ class CollarTest {
     @Test
     fun dismissedTipsForgetOldDatedKeys() {
         val today = java.time.LocalDate.of(2026, 10, 14)
-        val kept = com.bestrong.core.util.DismissedTips.prune(setOf("year_ago:2026-01-02", "year_ago:2026-10-01", "tip_plates", "year_ago:2026-10"), today)
-        assertEquals(setOf("year_ago:2026-10-01", "tip_plates", "year_ago:2026-10"), kept)
+        val keys = setOf("year_ago:2026-01-02", "year_ago:2026-10-01", "tip_plates", "year_ago:2026-10", "year_ago:2026-01", "missed:2026-01-05:2", "missed:2026-10-12:1")
+        val kept = com.bestrong.core.util.DismissedTips.prune(keys, today)
+        assertEquals(setOf("year_ago:2026-10-01", "tip_plates", "year_ago:2026-10", "missed:2026-10-12:1"), kept)
     }
 
     @Test

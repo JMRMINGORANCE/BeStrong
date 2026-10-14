@@ -399,6 +399,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** RPE puestos en el móvil (ya avisados al ponerlos): id de serie → valor. */
     private val localRpes = mutableMapOf<String, Double?>()
 
+    /** Avisos pendientes por serie: al ir pasando el RPE en el reloj (6, 7, 8…) solo cuenta el último. */
+    private val rpePromptJobs = mutableMapOf<String, kotlinx.coroutines.Job>()
+
     /**
      * Si llega del reloj un RPE nuevo en la última serie completada de un ejercicio, se propone el mismo ajuste
      * que al anotarlo en el móvil. La primera versión del entreno solo se recuerda.
@@ -411,12 +414,24 @@ class ActiveWorkoutViewModel @Inject constructor(
         seenRpes = now
         seenRpeWorkoutId = w?.id
         if (before == null) return
-        sets.filter { (we, s) -> s.rpe != null && before[s.id] != s.rpe && localRpes[s.id] != s.rpe && we.sets.lastOrNull { it.completed }?.id == s.id }
-            .forEach { (we, s) ->
-                Autoregulation.suggest(we, s.id, settings.value.stepKgFor(we.exercise.id))?.let {
-                    _events.tryEmit(WorkoutEvent.RpeSuggestion(we.id, we.exercise, it))
-                }
+        // Solo un RPE que cambia en una serie que ya estaba hecha: el que llega junto con la serie es la estimación
+        // por velocidad del reloj (y una serie que se desmarca y se vuelve a marcar no es un RPE nuevo)
+        sets.filter { (_, s) -> before.containsKey(s.id) && s.rpe != null && before[s.id] != s.rpe && localRpes[s.id] != s.rpe }
+            .forEach { (we, s) -> scheduleRpePrompt(we.id, s.id) }
+    }
+
+    private fun scheduleRpePrompt(weId: String, setId: String) {
+        rpePromptJobs.remove(setId)?.cancel()
+        rpePromptJobs[setId] = viewModelScope.launch {
+            kotlinx.coroutines.delay(RPE_PROMPT_DELAY_MS)
+            rpePromptJobs.remove(setId)
+            // Con el entreno de ese momento: sigue siendo la última serie hecha y su RPE es el definitivo
+            val we = workout.value?.exercises?.firstOrNull { it.id == weId } ?: return@launch
+            if (we.sets.lastOrNull { it.completed }?.id != setId) return@launch
+            Autoregulation.suggest(we, setId, settings.value.stepKgFor(we.exercise.id))?.let {
+                _events.tryEmit(WorkoutEvent.RpeSuggestion(we.id, we.exercise, it))
             }
+        }
     }
 
     fun setRpe(weId: String, setId: String, rpe: Double?) {
@@ -773,6 +788,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     private companion object {
+        /** Espera antes de proponer un ajuste por un RPE del reloj (se cambia tocando varias veces). */
+        const val RPE_PROMPT_DELAY_MS = 2_000L
+
         /** Más de esto abierto: entreno olvidado, no se felicita por el objetivo semanal. */
         const val STALE_WORKOUT_MS = 6 * 60 * 60 * 1000L
         const val MAX_WALL_CLOCK_MS = 24 * 60 * 60 * 1000L
