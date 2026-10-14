@@ -75,7 +75,12 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
         stringResource(R.string.f_arm) to { m: BodyMeasurement -> m.armCm },
         stringResource(R.string.f_thigh) to { m: BodyMeasurement -> m.thighCm },
     )
+    val snackbar = remember { androidx.compose.material3.SnackbarHostState() }
+    UndoMeasurementDelete(vm, snackbar)
+    // Cambio de peso frente a la medida anterior con peso (la lista va de la más reciente a la más antigua)
+    val deltas = remember(list) { weightDeltas(list) }
     Scaffold(
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.measurements)) },
@@ -128,36 +133,18 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             }
             item(key = "photos") { ProgressPhotosSection(vm) }
             items(list, key = { it.id }) { m ->
-                // Tocarla deja corregirla (mismo día y misma medida)
-                Card(
-                    Modifier.fillMaxWidth().clickable {
-                        editingId = m.id
-                        adding = true
-                    },
-                ) {
-                    ListItem(
-                        headlineContent = { Text(formatDate(m.dateEpochMs)) },
-                        supportingContent = {
-                            Text(
-                                listOfNotNull(
-                                    m.weightKg?.let { stringResource(R.string.m_weight, unit.format(it, withUnit = true)) },
-                                    m.bodyFatPct?.let { stringResource(R.string.m_fat, formatWeight(it)) },
-                                    m.waistCm?.let { stringResource(R.string.m_waist, formatWeight(it)) },
-                                    m.chestCm?.let { stringResource(R.string.m_chest, formatWeight(it)) },
-                                    m.armCm?.let { stringResource(R.string.m_arm, formatWeight(it)) },
-                                    m.thighCm?.let { stringResource(R.string.m_thigh, formatWeight(it)) },
-                                ).joinToString(" · "),
-                            )
-                        },
-                        trailingContent = { IconButton(onClick = { vm.deleteMeasurement(m.id) }) { Icon(Icons.Default.Delete, stringResource(R.string.action_delete)) } },
-                    )
-                }
+                MeasurementItem(m, deltas[m.id], unit, onEdit = {
+                    editingId = m.id
+                    adding = true
+                }) { vm.deleteMeasurement(m.id) }
             }
         }
     }
-    if (adding) {
+    // Al corregir una, se espera a tenerla cargada (tras cerrar Android la app, la lista llega después)
+    val editing = list.firstOrNull { it.id == editingId }
+    if (adding && (editingId == null || editing != null)) {
         MeasurementDialog(
-            initial = list.firstOrNull { it.id == editingId },
+            initial = editing,
             unit = unit,
             onSave = { m ->
                 vm.saveMeasurement(m)
@@ -172,8 +159,52 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     }
 }
 
+/** Una medida de la lista con el cambio de peso; tocarla deja corregirla (mismo día y misma medida). */
+@Composable
+private fun MeasurementItem(m: BodyMeasurement, delta: Double?, unit: WeightUnit, onEdit: () -> Unit, onDelete: () -> Unit) {
+    val change = delta?.let { d -> "  (" + (if (d >= 0) "+" else "−") + unit.format(kotlin.math.abs(d), withUnit = true) + ")" }.orEmpty()
+    val parts = listOfNotNull(
+        m.weightKg?.let { stringResource(R.string.m_weight, unit.format(it, withUnit = true)) },
+        m.bodyFatPct?.let { stringResource(R.string.m_fat, formatWeight(it)) },
+        m.waistCm?.let { stringResource(R.string.m_waist, formatWeight(it)) },
+        m.chestCm?.let { stringResource(R.string.m_chest, formatWeight(it)) },
+        m.armCm?.let { stringResource(R.string.m_arm, formatWeight(it)) },
+        m.thighCm?.let { stringResource(R.string.m_thigh, formatWeight(it)) },
+    )
+    Card(Modifier.fillMaxWidth().clickable(onClick = onEdit)) {
+        ListItem(
+            headlineContent = { Text(formatDate(m.dateEpochMs) + change) },
+            supportingContent = { Text(parts.joinToString(" · ")) },
+            trailingContent = { IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, stringResource(R.string.action_delete)) } },
+        )
+    }
+}
+
+/** Id → cambio de peso (kg) frente a la medida anterior que tenía peso; sin entrada si no hay con qué comparar. */
+private fun weightDeltas(list: List<BodyMeasurement>): Map<String, Double> {
+    val withWeight = list.filter { it.weightKg != null }.sortedByDescending { it.dateEpochMs }
+    return withWeight.zipWithNext { cur, prev -> cur.id to (cur.weightKg!! - prev.weightKg!!) }.toMap()
+}
+
+/** «Medida borrada» con «Deshacer». */
+@Composable
+private fun UndoMeasurementDelete(vm: ProfileViewModel, snackbar: androidx.compose.material3.SnackbarHostState) {
+    val deleted by vm.deletedMeasurement.collectAsStateWithLifecycle()
+    val msg = stringResource(R.string.measurement_deleted)
+    val undo = stringResource(R.string.action_undo)
+    androidx.compose.runtime.LaunchedEffect(deleted) {
+        if (deleted == null) return@LaunchedEffect
+        val result = snackbar.showSnackbar(msg, undo, duration = androidx.compose.material3.SnackbarDuration.Short)
+        if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) vm.undoDeleteMeasurement() else vm.clearDeletedMeasurement()
+    }
+}
+
 /** Valores posibles de cada medida (peso en kg, grasa en %, perímetros en cm): fuera de ahí es un error al escribir. */
 private val MEASURE_RANGES = listOf(20.0..400.0, 2.0..70.0, 30.0..250.0, 40.0..250.0, 10.0..100.0, 20.0..150.0)
+
+/** Lo guardado si no se tocó ([kept], en kg para el peso: se enseña en la unidad elegida); si no, lo escrito. */
+private fun fieldValue(text: String, index: Int, unit: WeightUnit, kept: Double?): Double? =
+    if (kept != null) (if (index == 0) unit.fromKg(kept) else kept) else measureValue(text, index, unit)
 
 /** El número escrito si es posible para esa medida (el peso se comprueba en kg); null si no lo es o está vacío. */
 private fun measureValue(text: String, index: Int, unit: WeightUnit): Double? {
@@ -187,9 +218,10 @@ private fun measureValue(text: String, index: Int, unit: WeightUnit): Double? {
 private fun MeasurementDialog(initial: BodyMeasurement?, unit: WeightUnit, onSave: (BodyMeasurement) -> Unit, onDismiss: () -> Unit) {
     fun shown(v: Double?) = v?.let { "%.1f".format(it).removeSuffix(".0").removeSuffix(",0") }.orEmpty()
     // Lo escrito sobrevive al giro; al cerrar el diálogo se descarta
+    val originals = listOf(initial?.weightKg, initial?.bodyFatPct, initial?.waistCm, initial?.chestCm, initial?.armCm, initial?.thighCm)
+    val originalTexts = originals.mapIndexed { i, v -> shown(if (i == 0) v?.let(unit::fromKg) else v) }
     val fields = rememberSaveable(initial?.id, saver = listSaver<List<MutableState<String>>, String>({ l -> l.map { it.value } }, { l -> l.map { mutableStateOf(it) } })) {
-        listOf(initial?.weightKg?.let(unit::fromKg), initial?.bodyFatPct, initial?.waistCm, initial?.chestCm, initial?.armCm, initial?.thighCm)
-            .map { mutableStateOf(shown(it)) }
+        originalTexts.map { mutableStateOf(it) }
     }
     val labels = listOf(
         stringResource(R.string.f_weight, unit.label),
@@ -200,7 +232,10 @@ private fun MeasurementDialog(initial: BodyMeasurement?, unit: WeightUnit, onSav
         stringResource(R.string.f_thigh),
     )
 
-    fun v(i: Int) = measureValue(fields[i].value, i, unit)
+    // Sin tocar: el valor guardado tal cual (sin el redondeo de lo enseñado y aunque sea de antes de los límites)
+    fun untouched(i: Int) = initial != null && fields[i].value == originalTexts[i]
+
+    fun v(i: Int) = fieldValue(fields[i].value, i, unit, originals[i].takeIf { untouched(i) })
 
     // Vacío no es error; escrito y fuera de rango, sí
     fun wrong(i: Int) = fields[i].value.isNotBlank() && v(i) == null
@@ -224,7 +259,8 @@ private fun MeasurementDialog(initial: BodyMeasurement?, unit: WeightUnit, onSav
         confirmButton = {
             Button(enabled = fields.indices.any { v(it) != null } && fields.indices.none { wrong(it) }, onClick = {
                 val base = initial ?: BodyMeasurement(dateEpochMs = System.currentTimeMillis())
-                onSave(base.copy(weightKg = v(0)?.let(unit::toKg), bodyFatPct = v(1), waistCm = v(2), chestCm = v(3), armCm = v(4), thighCm = v(5)))
+                val weight = if (untouched(0)) initial?.weightKg else v(0)?.let(unit::toKg)
+                onSave(base.copy(weightKg = weight, bodyFatPct = v(1), waistCm = v(2), chestCm = v(3), armCm = v(4), thighCm = v(5)))
             }) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },

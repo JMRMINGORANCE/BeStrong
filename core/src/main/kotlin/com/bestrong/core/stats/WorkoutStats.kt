@@ -63,11 +63,12 @@ object WorkoutStats {
      * récord o hay pocas sesiones (menos de seis) para hablar de estancamiento.
      */
     fun sessionsSinceBest(progress: List<ExerciseProgressPoint>): Int {
-        // Las últimas sesiones (un récord de hace años, antes de un parón, no cuenta) y el último récord igualado
+        // Las últimas sesiones (un récord de hace años, antes de un parón, no cuenta) desde la primera vez que se
+        // llegó a lo mejor: igualarlo (100×5 cada semana) también es estar estancado, como en Progression.isStalled
         val points = progress.filter { it.bestOneRepMax > 0 }.takeLast(PLATEAU_WINDOW)
         if (points.size < PLATEAU_MIN_HISTORY) return 0
         val top = points.maxOf { it.bestOneRepMax }
-        return points.lastIndex - points.indexOfLast { it.bestOneRepMax >= top - 1e-6 }
+        return points.lastIndex - points.indexOfFirst { it.bestOneRepMax >= top - 1e-6 }
     }
 
     private const val PLATEAU_MIN_HISTORY = 6

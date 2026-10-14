@@ -406,17 +406,24 @@ private fun PlateauHint(vm: ExercisesViewModel, exerciseId: String, progress: Li
     val stalled = remember(progress) { com.bestrong.core.stats.WorkoutStats.sessionsSinceBest(progress) }
     if (stalled < PLATEAU_SESSIONS) return
     val ranges by vm.repRanges.collectAsStateWithLifecycle()
-    val next = if (ranges[exerciseId] == HYPERTROPHY_RANGE) STRENGTH_RANGE else HYPERTROPHY_RANGE
+    // Sin rango, el de hipertrofia; con el de hipertrofia, el de fuerza; con otro ya elegido, no se propone nada
+    val next = when (ranges[exerciseId]) {
+        null -> HYPERTROPHY_RANGE
+        HYPERTROPHY_RANGE -> STRENGTH_RANGE
+        else -> null
+    }
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp)) {
             Text(stringResource(R.string.plateau_hint, stalled), style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = { vm.setRepRange(exerciseId, next) }) { Text(stringResource(R.string.plateau_try_range, next)) }
+            next?.let { r -> TextButton(onClick = { vm.setRepRange(exerciseId, r) }) { Text(stringResource(R.string.plateau_try_range, r.replace("-", "–"))) } }
         }
     }
 }
 
 private const val HYPERTROPHY_RANGE = "8-12"
-private const val STRENGTH_RANGE = "4-6"
+
+// Los mismos que los chips de rango (RepRangeChips), para que se vean elegidos
+private const val STRENGTH_RANGE = "3-5"
 
 /** Sesiones sin récord de 1RM estimado a partir de las que se habla de estancamiento. */
 private const val PLATEAU_SESSIONS = 4

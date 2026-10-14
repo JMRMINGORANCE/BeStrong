@@ -95,7 +95,7 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         val stem = name.substringBeforeLast('.')
         val ext = name.substring(stem.length)
         val sameDay = Regex(Regex.escape(stem) + " \\(\\d+\\)" + Regex.escape(ext))
-        val olds = children(tree).filter { (n, uri) -> uri != doc && (n == name || sameDay.matches(n)) }.values
+        val olds = childList(applicationContext, tree).filter { (n, uri) -> uri != doc && (n == name || sameDay.matches(n)) }.map { it.second }
         olds.forEach { runCatching { DocumentsContract.deleteDocument(resolver, it) } }
         // El proveedor la habrá creado como «nombre (1)»: se le devuelve el nombre si se puede
         if (olds.isNotEmpty()) runCatching { DocumentsContract.renameDocument(resolver, doc, name) }
@@ -106,10 +106,11 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     /** Deja solo las [KEEP] copias más recientes de cada tipo (el nombre lleva la fecha ISO, así que ordena bien). */
     private fun pruneOld(tree: Uri) {
         val resolver = applicationContext.contentResolver
-        children(tree).filterKeys { BACKUP_NAME.matches(it) }.entries
-            .groupBy { it.key.substringAfterLast('.') }
+        // Lista con repetidos (Drive deja dos archivos con el mismo nombre): cuentan todos para las [KEEP]
+        childList(applicationContext, tree).filter { BACKUP_NAME.matches(it.first) }
+            .groupBy { it.first.substringAfterLast('.') }
             .values.forEach { files ->
-                files.sortedByDescending { it.key }.drop(KEEP).forEach { DocumentsContract.deleteDocument(resolver, it.value) }
+                files.sortedByDescending { it.first }.drop(KEEP).forEach { DocumentsContract.deleteDocument(resolver, it.second) }
             }
     }
 
@@ -136,13 +137,16 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             wm.enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.KEEP, request)
         }
 
-        /** Nombre → documento de los archivos de la carpeta. */
-        private fun children(context: Context, tree: Uri): Map<String, Uri> {
+        /** Nombre → documento de los archivos de la carpeta (con nombres repetidos, uno de ellos). */
+        private fun children(context: Context, tree: Uri): Map<String, Uri> = childList(context, tree).toMap()
+
+        /** (nombre, documento) de todos los archivos de la carpeta, también los de nombre repetido. */
+        private fun childList(context: Context, tree: Uri): List<Pair<String, Uri>> {
             val uri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
             val projection = arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME)
             return context.contentResolver.query(uri, projection, null, null, null)?.use { c ->
-                buildMap {
-                    while (c.moveToNext()) put(c.getString(1), DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0)))
+                buildList {
+                    while (c.moveToNext()) add(c.getString(1) to DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0)))
                 }
             }.orEmpty()
         }

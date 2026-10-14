@@ -1182,4 +1182,5 @@
     <string name="plateau_try_range">%1$s Wdh. ausprobieren</string>
     <string name="planned_reps_line">Routinenplan: %1$s Wdh.</string>
     <string name="edit_measurement">Messung bearbeiten</string>
+    <string name="measurement_deleted">Messung gelöscht</string>
 </resources>

@@ -223,15 +223,35 @@ class ProfileViewModel @Inject constructor(
     fun updateSettings(block: (UserSettings) -> UserSettings) = settingsStore.update(block)
 
     fun saveMeasurement(m: BodyMeasurement) = viewModelScope.launch {
+        val before = repo.measurements.value.firstOrNull { it.id == m.id }
         repo.saveMeasurement(m)
-        // Con la exportación activada, el peso y la grasa también van a Health Connect
-        if (settingsStore.settings.value.healthConnectExport) {
-            runCatching { healthConnect.exportMeasurement(m) }.onFailure { android.util.Log.w("Profile", "Medida no exportada", it) }
-        }
+        // Al corregir solo la cintura (o un perímetro) no se toca Health Connect: el peso puede venir de la báscula
+        // y se duplicaría
+        val healthChanged = before == null || before.weightKg != m.weightKg || before.bodyFatPct != m.bodyFatPct
+        if (!healthChanged || !settingsStore.settings.value.healthConnectExport) return@launch
+        // Si se borró el peso o la grasa, también allí
+        if (before != null) runCatching { healthConnect.deleteMeasurement(m.id) }
+        runCatching { healthConnect.exportMeasurement(m) }.onFailure { android.util.Log.w("Profile", "Medida no exportada", it) }
     }
+
+    /** Última medida borrada, para «Deshacer». */
+    private val _deletedMeasurement = MutableStateFlow<BodyMeasurement?>(null)
+    val deletedMeasurement: StateFlow<BodyMeasurement?> = _deletedMeasurement
+
     fun deleteMeasurement(id: String) = viewModelScope.launch {
+        _deletedMeasurement.value = repo.measurements.value.firstOrNull { it.id == id }
         repo.deleteMeasurement(id)
         runCatching { healthConnect.deleteMeasurement(id) }
+    }
+
+    fun undoDeleteMeasurement() {
+        val m = _deletedMeasurement.value ?: return
+        _deletedMeasurement.value = null
+        saveMeasurement(m)
+    }
+
+    fun clearDeletedMeasurement() {
+        _deletedMeasurement.value = null
     }
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)

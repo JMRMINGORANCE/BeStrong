@@ -416,3 +416,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] «Plan de la rutina: 5 reps» en cada ejercicio del entreno
 - [x] Estancamiento con botón para probar otro rango de reps
 - [x] Copias automáticas sin duplicados «(1)» en proveedores que no dejan renombrar
+
+## Fase 49 — Medidas cómodas y plan en el reloj ✅
+- [x] Deshacer al borrar una medida
+- [x] Cambio de peso frente a la medida anterior en la lista
+- [x] El peso contestado desde el aviso completa la medida de hoy (no crea otra)
+- [x] Reps planeadas en la pantalla de serie del reloj
+- [x] Corregir una medida solo exporta a Health Connect si cambia el peso o la grasa

@@ -52,8 +52,10 @@ object NextTime {
      * luego 85×5); si se quedó corta (100×2 y luego 85×5), no se sube.
      */
     private fun topThenBackOffs(work: List<com.bestrong.core.model.WorkoutSet>, topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean {
+        // Solo descargas normales: una serie descendente o al fallo después no dice si la top salió
         val backOffs = work.filter { it !in topSets }
-        return work.last() !in topSets && backOffs.isNotEmpty() && topSets.first().reps >= backOffs.minOf { it.reps }
+        val normal = backOffs.isNotEmpty() && backOffs.all { it.type == SetType.NORMAL }
+        return normal && work.last() !in topSets && topSets.first().reps >= backOffs.minOf { it.reps }
     }
 
     /** Lo planeado en la rutina si lo hay; si no, las reps de la primera serie pesada. */

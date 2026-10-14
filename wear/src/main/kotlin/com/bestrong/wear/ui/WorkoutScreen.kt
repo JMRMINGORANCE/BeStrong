@@ -85,7 +85,8 @@ fun WorkoutScreen(
     var accumulated by remember { mutableFloatStateOf(0f) }
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(1_000) } }
-    LaunchedEffect(Unit) { focus.requestFocus() }
+    // Sin entreno (notificación o tile antiguos) el foco no llega a engancharse: no debe cerrar la app
+    LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
 
     val w = workout
     if (w == null) {
@@ -232,6 +233,10 @@ fun WorkoutScreen(
                     best?.let { com.bestrong.core.stats.OneRepMax.repsToBeat(it, set.weightKg) }?.let { reps ->
                         Text(pluralStringResource(R.plurals.record_hint, reps, reps), style = MaterialTheme.typography.labelSmall, color = Done)
                     }
+                }
+                // Las reps que planea la rutina para esta serie, si difieren de lo que pone
+                set?.targetReps?.takeIf { it != set.reps && we.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { planned ->
+                    Text(stringResource(R.string.planned_reps, planned), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 previous?.takeIf { we.exercise.tracking != TrackingType.CARDIO }?.let {
                     Text(

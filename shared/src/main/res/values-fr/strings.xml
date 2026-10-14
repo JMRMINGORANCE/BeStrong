@@ -1182,4 +1182,5 @@
     <string name="plateau_try_range">Essayer %1$s reps</string>
     <string name="planned_reps_line">Plan de la routine : %1$s reps</string>
     <string name="edit_measurement">Modifier la mesure</string>
+    <string name="measurement_deleted">Mesure supprimée</string>
 </resources>

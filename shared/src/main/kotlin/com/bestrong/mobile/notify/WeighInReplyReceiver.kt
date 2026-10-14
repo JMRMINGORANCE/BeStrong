@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
-import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.mobile.di.WorkerEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +28,7 @@ class WeighInReplyReceiver : BroadcastReceiver() {
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                if (kg != null) deps.actions().saveMeasurement(BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = kg))
+                if (kg != null) deps.actions().saveWeighIn(kg)
                 // Si no se entendió, vuelve el recordatorio con el aviso para poder contestar otra vez
                 if (kg != null) Notifier.weighInResult(app, unit.format(kg, withUnit = true)) else Notifier.weighIn(app, retry = true)
             } finally {

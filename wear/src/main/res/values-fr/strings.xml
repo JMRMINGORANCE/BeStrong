@@ -172,4 +172,5 @@
     <string name="cardio_complication_label">Cardio cette semaine</string>
     <string name="cardio_complication_desc">Cardio cette semaine : %1$s %2$s</string>
     <string name="tile_cardio">Cardio %1$s</string>
+    <string name="planned_reps">Plan : %1$d reps</string>
 </resources>
