@@ -143,7 +143,11 @@ class MainActivity : ComponentActivity() {
         launchRequest.value = when (intent?.action) {
             ACTION_OPEN_WORKOUT -> LaunchRequest.OpenWorkout
             ACTION_START_EMPTY -> LaunchRequest.StartEmpty
-            ACTION_START_ROUTINE -> intent.getStringExtra(EXTRA_ROUTINE_ID)?.let { LaunchRequest.StartRoutine(it) }
+            ACTION_START_ROUTINE -> intent.getStringExtra(EXTRA_ROUTINE_ID)?.let {
+                // Desde el botón «Empezar» del recordatorio: el aviso ya no hace falta
+                com.bestrong.mobile.notify.Notifier.cancelReminder(this)
+                LaunchRequest.StartRoutine(it)
+            }
             AppIntents.ACTION_OPEN_MUSCLE -> intent.getStringExtra(AppIntents.EXTRA_MUSCLE)?.let { LaunchRequest.OpenMuscle(it) }
             else -> null
         } ?: launchRequest.value

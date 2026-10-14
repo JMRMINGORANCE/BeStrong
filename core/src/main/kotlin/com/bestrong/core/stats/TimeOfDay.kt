@@ -49,8 +49,10 @@ object TimeOfDay {
         val recent = history.filter { it.isFinished && it.startedAtEpochMs >= since }
 
         // Solo peso × reps: en dominadas lastradas el «1RM» saldría del lastre
+        // Un ejercicio puede salir dos veces (pesado y descarga): cuenta la mejor de todas
         fun bestOf(w: Workout) = w.exercises.filter { it.exercise.tracking == TrackingType.WEIGHT_REPS }
-            .associate { we -> we.exercise.id to (we.completedSets.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0) }
+            .groupBy { it.exercise.id }
+            .mapValues { (_, list) -> list.flatMap { it.completedSets }.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0 }
             .filterValues { it > 0 }
         val best = mutableMapOf<String, Double>()
         recent.forEach { w -> bestOf(w).forEach { (id, e) -> best.merge(id, e, ::maxOf) } }

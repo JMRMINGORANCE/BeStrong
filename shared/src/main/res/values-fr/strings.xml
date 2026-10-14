@@ -1056,7 +1056,7 @@
     <string name="body_comp_need_height">Indique ta taille dans Profil pour voir le rapport tour de taille/taille et le FFMI.</string>
     <string name="body_comp_whtr">Taille/hauteur : %1$s · %2$s</string>
     <string name="body_comp_ffmi">FFMI (masse maigre rapportée à la taille) : %1$s</string>
-    <string name="body_comp_hint">Taille/hauteur sous 0,5 est recommandé. FFMI : environ 18–20 est la moyenne chez les hommes entraînés ; 22+ est avancé.</string>
+    <string name="body_comp_hint">Un rapport taille/hauteur inférieur à 0,5 est recommandé. FFMI : environ 18–20 est la moyenne chez les hommes entraînés ; 22+ est avancé.</string>
     <string name="body_range_low">bas</string>
     <string name="body_range_healthy">sain</string>
     <string name="body_range_high">élevé : à faire baisser</string>
@@ -1064,4 +1064,7 @@
     <string name="weight_rate_fast_gain">⚠ Tu prends plus de 1 % par semaine : à ce rythme, c\'est surtout du gras. Envisage de manger un peu moins.</string>
     <string name="weekday_title">Tes meilleurs jours</string>
     <string name="weekday_best">Ton jour le plus fort : %1$s, idéal pour les séances dures</string>
+    <string name="weekday_no_difference">Tes performances sont proches quel que soit le jour</string>
+    <string name="body_comp_hint_female">Un rapport taille/hauteur inférieur à 0,5 est recommandé. FFMI : environ 15–17 est la moyenne chez les femmes entraînées ; 19+ est avancé.</string>
+    <string name="cannot_go_lighter">Impossible d\'alléger davantage avec ce poids</string>
 </resources>

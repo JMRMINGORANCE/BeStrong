@@ -568,16 +568,19 @@ class WorkoutSession @Inject constructor(
         edit { WorkoutEditor.addWarmup(it, we.id, s.unit, bar) }
     }
 
-    /** Drop set (−20 %) tras la última serie efectiva del ejercicio actual. */
-    fun addDropSet() {
-        val we = currentExercise() ?: return
-        edit { WorkoutEditor.addDropSet(it, we.id, store.settings.value.stepKgFor(we.exercise.id)) }
-    }
+    /** Drop set (−20 %); false si con ese peso no se puede bajar más (para avisar). */
+    fun addDropSet(): Boolean = addLighter { w, id, step -> WorkoutEditor.addDropSet(w, id, step) }
 
-    /** Dos series de descarga (−10 %) tras la más pesada. */
-    fun addBackOff() {
-        val we = currentExercise() ?: return
-        edit { WorkoutEditor.addBackOff(it, we.id, store.settings.value.stepKgFor(we.exercise.id)) }
+    /** Dos series de descarga (−10 %) tras la más pesada; false si no se puede bajar más. */
+    fun addBackOff(): Boolean = addLighter { w, id, step -> WorkoutEditor.addBackOff(w, id, step) }
+
+    private fun addLighter(add: (Workout, String, Double) -> Workout): Boolean {
+        val we = currentExercise()
+        val w = _workout.value
+        val step = we?.let { store.settings.value.stepKgFor(it.exercise.id) } ?: 0.0
+        val changed = we != null && w != null && add(w, we.id, step) != w
+        if (changed) edit { add(it, we!!.id, step) }
+        return changed
     }
 
     /** Evolución del 1RM estimado y demás marcas del ejercicio (historial del móvil + del reloj). */

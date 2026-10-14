@@ -1064,4 +1064,7 @@
     <string name="weight_rate_fast_gain">⚠ Subes más de un 1 % por semana: a este ritmo se gana sobre todo grasa. Valora comer algo menos.</string>
     <string name="weekday_title">Tus mejores días</string>
     <string name="weekday_best">Rindes más el %1$s: buen día para las sesiones duras</string>
+    <string name="weekday_no_difference">Rindes parecido cualquier día</string>
+    <string name="body_comp_hint_female">Cintura/altura por debajo de 0,5 es lo recomendado. FFMI: unos 15–17 es la media en mujeres entrenadas; 19+ es avanzado.</string>
+    <string name="cannot_go_lighter">Con este peso no se puede bajar más</string>
 </resources>

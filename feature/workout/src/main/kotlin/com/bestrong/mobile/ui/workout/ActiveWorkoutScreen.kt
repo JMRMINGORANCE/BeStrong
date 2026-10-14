@@ -59,6 +59,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -385,16 +386,19 @@ private fun RepRangeLine(vm: ActiveWorkoutViewModel, we: WorkoutExercise) {
     var editing by remember { mutableStateOf(false) }
     if (editing) RepRangeDialog(vm, we.exercise.id) { editing = false }
     val current = we.sets.firstOrNull { !it.completed && it.type != SetType.WARMUP }?.reps
+    val factor = if (we.exercise.equipment == Equipment.DUMBBELL && settings.dumbbellTotal) 2 else 1
     Text(
         stringResource(
             R.string.rep_range_line,
             range.first, range.last,
             current?.let { "$it/${range.last}" } ?: "✓",
-            unit.format(settings.stepKgFor(we.exercise.id), withUnit = true),
+            // Salto exacto (1,25 no «1,3») y, con «suma de las dos mancuernas», como en las filas
+            unit.formatStep(settings.stepKgFor(we.exercise.id) * factor),
         ),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.padding(horizontal = 12.dp).clickable(onClickLabel = stringResource(R.string.rep_range)) { editing = true },
+        modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize()
+            .clickable(onClickLabel = stringResource(R.string.rep_range)) { editing = true }.padding(horizontal = 12.dp),
     )
 }
 

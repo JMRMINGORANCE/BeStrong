@@ -16,7 +16,14 @@ class ReminderSnoozeReceiver : BroadcastReceiver() {
         Notifier.cancelReminder(context)
         val request = OneTimeWorkRequestBuilder<SnoozedReminderWorker>()
             .setInitialDelay(SNOOZE_MINUTES, TimeUnit.MINUTES)
-            .setInputData(workDataOf(EXTRA_NAME to intent.getStringExtra(EXTRA_NAME), EXTRA_ID to intent.getStringExtra(EXTRA_ID)))
+            .setInputData(
+                workDataOf(
+                    EXTRA_NAME to intent.getStringExtra(EXTRA_NAME),
+                    EXTRA_ID to intent.getStringExtra(EXTRA_ID),
+                    // El día del aviso: pospuesto a las 23:30 no debe saltar mañana a las 00:30
+                    EXTRA_DAY to java.time.LocalDate.now().toEpochDay(),
+                ),
+            )
             .build()
         WorkManager.getInstance(context).enqueueUniqueWork(WORK_NAME, androidx.work.ExistingWorkPolicy.REPLACE, request)
     }
@@ -24,7 +31,8 @@ class ReminderSnoozeReceiver : BroadcastReceiver() {
     companion object {
         const val EXTRA_NAME = "routine_name"
         const val EXTRA_ID = "routine_id"
-        private const val WORK_NAME = "workout-reminder-snooze"
+        const val EXTRA_DAY = "day"
+        const val WORK_NAME = "workout-reminder-snooze"
         private const val SNOOZE_MINUTES = 60L
     }
 }
@@ -37,7 +45,9 @@ class SnoozedReminderWorker(context: Context, params: WorkerParameters) : Corout
         val zone = java.time.ZoneId.systemDefault()
         val today = java.time.LocalDate.now(zone)
         val trainedToday = repo.historyOnce().any { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == today }
-        if (!trainedToday && repo.activeOnce() == null) {
+        // Si entretanto se quitaron los recordatorios o ya es otro día, no se avisa
+        val stillWanted = deps.settings().settings.value.reminderDays.isNotEmpty() && inputData.getLong(ReminderSnoozeReceiver.EXTRA_DAY, today.toEpochDay()) == today.toEpochDay()
+        if (stillWanted && !trainedToday && repo.activeOnce() == null) {
             Notifier.reminder(applicationContext, inputData.getString(ReminderSnoozeReceiver.EXTRA_NAME), inputData.getString(ReminderSnoozeReceiver.EXTRA_ID))
         }
         return Result.success()

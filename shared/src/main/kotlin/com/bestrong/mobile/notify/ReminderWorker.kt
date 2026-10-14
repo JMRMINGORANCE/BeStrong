@@ -52,6 +52,8 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         fun schedule(context: Context, days: Set<Int>, hour: Int, minute: Int, force: Boolean = false) {
             if (days.isEmpty()) {
                 ExactWork.cancel(context, NAME)
+                // También un aviso pospuesto que estuviera pendiente
+                runCatching { androidx.work.WorkManager.getInstance(context).cancelUniqueWork(ReminderSnoozeReceiver.WORK_NAME) }
                 return
             }
             ExactWork.enqueue(context, NAME, "${days.sorted()}-$hour:$minute", nextFire(ZonedDateTime.now(), days, hour, minute), ReminderWorker::class.java, force)

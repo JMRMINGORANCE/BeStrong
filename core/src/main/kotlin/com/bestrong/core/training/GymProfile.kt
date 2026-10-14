@@ -38,6 +38,19 @@ data class GymProfile(
         else -> targetKg
     }
 
+    /**
+     * El peso más bajo que se puede montar por encima de [currentKg]: para que una subida no se pierda al
+     * redondear (p. ej. +1,25 kg con discos de 1,25 por lado en una barra = +2,5).
+     */
+    fun loadAbove(currentKg: Double, equipment: Equipment): Double = when (equipment) {
+        Equipment.BARBELL, Equipment.SMITH -> {
+            val step = (platesKg.filter { it > 0 }.minOrNull() ?: 1.25) * 2
+            nearestBarbell(currentKg + step).let { if (it > currentKg + 1e-6) it else currentKg + step }
+        }
+        Equipment.DUMBBELL, Equipment.KETTLEBELL -> dumbbellsKg.filter { it > currentKg + 1e-6 }.minOrNull() ?: currentKg
+        else -> currentKg
+    }
+
     /** Peso alcanzable con la barra y los discos (combinación voraz, por lado). */
     fun nearestBarbell(targetKg: Double): Double {
         if (targetKg <= barKg) return barKg

@@ -458,7 +458,7 @@ fun WeekdayCard(days: List<Triple<java.time.DayOfWeek, Int, Double>>) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.weekday_title))
             val bestName = best.first.getDisplayName(java.time.format.TextStyle.FULL, locale)
-            Text(if (clear) stringResource(R.string.weekday_best, bestName) else stringResource(R.string.day_part_no_difference), fontWeight = FontWeight.SemiBold)
+            Text(if (clear) stringResource(R.string.weekday_best, bestName) else stringResource(R.string.weekday_no_difference), fontWeight = FontWeight.SemiBold)
             days.forEach { (day, n, rel) ->
                 Text(
                     stringResource(R.string.day_part_line, day.getDisplayName(java.time.format.TextStyle.FULL, locale).replaceFirstChar { it.uppercase() }, (rel * 100).toInt(), n),

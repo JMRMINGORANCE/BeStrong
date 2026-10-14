@@ -1064,4 +1064,7 @@
     <string name="weight_rate_fast_gain">⚠ Du nimmst über 1 % pro Woche zu: in diesem Tempo ist es vor allem Fett. Iss eventuell etwas weniger.</string>
     <string name="weekday_title">Deine besten Tage</string>
     <string name="weekday_best">Am stärksten bist du am %1$s: ein guter Tag für harte Einheiten</string>
+    <string name="weekday_no_difference">Du bist an jedem Tag ähnlich stark</string>
+    <string name="body_comp_hint_female">Taille/Größe unter 0,5 wird empfohlen. FFMI: etwa 15–17 ist typisch für trainierte Frauen; ab 19 fortgeschritten.</string>
+    <string name="cannot_go_lighter">Leichter geht es mit diesem Gewicht nicht</string>
 </resources>

@@ -1064,4 +1064,7 @@
     <string name="weight_rate_fast_gain">⚠ You\'re gaining over 1% per week: at this pace it\'s mostly fat. Consider eating a bit less.</string>
     <string name="weekday_title">Your best days</string>
     <string name="weekday_best">You\'re strongest on %1$s: a good day for hard sessions</string>
+    <string name="weekday_no_difference">You perform about the same on any day</string>
+    <string name="body_comp_hint_female">Waist-to-height under 0.5 is recommended. FFMI: around 15–17 is typical for trained women; 19+ is advanced.</string>
+    <string name="cannot_go_lighter">Can\'t go any lighter from this weight</string>
 </resources>

@@ -202,9 +202,10 @@ private fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) 
         modifier = Modifier.padding(top = 8.dp),
     )
     // Más de un 1 % a la semana: aviso para frenar (en una dirección u otra)
-    if (com.bestrong.core.stats.WeightRate.tooFast(t.averageKg, t.changeKg)) {
+    val weekly = remember(points) { com.bestrong.core.stats.WeightRate.weeklyChange(points, System.currentTimeMillis()) }
+    if (com.bestrong.core.stats.WeightRate.tooFast(t.averageKg, weekly)) {
         Text(
-            stringResource(if ((t.changeKg ?: 0.0) < 0) R.string.weight_rate_fast_loss else R.string.weight_rate_fast_gain),
+            stringResource(if ((weekly ?: 0.0) < 0) R.string.weight_rate_fast_loss else R.string.weight_rate_fast_gain),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.error,
         )
@@ -373,8 +374,10 @@ private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement
     val settings by vm.settings.collectAsStateWithLifecycle()
     val sorted = list.sortedByDescending { it.dateEpochMs }
     val waist = sorted.firstNotNullOfOrNull { it.waistCm }
-    val weight = sorted.firstNotNullOfOrNull { it.weightKg }
-    val fat = sorted.firstNotNullOfOrNull { it.bodyFatPct }
+    // Peso y grasa de la misma medición (mezclar fechas falsea el FFMI)
+    val both = sorted.firstOrNull { it.weightKg != null && it.bodyFatPct != null }
+    val weight = both?.weightKg
+    val fat = both?.bodyFatPct
     if (waist == null && (weight == null || fat == null)) return
     val height = settings.heightCm
     Card {
@@ -384,23 +387,26 @@ private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement
                 Text(stringResource(R.string.body_comp_need_height), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 return@Column
             }
-            waist?.let { com.bestrong.core.stats.BodyComposition.waistToHeight(it, height) }?.let { r ->
-                val range = com.bestrong.core.stats.BodyComposition.waistToHeightRange(r)
-                val label = stringResource(
-                    when (range) {
-                        com.bestrong.core.stats.BodyRange.LOW -> R.string.body_range_low
-                        com.bestrong.core.stats.BodyRange.HEALTHY -> R.string.body_range_healthy
-                        com.bestrong.core.stats.BodyRange.HIGH -> R.string.body_range_high
-                    },
-                )
-                Text(stringResource(R.string.body_comp_whtr, "%.2f".format(r), label))
-            }
+            waist?.let { com.bestrong.core.stats.BodyComposition.waistToHeight(it, height) }?.let { WaistToHeightLine(it) }
             if (weight != null && fat != null) {
                 com.bestrong.core.stats.BodyComposition.ffmi(weight, fat, height)?.let { f ->
                     Text(stringResource(R.string.body_comp_ffmi, "%.1f".format(f)))
                 }
             }
-            Text(stringResource(R.string.body_comp_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(if (settings.sex == com.bestrong.core.stats.Sex.FEMALE) R.string.body_comp_hint_female else R.string.body_comp_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+}
+
+/** «Cintura/altura: 0,45 · saludable». */
+@Composable
+private fun WaistToHeightLine(ratio: Double) {
+    val label = stringResource(
+        when (com.bestrong.core.stats.BodyComposition.waistToHeightRange(ratio)) {
+            com.bestrong.core.stats.BodyRange.LOW -> R.string.body_range_low
+            com.bestrong.core.stats.BodyRange.HEALTHY -> R.string.body_range_healthy
+            com.bestrong.core.stats.BodyRange.HIGH -> R.string.body_range_high
+        },
+    )
+    Text(stringResource(R.string.body_comp_whtr, "%.2f".format(ratio), label))
 }

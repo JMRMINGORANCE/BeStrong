@@ -27,7 +27,7 @@ object BodyWeightGoal {
 
     /**
      * [points] (fecha, kg) ordenados. Sirve para bajar y para subir: la dirección la marca [startKg], el peso
-     * cuando se puso el objetivo (si no se guardó, el actual). Cumplido al cruzarlo o quedarse a menos de 0,3 kg.
+     * cuando se puso el objetivo (si no se guardó, [inferStart]). Cumplido al cruzarlo o quedarse a menos de 0,3 kg.
      */
     /**
      * Peso de partida cuando no se guardó (objetivos antiguos): el primero de las últimas semanas, no el de
@@ -53,6 +53,24 @@ object BodyWeightGoal {
 /** Ritmo de cambio de peso demasiado rápido: más del 1 % del peso por semana (se pierde músculo o se gana grasa). */
 object WeightRate {
     private const val MAX_WEEKLY_FRACTION = 0.01
+    private const val WINDOW_MS = 21 * 86_400_000L
+    private const val MIN_SPAN_MS = 14 * 86_400_000L
+    private const val MIN_POINTS = 3
+
+    /**
+     * Cambio semanal (kg/semana) por la tendencia de las 3 últimas semanas: hace falta al menos [MIN_POINTS]
+     * pesajes repartidos en 2 semanas (con uno por semana, un día de retención de líquidos no es una tendencia).
+     */
+    fun weeklyChange(points: List<Pair<Long, Double>>, nowEpochMs: Long): Double? {
+        val recent = points.filter { it.first in (nowEpochMs - WINDOW_MS)..nowEpochMs }
+        if (recent.size < MIN_POINTS || recent.last().first - recent.first().first < MIN_SPAN_MS) return null
+        val xs = recent.map { (it.first - recent.first().first) / (7 * 86_400_000.0) }
+        val ys = recent.map { it.second }
+        val mx = xs.average()
+        val my = ys.average()
+        val sxx = xs.sumOf { (it - mx) * (it - mx) }
+        return if (sxx == 0.0) null else xs.indices.sumOf { (xs[it] - mx) * (ys[it] - my) } / sxx
+    }
 
     /** True si el cambio semanal [changeKg] sobre una media de [averageKg] pasa del 1 %. */
     fun tooFast(averageKg: Double, changeKg: Double?): Boolean =

@@ -66,7 +66,7 @@ object Progression {
         val useRange = repRange != null && loaded && exercise.tracking == TrackingType.WEIGHT_REPS
         // Con rango, el 1RM estimado baja a propósito al subir peso y volver al mínimo: el estancamiento se mide
         // por reps con el mismo peso; sin rango, por el 1RM
-        val stalled = loaded && if (useRange) isStalledInRange(exercise.id, history, stallSessions) else isStalled(exercise.id, history, stallSessions)
+        val stalled = loaded && if (useRange) isStalledInRange(exercise.id, history, stallSessions, repRange) else isStalled(exercise.id, history, stallSessions)
         return when {
             stalled -> {
                 val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
@@ -128,15 +128,19 @@ object Progression {
     }
 
     /**
-     * Estancado con rango: [sessions] sesiones seguidas con el mismo peso máximo sin sumar más repeticiones
-     * que la sesión anterior a ellas.
+     * Estancado con rango: [sessions] sesiones seguidas con el mismo peso máximo sin subir la media de reps de
+     * las series efectivas a ese peso (sin contar drop sets ni descargas, ni cuántas series se hicieron).
+     * Si la última llegó al tope del rango en todas, no es estancamiento: toca subir (o consolidar).
      */
-    fun isStalledInRange(exerciseId: String, history: List<Workout>, sessions: Int = 3): Boolean {
+    fun isStalledInRange(exerciseId: String, history: List<Workout>, sessions: Int = 3, range: IntRange? = null): Boolean {
         val points = history.filter { it.isFinished }.sortedBy { it.startedAtEpochMs }.mapNotNull { w ->
-            val sets = w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.completedSets }.filter { it.type != SetType.WARMUP }
-            if (sets.isEmpty()) null else sets.maxOf { it.weightKg } to sets.sumOf { it.reps }
+            val sets = w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.completedSets }
+                .filter { it.type == SetType.NORMAL || it.type == SetType.FAILURE }
+            val top = sets.maxOfOrNull { it.weightKg } ?: return@mapNotNull null
+            val atTop = sets.filter { it.weightKg == top }
+            Triple(top, atTop.map { it.reps }.average(), atTop.all { range != null && it.reps >= range.last })
         }.takeLast(sessions + 1)
-        if (points.size < sessions + 1) return false
+        if (points.size < sessions + 1 || points.last().third) return false
         val (weight, before) = points.first()
         return points.all { it.first == weight } && points.drop(1).all { it.second <= before }
     }

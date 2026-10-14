@@ -416,3 +416,41 @@ class WeightRateTest {
         assertEquals(false, com.bestrong.core.stats.WeightRate.tooFast(80.0, null))
     }
 }
+
+class Iteration20Test {
+    @Test fun noDeloadWhenAtTopOrWithDropSets() {
+        val d = java.time.LocalDate.of(2026, 3, 2)
+        // Al tope 3 veces (la subida se perdió al redondear): no es estancamiento
+        val atTop = (0..3).map { i -> finishedWorkout("t$i", d.plusDays(i * 3L), bench to List(3) { done(80.0, 12) }) }
+        assertEquals(false, com.bestrong.core.training.Progression.isStalledInRange(bench.id, atTop, 3, 8..12))
+        // Un drop set en la primera sesión no cuenta: las reps a 80 suben
+        val first = finishedWorkout("a", d, bench to listOf(done(80.0, 10), done(80.0, 10), done(80.0, 9), done(60.0, 10).copy(type = SetType.DROP)))
+        val rest = listOf(30, 31, 32).mapIndexed { i, total -> finishedWorkout("b$i", d.plusDays(3L + i * 3), bench to listOf(done(80.0, total / 3), done(80.0, total / 3), done(80.0, total - 2 * (total / 3)))) }
+        assertEquals(false, com.bestrong.core.training.Progression.isStalledInRange(bench.id, listOf(first) + rest, 3, 8..12))
+    }
+
+    @Test fun loadAboveNeverRoundsBack() {
+        val gym = com.bestrong.core.training.GymProfile.gym()
+        val above = gym.loadAbove(80.0, com.bestrong.core.model.Equipment.BARBELL)
+        assertEquals(true, above > 80.0)
+    }
+}
+
+class WeightRateTrendTest {
+    @Test fun needsThreePointsOverTwoWeeks() {
+        val day = 86_400_000L
+        val now = 30 * day
+        assertEquals(null, com.bestrong.core.stats.WeightRate.weeklyChange(listOf(now - 7 * day to 80.0, now to 81.0), now))
+        val ok = listOf(now - 20 * day to 80.0, now - 10 * day to 79.0, now to 78.0)
+        assertEquals(-0.7, com.bestrong.core.stats.WeightRate.weeklyChange(ok, now)!!, 0.01)
+    }
+}
+
+class AssistedDropTest {
+    @Test fun assistedDropAddsAssistance() {
+        val pull = com.bestrong.core.library.ExerciseLibrary.all.first { it.tracking == com.bestrong.core.model.TrackingType.REPS_ONLY }
+        val we = WorkoutExercise(exercise = pull, sets = listOf(WorkoutSet(weightKg = -20.0, reps = 8)))
+        val out = WorkoutEditor.addDropSet(Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(we)), we.id, 2.5).exercises[0].sets
+        assertEquals(-22.5, out[1].weightKg, 0.0)
+    }
+}

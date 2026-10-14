@@ -290,13 +290,19 @@ class ActiveWorkoutViewModel @Inject constructor(
         }.take(limit)
     }
 
-    fun addBackOff(weId: String) = edit { w ->
-        val exerciseId = w.exercises.firstOrNull { it.id == weId }?.exercise?.id ?: return@edit w
-        WorkoutEditor.addBackOff(w, weId, settings.value.stepKgFor(exerciseId))
-    }
-    fun addDropSet(weId: String) = edit { w ->
-        val exerciseId = w.exercises.firstOrNull { it.id == weId }?.exercise?.id ?: return@edit w
-        WorkoutEditor.addDropSet(w, weId, settings.value.stepKgFor(exerciseId))
+    fun addBackOff(weId: String) = addLighter(weId, WorkoutEditor::addBackOff)
+    fun addDropSet(weId: String) = addLighter(weId) { w, id, step -> WorkoutEditor.addDropSet(w, id, step) }
+
+    /** Drop set o descarga; si con ese peso no se puede bajar más (barra casi vacía), se avisa en vez de no hacer nada. */
+    private fun addLighter(weId: String, add: (Workout, String, Double) -> Workout) {
+        val current = workout.value ?: return
+        val exerciseId = current.exercises.firstOrNull { it.id == weId }?.exercise?.id ?: return
+        val step = settings.value.stepKgFor(exerciseId)
+        if (add(current, weId, step) == current) {
+            android.widget.Toast.makeText(appContext, R.string.cannot_go_lighter, android.widget.Toast.LENGTH_SHORT).show()
+        } else {
+            edit { add(it, weId, step) }
+        }
     }
     fun removeSet(weId: String, setId: String) {
         val partner = partnerMode.value

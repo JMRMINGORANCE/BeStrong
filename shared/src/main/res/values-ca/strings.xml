@@ -1064,4 +1064,7 @@
     <string name="weight_rate_fast_gain">⚠ Puges més d\'un 1 % per setmana: a aquest ritme es guanya sobretot greix. Valora menjar una mica menys.</string>
     <string name="weekday_title">Els teus millors dies</string>
     <string name="weekday_best">Rendeixes més el %1$s: bon dia per a les sessions dures</string>
+    <string name="weekday_no_difference">Rendeixes semblant qualsevol dia</string>
+    <string name="body_comp_hint_female">Cintura/alçada per sota de 0,5 és el recomanat. FFMI: uns 15–17 és la mitjana en dones entrenades; 19+ és avançat.</string>
+    <string name="cannot_go_lighter">Amb aquest pes no es pot baixar més</string>
 </resources>

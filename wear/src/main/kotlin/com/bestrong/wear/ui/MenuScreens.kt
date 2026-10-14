@@ -56,6 +56,8 @@ fun MenuScreen(
     var maxHr by remember { mutableIntStateOf(session.maxHeartRate) }
     val voice = rememberVoiceInput(stringResource(R.string.voice_prompt)) { text -> if (session.applySpoken(text)) onBack() }
     val w = workout ?: return
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val warnIfNot: (Boolean) -> Unit = { added -> warnIfNotLighter(context, added) }
 
     ScreenScaffold(
         scrollState = listState,
@@ -105,10 +107,10 @@ fun MenuScreen(
             // Drop set y series de descarga, como en el móvil (solo ejercicios con peso)
             if (w.exercises.getOrNull(index)?.exercise?.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) {
                 item {
-                    Button(onClick = { session.addDropSet(); onBack() }, label = { Text(stringResource(R.string.menu_drop_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                    Button(onClick = { warnIfNot(session.addDropSet()); onBack() }, label = { Text(stringResource(R.string.menu_drop_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
                 }
                 item {
-                    Button(onClick = { session.addBackOff(); onBack() }, label = { Text(stringResource(R.string.menu_back_off)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
+                    Button(onClick = { warnIfNot(session.addBackOff()); onBack() }, label = { Text(stringResource(R.string.menu_back_off)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
                 }
             }
             item {
@@ -309,4 +311,9 @@ private fun ScalingLazyListScope.setCorrections(w: Workout, index: Int, session:
             Button(onClick = { if (session.undoLastSet()) onBack() }, label = { Text(stringResource(R.string.undo_last_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
         }
     }
+}
+
+/** Si no se pudo bajar más el peso, se dice (si no, el menú se cerraría sin hacer nada). */
+private fun warnIfNotLighter(context: android.content.Context, added: Boolean) {
+    if (!added) android.widget.Toast.makeText(context, R.string.cannot_go_lighter, android.widget.Toast.LENGTH_SHORT).show()
 }
