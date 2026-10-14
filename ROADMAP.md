@@ -299,7 +299,7 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 
 ## Fase 32 — Coherencia y atajos ✅
 - [x] Historial: cada ejercicio frente a la vez anterior (volumen y 1RM)
-- [x] 1RM con las reps en recámara del RPE también en el historial y en «frente a la última vez»
+- [x] 1RM con las reps en recámara del RPE también en el historial y en «frente a la última vez» (revisado en la fase 33: ahí se usa el 1RM de siempre, como en récords y gráficas; el del RPE queda para el peso orientativo)
 - [x] Widget: la rutina planificada para hoy primero y la que más tiempo lleva sin hacerse
 - [x] El RPE anotado en el reloj propone en el móvil el mismo ajuste de series
 - [x] Los avisos descartados con fecha se olvidan a los 60 días

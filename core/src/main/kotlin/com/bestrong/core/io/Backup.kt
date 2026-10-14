@@ -97,7 +97,7 @@ data class BackupSummary(
             measurements = data.measurements.size,
             firstWorkoutEpochMs = data.history.minOfOrNull { it.startedAtEpochMs },
             lastWorkoutEpochMs = data.history.maxOfOrNull { it.startedAtEpochMs },
-            hasSettings = data.settings != null || data.planning != null,
+            hasSettings = data.settings != null || data.planning != null || data.activeProgram != null,
         )
     }
 }

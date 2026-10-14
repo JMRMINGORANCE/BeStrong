@@ -362,8 +362,12 @@ private const val NO_CHANGE_KG = 0.5
 private fun ComparisonLine(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison) {
     val unit = LocalWeightUnit.current
 
-    // Sin «−0»: lo que no llega a medio kilo cuenta como sin cambio
-    fun signed(v: Double, text: String) = (if (v > -NO_CHANGE_KG) "+" else "−") + text
+    // Lo que no llega a medio kilo es «sin cambio» (±0); si no, con su signo
+    fun signed(v: Double, text: String) = when {
+        kotlin.math.abs(v) < NO_CHANGE_KG -> "±0"
+        v > 0 -> "+$text"
+        else -> "−$text"
+    }
     val up = c.best1rmDelta > 0.01 || (c.best1rmDelta >= -0.01 && c.volumeDelta > 0)
     Text(
         stringResource(

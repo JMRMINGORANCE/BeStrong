@@ -304,12 +304,20 @@ class ProfileViewModel @Inject constructor(
 
     private suspend fun restoreText(text: String) {
         runCatching { withContext(Dispatchers.Default) { Backup.decode(text) } }
-            .onSuccess { pendingRestore.value = it }
+            .onSuccess { showRestorePreview(it) }
             .onFailure { _messages.tryEmit(context.getString(R.string.restore_error, it.message.orEmpty())) }
+    }
+
+    private fun showRestorePreview(data: com.bestrong.core.io.BackupData) {
+        restoreWithSettings.value = true
+        pendingRestore.value = data
     }
 
     /** Copia leída y pendiente de confirmar (se enseña qué trae antes de restaurar). */
     val pendingRestore = MutableStateFlow<com.bestrong.core.io.BackupData?>(null)
+
+    /** Si restaurar también los ajustes: aquí y no en la pantalla, para que sobreviva a girar el móvil. */
+    val restoreWithSettings = MutableStateFlow(true)
 
     /**
      * Restaura la copia pendiente: añade lo que falte sin borrar nada. Con [includeSettings] en false se
@@ -318,7 +326,8 @@ class ProfileViewModel @Inject constructor(
     fun confirmRestore(includeSettings: Boolean) = viewModelScope.launch {
         val data = pendingRestore.value ?: return@launch
         pendingRestore.value = null
-        val result = runCatching { fullBackup.restore(if (includeSettings) data else data.copy(settings = null, planning = null)) }
+        // Sin ajustes: tampoco el programa (sus training max y su objetivo semanal son configuración)
+        val result = runCatching { fullBackup.restore(if (includeSettings) data else data.copy(settings = null, planning = null, activeProgram = null)) }
         _messages.tryEmit(
             result.fold(
                 { added -> context.getString(R.string.restore_done, data.history.size, data.routines.size, added) },
@@ -408,7 +417,7 @@ class ProfileViewModel @Inject constructor(
             withContext(Dispatchers.Default) { Backup.decode(text) }
         }
         // Se confirma en el diálogo con lo que trae (confirmRestore)
-        result.onSuccess { pendingRestore.value = it }
+        result.onSuccess { showRestorePreview(it) }
             .onFailure { _messages.tryEmit(context.getString(R.string.restore_error, it.message.orEmpty())) }
     }
 

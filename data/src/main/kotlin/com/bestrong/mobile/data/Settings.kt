@@ -111,8 +111,10 @@ data class UserSettings(
 
     /** Con el perfil de casa (sin barra) o el de gimnasio como activo, según dónde se entrena (configuración inicial). */
     fun trainingAt(home: Boolean): UserSettings {
-        val match = gyms.firstOrNull { (com.bestrong.core.model.Equipment.BARBELL in it.equipment) != home } ?: return this
-        return copy(activeGymId = match.id)
+        fun isHome(g: GymProfile) = com.bestrong.core.model.Equipment.BARBELL !in g.equipment
+        // Si el activo ya es de ese tipo se respeta (repetir el tutorial no cambia tu «gimnasio del trabajo»)
+        val match = gyms.firstOrNull { isHome(it) == home }?.takeIf { isHome(activeGym) != home }
+        return if (match == null) this else copy(activeGymId = match.id)
     }
 
     /** Salto de peso de ese ejercicio: el suyo propio o el de la unidad (2,5 kg / 5 lb). */
@@ -309,7 +311,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
 
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
-        val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
+        val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "lock_photos")
         val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())

@@ -149,7 +149,8 @@ object WorkoutStats {
         fun setsOf(w: Workout, id: String) = w.exercises.filter { it.exercise.id == id }.flatMap { it.completedSets }
         return workout.exercises.distinctBy { it.exercise.id }.mapNotNull { we ->
             val prev = sorted.firstNotNullOfOrNull { w -> setsOf(w, we.exercise.id).takeIf { it.isNotEmpty() } } ?: return@mapNotNull null
-            val now = setsOf(workout, we.exercise.id)
+            // Saltado hoy (sin series hechas): no es un retroceso
+            val now = setsOf(workout, we.exercise.id).takeIf { it.isNotEmpty() } ?: return@mapNotNull null
             ExerciseComparison(
                 exerciseId = we.exercise.id,
                 exerciseName = we.exercise.name,

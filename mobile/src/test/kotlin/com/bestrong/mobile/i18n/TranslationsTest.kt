@@ -11,24 +11,26 @@ import org.w3c.dom.Element
  * argumentos (%1$s, %2$d…) que el español: una que falte sale en español y un argumento distinto cuelga la app.
  */
 class TranslationsTest {
-    private val arg = Regex("%(\\d+)\\$([sdf])")
+    /** Cualquier argumento de formato (%s, %1$s, %d, %.1f…); «%%» es un % escrito y se quita antes. */
+    private val arg = Regex("%(\\d+\\$)?[-#+0,(]*\\d*(\\.\\d+)?[sdf]")
 
     /** Carpeta res del módulo, tanto si los tests corren desde el módulo como desde la raíz. */
     private fun resDir(module: String): File =
         listOf(File("../$module/src/main/res"), File("$module/src/main/res")).first { it.isDirectory }
 
-    /** clave → argumentos; los plurales como «plurals:nombre» con los argumentos de todas sus formas. */
-    private fun load(file: File): Map<String, Set<Pair<String, String>>> {
+    /** clave → argumentos ordenados; los plurales como «plurals:nombre» con los argumentos de todas sus formas juntos. */
+    private fun load(file: File): Map<String, String> {
         val doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
-        val out = mutableMapOf<String, Set<Pair<String, String>>>()
+        val out = mutableMapOf<String, String>()
         val nodes = doc.documentElement.childNodes
         for (i in 0 until nodes.length) {
             val e = nodes.item(i) as? Element ?: continue
             if (e.getAttribute("translatable") == "false") continue
-            val args = arg.findAll(e.textContent).map { it.groupValues[1] to it.groupValues[2] }.toSet()
+            val args = arg.findAll(e.textContent.replace("%%", "")).map { it.value }.toList()
             when (e.tagName) {
-                "string" -> out[e.getAttribute("name")] = args
-                "plurals" -> out["plurals:" + e.getAttribute("name")] = args
+                "string" -> out[e.getAttribute("name")] = args.sorted().joinToString(",")
+                // Cada lengua tiene sus formas (one, many…): se comparan los argumentos sin repetir
+                "plurals" -> out["plurals:" + e.getAttribute("name")] = args.distinct().sorted().joinToString(",")
             }
         }
         return out
@@ -49,4 +51,6 @@ class TranslationsTest {
     @Test fun phoneTranslationsMatchSpanish() = check("shared")
 
     @Test fun watchTranslationsMatchSpanish() = check("wear")
+
+    @Test fun watchFaceTranslationsMatchSpanish() = check("watchface")
 }

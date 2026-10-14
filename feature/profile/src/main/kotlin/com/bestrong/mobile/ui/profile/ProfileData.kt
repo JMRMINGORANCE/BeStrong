@@ -151,7 +151,7 @@ private const val MIN_PASSWORD = 10
 private fun RestorePreviewDialog(vm: ProfileViewModel) {
     val data by vm.pendingRestore.collectAsStateWithLifecycle()
     val summary = data?.let { com.bestrong.core.io.BackupSummary.of(it) } ?: return
-    var withSettings by remember(data) { mutableStateOf(true) }
+    val withSettings by vm.restoreWithSettings.collectAsStateWithLifecycle()
     AlertDialog(
         onDismissRequest = { vm.pendingRestore.value = null },
         title = { Text(stringResource(R.string.restore_backup)) },
@@ -169,7 +169,7 @@ private fun RestorePreviewDialog(vm: ProfileViewModel) {
                 Text(stringResource(R.string.restore_preview_merge), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (summary.hasSettings) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = withSettings, onCheckedChange = { withSettings = it })
+                        Checkbox(checked = withSettings, onCheckedChange = { vm.restoreWithSettings.value = it })
                         Text(stringResource(R.string.restore_preview_settings), Modifier.weight(1f))
                     }
                 }

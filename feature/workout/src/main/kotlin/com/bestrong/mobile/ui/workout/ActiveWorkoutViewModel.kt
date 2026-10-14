@@ -411,6 +411,11 @@ class ActiveWorkoutViewModel @Inject constructor(
         val now = sets.associate { (_, s) -> s.id to s.rpe }
         // Otro entreno (pareja, uno nuevo): se empieza a mirar desde cero, sin avisar de lo que ya traía
         val before = seenRpes.takeIf { w?.id == seenRpeWorkoutId }
+        if (before == null) {
+            // Los avisos pendientes eran del otro entreno
+            rpePromptJobs.values.forEach { it.cancel() }
+            rpePromptJobs.clear()
+        }
         seenRpes = now
         seenRpeWorkoutId = w?.id
         if (before == null) return
@@ -427,7 +432,9 @@ class ActiveWorkoutViewModel @Inject constructor(
             rpePromptJobs.remove(setId)
             // Con el entreno de ese momento: sigue siendo la última serie hecha y su RPE es el definitivo
             val we = workout.value?.exercises?.firstOrNull { it.id == weId } ?: return@launch
-            if (we.sets.lastOrNull { it.completed }?.id != setId) return@launch
+            val last = we.sets.lastOrNull { it.completed }
+            // Ya no es la última serie hecha, o el RPE definitivo lo puso el móvil (que ya avisó al ponerlo)
+            if (last?.id != setId || localRpes[setId] == last.rpe) return@launch
             Autoregulation.suggest(we, setId, settings.value.stepKgFor(we.exercise.id))?.let {
                 _events.tryEmit(WorkoutEvent.RpeSuggestion(we.id, we.exercise, it))
             }
