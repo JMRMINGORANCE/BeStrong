@@ -419,8 +419,11 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
-    /** Copias automáticas de la carpeta para elegir cuál restaurar (fecha, documento); null = sin abrir. */
-    val autoBackups = MutableStateFlow<List<Pair<String, Uri>>?>(null)
+    /** Una copia automática para elegir: su fecha, cuántos entrenos trae (null si no se pudo leer) y el documento. */
+    data class AutoBackupItem(val date: String, val workouts: Int?, val uri: Uri)
+
+    /** Copias automáticas de la carpeta para elegir cuál restaurar; null = sin abrir. */
+    val autoBackups = MutableStateFlow<List<AutoBackupItem>?>(null)
 
     /** Lee las copias automáticas de la carpeta elegida (la más reciente primero), sin buscar el archivo a mano. */
     fun listAutoBackups() = viewModelScope.launch {
@@ -431,7 +434,14 @@ class ProfileViewModel @Inject constructor(
             _messages.tryEmit(context.getString(if (e is SecurityException) R.string.auto_backup_lost else R.string.restore_latest_none))
             return@launch
         }
-        if (found.isEmpty()) _messages.tryEmit(context.getString(R.string.restore_latest_none)) else autoBackups.value = found
+        if (found.isEmpty()) {
+            _messages.tryEmit(context.getString(R.string.restore_latest_none))
+            return@launch
+        }
+        // Cuántos entrenos trae cada una (leerlas lleva un momento: fuera del hilo principal)
+        autoBackups.value = withContext(Dispatchers.IO) {
+            found.map { (date, uri) -> AutoBackupItem(date, runCatching { Backup.decode(readLimited(uri)).history.size }.getOrNull(), uri) }
+        }
     }
 
     /** Lee una copia JSON de BeStrong y la deja pendiente de confirmar (añade lo que falte, no borra nada). */

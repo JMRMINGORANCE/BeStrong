@@ -1139,4 +1139,11 @@
     <string name="history_gym_unknown">No gym</string>
     <string name="history_gym_change">Where was it done?</string>
     <string name="partner_name_taken">“%1$s” already has workouts in the history: choose another name so they don’t get mixed</string>
+    <string name="cardio_week">Cardio this week: %1$s km</string>
+    <string name="cardio_week_goal">Cardio this week: %1$s of %2$s km</string>
+    <string name="cardio_goal_title">Weekly cardio goal</string>
+    <string name="undo_gym_changed">Workout gym changed</string>
+    <string name="metric_distance">Distance</string>
+    <string name="metric_time">Time</string>
+    <string name="auto_backup_item">%1$s · %2$d workouts</string>
 </resources>

@@ -144,27 +144,32 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            item {
-                val labels = listOf(
-                    stringResource(R.string.metric_1rm),
-                    stringResource(R.string.metric_max_weight),
-                    stringResource(R.string.metric_volume),
-                    stringResource(R.string.metric_reps),
-                )
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                    labels.forEachIndexed { i, l ->
-                        SegmentedButton(selected = metric == i, onClick = { metric = i }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
+            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.CARDIO) item { CardioProgressChart(s.progress) }
+            if (s.exercise.tracking != com.bestrong.core.model.TrackingType.CARDIO) {
+                item {
+                    val labels = listOf(
+                        stringResource(R.string.metric_1rm),
+                        stringResource(R.string.metric_max_weight),
+                        stringResource(R.string.metric_volume),
+                        stringResource(R.string.metric_reps),
+                    )
+                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                        labels.forEachIndexed { i, l ->
+                            SegmentedButton(selected = metric == i, onClick = { metric = i }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
+                        }
                     }
                 }
             }
-            item {
-                val points = s.progress.takeLast(30).map { p ->
-                    ChartPoint(
-                        formatShortDate(p.dateEpochMs),
-                        when (metric) { 0 -> p.bestOneRepMax; 1 -> p.heaviestWeight; 2 -> p.volume; else -> p.bestReps.toDouble() },
-                    )
+            if (s.exercise.tracking != com.bestrong.core.model.TrackingType.CARDIO) {
+                item {
+                    val points = s.progress.takeLast(30).map { p ->
+                        ChartPoint(
+                            formatShortDate(p.dateEpochMs),
+                            when (metric) { 0 -> p.bestOneRepMax; 1 -> p.heaviestWeight; 2 -> p.volume; else -> p.bestReps.toDouble() },
+                        )
+                    }
+                    LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { unit.format(it) })
                 }
-                LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { unit.format(it) })
             }
             if (s.rpeTrend.size >= RPE_MIN_SESSIONS) item { RpeTrendCard(s.rpeTrend) }
             item { SectionHeader(stringResource(R.string.personal_records)) }
@@ -358,5 +363,21 @@ private fun CardioBestsCard(exercise: com.bestrong.core.model.Exercise, b: com.b
                 )
             }
         }
+    }
+}
+
+/** Cardio: distancia (km) o tiempo (min) de cada sesión, en vez del 1RM y el volumen que no tienen sentido aquí. */
+@Composable
+private fun CardioProgressChart(progress: List<com.bestrong.core.stats.ExerciseProgressPoint>) {
+    var byTime by rememberSaveable { mutableStateOf(false) }
+    Column {
+        val labels = listOf(stringResource(R.string.metric_distance), stringResource(R.string.metric_time))
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            labels.forEachIndexed { i, l ->
+                SegmentedButton(selected = byTime == (i == 1), onClick = { byTime = i == 1 }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
+            }
+        }
+        val points = progress.takeLast(30).map { p -> ChartPoint(formatShortDate(p.dateEpochMs), if (byTime) p.durationSec / 60.0 else p.distanceM / 1000) }
+        LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { "%.1f".format(it) + if (byTime) " min" else " km" })
     }
 }

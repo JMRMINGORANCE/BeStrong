@@ -107,6 +107,13 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
             if (snackbar.showSnackbar(deletedMsg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undoDelete() else vm.clearDeleted()
         }
     }
+    val gymEdit by vm.gymEdit.collectAsStateWithLifecycle()
+    val gymEditMsg = stringResource(R.string.undo_gym_changed)
+    LaunchedEffect(gymEdit) {
+        if (gymEdit != null) {
+            if (snackbar.showSnackbar(gymEditMsg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undoGymEdit() else vm.clearGymEdit()
+        }
+    }
 
     var logging by remember { mutableStateOf(false) }
     if (logging) {
@@ -515,9 +522,9 @@ private fun WorkoutGymLine(w: Workout, vm: HistoryViewModel) {
             text = {
                 Column {
                     (gyms + listOfNotNull(w.gymName)).distinct().forEach { g ->
-                        TextButton(onClick = { vm.editWorkout(w) { it.copy(gymName = g) }; picking = false }, modifier = Modifier.fillMaxWidth()) { Text(g, Modifier.fillMaxWidth()) }
+                        TextButton(onClick = { vm.changeGym(w, g); picking = false }, modifier = Modifier.fillMaxWidth()) { Text(g, Modifier.fillMaxWidth()) }
                     }
-                    TextButton(onClick = { vm.editWorkout(w) { it.copy(gymName = null) }; picking = false }, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = { vm.changeGym(w, null); picking = false }, modifier = Modifier.fillMaxWidth()) {
                         Text(stringResource(R.string.history_gym_unknown), Modifier.fillMaxWidth())
                     }
                 }

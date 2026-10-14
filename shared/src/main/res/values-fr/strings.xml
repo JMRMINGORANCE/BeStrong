@@ -1139,4 +1139,11 @@
     <string name="history_gym_unknown">Sans salle</string>
     <string name="history_gym_change">Où a-t-elle eu lieu ?</string>
     <string name="partner_name_taken">« %1$s » a déjà des séances dans l’historique : choisis un autre nom pour ne pas les mélanger</string>
+    <string name="cardio_week">Cardio cette semaine : %1$s km</string>
+    <string name="cardio_week_goal">Cardio cette semaine : %1$s sur %2$s km</string>
+    <string name="cardio_goal_title">Objectif cardio par semaine</string>
+    <string name="undo_gym_changed">Salle de la séance modifiée</string>
+    <string name="metric_distance">Distance</string>
+    <string name="metric_time">Durée</string>
+    <string name="auto_backup_item">%1$s · %2$d séances</string>
 </resources>

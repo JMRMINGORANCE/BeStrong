@@ -104,6 +104,26 @@ class HistoryViewModel @Inject constructor(
         repo.deleteWorkout(id)
     }
 
+    /** Entreno tal como estaba antes de cambiarle el gimnasio (para deshacerlo); null = nada que deshacer. */
+    private val _gymEdit = MutableStateFlow<Workout?>(null)
+    val gymEdit: StateFlow<Workout?> = _gymEdit
+
+    /** Cambia dónde se hizo un entreno pasado; se puede deshacer desde el aviso. */
+    fun changeGym(workout: Workout, gymName: String?) {
+        if (workout.gymName == gymName) return
+        _gymEdit.value = workout
+        editWorkout(workout) { it.copy(gymName = gymName) }
+    }
+
+    fun undoGymEdit() = viewModelScope.launch {
+        _gymEdit.value?.let { repo.saveWorkout(it.copy(updatedAtEpochMs = System.currentTimeMillis())) }
+        _gymEdit.value = null
+    }
+
+    fun clearGymEdit() {
+        _gymEdit.value = null
+    }
+
     fun undoDelete() = viewModelScope.launch {
         _deleted.value?.let { repo.saveWorkout(it) }
         _deleted.value = null

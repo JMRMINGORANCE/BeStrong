@@ -1139,4 +1139,11 @@
     <string name="history_gym_unknown">Sem ginásio</string>
     <string name="history_gym_change">Onde foi feito?</string>
     <string name="partner_name_taken">«%1$s» já tem treinos no histórico: escolhe outro nome para não os misturar</string>
+    <string name="cardio_week">Cardio esta semana: %1$s km</string>
+    <string name="cardio_week_goal">Cardio esta semana: %1$s de %2$s km</string>
+    <string name="cardio_goal_title">Objetivo de cardio por semana</string>
+    <string name="undo_gym_changed">Ginásio do treino alterado</string>
+    <string name="metric_distance">Distância</string>
+    <string name="metric_time">Tempo</string>
+    <string name="auto_backup_item">%1$s · %2$d treinos</string>
 </resources>

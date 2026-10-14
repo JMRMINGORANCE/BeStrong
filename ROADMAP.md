@@ -346,3 +346,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Cardio de la semana en el resumen semanal
 - [x] Corregir el gimnasio de un entreno pasado
 - [x] Renombrar a la pareja actualiza su historial (se guarda al terminar de escribir)
+
+## Fase 39 — Cardio con objetivo ✅
+- [x] Objetivo semanal de km de cardio con su progreso en Inicio
+- [x] Gráfica de cardio en la ficha (distancia o tiempo por sesión)
+- [x] Al elegir una copia automática, cuántos entrenos trae cada una
+- [x] Deshacer el cambio de gimnasio de un entreno pasado
+- [x] Buscar en el historial por el nombre de la pareja

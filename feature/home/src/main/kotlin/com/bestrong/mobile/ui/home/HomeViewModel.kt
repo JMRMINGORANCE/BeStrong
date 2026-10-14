@@ -101,6 +101,18 @@ class HomeViewModel @Inject constructor(
 
     fun setActiveGym(id: String) = settingsStore.update { it.copy(activeGymId = id) }
 
+    /** Cardio de esta semana (metros, segundos) y el objetivo de km, para la tarjeta de Inicio. */
+    data class CardioWeek(val meters: Double, val seconds: Long, val goalKm: Double?)
+
+    val cardioWeek: StateFlow<CardioWeek> = combine(repo.history, settingsStore.settings) { history, s ->
+        val zone = ZoneId.systemDefault()
+        val monday = LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val (m, sec) = com.bestrong.core.stats.CardioTotals.since(history, monday.atStartOfDay(zone).toInstant().toEpochMilli())
+        CardioWeek(m, sec, s.weeklyCardioKm)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CardioWeek(0.0, 0, null))
+
+    fun setWeeklyCardioKm(km: Double?) = settingsStore.update { it.copy(weeklyCardioKm = km) }
+
     /** Id → nombre de los gimnasios (para enseñar el de cada rutina; los borrados no salen). */
     val gymNames: StateFlow<Map<String, String>> = settingsStore.settings.map { s -> s.gyms.associate { it.id to it.name } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), settingsStore.settings.value.gyms.associate { it.id to it.name })

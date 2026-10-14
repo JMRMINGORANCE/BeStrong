@@ -33,6 +33,9 @@ data class ExerciseProgressPoint(
     val heaviestWeight: Double,
     val volume: Double,
     val bestReps: Int,
+    /** Cardio: metros y segundos de la sesión. */
+    val distanceM: Double = 0.0,
+    val durationSec: Int = 0,
 )
 
 data class WeekBucket(val weekStart: LocalDate, val workouts: Int, val volume: Double, val durationSec: Long)
@@ -200,6 +203,7 @@ object WorkoutStats {
         if (q.isEmpty()) return history
         return history.filter { w ->
             w.name.lowercase().contains(q) || w.notes.lowercase().contains(q) || w.gymName?.lowercase()?.contains(q) == true ||
+                w.athlete?.lowercase()?.contains(q) == true ||
                 w.exercises.any { we -> nameOf(we.exercise).lowercase().contains(q) || we.notes.lowercase().contains(q) || we.sets.any { it.note.lowercase().contains(q) } }
         }
     }
@@ -273,6 +277,8 @@ object WorkoutStats {
                         heaviestWeight = sets.maxOf { it.weightKg },
                         volume = sets.sumOf { it.volume },
                         bestReps = sets.maxOf { it.reps },
+                        distanceM = sets.sumOf { it.distanceM },
+                        durationSec = sets.sumOf { it.durationSec },
                     )
                 }
             }

@@ -545,10 +545,11 @@ private fun AutoBackupPicker(vm: ProfileViewModel) {
         title = { Text(stringResource(R.string.restore_latest)) },
         text = {
             Column(Modifier.heightIn(max = BACKUP_LIST_MAX_HEIGHT).verticalScroll(androidx.compose.foundation.rememberScrollState())) {
-                copies.forEach { (date, uri) ->
-                    TextButton(onClick = { vm.autoBackups.value = null; vm.restoreBackup(uri) }, modifier = Modifier.fillMaxWidth()) {
+                copies.forEach { c ->
+                    TextButton(onClick = { vm.autoBackups.value = null; vm.restoreBackup(c.uri) }, modifier = Modifier.fillMaxWidth()) {
                         // «2026-10-12 (1)»: copia repetida del mismo día, se enseña la fecha
-                        Text(date.substringBefore(" ("), Modifier.fillMaxWidth())
+                        val date = c.date.substringBefore(" (")
+                        Text(c.workouts?.let { stringResource(R.string.auto_backup_item, date, it) } ?: date, Modifier.fillMaxWidth())
                     }
                 }
             }

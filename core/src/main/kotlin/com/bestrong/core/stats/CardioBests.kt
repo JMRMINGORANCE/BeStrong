@@ -36,3 +36,19 @@ object CardioBestsCalc {
         )
     }
 }
+
+/** Cardio hecho desde una fecha (todos los ejercicios de cardio y de distancia sin peso): metros y segundos. */
+object CardioTotals {
+    fun since(history: List<Workout>, fromEpochMs: Long): Pair<Double, Long> {
+        val sets = history.filter { it.isFinished && it.startedAtEpochMs >= fromEpochMs }.flatMap { w ->
+            w.exercises.flatMap { we ->
+                when (we.exercise.tracking) {
+                    com.bestrong.core.model.TrackingType.CARDIO -> we.completedSets
+                    com.bestrong.core.model.TrackingType.DISTANCE -> we.completedSets.filter { it.weightKg == 0.0 }
+                    else -> emptyList()
+                }
+            }
+        }
+        return sets.sumOf { it.distanceM } to sets.sumOf { it.durationSec.toLong() }
+    }
+}

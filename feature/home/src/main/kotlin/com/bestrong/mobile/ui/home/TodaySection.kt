@@ -455,3 +455,45 @@ private fun BodyWeightQuickEntry(lastKg: Double?, onSave: (Double) -> Unit) {
         )
     }
 }
+
+/** Objetivos de km de cardio por semana que se pueden elegir. */
+private val CARDIO_GOALS_KM = listOf(5.0, 10.0, 20.0, 30.0, 50.0)
+
+/**
+ * «Cardio esta semana: 12,3 / 20 km» (solo si hay cardio esta semana o un objetivo puesto); tocarla deja poner o
+ * quitar el objetivo.
+ */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+fun CardioWeekCard(vm: HomeViewModel) {
+    val week by vm.cardioWeek.collectAsStateWithLifecycle()
+    if (week.goalKm == null && week.meters <= 0 && week.seconds <= 0) return
+    var editing by remember { mutableStateOf(false) }
+    val km = week.meters / 1000
+    Card(Modifier.fillMaxWidth().clickable { editing = true }) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            val goal = week.goalKm
+            Text(
+                if (goal != null) stringResource(R.string.cardio_week_goal, "%.1f".format(km), "%.0f".format(goal)) else stringResource(R.string.cardio_week, "%.1f".format(km)),
+                fontWeight = FontWeight.Bold,
+            )
+            if (goal != null) androidx.compose.material3.LinearProgressIndicator(progress = { (km / goal).toFloat().coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
+            if (week.seconds > 0) Text(com.bestrong.core.util.formatDuration(week.seconds), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+    if (editing) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { editing = false },
+            title = { Text(stringResource(R.string.cardio_goal_title)) },
+            text = {
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    androidx.compose.material3.FilterChip(selected = week.goalKm == null, onClick = { vm.setWeeklyCardioKm(null); editing = false }, label = { Text("—") })
+                    CARDIO_GOALS_KM.forEach { g ->
+                        androidx.compose.material3.FilterChip(selected = week.goalKm == g, onClick = { vm.setWeeklyCardioKm(g); editing = false }, label = { Text("${g.toInt()} km") })
+                    }
+                }
+            },
+            confirmButton = { androidx.compose.material3.TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_close)) } },
+        )
+    }
+}
