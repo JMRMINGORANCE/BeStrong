@@ -15,7 +15,8 @@ data class Tempo(val eccentric: Int, val bottomPause: Int, val concentric: Int, 
     /** Tiempo bajo tensión de una serie de [reps] repeticiones. */
     fun timeUnderTension(reps: Int): Int = repSeconds * reps
 
-    override fun toString() = "$eccentric-$bottomPause-$concentric-$topPause"
+    /** Subida de 0 s = explosiva: se escribe «X», como se teclea («3-1-X-0»). */
+    override fun toString() = "$eccentric-$bottomPause-${if (concentric == 0) "X" else concentric}-$topPause"
 
     enum class Phase { ECCENTRIC, BOTTOM, CONCENTRIC, TOP }
 

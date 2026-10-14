@@ -20,6 +20,9 @@ object Autoregulation {
 
     const val MAX_RPE = 10.0
 
+    /** Tipos de serie tras los que se propone ajustar. */
+    private val ADJUSTABLE = setOf(SetType.NORMAL, SetType.CLUSTER, SetType.FAILURE)
+
     /**
      * RPE a partir del cual se baja, con el objetivo [target]: como mucho 10 (con objetivo 9 un 10 sí es
      * pasarse); con objetivo 10 nunca, porque la serie a tope es lo buscado.
@@ -39,14 +42,14 @@ object Autoregulation {
     fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double): RpeAdjustment? {
         val done = exercise.sets.firstOrNull { it.id == completedSetId } ?: return null
         val rpe = done.rpe ?: return null
-        // Solo tras una serie normal: un drop o una al fallo van a RPE alto a propósito
-        if (done.type != SetType.NORMAL || done.weightKg <= 0) return null
+        // Normales y cluster; tras una al fallo solo se sube (si se quedó lejos del fallo); un drop no cuenta
+        if (done.type !in ADJUSTABLE || done.weightKg <= 0) return null
         val pending = exercise.sets.filter { !it.completed && it.type != SetType.WARMUP }
         if (pending.isEmpty()) return null
         val current = done.weightKg
         return when {
-            rpe >= high(exercise.targetRpe) -> RpeAdjustment(round(current * 0.95, stepKg).coerceAtLeast(0.0), -1).takeIf { it.newWeightKg < current }
-            rpe <= low(exercise.targetRpe) -> RpeAdjustment(current + stepKg, 1)
+            done.type != SetType.FAILURE && rpe >= high(exercise.targetRpe) -> RpeAdjustment(round(current * 0.95, stepKg).coerceAtLeast(0.0), -1).takeIf { it.newWeightKg < current }
+            rpe <= low(if (done.type == SetType.FAILURE) MAX_RPE else exercise.targetRpe) -> RpeAdjustment(current + stepKg, 1)
             else -> null
         }
     }

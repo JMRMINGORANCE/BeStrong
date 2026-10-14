@@ -74,6 +74,8 @@ data class ExerciseDetailState(
     val rpeTrend: List<Triple<Long, Double, Double>> = emptyList(),
     /** Mejor valor por sesión para el objetivo (1RM, reps o segundos según el ejercicio). */
     val goalPoints: List<Pair<Long, Double>> = emptyList(),
+    /** 1RM estimado reciente (con las reps en recámara del RPE), el mismo que usa el entreno. */
+    val recentOneRepMax: Double? = null,
 )
 
 @HiltViewModel
@@ -135,9 +137,11 @@ class ExercisesViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.exerciseGoalsKg)
 
     /** Mancuernas con «suma de las dos»: el objetivo se ve y se escribe como el total del par. */
-    /** Peso que se puede usar para [kg] en este ejercicio (gimnasio activo o su incremento). */
-    fun roundLoad(exercise: Exercise, kg: Double): Double {
-        val s = settingsStore.settings.value
+    /** Ajustes en vivo (para que la tabla de cargas cambie con el gimnasio o las mancuernas sumadas). */
+    val settings: StateFlow<com.bestrong.mobile.data.UserSettings> = settingsStore.settings
+
+    /** Peso que se puede usar para [kg] en este ejercicio (gimnasio activo o su incremento) con los ajustes [s]. */
+    fun roundLoad(exercise: Exercise, kg: Double, s: com.bestrong.mobile.data.UserSettings): Double {
         return com.bestrong.core.stats.RpeLoad.roundToLoadable(kg, s.unit, s.stepKgFor(exercise.id), s.gymFor(exercise.id), exercise.equipment)
     }
 
@@ -206,7 +210,7 @@ class ExercisesViewModel @Inject constructor(
         result
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings, repo.routines) { all, fullHistory, settings, routines ->
+    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings, repo.routines, planning.state) { all, fullHistory, settings, routines, _ ->
         val ex = all.firstOrNull { it.id == exerciseId } ?: return@combine null
         val family = ExerciseLibrary.familyOf(exerciseId)
         val history = if (includeVariants) WorkoutStats.mergeVariants(fullHistory, exerciseId, family) else fullHistory
@@ -217,6 +221,7 @@ class ExercisesViewModel @Inject constructor(
             exercise = ex,
             records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
+            recentOneRepMax = com.bestrong.core.stats.RpeLoad.recentOneRepMax(exerciseId, history, System.currentTimeMillis()),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
             // Como en el entreno: ajustada al gimnasio y al tope semanal (con su aviso)
             nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id), repRange = settings.repRangeFor(ex.id))

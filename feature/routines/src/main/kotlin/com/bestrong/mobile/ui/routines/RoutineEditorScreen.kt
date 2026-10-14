@@ -342,7 +342,8 @@ private val ROUTINE_TEMPOS = listOf("2-0-1-0", "3-0-1-0", "3-1-1-0", "4-0-1-0")
 private fun RoutineTempoRow(vm: RoutineEditorViewModel, routine: com.bestrong.core.model.Routine) {
     val eligible = routine.exercises.filter { it.exercise.tracking != TrackingType.CARDIO }
     if (eligible.size < 2) return
-    val distinct = eligible.map { it.tempo }.distinct()
+    // Comparando normalizados («3/1/1/0» es el chip 3-1-1-0)
+    val distinct = eligible.map { re -> re.tempo?.let { Tempo.parse(it)?.toString() } }.distinct()
     val common = distinct.singleOrNull().takeIf { distinct.size == 1 }
     Text(stringResource(R.string.tempo_all), style = MaterialTheme.typography.labelLarge)
     androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

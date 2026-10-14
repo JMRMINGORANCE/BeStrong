@@ -185,7 +185,12 @@ class ActiveWorkoutViewModel @Inject constructor(
     val recentOneRepMax: StateFlow<Map<String, Double>> = combine(
         workout.map { w -> w?.exercises?.map { it.exercise.id }.orEmpty().distinct() }.distinctUntilChanged(),
         repo.history,
-    ) { ids, history ->
+        repo.partnerHistory,
+        partnerMode,
+        settings,
+    ) { ids, me, partner, isPartner, s ->
+        // En modo pareja, con el historial de la pareja (como las marcas)
+        val history = if (isPartner) partner.filter { it.athlete == s.partnerName } else me
         val now = System.currentTimeMillis()
         ids.mapNotNull { id -> com.bestrong.core.stats.RpeLoad.recentOneRepMax(id, history, now)?.let { id to it } }.toMap()
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
@@ -262,7 +267,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         /** La serie recién hecha alcanza el objetivo de 1RM que el usuario se puso en ese ejercicio. */
         data class GoalReached(val exercise: Exercise, val goal: String) : WorkoutEvent
     }
-    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, TRIM }
+    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, TRIM, RPE_LOAD }
 
     private val _events = MutableSharedFlow<WorkoutEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<WorkoutEvent> = _events
@@ -467,9 +472,45 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
 
-    /** Pone [kg] en las series normales pendientes del ejercicio (el peso orientativo del RPE objetivo). */
-    fun applyWeightToPending(weId: String, kg: Double) = edit { w ->
-        WorkoutEditor.updateExercise(w, weId) { e -> e.copy(sets = e.sets.map { if (!it.completed && it.type == SetType.NORMAL) it.copy(weightKg = kg) else it }) }
+    /**
+     * Pone en cada serie normal pendiente el peso para sus reps al RPE objetivo (una pirámide 12/10/8 lleva tres
+     * pesos), redondeado al material y con el tope semanal, como el relleno. Se puede deshacer.
+     */
+    fun applyRpeLoads(weId: String) {
+        val partner = partnerMode.value
+        val s = settings.value
+        val e1rms = recentOneRepMax.value
+        val history = if (partner) repo.partnerHistory.value.filter { it.athlete == s.partnerName } else repo.history.value
+        viewModelScope.launch {
+            val (before, after) = update(partner) { w ->
+                WorkoutEditor.updateExercise(w, weId) { e -> withRpeLoads(e, e1rms[e.exercise.id], s, history) }
+            } ?: return@launch
+            val old = before.exercises.firstOrNull { it.id == weId }?.sets?.associateBy { it.id } ?: return@launch
+            val changed = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
+            if (changed.isEmpty()) return@launch
+            _events.tryEmit(
+                WorkoutEvent.Undoable(UndoKind.RPE_LOAD, partner, before.id) { w ->
+                    WorkoutEditor.updateExercise(w, weId) { we -> we.copy(sets = we.sets.map { set -> if (changed[set.id] == set) old.getValue(set.id) else set }) }
+                },
+            )
+        }
+    }
+
+    private fun withRpeLoads(
+        e: com.bestrong.core.model.WorkoutExercise,
+        e1rm: Double?,
+        s: com.bestrong.mobile.data.UserSettings,
+        history: List<Workout>,
+    ): com.bestrong.core.model.WorkoutExercise {
+        val rpe = e.targetRpe
+        if (rpe == null || e1rm == null) return e
+        val pending = e.sets.filter { !it.completed && it.type == SetType.NORMAL && it.reps > 0 }
+        val raw = pending.map { set ->
+            val kg = com.bestrong.core.stats.RpeLoad.weightFor(e1rm, set.reps, rpe)
+            set.copy(weightKg = com.bestrong.core.stats.RpeLoad.roundToLoadable(kg, s.unit, s.stepKgFor(e.exercise.id), s.gymFor(e.exercise.id), e.exercise.equipment))
+        }
+        val loaded = actions.loadable(e.exercise, raw, null, history = history).associateBy { it.id }
+        return e.copy(sets = e.sets.map { loaded[it.id] ?: it })
     }
 
     /** Añade series de aproximación antes de la primera serie de trabajo. */

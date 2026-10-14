@@ -1101,4 +1101,5 @@
     <string name="rpe_table_hint">Aus deinem aktuellen geschätzten 1RM (%1$s): das Gewicht je Wiederholungszahl, je nachdem, wie viele Wdh. du in Reserve lässt.</string>
     <string name="prog_capped_suffix">" · durch das Wochenlimit begrenzt"</string>
     <string name="tempo_all">Tempo für die ganze Routine</string>
+    <string name="undo_rpe_loads">RPE-Lasten übernommen</string>
 </resources>

@@ -1101,4 +1101,5 @@
     <string name="rpe_table_hint">D’après ton 1RM estimé récent (%1$s) : la charge pour chaque nombre de reps selon les reps en réserve.</string>
     <string name="prog_capped_suffix">" · limité par le plafond hebdomadaire"</string>
     <string name="tempo_all">Tempo pour toute la routine</string>
+    <string name="undo_rpe_loads">Charges par RPE appliquées</string>
 </resources>

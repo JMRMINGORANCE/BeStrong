@@ -186,6 +186,7 @@ fun ActiveWorkoutScreen(
     val undoCopy = stringResource(R.string.undo_copied_sets)
     val undoComplete = stringResource(R.string.undo_completed_sets)
     val undoTrim = stringResource(R.string.undo_trimmed_sets)
+    val undoRpeLoad = stringResource(R.string.undo_rpe_loads)
     val goalMsg = stringResource(R.string.goal_reached_live)
     val undoLabel = stringResource(R.string.action_undo)
     val applyLabel = stringResource(R.string.action_apply)
@@ -209,6 +210,7 @@ fun ActiveWorkoutScreen(
                         ActiveWorkoutViewModel.UndoKind.COPY -> undoCopy
                         ActiveWorkoutViewModel.UndoKind.COMPLETE -> undoComplete
                         ActiveWorkoutViewModel.UndoKind.TRIM -> undoTrim
+                        ActiveWorkoutViewModel.UndoKind.RPE_LOAD -> undoRpeLoad
                     }
                     if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) {
                         vm.undo(e)
@@ -916,7 +918,7 @@ private fun ExerciseCard(
     }
 }
 
-/** «🎯 RPE objetivo 8 en las series efectivas · ≈ 72,5 kg para 8 reps» (el peso, con historial; tocarlo lo aplica). */
+/** «🎯 RPE objetivo 8 en las series efectivas · ≈ 72,5 kg para 8 reps» (el peso, con historial; tocarlo lo aplica a las series pendientes, cada una con sus reps). */
 @Composable
 private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.model.WorkoutExercise) {
     val rpe = we.targetRpe?.takeIf { we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS } ?: return
@@ -925,6 +927,8 @@ private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.mode
     val settings by vm.settings.collectAsStateWithLifecycle()
     val e1rm = e1rms[we.exercise.id]
     val load = remember(we.sets, rpe, e1rm, settings) { vm.targetRpeLoad(we, e1rm, settings) }
+    // Solo se puede aplicar si queda alguna serie normal por hacer
+    val pending = we.sets.any { !it.completed && it.type == SetType.NORMAL }
     // Con «suma de las dos mancuernas», igual que en las filas
     val factor = if (we.exercise.equipment == Equipment.DUMBBELL && settings.dumbbellTotal) 2 else 1
     val hint = load?.let { (kg, reps) -> " · " + stringResource(R.string.target_rpe_hint, unit.format(kg * factor, withUnit = true), reps) }.orEmpty()
@@ -935,7 +939,7 @@ private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.mode
         color = MaterialTheme.colorScheme.secondary,
         // Tocar pone ese peso en las series pendientes
         modifier = Modifier.padding(horizontal = 12.dp)
-            .then(if (load != null) Modifier.clickable(onClickLabel = stringResource(R.string.plates_use_weight)) { vm.applyWeightToPending(we.id, load.first) } else Modifier),
+            .then(if (load != null && pending) Modifier.clickable(onClickLabel = stringResource(R.string.plates_use_weight)) { vm.applyRpeLoads(we.id) } else Modifier),
     )
 }
 

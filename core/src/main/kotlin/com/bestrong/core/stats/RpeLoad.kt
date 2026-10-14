@@ -13,11 +13,14 @@ object RpeLoad {
     private const val RECENT_WEEKS = 8L
     private const val WEEK_MS = 7 * 86_400_000L
 
-    /** RPE por debajo del cual no se usa para el 1RM: con tantas reps en recámara la estimación no es fiable. */
-    private const val MIN_RELIABLE_RPE = 6.0
+    /**
+     * RPE por debajo del cual no se usa para el 1RM: con tantas reps en recámara la estimación no es fiable (y el
+     * reloj, al estimarlo por la velocidad, pone 6 a todo lo que deja 4 o más).
+     */
+    private const val MIN_RELIABLE_RPE = 7.0
 
     /**
-     * 1RM estimado de una serie contando las reps en recámara si se anotó el RPE (5 × 100 kg a RPE 8 equivale
+     * 1RM estimado de una serie contando las reps en recámara si se anotó un RPE de 7 a 10 (5 × 100 kg a RPE 8 equivale
      * a 7 al fallo); sin RPE, el de siempre. Las series que no cuentan para récords dan 0.
      */
     fun oneRepMaxOf(set: com.bestrong.core.model.WorkoutSet): Double {

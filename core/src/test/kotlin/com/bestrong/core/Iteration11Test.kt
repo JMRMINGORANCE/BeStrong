@@ -609,4 +609,19 @@ class CollarTest {
         assertEquals(100.0 * (1 + 5 / 30.0), com.bestrong.core.stats.RpeLoad.oneRepMaxOf(WorkoutSet(weightKg = 100.0, reps = 5, completed = true)), 1e-9)
         assertEquals(100.0 * (1 + 5 / 30.0), com.bestrong.core.stats.RpeLoad.oneRepMaxOf(WorkoutSet(weightKg = 100.0, reps = 5, completed = true, rpe = 4.0)), 1e-9)
     }
+
+    @Test
+    fun explosiveTempoKeepsX() {
+        assertEquals("3-1-X-0", com.bestrong.core.training.Tempo.parse("3/1/x")?.toString())
+    }
+
+    @Test
+    fun failureSetLowRpeStillRaises() {
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val f = WorkoutSet(id = "f", weightKg = 80.0, reps = 8, completed = true, type = SetType.FAILURE, rpe = 8.0)
+        val we = WorkoutExercise(exercise = ex, sets = listOf(f, WorkoutSet(id = "p", weightKg = 80.0, reps = 8, type = SetType.FAILURE)))
+        // Al fallo con RPE 8: quedaba mucho, se propone subir; con RPE 10 no se toca
+        assertEquals(1, com.bestrong.core.training.Autoregulation.suggest(we, "f", 2.5)?.direction)
+        assertEquals(null, com.bestrong.core.training.Autoregulation.suggest(we.copy(sets = listOf(f.copy(rpe = 10.0), we.sets[1])), "f", 2.5))
+    }
 }

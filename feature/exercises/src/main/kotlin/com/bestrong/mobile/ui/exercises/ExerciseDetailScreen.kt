@@ -204,7 +204,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     }
                 }
             }
-            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RpeLoadCard(vm, s.exercise, s.progress) }
+            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RpeLoadCard(vm, s.exercise, s.recentOneRepMax) }
             if (s.strengthCurve.size >= 2) {
                 item {
                     Card(Modifier.fillMaxWidth()) {
@@ -305,21 +305,19 @@ private fun RepRangeCard(vm: ExercisesViewModel, exerciseId: String) {
 /** Reps y RPE de la tabla de cargas: fuerza, hipertrofia y resistencia, de 7 (3 en recámara) al fallo. */
 private val RPE_TABLE_REPS = listOf(3, 5, 8, 10, 12)
 private val RPE_TABLE_RPES = listOf(7.0, 8.0, 9.0, 10.0)
-private const val RPE_TABLE_RECENT_MS = 8 * 7 * 86_400_000L
 
 /**
- * «Cargas por RPE»: qué peso usar para N reps a un RPE, con el 1RM estimado de las últimas 8 semanas (o el
- * mejor, si no hay recientes). Redondeado al material del gimnasio o al incremento del ejercicio.
+ * «Cargas por RPE»: qué peso usar para N reps a un RPE, con el 1RM estimado reciente (el mismo del entreno,
+ * con las reps en recámara del RPE). Redondeado al material del gimnasio o al incremento del ejercicio.
  */
 @Composable
-private fun RpeLoadCard(vm: ExercisesViewModel, exercise: com.bestrong.core.model.Exercise, progress: List<com.bestrong.core.stats.ExerciseProgressPoint>) {
+private fun RpeLoadCard(vm: ExercisesViewModel, exercise: com.bestrong.core.model.Exercise, oneRepMaxKg: Double?) {
+    val e1rm = oneRepMaxKg ?: return
     val unit = LocalWeightUnit.current
-    val now = remember { System.currentTimeMillis() }
-    val e1rm = (progress.filter { it.dateEpochMs >= now - RPE_TABLE_RECENT_MS }.takeIf { it.isNotEmpty() } ?: progress)
-        .maxOfOrNull { it.bestOneRepMax }?.takeIf { it > 0 } ?: return
+    val settings by vm.settings.collectAsStateWithLifecycle()
     // Mancuernas como en las filas («suma de las dos» si está activado)
-    val factor = vm.weightFactor(exercise)
-    fun load(reps: Int, rpe: Double): String = unit.format(vm.roundLoad(exercise, com.bestrong.core.stats.RpeLoad.weightFor(e1rm, reps, rpe)) * factor)
+    val factor = if (settings.dumbbellTotal && exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
+    fun load(reps: Int, rpe: Double): String = unit.format(vm.roundLoad(exercise, com.bestrong.core.stats.RpeLoad.weightFor(e1rm, reps, rpe), settings) * factor)
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.rpe_table_title))
