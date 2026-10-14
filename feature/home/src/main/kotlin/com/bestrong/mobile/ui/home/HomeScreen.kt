@@ -230,6 +230,7 @@ fun HomeScreen(
             }
             // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
             item { MissedSessionCard(vm, onOpenWorkout) }
+            item { YearAgoCard(vm) }
             item { StaleRoutineCard(vm) }
             item { LaggingMusclesCard(vm, onOpenMuscle) }
             item { ReadinessCard(vm) }

@@ -96,6 +96,8 @@ data class WorkoutExercise(
     val supersetId: String? = null,
     /** Tempo de la repetición, p. ej. "3-1-1-0" (bajada-pausa-subida-pausa, en segundos). Ver [com.bestrong.core.training.Tempo]. */
     val tempo: String? = null,
+    /** RPE objetivo que trae la rutina (null = sin objetivo). */
+    val targetRpe: Double? = null,
 ) {
     val completedSets: List<WorkoutSet> get() = sets.filter { it.completed }
 

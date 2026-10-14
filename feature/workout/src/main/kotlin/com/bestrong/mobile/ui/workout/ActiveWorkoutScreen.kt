@@ -701,6 +701,14 @@ private fun ExerciseCard(
                 }
             }
             MissingEquipmentLine(vm, we) { substituting = true }
+            we.targetRpe?.let { rpe ->
+                Text(
+                    stringResource(R.string.target_rpe_line, rpe.toString().removeSuffix(".0").replace('.', ',')),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                )
+            }
             RepRangeLine(vm, we)
             // Nota fija del ejercicio (se guarda para siempre, no solo en este entreno)
             if (pinnedNote.isNotBlank()) {

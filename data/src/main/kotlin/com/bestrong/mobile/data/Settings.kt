@@ -76,6 +76,8 @@ data class UserSettings(
     val bodyWeightGoalStartKg: Double? = null,
     /** Fecha para la que se quiere llegar al peso objetivo (opcional). */
     val bodyWeightGoalDateMs: Long? = null,
+    /** Cintura objetivo (cm); null = sin objetivo. */
+    val waistGoalCm: Double? = null,
     /** Series semanales por músculo que se quiere alcanzar como mínimo (mapa, Inicio, widget). */
     val weeklySetsTarget: Int = 10,
     /** Día de la semana (1 = lunes … 7) para recordar pesarse; null = sin recordatorio. A las [WEIGH_IN_HOUR]. */
@@ -167,6 +169,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         bodyWeightGoalKg = prefs.getString("body_weight_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         bodyWeightGoalStartKg = prefs.getString("body_weight_goal_start", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         bodyWeightGoalDateMs = prefs.getString("body_weight_goal_date", null)?.toLongOrNull(),
+        waistGoalCm = prefs.getString("waist_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         weeklySetsTarget = prefs.getInt("weekly_sets_target", 10).coerceIn(1, 30),
         weighInDay = prefs.getInt("weigh_in_day", 0).takeIf { it in 1..7 },
         measureReminder = prefs.getBoolean("measure_reminder", false),
@@ -227,6 +230,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("body_weight_goal", s.bodyWeightGoalKg?.toString())
             putString("body_weight_goal_start", s.bodyWeightGoalStartKg?.toString())
             putString("body_weight_goal_date", s.bodyWeightGoalDateMs?.toString())
+            putString("waist_goal", s.waistGoalCm?.toString())
             putInt("weekly_sets_target", s.weeklySetsTarget)
             putInt("weigh_in_day", s.weighInDay ?: 0)
             putBoolean("measure_reminder", s.measureReminder)
@@ -293,7 +297,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())
     }

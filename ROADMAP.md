@@ -269,3 +269,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Aviso en el entreno si el gimnasio activo no tiene el material (con «Sustituir»)
 - [x] Sesión planificada saltada: hacerla hoy, pasarla a mañana o dejarla
 - [x] Recordatorio mensual de medidas con cinta
+
+## Fase 28 — Memoria y precisión ✅
+- [x] «Hace un año»: tus pesos de entonces comparados con los de ahora (Inicio)
+- [x] Peso de los cierres en el perfil del gimnasio (discos, calentamiento y sugerencias)
+- [x] RPE objetivo por ejercicio en la rutina (móvil y reloj)
+- [x] Cintura objetivo con lo que falta
+- [x] El reloj redondea la sugerencia a los discos y mancuernas del gimnasio activo

@@ -424,6 +424,7 @@ private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement
                 return@Column
             }
             waist?.let { com.bestrong.core.stats.BodyComposition.waistToHeight(it, height) }?.let { WaistToHeightLine(it) }
+            waist?.let { WaistGoalLine(vm, it, settings.waistGoalCm) }
             if (weight != null && fat != null) {
                 com.bestrong.core.stats.BodyComposition.ffmi(weight, fat, height)?.let { f ->
                     Text(stringResource(R.string.body_comp_ffmi, "%.1f".format(f)))
@@ -446,6 +447,55 @@ private fun WaistToHeightLine(ratio: Double) {
     )
     Text(stringResource(R.string.body_comp_whtr, "%.2f".format(ratio), label))
 }
+
+/** «Cintura objetivo: 80 cm · faltan 4 cm» y el botón para fijarla o cambiarla. */
+@Composable
+private fun WaistGoalLine(vm: ProfileViewModel, waistCm: Double, goalCm: Double?) {
+    var editing by remember { mutableStateOf(false) }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        val text = when {
+            goalCm == null -> stringResource(R.string.waist_goal_none)
+            waistCm <= goalCm + WAIST_GOAL_TOLERANCE_CM -> stringResource(R.string.waist_goal_reached, formatWeight(goalCm))
+            else -> stringResource(R.string.waist_goal_left, formatWeight(goalCm), formatWeight(waistCm - goalCm))
+        }
+        Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+        TextButton(onClick = { editing = true }) { Text(stringResource(R.string.goal_set)) }
+    }
+    if (editing) {
+        var input by remember { mutableStateOf(goalCm?.let(::formatWeight) ?: "") }
+        val parsed = input.replace(',', '.').toDoubleOrNull()?.takeIf { it in MIN_WAIST_GOAL_CM..MAX_WAIST_GOAL_CM }
+        AlertDialog(
+            onDismissRequest = { editing = false },
+            title = { Text(stringResource(R.string.waist_goal_title)) },
+            text = {
+                OutlinedTextField(
+                    value = input,
+                    onValueChange = { input = it },
+                    label = { Text(stringResource(R.string.f_waist)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                )
+            },
+            confirmButton = {
+                TextButton(enabled = parsed != null, onClick = {
+                    vm.updateSettings { it.copy(waistGoalCm = parsed) }
+                    editing = false
+                }) { Text(stringResource(R.string.action_save)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    vm.updateSettings { it.copy(waistGoalCm = null) }
+                    editing = false
+                }) { Text(stringResource(R.string.goal_remove)) }
+            },
+        )
+    }
+}
+
+/** Margen (cm) para dar la cintura objetivo por conseguida: la cinta no da más precisión. */
+private const val WAIST_GOAL_TOLERANCE_CM = 0.5
+private const val MIN_WAIST_GOAL_CM = 40.0
+private const val MAX_WAIST_GOAL_CM = 200.0
 
 /** Plazos que se pueden elegir para el peso objetivo (semanas). */
 private val GOAL_WEEKS = listOf(4, 8, 12, 16, 24)

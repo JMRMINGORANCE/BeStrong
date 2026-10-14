@@ -158,8 +158,31 @@ data class SharedSettings(
     /** Barra del gimnasio activo y las propias de cada ejercicio (kg), para el calentamiento del reloj. */
     val gymBarKg: Double = 20.0,
     val exerciseBarKg: Map<String, Double> = emptyMap(),
+    /** Gimnasio activo (discos, mancuernas, cierres): el reloj redondea la sugerencia a lo que se puede montar. */
+    val activeGym: com.bestrong.core.training.GymProfile? = null,
 ) {
-    fun barKgFor(exerciseId: String): Double = exerciseBarKg[exerciseId] ?: gymBarKg
+    /** El gimnasio activo con la barra propia del ejercicio, si la tiene (como en el móvil). */
+    fun gymFor(exerciseId: String): com.bestrong.core.training.GymProfile? =
+        activeGym?.let { g -> exerciseBarKg[exerciseId]?.let { g.copy(barKg = it) } ?: g }
+
+    fun barKgFor(exerciseId: String): Double = gymFor(exerciseId)?.loadedBarKg ?: exerciseBarKg[exerciseId] ?: gymBarKg
+
+    /**
+     * Series sugeridas ajustadas al material del gimnasio activo (solo en kg, como en el móvil): si tocaba
+     * subir y el redondeo deja el peso de la última vez, el siguiente que se pueda montar.
+     */
+    fun loadable(exercise: com.bestrong.core.model.Exercise, suggestion: com.bestrong.core.training.ProgressionSuggestion, previous: List<com.bestrong.core.model.WorkoutSet>): List<com.bestrong.core.model.WorkoutSet> {
+        val gym = gymFor(exercise.id)?.takeIf { unit == WeightUnit.KG } ?: return suggestion.sets
+        val raise = suggestion.kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
+        val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
+        return suggestion.sets.mapIndexed { i, set ->
+            val rounded = if (set.weightKg > 0) gym.nearestLoad(set.weightKg, exercise.equipment) else set.weightKg
+            val prev = before.getOrNull(i)?.weightKg
+            val lost = raise && prev != null && prev > 0 && rounded <= prev + 1e-6
+            set.copy(weightKg = if (lost) gym.loadAbove(prev!!, exercise.equipment) else rounded)
+        }
+    }
+
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
     fun repRangeFor(exerciseId: String): IntRange? = com.bestrong.core.training.Progression.parseRepRange(exerciseRepRange[exerciseId])
 }

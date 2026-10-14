@@ -74,6 +74,7 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
     var name by remember { mutableStateOf(gym.name) }
     var equipment by remember { mutableStateOf(gym.equipment) }
     var bar by remember { mutableStateOf(unit.format(gym.barKg)) }
+    var collars by remember { mutableStateOf(unit.format(gym.collarKg)) }
     var plates by remember { mutableStateOf(gym.platesKg.toSet()) }
     var anyDumbbell by remember { mutableStateOf(gym.dumbbellsKg.isEmpty()) }
     var dbFrom by remember { mutableStateOf(unit.format(gym.dumbbellsKg.minOrNull() ?: 2.0)) }
@@ -94,6 +95,13 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                 OutlinedTextField(
                     bar, { bar = it },
                     label = { Text(stringResource(R.string.gym_bar, unit.label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    collars, { collars = it },
+                    label = { Text(stringResource(R.string.gym_collars, unit.label)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
@@ -133,6 +141,7 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                         name = name.ifBlank { gym.name },
                         equipment = equipment,
                         barKg = unit.parseToKg(bar) ?: gym.barKg,
+                        collarKg = unit.parseToKg(collars)?.coerceIn(0.0, MAX_COLLARS_KG) ?: gym.collarKg,
                         platesKg = plates.sortedDescending().ifEmpty { gym.platesKg },
                         dumbbellsKg = dumbbells,
                     ),
@@ -147,3 +156,6 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
         },
     )
 }
+
+/** Límite razonable para los dos cierres (evita un «50» tecleado por error). */
+private const val MAX_COLLARS_KG = 10.0

@@ -1084,4 +1084,13 @@
     <string name="measure_reminder">Remind me to measure on the 1st of each month</string>
     <string name="rep_range_all_hint">Applies to these exercises in all your routines.</string>
     <string name="enter_weight_first">Enter the set\'s weight first</string>
+    <string name="year_ago_title">📅 A year ago</string>
+    <string name="year_ago_line">%1$s: %2$s → %3$s (%4$s%%)</string>
+    <string name="gym_collars">Collars, both (%1$s)</string>
+    <string name="target_rpe">Target RPE:</string>
+    <string name="target_rpe_line">🎯 Target RPE %1$s on working sets</string>
+    <string name="waist_goal_title">Waist goal (cm)</string>
+    <string name="waist_goal_none">No waist goal</string>
+    <string name="waist_goal_reached">Waist goal (%1$s cm) reached 🎉</string>
+    <string name="waist_goal_left">Waist goal: %1$s cm · %2$s cm to go</string>
 </resources>

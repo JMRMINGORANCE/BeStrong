@@ -243,6 +243,37 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     }
 }
 
+/** «Hace un año: Press banca 70×8 → 85×8 (+21 %)»; se puede descartar (vuelve con otra fecha). */
+@Composable
+fun YearAgoCard(vm: HomeViewModel) {
+    val items by vm.yearAgo.collectAsStateWithLifecycle()
+    val tips = com.bestrong.mobile.ui.help.LocalTips.current
+    val unit = com.bestrong.mobile.ui.components.LocalWeightUnit.current
+    val tipId = "year_ago:" + java.time.LocalDate.now()
+    if (items.isEmpty() || tipId in tips.dismissed) return
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.year_ago_title), fontWeight = FontWeight.Bold)
+            items.forEach { c ->
+                val pct = (c.change * 100).toInt()
+                Text(
+                    stringResource(
+                        R.string.year_ago_line,
+                        c.exercise.displayName(),
+                        unit.format(c.thenWeightKg) + "×" + c.thenReps,
+                        unit.format(c.nowWeightKg) + "×" + c.nowReps + " " + unit.label,
+                        (if (pct >= 0) "+" else "") + pct,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                androidx.compose.material3.TextButton(onClick = { tips.onDismiss(tipId) }) { Text(stringResource(R.string.got_it)) }
+            }
+        }
+    }
+}
+
 /** «Te saltaste «Push» del martes»: hacerla hoy, pasarla a mañana o dejarlo estar. */
 @Composable
 fun MissedSessionCard(vm: HomeViewModel, onOpenWorkout: () -> Unit) {

@@ -1084,4 +1084,13 @@
     <string name="measure_reminder">Lembrarme de medirme o día 1 de cada mes</string>
     <string name="rep_range_all_hint">Aplícase a estes exercicios en todas as túas rutinas.</string>
     <string name="enter_weight_first">Pon primeiro o peso da serie</string>
+    <string name="year_ago_title">📅 Hai un ano</string>
+    <string name="year_ago_line">%1$s: %2$s → %3$s (%4$s %%)</string>
+    <string name="gym_collars">Peches, os dous (%1$s)</string>
+    <string name="target_rpe">RPE obxectivo:</string>
+    <string name="target_rpe_line">🎯 RPE obxectivo %1$s nas series efectivas</string>
+    <string name="waist_goal_title">Cintura obxectivo (cm)</string>
+    <string name="waist_goal_none">Sen cintura obxectivo</string>
+    <string name="waist_goal_reached">Cintura obxectivo (%1$s cm) acadada 🎉</string>
+    <string name="waist_goal_left">Cintura obxectivo: %1$s cm · faltan %2$s cm</string>
 </resources>

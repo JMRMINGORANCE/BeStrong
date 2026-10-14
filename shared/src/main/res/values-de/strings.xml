@@ -1084,4 +1084,13 @@
     <string name="measure_reminder">Am 1. jedes Monats ans Messen erinnern</string>
     <string name="rep_range_all_hint">Gilt für diese Übungen in all deinen Routinen.</string>
     <string name="enter_weight_first">Trag zuerst das Gewicht des Satzes ein</string>
+    <string name="year_ago_title">📅 Vor einem Jahr</string>
+    <string name="year_ago_line">%1$s: %2$s → %3$s (%4$s %%)</string>
+    <string name="gym_collars">Verschlüsse, beide (%1$s)</string>
+    <string name="target_rpe">Ziel-RPE:</string>
+    <string name="target_rpe_line">🎯 Ziel-RPE %1$s in den Arbeitssätzen</string>
+    <string name="waist_goal_title">Taillenziel (cm)</string>
+    <string name="waist_goal_none">Kein Taillenziel</string>
+    <string name="waist_goal_reached">Taillenziel (%1$s cm) erreicht 🎉</string>
+    <string name="waist_goal_left">Taillenziel: %1$s cm · noch %2$s cm</string>
 </resources>

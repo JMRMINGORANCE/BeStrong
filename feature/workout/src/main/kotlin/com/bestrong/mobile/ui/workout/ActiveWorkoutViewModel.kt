@@ -448,7 +448,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun addWarmup(weId: String) = edit { w ->
         // Con la barra del ejercicio (EZ, hexagonal…) si tiene una propia
         val exerciseId = w.exercises.firstOrNull { it.id == weId }?.exercise?.id.orEmpty()
-        val bar = com.bestrong.core.training.GymProfile.barIn(settings.value.unit, settings.value.gymFor(exerciseId).barKg)
+        val gym = settings.value.gymFor(exerciseId)
+        val bar = com.bestrong.core.training.GymProfile.barIn(settings.value.unit, gym.barKg) + settings.value.unit.fromKg(gym.collarKg)
         WorkoutEditor.addWarmup(w, weId, settings.value.unit, settings.value.unit.toKg(bar))
     }
 

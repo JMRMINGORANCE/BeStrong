@@ -20,6 +20,8 @@ data class RoutineExercise(
     val notes: String = "",
     val supersetId: String? = null,
     val tempo: String? = null,
+    /** Esfuerzo objetivo de las series efectivas (RPE 6–10); null = sin objetivo. */
+    val targetRpe: Double? = null,
 )
 
 @Serializable
@@ -60,6 +62,7 @@ data class Routine(
                 notes = re.notes,
                 supersetId = re.supersetId,
                 tempo = re.tempo,
+                targetRpe = re.targetRpe,
                 sets = re.sets.mapIndexed { i, rs ->
                     // Calentamientos con calentamientos y efectivas (normal, drop, fallo…) con efectivas
                     val warm = rs.type == SetType.WARMUP
@@ -115,6 +118,7 @@ data class Routine(
                 notes = we.notes,
                 supersetId = we.supersetId,
                 tempo = we.tempo,
+                targetRpe = we.targetRpe,
                 sets = we.sets.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) },
             )
         }

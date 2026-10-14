@@ -171,7 +171,7 @@ class WorkoutSession @Inject constructor(
         val s = store.settings.value
         if (s.progressionEnabled) {
             val ex = exerciseFor(exerciseId)
-            if (ex != null) Progression.suggest(ex, store.history.value, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { return it.sets }
+            if (ex != null) Progression.suggest(ex, store.history.value, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { return s.loadable(ex, it, previous(exerciseId)) }
         }
         return previous(exerciseId)
     }

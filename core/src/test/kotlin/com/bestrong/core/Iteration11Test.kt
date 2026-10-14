@@ -480,3 +480,40 @@ class MissedLaterTest {
         assertEquals(emptyList<Any>(), out)
     }
 }
+
+class YearAgoTest {
+    @Test fun comparesSameExerciseAYearApart() {
+        val today = java.time.LocalDate.of(2026, 3, 10)
+        val history = listOf(
+            finishedWorkout("old", today.minusYears(1).plusDays(2), bench to listOf(done(70.0, 8))),
+            finishedWorkout("new", today.minusDays(3), bench to listOf(done(85.0, 8))),
+        )
+        val c = com.bestrong.core.stats.YearAgo.compare(history, today, UTC).single()
+        assertEquals(70.0, c.thenWeightKg, 0.0)
+        assertEquals(85.0, c.nowWeightKg, 0.0)
+        assertEquals(true, c.change > 0.2)
+    }
+}
+
+class CollarTest {
+    @Test fun collarsCountInLoads() {
+        val gym = com.bestrong.core.training.GymProfile.gym().copy(collarKg = 5.0)
+        assertEquals(25.0, gym.nearestBarbell(20.0), 0.0)
+        assertEquals(65.0, gym.nearestBarbell(65.0), 0.0)
+        val load = gym.plateLoad(65.0, com.bestrong.core.util.WeightUnit.KG)
+        assertEquals(listOf(20.0), load.perSide)
+    }
+
+    @Test
+    fun watchRoundsSuggestionToActiveGym() {
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST, equipment = com.bestrong.core.model.Equipment.BARBELL)
+        val gym = com.bestrong.core.training.GymProfile(name = "G", platesKg = listOf(20.0, 10.0, 5.0, 2.5))
+        val s = com.bestrong.core.sync.SharedSettings(activeGym = gym)
+        val prev = listOf(com.bestrong.core.model.WorkoutSet(weightKg = 60.0, reps = 5, completed = true))
+        val up = com.bestrong.core.training.ProgressionSuggestion(com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT, listOf(com.bestrong.core.model.WorkoutSet(weightKg = 61.25, reps = 5)), "")
+        // 61,25 se redondea a 60 (discos de 2,5): la subida no se pierde, pasa a 65
+        assertEquals(65.0, s.loadable(ex, up, prev).single().weightKg, 1e-9)
+        // Sin gimnasio sincronizado se deja la sugerencia tal cual
+        assertEquals(61.25, com.bestrong.core.sync.SharedSettings().loadable(ex, up, prev).single().weightKg, 1e-9)
+    }
+}

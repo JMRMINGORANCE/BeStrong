@@ -1084,4 +1084,13 @@
     <string name="measure_reminder">Me rappeler de me mesurer le 1er de chaque mois</string>
     <string name="rep_range_all_hint">S\'applique à ces exercices dans toutes tes routines.</string>
     <string name="enter_weight_first">Indique d\'abord le poids de la série</string>
+    <string name="year_ago_title">📅 Il y a un an</string>
+    <string name="year_ago_line">%1$s : %2$s → %3$s (%4$s %%)</string>
+    <string name="gym_collars">Colliers, les deux (%1$s)</string>
+    <string name="target_rpe">RPE visé :</string>
+    <string name="target_rpe_line">🎯 RPE visé %1$s sur les séries de travail</string>
+    <string name="waist_goal_title">Tour de taille visé (cm)</string>
+    <string name="waist_goal_none">Pas d’objectif de tour de taille</string>
+    <string name="waist_goal_reached">Objectif de tour de taille (%1$s cm) atteint 🎉</string>
+    <string name="waist_goal_left">Tour de taille visé : %1$s cm · encore %2$s cm</string>
 </resources>

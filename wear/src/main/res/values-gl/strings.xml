@@ -162,4 +162,5 @@
     <string name="rep_range_short">Rango %1$d–%2$d</string>
     <string name="cannot_go_lighter">Con este peso non se pode baixar máis</string>
     <string name="enter_weight_first">Pon primeiro o peso da serie</string>
+    <string name="target_rpe_short">🎯 RPE %1$s</string>
 </resources>

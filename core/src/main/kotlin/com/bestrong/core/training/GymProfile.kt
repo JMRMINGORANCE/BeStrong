@@ -20,14 +20,19 @@ data class GymProfile(
     val platesKg: List<Double> = listOf(25.0, 20.0, 15.0, 10.0, 5.0, 2.5, 1.25),
     /** Mancuernas disponibles (kg); vacío = cualquier peso. */
     val dumbbellsKg: List<Double> = emptyList(),
+    /** Peso de los dos cierres juntos (p. ej. 5 kg los de competición); 0 = sin cierres o no cuentan. */
+    val collarKg: Double = 0.0,
 ) {
+    /** Barra con sus cierres: lo mínimo que se levanta y la base sobre la que se ponen discos. */
+    val loadedBarKg: Double get() = barKg + collarKg
+
     /**
      * Discos por lado para [targetKg] con la barra y los discos de este gimnasio, en [unit]
      * (en libras se usan los discos estándar, porque los del perfil están en kg).
      */
     fun plateLoad(targetKg: Double, unit: WeightUnit): PlateLoad {
         val plates = platesKg.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
-        val bar = barIn(unit, barKg)
+        val bar = barIn(unit, barKg) + unit.fromKg(collarKg)
         return PlateCalculator.calculate(unit.fromKg(targetKg), unit, bar, plates)
     }
 
@@ -53,8 +58,9 @@ data class GymProfile(
 
     /** Peso alcanzable con la barra y los discos (combinación voraz, por lado). */
     fun nearestBarbell(targetKg: Double): Double {
-        if (targetKg <= barKg) return barKg
-        var remaining = (targetKg - barKg) / 2
+        val base = loadedBarKg
+        if (targetKg <= base) return base
+        var remaining = (targetKg - base) / 2
         var side = 0.0
         platesKg.filter { it > 0 }.sortedDescending().forEach { p ->
             while (remaining + 1e-9 >= p) {
@@ -62,7 +68,7 @@ data class GymProfile(
                 remaining -= p
             }
         }
-        val below = barKg + side * 2
+        val below = base + side * 2
         // Si queda un hueco grande, probamos con el disco más pequeño de más
         val smallest = platesKg.filter { it > 0 }.minOrNull() ?: return below
         val above = below + smallest * 2

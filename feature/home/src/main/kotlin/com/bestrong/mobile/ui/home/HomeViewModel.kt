@@ -272,6 +272,12 @@ class HomeViewModel @Inject constructor(
         }.sortedByDescending { it.second }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** «Hace un año»: los ejercicios que hacías entonces y ahora, el que más ha mejorado primero (máx. 3). */
+    val yearAgo: StateFlow<List<com.bestrong.core.stats.YearAgoComparison>> = repo.history.map { history ->
+        val zone = ZoneId.systemDefault()
+        com.bestrong.core.stats.YearAgo.compare(history, LocalDate.now(zone), zone).take(3)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /** Sesión planificada saltada: el día, la rutina y si se puede pasar a mañana (de esta semana y libre). */
     data class MissedSession(val day: java.time.DayOfWeek, val routine: Routine, val canMoveToTomorrow: Boolean)
 
