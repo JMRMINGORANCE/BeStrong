@@ -32,12 +32,14 @@ object BodyWeightGoal {
     fun progress(points: List<Pair<Long, Double>>, goalKg: Double, startKg: Double? = null, nowEpochMs: Long = System.currentTimeMillis()): BodyWeightGoalProgress? {
         if (points.isEmpty()) return null
         val current = points.last().second
-        val losing = (startKg ?: current) > goalKg
+        val recent = points.filter { it.first >= nowEpochMs - TREND_WEEKS * 7 * 86_400_000L }
+        // Objetivos de antes de guardar el peso inicial: el primero de las últimas semanas (no el de ahora,
+        // que tras pasarse del objetivo invertiría la dirección)
+        val losing = (startKg ?: recent.firstOrNull()?.second ?: points.first().second) > goalKg
         val crossed = if (losing) current <= goalKg else current >= goalKg
         val reached = crossed || kotlin.math.abs(current - goalKg) <= TOLERANCE_KG
         // Para bajar se invierte el signo: la predicción busca una línea que sube
         val sign = if (losing) -1.0 else 1.0
-        val recent = points.filter { it.first >= nowEpochMs - TREND_WEEKS * 7 * 86_400_000L }
         val eta = if (reached) null else Strength.predictDate(recent.map { it.first to it.second * sign }, goalKg * sign, nowEpochMs)
         return BodyWeightGoalProgress(remainingKg = kotlin.math.abs(current - goalKg), reached = reached, etaEpochMs = eta)
     }

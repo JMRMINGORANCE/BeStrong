@@ -17,6 +17,9 @@ enum class SuggestionKind {
     /** Ejercicio sin peso: +1 repetición por serie. */
     ADD_ONE_REP,
 
+    /** Con rango de repeticiones: +1 rep por serie hasta [ProgressionSuggestion.targetReps] (el tope). */
+    RANGE_ADD_REP,
+
     /** Ejercicio por tiempo: +5 s por serie. */
     ADD_TIME,
 
@@ -61,15 +64,20 @@ object Progression {
         val loaded = exercise.tracking != TrackingType.DURATION && last.any { it.weightKg > 0.0 }
         val easy = last.all { (it.rpe ?: 8.0) <= 9.0 }
         return when {
-            loaded && isStalled(exercise.id, history, stallSessions) -> {
+            // Con rango, el 1RM estimado baja a propósito al subir peso y volver al mínimo: no es estancamiento
+            repRange == null && loaded && isStalled(exercise.id, history, stallSessions) -> {
                 val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
                 ProgressionSuggestion(SuggestionKind.DELOAD, sets, "Llevas $stallSessions sesiones sin progresar: descarga al 90 %", stallSessions = stallSessions)
             }
-            exercise.tracking == TrackingType.DURATION || (exercise.tracking == TrackingType.REPS_ONLY && last.all { it.weightKg == 0.0 }) -> unloaded(exercise.tracking, last)
+            isUnloaded(exercise.tracking, last) -> unloaded(exercise.tracking, last)
             repRange != null && loaded && exercise.tracking == TrackingType.WEIGHT_REPS -> byRange(last, repRange, incrementKg, easy)
             else -> fixedReps(last, incrementKg, easy)
         }
     }
+
+    /** Por tiempo, o de repeticiones sin lastre: progresa sin tocar el peso. */
+    private fun isUnloaded(tracking: TrackingType, last: List<WorkoutSet>) =
+        tracking == TrackingType.DURATION || (tracking == TrackingType.REPS_ONLY && last.all { it.weightKg == 0.0 })
 
     /** Sin peso: +5 s por serie si es por tiempo, +1 repetición si no. */
     private fun unloaded(tracking: TrackingType, last: List<WorkoutSet>): ProgressionSuggestion =
@@ -102,12 +110,17 @@ object Progression {
      */
     private fun byRange(last: List<WorkoutSet>, range: IntRange, incrementKg: Double, easy: Boolean): ProgressionSuggestion {
         val atTop = last.all { it.reps >= range.last }
-        return if (atTop && easy) {
-            val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = range.first, completed = false, rpe = null) }
-            ProgressionSuggestion(SuggestionKind.INCREASE_WEIGHT, sets, "Tope del rango en todas: sube el peso y vuelve a ${range.first}")
-        } else {
-            val sets = last.map { it.copy(reps = (it.reps + 1).coerceIn(range.first, range.last), completed = false, rpe = null) }
-            ProgressionSuggestion(SuggestionKind.ADD_REPS, sets, "Mismo peso: +1 rep por serie hasta ${range.last}", targetReps = range.last)
+        return when {
+            atTop && easy -> {
+                val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = range.first, completed = false, rpe = null) }
+                ProgressionSuggestion(SuggestionKind.INCREASE_WEIGHT, sets, "Tope del rango en todas: sube el peso y vuelve a ${range.first}")
+            }
+            // En el tope pero al límite: consolidar antes de subir
+            atTop -> ProgressionSuggestion(SuggestionKind.REPEAT, last.map { it.copy(completed = false, rpe = null) }, "RPE alto: repite y consolida")
+            else -> {
+                val sets = last.map { it.copy(reps = (it.reps + 1).coerceIn(range.first, range.last), completed = false, rpe = null) }
+                ProgressionSuggestion(SuggestionKind.RANGE_ADD_REP, sets, "Mismo peso: +1 rep por serie hasta ${range.last}", targetReps = range.last)
+            }
         }
     }
 
@@ -121,4 +134,8 @@ object Progression {
     }
 
     private fun roundTo(value: Double, step: Double) = Math.round(value / step) * step
+
+    /** «8-12» → 8..12 (null si falta o no es válido). */
+    fun parseRepRange(text: String?): IntRange? = text?.split('-')?.mapNotNull { it.trim().toIntOrNull() }
+        ?.takeIf { it.size == 2 && it[0] in 1..it[1] }?.let { it[0]..it[1] }
 }

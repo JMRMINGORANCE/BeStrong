@@ -1032,4 +1032,5 @@
     <string name="rep_range">Rango de repeticións</string>
     <string name="rep_range_body">Dobre progresión: co mesmo peso, unha repetición máis por serie ata o tope; ao chegar en todas, sobe o peso e volve ao mínimo.</string>
     <string name="rep_range_none">Sen rango</string>
+    <string name="prog_range_add_rep">Mesmo peso: +1 rep por serie (ata %1$d)</string>
 </resources>

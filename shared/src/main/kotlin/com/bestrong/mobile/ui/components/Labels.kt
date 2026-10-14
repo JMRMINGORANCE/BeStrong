@@ -93,6 +93,7 @@ fun ProgressionSuggestion.reasonText(): String = when (kind) {
     SuggestionKind.INCREASE_WEIGHT -> stringResource(R.string.prog_increase)
     SuggestionKind.ADD_REPS -> stringResource(R.string.prog_add_reps, targetReps)
     SuggestionKind.ADD_ONE_REP -> stringResource(R.string.prog_add_one_rep)
+    SuggestionKind.RANGE_ADD_REP -> stringResource(R.string.prog_range_add_rep, targetReps)
     SuggestionKind.ADD_TIME -> stringResource(R.string.prog_add_time)
     SuggestionKind.REPEAT -> stringResource(R.string.prog_repeat)
     SuggestionKind.DELOAD -> stringResource(R.string.prog_deload, stallSessions)

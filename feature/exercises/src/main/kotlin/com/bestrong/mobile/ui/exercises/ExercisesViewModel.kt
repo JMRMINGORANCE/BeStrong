@@ -250,8 +250,13 @@ class ExercisesViewModel @Inject constructor(
         val previous = repo.exercises.value.firstOrNull { it.id == ex.id }
         repo.saveCustomExercise(ex)
         // El objetivo cambia de significado (kg ↔ reps ↔ segundos, o par ↔ una mancuerna): se quita
-        if (previous != null && (previous.tracking != ex.tracking || previous.equipment != ex.equipment)) {
+        val dumbbellChange = previous != null && (previous.equipment == Equipment.DUMBBELL) != (ex.equipment == Equipment.DUMBBELL)
+        if (previous != null && (previous.tracking != ex.tracking || dumbbellChange)) {
             settingsStore.update { s -> if (ex.id in s.exerciseGoalsKg) s.copy(exerciseGoalsKg = s.exerciseGoalsKg - ex.id) else s }
+        }
+        // La barra propia solo tiene sentido con barra
+        if (previous?.equipment == Equipment.BARBELL && ex.equipment != Equipment.BARBELL) {
+            settingsStore.update { s -> if (ex.id in s.exerciseBarKg) s.copy(exerciseBarKg = s.exerciseBarKg - ex.id) else s }
         }
         repo.routinesOnce().filter { r -> r.exercises.any { it.exercise.id == ex.id } }.forEach { r ->
             repo.saveRoutine(r.copy(exercises = r.exercises.map { if (it.exercise.id == ex.id) it.copy(exercise = ex) else it }))

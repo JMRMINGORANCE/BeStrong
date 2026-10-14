@@ -1032,4 +1032,5 @@
     <string name="rep_range">Wiederholungsbereich</string>
     <string name="rep_range_body">Doppelte Progression: gleiches Gewicht, pro Satz eine Wiederholung mehr bis zur Obergrenze; schaffen alle Sätze sie, mehr Gewicht und zurück zur Untergrenze.</string>
     <string name="rep_range_none">Kein Bereich</string>
+    <string name="prog_range_add_rep">Gleiches Gewicht: +1 Wdh. pro Satz (bis %1$d)</string>
 </resources>

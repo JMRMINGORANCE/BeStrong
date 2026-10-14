@@ -58,7 +58,6 @@ class WorkoutActions @Inject constructor(
     fun prefillLookup(): (String) -> List<WorkoutSet> {
         val history = repository.history.value
         val s = settings.settings.value
-        val gym = s.activeGym
         val weekAgo = System.currentTimeMillis() - 7 * 86_400_000L
         return { id ->
             val ex = repository.exercise(id)
@@ -72,7 +71,8 @@ class WorkoutActions @Inject constructor(
                 val lastWeekBest = WorkoutStats.bestWeightBetween(id, history, weekAgo, Long.MAX_VALUE)
                 sets.map { it.copy(weightKg = ProgressionCap.limit(it.weightKg, lastWeekBest, cap)) }
             }
-            // Solo pesos que se pueden montar con la barra, discos y mancuernas del gimnasio activo
+            // Solo pesos que se pueden montar con la barra (la del ejercicio, si tiene), discos y mancuernas del gimnasio activo
+            val gym = s.gymFor(id)
             if (ex == null || s.unit != com.bestrong.core.util.WeightUnit.KG) capped else capped.map { it.copy(weightKg = if (it.weightKg > 0) gym.nearestLoad(it.weightKg, ex.equipment) else 0.0) }
         }
     }

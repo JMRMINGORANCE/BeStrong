@@ -209,7 +209,14 @@ fun ActiveWorkoutScreen(
                         ActiveWorkoutViewModel.UndoKind.COMPLETE -> undoComplete
                         ActiveWorkoutViewModel.UndoKind.TRIM -> undoTrim
                     }
-                    if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo(e)
+                    if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) {
+                        vm.undo(e)
+                    } else {
+                        // Lo que venía detrás (objetivo conseguido) solo si no se ha deshecho
+                        (e.followUp as? ActiveWorkoutViewModel.WorkoutEvent.GoalReached)?.let {
+                            snackbar.showSnackbar(goalMsg.format(it.exercise.displayName(appContext), it.goal), duration = SnackbarDuration.Short)
+                        }
+                    }
                 }
                 is ActiveWorkoutViewModel.WorkoutEvent.GoalReached -> {
                     snackbar.showSnackbar(goalMsg.format(e.exercise.displayName(appContext), e.goal), duration = SnackbarDuration.Short)

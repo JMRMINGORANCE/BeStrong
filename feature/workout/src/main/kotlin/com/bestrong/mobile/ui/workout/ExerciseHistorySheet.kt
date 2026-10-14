@@ -41,7 +41,8 @@ fun ExerciseHistorySheet(vm: ActiveWorkoutViewModel, exercise: Exercise, weightF
                             we.completedSets.joinToString(" · ") { describeSet(it, exercise.tracking, unit, weightFactor) },
                             style = MaterialTheme.typography.bodyMedium,
                         )
-                        we.completedSets.maxOfOrNull { it.estimatedOneRepMax }?.takeIf { it > 0 }?.let {
+                        // El 1RM solo tiene sentido con peso (en dominadas lastradas saldría del lastre)
+                        we.completedSets.maxOfOrNull { it.estimatedOneRepMax }?.takeIf { it > 0 && exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }?.let {
                             Text(stringResource(R.string.one_rm_value, unit.format(it * weightFactor)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                         }
                         if (we.notes.isNotBlank()) Text("✎ " + we.notes, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

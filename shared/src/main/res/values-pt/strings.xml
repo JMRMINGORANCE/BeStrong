@@ -1032,4 +1032,5 @@
     <string name="rep_range">Intervalo de repetições</string>
     <string name="rep_range_body">Dupla progressão: mesmo peso, mais uma repetição por série até ao topo; quando chegares em todas, sobe o peso e volta ao mínimo.</string>
     <string name="rep_range_none">Sem intervalo</string>
+    <string name="prog_range_add_rep">Mesmo peso: +1 rep por série (até %1$d)</string>
 </resources>

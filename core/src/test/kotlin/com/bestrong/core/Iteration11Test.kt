@@ -333,5 +333,37 @@ class RepRangeProgressionTest {
         val s2 = com.bestrong.core.training.Progression.suggest(bench, top, 2.5, repRange = 8..12)!!
         assertEquals(82.5, s2.sets[0].weightKg, 0.0)
         assertEquals(8, s2.sets[0].reps)
+        assertEquals(com.bestrong.core.training.SuggestionKind.RANGE_ADD_REP, s1.kind)
+    }
+
+    @Test fun rangeProgressionIsNotADeload() {
+        val d = java.time.LocalDate.of(2026, 3, 2)
+        val seq = listOf(80.0 to 12, 82.5 to 8, 82.5 to 9, 82.5 to 10)
+        val history = seq.mapIndexed { i, (kg, r) -> finishedWorkout("w$i", d.plusDays(i * 3L), bench to List(3) { done(kg, r) }) }
+        val s = com.bestrong.core.training.Progression.suggest(bench, history, 2.5, repRange = 8..12)!!
+        assertEquals(com.bestrong.core.training.SuggestionKind.RANGE_ADD_REP, s.kind)
+        assertEquals(82.5, s.sets[0].weightKg, 0.0)
+    }
+}
+
+class Iteration18Test {
+    @Test fun backOffNeverZero() {
+        val we = WorkoutExercise(exercise = bench, sets = listOf(WorkoutSet(weightKg = 2.5, reps = 10)))
+        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(we))
+        assertEquals(1, WorkoutEditor.addBackOff(w, we.id, 2.5).exercises[0].sets.size)
+    }
+
+    @Test fun legacyWeightGoalKeepsDirectionAfterOvershoot() {
+        val day = 86_400_000L
+        val now = 60 * day
+        val points = listOf(now - 50 * day to 84.0, now - 30 * day to 82.0, now to 79.0)
+        // Sin peso inicial guardado: el objetivo de bajar a 80 está cumplido (no «falta 1 kg»)
+        assertEquals(true, com.bestrong.core.stats.BodyWeightGoal.progress(points, 80.0, startKg = null, nowEpochMs = now)!!.reached)
+    }
+
+    @Test fun parseRepRange() {
+        assertEquals(8..12, com.bestrong.core.training.Progression.parseRepRange("8-12"))
+        assertEquals(null, com.bestrong.core.training.Progression.parseRepRange("12-8"))
+        assertEquals(null, com.bestrong.core.training.Progression.parseRepRange(null))
     }
 }

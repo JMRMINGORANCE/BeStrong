@@ -90,11 +90,12 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                             LineChart(weights.map { ChartPoint(formatShortDate(it.dateEpochMs), it.weightKg!!) }, valueFormatter = { unit.format(it) })
                             WeightTrendLine(weights.map { it.dateEpochMs to it.weightKg!! }, unit)
                             WeightGoalLine(vm, weights.map { it.dateEpochMs to it.weightKg!! }, unit)
-                            WeighInReminder(vm)
                         }
                     }
                 }
             }
+            // Siempre visible: sirve precisamente para empezar a pesarse con regularidad
+            item { Card { Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp)) { WeighInReminder(vm) } } }
             others.forEach { (label, value) ->
                 val points = list.filter { value(it) != null }.sortedBy { it.dateEpochMs }
                 if (points.size >= 2) {
@@ -205,36 +206,7 @@ private fun WeightGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>
     val settings by vm.settings.collectAsStateWithLifecycle()
     val goal = settings.bodyWeightGoalKg
     var editing by rememberSaveable { mutableStateOf(false) }
-    if (editing) {
-        var text by rememberSaveable { mutableStateOf(goal?.let { unit.format(it) }.orEmpty()) }
-        val kg = unit.parseToKg(text)?.takeIf { it > 0 }
-        AlertDialog(
-            onDismissRequest = { editing = false },
-            title = { Text(stringResource(R.string.weight_goal_title)) },
-            text = {
-                OutlinedTextField(
-                    text,
-                    { t -> text = t.filter { it.isDigit() || it == ',' || it == '.' }.take(6) },
-                    label = { Text(unit.label) },
-                    singleLine = true,
-                    isError = text.isNotEmpty() && kg == null,
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
-                )
-            },
-            // Se guarda también el peso de ahora: decide si el objetivo es bajar o subir
-            confirmButton = {
-                TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = kg, bodyWeightGoalStartKg = points.lastOrNull()?.second) }; editing = false }, enabled = kg != null) {
-                    Text(stringResource(R.string.action_save))
-                }
-            },
-            dismissButton = {
-                Row {
-                    if (goal != null) TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = null, bodyWeightGoalStartKg = null) }; editing = false }) { Text(stringResource(R.string.goal_remove)) }
-                    TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_cancel)) }
-                }
-            },
-        )
-    }
+    if (editing) WeightGoalDialog(vm, goal, points, unit) { editing = false }
     val start = settings.bodyWeightGoalStartKg
     val progress = remember(points, goal, start) { goal?.let { com.bestrong.core.stats.BodyWeightGoal.progress(points, it, start) } }
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -255,6 +227,7 @@ private fun WeightGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>
 private fun WeighInReminder(vm: ProfileViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val notifPermission = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) {}
     Column(Modifier.padding(top = 8.dp)) {
         Text(stringResource(R.string.weigh_in_reminder, com.bestrong.mobile.data.WEIGH_IN_HOUR), style = MaterialTheme.typography.labelMedium)
         androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -266,10 +239,52 @@ private fun WeighInReminder(vm: ProfileViewModel) {
             java.time.DayOfWeek.entries.forEach { d ->
                 androidx.compose.material3.FilterChip(
                     selected = settings.weighInDay == d.value,
-                    onClick = { vm.updateSettings { it.copy(weighInDay = d.value) } },
+                    onClick = {
+                        if (android.os.Build.VERSION.SDK_INT >= 33) notifPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        vm.updateSettings { it.copy(weighInDay = d.value) }
+                    },
                     label = { Text(d.getDisplayName(java.time.format.TextStyle.SHORT, locale)) },
                 )
             }
         }
     }
+}
+
+/** Poner, cambiar o quitar el peso objetivo (guarda también el peso de partida, que decide si es bajar o subir). */
+@Composable
+private fun WeightGoalDialog(vm: ProfileViewModel, goal: Double?, points: List<Pair<Long, Double>>, unit: WeightUnit, onClose: () -> Unit) {
+    var text by rememberSaveable { mutableStateOf(goal?.let { unit.format(it) }.orEmpty()) }
+    val kg = unit.parseToKg(text)?.takeIf { it > 0 }
+    AlertDialog(
+        onDismissRequest = { onClose() },
+        title = { Text(stringResource(R.string.weight_goal_title)) },
+        text = {
+            OutlinedTextField(
+                text,
+                { t -> text = t.filter { it.isDigit() || it == ',' || it == '.' }.take(6) },
+                label = { Text(unit.label) },
+                singleLine = true,
+                isError = text.isNotEmpty() && kg == null,
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+            )
+        },
+        // Se guarda también el peso de ahora: decide si el objetivo es bajar o subir
+        confirmButton = {
+            TextButton(onClick = {
+                vm.updateSettings {
+                    // Guardar sin cambiar el objetivo conserva el peso de partida
+                    val start = if (kg == it.bodyWeightGoalKg) it.bodyWeightGoalStartKg ?: points.lastOrNull()?.second else points.lastOrNull()?.second
+                    it.copy(bodyWeightGoalKg = kg, bodyWeightGoalStartKg = start)
+                }; onClose()
+            }, enabled = kg != null) {
+                Text(stringResource(R.string.action_save))
+            }
+        },
+        dismissButton = {
+            Row {
+                if (goal != null) TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = null, bodyWeightGoalStartKg = null) }; onClose() }) { Text(stringResource(R.string.goal_remove)) }
+                TextButton(onClick = { onClose() }) { Text(stringResource(R.string.action_cancel)) }
+            }
+        },
+    )
 }

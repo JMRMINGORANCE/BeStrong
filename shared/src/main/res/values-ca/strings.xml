@@ -1032,4 +1032,5 @@
     <string name="rep_range">Rang de repeticions</string>
     <string name="rep_range_body">Doble progressió: amb el mateix pes, una repetició més per sèrie fins al màxim; quan hi arribes a totes, puja el pes i torna al mínim.</string>
     <string name="rep_range_none">Sense rang</string>
+    <string name="prog_range_add_rep">Mateix pes: +1 rep per sèrie (fins a %1$d)</string>
 </resources>

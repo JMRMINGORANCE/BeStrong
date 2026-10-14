@@ -105,8 +105,7 @@ data class UserSettings(
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
 
     /** Rango de repeticiones de ese ejercicio, si tiene (para la progresión). */
-    fun repRangeFor(exerciseId: String): IntRange? = exerciseRepRange[exerciseId]?.split('-')
-        ?.mapNotNull { it.trim().toIntOrNull() }?.takeIf { it.size == 2 && it[0] in 1..it[1] }?.let { it[0]..it[1] }
+    fun repRangeFor(exerciseId: String): IntRange? = com.bestrong.core.training.Progression.parseRepRange(exerciseRepRange[exerciseId])
 
     /** El gimnasio activo con la barra de ese ejercicio (para discos y calentamiento). */
     fun gymFor(exerciseId: String): GymProfile = exerciseBarKg[exerciseId]?.let { activeGym.copy(barKg = it) } ?: activeGym

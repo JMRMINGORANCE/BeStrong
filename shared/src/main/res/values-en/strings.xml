@@ -1032,4 +1032,5 @@
     <string name="rep_range">Rep range</string>
     <string name="rep_range_body">Double progression: same weight, one more rep per set up to the top; once every set gets there, add weight and drop back to the bottom.</string>
     <string name="rep_range_none">No range</string>
+    <string name="prog_range_add_rep">Same weight: +1 rep per set (up to %1$d)</string>
 </resources>

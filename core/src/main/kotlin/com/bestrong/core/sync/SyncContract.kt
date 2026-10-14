@@ -73,7 +73,7 @@ object SyncContract {
     fun encodeSettingsWithin(s: SharedSettings, maxBytes: Int = MAX_HISTORY_BYTES): ByteArray =
         sequenceOf(s, s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap()), s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap(), pinnedNotes = emptyMap()))
             .map(::encodeSettings).firstOrNull { it.size <= maxBytes }
-            ?: encodeSettings(s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap(), pinnedNotes = emptyMap(), exerciseIncrementKg = emptyMap()))
+            ?: encodeSettings(s.copy(bestOneRepMaxKg = emptyMap(), heaviestKg = emptyMap(), pinnedNotes = emptyMap(), exerciseIncrementKg = emptyMap(), exerciseRepRange = emptyMap()))
     fun decodeSettings(bytes: ByteArray): SharedSettings = json.decodeFromString(SharedSettings.serializer(), bytes.decodeToString())
 
     /**
@@ -153,8 +153,11 @@ data class SharedSettings(
     val heaviestKg: Map<String, Double> = emptyMap(),
     /** Descanso máximo tras una serie de calentamiento (s). */
     val warmupRestSeconds: Int = 60,
+    /** Rango de repeticiones por ejercicio («8-12»): la misma doble progresión que en el móvil. */
+    val exerciseRepRange: Map<String, String> = emptyMap(),
 ) {
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
+    fun repRangeFor(exerciseId: String): IntRange? = com.bestrong.core.training.Progression.parseRepRange(exerciseRepRange[exerciseId])
 }
 
 /**

@@ -270,6 +270,8 @@ object WorkoutEditor {
         val top = working.maxByOrNull { it.weightKg }?.takeIf { it.weightKg > 0 } ?: return@updateExercise we
         val raw = top.weightKg * BACK_OFF_FACTOR
         val weight = if (stepKg > 0) (Math.round(raw / stepKg) * stepKg).coerceAtMost(top.weightKg - stepKg).coerceAtLeast(0.0) else raw
+        // Con una barra casi vacía el −10 % redondeado daría 0 kg: no tiene sentido
+        if (weight <= 0.0) return@updateExercise we
         val at = we.sets.indexOf(working.last()) + 1
         val added = List(count) { WorkoutSet(weightKg = weight, reps = top.reps, repsRight = top.repsRight) }
         we.copy(sets = we.sets.toMutableList().apply { addAll(at, added) })

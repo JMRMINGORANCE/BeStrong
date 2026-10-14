@@ -153,7 +153,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 WorkoutEditor.trimToFit(w, budget) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = now, warmupRestSeconds = warmup, restEndsAtEpochMs = restEnds) }
             } ?: return@launch
             if (before == after) return@launch
-            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.TRIM, partner, before.id, WorkoutEditor.undoRemoval(before, after)))
+            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.TRIM, partner, before.id, restore = WorkoutEditor.undoRemoval(before, after)))
         }
     }
 
@@ -236,7 +236,14 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Avisos con acción: deshacer un borrado o aplicar un ajuste por RPE. */
     sealed interface WorkoutEvent {
         /** Borrado que se puede deshacer: [restore] vuelve a meter solo lo borrado en su sitio. */
-        class Undoable(val kind: UndoKind, val partner: Boolean, val workoutId: String, val restore: (Workout) -> Workout) : WorkoutEvent
+        class Undoable(
+            val kind: UndoKind,
+            val partner: Boolean,
+            val workoutId: String,
+            /** Aviso que va detrás (p. ej. objetivo conseguido) y que solo se muestra si no se deshace. */
+            val followUp: WorkoutEvent? = null,
+            val restore: (Workout) -> Workout,
+        ) : WorkoutEvent
         data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
 
         /** La serie recién hecha alcanza el objetivo de 1RM que el usuario se puso en ese ejercicio. */
@@ -267,7 +274,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         viewModelScope.launch {
             val (before, after) = update(partner) { WorkoutEditor.removeExercise(it, weId) } ?: return@launch
             if (before.exercises.none { it.id == weId }) return@launch
-            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.EXERCISE, partner, before.id, WorkoutEditor.undoRemoval(before, after)))
+            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.EXERCISE, partner, before.id, restore = WorkoutEditor.undoRemoval(before, after)))
         }
     }
     fun moveExercise(from: Int, to: Int) = edit { WorkoutEditor.moveExercise(it, from, to) }
@@ -340,18 +347,21 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (startsRest) onSetCompleted(after, after.exercises.indexOfFirst { it.id == weId })
             // Al deshacer solo se para el descanso que arrancó esto (no otro que vino después)
             val startedEnd = if (startsRest) restTimer.rest.value?.endsAtEpochMs else null
+            // El objetivo también se celebra si se llega marcando de golpe (las marcadas a la vez no cuentan
+            // como «ya lo tenías»), pero solo si no se deshace
+            val goal = if (partner) {
+                null
+            } else {
+                after.exercises.firstOrNull { it.id == weId }?.exercise?.tracking?.let { t ->
+                    marked.values.maxByOrNull { ExerciseGoals.valueOf(it, t) }?.let { goalEvent(after, weId, it.id, marked.keys) }
+                }
+            }
             _events.tryEmit(
-                WorkoutEvent.Undoable(UndoKind.COMPLETE, partner, before.id) { w ->
+                WorkoutEvent.Undoable(UndoKind.COMPLETE, partner, before.id, followUp = goal) { w ->
                     WorkoutEditor.updateExercise(w, weId) { we -> we.copy(sets = we.sets.map { s -> if (marked[s.id] == s) old.getValue(s.id) else s }) }
                 },
             )
             pendingRestUndo = startedEnd
-            // El objetivo también se celebra si se llega marcando de golpe (después del aviso de deshacer:
-            // las marcadas a la vez no cuentan como «ya lo tenías»)
-            if (!partner) {
-                val tracking = after.exercises.firstOrNull { it.id == weId }?.exercise?.tracking
-                tracking?.let { t -> marked.values.maxByOrNull { ExerciseGoals.valueOf(it, t) }?.let { checkGoal(after, weId, it.id, marked.keys) } }
-            }
         }
     }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
@@ -477,19 +487,19 @@ class ActiveWorkoutViewModel @Inject constructor(
             fun done(w: Workout) = w.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId }?.completed == true
             if (index >= 0 && !done(before) && done(updated)) {
                 onSetCompleted(updated, index)
-                if (!partner) checkGoal(updated, weId, setId)
+                if (!partner) goalEvent(updated, weId, setId)?.let { _events.tryEmit(it) }
             }
         }
     }
 
-    /** Celebra la primera serie que llega al objetivo de 1RM del ejercicio (no si ya lo tenías). */
-    private fun checkGoal(w: Workout, weId: String, setId: String, markedTogether: Set<String> = setOf(setId)) {
+    /** Aviso si esta serie es la primera que llega al objetivo del ejercicio (no si ya lo tenías); null si no. */
+    private fun goalEvent(w: Workout, weId: String, setId: String, markedTogether: Set<String> = setOf(setId)): WorkoutEvent.GoalReached? {
         val we = w.exercises.firstOrNull { it.id == weId }
         val set = we?.sets?.firstOrNull { it.id == setId }
         // Sin las marcas cargadas todavía no se sabe si ya lo tenías: mejor no celebrar de más
         val loaded = bests.value.isNotEmpty() || repo.history.value.isEmpty()
         val goal = we?.takeIf { loaded }?.let { settings.value.exerciseGoalsKg[it.exercise.id] }
-        if (we == null || set == null || goal == null) return
+        if (we == null || set == null || goal == null) return null
         val tracking = we.exercise.tracking
         val value = ExerciseGoals.valueOf(set, tracking)
         val historyBest = if (tracking == TrackingType.WEIGHT_REPS) {
@@ -499,7 +509,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
         val todayBest = w.exercises.filter { it.exercise.id == we.exercise.id }.flatMap { it.completedSets }
             .filter { it.id != setId && it.id !in markedTogether }.maxOfOrNull { ExerciseGoals.valueOf(it, tracking) } ?: 0.0
-        if (value >= goal && maxOf(historyBest, todayBest) < goal) _events.tryEmit(WorkoutEvent.GoalReached(we.exercise, goalText(we.exercise, goal)))
+        return if (value >= goal && maxOf(historyBest, todayBest) < goal) WorkoutEvent.GoalReached(we.exercise, goalText(we.exercise, goal)) else null
     }
 
     /** El objetivo como se ve en la app: peso (con el total de mancuernas si toca), reps o tiempo. */
