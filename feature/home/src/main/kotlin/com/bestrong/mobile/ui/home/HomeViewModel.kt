@@ -204,6 +204,7 @@ class HomeViewModel @Inject constructor(
         val last = repo.history.value.firstOrNull { it.isFinished } ?: return@launch
         if (repo.activeOnce() == null) {
             val template = last.routineId?.let { repo.routine(it) }
+            actions.useRoutineGym(template)
             val fromProgram = last.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
             // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
             // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya
@@ -224,7 +225,7 @@ class HomeViewModel @Inject constructor(
             return@launch
         }
         // Su gimnasio pasa a ser el activo antes de rellenar: los pesos salen con su material
-        routine.gymId?.takeIf { id -> settingsStore.settings.value.gyms.any { it.id == id } }?.let { id -> settingsStore.update { it.copy(activeGymId = id) } }
+        actions.useRoutineGym(routine)
         repo.setActive(routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup()))
         onStarted()
     }

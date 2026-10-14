@@ -62,13 +62,24 @@ enum class ComparisonKind {
     }
 }
 
-/** Distancia con signo en km: «+0.50 km», «−1.20 km», «±0 km». */
-fun signedDistance(deltaMeters: Double): String = when {
-    kotlin.math.abs(deltaMeters) < 5 -> "±0 km"
-    deltaMeters > 0 -> "+" + "%.2f km".format(deltaMeters / 1000)
-    else -> "−" + "%.2f km".format(-deltaMeters / 1000)
+/** Cambio de distancia por debajo del cual se considera la misma (el GPS o el paso varían unos metros). */
+private const val SAME_DISTANCE_M = 5.0
+
+/** Distancia con signo: en metros por debajo de 1 km («+20 m», del trineo o el granjero) y en km por encima («+0.50 km»). */
+fun signedDistance(deltaMeters: Double): String {
+    val abs = kotlin.math.abs(deltaMeters)
+    val sign = when {
+        abs < SAME_DISTANCE_M -> return "±0 m"
+        deltaMeters > 0 -> "+"
+        else -> "−"
+    }
+    return sign + if (abs < 1000) "${kotlin.math.round(abs).toInt()} m" else "%.2f km".format(abs / 1000)
 }
 
 /** Cardio o distancia frente a la vez anterior: (cambio para el color, texto); por tiempo si no hay distancia. */
-fun distanceComparison(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison): Pair<Double, String> =
-    if (c.hasDistance) c.distanceDelta to signedDistance(c.distanceDelta) else c.durationDelta.toDouble() to signedDuration(c.durationDelta)
+fun distanceComparison(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison): Pair<Double, String> = when {
+    !c.hasDistance -> c.durationDelta.toDouble() to signedDuration(c.durationDelta)
+    // Lo que el texto da por igual tampoco se pinta de verde
+    kotlin.math.abs(c.distanceDelta) < SAME_DISTANCE_M -> 0.0 to signedDistance(c.distanceDelta)
+    else -> c.distanceDelta to signedDistance(c.distanceDelta)
+}

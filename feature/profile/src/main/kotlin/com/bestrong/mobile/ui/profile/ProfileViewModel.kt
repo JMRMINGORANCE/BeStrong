@@ -436,6 +436,14 @@ class ProfileViewModel @Inject constructor(
             .onFailure { _messages.tryEmit(context.getString(R.string.restore_error, it.message.orEmpty())) }
     }
 
+    /** Borra un perfil de gimnasio y lo quita de las rutinas que lo tenían como suyo. */
+    fun deleteGym(id: String) {
+        settingsStore.update { s -> s.copy(gyms = s.gyms.filterNot { it.id == id }) }
+        viewModelScope.launch {
+            repo.routines.value.filter { it.gymId == id }.forEach { repo.saveRoutine(it.copy(gymId = null), keepPosition = true) }
+        }
+    }
+
     /** Carpeta elegida para la copia semanal: guardamos el permiso y hacemos una copia ya. */
     fun setBackupFolder(uri: Uri?) {
         val old = settings.value.backupFolderUri
@@ -445,8 +453,11 @@ class ProfileViewModel @Inject constructor(
             }
         }
         // Primero el ajuste y luego el permiso: una copia en marcha no lo toma por una carpeta perdida
-        settingsStore.update { it.copy(backupFolderUri = uri?.toString(), backupFolderLost = false, backupFailNotified = false) }
-        if (uri == null && old != null) {
+        settingsStore.update {
+            it.copy(backupFolderUri = uri?.toString(), backupFolderLost = false, backupFailNotified = false, backupFolderSetEpochMs = if (uri != null) System.currentTimeMillis() else 0)
+        }
+        // La carpeta anterior (al quitarla o al cambiar a otra) ya no hace falta: los permisos guardados tienen tope
+        if (old != null && old != uri?.toString()) {
             runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(old), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
         }
         if (uri != null) {

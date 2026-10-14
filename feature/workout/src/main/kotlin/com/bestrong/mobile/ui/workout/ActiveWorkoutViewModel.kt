@@ -211,7 +211,12 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun setActiveGym(id: String) {
         if (settings.value.activeGym.id == id) return
         settingsStore.update { it.copy(activeGymId = id) }
-        val partner = partnerMode.value
+        // Los dos entrenos (el tuyo y el de la pareja) están en el mismo gimnasio
+        refitActive(partnerMode.value)
+        refitActive(!partnerMode.value)
+    }
+
+    private fun refitActive(partner: Boolean) {
         viewModelScope.launch {
             val (before, after) = update(partner) { w ->
                 w.copy(exercises = w.exercises.map { e -> refitToGym(e) })
@@ -230,9 +235,18 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Series pendientes con peso de un ejercicio, al peso más cercano que se puede montar en el gimnasio activo. */
     private fun refitToGym(e: com.bestrong.core.model.WorkoutExercise): com.bestrong.core.model.WorkoutExercise {
         val s = settings.value
-        if (s.unit != com.bestrong.core.util.WeightUnit.KG) return e
         val gym = s.gymFor(e.exercise.id)
-        return e.copy(sets = e.sets.map { set -> if (!set.completed && set.weightKg > 0) set.copy(weightKg = gym.nearestLoad(set.weightKg, e.exercise.equipment)) else set })
+        // En libras no hay discos del perfil; si el gimnasio nuevo no tiene ese material no hay a qué ajustar
+        // (se verá el aviso de material)
+        if (s.unit != com.bestrong.core.util.WeightUnit.KG || e.exercise.equipment !in gym.equipment) return e
+        val barbell = e.exercise.equipment == com.bestrong.core.model.Equipment.BARBELL || e.exercise.equipment == com.bestrong.core.model.Equipment.SMITH
+        return e.copy(
+            sets = e.sets.map { set ->
+                // Por debajo de la barra (técnica con barra ligera) no se sube a la barra
+                val fits = set.weightKg > 0 && !(barbell && set.weightKg < gym.loadedBarKg)
+                if (!set.completed && fits) set.copy(weightKg = gym.nearestLoad(set.weightKg, e.exercise.equipment)) else set
+            },
+        )
     }
 
     fun setIncrement(exerciseId: String, kg: Double?) = settingsStore.update { s ->
@@ -714,6 +728,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             viewModelScope.launch {
                 val current = repo.takePartnerActive() ?: return@launch
                 val finished = WorkoutEditor.finish(current, System.currentTimeMillis())
+                    .copy(gymName = current.gymName ?: settings.value.takeIf { it.gyms.size > 1 }?.activeGym?.name)
                 setPartnerMode(false)
                 if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
             }

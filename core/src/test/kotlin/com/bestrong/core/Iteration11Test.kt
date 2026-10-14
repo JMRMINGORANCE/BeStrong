@@ -703,11 +703,37 @@ class CollarTest {
             exercises = listOf(WorkoutExercise(exercise = run, sets = listOf(WorkoutSet(durationSec = sec, distanceM = m, completed = true)))),
         )
         val withKm = com.bestrong.core.stats.WorkoutStats.compareWithPrevious(w("b", 10, 5500.0, 1800), listOf(w("a", 1, 5000.0, 1800))).single()
-        assertEquals("+0.50 km", com.bestrong.core.util.distanceComparison(withKm).second.replace(',', '.'))
+        assertEquals("+500 m", com.bestrong.core.util.distanceComparison(withKm).second)
         // Sin distancia en ninguna: por tiempo
         val timeOnly = com.bestrong.core.stats.WorkoutStats.compareWithPrevious(w("b", 10, 0.0, 1860), listOf(w("a", 1, 0.0, 1800))).single()
         assertEquals(60.0, com.bestrong.core.util.distanceComparison(timeOnly).first, 1e-9)
         // Se encuentra buscando el gimnasio
         assertEquals(1, com.bestrong.core.stats.WorkoutStats.search(listOf(w("a", 1, 0.0, 60)), "casa").size)
+    }
+
+    @Test
+    fun distanceNeedsBothSessionsAndShowsKmAboveOne() {
+        val run = com.bestrong.core.model.Exercise(id = "run", name = "Carrera", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST, tracking = com.bestrong.core.model.TrackingType.CARDIO)
+        fun w(id: String, t: Long, m: Double, sec: Int) = Workout(
+            id = id, name = id, startedAtEpochMs = t, finishedAtEpochMs = t + 1,
+            exercises = listOf(WorkoutExercise(exercise = run, sets = listOf(WorkoutSet(durationSec = sec, distanceM = m, completed = true)))),
+        )
+        // Solo la anterior con distancia: se compara por tiempo, no «−5 km»
+        val c = com.bestrong.core.stats.WorkoutStats.compareWithPrevious(w("b", 10, 0.0, 1800), listOf(w("a", 1, 5000.0, 1800))).single()
+        assertEquals(false, c.hasDistance)
+        assertEquals("+1.50 km", com.bestrong.core.util.signedDistance(1500.0).replace(',', '.'))
+        assertEquals("±0 m", com.bestrong.core.util.signedDistance(3.0))
+    }
+
+    @Test
+    fun csvKeepsGymAndAthlete() {
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val w = Workout(
+            name = "W", startedAtEpochMs = 1_700_000_000_000, finishedAtEpochMs = 1_700_003_600_000, gymName = "Hotel", athlete = "Ana",
+            exercises = listOf(WorkoutExercise(exercise = ex, sets = listOf(WorkoutSet(weightKg = 80.0, reps = 5, completed = true)))),
+        )
+        val back = com.bestrong.core.io.WorkoutCsv.import(com.bestrong.core.io.WorkoutCsv.export(listOf(w)), listOf(ex)).workouts.single()
+        assertEquals("Hotel", back.gymName)
+        assertEquals("Ana", back.athlete)
     }
 }

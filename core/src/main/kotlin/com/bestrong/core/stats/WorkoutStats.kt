@@ -148,7 +148,7 @@ object WorkoutStats {
         val durationDelta: Int = 0,
         /** Metros totales (distancia y cardio). */
         val distanceDelta: Double = 0.0,
-        /** Si alguna de las dos sesiones registró distancia (si no, el cardio se compara por tiempo). */
+        /** Si las dos sesiones registraron distancia (si no, el cardio se compara por tiempo). */
         val hasDistance: Boolean = false,
     )
 
@@ -172,7 +172,8 @@ object WorkoutStats {
                 repsDelta = now.sumOf { it.totalReps } - prev.sumOf { it.totalReps },
                 durationDelta = now.sumOf { it.durationSec } - prev.sumOf { it.durationSec },
                 distanceDelta = now.sumOf { it.distanceM } - prev.sumOf { it.distanceM },
-                hasDistance = (now + prev).any { it.distanceM > 0 },
+                // Las dos con distancia: con una sola, comparar km saldría un «−5 km» falso
+                hasDistance = now.any { it.distanceM > 0 } && prev.any { it.distanceM > 0 },
             )
         }
     }

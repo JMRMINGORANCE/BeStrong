@@ -40,6 +40,8 @@ data class UserSettings(
     val backupFolderLost: Boolean = false,
     /** Ya se avisó de que la copia lleva tiempo fallando (no se repite cada semana; se borra al salir bien). */
     val backupFailNotified: Boolean = false,
+    /** Cuándo se eligió la carpeta de copias (para avisar si nunca llega a salir bien ninguna). */
+    val backupFolderSetEpochMs: Long = 0,
     /** Sesiones por semana que el usuario se propone (si no sigue un programa). */
     val weeklyGoal: Int = 3,
     /** Botones principales abajo en la pantalla exterior del Fold (uso con una mano). */
@@ -157,6 +159,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         lastBackupEpochMs = prefs.getLong("backup_last", 0),
         backupFolderLost = prefs.getBoolean("backup_folder_lost", false),
         backupFailNotified = prefs.getBoolean("backup_fail_notified", false),
+        backupFolderSetEpochMs = prefs.getLong("backup_folder_set", 0),
         weeklyGoal = prefs.getInt("weekly_goal", 3),
         oneHanded = prefs.getBoolean("one_handed", false),
         gyms = readGyms(),
@@ -211,6 +214,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         putLong("backup_last", s.lastBackupEpochMs)
         putBoolean("backup_folder_lost", s.backupFolderLost)
         putBoolean("backup_fail_notified", s.backupFailNotified)
+        putLong("backup_folder_set", s.backupFolderSetEpochMs)
     }
 
     @Synchronized
@@ -320,7 +324,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
 
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
-        val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "backup_fail_notified", "lock_photos")
+        val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "backup_fail_notified", "backup_folder_set", "lock_photos")
         val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())

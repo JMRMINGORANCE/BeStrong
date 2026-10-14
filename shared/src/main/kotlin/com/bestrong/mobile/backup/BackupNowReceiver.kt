@@ -9,6 +9,9 @@ import androidx.core.app.NotificationManagerCompat
 class BackupNowReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         NotificationManagerCompat.from(context).cancel(intent.getIntExtra(EXTRA_NOTIFICATION_ID, 0))
+        // Si vuelve a fallar se avisa otra vez (se pidió a mano: hay que saber cómo acaba)
+        dagger.hilt.android.EntryPointAccessors.fromApplication(context, com.bestrong.mobile.di.WorkerEntryPoint::class.java)
+            .settings().update { it.copy(backupFailNotified = false) }
         AutoBackupWorker.runNow(context)
     }
 

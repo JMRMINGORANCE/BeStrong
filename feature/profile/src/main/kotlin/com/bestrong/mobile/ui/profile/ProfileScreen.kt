@@ -131,7 +131,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                 editingGym = null
             },
             onDelete = {
-                vm.updateSettings { s -> s.copy(gyms = s.gyms.filterNot { it.id == g.id }) }
+                vm.deleteGym(g.id)
                 editingGym = null
             },
             onDismiss = { editingGym = null },

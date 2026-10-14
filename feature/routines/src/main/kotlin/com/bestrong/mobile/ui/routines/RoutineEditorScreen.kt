@@ -328,10 +328,12 @@ private fun EmojiPicker(selected: String?, onPick: (String?) -> Unit) {
 private fun RoutineGymRow(vm: RoutineEditorViewModel, routine: com.bestrong.core.model.Routine) {
     val gyms = vm.gyms
     if (gyms.size < 2) return
+    // Un gimnasio que ya no existe (borrado, restaurado con otros ids) cuenta como ninguno
+    val gymId = routine.gymId?.takeIf { id -> gyms.any { it.id == id } }
     Text(stringResource(R.string.routine_gym), style = MaterialTheme.typography.labelLarge)
     androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        FilterChip(selected = routine.gymId == null, onClick = { vm.setGym(null) }, label = { Text(stringResource(R.string.routine_gym_any)) })
-        gyms.forEach { g -> FilterChip(selected = routine.gymId == g.id, onClick = { vm.setGym(g.id) }, label = { Text(g.name) }) }
+        FilterChip(selected = gymId == null, onClick = { vm.setGym(null) }, label = { Text(stringResource(R.string.routine_gym_any)) })
+        gyms.forEach { g -> FilterChip(selected = gymId == g.id, onClick = { vm.setGym(g.id) }, label = { Text(g.name) }) }
     }
 }
 

@@ -106,6 +106,15 @@ class WorkoutActions @Inject constructor(
         return sets.any { it.weightKg > ProgressionCap.limit(it.weightKg, lastWeekBest, cap) + 1e-6 }
     }
 
+    /**
+     * Si la rutina tiene gimnasio (y sigue existiendo), pasa a ser el activo: antes de rellenar, para que los
+     * pesos salgan con su material. Para empezarla, repetirla o repetir un entreno que salió de ella.
+     */
+    fun useRoutineGym(routine: com.bestrong.core.model.Routine?) {
+        val id = routine?.gymId ?: return
+        if (settings.settings.value.gyms.any { it.id == id }) settings.update { it.copy(activeGymId = id) }
+    }
+
     suspend fun exportHeartRateIfEnabled(workout: Workout) {
         if (!settings.settings.value.healthConnectExport) return
         runCatching { healthConnect.exportHeartRate(workout) }.onFailure { Log.w("HealthConnect", "Exportación del pulso fallida", it) }

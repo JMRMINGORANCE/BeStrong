@@ -39,7 +39,7 @@ object WorkoutCsv {
     private val HEADER = listOf(
         "workout_id", "date", "end_date", "workout_name", "workout_notes", "exercise_id", "exercise_name",
         "superset_id", "exercise_notes", "set_index", "set_type", "weight_kg", "reps", "duration_s", "rpe",
-        "reps_right", "distance_m", "assisted", "set_note", "target_rpe", "tempo",
+        "reps_right", "distance_m", "assisted", "set_note", "target_rpe", "tempo", "gym", "athlete",
     )
     private val ISO: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
@@ -79,6 +79,7 @@ object WorkoutCsv {
                         s.repsRight?.toString().orEmpty(), s.distanceM.toString(), s.assisted.toString(), s.note,
                         // La prescripción del ejercicio (se repite en cada serie, como sus notas)
                         we.targetRpe?.toString().orEmpty(), we.tempo.orEmpty(),
+                        w.gymName.orEmpty(), w.athlete.orEmpty(),
                     )
                 }
             }
@@ -120,6 +121,7 @@ object WorkoutCsv {
             val key: String, val name: String, val start: Long, val end: Long?, val notes: String, val exercise: Exercise,
             val exNotes: String, val superset: String?, val set: WorkoutSet,
             val targetRpe: Double? = null, val tempo: String? = null,
+            val gym: String? = null, val athlete: String? = null,
         )
 
         val parsed = rows.drop(1).mapNotNull { r ->
@@ -147,6 +149,8 @@ object WorkoutCsv {
                             // Columnas nuevas: los CSV antiguos no las tienen y quedan vacías
                             targetRpe = num(r.get("target_rpe"))?.takeIf { it in 1.0..10.0 },
                             tempo = r.get("tempo").ifBlank { null }?.let { com.bestrong.core.training.Tempo.parse(it)?.toString() },
+                            gym = r.get("gym").ifBlank { null },
+                            athlete = r.get("athlete").ifBlank { null },
                         )
                     }
                     CsvFormat.HEVY -> {
@@ -240,6 +244,8 @@ object WorkoutCsv {
                 updatedAtEpochMs = end,
                 notes = first.notes,
                 exercises = exercises,
+                gymName = first.gym,
+                athlete = first.athlete,
             )
         }.sortedByDescending { it.startedAtEpochMs }
 

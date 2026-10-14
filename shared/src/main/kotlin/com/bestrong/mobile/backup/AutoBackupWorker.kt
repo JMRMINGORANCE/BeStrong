@@ -55,10 +55,12 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
                 if (runAttemptCount < 2) {
                     Result.retry()
                 } else {
-                    // Fallo definitivo y la última copia buena tiene más de dos semanas: se avisa una vez (sin
-                    // ninguna copia buena aún no: el primer intento puede fallar solo por estar sin conexión)
+                    // Fallo definitivo y más de dos semanas sin copia buena: se avisa una vez (no nada más elegir la
+                    // carpeta: el primer intento puede fallar solo por estar sin conexión)
                     val s = settingsStore.settings.value
-                    if (s.lastBackupEpochMs > 0 && System.currentTimeMillis() - s.lastBackupEpochMs > STALE_MS && !s.backupFailNotified) {
+                    // Desde la última copia buena o, si nunca salió bien, desde que se eligió la carpeta
+                    val since = maxOf(s.lastBackupEpochMs, s.backupFolderSetEpochMs)
+                    if (since > 0 && System.currentTimeMillis() - since > STALE_MS && !s.backupFailNotified) {
                         com.bestrong.mobile.notify.Notifier.backupStopped(applicationContext, folderLost = false)
                         settingsStore.update { it.copy(backupFailNotified = true) }
                     }
@@ -131,7 +133,12 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
 
         /** Copia inmediata (al elegir la carpeta). */
         fun runNow(context: Context) {
-            WorkManager.getInstance(context).enqueue(androidx.work.OneTimeWorkRequestBuilder<AutoBackupWorker>().build())
+            // Única: varios toques seguidos no escriben a la vez el mismo archivo del día
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                "$NAME-now",
+                androidx.work.ExistingWorkPolicy.KEEP,
+                androidx.work.OneTimeWorkRequestBuilder<AutoBackupWorker>().build(),
+            )
         }
     }
 }

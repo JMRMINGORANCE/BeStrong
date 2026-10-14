@@ -183,6 +183,7 @@ class HistoryViewModel @Inject constructor(
     fun repeat(workout: Workout, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() == null) {
             val template = workout.routineId?.let { repo.routine(it) }
+            actions.useRoutineGym(template)
             val fromProgram = workout.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
             // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
             // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya
