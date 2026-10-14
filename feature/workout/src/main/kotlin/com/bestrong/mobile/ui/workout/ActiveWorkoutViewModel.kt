@@ -204,6 +204,9 @@ class ActiveWorkoutViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** Incremento propio del ejercicio en kg; null vuelve al de la unidad. */
+    /** Cambia el gimnasio activo (las sugerencias y el peso por RPE se recalculan con su material). */
+    fun setActiveGym(id: String) = settingsStore.update { it.copy(activeGymId = id) }
+
     fun setIncrement(exerciseId: String, kg: Double?) = settingsStore.update { s ->
         s.copy(exerciseIncrementKg = if (kg == null) s.exerciseIncrementKg - exerciseId else s.exerciseIncrementKg + (exerciseId to kg))
     }

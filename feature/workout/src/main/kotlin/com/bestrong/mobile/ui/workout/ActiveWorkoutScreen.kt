@@ -255,6 +255,7 @@ fun ActiveWorkoutScreen(
                 },
                 actions = {
                     var menu by remember { mutableStateOf(false) }
+                    val openGyms = gymSwitch(vm)
                     IconButton(onClick = vm::togglePause) {
                         if (w.isPaused) {
                             Icon(Icons.Default.PlayArrow, stringResource(R.string.workout_resume))
@@ -268,6 +269,7 @@ fun ActiveWorkoutScreen(
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.workout_notes)) }, onClick = { menu = false; editingNotes = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.touch_lock)) }, onClick = { menu = false; touchLocked = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.gym_switch_title)) }, onClick = { menu = false; openGyms() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.workout_discard)) }, onClick = { menu = false; confirmDiscard = true })
                     }
                 },
@@ -941,6 +943,17 @@ private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.mode
         modifier = Modifier.padding(horizontal = 12.dp)
             .then(if (load != null && pending) Modifier.clickable(onClickLabel = stringResource(R.string.plates_use_weight)) { vm.applyRpeLoads(we.id) } else Modifier),
     )
+}
+
+/** Diálogo para cambiar de gimnasio a mitad de entreno (de hotel, de casa…); devuelve cómo abrirlo. */
+@Composable
+private fun gymSwitch(vm: ActiveWorkoutViewModel): () -> Unit {
+    var open by remember { mutableStateOf(false) }
+    if (open) {
+        val settings by vm.settings.collectAsStateWithLifecycle()
+        com.bestrong.mobile.ui.components.GymPickerDialog(settings.gyms, settings.activeGym.id, vm::setActiveGym) { open = false }
+    }
+    return { open = true }
 }
 
 /** «Press banca: RPE 8.5 de media (objetivo 8)»: más duro en rojo, en el objetivo en verde. */

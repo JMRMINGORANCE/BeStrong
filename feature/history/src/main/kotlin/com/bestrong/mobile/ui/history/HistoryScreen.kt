@@ -346,7 +346,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                         restByExercise[we.id]?.let { r -> ExerciseRestLine(w, we, r, routinesById, vm) }
                         // Una vez por ejercicio (en su primer bloque) y solo con peso
                         val firstBlock = w.exercises.firstOrNull { it.exercise.id == we.exercise.id }?.id == we.id
-                        if (firstBlock && we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) comparisons[we.exercise.id]?.let { ComparisonLine(it) }
+                        if (firstBlock) comparisons[we.exercise.id]?.let { ComparisonLine(it, we.exercise.tracking) }
                         if (editing) TextButton(onClick = { vm.addPastSet(w, we.id) }) { Text(stringResource(R.string.add_set)) }
                     }
                 }
@@ -357,9 +357,33 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
 
 private const val NO_CHANGE_KG = 0.5
 
+/** Línea de comparación de una sola cifra (reps o tiempo), en verde si subió. */
+@Composable
+private fun SimpleComparisonLine(delta: Int, text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.bodySmall,
+        color = if (delta > 0) com.bestrong.mobile.ui.theme.statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 4.dp),
+    )
+}
+
 /** «Frente a la vez anterior: +250 kg de volumen · 1RM +2,5 kg», en verde si mejoró. */
 @Composable
-private fun ComparisonLine(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison) {
+private fun ComparisonLine(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison, tracking: com.bestrong.core.model.TrackingType) {
+    when (tracking) {
+        com.bestrong.core.model.TrackingType.WEIGHT_REPS -> WeightComparisonLine(c)
+        // Sin peso: reps totales; de tiempo: segundos totales (más es mejor en los dos)
+        com.bestrong.core.model.TrackingType.REPS_ONLY ->
+            SimpleComparisonLine(c.repsDelta, stringResource(R.string.history_vs_previous_reps, com.bestrong.core.util.signedCount(c.repsDelta)))
+        com.bestrong.core.model.TrackingType.DURATION ->
+            SimpleComparisonLine(c.durationDelta, stringResource(R.string.history_vs_previous_time, com.bestrong.core.util.signedDuration(c.durationDelta)))
+        else -> Unit
+    }
+}
+
+@Composable
+private fun WeightComparisonLine(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison) {
     val unit = LocalWeightUnit.current
 
     // Lo que no llega a medio kilo es «sin cambio» (±0); si no, con su signo

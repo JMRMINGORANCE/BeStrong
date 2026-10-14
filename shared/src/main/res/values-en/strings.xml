@@ -1112,4 +1112,11 @@
     <string name="setup_place_home">At home</string>
     <string name="auto_backup_lost">The backup folder is no longer available: choose another to keep backing up</string>
     <string name="auto_backup_stale">Last backup: %1$s. Over two weeks ago: check the folder</string>
+    <string name="gym_switch_title">Gym</string>
+    <string name="notif_backup_title">Automatic backup has stopped</string>
+    <string name="notif_backup_failing">It hasn’t worked for over two weeks: open Profile and check the folder</string>
+    <string name="restore_preview_new">Workouts you don’t have: %1$d</string>
+    <string name="restore_preview_older">It’s older than your latest workout: restoring its settings will replace your current ones</string>
+    <string name="history_vs_previous_reps">Vs. last time: %1$s reps</string>
+    <string name="history_vs_previous_time">Vs. last time: %1$s</string>
 </resources>

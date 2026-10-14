@@ -1112,4 +1112,11 @@
     <string name="setup_place_home">À la maison</string>
     <string name="auto_backup_lost">Le dossier des sauvegardes n’est plus disponible : choisis-en un autre pour continuer</string>
     <string name="auto_backup_stale">Dernière sauvegarde : %1$s. Il y a plus de deux semaines : vérifie le dossier</string>
+    <string name="gym_switch_title">Salle</string>
+    <string name="notif_backup_title">La sauvegarde automatique s’est arrêtée</string>
+    <string name="notif_backup_failing">Elle échoue depuis plus de deux semaines : ouvre Profil et vérifie le dossier</string>
+    <string name="restore_preview_new">Séances que tu n’as pas : %1$d</string>
+    <string name="restore_preview_older">Elle est plus ancienne que ta dernière séance : restaurer ses réglages remplacera les actuels</string>
+    <string name="history_vs_previous_reps">Par rapport à la dernière fois : %1$s reps</string>
+    <string name="history_vs_previous_time">Par rapport à la dernière fois : %1$s</string>
 </resources>

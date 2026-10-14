@@ -136,7 +136,7 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("BeStrong", fontWeight = FontWeight.Black) }) },
+        topBar = { TopAppBar(title = { Text("BeStrong", fontWeight = FontWeight.Black) }, actions = { GymChip(vm) }) },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         // Rejilla adaptable: 1 columna en el Fold plegado, 2-3 desplegado
@@ -446,4 +446,14 @@ private fun UndoDiscard(vm: HomeViewModel, snackbar: SnackbarHostState, onOpenWo
             if (result == SnackbarResult.ActionPerformed) vm.restoreDiscarded(onOpenWorkout) else vm.forgetDiscarded()
         }
     }
+}
+
+/** El gimnasio activo arriba a la derecha (solo con más de uno): tocarlo lo cambia antes de empezar. */
+@Composable
+private fun GymChip(vm: HomeViewModel) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    if (settings.gyms.size < 2) return
+    var open by remember { mutableStateOf(false) }
+    TextButton(onClick = { open = true }) { Text("🏋️ " + settings.activeGym.name, maxLines = 1) }
+    if (open) com.bestrong.mobile.ui.components.GymPickerDialog(settings.gyms, settings.activeGym.id, vm::setActiveGym) { open = false }
 }

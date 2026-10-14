@@ -1112,4 +1112,11 @@
     <string name="setup_place_home">Na casa</string>
     <string name="auto_backup_lost">O cartafol das copias xa non está dispoñible: escolle outro para seguir facendo copias</string>
     <string name="auto_backup_stale">Última copia: %1$s. Hai máis de dúas semanas: revisa o cartafol</string>
+    <string name="gym_switch_title">Ximnasio</string>
+    <string name="notif_backup_title">A copia automática detívose</string>
+    <string name="notif_backup_failing">Hai máis de dúas semanas que non se pode facer: abre Perfil e revisa o cartafol</string>
+    <string name="restore_preview_new">Adestramentos que non tes: %1$d</string>
+    <string name="restore_preview_older">É máis antiga ca o teu último adestramento: se restauras os seus axustes, substituirán os de agora</string>
+    <string name="history_vs_previous_reps">Fronte á vez anterior: %1$s reps</string>
+    <string name="history_vs_previous_time">Fronte á vez anterior: %1$s</string>
 </resources>

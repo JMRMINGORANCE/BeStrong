@@ -311,3 +311,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Configuración inicial: «¿Dónde entrenas?» (gimnasio o casa) elige el material
 - [x] Test de traducciones: las 7 lenguas con las mismas claves y argumentos
 - [x] Tempo explosivo (X): el reloj también avisa de subir
+
+## Fase 34 — Que nada se pare sin avisar ✅
+- [x] Notificación si la copia automática se para (carpeta perdida o dos semanas fallando)
+- [x] Al restaurar: cuántos entrenos son nuevos y aviso si la copia es más antigua que tu último entreno
+- [x] Historial: comparación también en ejercicios sin peso (reps) y de tiempo
+- [x] Cambiar de gimnasio desde el entreno (menú) y desde Inicio
+- [x] Resumen del reloj: reps o tiempo frente a la última vez en ejercicios sin peso

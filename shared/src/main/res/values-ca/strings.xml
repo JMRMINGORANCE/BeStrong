@@ -1112,4 +1112,11 @@
     <string name="setup_place_home">A casa</string>
     <string name="auto_backup_lost">La carpeta de les còpies ja no està disponible: tria’n una altra per continuar fent còpies</string>
     <string name="auto_backup_stale">Darrera còpia: %1$s. Fa més de dues setmanes: revisa la carpeta</string>
+    <string name="gym_switch_title">Gimnàs</string>
+    <string name="notif_backup_title">La còpia automàtica s’ha aturat</string>
+    <string name="notif_backup_failing">Fa més de dues setmanes que no es pot fer: obre Perfil i revisa la carpeta</string>
+    <string name="restore_preview_new">Entrenaments que no tens: %1$d</string>
+    <string name="restore_preview_older">És més antiga que el teu darrer entrenament: si en restaures els ajustos, substituiran els d’ara</string>
+    <string name="history_vs_previous_reps">Davant de la vegada anterior: %1$s reps</string>
+    <string name="history_vs_previous_time">Davant de la vegada anterior: %1$s</string>
 </resources>

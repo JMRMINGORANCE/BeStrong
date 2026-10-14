@@ -277,10 +277,16 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                 item { ListHeader { Text(stringResource(R.string.vs_last)) } }
                 items(s.comparisons.take(5)) { c ->
                     val name = ExerciseLibrary.byId(c.exerciseId)?.displayName() ?: c.exerciseName
+                    // Según el ejercicio: volumen con peso, reps sin peso, tiempo en los de tiempo
+                    val (delta, text) = when (w.exercises.firstOrNull { it.exercise.id == c.exerciseId }?.exercise?.tracking) {
+                        com.bestrong.core.model.TrackingType.REPS_ONLY -> c.repsDelta.toDouble() to com.bestrong.core.util.signedCount(c.repsDelta) + " reps"
+                        com.bestrong.core.model.TrackingType.DURATION -> c.durationDelta.toDouble() to com.bestrong.core.util.signedDuration(c.durationDelta)
+                        else -> c.volumeDelta to (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta))
+                    }
                     Text(
-                        stringResource(R.string.vs_line, name, (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta))),
+                        stringResource(R.string.vs_line, name, text),
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (c.volumeDelta >= 0) Done else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (delta >= 0) Done else MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
                 }

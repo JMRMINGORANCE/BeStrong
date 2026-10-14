@@ -660,4 +660,21 @@ class CollarTest {
         assertEquals(9L, s.lastWorkoutEpochMs)
         assertEquals(false, s.hasSettings)
     }
+
+    @Test
+    fun comparisonCountsTimeAndSkipsMissing() {
+        val plank = com.bestrong.core.model.Exercise(id = "plank", name = "Plancha", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST, tracking = com.bestrong.core.model.TrackingType.DURATION)
+        val bp = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        fun w(id: String, t: Long, sec: Int, withBench: Boolean) = Workout(
+            id = id, name = id, startedAtEpochMs = t, finishedAtEpochMs = t + 1,
+            exercises = listOf(WorkoutExercise(exercise = plank, sets = listOf(WorkoutSet(durationSec = sec, completed = true)))) +
+                if (withBench) listOf(WorkoutExercise(exercise = bp, sets = listOf(WorkoutSet(weightKg = 80.0, reps = 5, completed = true)))) else emptyList(),
+        )
+        val before = w("a", 1, 60, true)
+        val now = w("b", 10, 90, false).let { it.copy(exercises = it.exercises + WorkoutExercise(exercise = bp, sets = listOf(WorkoutSet(weightKg = 80.0, reps = 5)))) }
+        val c = com.bestrong.core.stats.WorkoutStats.compareWithPrevious(now, listOf(before))
+        // La plancha: +30 s; el press se saltó hoy (ninguna serie hecha): no sale
+        assertEquals(30, c.single().durationDelta)
+        assertEquals("plank", c.single().exerciseId)
+    }
 }

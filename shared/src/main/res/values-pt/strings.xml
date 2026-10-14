@@ -1112,4 +1112,11 @@
     <string name="setup_place_home">Em casa</string>
     <string name="auto_backup_lost">A pasta das cópias já não está disponível: escolhe outra para continuar a fazer cópias</string>
     <string name="auto_backup_stale">Última cópia: %1$s. Há mais de duas semanas: verifica a pasta</string>
+    <string name="gym_switch_title">Ginásio</string>
+    <string name="notif_backup_title">A cópia automática parou</string>
+    <string name="notif_backup_failing">Há mais de duas semanas que não é possível: abre o Perfil e verifica a pasta</string>
+    <string name="restore_preview_new">Treinos que não tens: %1$d</string>
+    <string name="restore_preview_older">É mais antiga do que o teu último treino: se restaurares as definições, substituem as atuais</string>
+    <string name="history_vs_previous_reps">Face à vez anterior: %1$s reps</string>
+    <string name="history_vs_previous_time">Face à vez anterior: %1$s</string>
 </resources>

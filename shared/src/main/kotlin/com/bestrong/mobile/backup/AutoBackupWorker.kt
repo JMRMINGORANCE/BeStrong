@@ -34,6 +34,7 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
                 Log.w("AutoBackup", "Sin permiso sobre la carpeta de copias: se desactiva")
                 // Se avisa en Perfil: sin esto las copias se paraban sin que nadie lo supiera
                 settingsStore.update { it.copy(backupFolderUri = null, backupFolderLost = true) }
+                com.bestrong.mobile.notify.Notifier.backupStopped(applicationContext, folderLost = true)
             }
             return Result.success()
         }
@@ -50,7 +51,14 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             { Result.success() },
             {
                 Log.w("AutoBackup", "Copia fallida", it)
-                if (runAttemptCount < 2) Result.retry() else Result.failure()
+                if (runAttemptCount < 2) {
+                    Result.retry()
+                } else {
+                    // Fallo definitivo y la última copia buena tiene más de dos semanas: se avisa
+                    val last = settingsStore.settings.value.lastBackupEpochMs
+                    if (System.currentTimeMillis() - last > STALE_MS) com.bestrong.mobile.notify.Notifier.backupStopped(applicationContext, folderLost = false)
+                    Result.failure()
+                }
             },
         )
     }
@@ -97,6 +105,9 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     }
 
     companion object {
+        /** Sin copia buena en más de esto (es semanal), un fallo definitivo avisa. */
+        private const val STALE_MS = 14 * 86_400_000L
+
         private const val NAME = "auto-backup"
         private const val KEEP = 8
         private const val PREFIX = "bestrong-auto-"

@@ -138,7 +138,15 @@ object WorkoutStats {
     }
 
     /** Comparación de un ejercicio con la última vez que se hizo. */
-    data class ExerciseComparison(val exerciseId: String, val exerciseName: String, val volumeDelta: Double, val best1rmDelta: Double, val repsDelta: Int)
+    data class ExerciseComparison(
+        val exerciseId: String,
+        val exerciseName: String,
+        val volumeDelta: Double,
+        val best1rmDelta: Double,
+        val repsDelta: Int,
+        /** Segundos totales (ejercicios de tiempo). */
+        val durationDelta: Int = 0,
+    )
 
     /** Ejercicio a ejercicio, qué cambió frente a la sesión anterior en que se hizo. */
     fun compareWithPrevious(workout: Workout, history: List<Workout>): List<ExerciseComparison> {
@@ -157,6 +165,7 @@ object WorkoutStats {
                 volumeDelta = now.sumOf { it.volume } - prev.sumOf { it.volume },
                 best1rmDelta = (now.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0) - (prev.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0),
                 repsDelta = now.sumOf { it.totalReps } - prev.sumOf { it.totalReps },
+                durationDelta = now.sumOf { it.durationSec } - prev.sumOf { it.durationSec },
             )
         }
     }

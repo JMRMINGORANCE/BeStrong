@@ -309,9 +309,22 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun showRestorePreview(data: com.bestrong.core.io.BackupData) {
+        val local = repo.history.value
+        val ids = local.map { it.id }.toSet()
+        val latestLocal = local.maxOfOrNull { it.startedAtEpochMs }
+        val latestBackup = data.history.maxOfOrNull { it.startedAtEpochMs }
+        restoreInfo.value = RestoreInfo(
+            newWorkouts = data.history.count { it.id !in ids },
+            olderThanLocal = latestLocal != null && latestBackup != null && latestBackup < latestLocal,
+        )
         restoreWithSettings.value = true
         pendingRestore.value = data
     }
+
+    /** Lo que aporta la copia frente a lo que ya hay: entrenos nuevos y si es más antigua que tu último entreno. */
+    data class RestoreInfo(val newWorkouts: Int = 0, val olderThanLocal: Boolean = false)
+
+    val restoreInfo = MutableStateFlow(RestoreInfo())
 
     /** Copia leída y pendiente de confirmar (se enseña qué trae antes de restaurar). */
     val pendingRestore = MutableStateFlow<com.bestrong.core.io.BackupData?>(null)

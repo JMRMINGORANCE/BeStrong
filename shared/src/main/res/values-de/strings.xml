@@ -1112,4 +1112,11 @@
     <string name="setup_place_home">Zu Hause</string>
     <string name="auto_backup_lost">Der Sicherungsordner ist nicht mehr verfügbar: wähle einen anderen, um weiter zu sichern</string>
     <string name="auto_backup_stale">Letzte Sicherung: %1$s. Über zwei Wochen her: prüfe den Ordner</string>
+    <string name="gym_switch_title">Studio</string>
+    <string name="notif_backup_title">Die automatische Sicherung wurde gestoppt</string>
+    <string name="notif_backup_failing">Seit über zwei Wochen fehlgeschlagen: öffne das Profil und prüfe den Ordner</string>
+    <string name="restore_preview_new">Trainings, die dir fehlen: %1$d</string>
+    <string name="restore_preview_older">Sie ist älter als dein letztes Training: Ihre Einstellungen würden die aktuellen ersetzen</string>
+    <string name="history_vs_previous_reps">Im Vergleich zum letzten Mal: %1$s Wdh.</string>
+    <string name="history_vs_previous_time">Im Vergleich zum letzten Mal: %1$s</string>
 </resources>

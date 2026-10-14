@@ -96,6 +96,11 @@ class HomeViewModel @Inject constructor(
         if (session != null && plan.mesocycle?.isDeloadWeek(LocalDate.now()) == true) session.copy(routine = Fatigue.deload(session.routine)) else session
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    /** Ajustes (gimnasio activo para el selector de arriba). */
+    val settings: StateFlow<com.bestrong.mobile.data.UserSettings> = settingsStore.settings
+
+    fun setActiveGym(id: String) = settingsStore.update { it.copy(activeGymId = id) }
+
     /** Si no hay programa: la rutina que lleva más tiempo sin hacerse. */
     val suggestedRoutine: StateFlow<Routine?> = combine(repo.routines, repo.history) { routines, history ->
         val last = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }

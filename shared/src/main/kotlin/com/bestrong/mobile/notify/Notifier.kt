@@ -26,6 +26,7 @@ object Notifier {
     private const val ID_WEEKLY = 21
     private const val ID_WEIGH_IN = 22
     private const val ID_MEASURE = 23
+    private const val ID_BACKUP = 24
     private const val ID_RECORDS_BASE = 100
 
     private fun ensureChannels(context: Context) {
@@ -136,6 +137,26 @@ object Notifier {
             .addAction(action)
             .build()
         NotificationManagerCompat.from(context).notify(ID_WEIGH_IN, n)
+    }
+
+    /**
+     * La copia automática se ha parado: la carpeta ya no está ([folderLost]) o lleva más de dos semanas fallando.
+     * Al tocarla se abre la app (en Perfil se elige otra carpeta).
+     */
+    @Suppress("MissingPermission")
+    fun backupStopped(context: Context, folderLost: Boolean) {
+        if (!canPost(context)) return
+        ensureChannels(context)
+        val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
+            .setSmallIcon(R.drawable.ic_stat_dumbbell)
+            .setContentTitle(context.getString(R.string.notif_backup_title))
+            .setContentText(context.getString(if (folderLost) R.string.auto_backup_lost else R.string.notif_backup_failing))
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(if (folderLost) R.string.auto_backup_lost else R.string.notif_backup_failing)))
+            .setCategory(NotificationCompat.CATEGORY_ERROR)
+            .setAutoCancel(true)
+            .setContentIntent(openApp(context))
+            .build()
+        NotificationManagerCompat.from(context).notify(ID_BACKUP, n)
     }
 
     /** Recordatorio mensual de medirse con cinta (cintura, pecho, brazo, muslo). */

@@ -25,3 +25,17 @@ fun formatDuration(seconds: Long): String {
     val s = seconds % 60
     return if (h > 0) "%dh %02dm".format(h, m) else "%d:%02d".format(m, s)
 }
+
+/** Diferencia con signo para comparar: «+3», «−2», «±0». */
+fun signedCount(delta: Int): String = when {
+    delta > 0 -> "+$delta"
+    delta < 0 -> "−${-delta}"
+    else -> "±0"
+}
+
+/** Diferencia de tiempo con signo: «+0:30», «−1:05», «±0:00». */
+fun signedDuration(deltaSeconds: Int): String = when {
+    deltaSeconds > 0 -> "+"
+    deltaSeconds < 0 -> "−"
+    else -> "±"
+} + formatDuration(kotlin.math.abs(deltaSeconds).toLong())

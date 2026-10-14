@@ -166,6 +166,10 @@ private fun RestorePreviewDialog(vm: ProfileViewModel) {
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
+                val info by vm.restoreInfo.collectAsStateWithLifecycle()
+                Text(stringResource(R.string.restore_preview_new, info.newWorkouts), fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
+                // Una copia vieja no borra nada, pero sus ajustes sí sustituirían a los de ahora
+                if (info.olderThanLocal) Text(stringResource(R.string.restore_preview_older), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 Text(stringResource(R.string.restore_preview_merge), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (summary.hasSettings) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
