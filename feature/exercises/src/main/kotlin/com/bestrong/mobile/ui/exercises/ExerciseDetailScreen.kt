@@ -112,6 +112,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
         )
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item { ExerciseMediaSection(vm, s.exercise) }
+            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { ExerciseGoalCard(vm, s) }
             if (s.variants.size > 1) {
                 item {
                     // Variantes enlazadas: historial y récords juntos o por separado
@@ -164,6 +165,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                 }
                 LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { unit.format(it) })
             }
+            if (s.rpeTrend.size >= RPE_MIN_SESSIONS) item { RpeTrendCard(s.rpeTrend) }
             item { SectionHeader(stringResource(R.string.personal_records)) }
             item {
                 Card(Modifier.fillMaxWidth()) {
@@ -259,4 +261,24 @@ private fun ExportExerciseButton(vm: ExercisesViewModel, exercise: com.bestrong.
     val plain = java.text.Normalizer.normalize(exercise.displayName(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{M}+"), "")
     val fileName = "bestrong-" + plain.lowercase().replace(Regex("[^a-z0-9]+"), "-").trim('-').ifEmpty { exercise.id } + ".csv"
     IconButton(onClick = { launcher.launch(fileName) }) { Icon(Icons.Default.FileDownload, stringResource(R.string.export_exercise_csv)) }
+}
+
+private const val RPE_MIN_SESSIONS = 3
+
+/** RPE medio de las últimas sesiones y aviso si cuesta más sin progresar (fatiga). */
+@Composable
+private fun RpeTrendCard(trend: List<Triple<Long, Double, Double>>) {
+    val rising = remember(trend) { com.bestrong.core.stats.Strength.effortRising(trend) }
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.rpe_trend_title), fontWeight = FontWeight.SemiBold)
+            LineChart(
+                trend.takeLast(20).map { (date, rpe, _) -> ChartPoint(formatShortDate(date), rpe) },
+                Modifier.fillMaxWidth(),
+                height = 120.dp,
+                valueFormatter = { "%.1f".format(it) },
+            )
+            if (rising) Text(stringResource(R.string.rpe_trend_rising), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+        }
+    }
 }

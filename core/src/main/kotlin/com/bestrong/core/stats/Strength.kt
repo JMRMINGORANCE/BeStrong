@@ -296,6 +296,30 @@ object Strength {
         )
     }
 
+    /**
+     * RPE medio por sesión de un ejercicio (series efectivas con RPE apuntado), de la más antigua a la
+     * más reciente: (inicio del entreno, RPE medio, mejor 1RM estimado de ese día).
+     */
+    fun rpeTrend(history: List<Workout>, exerciseIds: Set<String>): List<Triple<Long, Double, Double>> =
+        history.filter { it.isFinished }.sortedBy { it.startedAtEpochMs }.mapNotNull { w ->
+            val sets = w.exercises.filter { it.exercise.id in exerciseIds }.flatMap { it.completedSets }.filter { it.type != SetType.WARMUP }
+            val rpes = sets.mapNotNull { it.rpe }
+            if (rpes.isEmpty()) null else Triple(w.startedAtEpochMs, rpes.average(), sets.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0)
+        }
+
+    /**
+     * «Cada vez te cuesta más»: en las últimas [window] sesiones el RPE medio subió al menos [minRise]
+     * frente a las [window] anteriores sin que el 1RM estimado mejorase. Señal de fatiga acumulada.
+     */
+    fun effortRising(trend: List<Triple<Long, Double, Double>>, window: Int = 3, minRise: Double = 0.5): Boolean {
+        if (trend.size < window * 2) return false
+        val recent = trend.takeLast(window)
+        val before = trend.dropLast(window).takeLast(window)
+        val rpeUp = recent.map { it.second }.average() - before.map { it.second }.average() >= minRise
+        val noGain = recent.maxOf { it.third } <= before.maxOf { it.third } + 1e-6
+        return rpeUp && noGain
+    }
+
     fun monthSummary(history: List<Workout>, month: YearMonth, zone: ZoneId): PeriodSummary {
         val from = month.atDay(1).atStartOfDay(zone).toInstant().toEpochMilli()
         val to = month.plusMonths(1).atDay(1).atStartOfDay(zone).toInstant().toEpochMilli()

@@ -32,6 +32,7 @@ import androidx.glance.unit.ColorProvider
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.stats.MuscleTargets
 import com.bestrong.core.stats.WorkoutStats
+import com.bestrong.mobile.AppIntents
 import com.bestrong.mobile.MainActivity
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.labelRes
@@ -70,7 +71,13 @@ class MuscleWidget : GlanceAppWidget() {
                 Text(context.getString(R.string.widget_muscles_empty), style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp))
             }
             rows.forEach { (muscle, sets) ->
-                Row(modifier = GlanceModifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                // Cada fila abre la biblioteca con los ejercicios de ese músculo
+                val open = Intent(context, MainActivity::class.java).setAction(AppIntents.ACTION_OPEN_MUSCLE).putExtra(AppIntents.EXTRA_MUSCLE, muscle.name)
+                    .setData(android.net.Uri.parse("bestrong-widget://muscle/" + muscle.name))
+                Row(
+                    modifier = GlanceModifier.fillMaxWidth().padding(vertical = 2.dp).clickable(actionStartActivity(open)),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(context.getString(muscle.labelRes()), maxLines = 1, style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 13.sp))
                     Spacer(GlanceModifier.defaultWeight())
                     val value = "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0")

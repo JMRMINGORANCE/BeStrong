@@ -235,6 +235,9 @@ class ActiveWorkoutViewModel @Inject constructor(
         /** Borrado que se puede deshacer: [restore] vuelve a meter solo lo borrado en su sitio. */
         class Undoable(val kind: UndoKind, val partner: Boolean, val workoutId: String, val restore: (Workout) -> Workout) : WorkoutEvent
         data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
+
+        /** La serie recién hecha alcanza el objetivo de 1RM que el usuario se puso en ese ejercicio. */
+        data class GoalReached(val exercise: Exercise, val goalKg: Double) : WorkoutEvent
     }
     enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, TRIM }
 
@@ -433,8 +436,25 @@ class ActiveWorkoutViewModel @Inject constructor(
             val (before, updated) = update { WorkoutEditor.toggleSetCompleted(it, weId, setId) } ?: return@launch
             val index = updated.exercises.indexOfFirst { it.id == weId }
             fun done(w: Workout) = w.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId }?.completed == true
-            if (index >= 0 && !done(before) && done(updated)) onSetCompleted(updated, index)
+            if (index >= 0 && !done(before) && done(updated)) {
+                onSetCompleted(updated, index)
+                checkGoal(updated, weId, setId)
+            }
         }
+    }
+
+    /** Celebra la primera serie que llega al objetivo de 1RM del ejercicio (no si ya lo tenías). */
+    private fun checkGoal(w: Workout, weId: String, setId: String) {
+        val we = w.exercises.firstOrNull { it.id == weId }
+        val set = we?.sets?.firstOrNull { it.id == setId }?.takeIf { it.countsForRecords }
+        val goal = we?.let { settings.value.exerciseGoalsKg[it.exercise.id] }
+        if (we == null || set == null || goal == null) return
+        val before = maxOf(
+            bests.value[we.exercise.id]?.first ?: 0.0,
+            w.exercises.filter { it.exercise.id == we.exercise.id }.flatMap { it.completedSets }
+                .filter { it.id != setId && it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0,
+        )
+        if (set.estimatedOneRepMax >= goal && before < goal) _events.tryEmit(WorkoutEvent.GoalReached(we.exercise, goal))
     }
 
     /** Descanso, aviso por voz y desplazamiento al siguiente ejercicio tras completar una serie. */

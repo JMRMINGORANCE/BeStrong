@@ -49,7 +49,7 @@ class BeStrongWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val repo = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java).repository()
         val history = repo.historyOnce()
-        val routines = repo.routinesOnce().take(2)
+        val routines = repo.routinesOnce().filterNot { it.archived }.take(2)
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val week = WorkoutStats.weeklySummary(history, 1, today, zone).first().workouts

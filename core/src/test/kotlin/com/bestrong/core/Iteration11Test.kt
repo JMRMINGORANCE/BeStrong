@@ -239,3 +239,16 @@ class MoveKeepingSupersetsTest {
         assertEquals(listOf("b", "a", "c"), r.moveKeepingSupersets(1, down = false).exercises.map { it.id })
     }
 }
+
+class RpeTrendTest {
+    @Test fun effortRisingWhenRpeUpWithoutGains() {
+        val d = java.time.LocalDate.of(2026, 3, 2)
+        val rpes = listOf(7.0, 7.0, 7.5, 8.0, 8.5, 9.0)
+        val history = rpes.mapIndexed { i, r -> finishedWorkout("w$i", d.plusDays(i * 3L), bench to listOf(done(100.0, 5).copy(rpe = r))) }
+        val trend = com.bestrong.core.stats.Strength.rpeTrend(history, setOf(bench.id))
+        assertEquals(6, trend.size)
+        assertEquals(true, com.bestrong.core.stats.Strength.effortRising(trend))
+        val progressing = history.mapIndexed { i, w -> if (i == 5) finishedWorkout("p", d.plusDays(20), bench to listOf(done(110.0, 5).copy(rpe = 9.0))) else w }
+        assertEquals(false, com.bestrong.core.stats.Strength.effortRising(com.bestrong.core.stats.Strength.rpeTrend(progressing, setOf(bench.id))))
+    }
+}

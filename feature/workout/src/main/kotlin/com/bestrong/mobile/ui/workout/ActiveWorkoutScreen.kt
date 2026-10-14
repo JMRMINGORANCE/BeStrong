@@ -185,6 +185,7 @@ fun ActiveWorkoutScreen(
     val undoCopy = stringResource(R.string.undo_copied_sets)
     val undoComplete = stringResource(R.string.undo_completed_sets)
     val undoTrim = stringResource(R.string.undo_trimmed_sets)
+    val goalMsg = stringResource(R.string.goal_reached_live)
     val undoLabel = stringResource(R.string.action_undo)
     val applyLabel = stringResource(R.string.action_apply)
     val rpeDown = stringResource(R.string.rpe_suggest_down)
@@ -209,6 +210,9 @@ fun ActiveWorkoutScreen(
                         ActiveWorkoutViewModel.UndoKind.TRIM -> undoTrim
                     }
                     if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undo(e)
+                }
+                is ActiveWorkoutViewModel.WorkoutEvent.GoalReached -> {
+                    snackbar.showSnackbar(goalMsg.format(e.exercise.displayName(appContext), unitForShare.format(e.goalKg, withUnit = true)), duration = SnackbarDuration.Long)
                 }
                 is ActiveWorkoutViewModel.WorkoutEvent.RpeSuggestion -> {
                     val template = if (e.adjustment.direction < 0) rpeDown else rpeUp

@@ -989,4 +989,17 @@
     </plurals>
     <string name="routine_not_found">A rotina já não existe</string>
     <string name="export_failed">Não foi possível exportar</string>
+    <string name="routine_archive">Arquivar</string>
+    <string name="routine_unarchive">Desarquivar</string>
+    <string name="routines_archived">Arquivadas</string>
+    <string name="goal_title">O teu objetivo</string>
+    <string name="goal_set">Definir objetivo</string>
+    <string name="goal_hint">Define uma meta de 1RM (p. ex. 100) e vês quanto falta e quando lá chegarias a este ritmo.</string>
+    <string name="goal_field">1RM objetivo (%1$s)</string>
+    <string name="goal_reached">🎯 Objetivo de %1$s alcançado!</string>
+    <string name="goal_progress">1RM estimado %1$s de %2$s</string>
+    <string name="goal_progress_eta">1RM estimado %1$s de %2$s · a este ritmo, por volta de %3$s</string>
+    <string name="rpe_trend_title">Esforço (RPE médio por sessão)</string>
+    <string name="rpe_trend_rising">⚠ Custa cada vez mais sem o 1RM subir: pode ser fadiga. Pondera uma semana de descarga.</string>
+    <string name="goal_reached_live">🎯 %1$s: objetivo de %2$s alcançado!</string>
 </resources>

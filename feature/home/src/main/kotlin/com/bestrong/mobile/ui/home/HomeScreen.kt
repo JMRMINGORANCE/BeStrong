@@ -194,7 +194,7 @@ fun HomeScreen(
             item(span = { GridItemSpan(maxLineSpan) }) {
                 // Título y acciones en líneas separadas: con letra grande los botones bajan de línea
                 Column {
-                    SectionHeader(stringResource(R.string.home_my_routines, routines.size))
+                    SectionHeader(stringResource(R.string.home_my_routines, routines.count { !it.archived }))
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = { onEditRoutine(null) }) { Text(stringResource(R.string.home_new_routine)) }
                         TextButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_programs)) }
@@ -225,6 +225,7 @@ fun HomeScreen(
                     onDelete = { vm.delete(routine) },
                     onMoveUp = { vm.move(routine, -1) },
                     onMoveDown = { vm.move(routine, 1) },
+                    onArchive = { vm.setArchived(routine, !routine.archived) },
                 )
             }
             // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
@@ -247,6 +248,7 @@ private fun RoutineCard(
     onDelete: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
+    onArchive: () -> Unit = {},
 ) {
     var menu by remember { mutableStateOf(false) }
     var sharing by remember { mutableStateOf(false) }
@@ -262,6 +264,10 @@ private fun RoutineCard(
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_edit)) }, onClick = { menu = false; onEdit() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.routine_start_on_watch)) }, onClick = { menu = false; onStartWatch() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_duplicate)) }, onClick = { menu = false; onDuplicate() })
+                        DropdownMenuItem(
+                            text = { Text(stringResource(if (routine.archived) R.string.routine_unarchive else R.string.routine_archive)) },
+                            onClick = { menu = false; onArchive() },
+                        )
                         DropdownMenuItem(text = { Text(stringResource(R.string.share_routine_link)) }, onClick = { menu = false; sharing = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.export_routine_pdf)) }, onClick = { menu = false; RoutineShare.sharePdf(context, listOf(routine), routine.name) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; onMoveUp() })
@@ -377,7 +383,7 @@ private fun UndoRoutineDelete(vm: HomeViewModel, snackbar: SnackbarHostState) {
 
 /** Cabecera de una carpeta de rutinas; tocarla la pliega o despliega. */
 @Composable
-private fun FolderHeader(name: String, count: Int, folded: Boolean, onToggle: () -> Unit) {
+private fun FolderHeader(name: String, count: Int, folded: Boolean, icon: String = "📁", onToggle: () -> Unit) {
     val state = stringResource(if (folded) R.string.folder_collapsed else R.string.folder_expanded)
     Row(
         Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(vertical = 8.dp)
@@ -385,7 +391,7 @@ private fun FolderHeader(name: String, count: Int, folded: Boolean, onToggle: ()
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(if (folded) "▸" else "▾", Modifier.padding(end = 8.dp), color = MaterialTheme.colorScheme.primary)
-        Text("📁 $name", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+        Text("$icon $name", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
         Text("$count", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
@@ -397,7 +403,8 @@ private fun LazyGridScope.routineItems(
     onToggleFolder: (String) -> Unit,
     card: @Composable (Routine) -> Unit,
 ) {
-    val byFolder = routines.groupBy { it.folder?.trim()?.takeIf(String::isNotEmpty) }
+    val (archived, active) = routines.partition { it.archived }
+    val byFolder = active.groupBy { it.folder?.trim()?.takeIf(String::isNotEmpty) }
     items(byFolder[null].orEmpty(), key = { it.id }) { card(it) }
     byFolder.keys.filterNotNull().sorted().forEach { folder ->
         val list = byFolder.getValue(folder)
@@ -407,7 +414,18 @@ private fun LazyGridScope.routineItems(
         }
         if (!folded) items(list, key = { it.id }) { card(it) }
     }
+    // Archivadas al final, plegadas salvo que se abran (la clave en [collapsed] significa aquí «abierta»)
+    if (archived.isNotEmpty()) {
+        val open = ARCHIVE_KEY in collapsed
+        item(key = "folder:$ARCHIVE_KEY", span = { GridItemSpan(maxLineSpan) }) {
+            FolderHeader(stringResource(R.string.routines_archived), archived.size, !open, icon = "🗄") { onToggleFolder(ARCHIVE_KEY) }
+        }
+        if (open) items(archived, key = { it.id }) { card(it) }
+    }
 }
+
+/** Clave de la sección de rutinas archivadas (no puede coincidir con una carpeta: lleva un carácter de control). */
+private const val ARCHIVE_KEY = "\u0000archived"
 
 /** Descartar un entreno por error se puede deshacer al volver a Inicio. */
 @Composable

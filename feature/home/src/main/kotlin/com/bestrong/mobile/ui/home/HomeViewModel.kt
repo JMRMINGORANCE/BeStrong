@@ -98,7 +98,7 @@ class HomeViewModel @Inject constructor(
     /** Si no hay programa: la rutina que lleva más tiempo sin hacerse. */
     val suggestedRoutine: StateFlow<Routine?> = combine(repo.routines, repo.history) { routines, history ->
         val last = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
-        routines.filter { it.exercises.isNotEmpty() }.minByOrNull { last[it.id] ?: 0L }
+        routines.filter { it.exercises.isNotEmpty() && !it.archived }.minByOrNull { last[it.id] ?: 0L }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Semana actual: días entrenados frente al objetivo y adherencia de las 8 semanas anteriores. */
@@ -253,6 +253,11 @@ class HomeViewModel @Inject constructor(
         watchPush.pushToWatchNow()
         val ok = watchSync.startOnWatch(routine?.id)
         _messages.tryEmit(context.getString(if (ok) R.string.msg_opening_on_watch else R.string.msg_no_watch))
+    }
+
+    /** Archivar (o recuperar) sin borrar: el historial y la rutina se conservan. */
+    fun setArchived(routine: Routine, archived: Boolean) = viewModelScope.launch {
+        repo.saveRoutine(routine.copy(archived = archived), keepPosition = true)
     }
 
     fun duplicate(routine: Routine) = viewModelScope.launch {

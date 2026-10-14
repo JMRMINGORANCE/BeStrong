@@ -14,6 +14,8 @@ object AppIntents {
     const val ACTION_START_EMPTY = "com.bestrong.START_EMPTY"
     const val ACTION_START_ROUTINE = "com.bestrong.START_ROUTINE"
     const val EXTRA_ROUTINE_ID = "routine_id"
+    const val ACTION_OPEN_MUSCLE = "com.bestrong.OPEN_MUSCLE"
+    const val EXTRA_MUSCLE = "muscle"
 
     fun main(context: Context): Intent = Intent().setClassName(context, MAIN_ACTIVITY)
 

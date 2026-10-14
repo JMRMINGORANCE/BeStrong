@@ -148,6 +148,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             LaunchRequest.StartEmpty -> home.startEmpty(openWorkout)
             is LaunchRequest.StartRoutine -> home.startRoutineById(r.routineId, openWorkout)
             is LaunchRequest.ImportRoutine -> home.importRoutineLink(r.link)
+            is LaunchRequest.OpenMuscle -> nav.openMuscle(r.muscle)
             null -> return@LaunchedEffect
         }
         onLaunchHandled()
@@ -198,10 +199,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
                         onEditRoutine = { nav.navigate(Routes.routine(it)) },
                         onOpenPlanning = { nav.navigate(Routes.PLANNING) },
-                        onOpenMuscle = { muscle ->
-                            nav.navigateTopLevel(TopLevel.EXERCISES.route)
-                            nav.currentBackStackEntry?.savedStateHandle?.set(KEY_MUSCLE_FILTER, muscle.name)
-                        },
+                        onOpenMuscle = { muscle -> nav.openMuscle(muscle.name) },
                     )
                 }
                 composable(TopLevel.HISTORY.route) {
@@ -302,6 +300,12 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
 }
 
 private const val KEY_MUSCLE_FILTER = "muscle_filter"
+
+/** Biblioteca filtrada por ese músculo (nombre del enum), desde Inicio o el widget. */
+private fun NavHostController.openMuscle(muscle: String) {
+    navigateTopLevel(TopLevel.EXERCISES.route)
+    currentBackStackEntry?.savedStateHandle?.set(KEY_MUSCLE_FILTER, muscle)
+}
 
 private fun NavHostController.navigateTopLevel(route: String) = navigate(route) {
     popUpTo(graph.findStartDestination().id) { saveState = true }

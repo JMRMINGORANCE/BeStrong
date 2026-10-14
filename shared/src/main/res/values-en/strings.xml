@@ -989,4 +989,17 @@
     </plurals>
     <string name="routine_not_found">That routine no longer exists</string>
     <string name="export_failed">Couldn\'t export</string>
+    <string name="routine_archive">Archive</string>
+    <string name="routine_unarchive">Unarchive</string>
+    <string name="routines_archived">Archived</string>
+    <string name="goal_title">Your goal</string>
+    <string name="goal_set">Set goal</string>
+    <string name="goal_hint">Set a 1RM target (e.g. 100) to see how far you are and when you\'d get there at this pace.</string>
+    <string name="goal_field">Target 1RM (%1$s)</string>
+    <string name="goal_reached">🎯 %1$s goal reached!</string>
+    <string name="goal_progress">Estimated 1RM %1$s of %2$s</string>
+    <string name="goal_progress_eta">Estimated 1RM %1$s of %2$s · at this pace, around %3$s</string>
+    <string name="rpe_trend_title">Effort (average RPE per session)</string>
+    <string name="rpe_trend_rising">⚠ It\'s getting harder without your 1RM going up: possibly fatigue. Consider a deload week.</string>
+    <string name="goal_reached_live">🎯 %1$s: %2$s goal reached!</string>
 </resources>

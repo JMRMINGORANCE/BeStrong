@@ -35,6 +35,9 @@ sealed interface LaunchRequest {
     data object StartEmpty : LaunchRequest
     data class StartRoutine(val routineId: String) : LaunchRequest
 
+    /** Biblioteca filtrada por un músculo (desde el widget de músculos). */
+    data class OpenMuscle(val muscle: String) : LaunchRequest
+
     /** Rutina compartida por enlace o QR. */
     data class ImportRoutine(val link: String) : LaunchRequest
 }
@@ -141,6 +144,7 @@ class MainActivity : ComponentActivity() {
             ACTION_OPEN_WORKOUT -> LaunchRequest.OpenWorkout
             ACTION_START_EMPTY -> LaunchRequest.StartEmpty
             ACTION_START_ROUTINE -> intent.getStringExtra(EXTRA_ROUTINE_ID)?.let { LaunchRequest.StartRoutine(it) }
+            AppIntents.ACTION_OPEN_MUSCLE -> intent.getStringExtra(AppIntents.EXTRA_MUSCLE)?.let { LaunchRequest.OpenMuscle(it) }
             else -> null
         } ?: launchRequest.value
     }

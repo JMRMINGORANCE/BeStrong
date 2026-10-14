@@ -70,6 +70,8 @@ data class ExerciseDetailState(
     val nextTarget: ProgressionSuggestion? = null,
     /** Notas de ese día por entreno (sin las fijas de la rutina o del programa, que se repiten siempre). */
     val sessionNotes: Map<String, String> = emptyMap(),
+    /** RPE medio por sesión (fecha, RPE, mejor 1RM del día), para ver si cada vez cuesta más. */
+    val rpeTrend: List<Triple<Long, Double, Double>> = emptyList(),
 )
 
 @HiltViewModel
@@ -118,6 +120,15 @@ class ExercisesViewModel @Inject constructor(
     }
 
     /** Ejercicios usados recientemente, primero (como Hevy). */
+    /** Objetivos de 1RM por ejercicio (kg). */
+    val goals: StateFlow<Map<String, Double>> = settingsStore.settings.map { it.exerciseGoalsKg }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.exerciseGoalsKg)
+
+    /** null quita el objetivo. */
+    fun setGoal(exerciseId: String, kg: Double?) = settingsStore.update { s ->
+        s.copy(exerciseGoalsKg = if (kg == null) s.exerciseGoalsKg - exerciseId else s.exerciseGoalsKg + (exerciseId to kg))
+    }
+
     /** Ejercicios ocultos por el usuario. */
     val hidden: StateFlow<Set<String>> = settingsStore.settings.map { it.hiddenExercises }
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.hiddenExercises)
@@ -189,6 +200,7 @@ class ExercisesViewModel @Inject constructor(
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
             nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id)),
             sessionNotes = sessionNotes(exerciseId, history, routines),
+            rpeTrend = Strength.rpeTrend(history, setOf(exerciseId)),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

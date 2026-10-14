@@ -33,6 +33,8 @@ data class Routine(
     val emoji: String? = null,
     /** Carpeta en Inicio («Bloque de fuerza», «Casa»…); null = sin carpeta. */
     val folder: String? = null,
+    /** Archivada: no sale en Inicio, el reloj ni el widget, pero se conserva (y se puede recuperar). */
+    val archived: Boolean = false,
 ) {
     /** Nombre con su emoji delante, si tiene. */
     val displayName: String get() = emoji?.let { "$it $name" } ?: name

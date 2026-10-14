@@ -79,6 +79,8 @@ data class UserSettings(
     val dismissedTips: Set<String> = emptySet(),
     /** Incremento propio por ejercicio en kg (mancuernas de 2 kg, máquinas de 5 kg, microdiscos…). */
     val exerciseIncrementKg: Map<String, Double> = emptyMap(),
+    /** Objetivo de peso (1RM estimado, kg) que el usuario se pone en un ejercicio («press banca a 100»). */
+    val exerciseGoalsKg: Map<String, Double> = emptyMap(),
     /** Descanso tras una serie de calentamiento (no hace falta el de una serie efectiva). */
     val warmupRestSeconds: Int = 60,
 ) {
@@ -146,6 +148,9 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         exerciseIncrementKg = prefs.getString("exercise_increments", null)
             ?.let { runCatching { SyncContract.json.decodeFromString(INCREMENTS, it) }.getOrNull() }
             .orEmpty(),
+        exerciseGoalsKg = prefs.getString("exercise_goals", null)
+            ?.let { runCatching { SyncContract.json.decodeFromString(INCREMENTS, it) }.getOrNull() }
+            .orEmpty(),
     )
 
     private inline fun <reified E : Enum<E>> enumOr(key: String, default: E): E =
@@ -196,6 +201,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("last_seen_version", s.lastSeenVersion)
             putStringSet("dismissed_tips", s.dismissedTips)
             putString("exercise_increments", SyncContract.json.encodeToString(INCREMENTS, s.exerciseIncrementKg))
+            putString("exercise_goals", SyncContract.json.encodeToString(INCREMENTS, s.exerciseGoalsKg))
             putInt("warmup_rest", s.warmupRestSeconds)
         }
         _settings.value = s
@@ -246,7 +252,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
     }
 }

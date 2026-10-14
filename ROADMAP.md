@@ -227,3 +227,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] «Tu año»: entrenos, volumen, récords, mejor racha, músculo estrella y mayores subidas (compartible)
 - [x] Tutorial con página final de configuración (unidad y días por semana)
 - [x] Widget «Músculos esta semana»
+
+## Fase 22 — Metas y orden ✅
+- [x] Widget de músculos: tocar un músculo abre sus ejercicios
+- [x] Archivar rutinas (sin borrarlas; fuera de Inicio, reloj y widget)
+- [x] Objetivo de 1RM por ejercicio con progreso y fecha estimada
+- [x] Celebración al alcanzar el objetivo durante el entreno
+- [x] Tendencia de esfuerzo (RPE) por ejercicio con aviso de fatiga
