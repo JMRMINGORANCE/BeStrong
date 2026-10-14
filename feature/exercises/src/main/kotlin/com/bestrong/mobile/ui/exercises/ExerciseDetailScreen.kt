@@ -406,16 +406,18 @@ private fun PlateauHint(vm: ExercisesViewModel, exerciseId: String, progress: Li
     val stalled = remember(progress) { com.bestrong.core.stats.WorkoutStats.sessionsSinceBest(progress) }
     if (stalled < PLATEAU_SESSIONS) return
     val ranges by vm.repRanges.collectAsStateWithLifecycle()
-    // Sin rango, el de hipertrofia; con el de hipertrofia, el de fuerza; con otro ya elegido, no se propone nada
+    // Siempre otro estímulo: de los rangos altos a uno más pesado y de los bajos (o sin rango, o uno antiguo como
+    // «4-6») a hipertrofia
     val next = when (ranges[exerciseId]) {
-        null -> HYPERTROPHY_RANGE
-        HYPERTROPHY_RANGE -> STRENGTH_RANGE
-        else -> null
+        "12-20" -> HYPERTROPHY_RANGE
+        "10-15" -> "6-10"
+        HYPERTROPHY_RANGE, "6-10" -> STRENGTH_RANGE
+        else -> HYPERTROPHY_RANGE
     }
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp)) {
             Text(stringResource(R.string.plateau_hint, stalled), style = MaterialTheme.typography.bodyMedium)
-            next?.let { r -> TextButton(onClick = { vm.setRepRange(exerciseId, r) }) { Text(stringResource(R.string.plateau_try_range, r.replace("-", "–"))) } }
+            TextButton(onClick = { vm.setRepRange(exerciseId, next) }) { Text(stringResource(R.string.plateau_try_range, next.replace("-", "–"))) }
         }
     }
 }

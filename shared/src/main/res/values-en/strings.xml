@@ -1183,4 +1183,7 @@
     <string name="planned_reps_line">Routine plan: %1$s reps</string>
     <string name="edit_measurement">Edit measurement</string>
     <string name="measurement_deleted">Measurement deleted</string>
+    <string name="weight_month_change">Over the last month: %1$s</string>
+    <string name="export_measurements">Export measurements (CSV)</string>
+    <string name="export_measurements_done">Measurements exported</string>
 </resources>

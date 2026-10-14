@@ -461,7 +461,7 @@ private fun InjuriesCard(vm: PlanningViewModel, ui: PlanningUi) {
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             FilterChip(selected = ui.state.weeklyCap == null, onClick = { vm.setWeeklyCap(null) }, label = { Text(stringResource(R.string.cap_off)) })
             listOf(0.025, 0.05, 0.10).forEach { c ->
-                FilterChip(selected = ui.state.weeklyCap == c, onClick = { vm.setWeeklyCap(c) }, label = { Text(stringResource(R.string.cap_value, if (c < 0.05) "2,5" else "${(c * 100).roundToInt()}")) })
+                FilterChip(selected = ui.state.weeklyCap == c, onClick = { vm.setWeeklyCap(c) }, label = { Text(stringResource(R.string.cap_value, if (c < 0.05) java.text.NumberFormat.getNumberInstance().format(2.5) else "${(c * 100).roundToInt()}")) })
             }
         }
     }

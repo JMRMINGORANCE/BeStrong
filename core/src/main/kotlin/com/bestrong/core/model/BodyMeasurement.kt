@@ -13,4 +13,6 @@ data class BodyMeasurement(
     val chestCm: Double? = null,
     val armCm: Double? = null,
     val thighCm: Double? = null,
+    /** El peso vino de Health Connect (báscula, Samsung Health): no se vuelve a exportar (estaría dos veces). */
+    val weightFromHealth: Boolean = false,
 )

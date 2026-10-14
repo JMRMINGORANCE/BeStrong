@@ -423,3 +423,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] El peso contestado desde el aviso completa la medida de hoy (no crea otra)
 - [x] Reps planeadas en la pantalla de serie del reloj
 - [x] Corregir una medida solo exporta a Health Connect si cambia el peso o la grasa
+
+## Fase 50 — Medidas con origen y exportables ✅
+- [x] Los pesos traídos de Health Connect se marcan y no se vuelven a exportar (sin duplicados de la báscula)
+- [x] Exportar las medidas a CSV
+- [x] Cambio de peso en el último mes junto a la tendencia semanal
+- [x] El peso de Inicio completa la medida de hoy (como el del aviso)
+- [x] Estancamiento: siempre propone otro rango, también desde los rangos altos

@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -85,10 +86,18 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             TopAppBar(
                 title = { Text(stringResource(R.string.measurements)) },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
-                actions = { ShareProgressButton(vm, list, unit) },
+                actions = {
+                    ExportMeasurementsButton(vm, list)
+                    ShareProgressButton(vm, list, unit)
+                },
             )
         },
-        floatingActionButton = { FloatingActionButton(onClick = { adding = true }) { Icon(Icons.Default.Add, stringResource(R.string.add_measurement)) } },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                editingId = null
+                adding = true
+            }) { Icon(Icons.Default.Add, stringResource(R.string.add_measurement)) }
+        },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val weights = list.filter { it.weightKg != null }.sortedBy { it.dateEpochMs }
@@ -162,9 +171,10 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
 /** Una medida de la lista con el cambio de peso; tocarla deja corregirla (mismo día y misma medida). */
 @Composable
 private fun MeasurementItem(m: BodyMeasurement, delta: Double?, unit: WeightUnit, onEdit: () -> Unit, onDelete: () -> Unit) {
-    val change = delta?.let { d -> "  (" + (if (d >= 0) "+" else "−") + unit.format(kotlin.math.abs(d), withUnit = true) + ")" }.orEmpty()
+    // Sin cambio visible (menos de lo que se enseña), nada: ni «+0» ni «−0»
+    val change = delta?.takeIf { unit.format(kotlin.math.abs(it)) != "0" }?.let { d -> "  (" + (if (d >= 0) "+" else "−") + unit.format(kotlin.math.abs(d), withUnit = true) + ")" }.orEmpty()
     val parts = listOfNotNull(
-        m.weightKg?.let { stringResource(R.string.m_weight, unit.format(it, withUnit = true)) },
+        m.weightKg?.let { stringResource(R.string.m_weight, unit.format(it, withUnit = true)) + if (m.weightFromHealth) " (Health Connect)" else "" },
         m.bodyFatPct?.let { stringResource(R.string.m_fat, formatWeight(it)) },
         m.waistCm?.let { stringResource(R.string.m_waist, formatWeight(it)) },
         m.chestCm?.let { stringResource(R.string.m_chest, formatWeight(it)) },
@@ -177,6 +187,21 @@ private fun MeasurementItem(m: BodyMeasurement, delta: Double?, unit: WeightUnit
             supportingContent = { Text(parts.joinToString(" · ")) },
             trailingContent = { IconButton(onClick = onDelete) { Icon(Icons.Default.Delete, stringResource(R.string.action_delete)) } },
         )
+    }
+}
+
+/** Guarda las medidas en un CSV (fecha y cada medida). */
+@Composable
+private fun ExportMeasurementsButton(vm: ProfileViewModel, list: List<BodyMeasurement>) {
+    if (list.isEmpty()) return
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val done = stringResource(R.string.export_measurements_done)
+    val failed = stringResource(R.string.export_failed)
+    val launcher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        uri?.let { vm.exportMeasurementsCsv(it) { ok -> android.widget.Toast.makeText(context, if (ok) done else failed, android.widget.Toast.LENGTH_SHORT).show() } }
+    }
+    IconButton(onClick = { launcher.launch("bestrong-medidas.csv") }) {
+        Icon(Icons.Default.FileDownload, stringResource(R.string.export_measurements))
     }
 }
 
@@ -279,6 +304,14 @@ private fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) 
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 8.dp),
     )
+    // Y en el último mes (la tendencia que de verdad cuenta)
+    remember(points) { BodyWeightTrend.monthChange(points, System.currentTimeMillis()) }?.let { c ->
+        Text(
+            stringResource(R.string.weight_month_change, (if (c >= 0) "+" else "−") + unit.format(kotlin.math.abs(c), withUnit = true)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
     // Más de un 1 % a la semana: aviso para frenar (en una dirección u otra)
     val weekly = remember(points) { com.bestrong.core.stats.WeightRate.weeklyChange(points, System.currentTimeMillis()) }
     if (com.bestrong.core.stats.WeightRate.tooFast(t.averageKg, weekly)) {

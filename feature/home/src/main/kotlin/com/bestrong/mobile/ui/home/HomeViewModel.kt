@@ -219,7 +219,8 @@ class HomeViewModel @Inject constructor(
 
     /** Peso de hoy apuntado desde Inicio (va a Medidas y, si se exporta, a Health Connect). */
     fun logBodyWeight(kg: Double) = viewModelScope.launch {
-        actions.saveMeasurement(com.bestrong.core.model.BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = kg))
+        // En la medida de hoy si ya hay una (p. ej. solo la cintura), no en otra
+        actions.saveWeighIn(kg)
     }
 
     fun discardRecent(): Boolean = repo.recentlyDiscarded

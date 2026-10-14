@@ -118,7 +118,7 @@ class ProfileViewModel @Inject constructor(
         val fresh = snap.weights.groupBy { (t, _) -> java.time.Instant.ofEpochMilli(t).atZone(zone).toLocalDate() }
             .filterKeys { it !in have }
             .map { (_, list) -> list.maxBy { it.first } }
-        fresh.forEach { (t, kg) -> repo.saveMeasurement(BodyMeasurement(dateEpochMs = t, weightKg = kg)) }
+        fresh.forEach { (t, kg) -> repo.saveMeasurement(BodyMeasurement(dateEpochMs = t, weightKg = kg, weightFromHealth = true)) }
         _messages.tryEmit(context.getString(R.string.hc_import_weight_done, fresh.size))
     }
 
@@ -222,32 +222,55 @@ class ProfileViewModel @Inject constructor(
 
     fun updateSettings(block: (UserSettings) -> UserSettings) = settingsStore.update(block)
 
-    fun saveMeasurement(m: BodyMeasurement) = viewModelScope.launch {
-        val before = repo.measurements.value.firstOrNull { it.id == m.id }
-        repo.saveMeasurement(m)
-        // Al corregir solo la cintura (o un perímetro) no se toca Health Connect: el peso puede venir de la báscula
-        // y se duplicaría
-        val healthChanged = before == null || before.weightKg != m.weightKg || before.bodyFatPct != m.bodyFatPct
-        if (!healthChanged || !settingsStore.settings.value.healthConnectExport) return@launch
-        // Si se borró el peso o la grasa, también allí
-        if (before != null) runCatching { healthConnect.deleteMeasurement(m.id) }
-        runCatching { healthConnect.exportMeasurement(m) }.onFailure { android.util.Log.w("Profile", "Medida no exportada", it) }
+    fun saveMeasurement(m: BodyMeasurement) = viewModelScope.launch { saveMeasurementNow(m, force = false) }
+
+    /**
+     * Guarda la medida; a Health Connect solo si cambian el peso o la grasa ([force]: siempre, al deshacer un
+     * borrado). Corregido a mano, el peso ya es de la app (aunque viniera de la báscula).
+     */
+    private suspend fun saveMeasurementNow(m: BodyMeasurement, force: Boolean) {
+        val before = repo.measurementsOnce().firstOrNull { it.id == m.id }
+        val saved = if (before != null && before.weightKg != m.weightKg) m.copy(weightFromHealth = false) else m
+        repo.saveMeasurement(saved)
+        val healthChanged = force || before == null || before.weightKg != saved.weightKg || before.bodyFatPct != saved.bodyFatPct
+        if (!healthChanged || !settingsStore.settings.value.healthConnectExport) return
+        // Solo se borra lo que se quitó; lo demás se sustituye al exportar (mismo id de cliente)
+        if (before != null) runCatching { healthConnect.deleteMeasurement(m.id, weight = saved.weightKg == null, fat = saved.bodyFatPct == null) }
+        runCatching { healthConnect.exportMeasurement(saved) }.onFailure { android.util.Log.w("Profile", "Medida no exportada", it) }
+    }
+
+    /** Todas las medidas en CSV en [uri]; [onDone] dice si salió bien. */
+    fun exportMeasurementsCsv(uri: Uri, onDone: (Boolean) -> Unit) = viewModelScope.launch {
+        val ok = runCatching {
+            val csv = withContext(Dispatchers.Default) { com.bestrong.core.io.MeasurementCsv.export(repo.measurementsOnce()) }
+            withContext(Dispatchers.IO) { context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) } ?: error("no stream") }
+        }.isSuccess
+        onDone(ok)
     }
 
     /** Última medida borrada, para «Deshacer». */
     private val _deletedMeasurement = MutableStateFlow<BodyMeasurement?>(null)
     val deletedMeasurement: StateFlow<BodyMeasurement?> = _deletedMeasurement
 
-    fun deleteMeasurement(id: String) = viewModelScope.launch {
-        _deletedMeasurement.value = repo.measurements.value.firstOrNull { it.id == id }
-        repo.deleteMeasurement(id)
-        runCatching { healthConnect.deleteMeasurement(id) }
+    /** Borrado en curso: «Deshacer» espera a que acabe (si no, el borrado en Health Connect llegaría después). */
+    private var deleteMeasurementJob: kotlinx.coroutines.Job? = null
+
+    fun deleteMeasurement(id: String) {
+        deleteMeasurementJob = viewModelScope.launch {
+            val m = repo.measurementsOnce().firstOrNull { it.id == id } ?: return@launch
+            repo.deleteMeasurement(id)
+            runCatching { healthConnect.deleteMeasurement(id) }
+            _deletedMeasurement.value = m
+        }
     }
 
     fun undoDeleteMeasurement() {
         val m = _deletedMeasurement.value ?: return
         _deletedMeasurement.value = null
-        saveMeasurement(m)
+        viewModelScope.launch {
+            deleteMeasurementJob?.join()
+            saveMeasurementNow(m, force = true)
+        }
     }
 
     fun clearDeletedMeasurement() {

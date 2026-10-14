@@ -193,8 +193,10 @@ class WorkoutActions @Inject constructor(
     suspend fun saveWeighIn(kg: Double) {
         val zone = java.time.ZoneId.systemDefault()
         val today = java.time.LocalDate.now(zone)
-        val existing = repository.measurements.value.firstOrNull { java.time.Instant.ofEpochMilli(it.dateEpochMs).atZone(zone).toLocalDate() == today }
-        saveMeasurement(existing?.copy(weightKg = kg) ?: com.bestrong.core.model.BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = kg))
+        // De la base de datos: con la app cerrada (respuesta desde el aviso) la lista en memoria aún está vacía
+        val existing = repository.measurementsOnce().firstOrNull { java.time.Instant.ofEpochMilli(it.dateEpochMs).atZone(zone).toLocalDate() == today }
+        // Escrito por ti: ya es de la app (aunque hoy hubiera uno de la báscula)
+        saveMeasurement(existing?.copy(weightKg = kg, weightFromHealth = false) ?: com.bestrong.core.model.BodyMeasurement(dateEpochMs = System.currentTimeMillis(), weightKg = kg))
     }
 
     suspend fun saveMeasurement(m: com.bestrong.core.model.BodyMeasurement) {

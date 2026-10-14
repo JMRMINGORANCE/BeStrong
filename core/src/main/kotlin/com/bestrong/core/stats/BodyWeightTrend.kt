@@ -13,6 +13,13 @@ object BodyWeightTrend {
         val previous = avg(nowEpochMs - 2 * WEEK_MS, nowEpochMs - WEEK_MS)
         return Trend(current, previous?.let { current - it })
     }
+
+    /** Media de la última semana frente a la de hace un mes (días 28–35 atrás); null si falta alguna. */
+    fun monthChange(points: List<Pair<Long, Double>>, nowEpochMs: Long): Double? {
+        fun avg(from: Long, to: Long) = points.filter { it.first in from until to }.map { it.second }.takeIf { it.isNotEmpty() }?.average()
+        val current = avg(nowEpochMs - WEEK_MS, nowEpochMs + 1) ?: return null
+        return avg(nowEpochMs - 5 * WEEK_MS, nowEpochMs - 4 * WEEK_MS)?.let { current - it }
+    }
 }
 
 /** Cómo vas hacia un peso objetivo: lo que falta (kg, con signo hacia el objetivo) y cuándo llegarías. */

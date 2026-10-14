@@ -1183,4 +1183,7 @@
     <string name="planned_reps_line">Routinenplan: %1$s Wdh.</string>
     <string name="edit_measurement">Messung bearbeiten</string>
     <string name="measurement_deleted">Messung gelöscht</string>
+    <string name="weight_month_change">Im letzten Monat: %1$s</string>
+    <string name="export_measurements">Messungen exportieren (CSV)</string>
+    <string name="export_measurements_done">Messungen exportiert</string>
 </resources>

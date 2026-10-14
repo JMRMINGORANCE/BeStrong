@@ -61,11 +61,11 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
     /** Permisos de peso y grasa (nuevos: quien ya exportaba no los tenía). */
     suspend fun hasAllPermissions(): Boolean = granted().containsAll(setOf(weightPermission, bodyFatPermission))
 
-    /** Borra de Health Connect el peso y la grasa de una medida borrada en la app. */
-    suspend fun deleteMeasurement(id: String) {
+    /** Borra de Health Connect el peso y la grasa de una medida borrada en la app (o solo el que se quitó). */
+    suspend fun deleteMeasurement(id: String, weight: Boolean = true, fat: Boolean = true) {
         val granted = granted()
-        if (weightPermission in granted) runCatching { client.deleteRecords(WeightRecord::class, emptyList(), listOf("$id-weight")) }
-        if (bodyFatPermission in granted) runCatching { client.deleteRecords(BodyFatRecord::class, emptyList(), listOf("$id-fat")) }
+        if (weight && weightPermission in granted) runCatching { client.deleteRecords(WeightRecord::class, emptyList(), listOf("$id-weight")) }
+        if (fat && bodyFatPermission in granted) runCatching { client.deleteRecords(BodyFatRecord::class, emptyList(), listOf("$id-fat")) }
     }
 
     /** Quita lo exportado de un entreno (sesión, calorías, pulso y distancias) por sus ids de cliente. */
@@ -172,7 +172,8 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         val granted = granted()
         val time = Instant.ofEpochMilli(m.dateEpochMs)
         val records = listOfNotNull<Record>(
-            m.weightKg?.takeIf { weightPermission in granted && it in 1.0..1000.0 }?.let {
+            // El que vino de Health Connect ya está allí con su origen (la báscula)
+            m.weightKg?.takeIf { weightPermission in granted && !m.weightFromHealth && it in 1.0..1000.0 }?.let {
                 WeightRecord(time, null, Mass.kilograms(it), Metadata(clientRecordId = "${m.id}-weight", clientRecordVersion = System.currentTimeMillis()))
             },
             m.bodyFatPct?.takeIf { bodyFatPermission in granted && it in 1.0..100.0 }?.let {

@@ -1183,4 +1183,7 @@
     <string name="planned_reps_line">Pla de la rutina: %1$s reps</string>
     <string name="edit_measurement">Corregir mesura</string>
     <string name="measurement_deleted">Mesura esborrada</string>
+    <string name="weight_month_change">En l\'últim mes: %1$s</string>
+    <string name="export_measurements">Exportar mesures (CSV)</string>
+    <string name="export_measurements_done">Mesures exportades</string>
 </resources>
