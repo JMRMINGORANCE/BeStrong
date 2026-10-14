@@ -439,9 +439,7 @@ class WorkoutSession @Inject constructor(
         }
         return e1rm?.let {
             val kg = com.bestrong.core.stats.RpeLoad.weightFor(it, reps, rpe)
-            val gym = s.gymFor(exercise.id)?.takeIf { s.unit == com.bestrong.core.util.WeightUnit.KG }
-            gym?.nearestLoad(kg, exercise.equipment)
-                ?: s.unit.toKg(kotlin.math.round(s.unit.fromKg(kg) / s.unit.defaultIncrement) * s.unit.defaultIncrement)
+            com.bestrong.core.stats.RpeLoad.roundToLoadable(kg, s.unit, s.stepKgFor(exercise.id), s.gymFor(exercise.id), exercise.equipment)
         }
     }
 

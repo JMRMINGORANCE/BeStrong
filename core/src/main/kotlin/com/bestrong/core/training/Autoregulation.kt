@@ -39,7 +39,8 @@ object Autoregulation {
     fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double): RpeAdjustment? {
         val done = exercise.sets.firstOrNull { it.id == completedSetId } ?: return null
         val rpe = done.rpe ?: return null
-        if (done.type == SetType.WARMUP || done.weightKg <= 0) return null
+        // Solo tras una serie normal: un drop o una al fallo van a RPE alto a propósito
+        if (done.type != SetType.NORMAL || done.weightKg <= 0) return null
         val pending = exercise.sets.filter { !it.completed && it.type != SetType.WARMUP }
         if (pending.isEmpty()) return null
         val current = done.weightKg

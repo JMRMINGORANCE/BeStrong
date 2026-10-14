@@ -586,4 +586,19 @@ class CollarTest {
         assertEquals(8.5, back.targetRpe!!, 1e-9)
         assertEquals("3-1-1-0", back.tempo)
     }
+
+    @Test
+    fun plannedFailureSetDoesNotAutoregulate() {
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val failure = WorkoutSet(id = "f", weightKg = 80.0, reps = 8, completed = true, type = SetType.FAILURE, rpe = 10.0)
+        val we = WorkoutExercise(exercise = ex, sets = listOf(failure, WorkoutSet(id = "p", weightKg = 80.0, reps = 8)))
+        assertEquals(null, com.bestrong.core.training.Autoregulation.suggest(we, "f", 2.5))
+    }
+
+    @Test
+    fun loadHintRoundsMachinesToTheirStep() {
+        val gym = com.bestrong.core.training.GymProfile(name = "G")
+        // Polea: el gimnasio no la redondea, se usa el incremento del ejercicio
+        assertEquals(62.5, com.bestrong.core.stats.RpeLoad.roundToLoadable(63.7, com.bestrong.core.util.WeightUnit.KG, 2.5, gym, com.bestrong.core.model.Equipment.CABLE), 1e-9)
+    }
 }

@@ -921,8 +921,13 @@ private fun ExerciseCard(
 private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.model.WorkoutExercise) {
     val rpe = we.targetRpe?.takeIf { we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS } ?: return
     val unit = LocalWeightUnit.current
-    val load = remember(we.sets, rpe) { vm.targetRpeLoad(we) }
-    val hint = load?.let { (kg, reps) -> " · " + stringResource(R.string.target_rpe_hint, unit.format(kg, withUnit = true), reps) }.orEmpty()
+    val e1rms by vm.recentOneRepMax.collectAsStateWithLifecycle()
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val e1rm = e1rms[we.exercise.id]
+    val load = remember(we.sets, rpe, e1rm, settings) { vm.targetRpeLoad(we, e1rm, settings) }
+    // Con «suma de las dos mancuernas», igual que en las filas
+    val factor = if (we.exercise.equipment == Equipment.DUMBBELL && settings.dumbbellTotal) 2 else 1
+    val hint = load?.let { (kg, reps) -> " · " + stringResource(R.string.target_rpe_hint, unit.format(kg * factor, withUnit = true), reps) }.orEmpty()
     Text(
         // Como el RPE de las series («@8.5»)
         stringResource(R.string.target_rpe_line, rpe.toString().removeSuffix(".0")) + hint,

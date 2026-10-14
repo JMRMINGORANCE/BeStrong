@@ -22,6 +22,22 @@ object RpeLoad {
     fun weightFor(oneRepMaxKg: Double, reps: Int, rpe: Double): Double = oneRepMaxKg * fraction(reps, rpe)
 
     /**
+     * [kg] a un peso que se pueda usar: en kg, con los discos o mancuernas del [gym] si los hay para ese
+     * material; si no (máquinas, poleas, libras…), al incremento del ejercicio [stepKg].
+     */
+    fun roundToLoadable(
+        kg: Double,
+        unit: com.bestrong.core.util.WeightUnit,
+        stepKg: Double,
+        gym: com.bestrong.core.training.GymProfile?,
+        equipment: com.bestrong.core.model.Equipment,
+    ): Double {
+        val viaGym = gym?.takeIf { unit == com.bestrong.core.util.WeightUnit.KG }?.nearestLoad(kg, equipment)?.takeIf { kotlin.math.abs(it - kg) > 1e-9 }
+        val step = unit.fromKg(stepKg)
+        return viaGym ?: if (step <= 0) kg else unit.toKg(kotlin.math.round(unit.fromKg(kg) / step) * step)
+    }
+
+    /**
      * Mejor 1RM estimado de las últimas [RECENT_WEEKS] semanas (una marca de hace años no dice lo que levantas
      * hoy); si no hay, el mejor de todo el historial. Null si nunca se hizo con peso.
      */

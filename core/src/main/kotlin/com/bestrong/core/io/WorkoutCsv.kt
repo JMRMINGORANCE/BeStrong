@@ -146,7 +146,7 @@ object WorkoutCsv {
                             ),
                             // Columnas nuevas: los CSV antiguos no las tienen y quedan vacías
                             targetRpe = num(r.get("target_rpe"))?.takeIf { it in 1.0..10.0 },
-                            tempo = r.get("tempo").ifBlank { null }?.let { com.bestrong.core.training.Tempo.parse(it)?.toString() },
+                            tempo = r.get("tempo").ifBlank { null }?.takeIf { com.bestrong.core.training.Tempo.parse(it) != null },
                         )
                     }
                     CsvFormat.HEVY -> {

@@ -285,7 +285,10 @@ private const val YEAR_AGO_SNOOZE_DAYS = 30L
 
 /** Si se descartó «Hace un año» (clave «year_ago:fecha») en los últimos [YEAR_AGO_SNOOZE_DAYS] días. */
 private fun yearAgoDismissedRecently(dismissed: Set<String>, today: java.time.LocalDate): Boolean = dismissed.any { key ->
-    val date = key.removePrefix("year_ago:").takeIf { it != key }?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() }
+    // «year_ago:2026-10-14»; las de la versión anterior eran por mes («year_ago:2026-10»): cuentan desde el día 1
+    val date = key.removePrefix("year_ago:").takeIf { it != key }?.let {
+        runCatching { java.time.LocalDate.parse(it) }.getOrNull() ?: runCatching { java.time.YearMonth.parse(it).atDay(1) }.getOrNull()
+    }
     date != null && !date.isBefore(today.minusDays(YEAR_AGO_SNOOZE_DAYS))
 }
 

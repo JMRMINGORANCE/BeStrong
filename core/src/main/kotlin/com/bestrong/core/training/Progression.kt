@@ -50,6 +50,16 @@ data class ProgressionSuggestion(
  */
 object Progression {
 
+    /**
+     * «Fácil» respecto al RPE objetivo con que se hizo la última vez (8 si no tenía): hasta un punto por encima.
+     * Solo cuentan las series normales: un drop o una al fallo planificados van a RPE 10 a propósito.
+     */
+    private fun wasEasy(last: List<WorkoutSet>, targetRpe: Double?): Boolean {
+        val target = targetRpe ?: Autoregulation.TARGET
+        val rated = last.filter { it.type == SetType.NORMAL && it.countsForRecords }.ifEmpty { last }
+        return rated.all { (it.rpe ?: target) <= Autoregulation.easyUpTo(target) }
+    }
+
     fun suggest(
         exercise: Exercise,
         history: List<Workout>,
@@ -66,9 +76,7 @@ object Progression {
 
         // Sin carga (peso corporal o tiempo) el 1RM estimado es 0 y no sirve para detectar estancamiento
         val loaded = exercise.tracking != TrackingType.DURATION && last.any { it.weightKg > 0.0 }
-        // «Fácil» respecto al RPE objetivo con que se hizo la última vez (8 si no tenía): hasta un punto por encima
-        val target = previous?.targetRpe ?: Autoregulation.TARGET
-        val easy = last.all { (it.rpe ?: target) <= Autoregulation.easyUpTo(target) }
+        val easy = wasEasy(last, previous?.targetRpe)
         val useRange = repRange != null && loaded && exercise.tracking == TrackingType.WEIGHT_REPS
         // Con rango, el 1RM estimado baja a propósito al subir peso y volver al mínimo: el estancamiento se mide
         // por reps con el mismo peso; sin rango, por el 1RM

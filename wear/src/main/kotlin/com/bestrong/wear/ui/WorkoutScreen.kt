@@ -177,9 +177,9 @@ fun WorkoutScreen(
                     else -> ""
                 }
                 Text(stringResource(R.string.set_of, setNumber, we.sets.size, typeLabel), style = MaterialTheme.typography.labelSmall)
-                we.targetRpe?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS && set.type != SetType.WARMUP }?.let { rpe ->
+                we.targetRpe?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS && set.type == SetType.NORMAL }?.let { rpe ->
                     // Con historial, el peso orientativo para las reps de esta serie a ese RPE
-                    val load = remember(we.exercise.id, set.reps, rpe) { session.targetRpeLoadKg(we.exercise, set.reps, rpe) }
+                    val load = remember(we.exercise.id, set.reps, rpe, records) { session.targetRpeLoadKg(we.exercise, set.reps, rpe) }
                     Text(
                         stringResource(R.string.target_rpe_short, rpe.toString().removeSuffix(".0")) + load?.let { " · ≈" + unit.format(it) }.orEmpty(),
                         style = MaterialTheme.typography.labelSmall,

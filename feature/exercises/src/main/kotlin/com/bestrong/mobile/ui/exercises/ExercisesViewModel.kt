@@ -83,6 +83,7 @@ class ExercisesViewModel @Inject constructor(
     private val media: ExerciseMediaStore,
     private val settingsStore: SettingsStore,
     private val planning: PlanningStore,
+    private val actions: com.bestrong.mobile.WorkoutActions,
 ) : ViewModel() {
 
     val favorites: StateFlow<Set<String>> = settingsStore.settings.map { it.favoriteExercises }
@@ -134,6 +135,12 @@ class ExercisesViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.exerciseGoalsKg)
 
     /** Mancuernas con «suma de las dos»: el objetivo se ve y se escribe como el total del par. */
+    /** Peso que se puede usar para [kg] en este ejercicio (gimnasio activo o su incremento). */
+    fun roundLoad(exercise: Exercise, kg: Double): Double {
+        val s = settingsStore.settings.value
+        return com.bestrong.core.stats.RpeLoad.roundToLoadable(kg, s.unit, s.stepKgFor(exercise.id), s.gymFor(exercise.id), exercise.equipment)
+    }
+
     fun weightFactor(exercise: Exercise): Int = if (settingsStore.settings.value.dumbbellTotal && exercise.equipment == Equipment.DUMBBELL) 2 else 1
 
     /** null quita el objetivo. */
@@ -211,7 +218,9 @@ class ExercisesViewModel @Inject constructor(
             records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
-            nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id), repRange = settings.repRangeFor(ex.id)),
+            // Como en el entreno: ajustada al gimnasio y al tope semanal (con su aviso)
+            nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id), repRange = settings.repRangeFor(ex.id))
+                ?.let { sug -> sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, history = fullHistory), cappedByWeek = actions.cappedByWeek(ex, sug.sets, fullHistory)) },
             sessionNotes = sessionNotes(exerciseId, history, routines),
             rpeTrend = Strength.rpeTrend(history, setOf(exerciseId)),
             goalPoints = com.bestrong.core.stats.ExerciseGoals.points(history, exerciseId, ex.tracking),
