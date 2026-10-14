@@ -116,6 +116,8 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
         }
     }
 
+    CopiedSnackbar(vm, snackbar) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
+
     var logging by remember { mutableStateOf(false) }
     // Día tocado en el calendario (sin entreno): el diálogo empieza en él
     var logStart by remember { mutableStateOf<Long?>(null) }
@@ -266,9 +268,10 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     if (copying) {
         CopyToDayDialog(
             durationMin = w.durationSeconds() / 60,
-            onCopy = { s, e ->
+            exercises = w.exercises.map { it.id to it.exercise.name },
+            onCopy = { s, e, ids ->
                 copying = false
-                vm.copyToDay(w, s, e) {}
+                vm.copyToDay(w, s, e, ids)
             },
             onDismiss = { copying = false },
         )
@@ -614,5 +617,18 @@ private fun FilteredSummary(vm: HistoryViewModel, filtered: List<Workout>) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         TextButton(onClick = { launcher.launch("bestrong-historial.csv") }) { Text(stringResource(R.string.history_export_csv)) }
+    }
+}
+
+/** «Entreno copiado» con «Abrir» para ir a la copia. */
+@Composable
+private fun CopiedSnackbar(vm: HistoryViewModel, snackbar: SnackbarHostState, onOpen: (String) -> Unit) {
+    val copied by vm.copied.collectAsStateWithLifecycle()
+    val msg = stringResource(R.string.copy_to_day_done)
+    val open = stringResource(R.string.action_open)
+    LaunchedEffect(copied) {
+        val id = copied ?: return@LaunchedEffect
+        vm.clearCopied()
+        if (snackbar.showSnackbar(msg, open, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) onOpen(id)
     }
 }

@@ -275,13 +275,15 @@ class WorkoutSession @Inject constructor(
     /** Llega el entreno desde el móvil: se fusiona serie a serie con el local (no se pierde ninguna serie hecha). */
     fun applyRemote(incoming: Workout) {
         val local = _workout.value
-        if (store.phoneKnownWorkoutId != incoming.id) store.phoneKnownWorkoutId = incoming.id
+        // Se lee antes de apuntar el que llega: ¿tuvo el móvil alguna vez el entreno local?
+        val phoneKnew = store.phoneKnownWorkoutId
+        if (phoneKnew != incoming.id) store.phoneKnownWorkoutId = incoming.id
         val remote = if (local == null) incoming else WorkoutMerge.merge(local, incoming)
         if (remote == local) return
         val isNew = local == null || local.id != remote.id
         // Dos entrenos distintos (empezados a la vez sin conexión) y gana el del móvil: lo hecho en el reloj no se
         // pierde, se le manda terminado; pero solo si el móvil nunca lo tuvo (si lo tuvo, ya lo terminó o lo descartó)
-        val unknownToPhone = local != null && local.id != incoming.id && store.phoneKnownWorkoutId != local.id
+        val unknownToPhone = local != null && local.id != incoming.id && phoneKnew != local.id
         if (isNew && unknownToPhone && local.exercises.any { we -> we.sets.any { it.completed } }) sendReplaced(local)
         _workout.value = remote
         store.activeWorkout = remote

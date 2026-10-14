@@ -72,3 +72,18 @@ object CardioTotals {
         return sets.sumOf { it.distanceM } to sets.sumOf { it.durationSec.toLong() }
     }
 }
+
+/** Lo que falta para el objetivo semanal de cardio (km o minutos) y a qué ritmo diario hasta el domingo (hoy incluido). */
+data class CardioPace(val left: Double, val perDay: Double, val inMinutes: Boolean) {
+    companion object {
+        /** null sin objetivo o ya cumplido; [daysLeft] cuenta hoy (lunes = 7, domingo = 1). */
+        fun of(goalKm: Double?, goalMin: Int?, meters: Double, seconds: Long, daysLeft: Int): CardioPace? {
+            val days = daysLeft.coerceAtLeast(1)
+            return when {
+                goalMin != null -> (goalMin - seconds / 60.0).takeIf { it >= 1 }?.let { CardioPace(it, it / days, inMinutes = true) }
+                goalKm != null -> (goalKm - meters / 1000).takeIf { it > 0.05 }?.let { CardioPace(it, it / days, inMinutes = false) }
+                else -> null
+            }
+        }
+    }
+}

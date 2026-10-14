@@ -388,3 +388,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Racha de cardio en el widget
 - [x] La rutina que se está editando no se pierde si Android cierra la app
 - [x] «La próxima vez» se fija en las series más pesadas (las de descarga no cuentan)
+
+## Fase 45 — Copias con aviso y empujón de cardio ✅
+- [x] «Entreno copiado» con «Abrir» al copiar a otro día
+- [x] Elegir qué ejercicios se copian a otro día
+- [x] Aviso el jueves si el cardio de la semana va por detrás (lo que falta y a qué ritmo)
+- [x] La tile «Hoy toca» del reloj enseña el primer objetivo (ejercicio, peso y reps)
+- [x] La tile «Hoy toca» enseña el cardio de la semana frente al objetivo

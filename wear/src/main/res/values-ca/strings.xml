@@ -171,4 +171,5 @@
     <string name="vs_reps">%1$s reps</string>
     <string name="cardio_complication_label">Cardio aquesta setmana</string>
     <string name="cardio_complication_desc">Cardio aquesta setmana: %1$s %2$s</string>
+    <string name="tile_cardio">Cardio %1$s</string>
 </resources>

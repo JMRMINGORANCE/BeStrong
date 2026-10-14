@@ -485,16 +485,11 @@ private fun CardioWeekProgress(week: HomeViewModel.CardioWeek) {
 @Composable
 private fun cardioPace(week: HomeViewModel.CardioWeek): String? {
     val daysLeft = 8 - java.time.LocalDate.now().dayOfWeek.value
-    val goalMin = week.goalMin
-    val goalKm = week.goalKm
-    return when {
-        goalMin != null -> (goalMin - (week.seconds / 60).toInt()).takeIf { it > 0 }?.let { left ->
-            stringResource(R.string.cardio_pace_min, left, (left + daysLeft - 1) / daysLeft)
-        }
-        goalKm != null -> (goalKm - week.meters / 1000).takeIf { it > 0.05 }?.let { left ->
-            stringResource(R.string.cardio_pace_km, "%.1f".format(left), "%.1f".format(left / daysLeft))
-        }
-        else -> null
+    val pace = com.bestrong.core.stats.CardioPace.of(week.goalKm, week.goalMin, week.meters, week.seconds, daysLeft) ?: return null
+    return if (pace.inMinutes) {
+        stringResource(R.string.cardio_pace_min, kotlin.math.ceil(pace.left).toInt(), kotlin.math.ceil(pace.perDay).toInt())
+    } else {
+        stringResource(R.string.cardio_pace_km, "%.1f".format(pace.left), "%.1f".format(maxOf(pace.perDay, 0.1)))
     }
 }
 

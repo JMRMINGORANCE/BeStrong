@@ -73,7 +73,9 @@ class TodayTileService : TileService() {
                     .setColor(argb(0xFFBDBDBD.toInt()))
                     .build(),
             )
+            firstTarget(it)?.let { target -> content.addContent(caption(target, BeStrongPalette.OrangeArgb)) }
         }
+        cardioLine()?.let { content.addContent(caption(it, 0xFFBDBDBD.toInt())) }
 
         return PrimaryLayout.Builder(device)
             .setResponsiveContentInsetEnabled(true)
@@ -83,6 +85,28 @@ class TodayTileService : TileService() {
             .setContent(content.build())
             .setPrimaryChipContent(CompactChip.Builder(this, getString(R.string.tile_start), launch, device).build())
             .build()
+    }
+
+    private fun caption(text: String, color: Int) =
+        Text.Builder(this, text).setTypography(Typography.TYPOGRAPHY_CAPTION2).setColor(argb(color)).setMaxLines(1).build()
+
+    /** El primer objetivo de la sesión («Press banca · 82,5 × 8»), con las cargas que mandó el móvil. */
+    private fun firstTarget(routine: Routine): String? {
+        val first = routine.exercises.firstOrNull()
+        val set = first?.sets?.firstOrNull { it.type != com.bestrong.core.model.SetType.WARMUP && it.weightKg > 0 }
+        return set?.let { "${first.exercise.name} · ${container.store.settings.value.unit.format(it.weightKg)} × ${it.reps}" }
+    }
+
+    /** Cardio de la semana frente al objetivo («Cardio 12,0/20 km»), solo si se puso uno en el móvil. */
+    private fun cardioLine(): String? {
+        val s = container.store.settings.value
+        if (s.weeklyCardioKm == null && s.weeklyCardioMin == null) return null
+        val zone = java.time.ZoneId.systemDefault()
+        val monday = java.time.LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        val (meters, seconds) = com.bestrong.core.stats.CardioTotals.since(container.store.history.value, monday.atStartOfDay(zone).toInstant().toEpochMilli())
+        val goalMin = s.weeklyCardioMin
+        val progress = if (goalMin != null) "${seconds / 60}/$goalMin min" else "%.1f/%s km".format(meters / 1000, com.bestrong.core.util.formatGoalKm(s.weeklyCardioKm ?: 0.0))
+        return getString(R.string.tile_cardio, progress)
     }
 
     private companion object {

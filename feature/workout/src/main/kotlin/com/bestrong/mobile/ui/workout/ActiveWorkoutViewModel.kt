@@ -754,14 +754,15 @@ class ActiveWorkoutViewModel @Inject constructor(
             restTimer.skip()
             if (finished.exercises.isEmpty()) return@launch
             repo.saveWorkout(finished)
-            // El pulso y las calorías del reloj pueden haber llegado mientras se terminaba
+            // El pulso y las calorías del reloj pueden haber llegado mientras se terminaba: desde aquí, lo guardado
             actions.applyPendingWatchHealth(finished.id)
-            savedState[KEY_SUMMARY_ID] = finished.id
+            val saved = repo.storedWorkout(finished.id) ?: finished
+            savedState[KEY_SUMMARY_ID] = saved.id
             val history = repo.historyOnce()
-            _summary.value = withContext(Dispatchers.Default) { buildSummary(finished, history) }
+            _summary.value = withContext(Dispatchers.Default) { buildSummary(saved, history) }
             // Se compara con lo planificado (series sin hacer incluidas): saltarse una serie por cansancio no cambia la rutina
             changedRoutine(current)?.let { r -> _summary.value = _summary.value?.copy(routineToUpdate = r, planned = current) }
-            actions.exportToHealthConnectIfEnabled(finished)
+            actions.exportToHealthConnectIfEnabled(saved)
         }
     }
 

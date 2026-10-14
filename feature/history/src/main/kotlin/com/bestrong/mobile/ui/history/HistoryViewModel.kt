@@ -194,12 +194,12 @@ class HistoryViewModel @Inject constructor(
             }
         } else {
             // Sobre lo guardado (el pulso del reloj o la valoración pueden haber llegado después de abrirlo)
-            repo.updateWorkout(workout.id) { WorkoutEditor.cleanupFinished(block(it)).copy(updatedAtEpochMs = edited.updatedAtEpochMs) }
+            val saved = repo.updateWorkout(workout.id) { WorkoutEditor.cleanupFinished(block(it)).copy(updatedAtEpochMs = edited.updatedAtEpochMs) }
             // Corregido aquí, corregido en Health Connect: se quita lo de antes (un bloque de cardio borrado no
             // dejaría su distancia) y se exporta de nuevo
-            if (edited.athlete == null) {
+            if (saved != null && saved.athlete == null) {
                 actions.deleteFromHealthConnectIfEnabled(workout)
-                actions.exportToHealthConnectIfEnabled(edited)
+                actions.exportToHealthConnectIfEnabled(saved)
             }
         }
     }
@@ -250,11 +250,20 @@ class HistoryViewModel @Inject constructor(
     }
 
     /** Copia un entreno pasado, tal cual, a otro día (el que se hizo igual y no se apuntó). */
-    fun copyToDay(workout: Workout, startMs: Long, endMs: Long, onCopied: (String) -> Unit) = viewModelScope.launch {
-        val copy = WorkoutEditor.copyToDay(workout, startMs, endMs, System.currentTimeMillis())
+    fun copyToDay(workout: Workout, startMs: Long, endMs: Long, exerciseIds: Set<String>) = viewModelScope.launch {
+        val copy = WorkoutEditor.copyToDay(workout, startMs, endMs, System.currentTimeMillis(), exerciseIds)
+        if (copy.exercises.isEmpty()) return@launch
         repo.saveWorkout(copy)
+        _copied.value = copy.id
         if (copy.athlete == null) actions.exportToHealthConnectIfEnabled(copy)
-        onCopied(copy.id)
+    }
+
+    /** Id de la copia recién hecha (aviso con «Abrir»); null cuando ya se enseñó. */
+    private val _copied = MutableStateFlow<String?>(null)
+    val copied: StateFlow<String?> = _copied
+
+    fun clearCopied() {
+        _copied.value = null
     }
 
     /** Cambia la fecha, la hora y la duración de un entreno pasado. */

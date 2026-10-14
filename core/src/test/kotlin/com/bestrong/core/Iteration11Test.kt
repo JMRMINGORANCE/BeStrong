@@ -836,11 +836,33 @@ class CollarTest {
         val bench = com.bestrong.core.model.Exercise(id = "bench", name = "bench", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
         val sets = listOf(
             WorkoutSet(weightKg = 100.0, reps = 3, completed = true),
+            WorkoutSet(weightKg = 100.0, reps = 3, completed = true),
             WorkoutSet(weightKg = 80.0, reps = 8, completed = true),
             WorkoutSet(weightKg = 80.0, reps = 8, completed = true),
         )
         val s = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets), 2.5)
         assertEquals(102.5, s!!.weightKg, 1e-9)
         assertEquals(3, s.reps)
+    }
+
+    @Test
+    fun nextTimeHoldsAfterASingleTopSetWithoutRpe() {
+        val bench = com.bestrong.core.model.Exercise(id = "bench", name = "bench", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        val ramp = listOf(60.0 to 10, 70.0 to 8, 80.0 to 6).map { (kg, r) -> WorkoutSet(weightKg = kg, reps = r, completed = true) }
+        val s = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = ramp), 2.5)
+        assertEquals(80.0, s!!.weightKg, 1e-9)
+        assertEquals(0, s.direction)
+    }
+
+    @Test
+    fun kmLikeTruncatesSoAnUnmetGoalNeverLooksMet() {
+        val before = java.util.Locale.getDefault()
+        java.util.Locale.setDefault(java.util.Locale.US)
+        try {
+            assertEquals("11.9", com.bestrong.core.util.formatKmLike(11.96, 12.0))
+            assertEquals("12.03", com.bestrong.core.util.formatKmLike(12.039, 12.04))
+        } finally {
+            java.util.Locale.setDefault(before)
+        }
     }
 }

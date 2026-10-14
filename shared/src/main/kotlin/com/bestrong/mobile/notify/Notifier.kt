@@ -29,6 +29,7 @@ object Notifier {
     private const val ID_MEASURE = 23
     private const val ID_BACKUP = 24
     private const val ID_CARDIO_GOAL = 25
+    private const val ID_CARDIO_NUDGE = 26
     private const val ID_RECORDS_BASE = 100
 
     private fun ensureChannels(context: Context) {
@@ -208,6 +209,20 @@ object Notifier {
     }
 
     private const val RESULT_TIMEOUT_MS = 8_000L
+
+    /** A mitad de semana, si el cardio va por detrás del objetivo: lo que falta y a qué ritmo. */
+    @Suppress("MissingPermission")
+    fun cardioNudge(context: Context, pace: String) {
+        if (!canPost(context)) return
+        val n = NotificationCompat.Builder(context, CHANNEL_GOALS)
+            .setSmallIcon(R.drawable.ic_stat_dumbbell)
+            .setContentTitle(context.getString(R.string.notif_cardio_nudge))
+            .setContentText(pace)
+            .setContentIntent(openApp(context))
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(context).notify(ID_CARDIO_NUDGE, n)
+    }
 
     /** Objetivo semanal de cardio cumplido (una vez por semana). */
     @Suppress("MissingPermission")

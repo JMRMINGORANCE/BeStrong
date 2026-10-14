@@ -27,7 +27,12 @@ fun formatGoalKm(km: Double): String = when {
 
 /** Km hechos con los mismos decimales que el objetivo (al menos uno): «12,04 de 12,04» y no «12,0 de 12,04». */
 fun formatKmLike(km: Double, goalKm: Double?): String =
-    if (goalKm != null && Math.round(goalKm * 100) % 10 != 0L) "%.2f".format(km) else "%.1f".format(km)
+    // Truncado: 11,96 no se enseña como «12,0 de 12» con la barra sin llenar
+    if (goalKm != null && Math.round(goalKm * 100) % 10 != 0L) {
+        "%.2f".format(Math.floor(km * 100 + 1e-6) / 100)
+    } else {
+        "%.1f".format(Math.floor(km * 10 + 1e-6) / 10)
+    }
 
 /** 3725 s → "1h 02m", 125 s → "2:05" */
 fun formatDuration(seconds: Long): String {

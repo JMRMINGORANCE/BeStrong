@@ -505,18 +505,26 @@ object WorkoutEditor {
      * El mismo entreno, serie a serie, en otro día ([startMs]–[endMs]): ids nuevos, horas de las series movidas
      * y sin lo medido aquel día (pulso, calorías, valoración).
      */
-    fun copyToDay(workout: Workout, startMs: Long, endMs: Long, nowEpochMs: Long): Workout {
+    fun copyToDay(workout: Workout, startMs: Long, endMs: Long, nowEpochMs: Long, onlyExercises: Set<String>? = null): Workout {
         val shift = startMs - workout.startedAtEpochMs
         return workout.copy(
             id = com.bestrong.core.util.newId(),
             startedAtEpochMs = startMs,
             finishedAtEpochMs = endMs,
             updatedAtEpochMs = nowEpochMs,
+            // El tiempo elegido ya es el activo: sin las pausas de aquel día
             pausedAtEpochMs = null,
-            exercises = workout.exercises.map { we ->
+            pausedTotalMs = 0,
+            exercises = workout.exercises.filter { onlyExercises == null || it.id in onlyExercises }.map { we ->
                 we.copy(
                     id = com.bestrong.core.util.newId(),
-                    sets = we.sets.map { s -> s.copy(id = com.bestrong.core.util.newId(), completedAtEpochMs = s.completedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) }) },
+                    sets = we.sets.map { s ->
+                        s.copy(
+                            id = com.bestrong.core.util.newId(),
+                            completedAtEpochMs = s.completedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) },
+                            startedAtEpochMs = s.startedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) },
+                        )
+                    },
                 )
             },
             avgHeartRate = null,

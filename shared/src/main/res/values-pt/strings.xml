@@ -1172,4 +1172,7 @@
     <string name="cardio_pace_km">Faltam %1$s km · %2$s km por dia</string>
     <string name="cardio_pace_min">Faltam %1$d min · %2$d min por dia</string>
     <string name="cardio_streak_short">%1$d sem. seguidas</string>
+    <string name="action_open">Abrir</string>
+    <string name="copy_to_day_done">Treino copiado</string>
+    <string name="notif_cardio_nudge">O cardio da semana está atrasado</string>
 </resources>

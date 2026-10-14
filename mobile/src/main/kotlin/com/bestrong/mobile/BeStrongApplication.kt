@@ -190,6 +190,8 @@ class AppSync @Inject constructor(
         runCatching { ImagePrefetchWorker.schedule(context) }
         // Resumen de la semana el domingo por la tarde
         runCatching { WeeklySummaryWorker.schedule(context) }
+        // Jueves: empujón si el cardio de la semana va por detrás del objetivo
+        runCatching { com.bestrong.mobile.notify.CardioNudgeWorker.schedule(context) }
         scope.launch { notifyCardioGoal() }
         // Atajos dinámicos con las tres primeras rutinas (icono de la app, Bixby Routines)
         scope.launch {

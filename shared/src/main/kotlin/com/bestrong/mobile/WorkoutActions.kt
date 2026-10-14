@@ -52,7 +52,9 @@ class WorkoutActions @Inject constructor(
             )
         }
         if (merged == null) {
-            repository.savePendingHealth(com.bestrong.core.sync.SyncContract.encodeHealth(h).decodeToString())
+            repository.savePendingHealth(h.workoutId, com.bestrong.core.sync.SyncContract.encodeHealth(h).decodeToString())
+            // Si el móvil lo guardó justo entre medias, ya no lo recogerá: se aplica ahora
+            if (repository.storedWorkout(h.workoutId) != null) applyPendingWatchHealth(h.workoutId)
             return
         }
         // La sesión ya se exportó al terminar: ahora solo se añade la gráfica de pulso
@@ -61,9 +63,8 @@ class WorkoutActions @Inject constructor(
 
     /** Tras guardar un entreno terminado en el móvil: lo del reloj que llegó antes, si es de ese entreno. */
     suspend fun applyPendingWatchHealth(workoutId: String) {
-        val raw = repository.takePendingHealth() ?: return
-        val h = runCatching { com.bestrong.core.sync.SyncContract.decodeHealth(raw.encodeToByteArray()) }.getOrNull() ?: return
-        if (h.workoutId == workoutId) mergeWatchHealth(h)
+        val raw = repository.takePendingHealth(workoutId) ?: return
+        runCatching { com.bestrong.core.sync.SyncContract.decodeHealth(raw.encodeToByteArray()) }.getOrNull()?.let { mergeWatchHealth(it) }
     }
 
     /**

@@ -25,18 +25,24 @@ object NextTime {
         val topSets = work.filter { it.weightKg >= top }
         val target = topSets.first().reps
         val maxRpe = topSets.mapNotNull { it.rpe }.maxOrNull()
-        val allReps = topSets.all { it.reps >= target }
+        val allReps = topSets.all { it.reps >= target } && hasEvidence(topSets)
         val name = we.exercise.name
         val high = Autoregulation.high(we.targetRpe)
         return when {
             allReps && (maxRpe == null || maxRpe < high) -> NextTimeSuggestion(we.exercise.id, name, top + stepKg, target, 1)
-            !allReps && maxRpe != null && maxRpe >= high -> {
-                val lower = if (stepKg > 0) Math.floor(top * 0.95 / stepKg + 0.5) * stepKg else top * 0.95
-                NextTimeSuggestion(we.exercise.id, name, lower.coerceAtMost(top - stepKg).coerceAtLeast(0.0), target, -1)
-            }
+            !allReps && maxRpe != null && maxRpe >= high -> NextTimeSuggestion(we.exercise.id, name, lowered(top, stepKg), target, -1)
             else -> NextTimeSuggestion(we.exercise.id, name, top, target, 0)
         }
     }
+
+    /** Un 5 % menos, redondeado al escalón y al menos un escalón por debajo. */
+    private fun lowered(top: Double, stepKg: Double): Double {
+        val lower = if (stepKg > 0) Math.floor(top * 0.95 / stepKg + 0.5) * stepKg else top * 0.95
+        return lower.coerceAtMost(top - stepKg).coerceAtLeast(0.0)
+    }
+
+    /** Con una sola serie pesada (subiendo en pirámide) y sin RPE no hay con qué comparar: no se sube a ciegas. */
+    private fun hasEvidence(topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean = topSets.size >= 2 || topSets.any { it.rpe != null }
 
     fun forWorkout(workout: Workout, stepKg: Double): List<NextTimeSuggestion> = forWorkout(workout) { stepKg }
 

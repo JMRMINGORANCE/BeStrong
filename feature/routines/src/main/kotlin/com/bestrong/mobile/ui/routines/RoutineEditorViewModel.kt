@@ -80,6 +80,8 @@ class RoutineEditorViewModel @Inject constructor(
     init {
         savedStateHandle[KEY_ORIGINAL] = com.bestrong.core.io.Persistence.encodeRoutine(original)
         // Si la app se reabrió desde cero, las rutinas aún no estaban cargadas: las leemos de la BD
+        // Con borrador recuperado, la rutina tiene que seguir existiendo (se pudo borrar con la app en segundo plano)
+        if (draft != null && routineId != null) viewModelScope.launch { if (repo.routine(routineId) == null) _missing.value = true }
         if (draft == null && routineId != null && _routine.value.id != routineId) {
             viewModelScope.launch {
                 val stored = repo.routine(routineId)
