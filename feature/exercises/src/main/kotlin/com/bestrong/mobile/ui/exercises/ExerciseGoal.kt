@@ -26,33 +26,29 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bestrong.core.stats.RecordType
+import com.bestrong.core.model.TrackingType
 import com.bestrong.core.stats.Strength
+import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.formatDate
 
 /**
- * Objetivo propio del ejercicio («press banca a 100 kg» de 1RM estimado): barra de progreso, lo que
- * falta y cuándo llegarías al ritmo actual. Al alcanzarlo, se celebra.
+ * Objetivo propio del ejercicio («press banca a 100 kg» de 1RM, «15 dominadas», «plancha de 2 min»):
+ * barra de progreso, lo que llevas y cuándo llegarías al ritmo actual. Al alcanzarlo, se celebra.
  */
 @Composable
 fun ExerciseGoalCard(vm: ExercisesViewModel, s: ExerciseDetailState) {
-    val unit = LocalWeightUnit.current
     val goals by vm.goals.collectAsStateWithLifecycle()
     val goal = goals[s.exercise.id]
     var editing by rememberSaveable { mutableStateOf(false) }
+    val tracking = s.exercise.tracking
+    val byWeight = tracking == TrackingType.WEIGHT_REPS
     // Mancuernas con «suma de las dos»: todo se ve y se escribe como el total (se guarda por mancuerna)
-    val factor = vm.weightFactor(s.exercise)
-    if (editing) {
-        GoalDialog(
-            initial = goal?.let { unit.format(it * factor) }.orEmpty(),
-            hasGoal = goal != null,
-            onSave = { kg -> vm.setGoal(s.exercise.id, kg?.let { it / factor }); editing = false },
-            onDismiss = { editing = false },
-        )
-    }
-    val best = s.records[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0
+    val factor = if (byWeight) vm.weightFactor(s.exercise) else 1
+    val show = goalFormatter(tracking, factor)
+    if (editing) GoalEditor(vm, s, goal, factor) { editing = false }
+    val best = s.goalPoints.maxOfOrNull { it.second } ?: 0.0
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -64,37 +60,70 @@ fun ExerciseGoalCard(vm: ExercisesViewModel, s: ExerciseDetailState) {
                 return@Column
             }
             LinearProgressIndicator(progress = { (best / goal).toFloat().coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-            val eta = remember(s.progress, goal) { Strength.predictDate(s.progress.map { it.dateEpochMs to it.bestOneRepMax }, goal) }
+            val eta = remember(s.goalPoints, goal) { Strength.predictDate(s.goalPoints, goal) }
             val line = when {
-                best >= goal -> stringResource(R.string.goal_reached, unit.format(goal * factor, withUnit = true))
-                eta != null -> stringResource(R.string.goal_progress_eta, unit.format(best * factor), unit.format(goal * factor, withUnit = true), formatDate(eta))
-                else -> stringResource(R.string.goal_progress, unit.format(best * factor), unit.format(goal * factor, withUnit = true))
+                best >= goal -> stringResource(R.string.goal_reached, show(goal))
+                eta != null -> stringResource(R.string.goal_progress_now_eta, show(best), show(goal), formatDate(eta))
+                else -> stringResource(R.string.goal_progress_now, show(best), show(goal))
             }
             Text(line, style = MaterialTheme.typography.bodyMedium, color = if (best >= goal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
         }
     }
 }
 
-/** [onSave] recibe el objetivo en kg (null = quitarlo). Guardar solo se puede con un número válido. */
+/** Cómo se escribe un valor del objetivo: peso (con el total de mancuernas), tiempo o reps. */
 @Composable
-private fun GoalDialog(initial: String, hasGoal: Boolean, onSave: (Double?) -> Unit, onDismiss: () -> Unit) {
+private fun goalFormatter(tracking: TrackingType, factor: Int): (Double) -> String {
     val unit = LocalWeightUnit.current
+    val repsLabel = stringResource(R.string.reps_short)
+    return { v ->
+        when (tracking) {
+            TrackingType.WEIGHT_REPS -> unit.format(v * factor, withUnit = true)
+            TrackingType.DURATION -> formatDuration(v.toLong())
+            else -> "${v.toInt()} $repsLabel"
+        }
+    }
+}
+
+/** Diálogo para poner, cambiar o quitar el objetivo con la unidad adecuada a cada ejercicio. */
+@Composable
+private fun GoalEditor(vm: ExercisesViewModel, s: ExerciseDetailState, goal: Double?, factor: Int, onClose: () -> Unit) {
+    val unit = LocalWeightUnit.current
+    val byWeight = s.exercise.tracking == TrackingType.WEIGHT_REPS
+    GoalDialog(
+        initial = goal?.let { if (byWeight) unit.format(it * factor) else it.toInt().toString() }.orEmpty(),
+        label = when (s.exercise.tracking) {
+            TrackingType.WEIGHT_REPS -> stringResource(R.string.goal_field, unit.label)
+            TrackingType.DURATION -> stringResource(R.string.goal_field_seconds)
+            else -> stringResource(R.string.goal_field_reps)
+        },
+        parse = { t -> if (byWeight) unit.parseToKg(t)?.let { it / factor } else t.toIntOrNull()?.toDouble() },
+        decimal = byWeight,
+        hasGoal = goal != null,
+        onSave = { v -> vm.setGoal(s.exercise.id, v); onClose() },
+        onDismiss = onClose,
+    )
+}
+
+/** [onSave] recibe el objetivo ya convertido por [parse] (null = quitarlo). Guardar solo con un número válido. */
+@Composable
+private fun GoalDialog(initial: String, label: String, parse: (String) -> Double?, decimal: Boolean, hasGoal: Boolean, onSave: (Double?) -> Unit, onDismiss: () -> Unit) {
     var text by rememberSaveable { mutableStateOf(initial) }
-    val kg = unit.parseToKg(text)?.takeIf { it > 0 }
+    val value = parse(text)?.takeIf { it > 0 }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.goal_title)) },
         text = {
             OutlinedTextField(
                 text,
-                { t -> text = t.filter { it.isDigit() || it == ',' || it == '.' }.take(6) },
-                label = { Text(stringResource(R.string.goal_field, unit.label)) },
+                { t -> text = t.filter { it.isDigit() || (decimal && (it == ',' || it == '.')) }.take(6) },
+                label = { Text(label) },
                 singleLine = true,
-                isError = text.isNotEmpty() && kg == null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                isError = text.isNotEmpty() && value == null,
+                keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
             )
         },
-        confirmButton = { TextButton(onClick = { onSave(kg) }, enabled = kg != null) { Text(stringResource(R.string.action_save)) } },
+        confirmButton = { TextButton(onClick = { onSave(value) }, enabled = value != null) { Text(stringResource(R.string.action_save)) } },
         dismissButton = {
             Row {
                 if (hasGoal) TextButton(onClick = { onSave(null) }) { Text(stringResource(R.string.goal_remove)) }

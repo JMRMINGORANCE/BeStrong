@@ -112,7 +112,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
         )
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item { ExerciseMediaSection(vm, s.exercise) }
-            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { ExerciseGoalCard(vm, s) }
+            if (com.bestrong.core.stats.ExerciseGoals.supports(s.exercise.tracking)) item { ExerciseGoalCard(vm, s) }
             if (s.variants.size > 1) {
                 item {
                     // Variantes enlazadas: historial y récords juntos o por separado

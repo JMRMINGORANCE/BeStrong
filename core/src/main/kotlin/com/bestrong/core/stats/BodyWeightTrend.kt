@@ -14,3 +14,23 @@ object BodyWeightTrend {
         return Trend(current, previous?.let { current - it })
     }
 }
+
+/** Cómo vas hacia un peso objetivo: lo que falta (kg, con signo hacia el objetivo) y cuándo llegarías. */
+data class BodyWeightGoalProgress(val remainingKg: Double, val reached: Boolean, val etaEpochMs: Long?)
+
+object BodyWeightGoal {
+    /**
+     * [points] (fecha, kg) ordenados. Sirve para bajar y para subir: la dirección la marca el primer
+     * peso frente al objetivo. La fecha se estima con la tendencia de todas las medidas.
+     */
+    fun progress(points: List<Pair<Long, Double>>, goalKg: Double): BodyWeightGoalProgress? {
+        if (points.isEmpty()) return null
+        val losing = points.first().second > goalKg
+        val current = points.last().second
+        val reached = if (losing) current <= goalKg else current >= goalKg
+        // Para bajar se invierte el signo: la predicción busca una línea que sube
+        val sign = if (losing) -1.0 else 1.0
+        val eta = if (reached) null else Strength.predictDate(points.map { it.first to it.second * sign }, goalKg * sign)
+        return BodyWeightGoalProgress(remainingKg = kotlin.math.abs(current - goalKg), reached = reached, etaEpochMs = eta)
+    }
+}

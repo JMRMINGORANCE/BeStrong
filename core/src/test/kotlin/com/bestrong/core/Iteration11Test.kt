@@ -272,3 +272,26 @@ class Iteration16Test {
         assertEquals(false, back.archived)
     }
 }
+
+class BodyWeightGoalTest {
+    @Test fun losingWeightGoalPredictsDate() {
+        val day = 86_400_000L
+        val points = (0..9).map { it * 7 * day to 85.0 - it * 0.5 }
+        val p = com.bestrong.core.stats.BodyWeightGoal.progress(points, 78.0)!!
+        assertEquals(2.5, p.remainingKg, 1e-6)
+        assertEquals(false, p.reached)
+        assertEquals(true, p.etaEpochMs != null && p.etaEpochMs!! > points.last().first)
+        assertEquals(true, com.bestrong.core.stats.BodyWeightGoal.progress(points, 82.0)!!.reached)
+    }
+}
+
+class ExerciseGoalsTest {
+    @Test fun goalValuePerTracking() {
+        val plank = com.bestrong.core.library.ExerciseLibrary.byId("plank")!!
+        val d = java.time.LocalDate.of(2026, 3, 2)
+        val h = listOf(finishedWorkout("a", d, plank to listOf(WorkoutSet(durationSec = 60, completed = true), WorkoutSet(durationSec = 90, completed = true))))
+        val pts = com.bestrong.core.stats.ExerciseGoals.points(h, plank.id, plank.tracking)
+        assertEquals(90.0, pts.single().second, 0.0)
+        assertEquals(false, com.bestrong.core.stats.ExerciseGoals.supports(com.bestrong.core.model.TrackingType.CARDIO))
+    }
+}

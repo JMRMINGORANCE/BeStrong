@@ -112,6 +112,7 @@ class BeStrongWidget : GlanceAppWidget() {
 @InstallIn(SingletonComponent::class)
 interface WidgetEntryPoint {
     fun repository(): BeStrongRepository
+    fun settings(): com.bestrong.mobile.data.SettingsStore
 }
 
 class BeStrongWidgetReceiver : GlanceAppWidgetReceiver() {

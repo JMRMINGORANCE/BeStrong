@@ -16,12 +16,29 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.bestrong.mobile.shared.R
 
 data class ChartPoint(val label: String, val value: Double)
+
+/** «De 80 (3 mar) a 95 (2 jun), máximo 97, subiendo»: lo que dice la gráfica para quien no la ve. */
+@Composable
+private fun chartSummary(points: List<ChartPoint>, format: (Double) -> String): String {
+    val first = points.first()
+    val last = points.last()
+    val trend = stringResource(
+        when {
+            last.value > first.value * 1.01 -> R.string.chart_trend_up
+            last.value < first.value * 0.99 -> R.string.chart_trend_down
+            else -> R.string.chart_trend_flat
+        },
+    )
+    return stringResource(R.string.chart_summary, format(first.value), first.label, format(last.value), last.label, format(points.maxOf { it.value }), trend)
+}
 
 /** Gráfica de línea simple (progreso de un ejercicio, peso corporal...). */
 @Composable
@@ -32,7 +49,9 @@ fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: D
     val max = points.maxOf { it.value }
     val min = points.minOf { it.value }
     val range = (max - min).takeIf { it > 0 } ?: 1.0
-    Column(modifier) {
+    // TalkBack no ve el dibujo: se resume la gráfica en una frase (inicio, final, máximo y tendencia)
+    val summary = chartSummary(points, valueFormatter)
+    Column(modifier.clearAndSetSemantics { contentDescription = summary }) {
         Row(Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.chart_max, valueFormatter(max)), style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f))
             Text(stringResource(R.string.chart_min, valueFormatter(min)), style = MaterialTheme.typography.labelSmall)
@@ -64,6 +83,14 @@ fun LineChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: D
 /** Gráfica de barras (volumen semanal, entrenamientos por semana...). */
 @Composable
 fun BarChart(points: List<ChartPoint>, modifier: Modifier = Modifier, height: Dp = 160.dp) {
+    if (points.isNotEmpty()) {
+        val summary = points.joinToString(", ") { "${it.label}: ${"%.1f".format(it.value).removeSuffix(",0").removeSuffix(".0")}" }
+        BarChartContent(points, modifier.clearAndSetSemantics { contentDescription = summary }, height)
+    }
+}
+
+@Composable
+private fun BarChartContent(points: List<ChartPoint>, modifier: Modifier, height: Dp) {
     if (points.isEmpty()) return
     if (points.all { it.value == 0.0 }) {
         Text(stringResource(R.string.chart_no_weeks), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

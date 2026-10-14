@@ -80,19 +80,26 @@ private fun VolumeStatus.label(): String = when (this) {
  * Mapa muscular de la semana: series efectivas por músculo frente a la recomendación
  * de 10–20 series semanales. El estado se indica con color **y** texto (accesible).
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WeeklyMuscleMap(weekly: Map<MuscleGroup, Double>) {
+fun WeeklyMuscleMap(weekly: Map<MuscleGroup, Double>, target: Int = MuscleTargets.MIN_WEEKLY_SETS.toInt(), onTarget: (Int) -> Unit = {}) {
     Card {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(stringResource(R.string.muscle_map_title))
             Text(
-                stringResource(R.string.muscle_map_body, MuscleTargets.MIN_WEEKLY_SETS.toInt(), MuscleTargets.MAX_WEEKLY_SETS.toInt()),
+                stringResource(R.string.muscle_map_body, target, MuscleTargets.MAX_WEEKLY_SETS.toInt()),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            // Tu mínimo semanal (también lo usan Inicio y el widget)
+            // FlowRow: con letra grande los chips bajan de línea en vez de salirse
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.Center) {
+                Text(stringResource(R.string.weekly_sets_target), style = MaterialTheme.typography.labelMedium, modifier = Modifier.align(Alignment.CenterVertically))
+                for (n in WEEKLY_TARGET_CHOICES) FilterChip(selected = n == target, onClick = { onTarget(n) }, label = { Text("$n") })
+            }
             MAP_MUSCLES.forEach { m ->
                 val sets = weekly[m] ?: 0.0
-                val status = MuscleTargets.status(sets)
+                val status = MuscleTargets.status(sets, target.toDouble())
                 val name = m.label()
                 val statusText = status.label()
                 val setsText = stringResource(R.string.n_sets_value, formatWeight(sets))
@@ -151,3 +158,6 @@ fun RemindersDialog(settings: UserSettings, onSave: (Set<Int>, Int, Int) -> Unit
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }
+
+/** Mínimos semanales que se pueden elegir en el mapa muscular. */
+private val WEEKLY_TARGET_CHOICES = listOf(6, 8, 10, 12, 15)

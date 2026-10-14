@@ -70,6 +70,10 @@ data class UserSettings(
     val restVibration: VibrationStyle = VibrationStyle.TRIPLE,
     /** Unidades mixtas: peso corporal en otra unidad que las cargas (null = la misma). */
     val bodyUnit: WeightUnit? = null,
+    /** Peso corporal objetivo (kg); sirve para bajar o para subir. */
+    val bodyWeightGoalKg: Double? = null,
+    /** Series semanales por músculo que se quiere alcanzar como mínimo (mapa, Inicio, widget). */
+    val weeklySetsTarget: Int = 10,
     /** Columnas visibles en la tabla de series. */
     val showPreviousColumn: Boolean = true,
     val showComparison: Boolean = true,
@@ -79,7 +83,10 @@ data class UserSettings(
     val dismissedTips: Set<String> = emptySet(),
     /** Incremento propio por ejercicio en kg (mancuernas de 2 kg, máquinas de 5 kg, microdiscos…). */
     val exerciseIncrementKg: Map<String, Double> = emptyMap(),
-    /** Objetivo de peso (1RM estimado, kg) que el usuario se pone en un ejercicio («press banca a 100»). */
+    /**
+     * Objetivo que el usuario se pone en un ejercicio: 1RM estimado en kg («press banca a 100»), o
+     * repeticiones / segundos en los ejercicios sin peso o de tiempo (ver ExerciseGoals).
+     */
     val exerciseGoalsKg: Map<String, Double> = emptyMap(),
     /** Descanso tras una serie de calentamiento (no hace falta el de una serie efectiva). */
     val warmupRestSeconds: Int = 60,
@@ -139,6 +146,8 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         ),
         restVibration = enumOr("rest_vibration", VibrationStyle.TRIPLE),
         bodyUnit = prefs.getString("body_unit", null)?.let { runCatching { WeightUnit.valueOf(it) }.getOrNull() },
+        bodyWeightGoalKg = prefs.getString("body_weight_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
+        weeklySetsTarget = prefs.getInt("weekly_sets_target", 10).coerceIn(1, 30),
         showPreviousColumn = prefs.getBoolean("col_previous", true),
         showComparison = prefs.getBoolean("col_comparison", true),
         tutorialDone = prefs.getBoolean("tutorial_done", false),
@@ -195,6 +204,8 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("font", s.appearance.font.name)
             putString("rest_vibration", s.restVibration.name)
             putString("body_unit", s.bodyUnit?.name)
+            putString("body_weight_goal", s.bodyWeightGoalKg?.toString())
+            putInt("weekly_sets_target", s.weeklySetsTarget)
             putBoolean("col_previous", s.showPreviousColumn)
             putBoolean("col_comparison", s.showComparison)
             putBoolean("tutorial_done", s.tutorialDone)
@@ -252,7 +263,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "body_weight_goal")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
     }
 }

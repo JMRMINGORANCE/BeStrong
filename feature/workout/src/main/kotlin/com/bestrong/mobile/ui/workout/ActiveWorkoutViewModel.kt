@@ -10,9 +10,11 @@ import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.SessionRating
 import com.bestrong.core.model.SetType
+import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
+import com.bestrong.core.stats.ExerciseGoals
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WorkoutStats
@@ -238,7 +240,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         data class RpeSuggestion(val weId: String, val exercise: Exercise, val adjustment: RpeAdjustment) : WorkoutEvent
 
         /** La serie recién hecha alcanza el objetivo de 1RM que el usuario se puso en ese ejercicio. */
-        data class GoalReached(val exercise: Exercise, val goalKg: Double) : WorkoutEvent
+        data class GoalReached(val exercise: Exercise, val goal: String) : WorkoutEvent
     }
     enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, TRIM }
 
@@ -322,7 +324,10 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (marked.isEmpty()) return@launch
             // Si ya hay un descanso en marcha (p. ej. se completa un ejercicio olvidado), no se reinicia
             // El objetivo también se celebra si se llega marcando de golpe (con la mejor de las marcadas)
-            if (!partner) marked.values.filter { it.countsForRecords }.maxByOrNull { it.estimatedOneRepMax }?.let { checkGoal(after, weId, it.id) }
+            if (!partner) {
+                val tracking = after.exercises.firstOrNull { it.id == weId }?.exercise?.tracking
+                tracking?.let { t -> marked.values.maxByOrNull { ExerciseGoals.valueOf(it, t) }?.let { checkGoal(after, weId, it.id) } }
+            }
             val startsRest = restTimer.rest.value == null
             if (startsRest) onSetCompleted(after, after.exercises.indexOfFirst { it.id == weId })
             // Al deshacer solo se para el descanso que arrancó esto (no otro que vino después)
@@ -451,19 +456,31 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Celebra la primera serie que llega al objetivo de 1RM del ejercicio (no si ya lo tenías). */
     private fun checkGoal(w: Workout, weId: String, setId: String) {
         val we = w.exercises.firstOrNull { it.id == weId }
-        val set = we?.sets?.firstOrNull { it.id == setId }?.takeIf { it.countsForRecords }
+        val set = we?.sets?.firstOrNull { it.id == setId }
         // Sin las marcas cargadas todavía no se sabe si ya lo tenías: mejor no celebrar de más
         val loaded = bests.value.isNotEmpty() || repo.history.value.isEmpty()
         val goal = we?.takeIf { loaded }?.let { settings.value.exerciseGoalsKg[it.exercise.id] }
         if (we == null || set == null || goal == null) return
-        val before = maxOf(
-            bests.value[we.exercise.id]?.first ?: 0.0,
-            w.exercises.filter { it.exercise.id == we.exercise.id }.flatMap { it.completedSets }
-                .filter { it.id != setId && it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0,
-        )
-        // Con «suma de las dos mancuernas» el objetivo se muestra igual que los pesos de la fila
-        val factor = if (settings.value.dumbbellTotal && we.exercise.equipment == Equipment.DUMBBELL) 2 else 1
-        if (set.estimatedOneRepMax >= goal && before < goal) _events.tryEmit(WorkoutEvent.GoalReached(we.exercise, goal * factor))
+        val tracking = we.exercise.tracking
+        val value = ExerciseGoals.valueOf(set, tracking)
+        val historyBest = if (tracking == TrackingType.WEIGHT_REPS) {
+            bests.value[we.exercise.id]?.first ?: 0.0
+        } else {
+            ExerciseGoals.points(repo.history.value, we.exercise.id, tracking).maxOfOrNull { it.second } ?: 0.0
+        }
+        val todayBest = w.exercises.filter { it.exercise.id == we.exercise.id }.flatMap { it.completedSets }
+            .filter { it.id != setId }.maxOfOrNull { ExerciseGoals.valueOf(it, tracking) } ?: 0.0
+        if (value >= goal && maxOf(historyBest, todayBest) < goal) _events.tryEmit(WorkoutEvent.GoalReached(we.exercise, goalText(we.exercise, goal)))
+    }
+
+    /** El objetivo como se ve en la app: peso (con el total de mancuernas si toca), reps o tiempo. */
+    private fun goalText(exercise: Exercise, goal: Double): String = when (exercise.tracking) {
+        TrackingType.WEIGHT_REPS -> {
+            val factor = if (settings.value.dumbbellTotal && exercise.equipment == Equipment.DUMBBELL) 2 else 1
+            settings.value.unit.format(goal * factor, withUnit = true)
+        }
+        TrackingType.DURATION -> formatDuration(goal.toLong())
+        else -> "${goal.toInt()} " + appContext.getString(R.string.reps_short)
     }
 
     /** Descanso, aviso por voz y desplazamiento al siguiente ejercicio tras completar una serie. */

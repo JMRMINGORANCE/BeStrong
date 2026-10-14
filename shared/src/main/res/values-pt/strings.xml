@@ -997,10 +997,24 @@
     <string name="goal_hint">Define uma meta de 1RM (p. ex. 100) e vês quanto falta e quando lá chegarias a este ritmo.</string>
     <string name="goal_field">1RM objetivo (%1$s)</string>
     <string name="goal_reached">🎯 Objetivo de %1$s alcançado!</string>
-    <string name="goal_progress">1RM estimado %1$s de %2$s</string>
-    <string name="goal_progress_eta">1RM estimado %1$s de %2$s · a este ritmo, por volta de %3$s</string>
     <string name="rpe_trend_title">Esforço (RPE médio por sessão)</string>
     <string name="rpe_trend_rising">⚠ Custa cada vez mais sem o 1RM subir: pode ser fadiga. Pondera uma semana de descarga.</string>
     <string name="goal_reached_live">🎯 %1$s: objetivo de %2$s alcançado!</string>
     <string name="goal_remove">Remover objetivo</string>
+    <string name="chart_summary">Gráfico: de %1$s (%2$s) a %3$s (%4$s), máximo %5$s, %6$s</string>
+    <string name="chart_trend_up">a subir</string>
+    <string name="chart_trend_down">a descer</string>
+    <string name="chart_trend_flat">estável</string>
+    <string name="weight_goal_title">Peso objetivo</string>
+    <string name="weight_goal_none">Sem peso objetivo</string>
+    <string name="weight_goal_reached">🎯 Peso objetivo de %1$s alcançado</string>
+    <string name="weight_goal_left">Faltam %1$s para %2$s</string>
+    <string name="weight_goal_eta">Faltam %1$s para %2$s · a este ritmo, por volta de %3$s</string>
+    <string name="stale_routine">Não fazes «%1$s» há %2$d dias. Arquivar? Nada é apagado.</string>
+    <string name="stale_keep">Manter</string>
+    <string name="goal_field_reps">Repetições numa série</string>
+    <string name="goal_field_seconds">Segundos</string>
+    <string name="goal_progress_now">A tua melhor marca: %1$s de %2$s</string>
+    <string name="goal_progress_now_eta">A tua melhor marca: %1$s de %2$s · a este ritmo, por volta de %3$s</string>
+    <string name="weekly_sets_target">Mínimo:</string>
 </resources>

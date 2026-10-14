@@ -118,10 +118,13 @@ class HomeViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 
     /** Músculos que esta semana van por detrás de lo habitual (de jueves en adelante). */
-    val laggingMuscles: StateFlow<List<Pair<com.bestrong.core.model.MuscleGroup, Double>>> = repo.history.map { history ->
+    val laggingMuscles: StateFlow<List<Pair<com.bestrong.core.model.MuscleGroup, Double>>> = combine(repo.history, settingsStore.settings) { history, s ->
         val zone = ZoneId.systemDefault()
-        com.bestrong.core.stats.WorkoutStats.laggingMuscles(history, LocalDate.now(zone), zone)
+        com.bestrong.core.stats.WorkoutStats.laggingMuscles(history, LocalDate.now(zone), zone, minSets = s.weeklySetsTarget.toDouble())
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Mínimo de series semanales por músculo que se ha puesto el usuario. */
+    val weeklySetsTarget: Int get() = settingsStore.settings.value.weeklySetsTarget
 
     /** Programas predefinidos más los creados por el usuario. */
     val periodizedPrograms: List<PeriodizedProgram> get() = PeriodizedPrograms.all + planning.state.value.customPrograms
@@ -255,6 +258,19 @@ class HomeViewModel @Inject constructor(
         _messages.tryEmit(context.getString(if (ok) R.string.msg_opening_on_watch else R.string.msg_no_watch))
     }
 
+    /**
+     * Rutinas activas que llevan más de [STALE_DAYS] días sin hacerse (con días sin usar), la más olvidada
+     * primero: candidatas a archivar. Las que nunca se hicieron no cuentan (pueden ser nuevas).
+     */
+    val staleRoutines: StateFlow<List<Pair<Routine, Int>>> = combine(repo.routines, repo.history) { routines, history ->
+        val now = System.currentTimeMillis()
+        val last = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
+        routines.filter { !it.archived }.mapNotNull { r ->
+            val days = last[r.id]?.let { ((now - it) / 86_400_000L).toInt() } ?: return@mapNotNull null
+            (r to days).takeIf { days > STALE_DAYS }
+        }.sortedByDescending { it.second }
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /** Archivar (o recuperar) sin borrar: el historial y la rutina se conservan. */
     fun setArchived(routine: Routine, archived: Boolean) = viewModelScope.launch {
         repo.saveRoutine(routine.copy(archived = archived), keepPosition = true)
@@ -325,3 +341,6 @@ data class WeekProgress(
     val adherence: Double? = null,
     val today: DayOfWeek = DayOfWeek.MONDAY,
 )
+
+/** Días sin hacer una rutina a partir de los cuales se propone archivarla. */
+private const val STALE_DAYS = 60

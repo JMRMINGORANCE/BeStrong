@@ -220,7 +220,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                     }
                 }
             }
-            item { WeeklyMuscleMap(stats.weeklyMuscles) }
+            item { WeeklyMuscleMap(stats.weeklyMuscles, settings.weeklySetsTarget) { n -> vm.updateSettings { it.copy(weeklySetsTarget = n) } } }
             item { MuscleTrendCard(stats.muscleTrend) }
             stats.year?.let { y -> item { YearInReviewCard(y) } }
             item { WeekSummaryCard(advanced) }

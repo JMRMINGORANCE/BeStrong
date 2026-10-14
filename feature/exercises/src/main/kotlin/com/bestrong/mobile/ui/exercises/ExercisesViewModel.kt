@@ -72,6 +72,8 @@ data class ExerciseDetailState(
     val sessionNotes: Map<String, String> = emptyMap(),
     /** RPE medio por sesión (fecha, RPE, mejor 1RM del día), para ver si cada vez cuesta más. */
     val rpeTrend: List<Triple<Long, Double, Double>> = emptyList(),
+    /** Mejor valor por sesión para el objetivo (1RM, reps o segundos según el ejercicio). */
+    val goalPoints: List<Pair<Long, Double>> = emptyList(),
 )
 
 @HiltViewModel
@@ -204,6 +206,7 @@ class ExercisesViewModel @Inject constructor(
             nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id)),
             sessionNotes = sessionNotes(exerciseId, history, routines),
             rpeTrend = Strength.rpeTrend(history, setOf(exerciseId)),
+            goalPoints = com.bestrong.core.stats.ExerciseGoals.points(history, exerciseId, ex.tracking),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

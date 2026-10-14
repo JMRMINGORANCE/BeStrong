@@ -997,10 +997,24 @@
     <string name="goal_hint">Setz dir ein 1RM-Ziel (z. B. 100) und sieh, wie viel fehlt und wann du es in diesem Tempo erreichst.</string>
     <string name="goal_field">Ziel-1RM (%1$s)</string>
     <string name="goal_reached">🎯 Ziel von %1$s erreicht!</string>
-    <string name="goal_progress">Geschätztes 1RM %1$s von %2$s</string>
-    <string name="goal_progress_eta">Geschätztes 1RM %1$s von %2$s · in diesem Tempo um den %3$s</string>
     <string name="rpe_trend_title">Anstrengung (durchschnittliche RPE pro Einheit)</string>
     <string name="rpe_trend_rising">⚠ Es wird immer schwerer, ohne dass dein 1RM steigt: vielleicht Ermüdung. Erwäge eine Deload-Woche.</string>
     <string name="goal_reached_live">🎯 %1$s: Ziel von %2$s erreicht!</string>
     <string name="goal_remove">Ziel entfernen</string>
+    <string name="chart_summary">Diagramm: von %1$s (%2$s) bis %3$s (%4$s), max. %5$s, %6$s</string>
+    <string name="chart_trend_up">steigend</string>
+    <string name="chart_trend_down">fallend</string>
+    <string name="chart_trend_flat">gleichbleibend</string>
+    <string name="weight_goal_title">Zielgewicht</string>
+    <string name="weight_goal_none">Kein Zielgewicht</string>
+    <string name="weight_goal_reached">🎯 Zielgewicht von %1$s erreicht</string>
+    <string name="weight_goal_left">Noch %1$s bis %2$s</string>
+    <string name="weight_goal_eta">Noch %1$s bis %2$s · in diesem Tempo um den %3$s</string>
+    <string name="stale_routine">Du hast „%1$s“ seit %2$d Tagen nicht gemacht. Archivieren? Es wird nichts gelöscht.</string>
+    <string name="stale_keep">Behalten</string>
+    <string name="goal_field_reps">Wiederholungen in einem Satz</string>
+    <string name="goal_field_seconds">Sekunden</string>
+    <string name="goal_progress_now">Deine Bestleistung: %1$s von %2$s</string>
+    <string name="goal_progress_now_eta">Deine Bestleistung: %1$s von %2$s · in diesem Tempo um den %3$s</string>
+    <string name="weekly_sets_target">Minimum:</string>
 </resources>

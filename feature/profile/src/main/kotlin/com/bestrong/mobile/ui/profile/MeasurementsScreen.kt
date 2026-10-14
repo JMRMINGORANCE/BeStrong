@@ -3,6 +3,7 @@ package com.bestrong.mobile.ui.profile
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -87,6 +89,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                             SectionHeader(stringResource(R.string.body_weight_unit, unit.label))
                             LineChart(weights.map { ChartPoint(formatShortDate(it.dateEpochMs), it.weightKg!!) }, valueFormatter = { unit.format(it) })
                             WeightTrendLine(weights.map { it.dateEpochMs to it.weightKg!! }, unit)
+                            WeightGoalLine(vm, weights.map { it.dateEpochMs to it.weightKg!! }, unit)
                         }
                     }
                 }
@@ -193,4 +196,48 @@ private fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) 
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 8.dp),
     )
+}
+
+/** Peso objetivo: cuánto falta y cuándo llegarías al ritmo actual (para bajar o subir). */
+@Composable
+private fun WeightGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>, unit: WeightUnit) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val goal = settings.bodyWeightGoalKg
+    var editing by rememberSaveable { mutableStateOf(false) }
+    if (editing) {
+        var text by rememberSaveable { mutableStateOf(goal?.let { unit.format(it) }.orEmpty()) }
+        val kg = unit.parseToKg(text)?.takeIf { it > 0 }
+        AlertDialog(
+            onDismissRequest = { editing = false },
+            title = { Text(stringResource(R.string.weight_goal_title)) },
+            text = {
+                OutlinedTextField(
+                    text,
+                    { t -> text = t.filter { it.isDigit() || it == ',' || it == '.' }.take(6) },
+                    label = { Text(unit.label) },
+                    singleLine = true,
+                    isError = text.isNotEmpty() && kg == null,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                )
+            },
+            confirmButton = { TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = kg) }; editing = false }, enabled = kg != null) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = {
+                Row {
+                    if (goal != null) TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = null) }; editing = false }) { Text(stringResource(R.string.goal_remove)) }
+                    TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_cancel)) }
+                }
+            },
+        )
+    }
+    val progress = remember(points, goal) { goal?.let { com.bestrong.core.stats.BodyWeightGoal.progress(points, it) } }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        val text = when {
+            goal == null || progress == null -> stringResource(R.string.weight_goal_none)
+            progress.reached -> stringResource(R.string.weight_goal_reached, unit.format(goal, withUnit = true))
+            progress.etaEpochMs != null -> stringResource(R.string.weight_goal_eta, unit.format(progress.remainingKg, withUnit = true), unit.format(goal, withUnit = true), formatDate(progress.etaEpochMs!!))
+            else -> stringResource(R.string.weight_goal_left, unit.format(progress.remainingKg, withUnit = true), unit.format(goal, withUnit = true))
+        }
+        Text(text, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+        TextButton(onClick = { editing = true }) { Text(stringResource(if (goal == null) R.string.goal_set else R.string.action_edit)) }
+    }
 }

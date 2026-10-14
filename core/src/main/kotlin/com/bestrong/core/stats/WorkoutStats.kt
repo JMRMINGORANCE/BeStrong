@@ -44,9 +44,10 @@ object MuscleTargets {
     const val MIN_WEEKLY_SETS = 10.0
     const val MAX_WEEKLY_SETS = 20.0
 
-    fun status(sets: Double): VolumeStatus = when {
+    /** [minSets]: el mínimo semanal que se pone el usuario (10 por defecto). */
+    fun status(sets: Double, minSets: Double = MIN_WEEKLY_SETS): VolumeStatus = when {
         sets <= 0.0 -> VolumeStatus.NONE
-        sets < MIN_WEEKLY_SETS -> VolumeStatus.LOW
+        sets < minSets -> VolumeStatus.LOW
         sets <= MAX_WEEKLY_SETS -> VolumeStatus.OPTIMAL
         else -> VolumeStatus.HIGH
     }
@@ -299,12 +300,12 @@ object WorkoutStats {
      * Media semanal de series de [trend] en las semanas ya cerradas (la actual va a medias) y cómo
      * queda frente al rango habitual para ganar músculo ([MuscleTargets]).
      */
-    fun weeklySetsZone(weeks: List<Pair<LocalDate, Double>>, closedWeeks: Int = 4): Pair<Double, VolumeStatus>? {
+    fun weeklySetsZone(weeks: List<Pair<LocalDate, Double>>, closedWeeks: Int = 4, minSets: Double = MuscleTargets.MIN_WEEKLY_SETS): Pair<Double, VolumeStatus>? {
         // Las semanas antes de empezar a entrenar ese músculo no cuentan (bajarían la media)
         val closed = weeks.dropLast(1).dropWhile { it.second == 0.0 }.takeLast(closedWeeks)
         if (closed.size < 2) return null
         val avg = closed.map { it.second }.average()
-        val zone = MuscleTargets.status(avg)
+        val zone = MuscleTargets.status(avg, minSets)
         return avg to zone
     }
 
@@ -313,12 +314,12 @@ object WorkoutStats {
      * [MuscleTargets.MIN_WEEKLY_SETS] (media de las semanas cerradas) y esta semana aún no. Como mucho [limit],
      * los más atrasados primero, con las series que llevas.
      */
-    fun laggingMuscles(history: List<Workout>, today: LocalDate, zone: ZoneId, limit: Int = 3): List<Pair<MuscleGroup, Double>> {
+    fun laggingMuscles(history: List<Workout>, today: LocalDate, zone: ZoneId, limit: Int = 3, minSets: Double = MuscleTargets.MIN_WEEKLY_SETS): List<Pair<MuscleGroup, Double>> {
         if (today.dayOfWeek < DayOfWeek.THURSDAY) return emptyList()
         return muscleTrend(history, today, zone).mapNotNull { (m, weeks) ->
-            val usual = weeklySetsZone(weeks)?.second ?: return@mapNotNull null
+            val usual = weeklySetsZone(weeks, minSets = minSets)?.second ?: return@mapNotNull null
             val now = weeks.last().second
-            (m to now).takeIf { usual >= VolumeStatus.OPTIMAL && now < MuscleTargets.MIN_WEEKLY_SETS }
+            (m to now).takeIf { usual >= VolumeStatus.OPTIMAL && now < minSets }
         }.sortedBy { it.second }.take(limit)
     }
 

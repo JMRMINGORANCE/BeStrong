@@ -234,3 +234,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Objetivo de 1RM por ejercicio con progreso y fecha estimada
 - [x] Celebración al alcanzar el objetivo durante el entreno
 - [x] Tendencia de esfuerzo (RPE) por ejercicio con aviso de fatiga
+
+## Fase 23 — Metas para todo ✅
+- [x] Gráficas con resumen para TalkBack (inicio, final, máximo y tendencia)
+- [x] Peso corporal objetivo (para bajar o subir) con fecha estimada
+- [x] Propuesta de archivar rutinas sin usar en 60 días
+- [x] Objetivos de repeticiones o tiempo en ejercicios sin peso o isométricos
+- [x] Mínimo semanal de series por músculo configurable (mapa, Inicio y widget)

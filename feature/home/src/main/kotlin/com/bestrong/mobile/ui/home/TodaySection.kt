@@ -243,6 +243,23 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     }
 }
 
+/** «No haces «Pierna B» desde hace 75 días. ¿Archivarla?»: una a una, y se puede descartar. */
+@Composable
+fun StaleRoutineCard(vm: HomeViewModel) {
+    val stale by vm.staleRoutines.collectAsStateWithLifecycle()
+    val tips = com.bestrong.mobile.ui.help.LocalTips.current
+    val (routine, days) = stale.firstOrNull { "stale:${it.first.id}" !in tips.dismissed } ?: return
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.stale_routine, routine.displayName, days), style = MaterialTheme.typography.bodyMedium)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                androidx.compose.material3.TextButton(onClick = { tips.onDismiss("stale:${routine.id}") }) { Text(stringResource(R.string.stale_keep)) }
+                androidx.compose.material3.TextButton(onClick = { vm.setArchived(routine, true) }) { Text(stringResource(R.string.routine_archive)) }
+            }
+        }
+    }
+}
+
 /** «Esta semana vas corto de: Espalda 4 de 10 series». */
 @Composable
 fun LaggingMusclesCard(vm: HomeViewModel, onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {}) {
@@ -261,7 +278,7 @@ fun LaggingMusclesCard(vm: HomeViewModel, onOpenMuscle: (com.bestrong.core.model
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()),
+                        stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), vm.weeklySetsTarget),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f),

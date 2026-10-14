@@ -229,6 +229,7 @@ fun HomeScreen(
                 )
             }
             // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
+            item { StaleRoutineCard(vm) }
             item { LaggingMusclesCard(vm, onOpenMuscle) }
             item { ReadinessCard(vm) }
             item { IntakeCard(vm) }

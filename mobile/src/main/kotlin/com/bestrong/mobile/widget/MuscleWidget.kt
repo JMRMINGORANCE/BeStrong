@@ -30,7 +30,6 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.bestrong.core.model.MuscleGroup
-import com.bestrong.core.stats.MuscleTargets
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.mobile.AppIntents
 import com.bestrong.mobile.MainActivity
@@ -47,20 +46,21 @@ import java.time.ZoneId
 class MuscleWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val repo = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java).repository()
+        val entry = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
+        val repo = entry.repository()
+        val target = entry.settings().settings.value.weeklySetsTarget.toDouble()
         val history = repo.historyOnce()
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val week = WorkoutStats.weeklySetsPerMuscle(history, today, zone)
-        val lagging = WorkoutStats.laggingMuscles(history, today, zone, limit = MAX_ROWS)
+        val lagging = WorkoutStats.laggingMuscles(history, today, zone, limit = MAX_ROWS, minSets = target)
         val rows = (lagging.map { it.first } + week.keys).distinct().take(MAX_ROWS).map { it to (week[it] ?: 0.0) }
-        provideContent { GlanceTheme { Content(context, rows) } }
+        provideContent { GlanceTheme { Content(context, rows, target) } }
     }
 
     @Composable
-    private fun Content(context: Context, rows: List<Pair<MuscleGroup, Double>>) {
+    private fun Content(context: Context, rows: List<Pair<MuscleGroup, Double>>, target: Double) {
         val brand = ColorProvider(Color(0xFFFF6B1A))
-        val target = MuscleTargets.MIN_WEEKLY_SETS
         Column(
             modifier = GlanceModifier.fillMaxSize().background(GlanceTheme.colors.widgetBackground).cornerRadius(20.dp).padding(12.dp)
                 .clickable(actionStartActivity(Intent(context, MainActivity::class.java))),

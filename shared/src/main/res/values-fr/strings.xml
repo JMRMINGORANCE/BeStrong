@@ -997,10 +997,24 @@
     <string name="goal_hint">Fixe un objectif de 1RM (ex. 100) pour voir ce qui te manque et quand tu l\'atteindrais à ce rythme.</string>
     <string name="goal_field">1RM visé (%1$s)</string>
     <string name="goal_reached">🎯 Objectif de %1$s atteint !</string>
-    <string name="goal_progress">1RM estimé %1$s sur %2$s</string>
-    <string name="goal_progress_eta">1RM estimé %1$s sur %2$s · à ce rythme, vers le %3$s</string>
     <string name="rpe_trend_title">Effort (RPE moyen par séance)</string>
     <string name="rpe_trend_rising">⚠ C\'est de plus en plus dur sans progrès du 1RM : peut-être de la fatigue. Envisage une semaine de décharge.</string>
     <string name="goal_reached_live">🎯 %1$s : objectif de %2$s atteint !</string>
     <string name="goal_remove">Retirer l\'objectif</string>
+    <string name="chart_summary">Graphique : de %1$s (%2$s) à %3$s (%4$s), max %5$s, %6$s</string>
+    <string name="chart_trend_up">en hausse</string>
+    <string name="chart_trend_down">en baisse</string>
+    <string name="chart_trend_flat">stable</string>
+    <string name="weight_goal_title">Poids cible</string>
+    <string name="weight_goal_none">Pas de poids cible</string>
+    <string name="weight_goal_reached">🎯 Poids cible de %1$s atteint</string>
+    <string name="weight_goal_left">Encore %1$s pour %2$s</string>
+    <string name="weight_goal_eta">Encore %1$s pour %2$s · à ce rythme, vers le %3$s</string>
+    <string name="stale_routine">Tu n\'as pas fait « %1$s » depuis %2$d jours. L\'archiver ? Rien n\'est supprimé.</string>
+    <string name="stale_keep">Garder</string>
+    <string name="goal_field_reps">Répétitions en une série</string>
+    <string name="goal_field_seconds">Secondes</string>
+    <string name="goal_progress_now">Ton meilleur : %1$s sur %2$s</string>
+    <string name="goal_progress_now_eta">Ton meilleur : %1$s sur %2$s · à ce rythme, vers le %3$s</string>
+    <string name="weekly_sets_target">Minimum :</string>
 </resources>

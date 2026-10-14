@@ -997,10 +997,24 @@
     <string name="goal_hint">Set a 1RM target (e.g. 100) to see how far you are and when you\'d get there at this pace.</string>
     <string name="goal_field">Target 1RM (%1$s)</string>
     <string name="goal_reached">🎯 %1$s goal reached!</string>
-    <string name="goal_progress">Estimated 1RM %1$s of %2$s</string>
-    <string name="goal_progress_eta">Estimated 1RM %1$s of %2$s · at this pace, around %3$s</string>
     <string name="rpe_trend_title">Effort (average RPE per session)</string>
     <string name="rpe_trend_rising">⚠ It\'s getting harder without your 1RM going up: possibly fatigue. Consider a deload week.</string>
     <string name="goal_reached_live">🎯 %1$s: %2$s goal reached!</string>
     <string name="goal_remove">Remove goal</string>
+    <string name="chart_summary">Chart: from %1$s (%2$s) to %3$s (%4$s), max %5$s, %6$s</string>
+    <string name="chart_trend_up">going up</string>
+    <string name="chart_trend_down">going down</string>
+    <string name="chart_trend_flat">steady</string>
+    <string name="weight_goal_title">Target weight</string>
+    <string name="weight_goal_none">No target weight</string>
+    <string name="weight_goal_reached">🎯 Target weight of %1$s reached</string>
+    <string name="weight_goal_left">%1$s to go to %2$s</string>
+    <string name="weight_goal_eta">%1$s to go to %2$s · at this pace, around %3$s</string>
+    <string name="stale_routine">You haven\'t done “%1$s” in %2$d days. Archive it? Nothing is deleted.</string>
+    <string name="stale_keep">Keep</string>
+    <string name="goal_field_reps">Reps in one set</string>
+    <string name="goal_field_seconds">Seconds</string>
+    <string name="goal_progress_now">Your best: %1$s of %2$s</string>
+    <string name="goal_progress_now_eta">Your best: %1$s of %2$s · at this pace, around %3$s</string>
+    <string name="weekly_sets_target">Minimum:</string>
 </resources>
