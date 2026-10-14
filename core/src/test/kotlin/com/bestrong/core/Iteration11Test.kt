@@ -470,3 +470,13 @@ class Iteration20ImprovementsTest {
         assertEquals(null, com.bestrong.core.stats.BodyWeightGoal.neededWeeklyKg(2.0, 5 * week, 4 * week))
     }
 }
+
+class MissedLaterTest {
+    @Test fun doneLaterIsNotMissed() {
+        val monday = java.time.LocalDate.of(2026, 3, 2)
+        val plan = com.bestrong.core.training.WeekPlan(mapOf(3 to "push"))
+        // Planificada el miércoles, hecha el jueves; viernes: no se avisa
+        val out = plan.missedSessions(monday, monday.plusDays(4), setOf(monday.plusDays(3))) { id, since -> id == "push" && !monday.plusDays(3).isBefore(since) }
+        assertEquals(emptyList<Any>(), out)
+    }
+}

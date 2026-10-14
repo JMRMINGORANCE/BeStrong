@@ -57,7 +57,8 @@ fun MenuScreen(
     val voice = rememberVoiceInput(stringResource(R.string.voice_prompt)) { text -> if (session.applySpoken(text)) onBack() }
     val w = workout ?: return
     val context = androidx.compose.ui.platform.LocalContext.current
-    val warnIfNot: (Boolean) -> Unit = { added -> warnIfNotLighter(context, added) }
+    val hasWeight = w.exercises.getOrNull(index)?.sets?.any { it.weightKg > 0 } == true
+    val warnIfNot: (Boolean) -> Unit = { added -> warnIfNotLighter(context, added, hasWeight) }
 
     ScreenScaffold(
         scrollState = listState,
@@ -314,6 +315,7 @@ private fun ScalingLazyListScope.setCorrections(w: Workout, index: Int, session:
 }
 
 /** Si no se pudo bajar más el peso, se dice (si no, el menú se cerraría sin hacer nada). */
-private fun warnIfNotLighter(context: android.content.Context, added: Boolean) {
-    if (!added) android.widget.Toast.makeText(context, R.string.cannot_go_lighter, android.widget.Toast.LENGTH_SHORT).show()
+private fun warnIfNotLighter(context: android.content.Context, added: Boolean, hasWeight: Boolean) {
+    // Sin peso apuntado todavía no hay de dónde bajar: se dice eso
+    if (!added) android.widget.Toast.makeText(context, if (hasWeight) R.string.cannot_go_lighter else R.string.enter_weight_first, android.widget.Toast.LENGTH_SHORT).show()
 }

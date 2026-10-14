@@ -1082,4 +1082,6 @@
     <string name="notif_measure_title">Toca mesurar-se</string>
     <string name="notif_measure_text">Cintura, pit, braç i cuixa: un cop al mes n\'hi ha prou per veure la tendència.</string>
     <string name="measure_reminder">Recorda\'m mesurar-me el dia 1 de cada mes</string>
+    <string name="rep_range_all_hint">S\'aplica a aquests exercicis a totes les teves rutines.</string>
+    <string name="enter_weight_first">Posa primer el pes de la sèrie</string>
 </resources>

@@ -58,35 +58,44 @@ class WorkoutActions @Inject constructor(
     fun prefillLookup(): (String) -> List<WorkoutSet> {
         val history = repository.history.value
         val s = settings.settings.value
-        val weekAgo = System.currentTimeMillis() - 7 * 86_400_000L
         return { id ->
             val ex = repository.exercise(id)
             val suggestion = if (s.progressionEnabled && ex != null) Progression.suggest(ex, history, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id)) else null
             val previous = WorkoutStats.previousSets(id, history)
             val sets = suggestion?.sets ?: previous
-            // Límite de subida semanal (Planificación): no más de un x % sobre lo mejor de la semana pasada
-            val cap = planning.state.value.weeklyCap
-            val capped = if (cap == null) {
-                sets
-            } else {
-                val lastWeekBest = WorkoutStats.bestWeightBetween(id, history, weekAgo, Long.MAX_VALUE)
-                sets.map { it.copy(weightKg = ProgressionCap.limit(it.weightKg, lastWeekBest, cap)) }
-            }
-            // Solo pesos que se pueden montar con la barra (la del ejercicio, si tiene), discos y mancuernas del gimnasio activo;
-            // la asistencia (peso negativo) se deja tal cual
-            val gym = s.gymFor(id)
-            if (ex == null || s.unit != com.bestrong.core.util.WeightUnit.KG) {
-                capped
-            } else {
-                // Si toca subir y el redondeo deja el mismo peso, el siguiente que se pueda montar (si no, la subida se perdería)
-                val raise = suggestion?.kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT && cap == null
-                capped.mapIndexed { i, set ->
-                    val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }.getOrNull(i)?.weightKg
-                    val rounded = if (set.weightKg > 0) gym.nearestLoad(set.weightKg, ex.equipment) else set.weightKg
-                    val lost = raise && before != null && rounded <= before + 1e-6
-                    set.copy(weightKg = if (lost && before!! > 0) gym.loadAbove(before, ex.equipment) else rounded)
-                }
-            }
+            if (ex == null) sets else loadable(ex, sets, suggestion?.kind, previous, history)
+        }
+    }
+
+    /**
+     * Ajusta unas series propuestas a lo que se puede montar en el gimnasio activo: tope de subida semanal
+     * (Planificación), barra/discos/mancuernas (con la barra del ejercicio) y, si tocaba subir y el redondeo
+     * deja el mismo peso, el siguiente que se pueda montar (si no, la subida se perdería). La asistencia
+     * (peso negativo) se deja tal cual. Lo usan el relleno al empezar y la sugerencia del entreno.
+     */
+    fun loadable(
+        ex: com.bestrong.core.model.Exercise,
+        sets: List<WorkoutSet>,
+        kind: com.bestrong.core.training.SuggestionKind?,
+        previous: List<WorkoutSet> = WorkoutStats.previousSets(ex.id, repository.history.value),
+        history: List<Workout> = repository.history.value,
+    ): List<WorkoutSet> {
+        val s = settings.settings.value
+        val cap = planning.state.value.weeklyCap
+        val lastWeekBest = cap?.let { WorkoutStats.bestWeightBetween(ex.id, history, System.currentTimeMillis() - 7 * 86_400_000L, Long.MAX_VALUE) }
+        fun capped(kg: Double) = if (cap == null) kg else ProgressionCap.limit(kg, lastWeekBest, cap)
+        if (s.unit != com.bestrong.core.util.WeightUnit.KG) return sets.map { it.copy(weightKg = capped(it.weightKg)) }
+        val gym = s.gymFor(ex.id)
+        val raise = kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
+        val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
+        return sets.mapIndexed { i, set ->
+            val target = capped(set.weightKg)
+            val rounded = if (target > 0) gym.nearestLoad(target, ex.equipment) else target
+            val prev = before.getOrNull(i)?.weightKg
+            // Subida perdida al redondear: el siguiente peso montable, si el tope semanal lo permite
+            val lost = prev != null && prev > 0 && rounded <= prev + 1e-6
+            val above = if (raise && lost) gym.loadAbove(prev!!, ex.equipment) else null
+            set.copy(weightKg = above?.takeIf { it <= capped(it) + 1e-6 } ?: rounded)
         }
     }
 

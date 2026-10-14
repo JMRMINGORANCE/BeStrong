@@ -1075,11 +1075,13 @@
     <string name="weight_goal_pace_fast" formatted="false">É mais de 1 % por semana: pondera dar-te mais tempo.</string>
     <string name="weight_goal_date_passed">A data (%1$s) já passou: define uma nova.</string>
     <string name="gym_missing_equipment">⚠ Em «%1$s» não há material para este exercício (%2$s)</string>
-    <string name="missed_session">Saltaste «%1$s» de %2$s.</string>
+    <string name="missed_session">Saltaste «%1$s» na %2$s.</string>
     <string name="missed_today">Fazer hoje</string>
     <string name="missed_tomorrow">Passar para amanhã</string>
     <string name="missed_skip">Deixar</string>
     <string name="notif_measure_title">Hora de te medires</string>
     <string name="notif_measure_text">Cintura, peito, braço e coxa: uma vez por mês chega para ver a tendência.</string>
     <string name="measure_reminder">Lembrar-me de me medir no dia 1 de cada mês</string>
+    <string name="rep_range_all_hint">Aplica-se a estes exercícios em todas as tuas rotinas.</string>
+    <string name="enter_weight_first">Indica primeiro o peso da série</string>
 </resources>

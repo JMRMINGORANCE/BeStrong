@@ -1082,4 +1082,6 @@
     <string name="notif_measure_title">Zeit zum Messen</string>
     <string name="notif_measure_text">Taille, Brust, Arm und Oberschenkel: einmal im Monat reicht, um den Trend zu sehen.</string>
     <string name="measure_reminder">Am 1. jedes Monats ans Messen erinnern</string>
+    <string name="rep_range_all_hint">Gilt für diese Übungen in all deinen Routinen.</string>
+    <string name="enter_weight_first">Trag zuerst das Gewicht des Satzes ein</string>
 </resources>

@@ -112,7 +112,10 @@ object Progression {
      * más peso y vuelta al mínimo; si no, mismo peso y una repetición más en cada serie (sin pasar del tope).
      */
     private fun byRange(last: List<WorkoutSet>, range: IntRange, incrementKg: Double, easy: Boolean): ProgressionSuggestion {
-        val atTop = last.all { it.reps >= range.last }
+        // Igual que el estancamiento: las series efectivas al peso más alto (un drop set no cuenta)
+        val working = last.filter { it.type == SetType.NORMAL || it.type == SetType.FAILURE }.ifEmpty { last }
+        val top = working.maxOf { it.weightKg }
+        val atTop = working.filter { it.weightKg == top }.all { it.reps >= range.last }
         return when {
             atTop && easy -> {
                 val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = range.first, completed = false, rpe = null) }

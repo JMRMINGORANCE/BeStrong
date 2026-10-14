@@ -454,11 +454,17 @@ object ProgressionCap {
 }
 
 /**
- * Sesiones planificadas de la semana que empieza en [weekStart] cuyo día ya pasó sin entrenar
- * (día de la semana, id de rutina), la más reciente primero.
+ * Sesiones planificadas de la semana que empieza en [weekStart] cuyo día ya pasó sin entrenar ese día ni
+ * hacer esa rutina después (día de la semana, id de rutina), la más reciente primero.
+ * [routineDone] dice si la rutina se hizo entre una fecha y hoy (moverla de día también cuenta).
  */
-fun WeekPlan.missedSessions(weekStart: java.time.LocalDate, today: java.time.LocalDate, trainedDays: Set<java.time.LocalDate>): List<Pair<java.time.DayOfWeek, String>> =
+fun WeekPlan.missedSessions(
+    weekStart: java.time.LocalDate,
+    today: java.time.LocalDate,
+    trainedDays: Set<java.time.LocalDate>,
+    routineDone: (routineId: String, since: java.time.LocalDate) -> Boolean = { _, _ -> false },
+): List<Pair<java.time.DayOfWeek, String>> =
     days.mapNotNull { (d, id) ->
         val date = weekStart.plusDays(d - 1L)
-        if (date.isBefore(today) && date !in trainedDays) java.time.DayOfWeek.of(d) to id else null
+        if (date.isBefore(today) && date !in trainedDays && !routineDone(id, date)) java.time.DayOfWeek.of(d) to id else null
     }.sortedByDescending { it.first }

@@ -319,7 +319,9 @@ private fun EmojiPicker(selected: String?, onPick: (String?) -> Unit) {
 @Composable
 private fun RoutineRangeRow(vm: RoutineEditorViewModel, routine: com.bestrong.core.model.Routine) {
     if (routine.exercises.none { it.exercise.tracking == TrackingType.WEIGHT_REPS }) return
-    var common by remember(routine.exercises.size) { mutableStateOf(vm.commonRange()) }
+    var common by remember(routine.exercises.map { it.exercise.id }) { mutableStateOf(vm.commonRange()) }
     Text(stringResource(R.string.rep_range_all), style = MaterialTheme.typography.labelLarge)
+    // El rango es de cada ejercicio: también cambia en las demás rutinas que lo usan
+    Text(stringResource(R.string.rep_range_all_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     com.bestrong.mobile.ui.components.RepRangeChips(common) { vm.setRangeForAll(it); common = it }
 }

@@ -36,10 +36,16 @@ class RoutineEditorViewModel @Inject constructor(
         settingsStore.update { s -> s.copy(exerciseRepRange = if (range == null) s.exerciseRepRange - ids.toSet() else s.exerciseRepRange + ids.associateWith { range }) }
     }
 
-    /** El rango común de la rutina si todos sus ejercicios con peso tienen el mismo (para marcarlo). */
+    /** El rango común de la rutina; [MIXED_RANGE] si sus ejercicios tienen rangos distintos (no se marca ninguno). */
     fun commonRange(): String? {
         val ids = _routine.value.exercises.filter { it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }.map { it.exercise.id }
-        return ids.map { settingsStore.settings.value.exerciseRepRange[it] }.distinct().singleOrNull()
+        val ranges = ids.map { settingsStore.settings.value.exerciseRepRange[it] }.distinct()
+        return if (ranges.size == 1) ranges.single() else MIXED_RANGE
+    }
+
+    companion object {
+        /** Ejercicios con rangos distintos: no coincide con ningún chip. */
+        const val MIXED_RANGE = "mixed"
     }
 
     /** Argumento de navegación "id" (null = rutina nueva). */

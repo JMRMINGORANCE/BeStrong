@@ -1082,4 +1082,6 @@
     <string name="notif_measure_title">Toca medirse</string>
     <string name="notif_measure_text">Cintura, pecho, brazo y muslo: una vez al mes basta para ver la tendencia.</string>
     <string name="measure_reminder">Recordarme medirme el día 1 de cada mes</string>
+    <string name="rep_range_all_hint">Se aplica a estos ejercicios en todas tus rutinas.</string>
+    <string name="enter_weight_first">Pon primero el peso de la serie</string>
 </resources>

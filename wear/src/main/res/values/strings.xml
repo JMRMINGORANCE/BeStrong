@@ -161,4 +161,5 @@
     <string name="menu_back_off">2 series de descarga (−10 %)</string>
     <string name="rep_range_short">Rango %1$d–%2$d</string>
     <string name="cannot_go_lighter">Con este peso no se puede bajar más</string>
+    <string name="enter_weight_first">Pon primero el peso de la serie</string>
 </resources>

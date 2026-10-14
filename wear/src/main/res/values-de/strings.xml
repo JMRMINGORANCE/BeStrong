@@ -161,4 +161,5 @@
     <string name="menu_back_off">2 Back-off-Sätze (−10 %)</string>
     <string name="rep_range_short">Bereich %1$d–%2$d</string>
     <string name="cannot_go_lighter">Leichter geht es mit diesem Gewicht nicht</string>
+    <string name="enter_weight_first">Trag zuerst das Gewicht des Satzes ein</string>
 </resources>

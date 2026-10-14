@@ -1081,5 +1081,7 @@
     <string name="missed_skip">Deixalo</string>
     <string name="notif_measure_title">Toca medirse</string>
     <string name="notif_measure_text">Cintura, peito, brazo e coxa: unha vez ao mes chega para ver a tendencia.</string>
-    <string name="measure_reminder">Lembrarme medirme o día 1 de cada mes</string>
+    <string name="measure_reminder">Lembrarme de medirme o día 1 de cada mes</string>
+    <string name="rep_range_all_hint">Aplícase a estes exercicios en todas as túas rutinas.</string>
+    <string name="enter_weight_first">Pon primeiro o peso da serie</string>
 </resources>

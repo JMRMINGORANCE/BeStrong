@@ -161,4 +161,5 @@
     <string name="menu_back_off">2 séries dégressives (−10 %)</string>
     <string name="rep_range_short">Plage %1$d–%2$d</string>
     <string name="cannot_go_lighter">Impossible d\'alléger davantage avec ce poids</string>
+    <string name="enter_weight_first">Indique d\'abord le poids de la série</string>
 </resources>

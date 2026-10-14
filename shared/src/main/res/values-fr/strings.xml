@@ -1082,4 +1082,6 @@
     <string name="notif_measure_title">C\'est l\'heure des mensurations</string>
     <string name="notif_measure_text">Tour de taille, poitrine, bras et cuisse : une fois par mois suffit pour voir la tendance.</string>
     <string name="measure_reminder">Me rappeler de me mesurer le 1er de chaque mois</string>
+    <string name="rep_range_all_hint">S\'applique à ces exercices dans toutes tes routines.</string>
+    <string name="enter_weight_first">Indique d\'abord le poids de la série</string>
 </resources>

@@ -1082,4 +1082,6 @@
     <string name="notif_measure_title">Time to measure</string>
     <string name="notif_measure_text">Waist, chest, arm and thigh: once a month is enough to see the trend.</string>
     <string name="measure_reminder">Remind me to measure on the 1st of each month</string>
+    <string name="rep_range_all_hint">Applies to these exercises in all your routines.</string>
+    <string name="enter_weight_first">Enter the set\'s weight first</string>
 </resources>

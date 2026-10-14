@@ -173,7 +173,11 @@ class ActiveWorkoutViewModel @Inject constructor(
         if (!s.progressionEnabled) {
             emptyMap()
         } else {
-            exercises.mapNotNull { ex -> Progression.suggest(ex, history, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id))?.let { ex.id to it } }.toMap()
+            // Con los mismos ajustes que el relleno (discos, tope semanal, subida que no se pierde), para no contradecirlo
+            exercises.mapNotNull { ex ->
+                Progression.suggest(ex, history, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id))
+                    ?.let { sug -> ex.id to sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, history = history)) }
+            }.toMap()
         }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
@@ -299,7 +303,9 @@ class ActiveWorkoutViewModel @Inject constructor(
         val exerciseId = current.exercises.firstOrNull { it.id == weId }?.exercise?.id ?: return
         val step = settings.value.stepKgFor(exerciseId)
         if (add(current, weId, step) == current) {
-            android.widget.Toast.makeText(appContext, R.string.cannot_go_lighter, android.widget.Toast.LENGTH_SHORT).show()
+            // Sin peso apuntado todavía no hay de dónde bajar: se dice eso, no que no se pueda bajar más
+            val noWeight = current.exercises.first { it.id == weId }.sets.none { it.type != SetType.WARMUP && it.weightKg > 0 }
+            android.widget.Toast.makeText(appContext, if (noWeight) R.string.enter_weight_first else R.string.cannot_go_lighter, android.widget.Toast.LENGTH_SHORT).show()
         } else {
             edit { add(it, weId, step) }
         }

@@ -380,7 +380,9 @@ private fun MissingEquipmentLine(vm: ActiveWorkoutViewModel, we: WorkoutExercise
     val gym = vm.settings.collectAsStateWithLifecycle().value.activeGym
     val equipment = we.exercise.equipment
     // Sin material o ya hecho: no hace falta avisar
-    if (equipment == Equipment.BODYWEIGHT || equipment in gym.equipment || we.sets.all { it.completed }) return
+    // Correr, bici, comba… («otro»/cardio) no dependen del material del gimnasio
+    val needsNothing = equipment == Equipment.BODYWEIGHT || equipment == Equipment.OTHER || we.exercise.tracking == TrackingType.CARDIO
+    if (needsNothing || equipment in gym.equipment || we.sets.all { it.completed }) return
     Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             stringResource(R.string.gym_missing_equipment, gym.name, equipment.label()),
