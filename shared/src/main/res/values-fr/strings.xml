@@ -1126,4 +1126,10 @@
     <string name="notif_backup_now">Sauvegarder</string>
     <string name="backup_now_done">Sauvegarde terminée</string>
     <string name="backup_now_failed">Échec de la sauvegarde : vérifie le dossier ou la connexion</string>
+    <string name="cardio_bests">Records</string>
+    <string name="cardio_best_distance">Plus longue distance : %1$s</string>
+    <string name="cardio_best_time">Plus longue durée : %1$s</string>
+    <string name="cardio_best_pace">Meilleure allure (dès 1 km) : %1$s</string>
+    <string name="restore_latest">Restaurer la dernière sauvegarde automatique</string>
+    <string name="restore_latest_none">Aucune sauvegarde automatique dans le dossier</string>
 </resources>

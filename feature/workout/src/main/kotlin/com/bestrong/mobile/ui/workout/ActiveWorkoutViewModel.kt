@@ -104,6 +104,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             val name = settings.value.partnerName.ifBlank { return@launch }
             val mine = repo.activeWorkout.value
             val now = System.currentTimeMillis()
+            // Sus pesos de la última vez (o su sugerencia); si nunca hizo el ejercicio, los tuyos sin hacer
+            val theirs = actions.prefillLookup(athlete = name)
             val copy = (mine ?: WorkoutEditor.empty(now)).let { w ->
                 w.copy(
                     id = com.bestrong.core.util.newId(),
@@ -111,7 +113,10 @@ class ActiveWorkoutViewModel @Inject constructor(
                     startedAtEpochMs = now,
                     athlete = name,
                     exercises = w.exercises.map { we ->
-                        we.copy(id = com.bestrong.core.util.newId(), sets = we.sets.map { it.asPending() })
+                        val sets = theirs(we.exercise.id).filter { it.type != com.bestrong.core.model.SetType.WARMUP }
+                            .map { it.asPending() }
+                            .ifEmpty { we.sets.map { it.asPending() } }
+                        we.copy(id = com.bestrong.core.util.newId(), sets = sets)
                     },
                 )
             }
@@ -309,7 +314,8 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     fun addExercises(ids: List<String>) {
         val exercises = ids.mapNotNull { repo.exercise(it) }
-        val lookup = actions.prefillLookup()
+        // En modo pareja, con su historial
+        val lookup = actions.prefillLookup(athlete = settings.value.partnerName.takeIf { partnerMode.value })
         val history = repo.history.value
         // Descanso automático según el tipo de ejercicio (o el que usaste la última vez)
         edit { WorkoutEditor.addExercises(it, exercises, lookup, restFor = { ex -> RestPolicy.restFor(ex, history) }) }

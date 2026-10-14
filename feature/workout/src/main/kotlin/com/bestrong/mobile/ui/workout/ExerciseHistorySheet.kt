@@ -38,7 +38,7 @@ fun ExerciseHistorySheet(vm: ActiveWorkoutViewModel, exercise: Exercise, weightF
                     Column(Modifier.fillMaxWidth()) {
                         Text(formatDate(w.startedAtEpochMs), fontWeight = FontWeight.SemiBold)
                         Text(
-                            we.completedSets.joinToString(" · ") { describeSet(it, exercise.tracking, unit, weightFactor) },
+                            we.completedSets.joinToString(" · ") { describeSet(it, exercise, unit, weightFactor) },
                             style = MaterialTheme.typography.bodyMedium,
                         )
                         // El 1RM solo tiene sentido con peso (en dominadas lastradas saldría del lastre)

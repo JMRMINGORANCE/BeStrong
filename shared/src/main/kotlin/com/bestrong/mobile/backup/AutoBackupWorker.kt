@@ -93,16 +93,7 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         }
     }
 
-    /** Nombre → documento de los archivos de la carpeta. */
-    private fun children(tree: Uri): Map<String, Uri> {
-        val uri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
-        val projection = arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-        return applicationContext.contentResolver.query(uri, projection, null, null, null)?.use { c ->
-            buildMap {
-                while (c.moveToNext()) put(c.getString(1), DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0)))
-            }
-        }.orEmpty()
-    }
+    private fun children(tree: Uri): Map<String, Uri> = children(applicationContext, tree)
 
     /** Deja solo las [KEEP] copias más recientes de cada tipo (el nombre lleva la fecha ISO, así que ordena bien). */
     private fun pruneOld(tree: Uri) {
@@ -136,6 +127,21 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             val request = PeriodicWorkRequestBuilder<AutoBackupWorker>(7, TimeUnit.DAYS).setInitialDelay(7, TimeUnit.DAYS).build()
             wm.enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.KEEP, request)
         }
+
+        /** Nombre → documento de los archivos de la carpeta. */
+        private fun children(context: Context, tree: Uri): Map<String, Uri> {
+            val uri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree))
+            val projection = arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME)
+            return context.contentResolver.query(uri, projection, null, null, null)?.use { c ->
+                buildMap {
+                    while (c.moveToNext()) put(c.getString(1), DocumentsContract.buildDocumentUriUsingTree(tree, c.getString(0)))
+                }
+            }.orEmpty()
+        }
+
+        /** La copia automática completa (JSON) más reciente de la carpeta [tree], para restaurarla sin buscarla. */
+        fun latestJson(context: Context, tree: Uri): Uri? =
+            children(context, tree).filterKeys { it.startsWith(PREFIX) && it.endsWith(".json") }.maxByOrNull { it.key }?.value
 
         /** En el resultado de una copia fallida: la carpeta ya no estaba disponible. */
         const val OUT_FOLDER_LOST = "folder_lost"

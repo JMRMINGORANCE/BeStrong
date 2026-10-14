@@ -332,3 +332,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] El gimnasio de cada rutina en su tarjeta de Inicio
 - [x] «Copiar ahora» en Perfil, diciendo si salió bien
 - [x] Al rellenar y sugerir, lo último hecho en el mismo gimnasio (si allí ya se hizo el ejercicio)
+
+## Fase 37 — Cardio y pareja ✅
+- [x] Ritmo según el cardio: /500 m en remo, km/h en bici y min/km en el resto
+- [x] Mejores marcas de cardio en la ficha: distancia, tiempo y mejor ritmo (desde 1 km)
+- [x] Restaurar la última copia automática sin buscar el archivo
+- [x] Modo pareja: su entreno empieza con sus pesos (su historial), no con los tuyos
+- [x] El texto para compartir un entreno lleva el gimnasio y el ritmo del cardio

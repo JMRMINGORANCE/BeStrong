@@ -339,7 +339,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                         we.sets.forEachIndexed { i, set ->
                             Row(if (editing) Modifier.clickable { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
-                                Text(describeSet(set, we.exercise.tracking, unit), Modifier.weight(1f))
+                                Text(describeSet(set, we.exercise, unit), Modifier.weight(1f))
                                 if (set.estimatedOneRepMax > 0) Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax)), style = MaterialTheme.typography.bodySmall)
                             }
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)
@@ -461,7 +461,7 @@ private fun workoutText(w: Workout): String {
     val header = stringResource(R.string.share_workout_text, w.name, formatDate(w.startedAtEpochMs), w.completedSetCount)
     val lines = w.exercises.map { we ->
         val best = we.sets.filter { it.completed }.maxByOrNull { it.estimatedOneRepMax }
-        "• " + we.exercise.displayName() + (best?.let { " — " + describeSet(it, we.exercise.tracking, unit) } ?: "")
+        "• " + we.exercise.displayName() + (best?.let { " — " + describeSet(it, we.exercise, unit) } ?: "")
     }
     return (listOf(header) + lines).joinToString("\n")
 }

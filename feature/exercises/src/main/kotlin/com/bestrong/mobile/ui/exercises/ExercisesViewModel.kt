@@ -76,6 +76,8 @@ data class ExerciseDetailState(
     val goalPoints: List<Pair<Long, Double>> = emptyList(),
     /** 1RM estimado reciente (con las reps en recámara del RPE), el mismo que usa el entreno. */
     val recentOneRepMax: Double? = null,
+    /** Cardio: la más larga en distancia y en tiempo, y el mejor ritmo. */
+    val cardioBests: com.bestrong.core.stats.CardioBests? = null,
 )
 
 @HiltViewModel
@@ -230,6 +232,7 @@ class ExercisesViewModel @Inject constructor(
             sessionNotes = sessionNotes(exerciseId, history, routines),
             rpeTrend = Strength.rpeTrend(history, setOf(exerciseId)),
             goalPoints = com.bestrong.core.stats.ExerciseGoals.points(history, exerciseId, ex.tracking),
+            cardioBests = if (ex.tracking == com.bestrong.core.model.TrackingType.CARDIO) com.bestrong.core.stats.CardioBestsCalc.of(exerciseId, history).takeUnless { it.isEmpty } else null,
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

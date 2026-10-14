@@ -419,6 +419,17 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
+    /** La última copia automática de la carpeta elegida, a la vista previa (sin buscar el archivo a mano). */
+    fun restoreLatestAuto() = viewModelScope.launch {
+        val tree = settings.value.backupFolderUri?.let(Uri::parse) ?: return@launch
+        val latest = runCatching { withContext(Dispatchers.IO) { AutoBackupWorker.latestJson(context, tree) } }.getOrNull()
+        if (latest == null) {
+            _messages.tryEmit(context.getString(R.string.restore_latest_none))
+            return@launch
+        }
+        restoreBackup(latest)
+    }
+
     /** Lee una copia JSON de BeStrong y la deja pendiente de confirmar (añade lo que falte, no borra nada). */
     fun restoreBackup(uri: Uri) = viewModelScope.launch {
         val result = runCatching {

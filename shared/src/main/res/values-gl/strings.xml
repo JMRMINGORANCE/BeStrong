@@ -1126,4 +1126,10 @@
     <string name="notif_backup_now">Copiar agora</string>
     <string name="backup_now_done">Copia feita</string>
     <string name="backup_now_failed">Non se puido facer a copia: revisa o cartafol ou a conexión</string>
+    <string name="cardio_bests">Mellores marcas</string>
+    <string name="cardio_best_distance">Máis distancia: %1$s</string>
+    <string name="cardio_best_time">Máis tempo: %1$s</string>
+    <string name="cardio_best_pace">Mellor ritmo (desde 1 km): %1$s</string>
+    <string name="restore_latest">Restaurar a última copia automática</string>
+    <string name="restore_latest_none">Non hai ningunha copia automática no cartafol</string>
 </resources>

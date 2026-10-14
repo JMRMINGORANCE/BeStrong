@@ -28,8 +28,9 @@ object CoachReport {
         val dateFmt = DateTimeFormatter.ofPattern("EEE d MMM", locale)
         return history.filter { it.isFinished && it.startedAtEpochMs >= fromEpochMs }.sortedBy { it.startedAtEpochMs }
             .joinToString("\n\n") { w ->
+                // Con el gimnasio, si se sabe: las cargas de cada sitio no se comparan igual
                 val header = "▶ " + dateFmt.format(Instant.ofEpochMilli(w.startedAtEpochMs).atZone(zone)) + " · " + w.name +
-                    " (" + (w.durationSeconds() / 60) + " min · " + unit.label + ")"
+                    " (" + (w.durationSeconds() / 60) + " min · " + unit.label + w.gymName?.let { " · $it" }.orEmpty() + ")"
                 val lines = w.exercises.filter { it.completedSets.isNotEmpty() }.map { we ->
                     // Con «suma de las dos» el peso se da como en la app (se guarda por mancuerna)
                     val factor = if (dumbbellTotal && we.exercise.equipment == Equipment.DUMBBELL && we.exercise.tracking == TrackingType.WEIGHT_REPS) 2 else 1
@@ -53,7 +54,8 @@ object CoachReport {
             }
             TrackingType.DURATION -> "${s.durationSec}s"
             TrackingType.DISTANCE -> "${s.distanceM.toInt()}m"
-            TrackingType.CARDIO -> "${s.durationSec / 60}min" + if (s.distanceM > 0) " " + decimal(s.distanceM / 1000) + "km" else ""
+            // Con distancia, también el ritmo (min/km): lo que mira quien entrena a alguien que corre
+            TrackingType.CARDIO -> "${s.durationSec / 60}min" + if (s.distanceM > 0) " " + decimal(s.distanceM / 1000) + "km" + com.bestrong.core.util.paceText(s.durationSec, s.distanceM)?.let { " ($it)" }.orEmpty() else ""
         }
         // Misma abreviatura que en el historial de la app
         val warm = if (s.type == SetType.WARMUP) SetType.WARMUP.short + ":" else ""

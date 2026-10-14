@@ -84,11 +84,34 @@ fun distanceComparison(c: com.bestrong.core.stats.WorkoutStats.ExerciseCompariso
     else -> c.distanceDelta to signedDistance(c.distanceDelta)
 }
 
-/** Ritmo «5:30/km» con [durationSec] y [distanceM]; null sin alguno de los dos o con menos de 100 m (no es fiable). */
-fun paceText(durationSec: Int, distanceM: Double): String? {
+/** Cómo se mide el ritmo en cada cardio: min/km (correr, andar…), /500 m (remo) o km/h (bici). */
+enum class PaceStyle {
+    PER_KM,
+    PER_500M,
+    SPEED,
+    ;
+
+    companion object {
+        fun of(exerciseId: String?): PaceStyle = when (exerciseId) {
+            "rowing_machine" -> PER_500M
+            "cycling", "stationary_bike" -> SPEED
+            else -> PER_KM
+        }
+    }
+}
+
+/**
+ * Ritmo con [durationSec] y [distanceM] según [style]: «5:30/km», «2:05/500 m» o «28.5 km/h»; null sin alguno de
+ * los dos o con menos de 100 m (no es fiable).
+ */
+fun paceText(durationSec: Int, distanceM: Double, style: PaceStyle = PaceStyle.PER_KM): String? {
     if (durationSec <= 0 || distanceM < MIN_PACE_DISTANCE_M) return null
-    val perKm = kotlin.math.round(durationSec / (distanceM / 1000)).toLong()
-    return "%d:%02d/km".format(perKm / 60, perKm % 60)
+    fun minSec(seconds: Double): String = kotlin.math.round(seconds).toLong().let { "%d:%02d".format(it / 60, it % 60) }
+    return when (style) {
+        PaceStyle.PER_KM -> minSec(durationSec / (distanceM / 1000)) + "/km"
+        PaceStyle.PER_500M -> minSec(durationSec / (distanceM / 500)) + "/500 m"
+        PaceStyle.SPEED -> "%.1f km/h".format(distanceM / 1000 / (durationSec / 3600.0))
+    }
 }
 
 private const val MIN_PACE_DISTANCE_M = 100.0

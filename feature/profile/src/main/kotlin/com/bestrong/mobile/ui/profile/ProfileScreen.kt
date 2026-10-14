@@ -414,6 +414,13 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             supportingContent = { Text(stringResource(R.string.restore_backup_body)) },
                             trailingContent = { TextButton(onClick = { restoreLauncher.launch(arrayOf("application/json", "application/octet-stream", "text/*")) }) { Text(stringResource(R.string.action_restore)) } },
                         )
+                        // Con copia automática: la última de la carpeta, sin buscar el archivo
+                        if (settings.backupFolderUri != null) {
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.restore_latest)) },
+                                trailingContent = { TextButton(onClick = vm::restoreLatestAuto) { Text(stringResource(R.string.action_restore)) } },
+                            )
+                        }
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.csv_export)) },
                             supportingContent = { Text(stringResource(R.string.csv_export_body)) },

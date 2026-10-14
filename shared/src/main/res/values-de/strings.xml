@@ -1126,4 +1126,10 @@
     <string name="notif_backup_now">Jetzt sichern</string>
     <string name="backup_now_done">Sicherung erstellt</string>
     <string name="backup_now_failed">Sicherung fehlgeschlagen: prüfe Ordner oder Verbindung</string>
+    <string name="cardio_bests">Bestleistungen</string>
+    <string name="cardio_best_distance">Längste Strecke: %1$s</string>
+    <string name="cardio_best_time">Längste Dauer: %1$s</string>
+    <string name="cardio_best_pace">Bestes Tempo (ab 1 km): %1$s</string>
+    <string name="restore_latest">Letzte automatische Sicherung wiederherstellen</string>
+    <string name="restore_latest_none">Keine automatische Sicherung im Ordner</string>
 </resources>

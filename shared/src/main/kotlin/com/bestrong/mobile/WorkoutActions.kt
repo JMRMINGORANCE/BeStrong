@@ -53,10 +53,11 @@ class WorkoutActions @Inject constructor(
 
     /**
      * Series con las que rellenar un ejercicio al empezar: sugerencia de sobrecarga progresiva
-     * si está activada; si no, lo que se hizo la última vez.
+     * si está activada; si no, lo que se hizo la última vez. Con [athlete], con el historial de la pareja.
      */
-    fun prefillLookup(): (String) -> List<WorkoutSet> {
-        val history = repository.history.value
+    fun prefillLookup(athlete: String? = null): (String) -> List<WorkoutSet> {
+        // La pareja con su propio historial (sus pesos, no los tuyos)
+        val history = if (athlete != null) repository.partnerHistory.value.filter { it.athlete == athlete } else repository.history.value
         val s = settings.settings.value
         // Con varios gimnasios, lo último hecho en este (en el del hotel las mancuernas no son las de siempre)
         val gymName = s.activeGym.name.takeIf { s.gyms.size > 1 }

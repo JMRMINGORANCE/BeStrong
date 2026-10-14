@@ -1126,4 +1126,10 @@
     <string name="notif_backup_now">Copiar ara</string>
     <string name="backup_now_done">Còpia feta</string>
     <string name="backup_now_failed">No s’ha pogut fer la còpia: revisa la carpeta o la connexió</string>
+    <string name="cardio_bests">Millors marques</string>
+    <string name="cardio_best_distance">Més distància: %1$s</string>
+    <string name="cardio_best_time">Més temps: %1$s</string>
+    <string name="cardio_best_pace">Millor ritme (des d’1 km): %1$s</string>
+    <string name="restore_latest">Restaurar la darrera còpia automàtica</string>
+    <string name="restore_latest_none">No hi ha cap còpia automàtica a la carpeta</string>
 </resources>

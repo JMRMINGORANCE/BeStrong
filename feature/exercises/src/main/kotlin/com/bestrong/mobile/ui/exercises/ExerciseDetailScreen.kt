@@ -205,6 +205,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                 }
             }
             if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RpeLoadCard(vm, s.exercise, s.recentOneRepMax) }
+            s.cardioBests?.let { b -> item { CardioBestsCard(s.exercise, b) } }
             if (s.strengthCurve.size >= 2) {
                 item {
                     Card(Modifier.fillMaxWidth()) {
@@ -240,7 +241,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         // Notas de ese día para el ejercicio («hombro cargado», «agarre más abierto»…)
                         s.sessionNotes[w.id]?.let { Text("✎ $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary) }
                         w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
-                            Text("${i + 1}. ${describeSet(set, s.exercise.tracking, unit)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax)) else "")
+                            Text("${i + 1}. ${describeSet(set, s.exercise, unit)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax)) else "")
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
                     }
@@ -331,6 +332,22 @@ private fun RpeLoadCard(vm: ExercisesViewModel, exercise: com.bestrong.core.mode
                     Text("$reps", Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
                     RPE_TABLE_RPES.forEach { Text(load(reps, it), Modifier.weight(1f)) }
                 }
+            }
+        }
+    }
+}
+
+/** «Mejores marcas» del cardio: distancia y tiempo más largos y mejor ritmo (en su medida: /km, /500 m o km/h). */
+@Composable
+private fun CardioBestsCard(exercise: com.bestrong.core.model.Exercise, b: com.bestrong.core.stats.CardioBests) {
+    val style = com.bestrong.core.util.PaceStyle.of(exercise.id)
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            SectionHeader(stringResource(R.string.cardio_bests))
+            b.longestDistance?.let { Text(stringResource(R.string.cardio_best_distance, com.bestrong.mobile.ui.workout.cardioText(it.durationSec, it.distanceM, pace = style))) }
+            b.longestTime?.let { Text(stringResource(R.string.cardio_best_time, com.bestrong.mobile.ui.workout.cardioText(it.durationSec, it.distanceM, pace = style))) }
+            b.bestPace?.let { set ->
+                com.bestrong.core.util.paceText(set.durationSec, set.distanceM, style)?.let { Text(stringResource(R.string.cardio_best_pace, it), fontWeight = FontWeight.Bold) }
             }
         }
     }

@@ -751,4 +751,19 @@ class CollarTest {
         assertEquals(listOf("a"), com.bestrong.core.stats.WorkoutStats.atGym(h, "Hotel", "bp").map { it.id })
         assertEquals(2, com.bestrong.core.stats.WorkoutStats.atGym(h, "Trabajo", "bp").size)
     }
+
+    @Test
+    fun paceByCardioTypeAndBests() {
+        assertEquals("2:00/500 m", com.bestrong.core.util.paceText(480, 2000.0, com.bestrong.core.util.PaceStyle.of("rowing_machine")))
+        assertEquals("30.0 km/h", com.bestrong.core.util.paceText(3600, 30000.0, com.bestrong.core.util.PaceStyle.of("cycling")).orEmpty().replace(',', '.'))
+        val run = com.bestrong.core.model.Exercise(id = "running", name = "Carrera", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST, tracking = com.bestrong.core.model.TrackingType.CARDIO)
+        fun w(id: String, m: Double, sec: Int) = Workout(
+            id = id, name = id, startedAtEpochMs = 1, finishedAtEpochMs = 2,
+            exercises = listOf(WorkoutExercise(exercise = run, sets = listOf(WorkoutSet(durationSec = sec, distanceM = m, completed = true)))),
+        )
+        val b = com.bestrong.core.stats.CardioBestsCalc.of("running", listOf(w("a", 10000.0, 3300), w("b", 5000.0, 1500), w("c", 400.0, 60)))
+        assertEquals(10000.0, b.longestDistance!!.distanceM, 1e-9)
+        // El sprint de 400 m no cuenta para el ritmo: el mejor es el de 5 km (5:00/km)
+        assertEquals(5000.0, b.bestPace!!.distanceM, 1e-9)
+    }
 }

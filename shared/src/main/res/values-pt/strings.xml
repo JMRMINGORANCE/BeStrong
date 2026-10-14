@@ -1126,4 +1126,10 @@
     <string name="notif_backup_now">Copiar agora</string>
     <string name="backup_now_done">Cópia feita</string>
     <string name="backup_now_failed">Não foi possível fazer a cópia: verifica a pasta ou a ligação</string>
+    <string name="cardio_bests">Melhores marcas</string>
+    <string name="cardio_best_distance">Maior distância: %1$s</string>
+    <string name="cardio_best_time">Mais tempo: %1$s</string>
+    <string name="cardio_best_pace">Melhor ritmo (a partir de 1 km): %1$s</string>
+    <string name="restore_latest">Restaurar a última cópia automática</string>
+    <string name="restore_latest_none">Não há nenhuma cópia automática na pasta</string>
 </resources>
