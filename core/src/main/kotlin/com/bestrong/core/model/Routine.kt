@@ -118,3 +118,26 @@ data class Routine(
         }
     }
 }
+
+/**
+ * Superseries coherentes: cada grupo son ejercicios seguidos (si el mismo id reaparece más abajo,
+ * ese tramo pasa a ser otro grupo) y un «grupo» de un solo ejercicio deja de ser superserie.
+ */
+fun Routine.normalizedSupersets(): Routine {
+    val runs = mutableListOf<MutableList<Int>>()
+    exercises.forEachIndexed { i, re ->
+        val prev = exercises.getOrNull(i - 1)
+        if (re.supersetId != null && prev?.supersetId == re.supersetId) runs.last().add(i) else runs.add(mutableListOf(i))
+    }
+    val seen = mutableSetOf<String>()
+    val ids = arrayOfNulls<String>(exercises.size)
+    runs.forEach { run ->
+        val id = exercises[run.first()].supersetId
+        if (id != null && run.size > 1) {
+            val groupId = if (seen.add(id)) id else newId()
+            run.forEach { ids[it] = groupId }
+        }
+    }
+    val fixed = exercises.mapIndexed { i, re -> if (re.supersetId == ids[i]) re else re.copy(supersetId = ids[i]) }
+    return if (fixed == exercises) this else copy(exercises = fixed)
+}

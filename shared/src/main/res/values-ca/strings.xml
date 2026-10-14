@@ -948,10 +948,13 @@
     <string name="lagging_muscle_open">veure exercicis</string>
     <string name="notif_progress_eta">%1$d/%2$d sèries · ≈ %3$d min, fi %4$s</string>
     <string name="rest_use_real_done">Rutina actualitzada: descans de %1$s</string>
-    <string name="record_hint">🏆 %1$d reps amb %2$s = rècord</string>
+    <plurals name="record_hint">
+        <item quantity="one">🏆 %1$d rep amb %2$s = rècord</item>
+        <item quantity="other">🏆 %1$d reps amb %2$s = rècord</item>
+    </plurals>
     <string name="share_as_text">Comparteix com a text</string>
     <string name="routine_muscles_title">Sèries per múscul</string>
-    <string name="routine_muscles_hint">Els secundaris compten la meitat. Recomanat: 10–20 sèries per múscul a la setmana.</string>
+    <string name="routine_muscles_hint">Els secundaris compten la meitat. Recomanat: %1$d–%2$d sèries per múscul a la setmana.</string>
     <string name="filter_hidden">Amagats (%1$d)</string>
     <string name="exercise_hide">Amaga de la biblioteca</string>
     <string name="exercise_unhide">Torna a mostrar a la biblioteca</string>

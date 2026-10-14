@@ -257,7 +257,8 @@ object WorkoutEditor {
             val sets = we.sets.filterNot { it.id == setId }
             w = w.copy(exercises = if (sets.isEmpty()) w.exercises.filterIndexed { j, _ -> j != i } else w.exercises.map { if (it.id == we.id) it.copy(sets = sets) else it })
         }
-        return dropLoneSupersets(w)
+        // Si no se pudo quitar nada, el entreno sale tal cual (sin «arreglos» que harían creer que se recortó)
+        return if (w === workout) workout else dropLoneSupersets(w)
     }
 
     /** Lo que se baja el peso en un drop set. */

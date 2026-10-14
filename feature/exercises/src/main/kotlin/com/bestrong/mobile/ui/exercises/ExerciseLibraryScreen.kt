@@ -88,7 +88,14 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
     val scope = rememberCoroutineScope()
     // Llegando desde Inicio con un músculo: se enseña la lista filtrada, no la ficha que quedó abierta
-    LaunchedEffect(Unit) { vm.showList.collect { navigator.navigateTo(ListDetailPaneScaffoldRole.List) } }
+    val showList by vm.showList.collectAsStateWithLifecycle()
+    LaunchedEffect(showList) {
+        if (showList) {
+            // Se vacía la pila de paneles: «atrás» no debe volver a la ficha anterior
+            while (navigator.canNavigateBack()) navigator.navigateBack()
+            vm.listShown()
+        }
+    }
     NavigableListDetailPaneScaffold(
         navigator = navigator,
         listPane = {
@@ -164,9 +171,9 @@ private fun FilterChips(vm: ExercisesViewModel, filter: ExerciseFilter, onCreate
         FilterChip(selected = filter.favoritesOnly, onClick = { vm.filter.value = filter.copy(favoritesOnly = !filter.favoritesOnly) }, label = { Text(stringResource(R.string.filter_favorites)) })
         FilterChip(selected = filter.noEquipment, onClick = { vm.filter.value = filter.copy(noEquipment = !filter.noEquipment) }, label = { Text(stringResource(R.string.filter_no_equipment)) })
         // Solo si hay alguno oculto: para encontrarlos y volver a mostrarlos
-        val hidden by vm.hidden.collectAsStateWithLifecycle()
-        if (hidden.isNotEmpty() || filter.showHidden) {
-            FilterChip(selected = filter.showHidden, onClick = { vm.filter.value = filter.copy(showHidden = !filter.showHidden) }, label = { Text(stringResource(R.string.filter_hidden, hidden.size)) })
+        val hiddenCount by vm.hiddenCount.collectAsStateWithLifecycle()
+        if (hiddenCount > 0 || filter.showHidden) {
+            FilterChip(selected = filter.showHidden, onClick = { vm.filter.value = filter.copy(showHidden = !filter.showHidden) }, label = { Text(stringResource(R.string.filter_hidden, hiddenCount)) })
         }
         onCreate?.let { FilterChip(selected = false, onClick = it, label = { Text(stringResource(R.string.create_short)) }) }
     }

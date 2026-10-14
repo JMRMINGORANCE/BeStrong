@@ -4,6 +4,7 @@ import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
+import com.bestrong.core.model.normalizedSupersets
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.training.ProgramTexts
 import org.junit.Assert.assertEquals
@@ -177,5 +178,29 @@ class RoutineMuscleTest {
         val m = com.bestrong.core.stats.WorkoutStats.routineSetsPerMuscle(r)
         assertEquals(2.0, m.getValue(bench.primaryMuscle), 0.0)
         bench.secondaryMuscles.forEach { assertEquals(1.0, m.getValue(it), 0.0) }
+    }
+}
+
+class Iteration14Test {
+    private fun re(id: String, ss: String?) = com.bestrong.core.model.RoutineExercise(id = id, exercise = bench, supersetId = ss)
+
+    @Test fun normalizedSupersetsSplitsAndDropsLone() {
+        val r = com.bestrong.core.model.Routine(name = "r", exercises = listOf(re("a", "x"), re("b", null), re("c", "x"), re("d", "x"), re("e", "y")))
+        val result = r.normalizedSupersets()
+        // «a» quedó suelta (su pareja está lejos): deja de ser superserie; c-d siguen juntas; e sola, fuera
+        assertEquals(listOf(null, null, "x", "x", null), result.exercises.map { it.supersetId })
+    }
+
+    @Test fun trimWithNothingToRemoveKeepsWorkoutIdentical() {
+        val lone = WorkoutExercise(exercise = bench, supersetId = "s", sets = listOf(WorkoutSet(reps = 5)))
+        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(lone))
+        val out = WorkoutEditor.trimToFit(w, 0) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = 0) }
+        assertEquals(w, out)
+    }
+
+    @Test fun coachReportShowsBothSides() {
+        val w = finishedWorkout("w", java.time.LocalDate.of(2026, 3, 2), bench to listOf(done(20.0, 8).copy(repsRight = 7)))
+        val text = com.bestrong.core.io.CoachReport.text(listOf(w), 0, com.bestrong.core.util.WeightUnit.KG, UTC, java.util.Locale.ROOT)
+        assertEquals(true, text.contains("20×8/7"))
     }
 }

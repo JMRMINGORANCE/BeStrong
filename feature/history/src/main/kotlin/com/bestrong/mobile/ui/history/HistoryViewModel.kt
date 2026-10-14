@@ -146,13 +146,15 @@ class HistoryViewModel @Inject constructor(
      * Pone en la rutina de ese entreno el descanso real que hiciste en ese ejercicio. [occurrence] dice
      * cuál de las apariciones del ejercicio es (una rutina puede repetirlo, p. ej. series de descarga).
      */
-    fun useRealRest(workout: Workout, exerciseId: String, occurrence: Int, seconds: Int) = viewModelScope.launch {
-        val routine = workout.routineId?.let { repo.routine(it) } ?: return@launch
-        val target = routine.exercises.filter { it.exercise.id == exerciseId }.getOrNull(occurrence) ?: return@launch
+    fun useRealRest(workout: Workout, exerciseId: String, occurrence: Int, seconds: Int, onDone: (Boolean) -> Unit = {}) = viewModelScope.launch {
+        val routine = workout.routineId?.let { repo.routine(it) }
+        val target = routine?.exercises?.filter { it.exercise.id == exerciseId }?.getOrNull(occurrence)
+        if (routine == null || target == null) return@launch onDone(false)
         repo.saveRoutine(
             routine.copy(exercises = routine.exercises.map { if (it.id == target.id) it.copy(restSeconds = seconds) else it }),
             keepPosition = true,
         )
+        onDone(true)
     }
 
     /** El entreno en texto (series, RPE y notas), como el informe semanal para el entrenador. */

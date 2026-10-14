@@ -948,10 +948,13 @@
     <string name="lagging_muscle_open">ver exercicios</string>
     <string name="notif_progress_eta">%1$d/%2$d series · ≈ %3$d min, fin %4$s</string>
     <string name="rest_use_real_done">Rutina actualizada: descanso de %1$s</string>
-    <string name="record_hint">🏆 %1$d reps con %2$s = récord</string>
+    <plurals name="record_hint">
+        <item quantity="one">🏆 %1$d rep con %2$s = récord</item>
+        <item quantity="other">🏆 %1$d reps con %2$s = récord</item>
+    </plurals>
     <string name="share_as_text">Compartir como texto</string>
     <string name="routine_muscles_title">Series por músculo</string>
-    <string name="routine_muscles_hint">Os secundarios contan a metade. Recomendado: 10–20 series por músculo á semana.</string>
+    <string name="routine_muscles_hint">Os secundarios contan a metade. Recomendado: %1$d–%2$d series por músculo á semana.</string>
     <string name="filter_hidden">Ocultos (%1$d)</string>
     <string name="exercise_hide">Ocultar da biblioteca</string>
     <string name="exercise_unhide">Volver mostrar na biblioteca</string>

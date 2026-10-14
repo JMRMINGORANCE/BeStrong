@@ -41,21 +41,27 @@ object CoachReport {
     }
 
     private fun set(s: WorkoutSet, tracking: TrackingType, unit: WeightUnit): String {
+        // Unilaterales: izquierda/derecha
+        val reps = s.repsRight?.let { "${s.reps}/$it" } ?: "${s.reps}"
         val body = when (tracking) {
-            TrackingType.WEIGHT_REPS -> "${unit.format(s.weightKg)}×${s.reps}"
+            TrackingType.WEIGHT_REPS -> "${unit.format(s.weightKg)}×$reps"
             // Lastre (+) o asistencia (−): sin peso, solo las reps
             TrackingType.REPS_ONLY -> when {
-                s.weightKg > 0 -> "+${unit.format(s.weightKg)}×${s.reps}"
-                s.weightKg < 0 -> "−${unit.format(-s.weightKg)}×${s.reps}"
-                else -> "${s.reps}"
+                s.weightKg > 0 -> "+${unit.format(s.weightKg)}×$reps"
+                s.weightKg < 0 -> "−${unit.format(-s.weightKg)}×$reps"
+                else -> reps
             }
             TrackingType.DURATION -> "${s.durationSec}s"
             TrackingType.DISTANCE -> "${s.distanceM.toInt()}m"
             TrackingType.CARDIO -> "${s.durationSec / 60}min" + if (s.distanceM > 0) " " + decimal(s.distanceM / 1000) + "km" else ""
         }
-        val warm = if (s.type == SetType.WARMUP) "C:" else ""
-        return warm + body + (s.rpe?.let { " @" + decimal(it) }.orEmpty()) + (if (s.note.isNotBlank()) " (${s.note})" else "")
+        // Misma abreviatura que en el historial de la app
+        val warm = if (s.type == SetType.WARMUP) SetType.WARMUP.short + ":" else ""
+        return warm + body + extras(s)
     }
+
+    /** RPE y nota de la serie: « @8,5 (lento)». */
+    private fun extras(s: WorkoutSet): String = (s.rpe?.let { " @" + decimal(it) }.orEmpty()) + (if (s.note.isNotBlank()) " (${s.note})" else "")
 
     /** Un decimal como mucho y con coma, igual que los pesos. */
     private fun decimal(v: Double): String {

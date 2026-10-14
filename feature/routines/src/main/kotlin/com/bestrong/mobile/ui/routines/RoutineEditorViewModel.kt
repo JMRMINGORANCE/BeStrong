@@ -9,6 +9,7 @@ import com.bestrong.core.model.RoutineExercise
 import com.bestrong.core.model.RoutineSet
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
+import com.bestrong.core.model.normalizedSupersets
 import com.bestrong.core.training.Tempo
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.shared.R
@@ -59,11 +60,12 @@ class RoutineEditorViewModel @Inject constructor(
         val a = r.exercises[i]
         val b = r.exercises[i + 1]
         if (a.supersetId != null && a.supersetId == b.supersetId) {
-            r.copy(exercises = r.exercises.map { if (it.id == b.id) it.copy(supersetId = null) else it })
-                .let { nr -> if (nr.exercises.count { it.supersetId == a.supersetId } <= 1) nr.copy(exercises = nr.exercises.map { if (it.supersetId == a.supersetId) it.copy(supersetId = null) else it }) else nr }
+            // Separar: lo que va desde b forma su propio grupo (A | B-C), no se rompe todo
+            val newGroup = com.bestrong.core.util.newId()
+            r.copy(exercises = r.exercises.mapIndexed { j, e -> if (j > i && e.supersetId == a.supersetId) e.copy(supersetId = newGroup) else e }).normalizedSupersets()
         } else {
             val group = a.supersetId ?: b.supersetId ?: com.bestrong.core.util.newId()
-            r.copy(exercises = r.exercises.map { if (it.id == a.id || it.id == b.id) it.copy(supersetId = group) else it })
+            r.copy(exercises = r.exercises.map { if (it.id == a.id || it.id == b.id) it.copy(supersetId = group) else it }).normalizedSupersets()
         }
     }
 
@@ -97,20 +99,23 @@ class RoutineEditorViewModel @Inject constructor(
     private fun updateExercise(id: String, block: (RoutineExercise) -> RoutineExercise) =
         _routine.update { r -> r.copy(exercises = r.exercises.map { if (it.id == id) block(it) else it }) }
 
-    fun removeExercise(id: String) = _routine.update { r -> r.copy(exercises = r.exercises.filterNot { it.id == id }) }
+    fun removeExercise(id: String) = _routine.update { r -> r.copy(exercises = r.exercises.filterNot { it.id == id }).normalizedSupersets() }
 
     /** Copia del ejercicio justo debajo (p. ej. un bloque de series de descarga), fuera de superserie. */
     fun duplicateExercise(id: String) = _routine.update { r ->
         val i = r.exercises.indexOfFirst { it.id == id }
         if (i < 0) return@update r
-        r.copy(exercises = r.exercises.toMutableList().apply { add(i + 1, r.exercises[i].copy(id = com.bestrong.core.util.newId(), supersetId = null)) })
+        // Después de toda su superserie (no en medio, que la partiría)
+        val src = r.exercises[i]
+        val end = src.supersetId?.let { g -> r.exercises.indexOfLast { it.supersetId == g } } ?: i
+        r.copy(exercises = r.exercises.toMutableList().apply { add(end + 1, src.copy(id = com.bestrong.core.util.newId(), supersetId = null)) })
     }
 
     fun moveExercise(from: Int, to: Int) = _routine.update { r ->
         if (from !in r.exercises.indices || to !in r.exercises.indices) {
             r
         } else {
-            r.copy(exercises = r.exercises.toMutableList().apply { add(to, removeAt(from)) })
+            r.copy(exercises = r.exercises.toMutableList().apply { add(to, removeAt(from)) }).normalizedSupersets()
         }
     }
 

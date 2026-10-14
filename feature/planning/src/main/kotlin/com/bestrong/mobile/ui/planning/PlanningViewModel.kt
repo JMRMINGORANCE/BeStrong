@@ -68,6 +68,9 @@ class PlanningViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
+    /** Ejercicios ocultos en la biblioteca: el selector de programas tampoco los propone. */
+    val hiddenExercises: Set<String> get() = settings.settings.value.hiddenExercises
+
     val ui: StateFlow<PlanningUi> = combine(store.state, repo.history, repo.routines) { s, history, routines ->
         val today = LocalDate.now(ZoneId.systemDefault())
         val calis = Calisthenics.chains.map { (name, chain) ->

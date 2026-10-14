@@ -77,6 +77,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -367,7 +368,7 @@ private fun RecordHint(set: WorkoutSet, bestOneRepMaxKg: Double, weightFactor: I
     val reps = com.bestrong.core.stats.OneRepMax.repsToBeat(bestOneRepMaxKg, set.weightKg) ?: return
     val unit = LocalWeightUnit.current
     Text(
-        stringResource(R.string.record_hint, reps, unit.format(set.weightKg * weightFactor, withUnit = true)),
+        pluralStringResource(R.plurals.record_hint, reps, reps, unit.format(set.weightKg * weightFactor, withUnit = true)),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.tertiary,
         modifier = Modifier.padding(start = 48.dp, bottom = 4.dp),
@@ -664,7 +665,9 @@ private fun ExerciseCard(
             SetHeader(we.exercise.tracking, dumbbell, prefs.dumbbellTotal)
             var normalIndex = 0
             // Mejor 1RM estimado y peso máximo hasta hoy (sin historial no hay récord que batir)
-            val best = vm.bests.collectAsStateWithLifecycle().value[we.exercise.id]?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS }
+            val bestBefore = vm.bests.collectAsStateWithLifecycle().value[we.exercise.id]?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS }
+            // Para la pista «N reps = récord»: lo que ya batiste hoy también cuenta
+            val bestNow = bestBefore?.let { b -> maxOf(b.first, we.completedSets.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0) }
             val firstPendingId = we.sets.firstOrNull { !it.completed && it.countsForRecords }?.id
             we.sets.forEachIndexed { i, set ->
                 val displayIndex = if (set.type == SetType.NORMAL) normalIndex++ else -1
@@ -694,11 +697,11 @@ private fun ExerciseCard(
                         onStepReps = { vm.stepReps(we.id, set.id, it) },
                         weightFactor = weightFactor,
                         stepKg = stepKg,
-                        isRecord = best != null && set.completed && set.countsForRecords && we.exercise.tracking == TrackingType.WEIGHT_REPS &&
-                            (set.estimatedOneRepMax > best.first + 1e-6 || set.weightKg > best.second + 1e-6),
+                        isRecord = bestBefore != null && set.completed && set.countsForRecords &&
+                            (set.estimatedOneRepMax > bestBefore.first + 1e-6 || set.weightKg > bestBefore.second + 1e-6),
                     )
                     // En la siguiente serie: cuántas reps con ese peso serían récord
-                    if (set.id == firstPendingId && best != null) RecordHint(set, best.first, weightFactor)
+                    if (set.id == firstPendingId && bestNow != null) RecordHint(set, bestNow, weightFactor)
                 }
             }
             OutlinedButton(

@@ -13,6 +13,8 @@ data class RestSummary(val realSeconds: Int, val plannedSeconds: Int, val sample
 object RestStats {
     /** Más que esto entre dos series no es descanso (pausa, cambio de máquina, charla…). */
     private const val MAX_GAP_MS = 15 * 60_000L
+    private const val OUTLIER_FACTOR = 3
+    private const val MIN_OUTLIER_MS = 5 * 60_000L
 
     /**
      * Descanso medio real entre series seguidas del mismo ejercicio: lo que pasa desde que se marca
@@ -41,7 +43,9 @@ object RestStats {
             val end = a.completedAtEpochMs ?: return@mapNotNull null
             val nextStart = b.startedAtEpochMs ?: ((b.completedAtEpochMs ?: return@mapNotNull null) - maxOf(SetTimeline.DEFAULT_SET_MS, b.durationSec * 1000L))
             val gap = nextStart - end
-            if (gap <= 0 || gap > MAX_GAP_MS) null else gap / 1000 to we.restSeconds
+            // Muy por encima de lo previsto no es descanso sino otra cosa (series marcadas tarde, una llamada…)
+            val outlier = gap > maxOf(we.restSeconds * OUTLIER_FACTOR * 1000L, MIN_OUTLIER_MS)
+            if (gap <= 0 || gap > MAX_GAP_MS || outlier) null else gap / 1000 to we.restSeconds
         }
     }
 }

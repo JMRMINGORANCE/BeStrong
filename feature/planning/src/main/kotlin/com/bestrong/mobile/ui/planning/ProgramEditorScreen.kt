@@ -200,7 +200,7 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
     val defaultDayName = stringResource(R.string.prog_day_n, days.size + 1)
 
     picking?.takeIf { it in days.indices }?.let { dayIndex ->
-        ExercisePickDialog(onPick = { id ->
+        ExercisePickDialog(hidden = vm.hiddenExercises, onPick = { id ->
             days[dayIndex] = days[dayIndex].copy(items = days[dayIndex].items + ItemDraft(id))
             picking = null
         }, onDismiss = { picking = null })
@@ -318,10 +318,14 @@ private fun <T> ValueBox(label: String, value: T, show: (T) -> String, parse: (S
 
 /** Selector sencillo de ejercicios de la biblioteca con búsqueda. */
 @Composable
-fun ExercisePickDialog(onPick: (String) -> Unit, onDismiss: () -> Unit) {
+fun ExercisePickDialog(onPick: (String) -> Unit, onDismiss: () -> Unit, hidden: Set<String> = emptySet()) {
     var query by remember { mutableStateOf("") }
     val lang = com.bestrong.mobile.ui.components.uiLanguage()
-    val results = remember(query) { ExerciseLibrary.search(ExerciseLibrary.all, query, nameOf = { ExerciseLibrary.displayName(it, lang) }).take(60) }
+    // Los ocultos solo salen si se buscan por nombre
+    val results = remember(query) {
+        ExerciseLibrary.search(ExerciseLibrary.all, query, nameOf = { ExerciseLibrary.displayName(it, lang) })
+            .filter { query.isNotBlank() || it.id !in hidden }.take(60)
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.prog_add_exercise)) },

@@ -33,13 +33,14 @@ fun RoutineMusclesCard(routine: Routine, modifier: Modifier = Modifier) {
     Card(modifier) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.routine_muscles_title), fontWeight = FontWeight.SemiBold)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 perMuscle.forEach { (muscle, sets) ->
                     val tooMuch = sets > MuscleTargets.MAX_WEEKLY_SETS
                     // Solo informativo: no es un botón
                     Surface(shape = MaterialTheme.shapes.small, color = MaterialTheme.colorScheme.surfaceVariant) {
                         Text(
-                            muscle.label() + " " + "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"),
+                            // No solo color (modo daltónico): un aviso visible
+                            (if (tooMuch) "⚠ " else "") + muscle.label() + " " + "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"),
                             style = MaterialTheme.typography.labelLarge,
                             color = if (tooMuch) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -47,7 +48,7 @@ fun RoutineMusclesCard(routine: Routine, modifier: Modifier = Modifier) {
                     }
                 }
             }
-            Text(stringResource(R.string.routine_muscles_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.routine_muscles_hint, MuscleTargets.MIN_WEEKLY_SETS.toInt(), MuscleTargets.MAX_WEEKLY_SETS.toInt()), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

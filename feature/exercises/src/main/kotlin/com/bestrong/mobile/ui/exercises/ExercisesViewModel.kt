@@ -100,21 +100,31 @@ class ExercisesViewModel @Inject constructor(
 
     val filter = MutableStateFlow(ExerciseFilter())
 
-    /** Avisos de un solo uso para que la biblioteca vuelva a la lista (cierra la ficha que hubiera abierta). */
-    private val _showList = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val showList: kotlinx.coroutines.flow.SharedFlow<Unit> = _showList
+    /**
+     * La biblioteca debe volver a la lista (cerrando la ficha que hubiera abierta). Es un estado, no un
+     * evento: la pantalla puede suscribirse después de que se pida y lo limpia al atenderlo.
+     */
+    private val _showList = MutableStateFlow(false)
+    val showList: StateFlow<Boolean> = _showList
+    fun listShown() {
+        _showList.value = false
+    }
 
     /** Abre la biblioteca con solo ese músculo (nombre del enum; se ignora si no existe). Se mantiene el orden elegido. */
     fun showMuscle(name: String) {
         val muscle = MuscleGroup.entries.firstOrNull { it.name == name } ?: return
         filter.value = filter.value.copy(query = "", muscle = muscle, equipment = null, favoritesOnly = false, noEquipment = false, showHidden = false)
-        _showList.tryEmit(Unit)
+        _showList.value = true
     }
 
     /** Ejercicios usados recientemente, primero (como Hevy). */
     /** Ejercicios ocultos por el usuario. */
     val hidden: StateFlow<Set<String>> = settingsStore.settings.map { it.hiddenExercises }
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.hiddenExercises)
+
+    /** Cuántos ocultos existen todavía (los personalizados borrados no cuentan). */
+    val hiddenCount: StateFlow<Int> = combine(hidden, repo.exercises) { h, all -> all.count { it.id in h } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
     fun toggleHidden(id: String) = settingsStore.update { s ->
         s.copy(hiddenExercises = if (id in s.hiddenExercises) s.hiddenExercises - id else s.hiddenExercises + id)
@@ -125,7 +135,8 @@ class ExercisesViewModel @Inject constructor(
     val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, marks, planning.state) { all, f, history, (favs, hiddenIds), plan ->
         val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }
             .filter { !f.favoritesOnly || it.id in favs }
-            .filter { if (f.showHidden) it.id in hiddenIds else it.id !in hiddenIds }
+            // Ocultos: fuera de la lista, pero si los buscas por nombre aparecen (si no, parecería que no existen)
+            .filter { if (f.showHidden) it.id in hiddenIds else it.id !in hiddenIds || f.query.isNotBlank() }
             // Lesiones marcadas en Planificación: fuera los ejercicios que cargan esas zonas
             .filter { Injuries.isSafe(it, plan.injuries) }
             .filter { !f.noEquipment || it.equipment == Equipment.BODYWEIGHT || it.equipment == Equipment.BAND }
@@ -227,7 +238,10 @@ class ExercisesViewModel @Inject constructor(
     /** Cuántas rutinas usan el ejercicio (para avisar antes de borrarlo). */
     fun routinesUsing(exerciseId: String): Int = repo.routines.value.count { r -> r.exercises.any { it.exercise.id == exerciseId } }
 
-    fun deleteCustom(id: String) = viewModelScope.launch { repo.deleteCustomExercise(id) }
+    fun deleteCustom(id: String) = viewModelScope.launch {
+        repo.deleteCustomExercise(id)
+        settingsStore.update { s -> if (id in s.hiddenExercises) s.copy(hiddenExercises = s.hiddenExercises - id) else s }
+    }
 }
 
 /** Idiomas en los que está traducida la app. */

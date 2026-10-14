@@ -113,6 +113,10 @@ class ActiveWorkoutViewModel @Inject constructor(
                 )
             }
             repo.setPartnerActive(copy)
+            // La hora límite ya puesta también vale para el entreno del compañero recién creado
+            if (savedState.get<Long>(KEY_DEADLINE) != null) {
+                savedState[KEY_DEADLINE_WORKOUT] = listOfNotNull(savedState.get<String>(KEY_DEADLINE_WORKOUT)?.takeIf { it.isNotBlank() }, copy.id).joinToString(",")
+            }
         }
         setPartnerMode(partner)
     }
@@ -241,7 +245,14 @@ class ActiveWorkoutViewModel @Inject constructor(
     val syncConflicts = repo.syncConflicts
 
     /** Deshace el borrado de ese aviso: se recupera lo borrado sin perder lo que haya cambiado después. */
+    /** Fin del descanso que arrancó el último «marcar las que faltan» (para pararlo si se deshace). */
+    private var pendingRestUndo: Long? = null
+
     fun undo(event: WorkoutEvent.Undoable) {
+        if (event.kind == UndoKind.COMPLETE) {
+            pendingRestUndo?.let { end -> if (restTimer.rest.value?.endsAtEpochMs == end) restTimer.skip() }
+            pendingRestUndo = null
+        }
         viewModelScope.launch { update(event.partner) { w -> if (w.id == event.workoutId) event.restore(w) else w } }
     }
 
@@ -308,12 +319,14 @@ class ActiveWorkoutViewModel @Inject constructor(
             // Si ya hay un descanso en marcha (p. ej. se completa un ejercicio olvidado), no se reinicia
             val startsRest = restTimer.rest.value == null
             if (startsRest) onSetCompleted(after, after.exercises.indexOfFirst { it.id == weId })
+            // Al deshacer solo se para el descanso que arrancó esto (no otro que vino después)
+            val startedEnd = if (startsRest) restTimer.rest.value?.endsAtEpochMs else null
             _events.tryEmit(
                 WorkoutEvent.Undoable(UndoKind.COMPLETE, partner, before.id) { w ->
-                    if (startsRest) restTimer.skip()
                     WorkoutEditor.updateExercise(w, weId) { we -> we.copy(sets = we.sets.map { s -> if (marked[s.id] == s) old.getValue(s.id) else s }) }
                 },
             )
+            pendingRestUndo = startedEnd
         }
     }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }
@@ -345,7 +358,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun alternatives(weId: String): List<Exercise> {
         val we = workout.value?.exercises?.firstOrNull { it.id == weId } ?: return emptyList()
         val available = settings.value.activeGym.equipment
-        return Alternatives.forExercise(we.exercise, repo.exercises.value).sortedBy { if (it.equipment in available) 0 else 1 }
+        val hidden = settings.value.hiddenExercises
+        return Alternatives.forExercise(we.exercise, repo.exercises.value).filter { it.id !in hidden }.sortedBy { if (it.equipment in available) 0 else 1 }
     }
 
     fun substitute(weId: String, exerciseId: String) {
