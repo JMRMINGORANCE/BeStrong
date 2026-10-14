@@ -303,3 +303,11 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Widget: la rutina planificada para hoy primero y la que más tiempo lleva sin hacerse
 - [x] El RPE anotado en el reloj propone en el móvil el mismo ajuste de series
 - [x] Los avisos descartados con fecha se olvidan a los 60 días
+
+## Fase 33 — Copias, reloj y primeros pasos ✅
+- [x] Al restaurar una copia: qué trae (entrenos, fechas, rutinas, medidas) y si restaurar también los ajustes
+- [x] Aviso en Perfil si la carpeta de copias se pierde o la última copia tiene más de dos semanas
+- [x] Complicación «Descanso» con la cuenta atrás en cualquier esfera
+- [x] Configuración inicial: «¿Dónde entrenas?» (gimnasio o casa) elige el material
+- [x] Test de traducciones: las 7 lenguas con las mismas claves y argumentos
+- [x] Tempo explosivo (X): el reloj también avisa de subir

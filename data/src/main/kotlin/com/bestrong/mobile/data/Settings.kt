@@ -36,6 +36,8 @@ data class UserSettings(
     /** Carpeta (SAF) para la copia de seguridad semanal; null = desactivada. */
     val backupFolderUri: String? = null,
     val lastBackupEpochMs: Long = 0,
+    /** La carpeta de la copia automática dejó de estar disponible y se desactivó: se avisa hasta elegir otra. */
+    val backupFolderLost: Boolean = false,
     /** Sesiones por semana que el usuario se propone (si no sigue un programa). */
     val weeklyGoal: Int = 3,
     /** Botones principales abajo en la pantalla exterior del Fold (uso con una mano). */
@@ -107,6 +109,12 @@ data class UserSettings(
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
 
+    /** Con el perfil de casa (sin barra) o el de gimnasio como activo, según dónde se entrena (configuración inicial). */
+    fun trainingAt(home: Boolean): UserSettings {
+        val match = gyms.firstOrNull { (com.bestrong.core.model.Equipment.BARBELL in it.equipment) != home } ?: return this
+        return copy(activeGymId = match.id)
+    }
+
     /** Salto de peso de ese ejercicio: el suyo propio o el de la unidad (2,5 kg / 5 lb). */
     fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
 
@@ -125,6 +133,12 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private val _settings = MutableStateFlow(runCatching { read() }.getOrElse { UserSettings() })
     val settings: StateFlow<UserSettings> = _settings
 
+    /** Perfiles de gimnasio guardados; si no hay (o no se leen), el de gimnasio y el de casa por defecto. */
+    private fun readGyms(): List<GymProfile> = prefs.getString("gyms", null)
+        ?.let { runCatching { SyncContract.json.decodeFromString(ListSerializer(GymProfile.serializer()), it) }.getOrNull() }
+        ?.takeIf { it.isNotEmpty() }
+        ?: listOf(GymProfile.gym(), GymProfile.home())
+
     private fun read() = UserSettings(
         defaultRestSeconds = prefs.getInt("rest", 120),
         healthConnectExport = prefs.getBoolean("hc", false),
@@ -137,12 +151,10 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         reminderMinute = prefs.getInt("reminder_minute", 0),
         backupFolderUri = prefs.getString("backup_folder", null),
         lastBackupEpochMs = prefs.getLong("backup_last", 0),
+        backupFolderLost = prefs.getBoolean("backup_folder_lost", false),
         weeklyGoal = prefs.getInt("weekly_goal", 3),
         oneHanded = prefs.getBoolean("one_handed", false),
-        gyms = prefs.getString("gyms", null)
-            ?.let { runCatching { SyncContract.json.decodeFromString(ListSerializer(GymProfile.serializer()), it) }.getOrNull() }
-            ?.takeIf { it.isNotEmpty() }
-            ?: listOf(GymProfile.gym(), GymProfile.home()),
+        gyms = readGyms(),
         activeGymId = prefs.getString("active_gym", null),
         favoriteExercises = prefs.getStringSet("favorites", emptySet()).orEmpty().toSet(),
         hiddenExercises = prefs.getStringSet("hidden_exercises", emptySet()).orEmpty().toSet(),
@@ -203,6 +215,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("reminder_minute", s.reminderMinute)
             putString("backup_folder", s.backupFolderUri)
             putLong("backup_last", s.lastBackupEpochMs)
+            putBoolean("backup_folder_lost", s.backupFolderLost)
             putInt("weekly_goal", s.weeklyGoal)
             putBoolean("one_handed", s.oneHanded)
             putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))

@@ -62,7 +62,7 @@ class WearContainer @Inject constructor(
         for (tile in listOf(BeStrongTileService::class.java, TodayTileService::class.java)) {
             runCatching { TileService.getUpdater(app).requestUpdate(tile) }
         }
-        for (complication in listOf(WeeklyComplicationService::class.java, TodayComplicationService::class.java)) {
+        for (complication in listOf(WeeklyComplicationService::class.java, TodayComplicationService::class.java, com.bestrong.wear.complication.RestComplicationService::class.java)) {
             runCatching {
                 ComplicationDataSourceUpdateRequester
                     .create(app, ComponentName(app, complication))
@@ -81,6 +81,8 @@ class WearContainer @Inject constructor(
                 store.routines.drop(1),
                 session.workout.map { it != null }.distinctUntilChanged().drop(1),
                 store.settings.drop(1),
+                // La complicación del descanso: al empezar, alargar o acabar uno
+                session.rest.map { it?.endsAtEpochMs }.distinctUntilChanged().drop(1),
             ).debounce(500).collect { refreshSurfaces() }
         }
     }

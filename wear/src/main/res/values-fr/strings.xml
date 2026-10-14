@@ -165,4 +165,7 @@
     <string name="target_rpe_short">🎯 RPE %1$s</string>
     <string name="use_this_weight">Utiliser cette charge</string>
     <string name="last_set_rpe">RPE dernière série : %1$s</string>
+    <string name="complication_rest_label">Repos</string>
+    <string name="complication_rest_desc">Temps de repos restant</string>
+    <string name="complication_rest_none">Aucun repos en cours</string>
 </resources>

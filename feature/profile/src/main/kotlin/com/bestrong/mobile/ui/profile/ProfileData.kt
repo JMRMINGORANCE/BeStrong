@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -103,6 +105,7 @@ fun DataToolsSection(vm: ProfileViewModel) {
             dismissButton = { TextButton(onClick = { vm.pendingEncrypted.value = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
+    RestorePreviewDialog(vm)
     if (deleting) {
         AlertDialog(
             onDismissRequest = { deleting = false },
@@ -142,3 +145,37 @@ private fun PasswordField(value: String, hint: String, onChange: (String) -> Uni
 
 /** Mínimo para la copia cifrada: el archivo puede atacarse sin conexión. */
 private const val MIN_PASSWORD = 10
+
+/** Qué trae la copia (entrenos, fechas, rutinas…) antes de restaurarla, y si se quieren también sus ajustes. */
+@Composable
+private fun RestorePreviewDialog(vm: ProfileViewModel) {
+    val data by vm.pendingRestore.collectAsStateWithLifecycle()
+    val summary = data?.let { com.bestrong.core.io.BackupSummary.of(it) } ?: return
+    var withSettings by remember(data) { mutableStateOf(true) }
+    AlertDialog(
+        onDismissRequest = { vm.pendingRestore.value = null },
+        title = { Text(stringResource(R.string.restore_backup)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(stringResource(R.string.restore_preview_counts, summary.workouts, summary.routines, summary.measurements))
+                val first = summary.firstWorkoutEpochMs
+                val last = summary.lastWorkoutEpochMs
+                if (first != null && last != null) {
+                    Text(
+                        stringResource(R.string.restore_preview_range, com.bestrong.mobile.ui.components.formatDate(first), com.bestrong.mobile.ui.components.formatDate(last)),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+                Text(stringResource(R.string.restore_preview_merge), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (summary.hasSettings) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = withSettings, onCheckedChange = { withSettings = it })
+                        Text(stringResource(R.string.restore_preview_settings), Modifier.weight(1f))
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { vm.confirmRestore(withSettings) }) { Text(stringResource(R.string.action_restore)) } },
+        dismissButton = { TextButton(onClick = { vm.pendingRestore.value = null }) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}

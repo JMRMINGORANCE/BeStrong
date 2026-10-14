@@ -133,7 +133,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 onDone = { appVm.update { it.copy(tutorialDone = true, lastSeenVersion = BuildConfig.VERSION_CODE) } },
                 unit = settings.unit,
                 weeklyGoal = settings.weeklyGoal,
-                onSetup = { unit, goal -> appVm.update { it.copy(unit = unit, weeklyGoal = goal) } },
+                onSetup = { unit, goal, home -> appVm.update { it.copy(unit = unit, weeklyGoal = goal).trainingAt(home) } },
+                atHome = com.bestrong.core.model.Equipment.BARBELL !in settings.activeGym.equipment,
             )
         } else if (settings.lastSeenVersion < BuildConfig.VERSION_CODE) {
             WhatsNewDialog { appVm.update { it.copy(lastSeenVersion = BuildConfig.VERSION_CODE) } }

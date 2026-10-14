@@ -80,3 +80,24 @@ object Backup {
         )
     }
 }
+
+/** Lo que trae una copia, para enseñarlo antes de restaurar. */
+data class BackupSummary(
+    val workouts: Int,
+    val routines: Int,
+    val measurements: Int,
+    val firstWorkoutEpochMs: Long?,
+    val lastWorkoutEpochMs: Long?,
+    val hasSettings: Boolean,
+) {
+    companion object {
+        fun of(data: BackupData) = BackupSummary(
+            workouts = data.history.size,
+            routines = data.routines.size,
+            measurements = data.measurements.size,
+            firstWorkoutEpochMs = data.history.minOfOrNull { it.startedAtEpochMs },
+            lastWorkoutEpochMs = data.history.maxOfOrNull { it.startedAtEpochMs },
+            hasSettings = data.settings != null || data.planning != null,
+        )
+    }
+}

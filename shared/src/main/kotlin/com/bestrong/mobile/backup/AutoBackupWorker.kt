@@ -32,7 +32,8 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         if (tree == null || !granted) {
             if (tree != null) {
                 Log.w("AutoBackup", "Sin permiso sobre la carpeta de copias: se desactiva")
-                settingsStore.update { it.copy(backupFolderUri = null) }
+                // Se avisa en Perfil: sin esto las copias se paraban sin que nadie lo supiera
+                settingsStore.update { it.copy(backupFolderUri = null, backupFolderLost = true) }
             }
             return Result.success()
         }

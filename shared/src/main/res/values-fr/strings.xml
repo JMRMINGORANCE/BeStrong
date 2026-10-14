@@ -1103,4 +1103,13 @@
     <string name="tempo_all">Tempo pour toute la routine</string>
     <string name="undo_rpe_loads">Charges par RPE appliquées</string>
     <string name="history_vs_previous">Par rapport à la dernière fois : %1$s de volume · 1RM %2$s</string>
+    <string name="restore_preview_counts">La sauvegarde contient %1$d séances, %2$d routines et %3$d mesures.</string>
+    <string name="restore_preview_range">Séances du %1$s au %2$s</string>
+    <string name="restore_preview_merge">Ce qui manque est ajouté ; rien de ce qui existe n’est supprimé.</string>
+    <string name="restore_preview_settings">Restaurer aussi les réglages et la planification (ils remplacent les actuels)</string>
+    <string name="setup_place">Où t’entraînes-tu ?</string>
+    <string name="setup_place_gym">En salle</string>
+    <string name="setup_place_home">À la maison</string>
+    <string name="auto_backup_lost">Le dossier des sauvegardes n’est plus disponible : choisis-en un autre pour continuer</string>
+    <string name="auto_backup_stale">Dernière sauvegarde : %1$s. Il y a plus de deux semaines : vérifie le dossier</string>
 </resources>

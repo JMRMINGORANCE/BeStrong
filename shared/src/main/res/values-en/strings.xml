@@ -1103,4 +1103,13 @@
     <string name="tempo_all">Tempo for the whole routine</string>
     <string name="undo_rpe_loads">RPE loads applied</string>
     <string name="history_vs_previous">Vs. last time: %1$s volume · 1RM %2$s</string>
+    <string name="restore_preview_counts">The backup has %1$d workouts, %2$d routines and %3$d measurements.</string>
+    <string name="restore_preview_range">Workouts from %1$s to %2$s</string>
+    <string name="restore_preview_merge">Anything you don’t have is added; nothing you already have is deleted.</string>
+    <string name="restore_preview_settings">Also restore settings and planning (they replace the current ones)</string>
+    <string name="setup_place">Where do you train?</string>
+    <string name="setup_place_gym">At the gym</string>
+    <string name="setup_place_home">At home</string>
+    <string name="auto_backup_lost">The backup folder is no longer available: choose another to keep backing up</string>
+    <string name="auto_backup_stale">Last backup: %1$s. Over two weeks ago: check the folder</string>
 </resources>

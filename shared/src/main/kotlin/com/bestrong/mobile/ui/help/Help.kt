@@ -142,21 +142,28 @@ fun TutorialDialog(
     onDone: () -> Unit,
     unit: com.bestrong.core.util.WeightUnit = com.bestrong.core.util.WeightUnit.KG,
     weeklyGoal: Int = 3,
-    /** Última página: lo básico para empezar (unidad y días por semana). */
-    onSetup: (com.bestrong.core.util.WeightUnit, Int) -> Unit = { _, _ -> },
+    /** Última página: lo básico para empezar (unidad, días por semana y si se entrena en casa). */
+    onSetup: (com.bestrong.core.util.WeightUnit, Int, Boolean) -> Unit = { _, _, _ -> },
+    atHome: Boolean = false,
 ) {
     var page by rememberSaveable { mutableIntStateOf(0) }
     var chosenUnit by rememberSaveable { mutableStateOf(unit) }
     var chosenGoal by rememberSaveable { mutableIntStateOf(weeklyGoal) }
+    var chosenHome by rememberSaveable { mutableStateOf(atHome) }
     val pages = TUTORIAL.size + 1
     val setup = page == TUTORIAL.size
-    val finish = { onSetup(chosenUnit, chosenGoal); onDone() }
+    val finish = { onSetup(chosenUnit, chosenGoal, chosenHome); onDone() }
     AlertDialog(
         onDismissRequest = {},
         title = { Text(stringResource(if (setup) R.string.setup_title else TUTORIAL[page].first)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (setup) SetupPage(chosenUnit, chosenGoal, { chosenUnit = it }, { chosenGoal = it }) else Text(stringResource(TUTORIAL[page].second))
+                if (setup) {
+                    SetupPage(chosenUnit, chosenGoal, { chosenUnit = it }, { chosenGoal = it })
+                    PlaceChoice(chosenHome) { chosenHome = it }
+                } else {
+                    Text(stringResource(TUTORIAL[page].second))
+                }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                     Text(
                         (0 until pages).joinToString(" ") { if (it == page) "●" else "○" },
@@ -198,6 +205,18 @@ private fun SetupPage(
             for (d in 1..7) FilterChip(selected = d == goal, onClick = { onGoal(d) }, label = { Text("$d") })
         }
         Text(stringResource(R.string.setup_import_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** «¿Dónde entrenas?»: elige el perfil de material (discos y barra o mancuernas de casa) para los pesos sugeridos. */
+@Composable
+private fun PlaceChoice(home: Boolean, onChange: (Boolean) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.setup_place), style = MaterialTheme.typography.labelLarge)
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            FilterChip(selected = !home, onClick = { onChange(false) }, label = { Text(stringResource(R.string.setup_place_gym)) })
+            FilterChip(selected = home, onClick = { onChange(true) }, label = { Text(stringResource(R.string.setup_place_home)) })
+        }
     }
 }
 

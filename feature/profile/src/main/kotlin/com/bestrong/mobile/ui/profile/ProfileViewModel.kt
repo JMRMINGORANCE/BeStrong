@@ -303,13 +303,25 @@ class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun restoreText(text: String) {
-        val result = runCatching {
-            val data = withContext(Dispatchers.Default) { Backup.decode(text) }
-            data to fullBackup.restore(data)
-        }
+        runCatching { withContext(Dispatchers.Default) { Backup.decode(text) } }
+            .onSuccess { pendingRestore.value = it }
+            .onFailure { _messages.tryEmit(context.getString(R.string.restore_error, it.message.orEmpty())) }
+    }
+
+    /** Copia leída y pendiente de confirmar (se enseña qué trae antes de restaurar). */
+    val pendingRestore = MutableStateFlow<com.bestrong.core.io.BackupData?>(null)
+
+    /**
+     * Restaura la copia pendiente: añade lo que falte sin borrar nada. Con [includeSettings] en false se
+     * quedan tus ajustes y tu planificación actuales (útil al traer entrenos de otro móvil ya configurado).
+     */
+    fun confirmRestore(includeSettings: Boolean) = viewModelScope.launch {
+        val data = pendingRestore.value ?: return@launch
+        pendingRestore.value = null
+        val result = runCatching { fullBackup.restore(if (includeSettings) data else data.copy(settings = null, planning = null)) }
         _messages.tryEmit(
             result.fold(
-                { (data, added) -> context.getString(R.string.restore_done, data.history.size, data.routines.size, added) },
+                { added -> context.getString(R.string.restore_done, data.history.size, data.routines.size, added) },
                 { context.getString(R.string.restore_error, it.message.orEmpty()) },
             ),
         )
@@ -382,7 +394,7 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
-    /** Restaura una copia JSON de BeStrong (añade lo que falte, no borra nada). */
+    /** Lee una copia JSON de BeStrong y la deja pendiente de confirmar (añade lo que falte, no borra nada). */
     fun restoreBackup(uri: Uri) = viewModelScope.launch {
         val result = runCatching {
             val text = withContext(Dispatchers.IO) {
@@ -393,15 +405,11 @@ class ProfileViewModel @Inject constructor(
                 pendingEncrypted.value = text
                 return@launch
             }
-            val data = withContext(Dispatchers.Default) { Backup.decode(text) }
-            data to fullBackup.restore(data)
+            withContext(Dispatchers.Default) { Backup.decode(text) }
         }
-        _messages.tryEmit(
-            result.fold(
-                { (data, added) -> context.getString(R.string.restore_done, data.history.size, data.routines.size, added) },
-                { context.getString(R.string.restore_error, it.message.orEmpty()) },
-            ),
-        )
+        // Se confirma en el diálogo con lo que trae (confirmRestore)
+        result.onSuccess { pendingRestore.value = it }
+            .onFailure { _messages.tryEmit(context.getString(R.string.restore_error, it.message.orEmpty())) }
     }
 
     /** Carpeta elegida para la copia semanal: guardamos el permiso y hacemos una copia ya. */
@@ -415,7 +423,7 @@ class ProfileViewModel @Inject constructor(
                 runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(old), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
             }
         }
-        settingsStore.update { it.copy(backupFolderUri = uri?.toString()) }
+        settingsStore.update { it.copy(backupFolderUri = uri?.toString(), backupFolderLost = false) }
         if (uri != null) {
             AutoBackupWorker.runNow(context)
             _messages.tryEmit(context.getString(R.string.backup_started))

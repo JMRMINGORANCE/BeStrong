@@ -632,7 +632,7 @@ class WorkoutSession @Inject constructor(
             haptic(longArrayOf(0, 60, 120, 60, 120, 60)) // preparados
             delay(1_500)
             repeat(reps) {
-                tempo.phases.forEach { (phase, seconds) ->
+                tempo.guidePhases.forEach { (phase, seconds) ->
                     haptic(
                         when (phase) {
                             Tempo.Phase.ECCENTRIC -> longArrayOf(0, 180)

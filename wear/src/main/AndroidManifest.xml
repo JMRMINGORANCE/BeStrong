@@ -128,5 +128,23 @@
                 android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
                 android:value="3600" />
         </service>
+
+        <!-- Cuenta atrás del descanso: la esfera la anima sola; se actualiza al empezar o acabar un descanso -->
+        <service
+            android:name=".complication.RestComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_dumbbell"
+            android:label="@string/complication_rest_label"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT" />
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="0" />
+        </service>
     </application>
 </manifest>

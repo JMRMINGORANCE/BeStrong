@@ -642,4 +642,22 @@ class CollarTest {
         // La de hoy primero; luego la que nunca se hizo antes que la hecha
         assertEquals(listOf("c", "b"), picked.map { it.id })
     }
+
+    @Test
+    fun explosiveConcentricStillCues() {
+        val t = com.bestrong.core.training.Tempo.parse("3-1-X-0")!!
+        assertEquals(listOf(com.bestrong.core.training.Tempo.Phase.ECCENTRIC, com.bestrong.core.training.Tempo.Phase.BOTTOM, com.bestrong.core.training.Tempo.Phase.CONCENTRIC), t.guidePhases.map { it.first })
+        // El tiempo bajo tensión no cambia: la subida explosiva sigue contando 0 s
+        assertEquals(4, t.repSeconds)
+    }
+
+    @Test
+    fun backupSummaryCountsAndRange() {
+        val data = com.bestrong.core.io.BackupData(history = listOf(Workout(name = "A", startedAtEpochMs = 5), Workout(name = "B", startedAtEpochMs = 9)))
+        val s = com.bestrong.core.io.BackupSummary.of(data)
+        assertEquals(2, s.workouts)
+        assertEquals(5L, s.firstWorkoutEpochMs)
+        assertEquals(9L, s.lastWorkoutEpochMs)
+        assertEquals(false, s.hasSettings)
+    }
 }

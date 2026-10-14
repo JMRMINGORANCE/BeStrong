@@ -115,7 +115,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             onDone = { showTutorial = false },
             unit = settings.unit,
             weeklyGoal = settings.weeklyGoal,
-            onSetup = { unit, goal -> vm.updateSettings { it.copy(unit = unit, weeklyGoal = goal) } },
+            onSetup = { unit, goal, home -> vm.updateSettings { it.copy(unit = unit, weeklyGoal = goal).trainingAt(home) } },
+            atHome = com.bestrong.core.model.Equipment.BARBELL !in settings.activeGym.equipment,
         )
     }
     editingGym?.let { g ->
@@ -396,13 +397,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.auto_backup)) },
                             supportingContent = {
-                                Text(
-                                    when {
-                                        settings.backupFolderUri == null -> stringResource(R.string.auto_backup_off)
-                                        settings.lastBackupEpochMs > 0 -> stringResource(R.string.auto_backup_last, formatDate(settings.lastBackupEpochMs))
-                                        else -> stringResource(R.string.auto_backup_on)
-                                    },
-                                )
+                                AutoBackupStatus(settings)
                             },
                             trailingContent = {
                                 if (settings.backupFolderUri == null) {
@@ -498,5 +493,22 @@ private fun WarmupRestSetting(seconds: Int, onChange: (Int) -> Unit) {
                 FilterChip(selected = s == seconds, onClick = { onChange(s) }, label = { Text(com.bestrong.core.util.formatDuration(s.toLong())) })
             }
         }
+    }
+}
+
+/** Más días que esto sin copia (es semanal) es que algo falla: se avisa en rojo. */
+private const val BACKUP_STALE_DAYS = 14L
+
+/** Estado de la copia automática: apagada, carpeta perdida, última copia (en rojo si es vieja) o pendiente. */
+@Composable
+private fun AutoBackupStatus(settings: com.bestrong.mobile.data.UserSettings) {
+    val staleBefore = System.currentTimeMillis() - BACKUP_STALE_DAYS * 86_400_000L
+    val error = MaterialTheme.colorScheme.error
+    when {
+        settings.backupFolderUri == null && settings.backupFolderLost -> Text(stringResource(R.string.auto_backup_lost), color = error)
+        settings.backupFolderUri == null -> Text(stringResource(R.string.auto_backup_off))
+        settings.lastBackupEpochMs in 1 until staleBefore -> Text(stringResource(R.string.auto_backup_stale, formatDate(settings.lastBackupEpochMs)), color = error)
+        settings.lastBackupEpochMs > 0 -> Text(stringResource(R.string.auto_backup_last, formatDate(settings.lastBackupEpochMs)))
+        else -> Text(stringResource(R.string.auto_backup_on))
     }
 }

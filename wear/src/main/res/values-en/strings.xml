@@ -165,4 +165,7 @@
     <string name="target_rpe_short">🎯 RPE %1$s</string>
     <string name="use_this_weight">Use this weight</string>
     <string name="last_set_rpe">Last set RPE: %1$s</string>
+    <string name="complication_rest_label">Rest</string>
+    <string name="complication_rest_desc">Rest time left</string>
+    <string name="complication_rest_none">No rest running</string>
 </resources>

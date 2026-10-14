@@ -1103,4 +1103,13 @@
     <string name="tempo_all">Tempo de toda a rotina</string>
     <string name="undo_rpe_loads">Cargas por RPE aplicadas</string>
     <string name="history_vs_previous">Face à vez anterior: %1$s de volume · 1RM %2$s</string>
+    <string name="restore_preview_counts">A cópia tem %1$d treinos, %2$d rotinas e %3$d medidas.</string>
+    <string name="restore_preview_range">Treinos de %1$s a %2$s</string>
+    <string name="restore_preview_merge">Acrescenta-se o que não tens; nada do que já existe é apagado.</string>
+    <string name="restore_preview_settings">Restaurar também as definições e o planeamento (substituem os atuais)</string>
+    <string name="setup_place">Onde treinas?</string>
+    <string name="setup_place_gym">No ginásio</string>
+    <string name="setup_place_home">Em casa</string>
+    <string name="auto_backup_lost">A pasta das cópias já não está disponível: escolhe outra para continuar a fazer cópias</string>
+    <string name="auto_backup_stale">Última cópia: %1$s. Há mais de duas semanas: verifica a pasta</string>
 </resources>

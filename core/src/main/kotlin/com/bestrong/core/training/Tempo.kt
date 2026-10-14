@@ -12,6 +12,14 @@ data class Tempo(val eccentric: Int, val bottomPause: Int, val concentric: Int, 
     val phases: List<Pair<Phase, Int>>
         get() = listOf(Phase.ECCENTRIC to eccentric, Phase.BOTTOM to bottomPause, Phase.CONCENTRIC to concentric, Phase.TOP to topPause).filter { it.second > 0 }
 
+    /**
+     * Fases para guiar con vibraciones: como [phases], pero una subida explosiva (X, 0 s) también avisa y se le
+     * da 1 s (si no, tras la pausa abajo no habría ninguna señal de subir).
+     */
+    val guidePhases: List<Pair<Phase, Int>>
+        get() = listOf(Phase.ECCENTRIC to eccentric, Phase.BOTTOM to bottomPause, Phase.CONCENTRIC to concentric.coerceAtLeast(1), Phase.TOP to topPause)
+            .filter { it.second > 0 }
+
     /** Tiempo bajo tensión de una serie de [reps] repeticiones. */
     fun timeUnderTension(reps: Int): Int = repSeconds * reps
 

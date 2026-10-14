@@ -1103,4 +1103,13 @@
     <string name="tempo_all">Tempo de toda a rutina</string>
     <string name="undo_rpe_loads">Pesos por RPE aplicados</string>
     <string name="history_vs_previous">Fronte á vez anterior: %1$s de volume · 1RM %2$s</string>
+    <string name="restore_preview_counts">A copia trae %1$d adestramentos, %2$d rutinas e %3$d medidas.</string>
+    <string name="restore_preview_range">Adestramentos do %1$s ao %2$s</string>
+    <string name="restore_preview_merge">Engádese o que non teñas; non se borra nada do que xa hai.</string>
+    <string name="restore_preview_settings">Restaurar tamén os axustes e a planificación (substitúen os actuais)</string>
+    <string name="setup_place">Onde adestras?</string>
+    <string name="setup_place_gym">No ximnasio</string>
+    <string name="setup_place_home">Na casa</string>
+    <string name="auto_backup_lost">O cartafol das copias xa non está dispoñible: escolle outro para seguir facendo copias</string>
+    <string name="auto_backup_stale">Última copia: %1$s. Hai máis de dúas semanas: revisa o cartafol</string>
 </resources>

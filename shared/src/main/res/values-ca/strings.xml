@@ -1103,4 +1103,13 @@
     <string name="tempo_all">Tempo de tota la rutina</string>
     <string name="undo_rpe_loads">Pesos per RPE aplicats</string>
     <string name="history_vs_previous">Davant de la vegada anterior: %1$s de volum · 1RM %2$s</string>
+    <string name="restore_preview_counts">La còpia porta %1$d entrenaments, %2$d rutines i %3$d mesures.</string>
+    <string name="restore_preview_range">Entrenaments del %1$s al %2$s</string>
+    <string name="restore_preview_merge">S’afegeix el que no tinguis; no s’esborra res del que ja hi ha.</string>
+    <string name="restore_preview_settings">Restaurar també els ajustos i la planificació (substitueixen els actuals)</string>
+    <string name="setup_place">On entrenes?</string>
+    <string name="setup_place_gym">Al gimnàs</string>
+    <string name="setup_place_home">A casa</string>
+    <string name="auto_backup_lost">La carpeta de les còpies ja no està disponible: tria’n una altra per continuar fent còpies</string>
+    <string name="auto_backup_stale">Darrera còpia: %1$s. Fa més de dues setmanes: revisa la carpeta</string>
 </resources>
