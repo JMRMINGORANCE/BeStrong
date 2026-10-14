@@ -1130,7 +1130,12 @@
     <string name="cardio_best_distance">Més distància: %1$s</string>
     <string name="cardio_best_time">Més temps: %1$s</string>
     <string name="cardio_best_pace">Millor ritme (des d’1 km): %1$s</string>
-    <string name="restore_latest">Restaurar la darrera còpia automàtica</string>
+    <string name="restore_latest">Restaurar una còpia automàtica</string>
     <string name="restore_latest_none">No hi ha cap còpia automàtica a la carpeta</string>
     <string name="gym_name_taken">Ja hi ha un gimnàs anomenat «%1$s»: tria un altre nom</string>
+    <string name="notif_weekly_cardio">Cardio: %1$s</string>
+    <string name="cardio_total_week">Darrers 7 dies: %1$s</string>
+    <string name="cardio_total_month">Darrers 30 dies: %1$s</string>
+    <string name="history_gym_unknown">Sense gimnàs</string>
+    <string name="history_gym_change">On es va fer?</string>
 </resources>

@@ -213,6 +213,10 @@ object Notifier {
         val lines = listOfNotNull(
             text,
             week.records.takeIf { it.isNotEmpty() }?.let { context.getString(R.string.notif_weekly_records, it.size) },
+            // Con cardio: kilómetros y tiempo de la semana
+            week.takeIf { it.cardioDistanceM > 0 || it.cardioSec > 0 }?.let {
+                context.getString(R.string.notif_weekly_cardio, com.bestrong.mobile.ui.workout.cardioText(it.cardioSec.toInt(), it.cardioDistanceM, withPace = false))
+            },
             week.volumeChange?.let { c -> context.getString(R.string.notif_weekly_change, (if (c >= 0) "+" else "−") + "${(kotlin.math.abs(c) * 100).toInt()} %") },
             highLoadRatio?.let { context.getString(R.string.notif_weekly_load_high, String.format(java.util.Locale.getDefault(), "%.1f", it)) },
         )

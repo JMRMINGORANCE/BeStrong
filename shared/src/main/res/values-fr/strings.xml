@@ -1130,7 +1130,12 @@
     <string name="cardio_best_distance">Plus longue distance : %1$s</string>
     <string name="cardio_best_time">Plus longue durée : %1$s</string>
     <string name="cardio_best_pace">Meilleure allure (dès 1 km) : %1$s</string>
-    <string name="restore_latest">Restaurer la dernière sauvegarde automatique</string>
+    <string name="restore_latest">Restaurer une sauvegarde automatique</string>
     <string name="restore_latest_none">Aucune sauvegarde automatique dans le dossier</string>
     <string name="gym_name_taken">Il existe déjà une salle nommée « %1$s » : choisis un autre nom</string>
+    <string name="notif_weekly_cardio">Cardio : %1$s</string>
+    <string name="cardio_total_week">7 derniers jours : %1$s</string>
+    <string name="cardio_total_month">30 derniers jours : %1$s</string>
+    <string name="history_gym_unknown">Sans salle</string>
+    <string name="history_gym_change">Où a-t-elle eu lieu ?</string>
 </resources>

@@ -349,6 +349,14 @@ private fun CardioBestsCard(exercise: com.bestrong.core.model.Exercise, b: com.b
             b.bestPace?.let { set ->
                 com.bestrong.core.util.paceText(set.durationSec, set.distanceM, style)?.let { Text(stringResource(R.string.cardio_best_pace, it), fontWeight = FontWeight.Bold) }
             }
+            // Lo acumulado: últimos 7 y 30 días
+            listOf(R.string.cardio_total_week to b.week, R.string.cardio_total_month to b.month).filter { (_, t) -> t.second > 0 || t.first > 0 }.forEach { (label, t) ->
+                Text(
+                    stringResource(label, com.bestrong.mobile.ui.workout.cardioText(t.second, t.first, withPace = false)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

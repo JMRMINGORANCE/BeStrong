@@ -48,6 +48,9 @@ data class PeriodSummary(
     /** Variación de volumen frente al periodo anterior (fracción; null si el anterior estaba vacío). */
     val volumeChange: Double?,
     val topExercises: List<Pair<String, Double>>,
+    /** Cardio del periodo: metros y segundos de los ejercicios de cardio y distancia. */
+    val cardioDistanceM: Double = 0.0,
+    val cardioSec: Long = 0,
 )
 
 /** Resumen del año: lo del periodo más días entrenados, mejor racha, músculo estrella y mayores subidas de 1RM. */
@@ -244,7 +247,15 @@ object Strength {
             records = records,
             volumeChange = if (prevVolume > 0) (volume - prevVolume) / prevVolume else null,
             topExercises = top,
+            cardioDistanceM = cardioSets(inPeriod).sumOf { it.distanceM },
+            cardioSec = cardioSets(inPeriod).sumOf { it.durationSec.toLong() },
         )
+    }
+
+    /** Series hechas de cardio y distancia (para los totales de cardio del periodo). */
+    private fun cardioSets(workouts: List<Workout>) = workouts.flatMap { w ->
+        w.exercises.filter { it.exercise.tracking == com.bestrong.core.model.TrackingType.CARDIO || it.exercise.tracking == com.bestrong.core.model.TrackingType.DISTANCE }
+            .flatMap { it.completedSets }
     }
 
     fun weekSummary(history: List<Workout>, day: LocalDate, zone: ZoneId): PeriodSummary {

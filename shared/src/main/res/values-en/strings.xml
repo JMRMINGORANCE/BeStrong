@@ -1130,7 +1130,12 @@
     <string name="cardio_best_distance">Longest distance: %1$s</string>
     <string name="cardio_best_time">Longest time: %1$s</string>
     <string name="cardio_best_pace">Best pace (1 km or more): %1$s</string>
-    <string name="restore_latest">Restore the latest automatic backup</string>
+    <string name="restore_latest">Restore an automatic backup</string>
     <string name="restore_latest_none">There’s no automatic backup in the folder</string>
     <string name="gym_name_taken">There’s already a gym called “%1$s”: choose another name</string>
+    <string name="notif_weekly_cardio">Cardio: %1$s</string>
+    <string name="cardio_total_week">Last 7 days: %1$s</string>
+    <string name="cardio_total_month">Last 30 days: %1$s</string>
+    <string name="history_gym_unknown">No gym</string>
+    <string name="history_gym_change">Where was it done?</string>
 </resources>

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -44,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -312,11 +315,16 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.partner_name)) },
                                 supportingContent = {
+                                    // Se guarda al terminar (Hecho o al salir del campo), no con cada letra: renombrar
+                                    // también cambia su historial
                                     OutlinedTextField(
                                         partner,
-                                        { partner = it.take(20); vm.updateSettings { s -> s.copy(partnerName = partner.trim()) } },
+                                        { partner = it.take(20) },
                                         placeholder = { Text(stringResource(R.string.partner_name_body)) },
                                         singleLine = true,
+                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
+                                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { vm.renamePartner(partner) }),
+                                        modifier = Modifier.onFocusChanged { if (!it.isFocused) vm.renamePartner(partner) },
                                     )
                                 },
                             )
@@ -418,8 +426,9 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         if (settings.backupFolderUri != null) {
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.restore_latest)) },
-                                trailingContent = { TextButton(onClick = vm::restoreLatestAuto) { Text(stringResource(R.string.action_restore)) } },
+                                trailingContent = { TextButton(onClick = vm::listAutoBackups) { Text(stringResource(R.string.action_restore)) } },
                             )
+                            AutoBackupPicker(vm)
                         }
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.csv_export)) },
@@ -520,4 +529,25 @@ private fun AutoBackupStatus(settings: com.bestrong.mobile.data.UserSettings) {
         settings.lastBackupEpochMs > 0 -> Text(stringResource(R.string.auto_backup_last, formatDate(settings.lastBackupEpochMs)))
         else -> Text(stringResource(R.string.auto_backup_on))
     }
+}
+
+/** Las copias automáticas de la carpeta (la más reciente primero): elegir una la lleva a la vista previa. */
+@Composable
+private fun AutoBackupPicker(vm: ProfileViewModel) {
+    val list by vm.autoBackups.collectAsStateWithLifecycle()
+    val copies = list ?: return
+    AlertDialog(
+        onDismissRequest = { vm.autoBackups.value = null },
+        title = { Text(stringResource(R.string.restore_latest)) },
+        text = {
+            Column {
+                copies.forEach { (date, uri) ->
+                    TextButton(onClick = { vm.autoBackups.value = null; vm.restoreBackup(uri) }, modifier = Modifier.fillMaxWidth()) {
+                        Text(date, Modifier.fillMaxWidth())
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { vm.autoBackups.value = null }) { Text(stringResource(R.string.action_cancel)) } },
+    )
 }

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -330,7 +331,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                 }
             }
             item { RestSummaryLine(w) }
-            w.gymName?.let { gym -> item { Text("🏋️ $gym", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+            item { WorkoutGymLine(w, vm) }
             if (w.notes.isNotBlank()) item { Text(w.notes) }
             items(w.exercises, key = { it.id }) { we ->
                 Card(Modifier.fillMaxWidth()) {
@@ -492,5 +493,36 @@ private fun GymFilterRow(vm: HistoryViewModel) {
         shown.forEach { g ->
             FilterChip(selected = selected == g, onClick = { vm.gymFilter.value = if (selected == g) null else g }, label = { Text("🏋️ $g") })
         }
+    }
+}
+
+/** «🏋️ Hotel» (con varios gimnasios): tocarlo deja corregir dónde se hizo (p. ej. si se guardó con otro activo). */
+@Composable
+private fun WorkoutGymLine(w: Workout, vm: HistoryViewModel) {
+    val gyms = remember { vm.gymProfileNames() }
+    if (w.gymName == null && gyms.size < 2) return
+    var picking by remember { mutableStateOf(false) }
+    Text(
+        "🏋️ " + (w.gymName ?: stringResource(R.string.history_gym_unknown)),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.clickable(onClickLabel = stringResource(R.string.history_gym_change)) { picking = true },
+    )
+    if (picking) {
+        AlertDialog(
+            onDismissRequest = { picking = false },
+            title = { Text(stringResource(R.string.history_gym_change)) },
+            text = {
+                Column {
+                    (gyms + listOfNotNull(w.gymName)).distinct().forEach { g ->
+                        TextButton(onClick = { vm.editWorkout(w) { it.copy(gymName = g) }; picking = false }, modifier = Modifier.fillMaxWidth()) { Text(g, Modifier.fillMaxWidth()) }
+                    }
+                    TextButton(onClick = { vm.editWorkout(w) { it.copy(gymName = null) }; picking = false }, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.history_gym_unknown), Modifier.fillMaxWidth())
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { picking = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 }

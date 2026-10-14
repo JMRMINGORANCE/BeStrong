@@ -184,6 +184,9 @@ class HistoryViewModel @Inject constructor(
     }
 
     /** El entreno en texto (series, RPE y notas), como el informe semanal para el entrenador. */
+    /** Nombres de los perfiles de gimnasio (para corregir dónde se hizo un entreno). */
+    fun gymProfileNames(): List<String> = settingsStore.settings.value.gyms.map { it.name }
+
     fun shareText(workout: Workout): String = settingsStore.settings.value.let { prefs ->
         com.bestrong.core.io.CoachReport.text(
             listOf(workout.copy(finishedAtEpochMs = workout.finishedAtEpochMs ?: workout.startedAtEpochMs)),

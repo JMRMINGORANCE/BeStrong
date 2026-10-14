@@ -419,20 +419,19 @@ class ProfileViewModel @Inject constructor(
         )
     }
 
-    /** La última copia automática de la carpeta elegida, a la vista previa (sin buscar el archivo a mano). */
-    fun restoreLatestAuto() = viewModelScope.launch {
+    /** Copias automáticas de la carpeta para elegir cuál restaurar (fecha, documento); null = sin abrir. */
+    val autoBackups = MutableStateFlow<List<Pair<String, Uri>>?>(null)
+
+    /** Lee las copias automáticas de la carpeta elegida (la más reciente primero), sin buscar el archivo a mano. */
+    fun listAutoBackups() = viewModelScope.launch {
         val tree = settings.value.backupFolderUri?.let(Uri::parse) ?: return@launch
-        val latest = runCatching { withContext(Dispatchers.IO) { AutoBackupWorker.latestJson(context, tree) } }
+        val list = runCatching { withContext(Dispatchers.IO) { AutoBackupWorker.listJson(context, tree) } }
         // Sin permiso sobre la carpeta no es que no haya copias: la carpeta ya no está disponible
-        val uri = latest.getOrElse { e ->
+        val found = list.getOrElse { e ->
             _messages.tryEmit(context.getString(if (e is SecurityException) R.string.auto_backup_lost else R.string.restore_latest_none))
             return@launch
         }
-        if (uri == null) {
-            _messages.tryEmit(context.getString(R.string.restore_latest_none))
-            return@launch
-        }
-        restoreBackup(uri)
+        if (found.isEmpty()) _messages.tryEmit(context.getString(R.string.restore_latest_none)) else autoBackups.value = found
     }
 
     /** Lee una copia JSON de BeStrong y la deja pendiente de confirmar (añade lo que falte, no borra nada). */
@@ -488,6 +487,22 @@ class ProfileViewModel @Inject constructor(
             }
         }
         return true
+    }
+
+    /**
+     * Cambia el nombre de la pareja y, con él, el de sus entrenos (pasados y el que está en curso): su historial
+     * va por el nombre, y sin esto dejaría de usarse para sus pesos y marcas.
+     */
+    fun renamePartner(name: String) {
+        val old = settings.value.partnerName
+        val new = name.trim()
+        if (new == old) return
+        settingsStore.update { it.copy(partnerName = new) }
+        if (old.isBlank() || new.isBlank()) return
+        viewModelScope.launch {
+            repo.saveWorkouts(repo.historyOnce(includePartner = true).filter { it.athlete == old }.map { it.copy(athlete = new) })
+            repo.updatePartnerActive { w -> if (w.athlete == old) w.copy(athlete = new) else w }
+        }
     }
 
     /** Borra un perfil de gimnasio y lo quita de las rutinas que lo tenían como suyo. */

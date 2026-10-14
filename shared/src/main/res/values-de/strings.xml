@@ -1130,7 +1130,12 @@
     <string name="cardio_best_distance">Längste Strecke: %1$s</string>
     <string name="cardio_best_time">Längste Dauer: %1$s</string>
     <string name="cardio_best_pace">Bestes Tempo (ab 1 km): %1$s</string>
-    <string name="restore_latest">Letzte automatische Sicherung wiederherstellen</string>
+    <string name="restore_latest">Automatische Sicherung wiederherstellen</string>
     <string name="restore_latest_none">Keine automatische Sicherung im Ordner</string>
     <string name="gym_name_taken">Es gibt schon ein Studio namens „%1$s“: wähle einen anderen Namen</string>
+    <string name="notif_weekly_cardio">Cardio: %1$s</string>
+    <string name="cardio_total_week">Letzte 7 Tage: %1$s</string>
+    <string name="cardio_total_month">Letzte 30 Tage: %1$s</string>
+    <string name="history_gym_unknown">Kein Studio</string>
+    <string name="history_gym_change">Wo wurde es gemacht?</string>
 </resources>

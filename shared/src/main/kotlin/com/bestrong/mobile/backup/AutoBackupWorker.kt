@@ -145,9 +145,11 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             }.orEmpty()
         }
 
-        /** La copia automática completa (JSON) más reciente de la carpeta [tree], para restaurarla sin buscarla. */
-        fun latestJson(context: Context, tree: Uri): Uri? =
-            children(context, tree).filterKeys { it.startsWith(PREFIX) && it.endsWith(".json") }.maxByOrNull { it.key }?.value
+        /** Las copias automáticas completas (JSON) de la carpeta [tree], la más reciente primero: (fecha, documento). */
+        fun listJson(context: Context, tree: Uri): List<Pair<String, Uri>> =
+            children(context, tree).filterKeys { it.startsWith(PREFIX) && it.endsWith(".json") }
+                .entries.sortedByDescending { it.key }
+                .map { (name, uri) -> name.removePrefix(PREFIX).removeSuffix(".json") to uri }
 
         private val writeLock = kotlinx.coroutines.sync.Mutex()
 

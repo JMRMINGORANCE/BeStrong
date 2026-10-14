@@ -766,4 +766,18 @@ class CollarTest {
         // El sprint de 400 m no cuenta para el ritmo: el mejor es el de 5 km (5:00/km)
         assertEquals(5000.0, b.bestPace!!.distanceM, 1e-9)
     }
+
+    @Test
+    fun cardioTotalsByPeriod() {
+        val run = com.bestrong.core.model.Exercise(id = "running", name = "Carrera", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST, tracking = com.bestrong.core.model.TrackingType.CARDIO)
+        val day = 86_400_000L
+        val now = 100 * day
+        fun w(id: String, t: Long, m: Double) = Workout(
+            id = id, name = id, startedAtEpochMs = t, finishedAtEpochMs = t + 1,
+            exercises = listOf(WorkoutExercise(exercise = run, sets = listOf(WorkoutSet(durationSec = 1800, distanceM = m, completed = true)))),
+        )
+        val b = com.bestrong.core.stats.CardioBestsCalc.of("running", listOf(w("a", now - 2 * day, 5000.0), w("b", now - 20 * day, 8000.0), w("c", now - 60 * day, 3000.0)), now)
+        assertEquals(5000.0, b.week.first, 1e-9)
+        assertEquals(13000.0, b.month.first, 1e-9)
+    }
 }

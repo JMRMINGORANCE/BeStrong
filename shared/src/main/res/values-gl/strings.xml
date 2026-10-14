@@ -1130,7 +1130,12 @@
     <string name="cardio_best_distance">Máis distancia: %1$s</string>
     <string name="cardio_best_time">Máis tempo: %1$s</string>
     <string name="cardio_best_pace">Mellor ritmo (desde 1 km): %1$s</string>
-    <string name="restore_latest">Restaurar a última copia automática</string>
+    <string name="restore_latest">Restaurar unha copia automática</string>
     <string name="restore_latest_none">Non hai ningunha copia automática no cartafol</string>
     <string name="gym_name_taken">Xa hai un ximnasio chamado «%1$s»: escolle outro nome</string>
+    <string name="notif_weekly_cardio">Cardio: %1$s</string>
+    <string name="cardio_total_week">Últimos 7 días: %1$s</string>
+    <string name="cardio_total_month">Últimos 30 días: %1$s</string>
+    <string name="history_gym_unknown">Sen ximnasio</string>
+    <string name="history_gym_change">Onde se fixo?</string>
 </resources>

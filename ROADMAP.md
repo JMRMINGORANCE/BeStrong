@@ -339,3 +339,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Restaurar la última copia automática sin buscar el archivo
 - [x] Modo pareja: su entreno empieza con sus pesos (su historial), no con los tuyos
 - [x] El texto para compartir un entreno lleva el gimnasio y el ritmo del cardio
+
+## Fase 38 — Corregir y elegir ✅
+- [x] Elegir qué copia automática restaurar (la más reciente primero)
+- [x] Totales de cardio de los últimos 7 y 30 días en la ficha
+- [x] Cardio de la semana en el resumen semanal
+- [x] Corregir el gimnasio de un entreno pasado
+- [x] Renombrar a la pareja actualiza su historial (se guarda al terminar de escribir)
