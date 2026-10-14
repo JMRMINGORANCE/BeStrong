@@ -144,8 +144,10 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.CARDIO) item { CardioProgressChart(s.progress) }
-            if (s.exercise.tracking != com.bestrong.core.model.TrackingType.CARDIO) {
+            // Cardio, distancia y tiempo: su gráfica (distancia o tiempo); con peso y reps, la de 1RM y volumen
+            val timed = s.exercise.tracking in TIMED_TRACKING
+            if (timed) item { CardioProgressChart(s.progress, timeOnly = s.exercise.tracking == com.bestrong.core.model.TrackingType.DURATION) }
+            if (!timed) {
                 item {
                     val labels = listOf(
                         stringResource(R.string.metric_1rm),
@@ -160,7 +162,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     }
                 }
             }
-            if (s.exercise.tracking != com.bestrong.core.model.TrackingType.CARDIO) {
+            if (!timed) {
                 item {
                     val points = s.progress.takeLast(30).map { p ->
                         ChartPoint(
@@ -368,16 +370,22 @@ private fun CardioBestsCard(exercise: com.bestrong.core.model.Exercise, b: com.b
 
 /** Cardio: distancia (km) o tiempo (min) de cada sesión, en vez del 1RM y el volumen que no tienen sentido aquí. */
 @Composable
-private fun CardioProgressChart(progress: List<com.bestrong.core.stats.ExerciseProgressPoint>) {
-    var byTime by rememberSaveable { mutableStateOf(false) }
+private fun CardioProgressChart(progress: List<com.bestrong.core.stats.ExerciseProgressPoint>, timeOnly: Boolean = false) {
+    var chosenTime by rememberSaveable { mutableStateOf(false) }
+    val byTime = timeOnly || chosenTime
     Column {
         val labels = listOf(stringResource(R.string.metric_distance), stringResource(R.string.metric_time))
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            labels.forEachIndexed { i, l ->
-                SegmentedButton(selected = byTime == (i == 1), onClick = { byTime = i == 1 }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
+        if (!timeOnly) {
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                labels.forEachIndexed { i, l ->
+                    SegmentedButton(selected = byTime == (i == 1), onClick = { chosenTime = i == 1 }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
+                }
             }
         }
         val points = progress.takeLast(30).map { p -> ChartPoint(formatShortDate(p.dateEpochMs), if (byTime) p.durationSec / 60.0 else p.distanceM / 1000) }
         LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { "%.1f".format(it) + if (byTime) " min" else " km" })
     }
 }
+
+/** Ejercicios que se siguen por distancia o tiempo (no por peso y reps). */
+private val TIMED_TRACKING = setOf(com.bestrong.core.model.TrackingType.CARDIO, com.bestrong.core.model.TrackingType.DISTANCE, com.bestrong.core.model.TrackingType.DURATION)

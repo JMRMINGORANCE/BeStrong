@@ -70,6 +70,11 @@ data class UserSettings(
     val heightCm: Int? = null,
     /** Modo pareja: nombre de la otra persona (vacío = desactivado). */
     val partnerName: String = "",
+    /**
+     * Nombre con el que están guardados los entrenos de la pareja (el de [partnerName] mientras se escribe aún no):
+     * al confirmar un nombre nuevo se renombra su historial desde este. null = el mismo que [partnerName].
+     */
+    val partnerHistoryName: String? = null,
     /** Tema, acento, AMOLED, alto contraste, modo daltónico y tipo de letra. */
     val appearance: Appearance = Appearance(),
     /** Vibración al acabar el descanso (también en el reloj). */
@@ -114,6 +119,9 @@ data class UserSettings(
     val warmupRestSeconds: Int = 60,
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
+
+    /** El nombre de la pareja en su historial (el confirmado; mientras se escribe uno nuevo, el de antes). */
+    val partnerAthlete: String get() = partnerHistoryName ?: partnerName
 
     /** Con el perfil de casa (sin barra) o el de gimnasio como activo, según dónde se entrena (configuración inicial). */
     fun trainingAt(home: Boolean): UserSettings {
@@ -191,6 +199,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         birthYear = prefs.getInt("birth_year", 0).takeIf { it > 0 },
         heightCm = prefs.getInt("height_cm", 0).takeIf { it > 0 },
         partnerName = prefs.getString("partner_name", "").orEmpty(),
+        partnerHistoryName = prefs.getString("partner_history_name", null),
         sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
         appearance = Appearance(
             mode = enumOr("theme_mode", ThemeMode.SYSTEM),
@@ -264,6 +273,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("birth_year", s.birthYear ?: 0)
             putInt("height_cm", s.heightCm ?: 0)
             putString("partner_name", s.partnerName)
+            putString("partner_history_name", s.partnerHistoryName)
             putString("theme_mode", s.appearance.mode.name)
             putString("accent", s.appearance.accent.name)
             putBoolean("amoled", s.appearance.amoled)
@@ -343,7 +353,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "backup_fail_notified", "backup_folder_set", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km", "partner_history_name")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())
     }

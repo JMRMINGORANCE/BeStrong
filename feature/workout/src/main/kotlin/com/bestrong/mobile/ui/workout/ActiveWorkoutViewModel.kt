@@ -130,7 +130,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /** Historial de quien entrena ahora: el tuyo o, en modo pareja, el suyo (con el nombre de su entreno en curso). */
-    private val athleteHistory: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, partnerMode, repo.partnerWorkout) { me, partner, isPartner, pw ->
+    private val athleteHistory: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, partnerMode, repo.partnerWorkout, settingsStore.settings) { me, partner, isPartner, pw, _ ->
         historyOf(isPartner, me, partner, pw)
     }.flowOn(Dispatchers.Default).stateIn(
         viewModelScope,
@@ -140,7 +140,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     )
 
     private fun historyOf(isPartner: Boolean, me: List<Workout>, partner: List<Workout>, pw: Workout?): List<Workout> =
-        if (isPartner) partner.filter { it.athlete == (pw?.athlete ?: settingsStore.settings.value.partnerName) } else me
+        if (isPartner) partner.filter { it.athlete == (pw?.athlete ?: settingsStore.settings.value.partnerAthlete) } else me
 
     /** «La vez anterior» de cada ejercicio: en este gimnasio si allí ya se hizo (como el relleno), si no la última. */
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = combine(
@@ -225,13 +225,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** 1RM estimado reciente de los ejercicios del entreno (para el peso por RPE), calculado fuera del hilo principal. */
     val recentOneRepMax: StateFlow<Map<String, Double>> = combine(
         workout.map { w -> w?.exercises?.map { it.exercise.id }.orEmpty().distinct() }.distinctUntilChanged(),
-        repo.history,
-        repo.partnerHistory,
-        partnerMode,
-        settings,
-    ) { ids, me, partner, isPartner, s ->
-        // En modo pareja, con el historial de la pareja (como las marcas)
-        val history = if (isPartner) partner.filter { it.athlete == s.partnerName } else me
+        athleteHistory,
+    ) { ids, history ->
+        // De quien entrena (en modo pareja, el suyo)
         val now = System.currentTimeMillis()
         ids.mapNotNull { id -> com.bestrong.core.stats.RpeLoad.recentOneRepMax(id, history, now)?.let { id to it } }.toMap()
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
@@ -296,9 +292,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     /** Por ejercicio: (mejor 1RM estimado, peso máximo) del historial, para marcar récords en vivo. */
-    val bests: StateFlow<Map<String, Pair<Double, Double>>> = combine(repo.history, repo.partnerHistory, partnerMode, settings) { me, partner, isPartner, s ->
+    val bests: StateFlow<Map<String, Pair<Double, Double>>> = athleteHistory.map { h ->
         // En modo pareja se compara con las marcas de la pareja, no con las tuyas
-        val h = if (isPartner) partner.filter { it.athlete == s.partnerName } else me
         WorkoutStats.personalRecords(h).mapValues { (_, r) ->
             (r[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0) to (r[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0)
         }

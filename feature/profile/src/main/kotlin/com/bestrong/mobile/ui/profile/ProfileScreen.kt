@@ -41,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -314,6 +315,9 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         ) { v -> vm.updateSettings { it.copy(oneHanded = v) } }
                         run {
                             var partner by remember(settings.partnerName) { mutableStateOf(settings.partnerName) }
+                            // También al salir de la pantalla o al pasar la app a segundo plano (sin perder el foco)
+                            DisposableEffect(Unit) { onDispose { vm.commitPartnerName() } }
+                            androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_STOP) { vm.commitPartnerName() }
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.partner_name)) },
                                 supportingContent = {

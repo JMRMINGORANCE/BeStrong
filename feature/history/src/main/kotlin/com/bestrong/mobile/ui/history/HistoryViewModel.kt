@@ -70,7 +70,9 @@ class HistoryViewModel @Inject constructor(
         showPartner,
         selectedDay,
     ) { h, p, (q, gym), sp, day ->
-        val mine = if (sp) (h + p).sortedByDescending { it.startedAtEpochMs } else h
+        // Buscando su nombre salen sus entrenos aunque no se estén enseñando los de la pareja
+        val partnerSearched = q.isNotBlank() && p.any { it.athlete?.contains(q.trim(), ignoreCase = true) == true }
+        val mine = if (sp || partnerSearched) (h + p).sortedByDescending { it.startedAtEpochMs } else h
         val all = if (gym == null) mine else mine.filter { it.gymName == gym }
         val zone = ZoneId.systemDefault()
         val ofDay = if (day == null) all else all.filter { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == day }
@@ -112,12 +114,19 @@ class HistoryViewModel @Inject constructor(
     fun changeGym(workout: Workout, gymName: String?) {
         if (workout.gymName == gymName) return
         _gymEdit.value = workout
+        gymSetTo = gymName
         editWorkout(workout) { it.copy(gymName = gymName) }
     }
 
+    /** El gimnasio que se puso en el último cambio (el deshacer solo actúa si sigue siendo ese). */
+    private var gymSetTo: String? = null
+
+    /** Vuelve a poner solo el gimnasio de antes, sobre el entreno tal como está ahora (no se pierden otros cambios). */
     fun undoGymEdit() = viewModelScope.launch {
-        _gymEdit.value?.let { repo.saveWorkout(it.copy(updatedAtEpochMs = System.currentTimeMillis())) }
+        val before = _gymEdit.value ?: return@launch
         _gymEdit.value = null
+        val current = repo.historyOnce(includePartner = true).firstOrNull { it.id == before.id } ?: return@launch
+        if (current.gymName == gymSetTo) editWorkout(current) { it.copy(gymName = before.gymName) }
     }
 
     fun clearGymEdit() {

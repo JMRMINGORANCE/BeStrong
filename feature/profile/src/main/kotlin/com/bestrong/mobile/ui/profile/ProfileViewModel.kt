@@ -502,13 +502,17 @@ class ProfileViewModel @Inject constructor(
      * va por el nombre, y sin esto dejaría de usarse para sus pesos y marcas.
      */
     fun setPartnerName(name: String) {
-        // El nombre de antes de empezar a escribir: es el que se renombra al terminar (commitPartnerName)
-        if (partnerNameBeforeEdit == null) partnerNameBeforeEdit = settings.value.partnerName
-        settingsStore.update { it.copy(partnerName = name.trim()) }
+        // El nombre de su historial queda fijado (si no lo estaba) hasta confirmar el nuevo en commitPartnerName
+        settingsStore.update { it.copy(partnerName = name.trim(), partnerHistoryName = it.partnerAthlete) }
     }
 
-    /** Nombre de la pareja antes de la edición en curso (null = no se está editando). */
-    private var partnerNameBeforeEdit: String? = null
+    /** El último renombrado de historial en marcha: se espera antes de comprobar si un nombre está cogido. */
+    private var lastRewrite: kotlinx.coroutines.Job? = null
+
+    init {
+        // Un nombre escrito y no confirmado (la app se cerró a medias): se confirma al volver
+        commitPartnerName()
+    }
 
     /**
      * Al terminar de escribir (Hecho o al salir del campo): sus entrenos pasan al nombre nuevo. El nombre se guarda
@@ -516,19 +520,30 @@ class ProfileViewModel @Inject constructor(
      * persona en el historial se rechaza: mezclaría los dos para siempre.
      */
     fun commitPartnerName() {
-        val old = partnerNameBeforeEdit ?: return
-        partnerNameBeforeEdit = null
-        val new = settings.value.partnerName
-        if (new == old || new.isBlank()) return
+        val s = settings.value
+        val old = s.partnerHistoryName
+        val new = s.partnerName
+        // Sin edición pendiente, o vacío (se queda el de su historial hasta que se escriba uno): nada que confirmar
+        if (old == null || new.isBlank()) return
+        if (new == old) {
+            settingsStore.update { it.copy(partnerHistoryName = null) }
+        } else {
+            renamePartnerHistory(old, new)
+        }
+    }
+
+    private fun renamePartnerHistory(old: String, new: String) {
         viewModelScope.launch {
+            lastRewrite?.join()
             if (old.isNotBlank() && repo.historyOnce(includePartner = true).any { it.athlete == new }) {
-                settingsStore.update { it.copy(partnerName = old) }
+                settingsStore.update { it.copy(partnerName = old, partnerHistoryName = null) }
                 _messages.tryEmit(context.getString(R.string.partner_name_taken, new))
                 return@launch
             }
-            if (old.isNotBlank()) repo.rewriteHistory({ it.athlete == old }) { it.copy(athlete = new) }
+            if (old.isNotBlank()) lastRewrite = repo.rewriteHistory({ it.athlete == old }) { it.copy(athlete = new) }
             // Su entreno en curso, también si se empezó sin nombre
             repo.updatePartnerActive { w -> if (w.athlete == old || w.athlete.isNullOrBlank()) w.copy(athlete = new) else w }
+            settingsStore.update { if (it.partnerName == new) it.copy(partnerHistoryName = null) else it }
         }
     }
 
