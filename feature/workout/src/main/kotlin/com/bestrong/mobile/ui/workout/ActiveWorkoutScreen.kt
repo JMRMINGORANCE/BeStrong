@@ -187,6 +187,7 @@ fun ActiveWorkoutScreen(
     val undoComplete = stringResource(R.string.undo_completed_sets)
     val undoTrim = stringResource(R.string.undo_trimmed_sets)
     val undoRpeLoad = stringResource(R.string.undo_rpe_loads)
+    val undoGym = stringResource(R.string.undo_gym_loads)
     val goalMsg = stringResource(R.string.goal_reached_live)
     val undoLabel = stringResource(R.string.action_undo)
     val applyLabel = stringResource(R.string.action_apply)
@@ -211,6 +212,7 @@ fun ActiveWorkoutScreen(
                         ActiveWorkoutViewModel.UndoKind.COMPLETE -> undoComplete
                         ActiveWorkoutViewModel.UndoKind.TRIM -> undoTrim
                         ActiveWorkoutViewModel.UndoKind.RPE_LOAD -> undoRpeLoad
+                        ActiveWorkoutViewModel.UndoKind.GYM -> undoGym
                     }
                     if (snackbar.showSnackbar(msg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) {
                         vm.undo(e)
@@ -980,6 +982,29 @@ private fun RpeVsTargetLines(w: com.bestrong.core.model.Workout) {
     }
 }
 
+/** «Frente a la última vez»: volumen con peso, reps sin peso y tiempo en los de tiempo (como el historial y el reloj). */
+@Composable
+private fun SummaryComparisons(summary: FinishedSummary) {
+    val unit = LocalWeightUnit.current
+    val kinds = summary.workout.exercises.associate { it.exercise.id to com.bestrong.core.util.ComparisonKind.of(it.exercise.tracking) }
+    val shown = summary.comparisons.filter { kinds[it.exerciseId] != com.bestrong.core.util.ComparisonKind.NONE }
+    if (shown.isEmpty()) return
+    Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)
+    shown.take(5).forEach { c ->
+        val (up, text) = when (kinds[c.exerciseId]) {
+            com.bestrong.core.util.ComparisonKind.REPS -> (c.repsDelta > 0) to stringResource(R.string.history_vs_previous_reps_short, com.bestrong.core.util.signedCount(c.repsDelta))
+            com.bestrong.core.util.ComparisonKind.TIME -> (c.durationDelta > 0) to com.bestrong.core.util.signedDuration(c.durationDelta)
+            else -> (c.best1rmDelta > 0.01 || (c.best1rmDelta >= -0.01 && c.volumeDelta > 0)) to
+                (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta))
+        }
+        Text(
+            stringResource(R.string.summary_vs_line, ExerciseLibrary.byId(c.exerciseId)?.displayName() ?: c.exerciseName, text),
+            style = MaterialTheme.typography.bodySmall,
+            color = if (up) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 @Composable
 fun WorkoutSummaryDialog(
     summary: FinishedSummary,
@@ -1018,21 +1043,7 @@ fun WorkoutSummaryDialog(
                     Text(stringResource(R.string.weekly_goal_reached, goal), fontWeight = FontWeight.Bold, color = statusColors.good)
                 }
                 // Frente a la última vez que hiciste cada ejercicio
-                if (summary.comparisons.isNotEmpty()) {
-                    Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)
-                    summary.comparisons.take(5).forEach { c ->
-                        val up = c.best1rmDelta > 0.01 || (c.best1rmDelta >= -0.01 && c.volumeDelta > 0)
-                        Text(
-                            stringResource(
-                                R.string.summary_vs_line,
-                                ExerciseLibrary.byId(c.exerciseId)?.displayName() ?: c.exerciseName,
-                                (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta)),
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (up) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
+                SummaryComparisons(summary)
                 RpeVsTargetLines(w)
                 summary.imbalances.forEach { (id, ratio) ->
                     Text(

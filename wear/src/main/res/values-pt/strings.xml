@@ -168,4 +168,5 @@
     <string name="complication_rest_label">Descanso</string>
     <string name="complication_rest_desc">Tempo de descanso restante</string>
     <string name="complication_rest_none">Sem descanso em curso</string>
+    <string name="vs_reps">%1$s reps</string>
 </resources>

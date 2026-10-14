@@ -273,20 +273,24 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
             item { Text(stringResource(R.string.summary_volume, unit.formatVolume(w.totalVolume), w.completedSetCount)) }
             w.avgHeartRate?.let { item { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--"), color = HeartRed) } }
             w.calories?.let { item { Text(stringResource(R.string.summary_kcal, it)) } }
-            if (s.comparisons.isNotEmpty()) {
+            // Cardio y distancia no tienen comparación (todavía)
+            fun kindOf(c: com.bestrong.core.stats.WorkoutStats.ExerciseComparison) =
+                com.bestrong.core.util.ComparisonKind.of(w.exercises.firstOrNull { it.exercise.id == c.exerciseId }?.exercise?.tracking)
+            val shown = s.comparisons.filter { kindOf(it) != com.bestrong.core.util.ComparisonKind.NONE }
+            if (shown.isNotEmpty()) {
                 item { ListHeader { Text(stringResource(R.string.vs_last)) } }
-                items(s.comparisons.take(5)) { c ->
+                items(shown.take(5)) { c ->
                     val name = ExerciseLibrary.byId(c.exerciseId)?.displayName() ?: c.exerciseName
                     // Según el ejercicio: volumen con peso, reps sin peso, tiempo en los de tiempo
-                    val (delta, text) = when (w.exercises.firstOrNull { it.exercise.id == c.exerciseId }?.exercise?.tracking) {
-                        com.bestrong.core.model.TrackingType.REPS_ONLY -> c.repsDelta.toDouble() to com.bestrong.core.util.signedCount(c.repsDelta) + " reps"
-                        com.bestrong.core.model.TrackingType.DURATION -> c.durationDelta.toDouble() to com.bestrong.core.util.signedDuration(c.durationDelta)
-                        else -> c.volumeDelta to (if (c.volumeDelta >= 0) "+" else "−") + unit.formatVolume(kotlin.math.abs(c.volumeDelta))
+                    val (delta, text) = when (kindOf(c)) {
+                        com.bestrong.core.util.ComparisonKind.REPS -> c.repsDelta.toDouble() to stringResource(R.string.vs_reps, com.bestrong.core.util.signedCount(c.repsDelta))
+                        com.bestrong.core.util.ComparisonKind.TIME -> c.durationDelta.toDouble() to com.bestrong.core.util.signedDuration(c.durationDelta)
+                        else -> c.volumeDelta to signedVolume(c.volumeDelta, unit)
                     }
                     Text(
                         stringResource(R.string.vs_line, name, text),
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (delta >= 0) Done else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (delta > 0) Done else MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
                 }
@@ -330,6 +334,13 @@ private fun ScalingLazyListScope.setCorrections(w: Workout, index: Int, session:
             Button(onClick = { if (session.undoLastSet()) onBack() }, label = { Text(stringResource(R.string.undo_last_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
         }
     }
+}
+
+/** Volumen con signo; menos de medio kilo es «±0». */
+private fun signedVolume(v: Double, unit: com.bestrong.core.util.WeightUnit): String = when {
+    kotlin.math.abs(v) < 0.5 -> "±0"
+    v > 0 -> "+" + unit.formatVolume(v)
+    else -> "−" + unit.formatVolume(-v)
 }
 
 /** Si no se pudo bajar más el peso, se dice (si no, el menú se cerraría sin hacer nada). */

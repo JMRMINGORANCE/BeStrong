@@ -1119,4 +1119,6 @@
     <string name="restore_preview_older">Sie ist älter als dein letztes Training: Ihre Einstellungen würden die aktuellen ersetzen</string>
     <string name="history_vs_previous_reps">Im Vergleich zum letzten Mal: %1$s Wdh.</string>
     <string name="history_vs_previous_time">Im Vergleich zum letzten Mal: %1$s</string>
+    <string name="history_vs_previous_reps_short">%1$s Wdh.</string>
+    <string name="undo_gym_loads">Offene Gewichte ans Studio angepasst</string>
 </resources>

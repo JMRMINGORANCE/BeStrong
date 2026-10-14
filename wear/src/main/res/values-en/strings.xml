@@ -168,4 +168,5 @@
     <string name="complication_rest_label">Rest</string>
     <string name="complication_rest_desc">Rest time left</string>
     <string name="complication_rest_none">No rest running</string>
+    <string name="vs_reps">%1$s reps</string>
 </resources>

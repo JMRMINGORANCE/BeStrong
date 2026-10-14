@@ -1119,4 +1119,6 @@
     <string name="restore_preview_older">Elle est plus ancienne que ta dernière séance : restaurer ses réglages remplacera les actuels</string>
     <string name="history_vs_previous_reps">Par rapport à la dernière fois : %1$s reps</string>
     <string name="history_vs_previous_time">Par rapport à la dernière fois : %1$s</string>
+    <string name="history_vs_previous_reps_short">%1$s reps</string>
+    <string name="undo_gym_loads">Charges restantes ajustées à la salle</string>
 </resources>

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -448,12 +449,17 @@ private fun UndoDiscard(vm: HomeViewModel, snackbar: SnackbarHostState, onOpenWo
     }
 }
 
+/** Ancho máximo del gimnasio en la barra: un nombre largo no puede tapar el título. */
+private val GYM_CHIP_MAX_WIDTH = 140.dp
+
 /** El gimnasio activo arriba a la derecha (solo con más de uno): tocarlo lo cambia antes de empezar. */
 @Composable
 private fun GymChip(vm: HomeViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     if (settings.gyms.size < 2) return
     var open by remember { mutableStateOf(false) }
-    TextButton(onClick = { open = true }) { Text("🏋️ " + settings.activeGym.name, maxLines = 1) }
+    TextButton(onClick = { open = true }, modifier = Modifier.widthIn(max = GYM_CHIP_MAX_WIDTH)) {
+        Text("🏋️ " + settings.activeGym.name, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+    }
     if (open) com.bestrong.mobile.ui.components.GymPickerDialog(settings.gyms, settings.activeGym.id, vm::setActiveGym) { open = false }
 }

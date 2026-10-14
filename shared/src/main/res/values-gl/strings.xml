@@ -1119,4 +1119,6 @@
     <string name="restore_preview_older">É máis antiga ca o teu último adestramento: se restauras os seus axustes, substituirán os de agora</string>
     <string name="history_vs_previous_reps">Fronte á vez anterior: %1$s reps</string>
     <string name="history_vs_previous_time">Fronte á vez anterior: %1$s</string>
+    <string name="history_vs_previous_reps_short">%1$s reps</string>
+    <string name="undo_gym_loads">Pesos pendentes axustados ao ximnasio</string>
 </resources>

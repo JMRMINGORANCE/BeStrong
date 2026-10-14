@@ -308,13 +308,15 @@ class ProfileViewModel @Inject constructor(
             .onFailure { _messages.tryEmit(context.getString(R.string.restore_error, it.message.orEmpty())) }
     }
 
-    private fun showRestorePreview(data: com.bestrong.core.io.BackupData) {
-        val local = repo.history.value
+    private suspend fun showRestorePreview(data: com.bestrong.core.io.BackupData) {
+        // Como al restaurar: con los de la pareja y sin contar los ya importados con otro id (misma hora y nombre)
+        val local = repo.historyOnce(includePartner = true)
         val ids = local.map { it.id }.toSet()
+        val keys = local.map { it.startedAtEpochMs to it.name }.toSet()
         val latestLocal = local.maxOfOrNull { it.startedAtEpochMs }
         val latestBackup = data.history.maxOfOrNull { it.startedAtEpochMs }
         restoreInfo.value = RestoreInfo(
-            newWorkouts = data.history.count { it.id !in ids },
+            newWorkouts = data.history.count { it.id !in ids && (it.startedAtEpochMs to it.name) !in keys },
             olderThanLocal = latestLocal != null && latestBackup != null && latestBackup < latestLocal,
         )
         restoreWithSettings.value = true
@@ -436,16 +438,17 @@ class ProfileViewModel @Inject constructor(
 
     /** Carpeta elegida para la copia semanal: guardamos el permiso y hacemos una copia ya. */
     fun setBackupFolder(uri: Uri?) {
+        val old = settings.value.backupFolderUri
         if (uri != null) {
             runCatching {
                 context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             }
-        } else {
-            settings.value.backupFolderUri?.let { old ->
-                runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(old), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
-            }
         }
-        settingsStore.update { it.copy(backupFolderUri = uri?.toString(), backupFolderLost = false) }
+        // Primero el ajuste y luego el permiso: una copia en marcha no lo toma por una carpeta perdida
+        settingsStore.update { it.copy(backupFolderUri = uri?.toString(), backupFolderLost = false, backupFailNotified = false) }
+        if (uri == null && old != null) {
+            runCatching { context.contentResolver.releasePersistableUriPermission(Uri.parse(old), Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION) }
+        }
         if (uri != null) {
             AutoBackupWorker.runNow(context)
             _messages.tryEmit(context.getString(R.string.backup_started))

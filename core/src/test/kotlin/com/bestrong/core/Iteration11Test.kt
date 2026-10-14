@@ -677,4 +677,21 @@ class CollarTest {
         assertEquals(30, c.single().durationDelta)
         assertEquals("plank", c.single().exerciseId)
     }
+
+    @Test
+    fun comparisonIgnoresWarmups() {
+        val pu = com.bestrong.core.model.Exercise(id = "pu", name = "Dominadas", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST, tracking = com.bestrong.core.model.TrackingType.REPS_ONLY)
+        fun w(id: String, t: Long, warmup: Boolean) = Workout(
+            id = id, name = id, startedAtEpochMs = t, finishedAtEpochMs = t + 1,
+            exercises = listOf(
+                WorkoutExercise(
+                    exercise = pu,
+                    sets = listOfNotNull(WorkoutSet(reps = 4, completed = true, type = SetType.WARMUP).takeIf { warmup }, WorkoutSet(reps = 8, completed = true)),
+                ),
+            ),
+        )
+        // Una serie de aproximación de más no cuenta como reps ganadas
+        assertEquals(0, com.bestrong.core.stats.WorkoutStats.compareWithPrevious(w("b", 10, true), listOf(w("a", 1, false))).single().repsDelta)
+        assertEquals(com.bestrong.core.util.ComparisonKind.NONE, com.bestrong.core.util.ComparisonKind.of(com.bestrong.core.model.TrackingType.CARDIO))
+    }
 }

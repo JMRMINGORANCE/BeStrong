@@ -204,8 +204,36 @@ class ActiveWorkoutViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** Incremento propio del ejercicio en kg; null vuelve al de la unidad. */
-    /** Cambia el gimnasio activo (las sugerencias y el peso por RPE se recalculan con su material). */
-    fun setActiveGym(id: String) = settingsStore.update { it.copy(activeGymId = id) }
+    /**
+     * Cambia el gimnasio activo: las sugerencias y el peso por RPE se recalculan con su material, y las series
+     * pendientes con peso se ajustan a lo que hay en el nuevo (se puede deshacer).
+     */
+    fun setActiveGym(id: String) {
+        if (settings.value.activeGym.id == id) return
+        settingsStore.update { it.copy(activeGymId = id) }
+        val partner = partnerMode.value
+        viewModelScope.launch {
+            val (before, after) = update(partner) { w ->
+                w.copy(exercises = w.exercises.map { e -> refitToGym(e) })
+            } ?: return@launch
+            val old = before.exercises.flatMap { it.sets }.associateBy { it.id }
+            val changed = after.exercises.flatMap { it.sets }.filter { old[it.id] != null && old[it.id] != it }.associateBy { it.id }
+            if (changed.isEmpty()) return@launch
+            _events.tryEmit(
+                WorkoutEvent.Undoable(UndoKind.GYM, partner, before.id) { w ->
+                    w.copy(exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { s -> if (changed[s.id] == s) old.getValue(s.id) else s }) })
+                },
+            )
+        }
+    }
+
+    /** Series pendientes con peso de un ejercicio, al peso más cercano que se puede montar en el gimnasio activo. */
+    private fun refitToGym(e: com.bestrong.core.model.WorkoutExercise): com.bestrong.core.model.WorkoutExercise {
+        val s = settings.value
+        if (s.unit != com.bestrong.core.util.WeightUnit.KG) return e
+        val gym = s.gymFor(e.exercise.id)
+        return e.copy(sets = e.sets.map { set -> if (!set.completed && set.weightKg > 0) set.copy(weightKg = gym.nearestLoad(set.weightKg, e.exercise.equipment)) else set })
+    }
 
     fun setIncrement(exerciseId: String, kg: Double?) = settingsStore.update { s ->
         s.copy(exerciseIncrementKg = if (kg == null) s.exerciseIncrementKg - exerciseId else s.exerciseIncrementKg + (exerciseId to kg))
@@ -270,7 +298,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         /** La serie recién hecha alcanza el objetivo de 1RM que el usuario se puso en ese ejercicio. */
         data class GoalReached(val exercise: Exercise, val goal: String) : WorkoutEvent
     }
-    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, TRIM, RPE_LOAD }
+    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, TRIM, RPE_LOAD, GYM }
 
     private val _events = MutableSharedFlow<WorkoutEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<WorkoutEvent> = _events

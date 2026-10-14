@@ -1119,4 +1119,6 @@
     <string name="restore_preview_older">Es más antigua que tu último entreno: si restauras sus ajustes, sustituirán a los de ahora</string>
     <string name="history_vs_previous_reps">Frente a la vez anterior: %1$s reps</string>
     <string name="history_vs_previous_time">Frente a la vez anterior: %1$s</string>
+    <string name="history_vs_previous_reps_short">%1$s reps</string>
+    <string name="undo_gym_loads">Pesos pendientes ajustados al gimnasio</string>
 </resources>

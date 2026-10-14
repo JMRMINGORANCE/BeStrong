@@ -38,6 +38,8 @@ data class UserSettings(
     val lastBackupEpochMs: Long = 0,
     /** La carpeta de la copia automática dejó de estar disponible y se desactivó: se avisa hasta elegir otra. */
     val backupFolderLost: Boolean = false,
+    /** Ya se avisó de que la copia lleva tiempo fallando (no se repite cada semana; se borra al salir bien). */
+    val backupFailNotified: Boolean = false,
     /** Sesiones por semana que el usuario se propone (si no sigue un programa). */
     val weeklyGoal: Int = 3,
     /** Botones principales abajo en la pantalla exterior del Fold (uso con una mano). */
@@ -154,6 +156,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         backupFolderUri = prefs.getString("backup_folder", null),
         lastBackupEpochMs = prefs.getLong("backup_last", 0),
         backupFolderLost = prefs.getBoolean("backup_folder_lost", false),
+        backupFailNotified = prefs.getBoolean("backup_fail_notified", false),
         weeklyGoal = prefs.getInt("weekly_goal", 3),
         oneHanded = prefs.getBoolean("one_handed", false),
         gyms = readGyms(),
@@ -202,6 +205,14 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private inline fun <reified E : Enum<E>> enumOr(key: String, default: E): E =
         prefs.getString(key, null)?.let { v -> enumValues<E>().firstOrNull { it.name == v } } ?: default
 
+    /** Estado de la copia automática (propio de este móvil: no viaja en las copias). */
+    private fun android.content.SharedPreferences.Editor.putBackupState(s: UserSettings) {
+        putString("backup_folder", s.backupFolderUri)
+        putLong("backup_last", s.lastBackupEpochMs)
+        putBoolean("backup_folder_lost", s.backupFolderLost)
+        putBoolean("backup_fail_notified", s.backupFailNotified)
+    }
+
     @Synchronized
     fun update(block: (UserSettings) -> UserSettings) {
         val s = block(_settings.value)
@@ -215,9 +226,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putStringSet("reminder_days", s.reminderDays.map { it.toString() }.toSet())
             putInt("reminder_hour", s.reminderHour)
             putInt("reminder_minute", s.reminderMinute)
-            putString("backup_folder", s.backupFolderUri)
-            putLong("backup_last", s.lastBackupEpochMs)
-            putBoolean("backup_folder_lost", s.backupFolderLost)
+            putBackupState(s)
             putInt("weekly_goal", s.weeklyGoal)
             putBoolean("one_handed", s.oneHanded)
             putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))
@@ -311,7 +320,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
 
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
-        val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "lock_photos")
+        val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "backup_fail_notified", "lock_photos")
         val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())

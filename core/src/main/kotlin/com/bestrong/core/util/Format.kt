@@ -39,3 +39,21 @@ fun signedDuration(deltaSeconds: Int): String = when {
     deltaSeconds < 0 -> "−"
     else -> "±"
 } + formatDuration(kotlin.math.abs(deltaSeconds).toLong())
+
+/** Qué se compara con la vez anterior según cómo se registra el ejercicio (cardio y distancia, nada). */
+enum class ComparisonKind {
+    VOLUME,
+    REPS,
+    TIME,
+    NONE,
+    ;
+
+    companion object {
+        fun of(tracking: com.bestrong.core.model.TrackingType?): ComparisonKind = when (tracking) {
+            com.bestrong.core.model.TrackingType.REPS_ONLY -> REPS
+            com.bestrong.core.model.TrackingType.DURATION -> TIME
+            com.bestrong.core.model.TrackingType.WEIGHT_REPS, null -> VOLUME
+            else -> NONE
+        }
+    }
+}

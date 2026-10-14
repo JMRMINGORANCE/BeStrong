@@ -30,7 +30,8 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         // Permiso revocado (carpeta borrada, app de archivos desinstalada…): se desactiva en vez de fallar cada semana
         val granted = tree != null && applicationContext.contentResolver.persistedUriPermissions.any { it.uri == tree && it.isWritePermission }
         if (tree == null || !granted) {
-            if (tree != null) {
+            // Se vuelve a mirar: si el usuario acaba de quitar la carpeta él mismo, no es una carpeta perdida
+            if (tree != null && settingsStore.settings.value.backupFolderUri == tree.toString()) {
                 Log.w("AutoBackup", "Sin permiso sobre la carpeta de copias: se desactiva")
                 // Se avisa en Perfil: sin esto las copias se paraban sin que nadie lo supiera
                 settingsStore.update { it.copy(backupFolderUri = null, backupFolderLost = true) }
@@ -44,7 +45,7 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             // Prefijo propio: la rotación nunca toca las exportaciones manuales («bestrong-fecha.csv»)
             write(tree, "$PREFIX$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
             write(tree, "$PREFIX$date.json", "application/json", Backup.encode(data).toByteArray())
-            settingsStore.update { it.copy(lastBackupEpochMs = System.currentTimeMillis()) }
+            settingsStore.update { it.copy(lastBackupEpochMs = System.currentTimeMillis(), backupFailNotified = false) }
             // Sin rotación, cada semana se acumulan varios MB en la carpeta (Drive) para siempre
             runCatching { pruneOld(tree) }.onFailure { Log.w("AutoBackup", "No se pudieron borrar copias antiguas", it) }
         }.fold(
@@ -54,9 +55,13 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
                 if (runAttemptCount < 2) {
                     Result.retry()
                 } else {
-                    // Fallo definitivo y la última copia buena tiene más de dos semanas: se avisa
-                    val last = settingsStore.settings.value.lastBackupEpochMs
-                    if (System.currentTimeMillis() - last > STALE_MS) com.bestrong.mobile.notify.Notifier.backupStopped(applicationContext, folderLost = false)
+                    // Fallo definitivo y la última copia buena tiene más de dos semanas: se avisa una vez (sin
+                    // ninguna copia buena aún no: el primer intento puede fallar solo por estar sin conexión)
+                    val s = settingsStore.settings.value
+                    if (s.lastBackupEpochMs > 0 && System.currentTimeMillis() - s.lastBackupEpochMs > STALE_MS && !s.backupFailNotified) {
+                        com.bestrong.mobile.notify.Notifier.backupStopped(applicationContext, folderLost = false)
+                        settingsStore.update { it.copy(backupFailNotified = true) }
+                    }
                     Result.failure()
                 }
             },

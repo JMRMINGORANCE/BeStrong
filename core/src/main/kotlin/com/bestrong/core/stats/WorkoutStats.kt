@@ -154,7 +154,8 @@ object WorkoutStats {
         val sorted = earlier.sortedByDescending { it.startedAtEpochMs }
 
         // Un ejercicio en dos bloques (o dos veces en la sesión anterior) cuenta con todas sus series
-        fun setsOf(w: Workout, id: String) = w.exercises.filter { it.exercise.id == id }.flatMap { it.completedSets }
+        // Sin calentamiento: una serie de aproximación de más no es progreso
+        fun setsOf(w: Workout, id: String) = w.exercises.filter { it.exercise.id == id }.flatMap { e -> e.completedSets.filter { it.type != SetType.WARMUP } }
         return workout.exercises.distinctBy { it.exercise.id }.mapNotNull { we ->
             val prev = sorted.firstNotNullOfOrNull { w -> setsOf(w, we.exercise.id).takeIf { it.isNotEmpty() } } ?: return@mapNotNull null
             // Saltado hoy (sin series hechas): no es un retroceso
