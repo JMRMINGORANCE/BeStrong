@@ -231,6 +231,24 @@ private fun WeightGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>
         Text(text, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
         TextButton(onClick = { editing = true }) { Text(stringResource(if (goal == null) R.string.goal_set else R.string.action_edit)) }
     }
+    if (progress != null && !progress.reached) GoalPaceLine(settings.bodyWeightGoalDateMs, progress.remainingKg, points.lastOrNull()?.second, unit)
+}
+
+/** Con fecha: «Para el 3 dic necesitas 0,4 kg por semana» y aviso si pasa del 1 % semanal. */
+@Composable
+private fun GoalPaceLine(dateMs: Long?, remainingKg: Double, currentKg: Double?, unit: WeightUnit) {
+    dateMs ?: return
+    val weekly = com.bestrong.core.stats.BodyWeightGoal.neededWeeklyKg(remainingKg, System.currentTimeMillis(), dateMs)
+    val tooFast = weekly != null && currentKg != null && com.bestrong.core.stats.WeightRate.tooFast(currentKg, weekly)
+    Text(
+        if (weekly == null) {
+            stringResource(R.string.weight_goal_date_passed, formatDate(dateMs))
+        } else {
+            stringResource(R.string.weight_goal_pace, formatDate(dateMs), unit.formatStep(weekly)) + if (tooFast) " " + stringResource(R.string.weight_goal_pace_fast) else ""
+        },
+        style = MaterialTheme.typography.bodySmall,
+        color = if (tooFast || weekly == null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 /** Recordatorio semanal de pesarse: el día elegido a las 8 (mejor siempre en las mismas condiciones). */
@@ -259,6 +277,17 @@ private fun WeighInReminder(vm: ProfileViewModel) {
                 )
             }
         }
+        // Y una vez al mes, las medidas con cinta
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.measure_reminder), style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
+            androidx.compose.material3.Switch(
+                checked = settings.measureReminder,
+                onCheckedChange = { on ->
+                    if (on && android.os.Build.VERSION.SDK_INT >= 33) notifPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    vm.updateSettings { it.copy(measureReminder = on) }
+                },
+            )
+        }
     }
 }
 
@@ -266,19 +295,31 @@ private fun WeighInReminder(vm: ProfileViewModel) {
 @Composable
 private fun WeightGoalDialog(vm: ProfileViewModel, goal: Double?, points: List<Pair<Long, Double>>, unit: WeightUnit, onClose: () -> Unit) {
     var text by rememberSaveable { mutableStateOf(goal?.let { unit.format(it) }.orEmpty()) }
+    var weeks by rememberSaveable { mutableStateOf<Int?>(null) }
     val kg = unit.parseToKg(text)?.takeIf { it > 0 }
+    val date = weeks?.let { System.currentTimeMillis() + it * 7L * 86_400_000L }
     AlertDialog(
         onDismissRequest = { onClose() },
         title = { Text(stringResource(R.string.weight_goal_title)) },
         text = {
-            OutlinedTextField(
-                text,
-                { t -> text = t.filter { it.isDigit() || it == ',' || it == '.' }.take(6) },
-                label = { Text(unit.label) },
-                singleLine = true,
-                isError = text.isNotEmpty() && kg == null,
-                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    text,
+                    { t -> text = t.filter { it.isDigit() || it == ',' || it == '.' }.take(6) },
+                    label = { Text(unit.label) },
+                    singleLine = true,
+                    isError = text.isNotEmpty() && kg == null,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
+                )
+                // Fecha opcional: en cuántas semanas (desde hoy)
+                Text(stringResource(R.string.weight_goal_by), style = MaterialTheme.typography.labelMedium)
+                androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    androidx.compose.material3.FilterChip(selected = weeks == null, onClick = { weeks = null }, label = { Text(stringResource(R.string.weight_goal_no_date)) })
+                    for (n in GOAL_WEEKS) {
+                        androidx.compose.material3.FilterChip(selected = weeks == n, onClick = { weeks = n }, label = { Text(stringResource(R.string.n_weeks_short, n)) })
+                    }
+                }
+            }
         },
         // Se guarda también el peso de ahora: decide si el objetivo es bajar o subir
         confirmButton = {
@@ -287,11 +328,13 @@ private fun WeightGoalDialog(vm: ProfileViewModel, goal: Double?, points: List<P
                     // Guardar sin cambiar el objetivo (salvo redondeos de la unidad) lo deja todo como estaba;
                     // los antiguos sin peso de partida toman el mismo que se deduce al mostrarlos
                     val old = it.bodyWeightGoalKg
-                    if (old != null && kg != null && kotlin.math.abs(kg - old) < unit.toKg(SAME_GOAL_TOLERANCE)) {
+                    val kept = if (old != null && kg != null && kotlin.math.abs(kg - old) < unit.toKg(SAME_GOAL_TOLERANCE)) {
                         it.copy(bodyWeightGoalStartKg = it.bodyWeightGoalStartKg ?: com.bestrong.core.stats.BodyWeightGoal.inferStart(points))
                     } else {
                         it.copy(bodyWeightGoalKg = kg, bodyWeightGoalStartKg = points.lastOrNull()?.second)
                     }
+                    // Sin elegir semanas se conserva la fecha que hubiera
+                    kept.copy(bodyWeightGoalDateMs = date ?: it.bodyWeightGoalDateMs)
                 }; onClose()
             }, enabled = kg != null) {
                 Text(stringResource(R.string.action_save))
@@ -299,7 +342,7 @@ private fun WeightGoalDialog(vm: ProfileViewModel, goal: Double?, points: List<P
         },
         dismissButton = {
             Row {
-                if (goal != null) TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = null, bodyWeightGoalStartKg = null) }; onClose() }) { Text(stringResource(R.string.goal_remove)) }
+                if (goal != null) TextButton(onClick = { vm.updateSettings { it.copy(bodyWeightGoalKg = null, bodyWeightGoalStartKg = null, bodyWeightGoalDateMs = null) }; onClose() }) { Text(stringResource(R.string.goal_remove)) }
                 TextButton(onClick = { onClose() }) { Text(stringResource(R.string.action_cancel)) }
             }
         },
@@ -410,3 +453,6 @@ private fun WaistToHeightLine(ratio: Double) {
     )
     Text(stringResource(R.string.body_comp_whtr, "%.2f".format(ratio), label))
 }
+
+/** Plazos que se pueden elegir para el peso objetivo (semanas). */
+private val GOAL_WEEKS = listOf(4, 8, 12, 16, 24)

@@ -374,6 +374,24 @@ private fun KeepScreenOn(enabled: Boolean) {
     }
 }
 
+/** «⚠ «Casa» no tiene Mancuernas · Sustituir»: el gimnasio activo no tiene el material del ejercicio. */
+@Composable
+private fun MissingEquipmentLine(vm: ActiveWorkoutViewModel, we: WorkoutExercise, onSubstitute: () -> Unit) {
+    val gym = vm.settings.collectAsStateWithLifecycle().value.activeGym
+    val equipment = we.exercise.equipment
+    // Sin material o ya hecho: no hace falta avisar
+    if (equipment == Equipment.BODYWEIGHT || equipment in gym.equipment || we.sets.all { it.completed }) return
+    Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            stringResource(R.string.gym_missing_equipment, gym.name, equipment.label()),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.weight(1f),
+        )
+        TextButton(onClick = onSubstitute) { Text(stringResource(R.string.substitute_title)) }
+    }
+}
+
 /**
  * «Rango 8–12 · 10/12 → al llegar a 12 en todas, +2,5 kg»: el rango de la doble progresión con lo que
  * llevas en la siguiente serie. Tocarlo abre el selector de rango.
@@ -680,6 +698,7 @@ private fun ExerciseCard(
                     )
                 }
             }
+            MissingEquipmentLine(vm, we) { substituting = true }
             RepRangeLine(vm, we)
             // Nota fija del ejercicio (se guarda para siempre, no solo en este entreno)
             if (pinnedNote.isNotBlank()) {

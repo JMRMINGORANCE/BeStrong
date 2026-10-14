@@ -113,6 +113,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item { ExerciseMediaSection(vm, s.exercise) }
             if (com.bestrong.core.stats.ExerciseGoals.supports(s.exercise.tracking)) item { ExerciseGoalCard(vm, s) }
+            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RepRangeCard(vm, s.exercise.id) }
             if (s.variants.size > 1) {
                 item {
                     // Variantes enlazadas: historial y récords juntos o por separado
@@ -283,6 +284,19 @@ private fun RpeTrendCard(trend: List<Triple<Long, Double, Double>>) {
                 valueFormatter = { "%.1f".format(it) },
             )
             if (rising) Text(stringResource(R.string.rpe_trend_rising), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
+/** Rango de repeticiones del ejercicio sin tener que estar entrenando (lo usa la progresión). */
+@Composable
+private fun RepRangeCard(vm: ExercisesViewModel, exerciseId: String) {
+    val ranges by vm.repRanges.collectAsStateWithLifecycle()
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.rep_range), fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.rep_range_body), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            com.bestrong.mobile.ui.components.RepRangeChips(ranges[exerciseId]) { vm.setRepRange(exerciseId, it) }
         }
     }
 }

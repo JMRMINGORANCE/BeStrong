@@ -53,9 +53,6 @@ fun ExerciseBarDialog(vm: ActiveWorkoutViewModel, exerciseId: String, onDismiss:
     )
 }
 
-/** Rangos habituales para la doble progresión. */
-private val REP_RANGES = listOf("3-5", "5-8", "6-10", "8-12", "10-15", "12-20")
-
 /**
  * Rango de repeticiones del ejercicio (doble progresión): se sube una rep por serie hasta el tope y entonces
  * peso, volviendo al mínimo. «Sin rango» deja la progresión de siempre.
@@ -71,12 +68,7 @@ fun RepRangeDialog(vm: ActiveWorkoutViewModel, exerciseId: String, onDismiss: ()
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.rep_range_body), style = MaterialTheme.typography.bodySmall)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    FilterChip(selected = current == null, onClick = { vm.setRepRange(exerciseId, null) }, label = { Text(stringResource(R.string.rep_range_none)) })
-                    REP_RANGES.forEach { r ->
-                        FilterChip(selected = current == r, onClick = { vm.setRepRange(exerciseId, r) }, label = { Text(r.replace("-", "–")) })
-                    }
-                }
+                com.bestrong.mobile.ui.components.RepRangeChips(current) { vm.setRepRange(exerciseId, it) }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.got_it)) } },

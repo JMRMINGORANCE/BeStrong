@@ -121,6 +121,14 @@ class ExercisesViewModel @Inject constructor(
         _showList.value = true
     }
 
+    /** Rangos de repeticiones por ejercicio («8-12»). */
+    val repRanges: StateFlow<Map<String, String>> = settingsStore.settings.map { it.exerciseRepRange }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.exerciseRepRange)
+
+    fun setRepRange(exerciseId: String, range: String?) = settingsStore.update { s ->
+        s.copy(exerciseRepRange = if (range == null) s.exerciseRepRange - exerciseId else s.exerciseRepRange + (exerciseId to range))
+    }
+
     /** Objetivos de 1RM por ejercicio (kg). */
     val goals: StateFlow<Map<String, Double>> = settingsStore.settings.map { it.exerciseGoalsKg }
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.exerciseGoalsKg)

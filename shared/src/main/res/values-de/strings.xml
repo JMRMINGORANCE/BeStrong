@@ -1067,4 +1067,19 @@
     <string name="weekday_no_difference">Du bist an jedem Tag ähnlich stark</string>
     <string name="body_comp_hint_female">Taille/Größe unter 0,5 wird empfohlen. FFMI: etwa 15–17 ist typisch für trainierte Frauen; ab 19 fortgeschritten.</string>
     <string name="cannot_go_lighter">Leichter geht es mit diesem Gewicht nicht</string>
+    <string name="rep_range_all">Wiederholungsbereich für die ganze Routine</string>
+    <string name="weight_goal_by">Bis wann?</string>
+    <string name="weight_goal_no_date">Ohne Datum</string>
+    <string name="n_weeks_short">%1$d Wo.</string>
+    <string name="weight_goal_pace">Bis %1$s brauchst du %2$s pro Woche.</string>
+    <string name="weight_goal_pace_fast" formatted="false">Das sind über 1 % pro Woche: gib dir lieber mehr Zeit.</string>
+    <string name="weight_goal_date_passed">Das Datum (%1$s) ist vorbei: setz ein neues.</string>
+    <string name="gym_missing_equipment">⚠ In „%1$s“ fehlt das Gerät für diese Übung (%2$s)</string>
+    <string name="missed_session">Du hast „%1$s“ am %2$s ausgelassen.</string>
+    <string name="missed_today">Heute machen</string>
+    <string name="missed_tomorrow">Auf morgen legen</string>
+    <string name="missed_skip">Auslassen</string>
+    <string name="notif_measure_title">Zeit zum Messen</string>
+    <string name="notif_measure_text">Taille, Brust, Arm und Oberschenkel: einmal im Monat reicht, um den Trend zu sehen.</string>
+    <string name="measure_reminder">Am 1. jedes Monats ans Messen erinnern</string>
 </resources>

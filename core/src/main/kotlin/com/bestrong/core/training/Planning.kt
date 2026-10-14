@@ -452,3 +452,13 @@ object ProgressionCap {
         return suggestedKg.coerceAtMost(cap.coerceAtLeast(lastWeekBestKg))
     }
 }
+
+/**
+ * Sesiones planificadas de la semana que empieza en [weekStart] cuyo día ya pasó sin entrenar
+ * (día de la semana, id de rutina), la más reciente primero.
+ */
+fun WeekPlan.missedSessions(weekStart: java.time.LocalDate, today: java.time.LocalDate, trainedDays: Set<java.time.LocalDate>): List<Pair<java.time.DayOfWeek, String>> =
+    days.mapNotNull { (d, id) ->
+        val date = weekStart.plusDays(d - 1L)
+        if (date.isBefore(today) && date !in trainedDays) java.time.DayOfWeek.of(d) to id else null
+    }.sortedByDescending { it.first }

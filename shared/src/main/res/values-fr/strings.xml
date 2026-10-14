@@ -1067,4 +1067,19 @@
     <string name="weekday_no_difference">Tes performances sont proches quel que soit le jour</string>
     <string name="body_comp_hint_female">Un rapport taille/hauteur inférieur à 0,5 est recommandé. FFMI : environ 15–17 est la moyenne chez les femmes entraînées ; 19+ est avancé.</string>
     <string name="cannot_go_lighter">Impossible d\'alléger davantage avec ce poids</string>
+    <string name="rep_range_all">Fourchette de répétitions pour toute la routine</string>
+    <string name="weight_goal_by">Pour quand ?</string>
+    <string name="weight_goal_no_date">Sans date</string>
+    <string name="n_weeks_short">%1$d sem.</string>
+    <string name="weight_goal_pace">Pour le %1$s, il te faut %2$s par semaine.</string>
+    <string name="weight_goal_pace_fast" formatted="false">C\'est plus de 1 % par semaine : envisage de te laisser plus de temps.</string>
+    <string name="weight_goal_date_passed">La date (%1$s) est passée : fixes-en une nouvelle.</string>
+    <string name="gym_missing_equipment">⚠ « %1$s » n\'a pas le matériel pour cet exercice (%2$s)</string>
+    <string name="missed_session">Tu as manqué « %1$s », prévu %2$s.</string>
+    <string name="missed_today">La faire aujourd\'hui</string>
+    <string name="missed_tomorrow">Reporter à demain</string>
+    <string name="missed_skip">Laisser</string>
+    <string name="notif_measure_title">C\'est l\'heure des mensurations</string>
+    <string name="notif_measure_text">Tour de taille, poitrine, bras et cuisse : une fois par mois suffit pour voir la tendance.</string>
+    <string name="measure_reminder">Me rappeler de me mesurer le 1er de chaque mois</string>
 </resources>

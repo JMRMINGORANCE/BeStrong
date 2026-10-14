@@ -33,6 +33,12 @@ object BodyWeightGoal {
      * Peso de partida cuando no se guardó (objetivos antiguos): el primero de las últimas semanas, no el de
      * ahora, que tras pasarse del objetivo invertiría la dirección.
      */
+    /** Kg por semana necesarios para llegar a tiempo (null si la fecha ya pasó). */
+    fun neededWeeklyKg(remainingKg: Double, nowEpochMs: Long, dateEpochMs: Long): Double? {
+        val weeks = (dateEpochMs - nowEpochMs) / (7 * 86_400_000.0)
+        return if (weeks <= 0) null else remainingKg / weeks
+    }
+
     fun inferStart(points: List<Pair<Long, Double>>, nowEpochMs: Long = System.currentTimeMillis()): Double? =
         points.firstOrNull { it.first >= nowEpochMs - TREND_WEEKS * 7 * 86_400_000L }?.second ?: points.firstOrNull()?.second
 

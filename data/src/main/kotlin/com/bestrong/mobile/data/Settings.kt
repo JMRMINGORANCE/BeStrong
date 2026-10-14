@@ -74,10 +74,14 @@ data class UserSettings(
     val bodyWeightGoalKg: Double? = null,
     /** Peso que tenías al ponerte el objetivo: marca si es para bajar o para subir. */
     val bodyWeightGoalStartKg: Double? = null,
+    /** Fecha para la que se quiere llegar al peso objetivo (opcional). */
+    val bodyWeightGoalDateMs: Long? = null,
     /** Series semanales por músculo que se quiere alcanzar como mínimo (mapa, Inicio, widget). */
     val weeklySetsTarget: Int = 10,
     /** Día de la semana (1 = lunes … 7) para recordar pesarse; null = sin recordatorio. A las [WEIGH_IN_HOUR]. */
     val weighInDay: Int? = null,
+    /** Recordatorio mensual (día 1) de tomarse las medidas con cinta. */
+    val measureReminder: Boolean = false,
     /** Columnas visibles en la tabla de series. */
     val showPreviousColumn: Boolean = true,
     val showComparison: Boolean = true,
@@ -162,8 +166,10 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         bodyUnit = prefs.getString("body_unit", null)?.let { runCatching { WeightUnit.valueOf(it) }.getOrNull() },
         bodyWeightGoalKg = prefs.getString("body_weight_goal", null)?.toDoubleOrNull()?.takeIf { it > 0 },
         bodyWeightGoalStartKg = prefs.getString("body_weight_goal_start", null)?.toDoubleOrNull()?.takeIf { it > 0 },
+        bodyWeightGoalDateMs = prefs.getString("body_weight_goal_date", null)?.toLongOrNull(),
         weeklySetsTarget = prefs.getInt("weekly_sets_target", 10).coerceIn(1, 30),
         weighInDay = prefs.getInt("weigh_in_day", 0).takeIf { it in 1..7 },
+        measureReminder = prefs.getBoolean("measure_reminder", false),
         showPreviousColumn = prefs.getBoolean("col_previous", true),
         showComparison = prefs.getBoolean("col_comparison", true),
         tutorialDone = prefs.getBoolean("tutorial_done", false),
@@ -220,8 +226,10 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("body_unit", s.bodyUnit?.name)
             putString("body_weight_goal", s.bodyWeightGoalKg?.toString())
             putString("body_weight_goal_start", s.bodyWeightGoalStartKg?.toString())
+            putString("body_weight_goal_date", s.bodyWeightGoalDateMs?.toString())
             putInt("weekly_sets_target", s.weeklySetsTarget)
             putInt("weigh_in_day", s.weighInDay ?: 0)
+            putBoolean("measure_reminder", s.measureReminder)
             putBoolean("col_previous", s.showPreviousColumn)
             putBoolean("col_comparison", s.showComparison)
             putBoolean("tutorial_done", s.tutorialDone)
@@ -285,7 +293,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())
     }

@@ -1067,4 +1067,19 @@
     <string name="weekday_no_difference">Rendes parecido calquera día</string>
     <string name="body_comp_hint_female">Cintura/altura por debaixo de 0,5 é o recomendado. FFMI: uns 15–17 é a media en mulleres adestradas; 19+ é avanzado.</string>
     <string name="cannot_go_lighter">Con este peso non se pode baixar máis</string>
+    <string name="rep_range_all">Rango de repeticións para toda a rutina</string>
+    <string name="weight_goal_by">Para cando?</string>
+    <string name="weight_goal_no_date">Sen data</string>
+    <string name="n_weeks_short">%1$d sem</string>
+    <string name="weight_goal_pace">Para o %1$s necesitas %2$s por semana.</string>
+    <string name="weight_goal_pace_fast" formatted="false">É máis do 1 % semanal: valora darte máis tempo.</string>
+    <string name="weight_goal_date_passed">A data (%1$s) xa pasou: pon unha nova.</string>
+    <string name="gym_missing_equipment">⚠ En «%1$s» non hai material para este exercicio (%2$s)</string>
+    <string name="missed_session">Saltaches «%1$s» do %2$s.</string>
+    <string name="missed_today">Facela hoxe</string>
+    <string name="missed_tomorrow">Pasala a mañá</string>
+    <string name="missed_skip">Deixalo</string>
+    <string name="notif_measure_title">Toca medirse</string>
+    <string name="notif_measure_text">Cintura, peito, brazo e coxa: unha vez ao mes chega para ver a tendencia.</string>
+    <string name="measure_reminder">Lembrarme medirme o día 1 de cada mes</string>
 </resources>

@@ -1067,4 +1067,19 @@
     <string name="weekday_no_difference">Rendeixes semblant qualsevol dia</string>
     <string name="body_comp_hint_female">Cintura/alçada per sota de 0,5 és el recomanat. FFMI: uns 15–17 és la mitjana en dones entrenades; 19+ és avançat.</string>
     <string name="cannot_go_lighter">Amb aquest pes no es pot baixar més</string>
+    <string name="rep_range_all">Rang de repeticions per a tota la rutina</string>
+    <string name="weight_goal_by">Per a quan?</string>
+    <string name="weight_goal_no_date">Sense data</string>
+    <string name="n_weeks_short">%1$d setm.</string>
+    <string name="weight_goal_pace">Per al %1$s necessites %2$s per setmana.</string>
+    <string name="weight_goal_pace_fast" formatted="false">És més de l\'1 % setmanal: valora donar-te més temps.</string>
+    <string name="weight_goal_date_passed">La data (%1$s) ja ha passat: posa\'n una de nova.</string>
+    <string name="gym_missing_equipment">⚠ A «%1$s» no hi ha material per a aquest exercici (%2$s)</string>
+    <string name="missed_session">Et vas saltar «%1$s» del %2$s.</string>
+    <string name="missed_today">Fes-la avui</string>
+    <string name="missed_tomorrow">Passa-la a demà</string>
+    <string name="missed_skip">Deixa-ho</string>
+    <string name="notif_measure_title">Toca mesurar-se</string>
+    <string name="notif_measure_text">Cintura, pit, braç i cuixa: un cop al mes n\'hi ha prou per veure la tendència.</string>
+    <string name="measure_reminder">Recorda\'m mesurar-me el dia 1 de cada mes</string>
 </resources>

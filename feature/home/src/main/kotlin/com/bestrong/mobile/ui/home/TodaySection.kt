@@ -243,6 +243,30 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     }
 }
 
+/** «Te saltaste «Push» del martes»: hacerla hoy, pasarla a mañana o dejarlo estar. */
+@Composable
+fun MissedSessionCard(vm: HomeViewModel, onOpenWorkout: () -> Unit) {
+    val missed by vm.missedSession.collectAsStateWithLifecycle()
+    val tips = com.bestrong.mobile.ui.help.LocalTips.current
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val (day, routine) = missed ?: return
+    // Una vez atendida (hecha hoy o descartada) no vuelve a salir esa semana
+    val tipId = "missed:" + java.time.LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)) + ":" + day.value
+    if (tipId in tips.dismissed) return
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.missed_session, routine.displayName, day.getDisplayName(java.time.format.TextStyle.FULL, locale)), style = MaterialTheme.typography.bodyMedium)
+            androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                androidx.compose.material3.TextButton(onClick = { tips.onDismiss(tipId) }) { Text(stringResource(R.string.missed_skip)) }
+                if (vm.canMoveToTomorrow()) {
+                    androidx.compose.material3.TextButton(onClick = { vm.moveMissedToTomorrow(day) }) { Text(stringResource(R.string.missed_tomorrow)) }
+                }
+                androidx.compose.material3.TextButton(onClick = { tips.onDismiss(tipId); vm.startRoutine(routine, onOpenWorkout) }) { Text(stringResource(R.string.missed_today)) }
+            }
+        }
+    }
+}
+
 /** «No haces «Pierna B» desde hace 75 días. ¿Archivarla?»: una a una, y se puede descartar. */
 @Composable
 fun StaleRoutineCard(vm: HomeViewModel) {

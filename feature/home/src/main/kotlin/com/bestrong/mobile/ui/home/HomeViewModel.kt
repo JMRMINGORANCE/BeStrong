@@ -17,6 +17,7 @@ import com.bestrong.core.training.PeriodizedPrograms
 import com.bestrong.core.training.ProgramSession
 import com.bestrong.core.training.Readiness
 import com.bestrong.core.training.ReadinessReport
+import com.bestrong.core.training.missedSessions
 import com.bestrong.mobile.WatchPush
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
@@ -270,6 +271,36 @@ class HomeViewModel @Inject constructor(
             (r to days).takeIf { days > STALE_DAYS }
         }.sortedByDescending { it.second }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** La última sesión planificada de esta semana que se pasó sin entrenar (día, rutina), si la hay. */
+    val missedSession: StateFlow<Pair<java.time.DayOfWeek, Routine>?> = combine(planning.state, repo.history, repo.routines) { plan, history, routines ->
+        val zone = ZoneId.systemDefault()
+        val today = LocalDate.now(zone)
+        val weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        val trained = com.bestrong.core.stats.WorkoutStats.trainingDays(history, zone)
+        plan.planFor(weekStart).missedSessions(weekStart, today, trained)
+            .firstNotNullOfOrNull { (day, id) -> routines.firstOrNull { it.id == id && !it.archived }?.let { day to it } }
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Pasa la sesión saltada a mañana (solo si mañana es de esta semana y está libre). */
+    fun moveMissedToTomorrow(day: java.time.DayOfWeek) {
+        val today = LocalDate.now()
+        val tomorrow = today.plusDays(1)
+        val weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        if (tomorrow.dayOfWeek == java.time.DayOfWeek.MONDAY) return
+        planning.update { s ->
+            val plan = s.planFor(weekStart)
+            if (plan.routineFor(tomorrow.dayOfWeek) != null) s else s.copy(weekPlans = s.weekPlans + (weekStart.toEpochDay() to plan.move(day, tomorrow.dayOfWeek)))
+        }
+    }
+
+    /** Si mañana se puede recolocar la sesión (de esta semana y sin otra planificada). */
+    fun canMoveToTomorrow(): Boolean {
+        val today = LocalDate.now()
+        val tomorrow = today.plusDays(1)
+        val weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        return tomorrow.dayOfWeek != java.time.DayOfWeek.MONDAY && planning.state.value.planFor(weekStart).routineFor(tomorrow.dayOfWeek) == null
+    }
 
     /** Archivar (o recuperar) sin borrar: el historial y la rutina se conservan. */
     fun setArchived(routine: Routine, archived: Boolean) = viewModelScope.launch {

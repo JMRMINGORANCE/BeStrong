@@ -262,3 +262,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Composición corporal: cintura/altura y FFMI
 - [x] Aviso si el peso cambia más de un 1 % por semana
 - [x] «Tus mejores días» de la semana
+
+## Fase 27 — Planificar y cumplir ✅
+- [x] Rango de repeticiones desde la ficha del ejercicio y para toda una rutina
+- [x] Peso objetivo con fecha: ritmo semanal necesario y aviso si pasa del 1 %
+- [x] Aviso en el entreno si el gimnasio activo no tiene el material (con «Sustituir»)
+- [x] Sesión planificada saltada: hacerla hoy, pasarla a mañana o dejarla
+- [x] Recordatorio mensual de medidas con cinta

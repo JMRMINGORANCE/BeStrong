@@ -1067,4 +1067,19 @@
     <string name="weekday_no_difference">You perform about the same on any day</string>
     <string name="body_comp_hint_female">Waist-to-height under 0.5 is recommended. FFMI: around 15–17 is typical for trained women; 19+ is advanced.</string>
     <string name="cannot_go_lighter">Can\'t go any lighter from this weight</string>
+    <string name="rep_range_all">Rep range for the whole routine</string>
+    <string name="weight_goal_by">By when?</string>
+    <string name="weight_goal_no_date">No date</string>
+    <string name="n_weeks_short">%1$d wk</string>
+    <string name="weight_goal_pace">To make it by %1$s you need %2$s per week.</string>
+    <string name="weight_goal_pace_fast" formatted="false">That\'s over 1% a week: consider giving yourself more time.</string>
+    <string name="weight_goal_date_passed">The date (%1$s) has passed: set a new one.</string>
+    <string name="gym_missing_equipment">⚠ “%1$s” lacks the equipment for this exercise (%2$s)</string>
+    <string name="missed_session">You missed “%1$s” on %2$s.</string>
+    <string name="missed_today">Do it today</string>
+    <string name="missed_tomorrow">Move to tomorrow</string>
+    <string name="missed_skip">Skip it</string>
+    <string name="notif_measure_title">Time to measure</string>
+    <string name="notif_measure_text">Waist, chest, arm and thigh: once a month is enough to see the trend.</string>
+    <string name="measure_reminder">Remind me to measure on the 1st of each month</string>
 </resources>

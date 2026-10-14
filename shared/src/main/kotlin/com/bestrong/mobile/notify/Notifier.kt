@@ -25,6 +25,7 @@ object Notifier {
     private const val ID_REMINDER = 20
     private const val ID_WEEKLY = 21
     private const val ID_WEIGH_IN = 22
+    private const val ID_MEASURE = 23
     private const val ID_RECORDS_BASE = 100
 
     private fun ensureChannels(context: Context) {
@@ -135,6 +136,22 @@ object Notifier {
             .addAction(action)
             .build()
         NotificationManagerCompat.from(context).notify(ID_WEIGH_IN, n)
+    }
+
+    /** Recordatorio mensual de medirse con cinta (cintura, pecho, brazo, muslo). */
+    @Suppress("MissingPermission")
+    fun measure(context: Context) {
+        if (!canPost(context)) return
+        ensureChannels(context)
+        val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
+            .setSmallIcon(R.drawable.ic_stat_dumbbell)
+            .setContentTitle(context.getString(R.string.notif_measure_title))
+            .setContentText(context.getString(R.string.notif_measure_text))
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setAutoCancel(true)
+            .setContentIntent(openApp(context))
+            .build()
+        NotificationManagerCompat.from(context).notify(ID_MEASURE, n)
     }
 
     /** Tras contestar: confirmación con el peso guardado; se quita sola y sin volver a sonar. */

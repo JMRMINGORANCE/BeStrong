@@ -8,6 +8,7 @@ import com.bestrong.core.model.moveKeepingSupersets
 import com.bestrong.core.model.normalizedSupersets
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.training.ProgramTexts
+import com.bestrong.core.training.missedSessions
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -452,5 +453,20 @@ class AssistedDropTest {
         val we = WorkoutExercise(exercise = pull, sets = listOf(WorkoutSet(weightKg = -20.0, reps = 8)))
         val out = WorkoutEditor.addDropSet(Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(we)), we.id, 2.5).exercises[0].sets
         assertEquals(-22.5, out[1].weightKg, 0.0)
+    }
+}
+
+class Iteration20ImprovementsTest {
+    @Test fun missedSessionsOnlyPastAndUntrained() {
+        val monday = java.time.LocalDate.of(2026, 3, 2)
+        val plan = com.bestrong.core.training.WeekPlan(mapOf(1 to "a", 2 to "b", 5 to "c"))
+        // Jueves: lunes entrenado, martes no, viernes aún no ha llegado
+        assertEquals(listOf(java.time.DayOfWeek.TUESDAY to "b"), plan.missedSessions(monday, monday.plusDays(3), setOf(monday)))
+    }
+
+    @Test fun neededWeeklyRate() {
+        val week = 7 * 86_400_000L
+        assertEquals(0.5, com.bestrong.core.stats.BodyWeightGoal.neededWeeklyKg(2.0, 0, 4 * week)!!, 1e-9)
+        assertEquals(null, com.bestrong.core.stats.BodyWeightGoal.neededWeeklyKg(2.0, 5 * week, 4 * week))
     }
 }

@@ -28,7 +28,20 @@ class RoutineEditorViewModel @Inject constructor(
     private val repo: BeStrongRepository,
     savedStateHandle: SavedStateHandle,
     @ApplicationContext private val context: Context,
+    private val settingsStore: com.bestrong.mobile.data.SettingsStore,
 ) : ViewModel() {
+    /** Pone (o quita) el mismo rango de repeticiones a todos los ejercicios con peso de la rutina. */
+    fun setRangeForAll(range: String?) {
+        val ids = _routine.value.exercises.filter { it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }.map { it.exercise.id }
+        settingsStore.update { s -> s.copy(exerciseRepRange = if (range == null) s.exerciseRepRange - ids.toSet() else s.exerciseRepRange + ids.associateWith { range }) }
+    }
+
+    /** El rango común de la rutina si todos sus ejercicios con peso tienen el mismo (para marcarlo). */
+    fun commonRange(): String? {
+        val ids = _routine.value.exercises.filter { it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }.map { it.exercise.id }
+        return ids.map { settingsStore.settings.value.exerciseRepRange[it] }.distinct().singleOrNull()
+    }
+
     /** Argumento de navegación "id" (null = rutina nueva). */
     private val routineId: String? = savedStateHandle.get<String>("id")
 

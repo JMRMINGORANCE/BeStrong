@@ -173,6 +173,10 @@ class AppSync @Inject constructor(
             settings.settings.map { it.weighInDay }.distinctUntilChanged()
                 .collect { day -> runCatching { com.bestrong.mobile.notify.WeighInWorker.schedule(context, day) }.onFailure { Log.w("AppSync", "Pesarse", it) } }
         }
+        scope.launch {
+            settings.settings.map { it.measureReminder }.distinctUntilChanged()
+                .collect { on -> runCatching { com.bestrong.mobile.notify.MeasureWorker.schedule(context, on) }.onFailure { Log.w("AppSync", "Medidas", it) } }
+        }
     }
 }
 

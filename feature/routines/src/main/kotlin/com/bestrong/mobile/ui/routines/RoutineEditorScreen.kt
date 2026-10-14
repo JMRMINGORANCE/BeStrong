@@ -106,6 +106,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                     OutlinedTextField(routine.notes, vm::setNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.fillMaxWidth())
                     EmojiPicker(routine.emoji, vm::setEmoji)
                     FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
+                    RoutineRangeRow(vm, routine)
                 }
             }
             itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
@@ -312,4 +313,13 @@ private fun EmojiPicker(selected: String?, onPick: (String?) -> Unit) {
             FilterChip(selected = selected == e, onClick = { onPick(e) }, label = { Text(e) })
         }
     }
+}
+
+/** Mismo rango de repeticiones para toda la rutina (p. ej. un día de hipertrofia); solo si tiene ejercicios con peso. */
+@Composable
+private fun RoutineRangeRow(vm: RoutineEditorViewModel, routine: com.bestrong.core.model.Routine) {
+    if (routine.exercises.none { it.exercise.tracking == TrackingType.WEIGHT_REPS }) return
+    var common by remember(routine.exercises.size) { mutableStateOf(vm.commonRange()) }
+    Text(stringResource(R.string.rep_range_all), style = MaterialTheme.typography.labelLarge)
+    com.bestrong.mobile.ui.components.RepRangeChips(common) { vm.setRangeForAll(it); common = it }
 }
