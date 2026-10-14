@@ -255,3 +255,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] «Tu mejor hora»: rendimiento según la hora a la que entrenas
 - [x] Compartir el progreso corporal (peso, objetivo y medidas)
 - [x] Añadir una sesión planificada al calendario del móvil
+
+## Fase 26 — Contexto y cuerpo ✅
+- [x] Rango de repeticiones visible durante el entreno (móvil y reloj)
+- [x] Recordatorio de entrenar con «Empezar» y «Dentro de 1 h»
+- [x] Composición corporal: cintura/altura y FFMI
+- [x] Aviso si el peso cambia más de un 1 % por semana
+- [x] «Tus mejores días» de la semana

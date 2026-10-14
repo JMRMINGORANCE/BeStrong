@@ -373,6 +373,31 @@ private fun KeepScreenOn(enabled: Boolean) {
     }
 }
 
+/**
+ * «Rango 8–12 · 10/12 → al llegar a 12 en todas, +2,5 kg»: el rango de la doble progresión con lo que
+ * llevas en la siguiente serie. Tocarlo abre el selector de rango.
+ */
+@Composable
+private fun RepRangeLine(vm: ActiveWorkoutViewModel, we: WorkoutExercise) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val range = settings.repRangeFor(we.exercise.id)?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS } ?: return
+    val unit = LocalWeightUnit.current
+    var editing by remember { mutableStateOf(false) }
+    if (editing) RepRangeDialog(vm, we.exercise.id) { editing = false }
+    val current = we.sets.firstOrNull { !it.completed && it.type != SetType.WARMUP }?.reps
+    Text(
+        stringResource(
+            R.string.rep_range_line,
+            range.first, range.last,
+            current?.let { "$it/${range.last}" } ?: "✓",
+            unit.format(settings.stepKgFor(we.exercise.id), withUnit = true),
+        ),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.padding(horizontal = 12.dp).clickable(onClickLabel = stringResource(R.string.rep_range)) { editing = true },
+    )
+}
+
 /** «🏆 6 reps con 100 kg = récord»: lo que hace falta en esta serie para superar tu mejor 1RM estimado. */
 @Composable
 private fun RecordHint(set: WorkoutSet, bestOneRepMaxKg: Double, weightFactor: Int) {
@@ -651,6 +676,7 @@ private fun ExerciseCard(
                     )
                 }
             }
+            RepRangeLine(vm, we)
             // Nota fija del ejercicio (se guarda para siempre, no solo en este entreno)
             if (pinnedNote.isNotBlank()) {
                 Text(

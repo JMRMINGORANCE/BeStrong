@@ -49,3 +49,12 @@ object BodyWeightGoal {
         return BodyWeightGoalProgress(remainingKg = kotlin.math.abs(current - goalKg), reached = reached, etaEpochMs = eta)
     }
 }
+
+/** Ritmo de cambio de peso demasiado rápido: más del 1 % del peso por semana (se pierde músculo o se gana grasa). */
+object WeightRate {
+    private const val MAX_WEEKLY_FRACTION = 0.01
+
+    /** True si el cambio semanal [changeKg] sobre una media de [averageKg] pasa del 1 %. */
+    fun tooFast(averageKg: Double, changeKg: Double?): Boolean =
+        changeKg != null && averageKg > 0 && kotlin.math.abs(changeKg) > averageKg * MAX_WEEKLY_FRACTION
+}

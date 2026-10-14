@@ -1049,4 +1049,19 @@
     <string name="cal_add_to_calendar">Zum Kalender hinzufügen</string>
     <string name="day_part_no_difference">Du bist zu jeder Tageszeit ähnlich stark</string>
     <string name="no_calendar_app">Keine Kalender-App gefunden</string>
+    <string name="rep_range_line">Bereich %1$d–%2$d · %3$s → bei %2$d in allen Sätzen +%4$s</string>
+    <string name="notif_reminder_start">Starten</string>
+    <string name="notif_reminder_snooze">In 1 Std.</string>
+    <string name="body_comp_title">Körperzusammensetzung</string>
+    <string name="body_comp_need_height">Trag deine Größe im Profil ein, um Taille-Größe-Verhältnis und FFMI zu sehen.</string>
+    <string name="body_comp_whtr">Taille/Größe: %1$s · %2$s</string>
+    <string name="body_comp_ffmi">FFMI (fettfreie Masse pro Größe): %1$s</string>
+    <string name="body_comp_hint">Taille/Größe unter 0,5 wird empfohlen. FFMI: etwa 18–20 ist typisch für trainierte Männer; ab 22 fortgeschritten.</string>
+    <string name="body_range_low">niedrig</string>
+    <string name="body_range_healthy">gesund</string>
+    <string name="body_range_high">hoch: besser senken</string>
+    <string name="weight_rate_fast_loss">⚠ Du verlierst über 1 % pro Woche: in diesem Tempo geht Muskulatur verloren. Iss eventuell etwas mehr.</string>
+    <string name="weight_rate_fast_gain">⚠ Du nimmst über 1 % pro Woche zu: in diesem Tempo ist es vor allem Fett. Iss eventuell etwas weniger.</string>
+    <string name="weekday_title">Deine besten Tage</string>
+    <string name="weekday_best">Am stärksten bist du am %1$s: ein guter Tag für harte Einheiten</string>
 </resources>

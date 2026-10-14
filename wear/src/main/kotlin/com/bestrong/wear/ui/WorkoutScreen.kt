@@ -177,6 +177,12 @@ fun WorkoutScreen(
                     else -> ""
                 }
                 Text(stringResource(R.string.set_of, setNumber, we.sets.size, typeLabel), style = MaterialTheme.typography.labelSmall)
+                // Rango de la doble progresión (lo elige el móvil)
+                if (we.exercise.tracking == TrackingType.WEIGHT_REPS) {
+                    session.settings.collectAsStateWithLifecycle().value.repRangeFor(we.exercise.id)?.let { r ->
+                        Text(stringResource(R.string.rep_range_short, r.first, r.last), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    }
+                }
 
                 when (we.exercise.tracking) {
                     TrackingType.DURATION -> BigValue("${set.durationSec}", "s", selected = true) {}

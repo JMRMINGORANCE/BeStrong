@@ -71,19 +71,39 @@ object Notifier {
 
     /** Recordatorio de entreno del día. */
     @Suppress("MissingPermission")
-    fun reminder(context: Context, routineName: String?) {
+    fun reminder(context: Context, routineName: String?, routineId: String? = null) {
         if (!canPost(context)) return
         ensureChannels(context)
-        val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
+        val b = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
             .setContentTitle(context.getString(R.string.notif_reminder_title))
             .setContentText(routineName?.let { context.getString(R.string.notif_reminder_routine, it) } ?: context.getString(R.string.notif_reminder_text))
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setAutoCancel(true)
             .setContentIntent(openApp(context))
-            .build()
-        NotificationManagerCompat.from(context).notify(ID_REMINDER, n)
+        // «Empezar» abre la app con la rutina ya en marcha
+        if (routineId != null) {
+            val start = PendingIntent.getActivity(
+                context, ID_REMINDER,
+                AppIntents.main(context).setAction(AppIntents.ACTION_START_ROUTINE).putExtra(AppIntents.EXTRA_ROUTINE_ID, routineId)
+                    .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+            b.addAction(R.drawable.ic_stat_dumbbell, context.getString(R.string.notif_reminder_start), start)
+        }
+        // «Dentro de 1 h»: el mismo aviso más tarde
+        val snooze = PendingIntent.getBroadcast(
+            context, ID_REMINDER + 1,
+            Intent(context, ReminderSnoozeReceiver::class.java).setPackage(context.packageName)
+                .putExtra(ReminderSnoozeReceiver.EXTRA_NAME, routineName).putExtra(ReminderSnoozeReceiver.EXTRA_ID, routineId),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+        b.addAction(R.drawable.ic_stat_dumbbell, context.getString(R.string.notif_reminder_snooze), snooze)
+        NotificationManagerCompat.from(context).notify(ID_REMINDER, b.build())
     }
+
+    /** Quita el recordatorio (al posponerlo). */
+    fun cancelReminder(context: Context) = NotificationManagerCompat.from(context).cancel(ID_REMINDER)
 
     /** Recordatorio semanal de pesarse: se puede contestar con el peso sin abrir la app (o tocar para abrirla). */
     @Suppress("MissingPermission")

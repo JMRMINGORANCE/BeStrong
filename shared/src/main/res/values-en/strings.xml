@@ -1049,4 +1049,19 @@
     <string name="cal_add_to_calendar">Add to calendar</string>
     <string name="day_part_no_difference">You perform about the same at any time</string>
     <string name="no_calendar_app">No calendar app found</string>
+    <string name="rep_range_line">Range %1$d–%2$d · %3$s → at %2$d on every set, +%4$s</string>
+    <string name="notif_reminder_start">Start</string>
+    <string name="notif_reminder_snooze">In 1 h</string>
+    <string name="body_comp_title">Body composition</string>
+    <string name="body_comp_need_height">Add your height in Profile to see waist-to-height ratio and FFMI.</string>
+    <string name="body_comp_whtr">Waist-to-height: %1$s · %2$s</string>
+    <string name="body_comp_ffmi">FFMI (fat-free mass index): %1$s</string>
+    <string name="body_comp_hint">Waist-to-height under 0.5 is recommended. FFMI: around 18–20 is typical for trained men; 22+ is advanced.</string>
+    <string name="body_range_low">low</string>
+    <string name="body_range_healthy">healthy</string>
+    <string name="body_range_high">high: worth bringing down</string>
+    <string name="weight_rate_fast_loss">⚠ You\'re losing over 1% per week: at this pace you lose muscle. Consider eating a bit more.</string>
+    <string name="weight_rate_fast_gain">⚠ You\'re gaining over 1% per week: at this pace it\'s mostly fat. Consider eating a bit less.</string>
+    <string name="weekday_title">Your best days</string>
+    <string name="weekday_best">You\'re strongest on %1$s: a good day for hard sessions</string>
 </resources>

@@ -447,3 +447,24 @@ private fun com.bestrong.core.stats.DayPart.label(): String = stringResource(
 
 /** Diferencia mínima (fracción de tu mejor marca) para decir que una franja es mejor. */
 private const val CLEAR_DIFFERENCE = 0.03
+
+/** «Tus mejores días»: % medio de tu mejor marca según el día de la semana (útil para colocar las sesiones duras). */
+@Composable
+fun WeekdayCard(days: List<Triple<java.time.DayOfWeek, Int, Double>>) {
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    val best = days.first()
+    val clear = best.third - days[1].third >= CLEAR_DIFFERENCE
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            SectionHeader(stringResource(R.string.weekday_title))
+            val bestName = best.first.getDisplayName(java.time.format.TextStyle.FULL, locale)
+            Text(if (clear) stringResource(R.string.weekday_best, bestName) else stringResource(R.string.day_part_no_difference), fontWeight = FontWeight.SemiBold)
+            days.forEach { (day, n, rel) ->
+                Text(
+                    stringResource(R.string.day_part_line, day.getDisplayName(java.time.format.TextStyle.FULL, locale).replaceFirstChar { it.uppercase() }, (rel * 100).toInt(), n),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+    }
+}

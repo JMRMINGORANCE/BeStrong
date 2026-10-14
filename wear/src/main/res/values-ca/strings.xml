@@ -159,4 +159,5 @@
     </plurals>
     <string name="menu_drop_set">Drop set (−20 %)</string>
     <string name="menu_back_off">2 sèries de descàrrega (−10 %)</string>
+    <string name="rep_range_short">Rang %1$d–%2$d</string>
 </resources>

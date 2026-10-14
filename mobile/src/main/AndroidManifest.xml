@@ -156,6 +156,10 @@
         <receiver
             android:name=".notify.WeighInReplyReceiver"
             android:exported="false" />
+        <!-- «Dentro de 1 h» del recordatorio de entrenar -->
+        <receiver
+            android:name=".notify.ReminderSnoozeReceiver"
+            android:exported="false" />
         <receiver
             android:name=".widget.BeStrongWidgetReceiver"
             android:exported="true"

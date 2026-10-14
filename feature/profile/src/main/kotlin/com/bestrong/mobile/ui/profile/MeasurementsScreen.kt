@@ -96,6 +96,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                     }
                 }
             }
+            item { BodyCompositionCard(vm, list) }
             // Siempre visible: sirve precisamente para empezar a pesarse con regularidad
             item { Card { Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp)) { WeighInReminder(vm) } } }
             others.forEach { (label, value) ->
@@ -200,6 +201,14 @@ private fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) 
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(top = 8.dp),
     )
+    // Más de un 1 % a la semana: aviso para frenar (en una dirección u otra)
+    if (com.bestrong.core.stats.WeightRate.tooFast(t.averageKg, t.changeKg)) {
+        Text(
+            stringResource(if ((t.changeKg ?: 0.0) < 0) R.string.weight_rate_fast_loss else R.string.weight_rate_fast_gain),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error,
+        )
+    }
 }
 
 /** Peso objetivo: cuánto falta y cuándo llegarías al ritmo actual (para bajar o subir). */
@@ -357,3 +366,41 @@ private fun measurementChanges(list: List<BodyMeasurement>, labels: List<Pair<St
 
 /** Diferencia (en la unidad) por debajo de la cual se considera el mismo objetivo: el texto va con un decimal. */
 private const val SAME_GOAL_TOLERANCE = 0.05
+
+/** Cintura/altura y FFMI con las últimas medidas (hace falta la altura del perfil). */
+@Composable
+private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement>) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val sorted = list.sortedByDescending { it.dateEpochMs }
+    val waist = sorted.firstNotNullOfOrNull { it.waistCm }
+    val weight = sorted.firstNotNullOfOrNull { it.weightKg }
+    val fat = sorted.firstNotNullOfOrNull { it.bodyFatPct }
+    if (waist == null && (weight == null || fat == null)) return
+    val height = settings.heightCm
+    Card {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            SectionHeader(stringResource(R.string.body_comp_title))
+            if (height == null) {
+                Text(stringResource(R.string.body_comp_need_height), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                return@Column
+            }
+            waist?.let { com.bestrong.core.stats.BodyComposition.waistToHeight(it, height) }?.let { r ->
+                val range = com.bestrong.core.stats.BodyComposition.waistToHeightRange(r)
+                val label = stringResource(
+                    when (range) {
+                        com.bestrong.core.stats.BodyRange.LOW -> R.string.body_range_low
+                        com.bestrong.core.stats.BodyRange.HEALTHY -> R.string.body_range_healthy
+                        com.bestrong.core.stats.BodyRange.HIGH -> R.string.body_range_high
+                    },
+                )
+                Text(stringResource(R.string.body_comp_whtr, "%.2f".format(r), label))
+            }
+            if (weight != null && fat != null) {
+                com.bestrong.core.stats.BodyComposition.ffmi(weight, fat, height)?.let { f ->
+                    Text(stringResource(R.string.body_comp_ffmi, "%.1f".format(f)))
+                }
+            }
+            Text(stringResource(R.string.body_comp_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}

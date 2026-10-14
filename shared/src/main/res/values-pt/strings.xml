@@ -1049,4 +1049,19 @@
     <string name="cal_add_to_calendar">Adicionar ao calendário</string>
     <string name="day_part_no_difference">Rendes de forma parecida a qualquer hora</string>
     <string name="no_calendar_app">Não há nenhuma app de calendário</string>
+    <string name="rep_range_line">Intervalo %1$d–%2$d · %3$s → ao chegar a %2$d em todas, +%4$s</string>
+    <string name="notif_reminder_start">Começar</string>
+    <string name="notif_reminder_snooze">Daqui a 1 h</string>
+    <string name="body_comp_title">Composição corporal</string>
+    <string name="body_comp_need_height">Indica a tua altura no Perfil para ver a relação cintura/altura e o FFMI.</string>
+    <string name="body_comp_whtr">Cintura/altura: %1$s · %2$s</string>
+    <string name="body_comp_ffmi">FFMI (massa livre de gordura por altura): %1$s</string>
+    <string name="body_comp_hint">Cintura/altura abaixo de 0,5 é o recomendado. FFMI: cerca de 18–20 é a média em homens treinados; 22+ é avançado.</string>
+    <string name="body_range_low">baixo</string>
+    <string name="body_range_healthy">saudável</string>
+    <string name="body_range_high">alto: convém baixá-lo</string>
+    <string name="weight_rate_fast_loss">⚠ Estás a perder mais de 1 % por semana: a este ritmo perde-se músculo. Pondera comer um pouco mais.</string>
+    <string name="weight_rate_fast_gain">⚠ Estás a ganhar mais de 1 % por semana: a este ritmo ganha-se sobretudo gordura. Pondera comer um pouco menos.</string>
+    <string name="weekday_title">Os teus melhores dias</string>
+    <string name="weekday_best">O teu dia mais forte: %1$s, bom para as sessões duras</string>
 </resources>

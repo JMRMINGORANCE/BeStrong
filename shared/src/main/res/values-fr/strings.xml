@@ -1049,4 +1049,19 @@
     <string name="cal_add_to_calendar">Ajouter à l\'agenda</string>
     <string name="day_part_no_difference">Tes performances sont proches à toute heure</string>
     <string name="no_calendar_app">Aucune appli d\'agenda</string>
+    <string name="rep_range_line">Fourchette %1$d–%2$d · %3$s → à %2$d sur toutes, +%4$s</string>
+    <string name="notif_reminder_start">Commencer</string>
+    <string name="notif_reminder_snooze">Dans 1 h</string>
+    <string name="body_comp_title">Composition corporelle</string>
+    <string name="body_comp_need_height">Indique ta taille dans Profil pour voir le rapport tour de taille/taille et le FFMI.</string>
+    <string name="body_comp_whtr">Taille/hauteur : %1$s · %2$s</string>
+    <string name="body_comp_ffmi">FFMI (masse maigre rapportée à la taille) : %1$s</string>
+    <string name="body_comp_hint">Taille/hauteur sous 0,5 est recommandé. FFMI : environ 18–20 est la moyenne chez les hommes entraînés ; 22+ est avancé.</string>
+    <string name="body_range_low">bas</string>
+    <string name="body_range_healthy">sain</string>
+    <string name="body_range_high">élevé : à faire baisser</string>
+    <string name="weight_rate_fast_loss">⚠ Tu perds plus de 1 % par semaine : à ce rythme, on perd du muscle. Envisage de manger un peu plus.</string>
+    <string name="weight_rate_fast_gain">⚠ Tu prends plus de 1 % par semaine : à ce rythme, c\'est surtout du gras. Envisage de manger un peu moins.</string>
+    <string name="weekday_title">Tes meilleurs jours</string>
+    <string name="weekday_best">Ton jour le plus fort : %1$s, idéal pour les séances dures</string>
 </resources>

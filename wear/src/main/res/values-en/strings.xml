@@ -159,4 +159,5 @@
     </plurals>
     <string name="menu_drop_set">Drop set (−20%)</string>
     <string name="menu_back_off">2 back-off sets (−10%)</string>
+    <string name="rep_range_short">Range %1$d–%2$d</string>
 </resources>

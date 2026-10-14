@@ -226,6 +226,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             item { WeekSummaryCard(advanced) }
             item { TrainingLoadCard(advanced) }
             if (advanced.dayParts.size >= 2) item { DayPartCard(advanced.dayParts) }
+            if (advanced.weekdays.size >= 2) item { WeekdayCard(advanced.weekdays) }
             item { StrengthLevelsCard(advanced, settings.sex) { sex -> vm.updateSettings { it.copy(sex = sex) } } }
             item { BalanceCard(advanced) }
             item { MuscleRecoveryCard(advanced) }

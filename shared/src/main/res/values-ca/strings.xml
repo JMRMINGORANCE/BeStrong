@@ -1049,4 +1049,19 @@
     <string name="cal_add_to_calendar">Afegeix al calendari</string>
     <string name="day_part_no_difference">Rendeixes semblant a qualsevol hora</string>
     <string name="no_calendar_app">No hi ha cap app de calendari</string>
+    <string name="rep_range_line">Rang %1$d–%2$d · %3$s → en arribar a %2$d a totes, +%4$s</string>
+    <string name="notif_reminder_start">Comença</string>
+    <string name="notif_reminder_snooze">D\'aquí a 1 h</string>
+    <string name="body_comp_title">Composició corporal</string>
+    <string name="body_comp_need_height">Posa la teva alçada a Perfil per veure la relació cintura/alçada i l\'FFMI.</string>
+    <string name="body_comp_whtr">Cintura/alçada: %1$s · %2$s</string>
+    <string name="body_comp_ffmi">FFMI (massa lliure de greix per alçada): %1$s</string>
+    <string name="body_comp_hint">Cintura/alçada per sota de 0,5 és el recomanat. FFMI: uns 18–20 és la mitjana en homes entrenats; 22+ és avançat.</string>
+    <string name="body_range_low">baix</string>
+    <string name="body_range_healthy">saludable</string>
+    <string name="body_range_high">alt: convé baixar-lo</string>
+    <string name="weight_rate_fast_loss">⚠ Baixes més d\'un 1 % per setmana: a aquest ritme es perd múscul. Valora menjar una mica més.</string>
+    <string name="weight_rate_fast_gain">⚠ Puges més d\'un 1 % per setmana: a aquest ritme es guanya sobretot greix. Valora menjar una mica menys.</string>
+    <string name="weekday_title">Els teus millors dies</string>
+    <string name="weekday_best">Rendeixes més el %1$s: bon dia per a les sessions dures</string>
 </resources>

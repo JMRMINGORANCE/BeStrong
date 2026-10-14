@@ -398,3 +398,21 @@ class Iteration19Test {
         assertEquals(1, WorkoutEditor.addDropSet(w, we.id, 2.5).exercises[0].sets.size)
     }
 }
+
+class BodyCompositionTest {
+    @Test fun indices() {
+        assertEquals(0.45, com.bestrong.core.stats.BodyComposition.waistToHeight(81.0, 180)!!, 1e-9)
+        assertEquals(com.bestrong.core.stats.BodyRange.HEALTHY, com.bestrong.core.stats.BodyComposition.waistToHeightRange(0.45))
+        // 80 kg, 15 % grasa, 1,80 m → 68 / 3,24 = 20,99
+        assertEquals(20.99, com.bestrong.core.stats.BodyComposition.ffmi(80.0, 15.0, 180)!!, 0.01)
+        assertEquals(null, com.bestrong.core.stats.BodyComposition.ffmi(80.0, 15.0, 0))
+    }
+}
+
+class WeightRateTest {
+    @Test fun tooFastAboveOnePercentPerWeek() {
+        assertEquals(true, com.bestrong.core.stats.WeightRate.tooFast(80.0, -1.0))
+        assertEquals(false, com.bestrong.core.stats.WeightRate.tooFast(80.0, -0.5))
+        assertEquals(false, com.bestrong.core.stats.WeightRate.tooFast(80.0, null))
+    }
+}
