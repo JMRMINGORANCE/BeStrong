@@ -623,14 +623,14 @@ private fun FilteredSummary(vm: HistoryViewModel, filtered: List<Workout>) {
 /** «Entreno copiado» con «Abrir» para ir a la copia. */
 @Composable
 private fun CopiedSnackbar(vm: HistoryViewModel, snackbar: SnackbarHostState, onOpen: (String) -> Unit) {
-    val copied by vm.copied.collectAsStateWithLifecycle()
     val msg = stringResource(R.string.copy_to_day_done)
     val open = stringResource(R.string.action_open)
-    LaunchedEffect(copied) {
-        val id = copied ?: return@LaunchedEffect
-        // Se limpia después (como los otros avisos): limpiarlo antes reiniciaría este efecto y cortaría el aviso
-        val result = snackbar.showSnackbar(msg, open, duration = SnackbarDuration.Short)
-        vm.clearCopied()
-        if (result == SnackbarResult.ActionPerformed) onOpen(id)
+    // Se recoge y se limpia enseguida (si se sale con el aviso a la vista no vuelve a salir), sin reiniciar el efecto
+    LaunchedEffect(Unit) {
+        vm.copied.collect { id ->
+            if (id == null) return@collect
+            vm.clearCopied()
+            if (snackbar.showSnackbar(msg, open, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) onOpen(id)
+        }
     }
 }

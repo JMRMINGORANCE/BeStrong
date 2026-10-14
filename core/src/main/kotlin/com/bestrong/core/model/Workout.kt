@@ -44,6 +44,8 @@ data class WorkoutSet(
     val completedAtEpochMs: Long? = null,
     /** Cardio con cronómetro: cuándo arrancó (en marcha mientras no esté completada). */
     val startedAtEpochMs: Long? = null,
+    /** Reps planeadas en la rutina (null = sin plan): «la próxima vez» compara lo hecho con esto. */
+    val targetReps: Int? = null,
 ) {
     /** Cronómetro de cardio en marcha. */
     val isRunning: Boolean get() = startedAtEpochMs != null && !completed

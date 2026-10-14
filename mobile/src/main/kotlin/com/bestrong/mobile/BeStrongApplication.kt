@@ -65,6 +65,11 @@ class AppSync @Inject constructor(
     /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
     suspend fun pushToWatchNow() = watchPush.pushToWatchNow()
 
+    private suspend fun scheduleCardioNudge() =
+        settings.settings.map { it.cardioNudgeDay }.distinctUntilChanged().collect { day ->
+            runCatching { com.bestrong.mobile.notify.CardioNudgeWorker.schedule(context, day) }
+        }
+
     /** Cómo va el objetivo de cardio de esta semana: [goal] identifica el objetivo puesto («km:20», «min:150»). */
     private data class CardioGoalState(val week: Long, val goal: String, val met: Boolean, val text: String)
 
@@ -190,8 +195,8 @@ class AppSync @Inject constructor(
         runCatching { ImagePrefetchWorker.schedule(context) }
         // Resumen de la semana el domingo por la tarde
         runCatching { WeeklySummaryWorker.schedule(context) }
-        // Jueves: empujón si el cardio de la semana va por detrás del objetivo
-        runCatching { com.bestrong.mobile.notify.CardioNudgeWorker.schedule(context) }
+        // Empujón si el cardio de la semana va por detrás del objetivo, el día elegido (se reprograma si cambia)
+        scope.launch { scheduleCardioNudge() }
         scope.launch { notifyCardioGoal() }
         // Atajos dinámicos con las tres primeras rutinas (icono de la app, Bixby Routines)
         scope.launch {

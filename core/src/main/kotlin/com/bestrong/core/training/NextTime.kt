@@ -12,7 +12,7 @@ data class NextTimeSuggestion(
     val weightKg: Double,
     val reps: Int,
     val direction: Int,
-    /** Se mantiene por falta de datos (una sola serie pesada al final, sin RPE): apuntando el RPE podría subir. */
+    /** Se mantiene por falta de datos (una sola serie pesada sin plan ni RPE): apuntando el RPE podría subir. */
     val needsRpe: Boolean = false,
 )
 
@@ -31,9 +31,9 @@ object NextTime {
         val top = work.maxOf { it.weightKg }
         // Solo las series con el peso más alto: las de descarga (más ligeras, más o menos reps) no marcan el objetivo
         val topSets = work.filter { it.weightKg >= top }
-        val target = topSets.first().reps
+        val target = targetOf(topSets)
         val maxRpe = topSets.mapNotNull { it.rpe }.maxOrNull()
-        val evidence = hasEvidence(work, topSets)
+        val evidence = hasEvidence(topSets)
         val allReps = topSets.all { it.reps >= target } && evidence
         val name = we.exercise.name
         val high = Autoregulation.high(we.targetRpe)
@@ -44,6 +44,9 @@ object NextTime {
         }
     }
 
+    /** Lo planeado en la rutina si lo hay; si no, las reps de la primera serie pesada. */
+    private fun targetOf(topSets: List<com.bestrong.core.model.WorkoutSet>): Int = topSets.first().targetReps ?: topSets.first().reps
+
     /** Un 5 % menos, redondeado al escalón y al menos un escalón por debajo. */
     private fun lowered(top: Double, stepKg: Double): Double {
         val lower = if (stepKg > 0) Math.floor(top * 0.95 / stepKg + 0.5) * stepKg else top * 0.95
@@ -51,11 +54,11 @@ object NextTime {
     }
 
     /**
-     * Con una sola serie pesada al final (subiendo en pirámide) y sin RPE no hay con qué comparar: no se sube a
-     * ciegas. Una serie pesada seguida de las de descarga (serie top) sí cuenta: era la planeada.
+     * Con una sola serie pesada, sin reps planeadas ni RPE, no hay con qué comparar (¿salieron las que tocaban o
+     * menos?): no se sube a ciegas.
      */
-    private fun hasEvidence(work: List<com.bestrong.core.model.WorkoutSet>, topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean =
-        topSets.size >= 2 || topSets.any { it.rpe != null } || work.last() !in topSets
+    private fun hasEvidence(topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean =
+        topSets.size >= 2 || topSets.any { it.rpe != null || it.targetReps != null }
 
     fun forWorkout(workout: Workout, stepKg: Double): List<NextTimeSuggestion> = forWorkout(workout) { stepKg }
 

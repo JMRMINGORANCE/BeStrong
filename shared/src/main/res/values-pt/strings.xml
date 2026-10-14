@@ -1177,4 +1177,6 @@
     <string name="notif_cardio_nudge">O cardio da semana está atrasado</string>
     <string name="summary_next_needs_rpe">Com uma só série pesada no fim, registe o RPE para poder sugerir subir</string>
     <string name="cardio_nudge_setting">Avisar-me à quinta se estiver atrasado</string>
+    <string name="routine_recovered_as_new">Esta rotina foi apagada: ao guardar será criada como nova</string>
+    <string name="plateau_hint">%1$d sessões sem melhorar o teu 1RM estimado. Experimenta outra gama de reps ou uma semana de descarga.</string>
 </resources>

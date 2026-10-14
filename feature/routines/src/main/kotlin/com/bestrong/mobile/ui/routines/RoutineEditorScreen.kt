@@ -391,4 +391,9 @@ private fun RoutineRangeRow(vm: RoutineEditorViewModel, routine: com.bestrong.co
 private fun CloseIfMissing(vm: RoutineEditorViewModel, onClose: () -> Unit) {
     val missing by vm.missing.collectAsStateWithLifecycle()
     LaunchedEffect(missing) { if (missing) onClose() }
+    // Borrador recuperado de una rutina que se borró: se avisa de que al guardar será una nueva
+    val recovered by vm.recoveredAsNew.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val text = stringResource(R.string.routine_recovered_as_new)
+    LaunchedEffect(recovered) { if (recovered) android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_LONG).show() }
 }

@@ -1177,4 +1177,6 @@
     <string name="notif_cardio_nudge">This week\'s cardio is behind</string>
     <string name="summary_next_needs_rpe">With a single heavy set at the end, log its RPE so it can suggest going up</string>
     <string name="cardio_nudge_setting">Remind me on Thursday if I\'m behind</string>
+    <string name="routine_recovered_as_new">This routine was deleted: saving will create it as new</string>
+    <string name="plateau_hint">%1$d sessions without beating your estimated 1RM. Try another rep range or a deload week.</string>
 </resources>

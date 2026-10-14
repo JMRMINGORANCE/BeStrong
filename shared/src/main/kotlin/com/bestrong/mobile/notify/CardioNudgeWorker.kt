@@ -17,7 +17,7 @@ import java.time.ZonedDateTime
 import java.time.temporal.TemporalAdjusters
 
 /**
- * Jueves por la tarde: si hay objetivo semanal de cardio y no se lleva ni la mitad, un empujón con lo que falta y
+ * El día elegido (jueves por defecto) por la tarde: si hay objetivo semanal de cardio y no se lleva ni la mitad, un empujón con lo que falta y
  * el ritmo para llegar el domingo («Faltan 12 km · 3 km al día»).
  */
 class CardioNudgeWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
@@ -35,7 +35,7 @@ class CardioNudgeWorker(context: Context, params: WorkerParameters) : CoroutineW
             // Solo si va por detrás: menos de la mitad hecha
             if (pace != null && pace.left > goal / 2) Notifier.cardioNudge(applicationContext, text(pace))
         } finally {
-            runCatching { schedule(applicationContext, force = true) }.onFailure { Log.w("CardioNudge", "No se pudo reprogramar", it) }
+            runCatching { schedule(applicationContext, deps.settings().settings.value.cardioNudgeDay, force = true) }.onFailure { Log.w("CardioNudge", "No se pudo reprogramar", it) }
         }
         return Result.success()
     }
@@ -49,12 +49,14 @@ class CardioNudgeWorker(context: Context, params: WorkerParameters) : CoroutineW
     companion object {
         private const val NAME = "cardio-nudge"
 
-        /** Próximo jueves a las 18:00 (OneTimeWork que se reprograma al acabar, ver [ExactWork]). */
-        fun schedule(context: Context, force: Boolean = false) {
+        /** Próximo [day] (1 = lunes) a las 18:00 (OneTimeWork que se reprograma al acabar, ver [ExactWork]). */
+        fun schedule(context: Context, day: Int, force: Boolean = false) {
             val now = ZonedDateTime.now()
-            var next = now.toLocalDate().with(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY)).atTime(LocalTime.of(18, 0)).atZone(now.zone)
+            val dow = DayOfWeek.of(day.coerceIn(1, 7))
+            var next = now.toLocalDate().with(TemporalAdjusters.nextOrSame(dow)).atTime(LocalTime.of(18, 0)).atZone(now.zone)
             if (!next.isAfter(now)) next = next.plusWeeks(1)
-            ExactWork.enqueue(context, NAME, "thursday-18:00", next, CardioNudgeWorker::class.java, force)
+            // Cambiar el día cambia la clave: se sustituye lo programado
+            ExactWork.enqueue(context, NAME, "$dow-18:00", next, CardioNudgeWorker::class.java, force)
         }
     }
 }

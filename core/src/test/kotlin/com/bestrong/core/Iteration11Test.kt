@@ -869,9 +869,16 @@ class CollarTest {
     @Test
     fun nextTimeProgressesATopSetFollowedByBackOffs() {
         val bench = com.bestrong.core.model.Exercise(id = "bench", name = "bench", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
-        val sets = listOf(100.0 to 5, 85.0 to 5, 85.0 to 5, 85.0 to 5).map { (kg, r) -> WorkoutSet(weightKg = kg, reps = r, completed = true) }
-        val s = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets), 2.5)
+        fun sets(topReps: Int) = listOf(100.0 to topReps, 85.0 to 5, 85.0 to 5, 85.0 to 5).map { (kg, r) -> WorkoutSet(weightKg = kg, reps = r, completed = true, targetReps = 5) }
+        val s = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets(5)), 2.5)
         assertEquals(102.5, s!!.weightKg, 1e-9)
         assertEquals(false, s.needsRpe)
+        // Planeadas 5 y salieron 2: se mantiene
+        val missed = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets(2)), 2.5)
+        assertEquals(100.0, missed!!.weightKg, 1e-9)
+        assertEquals(0, missed.direction)
+        // Sin plan ni RPE, una sola serie pesada: no se sube a ciegas
+        val unplanned = com.bestrong.core.training.NextTime.suggest(WorkoutExercise(exercise = bench, sets = sets(5).map { it.copy(targetReps = null) }), 2.5)
+        assertEquals(true, unplanned!!.needsRpe)
     }
 }

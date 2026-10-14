@@ -72,6 +72,7 @@ interface BeStrongDao {
     @Query("DELETE FROM kv WHERE `key` = :key")
     suspend fun deleteValue(key: String)
 
-    @Query("DELETE FROM kv WHERE `key` LIKE :prefix || '%'")
-    suspend fun deleteValuesStartingWith(prefix: String)
+    /** Claves que empiezan exactamente por [prefix] (sin comodines de LIKE). */
+    @Query("SELECT * FROM kv WHERE substr(`key`, 1, length(:prefix)) = :prefix")
+    suspend fun valuesStartingWith(prefix: String): List<KeyValueEntity>
 }

@@ -75,6 +75,7 @@ data class Routine(
                         reps = prev?.reps?.takeIf { it > 0 } ?: rs.reps,
                         durationSec = prev?.durationSec?.takeIf { it > 0 } ?: rs.durationSec,
                         type = rs.type,
+                        targetReps = rs.reps.takeIf { it > 0 && rs.durationSec == 0 },
                     )
                 },
             )

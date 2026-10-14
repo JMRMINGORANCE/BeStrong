@@ -170,10 +170,17 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                             when (metric) { 0 -> p.bestOneRepMax; 1 -> p.heaviestWeight; 2 -> p.volume; else -> p.bestReps.toDouble() },
                         )
                     }
-                    LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = { unit.format(it) })
+                    // Peso en tu unidad, volumen con su unidad y las reps tal cual
+                    val formatter: (Double) -> String = when (metric) {
+                        2 -> { v -> unit.formatVolume(v) }
+                        3 -> { v -> v.toInt().toString() }
+                        else -> { v -> unit.format(v) }
+                    }
+                    LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = formatter)
                 }
             }
             if (s.rpeTrend.size >= RPE_MIN_SESSIONS) item { RpeTrendCard(s.rpeTrend) }
+            if (!timed) item { PlateauHint(s.progress) }
             item { SectionHeader(stringResource(R.string.personal_records)) }
             item {
                 Card(Modifier.fillMaxWidth()) {
@@ -389,3 +396,16 @@ private fun CardioProgressChart(progress: List<com.bestrong.core.stats.ExerciseP
 
 /** Ejercicios que se siguen por distancia o tiempo (no por peso y reps). */
 private val TIMED_TRACKING = setOf(com.bestrong.core.model.TrackingType.CARDIO, com.bestrong.core.model.TrackingType.DISTANCE, com.bestrong.core.model.TrackingType.DURATION)
+
+/** «4 sesiones sin mejorar tu 1RM estimado»: con una idea para salir del estancamiento. */
+@Composable
+private fun PlateauHint(progress: List<com.bestrong.core.stats.ExerciseProgressPoint>) {
+    val stalled = remember(progress) { com.bestrong.core.stats.WorkoutStats.sessionsSinceBest(progress) }
+    if (stalled < PLATEAU_SESSIONS) return
+    Card(Modifier.fillMaxWidth()) {
+        Text(stringResource(R.string.plateau_hint, stalled), Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+/** Sesiones sin récord de 1RM estimado a partir de las que se habla de estancamiento. */
+private const val PLATEAU_SESSIONS = 4

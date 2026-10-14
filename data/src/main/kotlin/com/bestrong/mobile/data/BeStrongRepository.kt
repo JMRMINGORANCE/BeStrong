@@ -351,13 +351,16 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** Pulso y calorías del reloj que llegaron antes de que el móvil guardase ese entreno (JSON, uno por entreno). */
     suspend fun savePendingHealth(workoutId: String, raw: String) {
-        // Solo sirve unos segundos: las de entrenos descartados (que nunca se guardan) no se acumulan
-        dao.deleteValuesStartingWith(KEY_PENDING_HEALTH)
-        dao.putValue(KeyValueEntity(KEY_PENDING_HEALTH + workoutId, raw))
+        // Las de entrenos descartados (que nunca se guardan) no se acumulan: fuera las de hace más de un día
+        val now = System.currentTimeMillis()
+        dao.valuesStartingWith(KEY_PENDING_HEALTH)
+            .filter { (it.value.substringBefore('|').toLongOrNull() ?: 0L) < now - PENDING_HEALTH_MS }
+            .forEach { dao.deleteValue(it.key) }
+        dao.putValue(KeyValueEntity(KEY_PENDING_HEALTH + workoutId, "$now|$raw"))
     }
 
     suspend fun takePendingHealth(workoutId: String): String? =
-        dao.valueOnce(KEY_PENDING_HEALTH + workoutId)?.also { dao.deleteValue(KEY_PENDING_HEALTH + workoutId) }
+        dao.valueOnce(KEY_PENDING_HEALTH + workoutId)?.also { dao.deleteValue(KEY_PENDING_HEALTH + workoutId) }?.substringAfter('|')
 
     /** Un cambio de un entreno guardado a la vez (valorarlo y el pulso que llega del reloj no se pisan). */
     private val updateMutex = Mutex()
@@ -486,6 +489,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         const val KEY_TRASH = "trash"
         const val KEY_PENDING_HEALTH = "pending_watch_health:"
         const val KEY_WATCH_KNOWN = "watch_known_workout"
+        const val PENDING_HEALTH_MS = 86_400_000L
     }
 }
 

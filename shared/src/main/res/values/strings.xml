@@ -1177,4 +1177,6 @@
     <string name="notif_cardio_nudge">El cardio de la semana va por detrás</string>
     <string name="summary_next_needs_rpe">Con una sola serie pesada al final, apunta su RPE para que pueda sugerir subir</string>
     <string name="cardio_nudge_setting">Avisarme el jueves si voy por detrás</string>
+    <string name="routine_recovered_as_new">Esta rutina se borró: al guardar se creará como nueva</string>
+    <string name="plateau_hint">%1$d sesiones sin mejorar tu 1RM estimado. Prueba otro rango de reps o una semana de descarga.</string>
 </resources>

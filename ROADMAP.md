@@ -402,3 +402,10 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] La serie top seguida de descargas cuenta para subir el peso
 - [x] El borrador de una rutina borrada se guarda como rutina nueva en vez de perderse
 - [x] Nombres de ejercicios en tu idioma en la tile del reloj y al copiar un entreno
+
+## Fase 47 — Plan y estancamiento ✅
+- [x] Las series guardan las reps planeadas en la rutina: «la próxima vez» compara lo hecho con el plan
+- [x] Aviso de estancamiento en la ficha del ejercicio (4+ sesiones sin mejorar el 1RM estimado)
+- [x] Elegir el día del aviso de cardio
+- [x] Gráficas de reps y volumen de la ficha con su formato (no como peso)
+- [x] Borrador de una rutina borrada: se avisa de que se guardará como nueva

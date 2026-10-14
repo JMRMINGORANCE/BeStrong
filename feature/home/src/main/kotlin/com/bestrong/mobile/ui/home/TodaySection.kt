@@ -563,8 +563,22 @@ fun CardioWeekCard(vm: HomeViewModel) {
 @Composable
 private fun CardioNudgeSwitch(vm: HomeViewModel) {
     val on by vm.cardioNudge.collectAsStateWithLifecycle()
+    val day by vm.cardioNudgeDay.collectAsStateWithLifecycle()
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(R.string.cardio_nudge_setting), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
         androidx.compose.material3.Switch(checked = on, onCheckedChange = vm::setCardioNudge)
+    }
+    // Qué día (por la tarde) llega el aviso
+    if (on) {
+        val locale = java.util.Locale.getDefault()
+        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            java.time.DayOfWeek.entries.forEach { d ->
+                androidx.compose.material3.FilterChip(
+                    selected = d.value == day,
+                    onClick = { vm.setCardioNudgeDay(d.value) },
+                    label = { Text(d.getDisplayName(java.time.format.TextStyle.NARROW_STANDALONE, locale)) },
+                )
+            }
+        }
     }
 }

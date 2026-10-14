@@ -1070,7 +1070,7 @@ fun WorkoutSummaryDialog(
                         )
                     }
                     // Por qué se mantiene alguno: le falta el RPE de la serie pesada
-                    if (summary.nextTime.any { it.needsRpe }) {
+                    if (summary.nextTime.take(6).any { it.needsRpe }) {
                         Text(stringResource(R.string.summary_next_needs_rpe), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }

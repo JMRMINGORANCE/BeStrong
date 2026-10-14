@@ -1177,4 +1177,6 @@
     <string name="notif_cardio_nudge">Das Cardio dieser Woche hinkt hinterher</string>
     <string name="summary_next_needs_rpe">Bei nur einem schweren Satz am Ende den RPE eintragen, damit eine Steigerung vorgeschlagen werden kann</string>
     <string name="cardio_nudge_setting">Donnerstags erinnern, wenn ich hinterher bin</string>
+    <string name="routine_recovered_as_new">Diese Routine wurde gelöscht: Speichern legt sie neu an</string>
+    <string name="plateau_hint">%1$d Einheiten ohne neues geschätztes 1RM. Probier einen anderen Wiederholungsbereich oder eine Deload-Woche.</string>
 </resources>

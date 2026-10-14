@@ -1177,4 +1177,6 @@
     <string name="notif_cardio_nudge">Le cardio de la semaine est en retard</string>
     <string name="summary_next_needs_rpe">Avec une seule série lourde à la fin, note son RPE pour qu\'il puisse proposer d\'augmenter</string>
     <string name="cardio_nudge_setting">Me prévenir le jeudi si je suis en retard</string>
+    <string name="routine_recovered_as_new">Cette routine a été supprimée : l\'enregistrer la recréera</string>
+    <string name="plateau_hint">%1$d séances sans battre ton 1RM estimé. Essaie une autre plage de reps ou une semaine de décharge.</string>
 </resources>

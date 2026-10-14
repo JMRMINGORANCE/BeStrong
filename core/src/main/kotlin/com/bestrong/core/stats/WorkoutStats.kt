@@ -58,6 +58,18 @@ object MuscleTargets {
 
 /** Cálculos sobre el historial. Todas las funciones son puras: [history] = entrenamientos terminados. */
 object WorkoutStats {
+    /**
+     * Sesiones seguidas sin superar el mejor 1RM estimado (las últimas, desde la del récord); 0 si la última fue
+     * récord o hay pocas sesiones (menos de seis) para hablar de estancamiento.
+     */
+    fun sessionsSinceBest(progress: List<ExerciseProgressPoint>): Int {
+        val points = progress.filter { it.bestOneRepMax > 0 }
+        if (points.size < PLATEAU_MIN_HISTORY) return 0
+        val best = points.indices.maxBy { points[it].bestOneRepMax }
+        return points.lastIndex - best
+    }
+
+    private const val PLATEAU_MIN_HISTORY = 6
 
     private fun Workout.finishedAt(): Long = finishedAtEpochMs ?: startedAtEpochMs
 

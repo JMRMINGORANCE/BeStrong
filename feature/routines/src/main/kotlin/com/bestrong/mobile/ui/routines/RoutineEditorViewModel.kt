@@ -63,7 +63,11 @@ class RoutineEditorViewModel @Inject constructor(
         draft ?: routineId?.let { id -> repo.routines.value.firstOrNull { it.id == id } } ?: Routine(name = ""),
     )
     val routine: StateFlow<Routine> = _routine.asStateFlow()
-    val isNew = routineId == null
+
+    /** El borrador era de una rutina que ya no existe: se guardará como nueva (no se puede borrar). */
+    private val _recoveredAsNew = MutableStateFlow(false)
+    val recoveredAsNew: StateFlow<Boolean> = _recoveredAsNew.asStateFlow()
+    val isNew: Boolean get() = routineId == null || _recoveredAsNew.value
 
     /** Rutina tal y como se abrió, para saber si hay cambios sin guardar al salir. */
     private var original: Routine = savedRoutine(KEY_ORIGINAL) ?: _routine.value
@@ -83,7 +87,12 @@ class RoutineEditorViewModel @Inject constructor(
         // Con borrador recuperado, la rutina tiene que seguir existiendo (se pudo borrar con la app en segundo plano)
         // con lo escrito: así no se pierde y al guardar sale como rutina nueva
         if (draft != null && routineId != null) {
-            viewModelScope.launch { if (repo.routine(routineId) == null) _routine.update { it.copy(id = com.bestrong.core.util.newId()) } }
+            viewModelScope.launch {
+                if (repo.routine(routineId) == null) {
+                    _recoveredAsNew.value = true
+                    _routine.update { it.copy(id = com.bestrong.core.util.newId()) }
+                }
+            }
         }
         if (draft == null && routineId != null && _routine.value.id != routineId) {
             viewModelScope.launch {
