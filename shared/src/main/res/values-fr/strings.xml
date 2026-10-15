@@ -1192,4 +1192,7 @@
     <string name="hc_restore_hidden">Récupérer supprimés</string>
     <string name="routine_search_none">Aucune routine ne correspond</string>
     <string name="import_measurements_summary">Mesures : %1$d nouvelles, %2$d complétées</string>
+    <string name="hc_restore_none">Aucun poids supprimé à récupérer</string>
+    <string name="import_measurements_skipped">%1$d lignes illisibles</string>
+    <string name="routine_search_clear">Effacer la recherche</string>
 </resources>

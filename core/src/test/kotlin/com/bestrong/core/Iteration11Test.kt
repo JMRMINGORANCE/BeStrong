@@ -914,4 +914,26 @@ class CollarTest {
         assertEquals(listOf(10.0, 10.0), load.perSide)
         assertEquals(0.0, load.remainder, 1e-9)
     }
+
+    @Test
+    fun measurementCsvReadsScaleExportsWithTimesUnitsAndUsDates() {
+        val zone = java.time.ZoneOffset.UTC
+        fun day(m: com.bestrong.core.model.BodyMeasurement) = java.time.Instant.ofEpochMilli(m.dateEpochMs).atZone(zone).toLocalDate()
+        val withings = com.bestrong.core.io.MeasurementCsv.read("Date,Weight (lb),Fat mass (kg)\n2026-03-02 08:15:23,176.4,15", zone)
+        assertEquals(80.0, withings.rows.single().weightKg!!, 0.05)
+        assertEquals(null, withings.rows.single().bodyFatPct)
+        assertEquals(java.time.LocalDate.of(2026, 3, 2), day(withings.rows.single()))
+        val us = com.bestrong.core.io.MeasurementCsv.read("Time of Measurement,Weight\n03/02/2026,80\n03/14/2026,81\nnope,82", zone)
+        assertEquals(listOf(java.time.LocalDate.of(2026, 3, 2), java.time.LocalDate.of(2026, 3, 14)), us.rows.map(::day))
+        assertEquals(1, us.skipped)
+        // «Pescoço» (cuello) no es el peso
+        val pt = com.bestrong.core.io.MeasurementCsv.read("Data;Pescoço;Peso\n02/03/2026;38;80,5", zone)
+        assertEquals(80.5, pt.rows.single().weightKg!!, 1e-9)
+    }
+
+    @Test
+    fun platesKeepTheUsualLoadWhenItIsAsGood() {
+        val load = com.bestrong.core.training.PlateCalculator.calculate(165.0, com.bestrong.core.util.WeightUnit.LB)
+        assertEquals(listOf(45.0, 10.0, 5.0), load.perSide)
+    }
 }

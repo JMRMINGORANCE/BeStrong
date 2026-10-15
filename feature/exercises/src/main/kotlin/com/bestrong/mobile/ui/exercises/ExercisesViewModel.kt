@@ -140,11 +140,7 @@ class ExercisesViewModel @Inject constructor(
     }
 
     fun setRepRange(exerciseId: String, range: String?) = settingsStore.update { s ->
-        // Quitar el rango a mano también quita el descanso del aviso de estancamiento
-        s.copy(
-            exerciseRepRange = if (range == null) s.exerciseRepRange - exerciseId else s.exerciseRepRange + (exerciseId to range),
-            plateauSnoozed = if (range == null) s.plateauSnoozed - exerciseId else s.plateauSnoozed,
-        )
+        s.copy(exerciseRepRange = if (range == null) s.exerciseRepRange - exerciseId else s.exerciseRepRange + (exerciseId to range))
     }
 
     /** Objetivos de 1RM por ejercicio (kg). */

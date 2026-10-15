@@ -1192,4 +1192,7 @@
     <string name="hc_restore_hidden">Restore deleted</string>
     <string name="routine_search_none">No routines match</string>
     <string name="import_measurements_summary">Measurements: %1$d new, %2$d completed</string>
+    <string name="hc_restore_none">No deleted weights to restore</string>
+    <string name="import_measurements_skipped">%1$d rows couldn\'t be read</string>
+    <string name="routine_search_clear">Clear search</string>
 </resources>

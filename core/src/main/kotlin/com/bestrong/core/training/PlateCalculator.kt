@@ -22,15 +22,35 @@ object PlateCalculator {
 
     fun calculate(target: Double, unit: WeightUnit, bar: Double = defaultBar(unit), plates: List<Double> = defaultPlates(unit)): PlateLoad {
         if (target <= bar) return PlateLoad(emptyList(), bar, bar, (target - bar).coerceAtLeast(0.0))
-        val perSide = exactSide((target - bar) / 2, plates.filter { it > 0 })
+        val perSide = bestSide((target - bar) / 2, plates.filter { it > 0 })
         val achieved = bar + perSide.sum() * 2
         return PlateLoad(perSide, bar, achieved, round((target - achieved) * 100) / 100)
     }
 
     /**
-     * Discos de un lado que más se acercan a [side] sin pasarse, con los menos discos posibles (no a lo bruto de
-     * mayor a menor: con {15, 10} y 20 por lado son 10 + 10, no 15 y sobran 5). En centésimas, para kg y lb.
+     * Discos de un lado lo más cerca de [side] sin pasarse. Lo de siempre (de mayor a menor) si llega igual de
+     * cerca (60 lb: 45 + 10 + 5, no 35 + 25); si no, la combinación exacta (con {15, 10} y 20 por lado: 10 + 10).
      */
+    fun bestSide(side: Double, plates: List<Double>): List<Double> {
+        val greedy = greedySide(side, plates)
+        val exact = exactSide(side, plates)
+        return if (greedy.sum() + 1e-6 >= exact.sum()) greedy else exact
+    }
+
+    private fun greedySide(side: Double, plates: List<Double>): List<Double> {
+        var remaining = side
+        val out = mutableListOf<Double>()
+        plates.filter { it > 0 }.sortedDescending().forEach { p ->
+            // Tolerancia de redondeo (conversiones kg ↔ lb)
+            while (remaining + 1e-3 >= p) {
+                out += p
+                remaining -= p
+            }
+        }
+        return out
+    }
+
+    /** La combinación (con los menos discos) que más se acerca sin pasarse. En centésimas, para kg y lb. */
     private fun exactSide(side: Double, plates: List<Double>): List<Double> {
         val amount = Math.round(side * 100).toInt().coerceIn(0, MAX_SIDE_CENTS)
         val units = plates.map { Math.round(it * 100).toInt() }.filter { it > 0 }.distinct().sortedDescending()

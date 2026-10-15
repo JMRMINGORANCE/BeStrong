@@ -239,8 +239,9 @@ class ProfileViewModel @Inject constructor(
      * Guarda la medida; a Health Connect solo si cambian el peso o la grasa ([force]: siempre, al deshacer un
      * borrado).
      */
-    private suspend fun saveMeasurementNow(m: BodyMeasurement, force: Boolean) {
-        val before = repo.measurementsOnce().firstOrNull { it.id == m.id }
+    private suspend fun saveMeasurementNow(m: BodyMeasurement, force: Boolean, known: List<BodyMeasurement>? = null) {
+        // [known]: las medidas ya leídas (importando muchas no se relee la tabla en cada una)
+        val before = (known ?: repo.measurementsOnce()).firstOrNull { it.id == m.id }
         // Un peso de la báscula corregido a mano sigue sin exportarse: allí ya está el de la báscula (saldría doble)
         val saved = m
         repo.saveMeasurement(saved)
@@ -262,21 +263,30 @@ class ProfileViewModel @Inject constructor(
 
     /**
      * Medidas desde un CSV ([uri]): el día que ya tiene medida solo se le rellena lo que le falta; [onDone] recibe
-     * cuántas se añadieron y cuántas se completaron (null si no se pudo leer).
+     * cuántas se añadieron, cuántas se completaron y cuántas filas se saltaron (null si no se pudo leer o no se
+     * entendió ninguna fila).
      */
-    fun importMeasurementsCsv(uri: Uri, onDone: (Pair<Int, Int>?) -> Unit) = viewModelScope.launch {
-        val rows = runCatching {
+    fun importMeasurementsCsv(uri: Uri, onDone: (Triple<Int, Int, Int>?) -> Unit) = viewModelScope.launch {
+        val read = runCatching {
             val text = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error("no stream") }
-            withContext(Dispatchers.Default) { com.bestrong.core.io.MeasurementCsv.parse(text) }
+            withContext(Dispatchers.Default) { com.bestrong.core.io.MeasurementCsv.read(text) }
         }.getOrNull()
-        if (rows == null) {
+        if (read == null || read.rows.isEmpty()) {
             onDone(null)
             return@launch
         }
+        // Aunque se salga de la pantalla, la importación termina (no se queda a medias)
+        val (added, completed) = withContext(kotlinx.coroutines.NonCancellable) { saveImported(read.rows) }
+        onDone(Triple(added, completed, read.skipped))
+    }
+
+    /** Guarda las filas importadas juntando las del mismo día; devuelve (nuevas, completadas). */
+    private suspend fun saveImported(rows: List<BodyMeasurement>): Pair<Int, Int> {
         val zone = ZoneId.systemDefault()
         fun day(t: Long) = java.time.Instant.ofEpochMilli(t).atZone(zone).toLocalDate()
+        val known = repo.measurementsOnce()
         // Se actualiza al ir guardando: dos filas del mismo día se juntan en una medida
-        val byDay = repo.measurementsOnce().associateBy { day(it.dateEpochMs) }.toMutableMap()
+        val byDay = known.associateBy { day(it.dateEpochMs) }.toMutableMap()
         var added = 0
         var completed = 0
         rows.forEach { row ->
@@ -284,12 +294,12 @@ class ProfileViewModel @Inject constructor(
             val merged = old?.let { fillMissing(it, row) } ?: row
             if (merged != old) {
                 // Como las demás: con la exportación activada, el peso y la grasa también a Health Connect
-                saveMeasurementNow(merged, force = false)
+                saveMeasurementNow(merged, force = false, known = listOfNotNull(old))
                 byDay[day(merged.dateEpochMs)] = merged
                 if (old == null) added++ else completed++
             }
         }
-        onDone(added to completed)
+        return added to completed
     }
 
     /** [old] con lo que le falta tomado de [row] (lo que ya tenía no se toca). */
@@ -304,6 +314,11 @@ class ProfileViewModel @Inject constructor(
 
     /** Los pesos de la báscula borrados aquí vuelven a traerse en la próxima importación. */
     fun restoreIgnoredHealthWeights() = viewModelScope.launch {
+        // Sin ninguno borrado no hay nada que recuperar (ni se pide importar en vano)
+        if (repo.ignoredHealthWeightDays().isEmpty()) {
+            _messages.tryEmit(context.getString(R.string.hc_restore_none))
+            return@launch
+        }
         repo.clearIgnoredHealthWeights()
         importHealthWeights()
     }

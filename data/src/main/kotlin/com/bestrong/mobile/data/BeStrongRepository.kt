@@ -353,8 +353,18 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
      * Días (epochDay) cuyo peso de Health Connect se borró aquí a propósito: no se vuelven a traer al importar.
      * Solo los de los últimos meses (la importación no mira más atrás), así la lista no crece sin fin.
      */
-    suspend fun ignoredHealthWeightDays(): Set<Long> =
-        dao.valueOnce(KEY_IGNORED_HC_WEIGHTS)?.split(',')?.mapNotNull { it.toLongOrNull() }?.toSet().orEmpty()
+    suspend fun ignoredHealthWeightDays(): Set<Long> {
+        val days = dao.valueOnce(KEY_IGNORED_HC_WEIGHTS)?.split(',')?.mapNotNull { it.toLongOrNull() }?.toSet().orEmpty()
+        // Los de la versión anterior (por hora): se pasan a días para que no vuelvan
+        val zone = java.time.ZoneId.systemDefault()
+        val legacy = dao.valueOnce(KEY_IGNORED_HC_WEIGHTS_LEGACY)?.split(',')?.mapNotNull { it.toLongOrNull() }
+            ?.map { java.time.Instant.ofEpochMilli(it).atZone(zone).toLocalDate().toEpochDay() }.orEmpty()
+        if (legacy.isEmpty()) return days
+        val all = days + legacy
+        dao.putValue(KeyValueEntity(KEY_IGNORED_HC_WEIGHTS, all.joinToString(",")))
+        dao.deleteValue(KEY_IGNORED_HC_WEIGHTS_LEGACY)
+        return all
+    }
 
     suspend fun ignoreHealthWeightDay(epochDay: Long) {
         val oldest = java.time.LocalDate.now().toEpochDay() - IGNORED_KEEP_DAYS
@@ -363,7 +373,10 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     }
 
     /** Vuelve a traer al importar los pesos de la báscula que se habían borrado aquí. */
-    suspend fun clearIgnoredHealthWeights() = dao.deleteValue(KEY_IGNORED_HC_WEIGHTS)
+    suspend fun clearIgnoredHealthWeights() {
+        dao.deleteValue(KEY_IGNORED_HC_WEIGHTS)
+        dao.deleteValue(KEY_IGNORED_HC_WEIGHTS_LEGACY)
+    }
 
     /** Pulso y calorías del reloj que llegaron antes de que el móvil guardase ese entreno (JSON, uno por entreno). */
     suspend fun savePendingHealth(workoutId: String, raw: String) {
@@ -506,6 +519,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         const val KEY_PENDING_HEALTH = "pending_watch_health:"
         const val KEY_WATCH_KNOWN = "watch_known_workout"
         const val KEY_IGNORED_HC_WEIGHTS = "ignored_hc_weight_days"
+        const val KEY_IGNORED_HC_WEIGHTS_LEGACY = "ignored_hc_weights"
         const val IGNORED_KEEP_DAYS = 180L
         const val PENDING_HEALTH_MS = 86_400_000L
     }

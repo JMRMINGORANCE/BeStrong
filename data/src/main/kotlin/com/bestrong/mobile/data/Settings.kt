@@ -275,7 +275,8 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
 
     @Synchronized
     fun update(block: (UserSettings) -> UserSettings) {
-        val s = block(_settings.value)
+        // El descanso del aviso de estancamiento solo tiene sentido con un rango puesto (se quite donde se quite)
+        val s = block(_settings.value).let { n -> n.copy(plateauSnoozed = n.plateauSnoozed.filterKeys { it in n.exerciseRepRange }) }
         prefs.edit {
             putInt("rest", s.defaultRestSeconds)
             putBoolean("hc", s.healthConnectExport)

@@ -1192,4 +1192,7 @@
     <string name="hc_restore_hidden">Recuperar borrados</string>
     <string name="routine_search_none">Ninguna rutina coincide</string>
     <string name="import_measurements_summary">Medidas: %1$d nuevas, %2$d completadas</string>
+    <string name="hc_restore_none">No hay pesos borrados que recuperar</string>
+    <string name="import_measurements_skipped">%1$d filas no se entendieron</string>
+    <string name="routine_search_clear">Borrar búsqueda</string>
 </resources>

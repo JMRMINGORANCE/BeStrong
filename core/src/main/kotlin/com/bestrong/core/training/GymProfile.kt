@@ -56,18 +56,11 @@ data class GymProfile(
         else -> currentKg
     }
 
-    /** Peso alcanzable con la barra y los discos (combinación voraz, por lado). */
+    /** Peso alcanzable con la barra y los discos (lo mismo que monta la calculadora de discos, por lado). */
     fun nearestBarbell(targetKg: Double): Double {
         val base = loadedBarKg
         if (targetKg <= base) return base
-        var remaining = (targetKg - base) / 2
-        var side = 0.0
-        platesKg.filter { it > 0 }.sortedDescending().forEach { p ->
-            while (remaining + 1e-9 >= p) {
-                side += p
-                remaining -= p
-            }
-        }
+        val side = PlateCalculator.bestSide((targetKg - base) / 2, platesKg).sum()
         val below = base + side * 2
         // Si queda un hueco grande, probamos con el disco más pequeño de más
         val smallest = platesKg.filter { it > 0 }.minOrNull() ?: return below

@@ -277,5 +277,8 @@ object ExerciseLibrary {
     }
 
     internal fun String.normalized(): String =
-        Normalizer.normalize(lowercase().trim(), Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
+        Normalizer.normalize(lowercase().trim(), Normalizer.Form.NFD).replace(MARKS, "")
+
+    /** Compilada una vez: la búsqueda la usa por cada ejercicio, palabra y sinónimo. */
+    private val MARKS = Regex("\\p{Mn}+")
 }

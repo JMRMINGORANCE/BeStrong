@@ -1192,4 +1192,7 @@
     <string name="hc_restore_hidden">Recuperar apagados</string>
     <string name="routine_search_none">Nenhuma rotina corresponde</string>
     <string name="import_measurements_summary">Medidas: %1$d novas, %2$d completadas</string>
+    <string name="hc_restore_none">Não há pesos apagados para recuperar</string>
+    <string name="import_measurements_skipped">%1$d linhas não foram entendidas</string>
+    <string name="routine_search_clear">Limpar pesquisa</string>
 </resources>

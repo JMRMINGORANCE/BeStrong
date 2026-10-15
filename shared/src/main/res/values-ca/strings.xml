@@ -1192,4 +1192,7 @@
     <string name="hc_restore_hidden">Recuperar esborrats</string>
     <string name="routine_search_none">Cap rutina coincideix</string>
     <string name="import_measurements_summary">Mesures: %1$d noves, %2$d completades</string>
+    <string name="hc_restore_none">No hi ha pesos esborrats per recuperar</string>
+    <string name="import_measurements_skipped">%1$d files no s\'han entès</string>
+    <string name="routine_search_clear">Esborrar cerca</string>
 </resources>

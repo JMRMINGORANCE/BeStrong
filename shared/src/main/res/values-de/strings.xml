@@ -1192,4 +1192,7 @@
     <string name="hc_restore_hidden">Gelöschte zurückholen</string>
     <string name="routine_search_none">Keine passende Routine</string>
     <string name="import_measurements_summary">Messungen: %1$d neu, %2$d ergänzt</string>
+    <string name="hc_restore_none">Keine gelöschten Gewichte zum Zurückholen</string>
+    <string name="import_measurements_skipped">%1$d Zeilen nicht lesbar</string>
+    <string name="routine_search_clear">Suche löschen</string>
 </resources>

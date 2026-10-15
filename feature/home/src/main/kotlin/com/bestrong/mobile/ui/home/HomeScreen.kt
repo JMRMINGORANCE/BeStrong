@@ -493,7 +493,7 @@ private fun RoutineSearchField(count: Int, query: String, nothingShown: Boolean,
         singleLine = true,
         trailingIcon = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = { onChange("") }) { Icon(Icons.Default.Close, stringResource(R.string.history_clear_filters)) }
+                IconButton(onClick = { onChange("") }) { Icon(Icons.Default.Close, stringResource(R.string.routine_search_clear)) }
             }
         },
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
