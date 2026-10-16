@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -68,7 +67,7 @@ private fun liftName(id: String): String = ExerciseLibrary.byId(id)?.displayName
 @Composable
 fun StrengthLevelsCard(stats: AdvancedStats, sex: Sex, onSex: (Sex) -> Unit) {
     val unit = LocalWeightUnit.current
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.strength_levels))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -101,7 +100,7 @@ fun StrengthLevelsCard(stats: AdvancedStats, sex: Sex, onSex: (Sex) -> Unit) {
 @Composable
 fun BalanceCard(stats: AdvancedStats) {
     val b = stats.balance
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.balance_title))
             Text(stringResource(R.string.balance_push_pull, formatWeight(b.push), formatWeight(b.pull)))
@@ -119,7 +118,7 @@ fun BalanceCard(stats: AdvancedStats) {
 fun WeekSummaryCard(stats: AdvancedStats) {
     val unit = LocalWeightUnit.current
     val w = stats.week ?: return
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.week_summary))
             Text(stringResource(R.string.week_summary_line, w.workouts, unit.formatVolume(w.volume), w.sets, formatWeight(stats.weekEffectiveSets)))
@@ -157,7 +156,7 @@ private val ACHIEVEMENT_NAMES = mapOf(
 @Composable
 fun AchievementsCard(stats: AdvancedStats) {
     val unit = LocalWeightUnit.current
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             val unlocked = stats.achievements.count { it.unlocked }
             SectionHeader(stringResource(R.string.achievements) + " · " + stringResource(R.string.achievements_count, unlocked, stats.achievements.size))
@@ -182,7 +181,7 @@ fun AchievementsCard(stats: AdvancedStats) {
 fun RecordTimelineCard(stats: AdvancedStats) {
     if (stats.timeline.isEmpty()) return
     val unit = LocalWeightUnit.current
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.record_timeline))
             stats.timeline.forEach { r ->
@@ -199,7 +198,7 @@ fun RecordTimelineCard(stats: AdvancedStats) {
 @Composable
 fun MuscleRecoveryCard(stats: AdvancedStats) {
     if (stats.daysSince.values.all { it == null }) return
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.muscle_recovery))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -222,7 +221,7 @@ fun MuscleRecoveryCard(stats: AdvancedStats) {
 
 @Composable
 fun ToolsCard(onOneRm: () -> Unit, onScores: () -> Unit, onReport: () -> Unit = {}, onShareWeek: () -> Unit = {}) {
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(stringResource(R.string.tools))
             OutlinedButton(onClick = onOneRm, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_1rm)) }
@@ -362,7 +361,7 @@ fun MonthlyReportDialog(onShare: (monthsAgo: Int, pdf: Boolean) -> Unit, onDismi
 fun TrainingLoadCard(stats: AdvancedStats) {
     val load = stats.load ?: return
     if (load.weeks.all { it.second == 0.0 }) return
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.training_load))
             BarChart(load.weeks.map { (monday, value) -> ChartPoint(formatShortDate(monday.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()), value) })
@@ -385,7 +384,7 @@ fun MuscleTrendCard(trend: Map<com.bestrong.core.model.MuscleGroup, List<Pair<ja
     if (trend.isEmpty()) return
     var selected by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(trend.keys.first()) }
     val weeks = trend[selected] ?: trend.values.first()
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.muscle_trend))
             androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -419,7 +418,7 @@ private fun MuscleZoneLine(weeks: List<Pair<java.time.LocalDate, Double>>, targe
 @Composable
 fun DayPartCard(parts: List<com.bestrong.core.stats.DayPartStat>) {
     val best = parts.first()
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.day_part_title))
             // Solo hay «mejor hora» si la diferencia se nota (3 puntos); si no, da igual cuándo entrenes
@@ -454,7 +453,7 @@ fun WeekdayCard(days: List<Triple<java.time.DayOfWeek, Int, Double>>) {
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     val best = days.first()
     val clear = best.third - days[1].third >= CLEAR_DIFFERENCE
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.weekday_title))
             val bestName = best.first.getDisplayName(java.time.format.TextStyle.FULL, locale)

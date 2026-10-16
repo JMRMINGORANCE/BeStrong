@@ -4,6 +4,7 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,11 +13,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -39,7 +42,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -154,324 +157,335 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     LaunchedEffect(Unit) { vm.refreshHealthConnect() }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
 
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.nav_profile)) }) }, snackbarHost = { SnackbarHost(snackbar) }) { padding ->
+    var tab by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
+    Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 340.dp),
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
+            // Dos pestañas: el progreso (lo que se mira a menudo) y los ajustes (lo que se toca de vez en cuando)
             item(span = { GridItemSpan(maxLineSpan) }) {
-                // 4 en fila en el Fold desplegado; 2 × 2 en la pantalla exterior
-                BoxWithConstraints {
-                    val tiles: List<Pair<String, String>> = listOf(
-                        stringResource(R.string.stat_workouts) to "${stats.totalWorkouts}",
-                        stringResource(R.string.stat_streak) to "🔥 ${stats.weeklyStreak}",
-                        stringResource(R.string.stat_total_volume) to unit.formatVolume(stats.totalVolume),
-                        stringResource(R.string.stat_time) to formatDuration(stats.totalDurationSec),
-                    )
-                    val perRow = if (maxWidth < 600.dp) 2 else 4
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        tiles.chunked(perRow).forEach { row ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                row.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
-                            }
-                        }
-                        // Cómo es un entreno típico: duración, series y volumen medios
-                        if (stats.totalWorkouts > 0) {
-                            val n = stats.totalWorkouts
-                            Text(
-                                stringResource(R.string.stat_average_workout, formatDuration(stats.totalDurationSec / n), stats.totalSets / n, unit.formatVolume(stats.totalVolume / n)),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    com.bestrong.mobile.ui.components.ScreenTitle(stringResource(R.string.nav_profile))
+                    ProfileTabs(tab) { tab = it }
                 }
             }
-            item {
-                Card {
-                    Column(Modifier.padding(16.dp)) {
-                        SectionHeader(stringResource(R.string.weekly_volume, unit.label))
-                        val f = DateTimeFormatter.ofPattern("d/M")
-                        BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), unit.fromKg(it.volume)) })
-                    }
-                }
-            }
-            item {
-                Card {
-                    Column(Modifier.padding(16.dp)) {
-                        SectionHeader(stringResource(R.string.workouts_per_week))
-                        val f = DateTimeFormatter.ofPattern("d/M")
-                        BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), it.workouts.toDouble()) })
-                    }
-                }
-            }
-            item {
-                Card {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        SectionHeader(stringResource(R.string.sets_per_muscle))
-                        if (stats.muscles30d.isEmpty()) Text(stringResource(R.string.no_data_yet))
-                        val max = stats.muscles30d.values.maxOrNull() ?: 1.0
-                        stats.muscles30d.forEach { (m, sets) ->
-                            Row {
-                                Text(m.label(), Modifier.weight(0.4f), style = MaterialTheme.typography.bodySmall)
-                                LinearProgressIndicator(progress = { (sets / max).toFloat() }, modifier = Modifier.weight(0.45f).padding(top = 8.dp))
-                                Text(formatWeight(sets), Modifier.weight(0.15f).padding(start = 8.dp), style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    }
-                }
-            }
-            item { WeeklyMuscleMap(stats.weeklyMuscles, settings.weeklySetsTarget) { n -> vm.updateSettings { it.copy(weeklySetsTarget = n) } } }
-            item { MuscleTrendCard(stats.muscleTrend, settings.weeklySetsTarget) }
-            stats.year?.let { y -> item { YearInReviewCard(y) } }
-            item { WeekSummaryCard(advanced) }
-            item { TrainingLoadCard(advanced) }
-            if (advanced.dayParts.size >= 2) item { DayPartCard(advanced.dayParts) }
-            if (advanced.weekdays.size >= 2) item { WeekdayCard(advanced.weekdays) }
-            item { StrengthLevelsCard(advanced, settings.sex) { sex -> vm.updateSettings { it.copy(sex = sex) } } }
-            item { BalanceCard(advanced) }
-            item { MuscleRecoveryCard(advanced) }
-            item { AchievementsCard(advanced) }
-            item { RecordTimelineCard(advanced) }
-            item {
-                ToolsCard(
-                    onOneRm = { showOneRm = true },
-                    onScores = { showScores = true },
-                    onReport = { showReport = true },
-                    onShareWeek = {
-                        // Texto de los últimos 7 días para el entrenador (WhatsApp, correo…)
-                        vm.coachWeekText()?.let { text ->
-                            val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, text)
-                            context.startActivity(android.content.Intent.createChooser(send, null))
-                        }
-                    },
-                )
-            }
-            item {
-                Card {
-                    Column(Modifier.padding(16.dp)) {
-                        SectionHeader(stringResource(R.string.best_1rm))
-                        if (stats.topOneRepMax.isEmpty()) Text(stringResource(R.string.complete_sets_for_records))
-                        stats.topOneRepMax.forEach { pr ->
-                            ListItem(
-                                headlineContent = { Text(pr.exerciseName) },
-                                trailingContent = { Text(unit.format(pr.value, withUnit = true), fontWeight = FontWeight.Bold) },
-                                modifier = Modifier.clickable { onOpenExercise(pr.exerciseId) },
-                            )
-                        }
-                    }
-                }
-            }
-            item {
-                Card(onClick = onOpenMeasurements) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.measurements)) },
-                        supportingContent = {
-                            Text(measurements.firstOrNull()?.weightKg?.let { stringResource(R.string.last_weight, unit.format(it, withUnit = true)) } ?: stringResource(R.string.log_measurements))
-                        },
-                        trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
-                    )
-                }
-            }
-            item { BodyDataCard(settings, vm::updateSettings) }
-            item(span = { GridItemSpan(maxLineSpan) }) { AppearanceCard(settings, vm::updateSettings) }
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Card {
-                    Column(Modifier.padding(vertical = 8.dp)) {
-                        SectionHeader(stringResource(R.string.settings), Modifier.padding(horizontal = 16.dp))
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.weight_unit)) },
-                            trailingContent = {
-                                SingleChoiceSegmentedButtonRow {
-                                    WeightUnit.entries.forEachIndexed { i, u ->
-                                        SegmentedButton(
-                                            selected = settings.unit == u,
-                                            onClick = { vm.updateSettings { it.copy(unit = u) } },
-                                            shape = SegmentedButtonDefaults.itemShape(i, WeightUnit.entries.size),
-                                        ) { Text(u.label) }
-                                    }
-                                }
-                            },
+            if (tab == 0) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    // 4 en fila en el Fold desplegado; 2 × 2 en la pantalla exterior
+                    BoxWithConstraints {
+                        val tiles: List<Pair<String, String>> = listOf(
+                            stringResource(R.string.stat_workouts) to "${stats.totalWorkouts}",
+                            stringResource(R.string.stat_streak) to "🔥 ${stats.weeklyStreak}",
+                            stringResource(R.string.stat_total_volume) to unit.formatVolume(stats.totalVolume),
+                            stringResource(R.string.stat_time) to formatDuration(stats.totalDurationSec),
                         )
-                        SwitchItem(
-                            title = stringResource(R.string.progression_setting),
-                            body = stringResource(R.string.progression_setting_body),
-                            checked = settings.progressionEnabled,
-                        ) { v -> vm.updateSettings { it.copy(progressionEnabled = v) } }
-                        WarmupRestSetting(settings.warmupRestSeconds) { v -> vm.updateSettings { it.copy(warmupRestSeconds = v) } }
-                        SwitchItem(stringResource(R.string.rest_countdown), checked = settings.restCountdown) { v ->
-                            vm.updateSettings { it.copy(restCountdown = v) }
+                        val perRow = if (maxWidth < 600.dp) 2 else 4
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            tiles.chunked(perRow).forEach { row ->
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    row.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
+                                }
+                            }
+                            // Cómo es un entreno típico: duración, series y volumen medios
+                            if (stats.totalWorkouts > 0) {
+                                val n = stats.totalWorkouts
+                                Text(
+                                    stringResource(R.string.stat_average_workout, formatDuration(stats.totalDurationSec / n), stats.totalSets / n, unit.formatVolume(stats.totalVolume / n)),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
-                        SwitchItem(stringResource(R.string.vibrate_rest), checked = settings.vibrateOnRestEnd) { v ->
-                            vm.updateSettings { it.copy(vibrateOnRestEnd = v) }
+                    }
+                }
+                item {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                        Column(Modifier.padding(16.dp)) {
+                            SectionHeader(stringResource(R.string.weekly_volume, unit.label))
+                            val f = DateTimeFormatter.ofPattern("d/M")
+                            BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), unit.fromKg(it.volume)) })
                         }
-                        SwitchItem(stringResource(R.string.keep_screen_on), checked = settings.keepScreenOn) { v ->
-                            vm.updateSettings { it.copy(keepScreenOn = v) }
+                    }
+                }
+                item {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                        Column(Modifier.padding(16.dp)) {
+                            SectionHeader(stringResource(R.string.workouts_per_week))
+                            val f = DateTimeFormatter.ofPattern("d/M")
+                            BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), it.workouts.toDouble()) })
                         }
-                        SwitchItem(
-                            title = stringResource(R.string.one_handed),
-                            body = stringResource(R.string.one_handed_body),
-                            checked = settings.oneHanded,
-                        ) { v -> vm.updateSettings { it.copy(oneHanded = v) } }
-                        run {
-                            var partner by remember(settings.partnerName) { mutableStateOf(settings.partnerName) }
-                            // También al salir de la pantalla o al pasar la app a segundo plano (sin perder el foco)
-                            DisposableEffect(Unit) { onDispose { vm.commitPartnerName() } }
-                            androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_STOP) { vm.commitPartnerName() }
+                    }
+                }
+                item {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            SectionHeader(stringResource(R.string.sets_per_muscle))
+                            if (stats.muscles30d.isEmpty()) Text(stringResource(R.string.no_data_yet))
+                            val max = stats.muscles30d.values.maxOrNull() ?: 1.0
+                            stats.muscles30d.forEach { (m, sets) ->
+                                Row {
+                                    Text(m.label(), Modifier.weight(0.4f), style = MaterialTheme.typography.bodySmall)
+                                    LinearProgressIndicator(progress = { (sets / max).toFloat() }, modifier = Modifier.weight(0.45f).padding(top = 8.dp))
+                                    Text(formatWeight(sets), Modifier.weight(0.15f).padding(start = 8.dp), style = MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                        }
+                    }
+                }
+                item { WeeklyMuscleMap(stats.weeklyMuscles, settings.weeklySetsTarget) { n -> vm.updateSettings { it.copy(weeklySetsTarget = n) } } }
+                item { MuscleTrendCard(stats.muscleTrend, settings.weeklySetsTarget) }
+                stats.year?.let { y -> item { YearInReviewCard(y) } }
+                item { WeekSummaryCard(advanced) }
+                item { TrainingLoadCard(advanced) }
+                if (advanced.dayParts.size >= 2) item { DayPartCard(advanced.dayParts) }
+                if (advanced.weekdays.size >= 2) item { WeekdayCard(advanced.weekdays) }
+                item { StrengthLevelsCard(advanced, settings.sex) { sex -> vm.updateSettings { it.copy(sex = sex) } } }
+                item { BalanceCard(advanced) }
+                item { MuscleRecoveryCard(advanced) }
+                item { AchievementsCard(advanced) }
+                item { RecordTimelineCard(advanced) }
+                item {
+                    ToolsCard(
+                        onOneRm = { showOneRm = true },
+                        onScores = { showScores = true },
+                        onReport = { showReport = true },
+                        onShareWeek = {
+                            // Texto de los últimos 7 días para el entrenador (WhatsApp, correo…)
+                            vm.coachWeekText()?.let { text ->
+                                val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, text)
+                                context.startActivity(android.content.Intent.createChooser(send, null))
+                            }
+                        },
+                    )
+                }
+                item {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                        Column(Modifier.padding(16.dp)) {
+                            SectionHeader(stringResource(R.string.best_1rm))
+                            if (stats.topOneRepMax.isEmpty()) Text(stringResource(R.string.complete_sets_for_records))
+                            stats.topOneRepMax.forEach { pr ->
+                                ListItem(
+                                    headlineContent = { Text(pr.exerciseName) },
+                                    trailingContent = { Text(unit.format(pr.value, withUnit = true), fontWeight = FontWeight.Bold) },
+                                    modifier = Modifier.clickable { onOpenExercise(pr.exerciseId) },
+                                )
+                            }
+                        }
+                    }
+                }
+                item {
+                    Card(onClick = onOpenMeasurements) {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.measurements)) },
+                            supportingContent = {
+                                Text(measurements.firstOrNull()?.weightKg?.let { stringResource(R.string.last_weight, unit.format(it, withUnit = true)) } ?: stringResource(R.string.log_measurements))
+                            },
+                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
+                        )
+                    }
+                }
+            } else {
+                item { BodyDataCard(settings, vm::updateSettings) }
+                item(span = { GridItemSpan(maxLineSpan) }) { AppearanceCard(settings, vm::updateSettings) }
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                        Column(Modifier.padding(vertical = 8.dp)) {
+                            SectionHeader(stringResource(R.string.settings), Modifier.padding(horizontal = 16.dp))
                             ListItem(
-                                headlineContent = { Text(stringResource(R.string.partner_name)) },
-                                supportingContent = {
-                                    // El nombre se guarda con cada letra; su historial se renombra al terminar (Hecho o al
-                                    // salir del campo)
-                                    OutlinedTextField(
-                                        partner,
-                                        { partner = it.take(20); vm.setPartnerName(partner) },
-                                        placeholder = { Text(stringResource(R.string.partner_name_body)) },
-                                        singleLine = true,
-                                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
-                                        keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { vm.commitPartnerName() }),
-                                        modifier = Modifier.onFocusChanged { if (!it.isFocused) vm.commitPartnerName() },
-                                    )
+                                headlineContent = { Text(stringResource(R.string.weight_unit)) },
+                                trailingContent = {
+                                    SingleChoiceSegmentedButtonRow {
+                                        WeightUnit.entries.forEachIndexed { i, u ->
+                                            SegmentedButton(
+                                                selected = settings.unit == u,
+                                                onClick = { vm.updateSettings { it.copy(unit = u) } },
+                                                shape = SegmentedButtonDefaults.itemShape(i, WeightUnit.entries.size),
+                                            ) { Text(u.label) }
+                                        }
+                                    }
                                 },
                             )
-                        }
-                        SwitchItem(
-                            title = stringResource(R.string.media_controls),
-                            body = stringResource(R.string.media_controls_body),
-                            checked = settings.mediaControls,
-                        ) { v -> vm.updateSettings { it.copy(mediaControls = v) } }
-                        if (settings.mediaControls) MusicAppPicker(settings.musicApp) { pkg -> vm.updateSettings { it.copy(musicApp = pkg) } }
-                        SwitchItem(
-                            title = stringResource(R.string.voice_announcements),
-                            body = stringResource(R.string.voice_announcements_body),
-                            checked = settings.voiceAnnouncements,
-                        ) { v -> vm.updateSettings { it.copy(voiceAnnouncements = v) } }
-                        SwitchItem(
-                            title = stringResource(R.string.volume_keys),
-                            body = stringResource(R.string.volume_keys_body),
-                            checked = settings.volumeKeys,
-                        ) { v -> vm.updateSettings { it.copy(volumeKeys = v) } }
-                        val unlockTitle = stringResource(R.string.progress_unlock_title)
-                        SwitchItem(stringResource(R.string.progress_lock_setting), checked = settings.lockProgressPhotos) { v ->
-                            // Quitar el bloqueo pide la huella/PIN: si no, cualquiera con el móvil desbloqueado lo desactivaría
-                            if (v) {
-                                vm.updateSettings { it.copy(lockProgressPhotos = true) }
-                            } else {
-                                BiometricLock.authenticate(context, unlockTitle, onSuccess = { vm.updateSettings { it.copy(lockProgressPhotos = false) } })
+                            SwitchItem(
+                                title = stringResource(R.string.progression_setting),
+                                body = stringResource(R.string.progression_setting_body),
+                                checked = settings.progressionEnabled,
+                            ) { v -> vm.updateSettings { it.copy(progressionEnabled = v) } }
+                            WarmupRestSetting(settings.warmupRestSeconds) { v -> vm.updateSettings { it.copy(warmupRestSeconds = v) } }
+                            SwitchItem(stringResource(R.string.rest_countdown), checked = settings.restCountdown) { v ->
+                                vm.updateSettings { it.copy(restCountdown = v) }
                             }
-                        }
-                        SwitchItem(
-                            title = stringResource(R.string.dumbbell_total),
-                            body = stringResource(R.string.dumbbell_total_body),
-                            checked = settings.dumbbellTotal,
-                        ) { v -> vm.updateSettings { it.copy(dumbbellTotal = v) } }
-                        GymProfilesSection(
-                            settings = settings,
-                            onSelect = { id -> vm.updateSettings { s -> s.copy(gyms = s.gyms, activeGymId = id) } },
-                            onEdit = { editingGym = it },
-                            onAdd = { editingGym = GymProfile(name = "") },
-                        )
-                        SwitchItem(
-                            title = stringResource(R.string.hc_export),
-                            body = when {
-                                !vm.healthConnectAvailable -> stringResource(R.string.hc_unavailable)
-                                settings.healthConnectExport && !hcGranted -> stringResource(R.string.hc_missing_perms)
-                                settings.healthConnectExport && !hcComplete -> stringResource(R.string.hc_more_perms)
-                                else -> stringResource(R.string.hc_body)
-                            },
-                            checked = settings.healthConnectExport && hcGranted,
-                            enabled = vm.healthConnectAvailable,
-                        ) { on ->
-                            if (on && !hcGranted) {
-                                hcLauncher.launch(vm.healthConnectPermissions)
-                            } else {
-                                vm.updateSettings { it.copy(healthConnectExport = on) }
+                            SwitchItem(stringResource(R.string.vibrate_rest), checked = settings.vibrateOnRestEnd) { v ->
+                                vm.updateSettings { it.copy(vibrateOnRestEnd = v) }
                             }
-                        }
-                        if (settings.healthConnectExport && hcGranted && !hcComplete) {
-                            TextButton(onClick = { hcMoreLauncher.launch(vm.healthConnectPermissions) }, modifier = Modifier.padding(horizontal = 8.dp)) {
-                                Text(stringResource(R.string.hc_grant_more))
+                            SwitchItem(stringResource(R.string.keep_screen_on), checked = settings.keepScreenOn) { v ->
+                                vm.updateSettings { it.copy(keepScreenOn = v) }
                             }
-                        }
-                        if (vm.healthConnectAvailable) {
-                            ListItem(
-                                headlineContent = { Text(stringResource(R.string.hc_import_weight)) },
-                                supportingContent = { Text(stringResource(R.string.readiness_connect)) },
-                                // Los pesos de la báscula borrados aquí no vuelven al importar; con esto, sí
-                                trailingContent = { TextButton(onClick = vm::restoreIgnoredHealthWeights) { Text(stringResource(R.string.hc_restore_hidden)) } },
-                                modifier = Modifier.clickable { hcReadLauncher.launch(vm.healthReadPermissions) },
-                            )
-                        }
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.reminders)) },
-                            supportingContent = { Text(reminderSummary(settings)) },
-                            modifier = Modifier.clickable { showReminders = true },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.auto_backup)) },
-                            supportingContent = {
-                                Column {
-                                    AutoBackupStatus(settings)
-                                    if (settings.backupFolderUri != null) {
-                                        TextButton(onClick = vm::backupNow, contentPadding = PaddingValues(0.dp)) { Text(stringResource(R.string.notif_backup_now)) }
-                                    }
-                                }
-                            },
-                            trailingContent = {
-                                if (settings.backupFolderUri == null) {
-                                    TextButton(onClick = { folderLauncher.launch(null) }) { Text(stringResource(R.string.action_choose_folder)) }
+                            SwitchItem(
+                                title = stringResource(R.string.one_handed),
+                                body = stringResource(R.string.one_handed_body),
+                                checked = settings.oneHanded,
+                            ) { v -> vm.updateSettings { it.copy(oneHanded = v) } }
+                            run {
+                                var partner by remember(settings.partnerName) { mutableStateOf(settings.partnerName) }
+                                // También al salir de la pantalla o al pasar la app a segundo plano (sin perder el foco)
+                                DisposableEffect(Unit) { onDispose { vm.commitPartnerName() } }
+                                androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_STOP) { vm.commitPartnerName() }
+                                ListItem(
+                                    headlineContent = { Text(stringResource(R.string.partner_name)) },
+                                    supportingContent = {
+                                        // El nombre se guarda con cada letra; su historial se renombra al terminar (Hecho o al
+                                        // salir del campo)
+                                        OutlinedTextField(
+                                            partner,
+                                            { partner = it.take(20); vm.setPartnerName(partner) },
+                                            placeholder = { Text(stringResource(R.string.partner_name_body)) },
+                                            singleLine = true,
+                                            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
+                                            keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { vm.commitPartnerName() }),
+                                            modifier = Modifier.onFocusChanged { if (!it.isFocused) vm.commitPartnerName() },
+                                        )
+                                    },
+                                )
+                            }
+                            SwitchItem(
+                                title = stringResource(R.string.media_controls),
+                                body = stringResource(R.string.media_controls_body),
+                                checked = settings.mediaControls,
+                            ) { v -> vm.updateSettings { it.copy(mediaControls = v) } }
+                            if (settings.mediaControls) MusicAppPicker(settings.musicApp) { pkg -> vm.updateSettings { it.copy(musicApp = pkg) } }
+                            SwitchItem(
+                                title = stringResource(R.string.voice_announcements),
+                                body = stringResource(R.string.voice_announcements_body),
+                                checked = settings.voiceAnnouncements,
+                            ) { v -> vm.updateSettings { it.copy(voiceAnnouncements = v) } }
+                            SwitchItem(
+                                title = stringResource(R.string.volume_keys),
+                                body = stringResource(R.string.volume_keys_body),
+                                checked = settings.volumeKeys,
+                            ) { v -> vm.updateSettings { it.copy(volumeKeys = v) } }
+                            val unlockTitle = stringResource(R.string.progress_unlock_title)
+                            SwitchItem(stringResource(R.string.progress_lock_setting), checked = settings.lockProgressPhotos) { v ->
+                                // Quitar el bloqueo pide la huella/PIN: si no, cualquiera con el móvil desbloqueado lo desactivaría
+                                if (v) {
+                                    vm.updateSettings { it.copy(lockProgressPhotos = true) }
                                 } else {
-                                    TextButton(onClick = { vm.setBackupFolder(null) }) { Text(stringResource(R.string.action_disable)) }
+                                    BiometricLock.authenticate(context, unlockTitle, onSuccess = { vm.updateSettings { it.copy(lockProgressPhotos = false) } })
                                 }
-                            },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.restore_backup)) },
-                            supportingContent = { Text(stringResource(R.string.restore_backup_body)) },
-                            trailingContent = { TextButton(onClick = { restoreLauncher.launch(arrayOf("application/json", "application/octet-stream", "text/*")) }) { Text(stringResource(R.string.action_restore)) } },
-                        )
-                        // Con copia automática: la última de la carpeta, sin buscar el archivo
-                        if (settings.backupFolderUri != null) {
-                            ListItem(
-                                headlineContent = { Text(stringResource(R.string.restore_latest)) },
-                                trailingContent = { TextButton(onClick = vm::listAutoBackups) { Text(stringResource(R.string.action_restore)) } },
+                            }
+                            SwitchItem(
+                                title = stringResource(R.string.dumbbell_total),
+                                body = stringResource(R.string.dumbbell_total_body),
+                                checked = settings.dumbbellTotal,
+                            ) { v -> vm.updateSettings { it.copy(dumbbellTotal = v) } }
+                            GymProfilesSection(
+                                settings = settings,
+                                onSelect = { id -> vm.updateSettings { s -> s.copy(gyms = s.gyms, activeGymId = id) } },
+                                onEdit = { editingGym = it },
+                                onAdd = { editingGym = GymProfile(name = "") },
                             )
-                            AutoBackupPicker(vm)
+                            SwitchItem(
+                                title = stringResource(R.string.hc_export),
+                                body = when {
+                                    !vm.healthConnectAvailable -> stringResource(R.string.hc_unavailable)
+                                    settings.healthConnectExport && !hcGranted -> stringResource(R.string.hc_missing_perms)
+                                    settings.healthConnectExport && !hcComplete -> stringResource(R.string.hc_more_perms)
+                                    else -> stringResource(R.string.hc_body)
+                                },
+                                checked = settings.healthConnectExport && hcGranted,
+                                enabled = vm.healthConnectAvailable,
+                            ) { on ->
+                                if (on && !hcGranted) {
+                                    hcLauncher.launch(vm.healthConnectPermissions)
+                                } else {
+                                    vm.updateSettings { it.copy(healthConnectExport = on) }
+                                }
+                            }
+                            if (settings.healthConnectExport && hcGranted && !hcComplete) {
+                                TextButton(onClick = { hcMoreLauncher.launch(vm.healthConnectPermissions) }, modifier = Modifier.padding(horizontal = 8.dp)) {
+                                    Text(stringResource(R.string.hc_grant_more))
+                                }
+                            }
+                            if (vm.healthConnectAvailable) {
+                                ListItem(
+                                    headlineContent = { Text(stringResource(R.string.hc_import_weight)) },
+                                    supportingContent = { Text(stringResource(R.string.readiness_connect)) },
+                                    // Los pesos de la báscula borrados aquí no vuelven al importar; con esto, sí
+                                    trailingContent = { TextButton(onClick = vm::restoreIgnoredHealthWeights) { Text(stringResource(R.string.hc_restore_hidden)) } },
+                                    modifier = Modifier.clickable { hcReadLauncher.launch(vm.healthReadPermissions) },
+                                )
+                            }
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.reminders)) },
+                                supportingContent = { Text(reminderSummary(settings)) },
+                                modifier = Modifier.clickable { showReminders = true },
+                            )
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.auto_backup)) },
+                                supportingContent = {
+                                    Column {
+                                        AutoBackupStatus(settings)
+                                        if (settings.backupFolderUri != null) {
+                                            TextButton(onClick = vm::backupNow, contentPadding = PaddingValues(0.dp)) { Text(stringResource(R.string.notif_backup_now)) }
+                                        }
+                                    }
+                                },
+                                trailingContent = {
+                                    if (settings.backupFolderUri == null) {
+                                        TextButton(onClick = { folderLauncher.launch(null) }) { Text(stringResource(R.string.action_choose_folder)) }
+                                    } else {
+                                        TextButton(onClick = { vm.setBackupFolder(null) }) { Text(stringResource(R.string.action_disable)) }
+                                    }
+                                },
+                            )
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.restore_backup)) },
+                                supportingContent = { Text(stringResource(R.string.restore_backup_body)) },
+                                trailingContent = { TextButton(onClick = { restoreLauncher.launch(arrayOf("application/json", "application/octet-stream", "text/*")) }) { Text(stringResource(R.string.action_restore)) } },
+                            )
+                            // Con copia automática: la última de la carpeta, sin buscar el archivo
+                            if (settings.backupFolderUri != null) {
+                                ListItem(
+                                    headlineContent = { Text(stringResource(R.string.restore_latest)) },
+                                    trailingContent = { TextButton(onClick = vm::listAutoBackups) { Text(stringResource(R.string.action_restore)) } },
+                                )
+                                AutoBackupPicker(vm)
+                            }
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.csv_export)) },
+                                supportingContent = { Text(stringResource(R.string.csv_export_body)) },
+                                trailingContent = { TextButton(onClick = { exportLauncher.launch("bestrong-${java.time.LocalDate.now()}.csv") }) { Text(stringResource(R.string.action_export)) } },
+                            )
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.csv_import)) },
+                                supportingContent = { Text(stringResource(R.string.csv_import_body)) },
+                                trailingContent = { TextButton(onClick = { importLauncher.launch(arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) }) { Text(stringResource(R.string.action_import)) } },
+                            )
+                            DataToolsSection(vm)
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.help)) },
+                                supportingContent = { Text(stringResource(R.string.help_body)) },
+                                modifier = Modifier.clickable { showHelp = true },
+                            )
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.about_title)) },
+                                supportingContent = { Text(stringResource(R.string.about_subtitle)) },
+                                modifier = Modifier.clickable { showAbout = true },
+                            )
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.privacy)) },
+                                supportingContent = { Text(stringResource(R.string.privacy_body)) },
+                                modifier = Modifier.clickable { context.startActivity(AppIntents.privacy(context)) },
+                            )
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.watch_sync)) },
+                                supportingContent = { Text(stringResource(R.string.watch_sync_body)) },
+                                trailingContent = { TextButton(onClick = vm::syncWatchNow) { Text(stringResource(R.string.action_sync)) } },
+                            )
                         }
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.csv_export)) },
-                            supportingContent = { Text(stringResource(R.string.csv_export_body)) },
-                            trailingContent = { TextButton(onClick = { exportLauncher.launch("bestrong-${java.time.LocalDate.now()}.csv") }) { Text(stringResource(R.string.action_export)) } },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.csv_import)) },
-                            supportingContent = { Text(stringResource(R.string.csv_import_body)) },
-                            trailingContent = { TextButton(onClick = { importLauncher.launch(arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) }) { Text(stringResource(R.string.action_import)) } },
-                        )
-                        DataToolsSection(vm)
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.help)) },
-                            supportingContent = { Text(stringResource(R.string.help_body)) },
-                            modifier = Modifier.clickable { showHelp = true },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.about_title)) },
-                            supportingContent = { Text(stringResource(R.string.about_subtitle)) },
-                            modifier = Modifier.clickable { showAbout = true },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.privacy)) },
-                            supportingContent = { Text(stringResource(R.string.privacy_body)) },
-                            modifier = Modifier.clickable { context.startActivity(AppIntents.privacy(context)) },
-                        )
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.watch_sync)) },
-                            supportingContent = { Text(stringResource(R.string.watch_sync_body)) },
-                            trailingContent = { TextButton(onClick = vm::syncWatchNow) { Text(stringResource(R.string.action_sync)) } },
-                        )
                     }
                 }
             }
@@ -565,4 +579,26 @@ private fun AutoBackupPicker(vm: ProfileViewModel) {
         },
         confirmButton = { TextButton(onClick = { vm.autoBackups.value = null }) { Text(stringResource(R.string.action_cancel)) } },
     )
+}
+
+/** Selector de las dos pestañas de Perfil, en píldora: la elegida, rellena con el degradado de marca. */
+@Composable
+private fun ProfileTabs(selected: Int, onSelect: (Int) -> Unit) {
+    val labels = listOf(stringResource(R.string.profile_progress), stringResource(R.string.settings))
+    Row(
+        Modifier.fillMaxWidth().then(Modifier.clip(androidx.compose.foundation.shape.CircleShape)).background(MaterialTheme.colorScheme.surfaceContainer).padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        labels.forEachIndexed { i, label ->
+            val on = i == selected
+            androidx.compose.foundation.layout.Box(
+                Modifier.weight(1f).height(44.dp).clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(if (on) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.Transparent))
+                    .selectable(selected = on, role = androidx.compose.ui.semantics.Role.Tab) { onSelect(i) },
+                contentAlignment = androidx.compose.ui.Alignment.Center,
+            ) {
+                Text(label, fontWeight = FontWeight.Bold, color = if (on) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
 }

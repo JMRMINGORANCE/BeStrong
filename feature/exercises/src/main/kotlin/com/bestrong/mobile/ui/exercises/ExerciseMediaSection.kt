@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,15 +64,13 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise) {
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         image?.let { img ->
-            Card(Modifier.fillMaxWidth()) {
-                // La animación de internet sobre la miniatura de la app: sin conexión se ve al menos la postura
+            com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                // La animación que va en la app (sin conexión); si no la hay, la de internet
                 val thumb = remember(exercise.id) { com.bestrong.mobile.ui.components.ExerciseImageIndex.thumb(context, exercise.id) }
                 androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().height(220.dp).background(androidx.compose.ui.graphics.Color.White)) {
-                    if (thumb != null && thumb != img.url) {
-                        AsyncImage(model = thumb, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.matchParentSize())
-                    }
                     AsyncImage(
-                        model = img.url,
+                        // La de la app, sin fundido (llega al instante)
+                        model = coil.request.ImageRequest.Builder(context).data(thumb ?: img.url).crossfade(thumb == null).build(),
                         contentDescription = stringResource(R.string.exercise_image_desc, img.wgerName.ifBlank { exercise.name }),
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.matchParentSize(),

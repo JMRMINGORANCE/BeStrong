@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -73,6 +72,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -484,7 +484,7 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
         }
         val muscles = WorkoutStats.setsPerMuscle(listOf(w.copy(finishedAtEpochMs = 1)), 0)
         if (muscles.isNotEmpty()) {
-            Card(Modifier.fillMaxWidth()) {
+            com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                 Column(Modifier.padding(12.dp)) {
                     Text(stringResource(R.string.muscles_worked), fontWeight = FontWeight.SemiBold)
                     muscles.entries.take(6).forEach { (m, sets) ->
@@ -500,7 +500,7 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
         w.exercises.firstOrNull { we -> we.sets.any { !it.completed } }?.let { we ->
             val set = we.sets.first { !it.completed }
             val prev = previous(we.exercise.id).getOrNull(we.sets.indexOf(set))
-            Card(Modifier.fillMaxWidth()) {
+            com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                 Column(Modifier.padding(12.dp)) {
                     Text(stringResource(R.string.next_up), style = MaterialTheme.typography.labelMedium)
                     Text(we.exercise.displayName(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -591,24 +591,28 @@ private fun ExerciseCard(
     var cardHeight by remember { mutableIntStateOf(1) }
     val dragHint = stringResource(R.string.drag_to_reorder)
 
+    // Cada ejercicio en su bloque redondeado (las superseries, juntas y con su barra de color)
     Row(
-        Modifier.fillMaxWidth().height(IntrinsicSize.Min)
+        Modifier.fillMaxWidth()
+            .padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = if (nextInSuperset) 0.dp else 6.dp)
+            .height(IntrinsicSize.Min)
             .onSizeChanged { cardHeight = it.height.coerceAtLeast(1) }
             .graphicsLayer { translationY = dragY }
-            .zIndex(if (dragY != 0f) 1f else 0f),
+            .zIndex(if (dragY != 0f) 1f else 0f)
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surfaceContainer),
     ) {
         // Barra lateral de color para las superseries
         Box(Modifier.width(4.dp).fillMaxHeight().background(supersetColor ?: Color.Transparent))
-        Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
+        Column(Modifier.weight(1f).padding(vertical = 10.dp)) {
             Row(Modifier.padding(start = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                com.bestrong.mobile.ui.components.ExerciseThumb(we.exercise, 44.dp, Modifier.padding(end = 10.dp))
+                com.bestrong.mobile.ui.components.ExerciseThumb(we.exercise, 54.dp, Modifier.padding(end = 12.dp))
                 Column(Modifier.weight(1f)) {
                     supersetLabel?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = supersetColor ?: Color.Unspecified, fontWeight = FontWeight.Bold) }
                     Text(
                         we.exercise.displayName(),
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier
                             .semantics { heading(); stateDescription = dragHint }
                             .pointerInput(index, count) {
@@ -802,7 +806,6 @@ private fun ExerciseCard(
             ) { Text(stringResource(R.string.add_set)) }
         }
     }
-    if (!nextInSuperset) HorizontalDivider()
 
     if (editRest) {
         val options = listOf(0, 30, 45, 60, 90, 120, 150, 180, 240, 300)

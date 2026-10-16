@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,7 +35,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.decode.BitmapFactoryDecoder
 import coil.request.ImageRequest
 import com.bestrong.core.model.Exercise
 import com.bestrong.mobile.shared.R
@@ -117,8 +117,8 @@ fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Mod
         if (!loaded) Icon(Icons.Default.FitnessCenter, null, Modifier.size(size * 0.5f), tint = MaterialTheme.colorScheme.onPrimaryContainer)
         if (thumb != null) {
             AsyncImage(
-                model = ImageRequest.Builder(context).data(thumb).decoderFactory(BitmapFactoryDecoder.Factory())
-                    // La de la app llega al instante: el fundido solo para la de internet
+                model = ImageRequest.Builder(context).data(thumb)
+                    // La de la app llega al instante (y animada): el fundido solo para la de internet
                     .crossfade(thumb !is String || !thumb.startsWith("file:")).build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -127,18 +127,15 @@ fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Mod
             )
         }
     }
-    if (big && model != null) {
+    if (big && (thumb ?: model) != null) {
         AlertDialog(
             onDismissRequest = { big = false },
             title = { Text(exercise.displayName()) },
             text = {
-                // Animada (GIF) en grande, para ver la técnica; debajo la miniatura, por si no hay conexión
+                // La animación en grande, para ver la técnica (la de la app no necesita conexión)
                 Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(16.dp)).background(androidx.compose.ui.graphics.Color.White)) {
-                    if (thumb != null && thumb != model) {
-                        AsyncImage(model = thumb, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.matchParentSize())
-                    }
                     AsyncImage(
-                        model = model,
+                        model = ImageRequest.Builder(context).data(thumb ?: model).crossfade(thumb == null).build(),
                         contentDescription = stringResource(R.string.exercise_image_desc, exercise.displayName()),
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.matchParentSize(),
@@ -172,6 +169,38 @@ fun ExerciseThumbStrip(exercises: List<Exercise>, size: Dp = 40.dp, max: Int = 5
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.offset(x = -(size * 0.22f) * (shown.size - 1) + 6.dp),
+            )
+        }
+    }
+}
+
+/**
+ * La animación del ejercicio ocupando todo [modifier] (para tarjetas grandes); sin imagen, el icono sobre un
+ * degradado suave.
+ */
+@Composable
+fun ExerciseImage(exercise: Exercise, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val thumb = remember(exercise.id) { ExerciseImageIndex.thumb(context, exercise.id) }
+    var loaded by remember(exercise.id) { mutableStateOf(false) }
+    Box(
+        modifier.background(
+            if (loaded) {
+                androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.White)
+            } else {
+                Brush.linearGradient(listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainerHighest))
+            },
+        ),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (!loaded) Icon(Icons.Default.FitnessCenter, null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+        if (thumb != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(context).data(thumb).crossfade(thumb !is String || !thumb.startsWith("file:")).build(),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                onSuccess = { loaded = true },
+                modifier = Modifier.matchParentSize().padding(6.dp),
             )
         }
     }

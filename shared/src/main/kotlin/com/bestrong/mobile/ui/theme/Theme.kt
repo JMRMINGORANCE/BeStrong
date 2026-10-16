@@ -152,7 +152,7 @@ private fun brandLight(accent: Accent): ColorScheme {
 
 /** Esquinas generosas: tarjetas de 24 dp, diálogos de 32 y chips/botones redondeados. */
 private val BeStrongShapes = androidx.compose.material3.Shapes(
-    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
     small = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
     medium = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
     large = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),

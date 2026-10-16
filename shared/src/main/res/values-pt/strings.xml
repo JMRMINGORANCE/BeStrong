@@ -64,7 +64,6 @@
     <string name="all">Todos</string>
     <string name="amoled">Preto AMOLED</string>
     <string name="amoled_body">Fundo preto puro no modo escuro: poupa bateria no Fold</string>
-    <string name="and_n_more">e mais %1$d…</string>
     <string name="app_name">BeStrong</string>
     <string name="appearance">Aparência e acessibilidade</string>
     <string name="auto_backup">Cópia de segurança semanal</string>
@@ -285,7 +284,6 @@
     <string name="help_body">Glossário, perguntas frequentes, tutorial e novidades</string>
     <string name="high_contrast">Alto contraste</string>
     <string name="high_contrast_body">Textos e contornos mais marcados</string>
-    <string name="history_card_detail">%1$s · %2$s · %3$d séries</string>
     <string name="history_edit">Editar treino</string>
     <string name="history_edit_done">Terminar edição</string>
     <string name="history_edit_hint">Toca numa série para a corrigir ou eliminar. Os recordes são recalculados.</string>
@@ -307,7 +305,6 @@
     <string name="home_no_routines">Cria a tua primeira rotina (ex.: Push / Pull / Legs) ou guarda um treino como rotina ao terminá-lo.</string>
     <string name="home_on_watch">No relógio</string>
     <string name="home_programs">Programas</string>
-    <string name="home_start">Começar</string>
     <string name="import_done">%1$s: %2$d treinos importados</string>
     <string name="import_error">Erro ao importar: %1$s</string>
     <string name="import_existing"> (%1$d já existiam)</string>
@@ -780,10 +777,8 @@
     <string name="watch_sync">Sincronizar com o Galaxy Watch</string>
     <string name="watch_sync_body">Enviar agora rotinas e histórico para o relógio</string>
     <string name="week_adherence">Regularidade nas últimas semanas: %1$d%%</string>
-    <string name="week_goal_less">Baixar objetivo semanal</string>
-    <string name="week_goal_more">Subir objetivo semanal</string>
     <string name="week_records">%1$d recordes esta semana</string>
-    <string name="week_sessions">Esta semana: %1$d de %2$d sessões</string>
+    <string name="week_sessions">%1$d de %2$d sessões</string>
     <string name="week_summary">Resumo semanal</string>
     <string name="week_summary_line">%1$d treinos · %2$s · %3$d séries (%4$s efetivas)</string>
     <string name="week_vs_last">%1$s de volume face à semana passada</string>
@@ -1214,4 +1209,22 @@
     <string name="guided_resume">Continuar</string>
     <string name="plateau_not_now">Agora não</string>
     <string name="rest_countdown">Contagem 3-2-1 no fim do descanso</string>
+    <string name="quick_repeat">Repetir</string>
+    <string name="week_goal_title">Meta semanal</string>
+    <string name="week_title">Esta semana</string>
+    <string name="routine_new_short">Nova</string>
+    <plurals name="exercise_count">
+        <item quantity="one">%1$d exercício</item>
+        <item quantity="other">%1$d exercícios</item>
+    </plurals>
+    <string name="history_workouts">Treinos</string>
+    <plurals name="workout_count">
+        <item quantity="one">%1$d treino</item>
+        <item quantity="other">%1$d treinos</item>
+    </plurals>
+    <plurals name="history_sets_done">
+        <item quantity="one">%1$d série</item>
+        <item quantity="other">%1$d séries</item>
+    </plurals>
+    <string name="profile_progress">Progresso</string>
 </resources>

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -45,7 +44,7 @@ fun YearInReviewCard(y: YearSummary) {
         }
     }
     val title = stringResource(R.string.year_title, y.year)
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(title)
             lines.forEachIndexed { i, line ->

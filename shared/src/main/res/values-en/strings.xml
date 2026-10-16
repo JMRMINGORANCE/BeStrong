@@ -64,7 +64,6 @@
     <string name="all">All</string>
     <string name="amoled">AMOLED black</string>
     <string name="amoled_body">Pure black background in dark mode: saves battery on the Fold</string>
-    <string name="and_n_more">and %1$d more…</string>
     <string name="app_name">BeStrong</string>
     <string name="appearance">Appearance and accessibility</string>
     <string name="auto_backup">Weekly backup</string>
@@ -285,7 +284,6 @@
     <string name="help_body">Glossary, FAQ, tutorial and what’s new</string>
     <string name="high_contrast">High contrast</string>
     <string name="high_contrast_body">Stronger text and borders</string>
-    <string name="history_card_detail">%1$s · %2$s · %3$d sets</string>
     <string name="history_edit">Edit workout</string>
     <string name="history_edit_done">Finish editing</string>
     <string name="history_edit_hint">Tap a set to fix or delete it. Records are recalculated.</string>
@@ -307,7 +305,6 @@
     <string name="home_no_routines">Create your first routine (e.g. Push / Pull / Legs) or save a workout as a routine when you finish it.</string>
     <string name="home_on_watch">On watch</string>
     <string name="home_programs">Programs</string>
-    <string name="home_start">Start</string>
     <string name="import_done">%1$s: %2$d workouts imported</string>
     <string name="import_error">Import failed: %1$s</string>
     <string name="import_existing"> (%1$d already existed)</string>
@@ -780,10 +777,8 @@
     <string name="watch_sync">Sync with Galaxy Watch</string>
     <string name="watch_sync_body">Send routines and history to the watch now</string>
     <string name="week_adherence">Consistency over recent weeks: %1$d%%</string>
-    <string name="week_goal_less">Lower weekly goal</string>
-    <string name="week_goal_more">Raise weekly goal</string>
     <string name="week_records">%1$d records this week</string>
-    <string name="week_sessions">This week: %1$d of %2$d sessions</string>
+    <string name="week_sessions">%1$d of %2$d sessions</string>
     <string name="week_summary">Weekly summary</string>
     <string name="week_summary_line">%1$d workouts · %2$s · %3$d sets (%4$s effective)</string>
     <string name="week_vs_last">%1$s volume vs last week</string>
@@ -1214,4 +1209,22 @@
     <string name="guided_resume">Resume</string>
     <string name="plateau_not_now">Not now</string>
     <string name="rest_countdown">3-2-1 countdown at the end of rest</string>
+    <string name="quick_repeat">Repeat</string>
+    <string name="week_goal_title">Weekly goal</string>
+    <string name="week_title">This week</string>
+    <string name="routine_new_short">New</string>
+    <plurals name="exercise_count">
+        <item quantity="one">%1$d exercise</item>
+        <item quantity="other">%1$d exercises</item>
+    </plurals>
+    <string name="history_workouts">Workouts</string>
+    <plurals name="workout_count">
+        <item quantity="one">%1$d workout</item>
+        <item quantity="other">%1$d workouts</item>
+    </plurals>
+    <plurals name="history_sets_done">
+        <item quantity="one">%1$d set</item>
+        <item quantity="other">%1$d sets</item>
+    </plurals>
+    <string name="profile_progress">Progress</string>
 </resources>

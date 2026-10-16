@@ -18,7 +18,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -232,7 +231,7 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
                 OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.prog_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             }
             itemsIndexed(days) { dayIndex, day ->
-                Card(Modifier.fillMaxWidth()) {
+                com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             OutlinedTextField(day.name, { days[dayIndex] = day.copy(name = it) }, label = { Text(stringResource(R.string.prog_day_name)) }, singleLine = true, modifier = Modifier.weight(1f))

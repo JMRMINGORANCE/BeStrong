@@ -64,7 +64,6 @@
     <string name="all">Tots</string>
     <string name="amoled">Negre AMOLED</string>
     <string name="amoled_body">Fons negre pur en mode fosc: estalvia bateria al Fold</string>
-    <string name="and_n_more">i %1$d més…</string>
     <string name="app_name">BeStrong</string>
     <string name="appearance">Aparença i accessibilitat</string>
     <string name="auto_backup">Còpia de seguretat setmanal</string>
@@ -285,7 +284,6 @@
     <string name="help_body">Glossari, preguntes freqüents, tutorial i novetats</string>
     <string name="high_contrast">Alt contrast</string>
     <string name="high_contrast_body">Textos i vores més marcats</string>
-    <string name="history_card_detail">%1$s · %2$s · %3$d sèries</string>
     <string name="history_edit">Editar entrenament</string>
     <string name="history_edit_done">Acabar l’edició</string>
     <string name="history_edit_hint">Toca una sèrie per corregir-la o esborrar-la. Els rècords es recalculen.</string>
@@ -307,7 +305,6 @@
     <string name="home_no_routines">Crea la teva primera rutina (p. ex. Push / Pull / Cama) o desa un entrenament com a rutina en acabar-lo.</string>
     <string name="home_on_watch">Al rellotge</string>
     <string name="home_programs">Programes</string>
-    <string name="home_start">Començar</string>
     <string name="import_done">%1$s: %2$d entrenaments importats</string>
     <string name="import_error">Error en importar: %1$s</string>
     <string name="import_existing"> (%1$d ja existien)</string>
@@ -780,10 +777,8 @@
     <string name="watch_sync">Sincronitzar amb Galaxy Watch</string>
     <string name="watch_sync_body">Envia rutines i historial al rellotge ara</string>
     <string name="week_adherence">Constància de les últimes setmanes: %1$d %%</string>
-    <string name="week_goal_less">Baixar objectiu setmanal</string>
-    <string name="week_goal_more">Pujar objectiu setmanal</string>
     <string name="week_records">%1$d rècords aquesta setmana</string>
-    <string name="week_sessions">Aquesta setmana: %1$d de %2$d sessions</string>
+    <string name="week_sessions">%1$d de %2$d sessions</string>
     <string name="week_summary">Resum de la setmana</string>
     <string name="week_summary_line">%1$d entrenaments · %2$s · %3$d sèries (%4$s efectives)</string>
     <string name="week_vs_last">%1$s de volum respecte a la setmana passada</string>
@@ -1214,4 +1209,22 @@
     <string name="guided_resume">Continuar</string>
     <string name="plateau_not_now">Ara no</string>
     <string name="rest_countdown">Compte enrere 3-2-1 al final del descans</string>
+    <string name="quick_repeat">Repetir</string>
+    <string name="week_goal_title">Objectiu setmanal</string>
+    <string name="week_title">Aquesta setmana</string>
+    <string name="routine_new_short">Nova</string>
+    <plurals name="exercise_count">
+        <item quantity="one">%1$d exercici</item>
+        <item quantity="other">%1$d exercicis</item>
+    </plurals>
+    <string name="history_workouts">Entrenaments</string>
+    <plurals name="workout_count">
+        <item quantity="one">%1$d entrenament</item>
+        <item quantity="other">%1$d entrenaments</item>
+    </plurals>
+    <plurals name="history_sets_done">
+        <item quantity="one">%1$d sèrie</item>
+        <item quantity="other">%1$d sèries</item>
+    </plurals>
+    <string name="profile_progress">Progrés</string>
 </resources>

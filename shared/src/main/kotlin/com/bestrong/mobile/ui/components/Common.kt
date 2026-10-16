@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,6 +28,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.ZoneId
@@ -54,23 +57,95 @@ fun formatShortDate(epochMs: Long): String =
     shortDateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
 
 /**
- * Cabecera de sección: una barra corta del color de acento y el título en mayúsculas pequeñas, como las secciones de
- * un marcador.
+ * Cabecera de sección: título limpio, sin adornos, y una acción opcional a la derecha («+ Nueva», «Ver todo»).
  */
 @Composable
-fun SectionHeader(text: String, modifier: Modifier = Modifier) {
-    Row(modifier.padding(top = 12.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            Modifier.size(width = 4.dp, height = 18.dp).clip(RoundedCornerShape(2.dp))
-                .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary))),
-        )
+fun SectionHeader(text: String, modifier: Modifier = Modifier, large: Boolean = false, action: (@Composable () -> Unit)? = null) {
+    // Grande entre bloques de la pantalla; dentro de una tarjeta, más discreto
+    Row(modifier.fillMaxWidth().padding(top = if (large) 16.dp else 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(
             text,
-            style = MaterialTheme.typography.titleMedium,
+            style = if (large) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(start = 10.dp).semantics { heading() },
+            modifier = Modifier.weight(1f).semantics { heading() },
         )
+        action?.invoke()
+    }
+}
+
+/** Título grande de cada pestaña: un antetítulo pequeño encima (la fecha, un resumen) y las acciones a la derecha. */
+@Composable
+fun ScreenTitle(title: String, modifier: Modifier = Modifier, overline: String? = null, actions: @Composable RowScope.() -> Unit = {}) {
+    Row(modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp), verticalAlignment = Alignment.Bottom) {
+        Column(Modifier.weight(1f)) {
+            overline?.let {
+                Text(it.uppercase(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            }
+            Text(title, style = MaterialTheme.typography.displaySmall, modifier = Modifier.semantics { heading() })
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, content = actions)
+    }
+}
+
+/** Contenedor limpio: esquinas grandes y un color de superficie suave, sin bordes ni sombras. */
+@Composable
+fun Panel(
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    contentPadding: Dp = 18.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val shape = MaterialTheme.shapes.large
+    val base = modifier.fillMaxWidth().clip(shape).background(MaterialTheme.colorScheme.surfaceContainer)
+    Column(
+        (if (onClick != null) base.clickable(onClick = onClick) else base).padding(contentPadding),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        content = content,
+    )
+}
+
+/** Acceso rápido: icono en un círculo de color y la etiqueta debajo; [filled] para el principal. */
+@Composable
+fun QuickAction(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier, filled: Boolean = false) {
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        modifier.clip(MaterialTheme.shapes.large)
+            .background(if (filled) brandGradient() else androidx.compose.ui.graphics.SolidColor(scheme.surfaceContainer))
+            .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+    ) {
+        Box(
+            Modifier.size(44.dp).clip(androidx.compose.foundation.shape.CircleShape)
+                .background(if (filled) scheme.surfaceContainerLowest.copy(alpha = 0.25f) else scheme.primary.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            androidx.compose.material3.Icon(icon, null, tint = if (filled) scheme.onPrimary else scheme.primary)
+        }
+        Text(
+            label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = if (filled) scheme.onPrimary else scheme.onSurface,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+/** Dato pequeño en una píldora («6 ejercicios», «≈ 45 min»). */
+@Composable
+fun MetaPill(text: String, modifier: Modifier = Modifier, icon: ImageVector? = null) {
+    Row(
+        modifier.clip(androidx.compose.foundation.shape.CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .padding(horizontal = 10.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        icon?.let { androidx.compose.material3.Icon(it, null, Modifier.size(14.dp).padding(end = 2.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+        Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -144,4 +219,31 @@ fun EmptyState(icon: ImageVector, title: String, subtitle: String, modifier: Mod
             )
         }
     }
+}
+
+/** Buscador en píldora, sin borde: el mismo en todas las pantallas. */
+@Composable
+fun SearchPill(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    modifier: Modifier = Modifier,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    androidx.compose.material3.TextField(
+        value = value,
+        onValueChange = onValueChange,
+        leadingIcon = { androidx.compose.material3.Icon(Icons.Default.Search, null) },
+        trailingIcon = trailing,
+        placeholder = { Text(placeholder) },
+        singleLine = true,
+        shape = androidx.compose.foundation.shape.CircleShape,
+        colors = androidx.compose.material3.TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            focusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+            unfocusedIndicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+        ),
+        modifier = modifier.fillMaxWidth(),
+    )
 }

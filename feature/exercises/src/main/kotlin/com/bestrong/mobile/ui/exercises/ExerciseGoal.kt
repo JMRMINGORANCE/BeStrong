@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -49,7 +48,7 @@ fun ExerciseGoalCard(vm: ExercisesViewModel, s: ExerciseDetailState) {
     val show = goalFormatter(tracking, factor)
     if (editing) GoalEditor(vm, s, goal, factor) { editing = false }
     val best = s.goalPoints.maxOfOrNull { it.second } ?: 0.0
-    Card(Modifier.fillMaxWidth()) {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.goal_title), fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))

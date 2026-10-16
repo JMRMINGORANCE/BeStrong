@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -42,7 +41,7 @@ fun BodyDataCard(settings: UserSettings, onUpdate: ((UserSettings) -> UserSettin
     // Cambio desde fuera (ajustes cargados tarde, copia restaurada)
     LaunchedEffect(settings.birthYear) { if (settings.birthYear != null && validYear(year) != settings.birthYear) year = settings.birthYear.toString() }
     LaunchedEffect(settings.heightCm) { if (settings.heightCm != null && validHeight(height) != settings.heightCm) height = settings.heightCm.toString() }
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(stringResource(R.string.body_data))
             Text(stringResource(R.string.body_data_body), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

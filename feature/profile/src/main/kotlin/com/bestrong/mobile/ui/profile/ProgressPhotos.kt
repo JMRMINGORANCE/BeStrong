@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -65,7 +64,7 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
     var toDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
     val unlockTitle = stringResource(R.string.progress_unlock_title)
 
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(stringResource(R.string.progress_photos))
             Text(stringResource(R.string.progress_photos_locked), style = MaterialTheme.typography.bodySmall)

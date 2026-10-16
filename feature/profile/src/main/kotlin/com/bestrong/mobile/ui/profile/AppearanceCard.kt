@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +37,7 @@ fun AppearanceCard(settings: UserSettings, onUpdate: ((UserSettings) -> UserSett
     val a = settings.appearance
     fun setA(block: (Appearance) -> Appearance) = onUpdate { it.copy(appearance = block(it.appearance)) }
     val context = LocalContext.current
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(vertical = 8.dp)) {
             SectionHeader(stringResource(R.string.appearance), Modifier.padding(horizontal = 16.dp))
             Chips(

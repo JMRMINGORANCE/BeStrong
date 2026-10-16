@@ -3,6 +3,7 @@ package com.bestrong.mobile
 import android.os.Looper
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -44,5 +45,9 @@ class TabsScreenshotTest {
             settle()
             shot(name)
         }
+        // La pestaña de ajustes de Perfil
+        compose.onNodeWithText("Ajustes").performClick()
+        settle()
+        shot("dark_settings")
     }
 }

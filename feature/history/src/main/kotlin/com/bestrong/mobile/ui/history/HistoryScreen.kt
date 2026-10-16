@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.history
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -19,11 +21,9 @@ import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,7 +31,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -54,6 +53,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -143,48 +143,44 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
             listPane = {
                 AnimatedPane {
                     Column(Modifier.fillMaxSize()) {
-                        TopAppBar(
-                            title = { Text(stringResource(R.string.nav_history)) },
-                            actions = {
-                                IconButton(onClick = {
-                                    logStart = null
-                                    logging = true
-                                }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
-                            },
-                        )
+                        com.bestrong.mobile.ui.components.ScreenTitle(
+                            stringResource(R.string.nav_history),
+                            Modifier.padding(horizontal = 20.dp),
+                            overline = androidx.compose.ui.res.pluralStringResource(R.plurals.workout_count, history.size, history.size),
+                        ) {
+                            androidx.compose.material3.FilledTonalIconButton(onClick = {
+                                logStart = null
+                                logging = true
+                            }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
+                        }
                         if (history.isEmpty() && partnerWorkouts.isEmpty()) {
                             EmptyState(Icons.Default.History, stringResource(R.string.history_empty_title), stringResource(R.string.history_empty_body))
                             return@Column
                         }
-                        LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            item {
-                                OutlinedTextField(
-                                    value = query,
-                                    onValueChange = { vm.query.value = it },
-                                    placeholder = { Text(stringResource(R.string.history_search)) },
-                                    leadingIcon = { Icon(Icons.Default.Search, null) },
-                                    singleLine = true,
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
+                        // Primero el calendario (lo que más se mira), luego el año y la lista con su buscador
+                        LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            if (query.isBlank()) {
+                                item {
+                                    com.bestrong.mobile.ui.components.Panel {
+                                        CalendarMonth(
+                                            days,
+                                            Modifier,
+                                            selectedDay,
+                                            // Con «Pareja» un día vacío puede ser uno tuyo entrenado: ahí no se apunta nada
+                                            onEmptyDay = { day: java.time.LocalDate ->
+                                                logStart = pastWorkoutStart(day)
+                                                logging = true
+                                            }.takeUnless { onlyPartner },
+                                        ) { vm.selectedDay.value = it }
+                                    }
+                                }
+                                item { com.bestrong.mobile.ui.components.Panel { YearHeatmap(heatmap) } }
                             }
+                            item { com.bestrong.mobile.ui.components.SectionHeader(stringResource(R.string.history_workouts), large = true) }
+                            item { com.bestrong.mobile.ui.components.SearchPill(query, { vm.query.value = it }, stringResource(R.string.history_search)) }
                             item { GymFilterRow(vm) }
                             if (partnerWorkouts.isNotEmpty()) {
                                 item { AthleteFilterRow(vm, partnerWorkouts.first().athlete.orEmpty()) }
-                            }
-                            if (query.isBlank()) {
-                                item { YearHeatmap(heatmap, Modifier.padding(vertical = 4.dp)) }
-                                item {
-                                    CalendarMonth(
-                                        days,
-                                        Modifier.padding(bottom = 8.dp),
-                                        selectedDay,
-                                        // Con «Pareja» un día vacío puede ser uno tuyo entrenado: ahí no se apunta nada
-                                        onEmptyDay = { day: java.time.LocalDate ->
-                                            logStart = pastWorkoutStart(day)
-                                            logging = true
-                                        }.takeUnless { onlyPartner },
-                                    ) { vm.selectedDay.value = it }
-                                }
                             }
                             selectedDay?.let { day ->
                                 item {
@@ -202,7 +198,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                                 val dragText = workoutText(w)
                                 WorkoutCard(
                                     w,
-                                    Modifier.combinedClickable(
+                                    Modifier.clip(MaterialTheme.shapes.large).combinedClickable(
                                         onLongClick = { DragShare.start(view, w.name, dragText) },
                                         onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } },
                                     ),
@@ -234,26 +230,49 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
     }
 }
 
+/** Un entreno de la lista: la fecha en un sello a la izquierda, el nombre, sus datos en píldoras y sus ejercicios. */
 @Composable
 private fun WorkoutCard(w: Workout, modifier: Modifier = Modifier) {
     val unit = LocalWeightUnit.current
-    Card(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(w.name, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                if (w.source == WorkoutSource.WATCH) Icon(Icons.Default.Watch, stringResource(R.string.logged_on_watch), Modifier.padding(start = 4.dp))
+    val date = java.time.Instant.ofEpochMilli(w.startedAtEpochMs).atZone(java.time.ZoneId.systemDefault())
+    com.bestrong.mobile.ui.components.Panel(modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Sello con el día y el mes
+            Column(
+                Modifier.size(54.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text("${date.dayOfMonth}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    date.month.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.getDefault()).uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
-            Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
-            Text(
-                stringResource(R.string.history_card_detail, formatDuration(w.durationSeconds()), unit.formatVolume(w.totalVolume), w.completedSetCount),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            w.exercises.take(4).forEach { we ->
-                Text(stringResource(R.string.sets_times_exercise, we.sets.size, we.exercise.displayName()), style = MaterialTheme.typography.bodySmall)
+            Column(Modifier.weight(1f).padding(start = 14.dp)) {
+                Text(w.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            if (w.exercises.size > 4) Text(stringResource(R.string.and_n_more, w.exercises.size - 4), style = MaterialTheme.typography.bodySmall)
+            if (w.source == WorkoutSource.WATCH) Icon(Icons.Default.Watch, stringResource(R.string.logged_on_watch), Modifier.padding(start = 4.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            com.bestrong.mobile.ui.components.MetaPill("⏱ " + formatDuration(w.durationSeconds()))
+            if (w.totalVolume > 0) com.bestrong.mobile.ui.components.MetaPill(unit.formatVolume(w.totalVolume))
+            com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.history_sets_done, w.completedSetCount, w.completedSetCount))
+        }
+        // Las imágenes de sus ejercicios y, debajo, cuáles fueron
+        com.bestrong.mobile.ui.components.ExerciseThumbStrip(w.exercises.map { it.exercise }, 40.dp)
+        val res = androidx.compose.ui.platform.LocalContext.current.resources
+        val names = w.exercises.map { it.sets.size to it.exercise.displayName() }
+        Text(
+            names.joinToString { (n, name) -> res.getString(R.string.sets_times_exercise, n, name) },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        )
     }
 }
 
@@ -361,7 +380,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             }
             if (records.isNotEmpty()) {
                 item {
-                    Card(Modifier.fillMaxWidth()) {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                         Column(Modifier.padding(12.dp)) {
                             Text(stringResource(R.string.n_records, records.size), fontWeight = FontWeight.Bold)
                             records.forEach { Text(stringResource(R.string.record_line, it.exerciseName, it.type.label(), unit.format(it.value)), style = MaterialTheme.typography.bodySmall) }
@@ -373,7 +392,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             item { WorkoutGymLine(w, vm) }
             if (w.notes.isNotBlank()) item { Text(w.notes) }
             items(w.exercises, key = { it.id }) { we ->
-                Card(Modifier.fillMaxWidth()) {
+                com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                     Column(Modifier.padding(12.dp)) {
                         Text(we.exercise.displayName(), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
                         we.sets.forEachIndexed { i, set ->

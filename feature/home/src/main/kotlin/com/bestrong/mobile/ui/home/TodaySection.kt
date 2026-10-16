@@ -21,11 +21,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -147,67 +146,81 @@ fun HeroButton(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Com
     )
 }
 
-/** Semana: días entrenados (L–D), sesiones frente al objetivo y adherencia. */
+/** Semana: anillo con las sesiones frente al objetivo y los días entrenados (L–D); tocarla cambia el objetivo. */
 @Composable
 fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // Anillo con las sesiones de la semana frente al objetivo
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(64.dp)) {
-                    androidx.compose.material3.CircularProgressIndicator(
-                        progress = { (week.trainedDays.size.toFloat() / week.goal).coerceAtMost(1f) },
-                        modifier = Modifier.size(64.dp),
-                        strokeWidth = 7.dp,
-                        trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
-                    )
-                    Text("${week.trainedDays.size}/${week.goal}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
-                }
+    var editing by remember { mutableStateOf(false) }
+    com.bestrong.mobile.ui.components.Panel(onClick = if (canChangeGoal) ({ editing = true }) else null) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(58.dp)) {
+                androidx.compose.material3.CircularProgressIndicator(
+                    progress = { (week.trainedDays.size.toFloat() / week.goal).coerceAtMost(1f) },
+                    modifier = Modifier.size(58.dp),
+                    strokeWidth = 6.dp,
+                    trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                )
+                Text("${week.trainedDays.size}/${week.goal}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Black)
+            }
+            Column(Modifier.weight(1f).padding(start = 14.dp)) {
+                Text(stringResource(R.string.week_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                 Text(
                     stringResource(R.string.week_sessions, week.trainedDays.size, week.goal),
-                    Modifier.weight(1f).padding(start = 14.dp),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (canChangeGoal) {
-                    val lessGoal = stringResource(R.string.week_goal_less)
-                    val moreGoal = stringResource(R.string.week_goal_more)
-                    TextButton(onClick = { onGoalChange(week.goal - 1) }, enabled = week.goal > 1, modifier = Modifier.semantics { contentDescription = lessGoal }) { Text("−") }
-                    TextButton(onClick = { onGoalChange(week.goal + 1) }, enabled = week.goal < 7, modifier = Modifier.semantics { contentDescription = moreGoal }) { Text("+") }
+                week.adherence?.let {
+                    Text(stringResource(R.string.week_adherence, (it * 100).toInt()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                DayOfWeek.entries.forEach { d ->
-                    val done = d in week.trainedDays
-                    val name = d.getDisplayName(TextStyle.FULL, locale)
-                    val state = stringResource(if (done) R.string.day_trained else R.string.day_not_trained)
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .size(38.dp)
-                            .background(
-                                if (done) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceContainerHighest),
-                                CircleShape,
-                            )
-                            .then(if (d == week.today) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
-                            .semantics { contentDescription = "$name: $state" },
-                    ) {
-                        Text(
-                            d.getDisplayName(TextStyle.NARROW, locale),
-                            color = if (done) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
+            if (canChangeGoal) Icon(Icons.Default.Edit, stringResource(R.string.week_goal_title), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        }
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            DayOfWeek.entries.forEach { d ->
+                val done = d in week.trainedDays
+                val name = d.getDisplayName(TextStyle.FULL, locale)
+                val state = stringResource(if (done) R.string.day_trained else R.string.day_not_trained)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(
+                            if (done) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceContainerHighest),
+                            CircleShape,
                         )
-                    }
+                        .then(if (d == week.today) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
+                        .semantics { contentDescription = "$name: $state" },
+                ) {
+                    Text(
+                        d.getDisplayName(TextStyle.NARROW, locale),
+                        color = if (done) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
-            }
-            week.adherence?.let {
-                Text(stringResource(R.string.week_adherence, (it * 100).toInt()), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
+    if (editing) WeekGoalDialog(week.goal, onPick = { onGoalChange(it); editing = false }) { editing = false }
+}
+
+/** Objetivo de sesiones por semana: de 1 a 7. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun WeekGoalDialog(goal: Int, onPick: (Int) -> Unit, onDismiss: () -> Unit) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.week_goal_title)) },
+        text = {
+            androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                for (n in 1..7) {
+                    androidx.compose.material3.FilterChip(selected = n == goal, onClick = { onPick(n) }, label = { Text("$n", fontWeight = FontWeight.Bold) })
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
+    )
 }
 
 /** Guarda un mapa de textos (id → valor escrito) en el estado de la pantalla. */
@@ -286,7 +299,7 @@ fun YearAgoCard(vm: HomeViewModel, onOpenExercise: (String) -> Unit = {}) {
     val today = java.time.LocalDate.now()
     val tipId = "year_ago:$today"
     if (items.isEmpty() || yearAgoDismissedRecently(tips.dismissed, today)) return
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.year_ago_title), fontWeight = FontWeight.Bold)
             items.forEach { c ->
@@ -332,7 +345,7 @@ fun MissedSessionCard(vm: HomeViewModel, onOpenWorkout: () -> Unit) {
     // Una vez atendida (hecha hoy o descartada) no vuelve a salir esa semana
     val tipId = "missed:" + java.time.LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)) + ":" + day.value
     if (tipId in tips.dismissed) return
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.missed_session, routine.displayName, day.getDisplayName(java.time.format.TextStyle.FULL, locale)), style = MaterialTheme.typography.bodyMedium)
             androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -352,7 +365,7 @@ fun StaleRoutineCard(vm: HomeViewModel) {
     val stale by vm.staleRoutines.collectAsStateWithLifecycle()
     val tips = com.bestrong.mobile.ui.help.LocalTips.current
     val (routine, days) = stale.firstOrNull { "stale:${it.first.id}" !in tips.dismissed } ?: return
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.stale_routine, routine.displayName, days), style = MaterialTheme.typography.bodyMedium)
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -368,7 +381,7 @@ fun StaleRoutineCard(vm: HomeViewModel) {
 fun LaggingMusclesCard(vm: HomeViewModel, onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {}) {
     val lagging by vm.laggingMuscles.collectAsStateWithLifecycle()
     if (lagging.isEmpty()) return
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(vertical = 12.dp)) {
             Text(stringResource(R.string.lagging_muscles_title), fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
             // Cada músculo abre la biblioteca con sus ejercicios
@@ -399,7 +412,7 @@ fun ReadinessCard(vm: HomeViewModel) {
     val r by vm.readiness.collectAsStateWithLifecycle()
     val connected by vm.healthConnected.collectAsStateWithLifecycle()
     val report = r ?: return
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.readiness_title), Modifier.weight(1f), fontWeight = FontWeight.Bold)
@@ -435,7 +448,7 @@ fun IntakeCard(vm: HomeViewModel) {
     val intake by vm.intake.collectAsStateWithLifecycle()
     val bw by vm.bodyWeightKg.collectAsStateWithLifecycle()
     val range = bw?.takeIf { it > 0 }?.let { com.bestrong.core.training.Nutrition.proteinRangeGrams(it) }?.takeIf { it.first > 0 }
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.intake_title), fontWeight = FontWeight.Bold)
             Text(stringResource(R.string.intake_protein, intake.proteinG, range?.let { "${it.first}–${it.last}" } ?: "?"))
@@ -559,7 +572,7 @@ fun CardioWeekCard(vm: HomeViewModel) {
     val week by vm.cardioWeek.collectAsStateWithLifecycle()
     if (!week.worthShowing) return
     var editing by remember { mutableStateOf(false) }
-    Card(Modifier.fillMaxWidth().clickable { editing = true }) {
+    com.bestrong.mobile.ui.components.Panel(onClick = { editing = true }, contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             CardioWeekProgress(week)
         }

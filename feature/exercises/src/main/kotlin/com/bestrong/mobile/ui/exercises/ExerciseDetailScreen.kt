@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -183,7 +182,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { PlateauHint(vm, exerciseId, s.progress) }
             item { SectionHeader(stringResource(R.string.personal_records)) }
             item {
-                Card(Modifier.fillMaxWidth()) {
+                com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         RecordType.entries.forEach { type ->
                             val pr = s.records[type] ?: return@forEach
@@ -205,7 +204,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             s.nextTarget?.let { t ->
                 item {
                     val work = t.sets.firstOrNull { it.type != SetType.WARMUP } ?: t.sets.first()
-                    Card(Modifier.fillMaxWidth()) {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             SectionHeader(stringResource(R.string.next_target))
                             Text(
@@ -222,7 +221,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             s.cardioBests?.let { b -> item { CardioBestsCard(s.exercise, b) } }
             if (s.strengthCurve.size >= 2) {
                 item {
-                    Card(Modifier.fillMaxWidth()) {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                         Column(Modifier.padding(16.dp)) {
                             SectionHeader(stringResource(R.string.strength_curve))
                             Text(stringResource(R.string.strength_curve_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -248,7 +247,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             }
             item { SectionHeader(stringResource(R.string.nav_history)) }
             items(s.recentSessions, key = { it.id }) { w ->
-                Card(Modifier.fillMaxWidth()) {
+                com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                     Column(Modifier.padding(12.dp)) {
                         Text(w.name, fontWeight = FontWeight.SemiBold)
                         Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
@@ -290,7 +289,7 @@ private const val RPE_MIN_SESSIONS = 3
 @Composable
 private fun RpeTrendCard(trend: List<Triple<Long, Double, Double>>) {
     val rising = remember(trend) { com.bestrong.core.stats.Strength.effortRising(trend) }
-    Card(Modifier.fillMaxWidth()) {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.rpe_trend_title), fontWeight = FontWeight.SemiBold)
             LineChart(
@@ -308,7 +307,7 @@ private fun RpeTrendCard(trend: List<Triple<Long, Double, Double>>) {
 @Composable
 private fun RepRangeCard(vm: ExercisesViewModel, exerciseId: String) {
     val ranges by vm.repRanges.collectAsStateWithLifecycle()
-    Card(Modifier.fillMaxWidth()) {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(stringResource(R.string.rep_range), fontWeight = FontWeight.SemiBold)
             Text(stringResource(R.string.rep_range_body), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -333,7 +332,7 @@ private fun RpeLoadCard(vm: ExercisesViewModel, exercise: com.bestrong.core.mode
     // Mancuernas como en las filas («suma de las dos» si está activado)
     val factor = if (settings.dumbbellTotal && exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
     fun load(reps: Int, rpe: Double): String = unit.format(vm.roundLoad(exercise, com.bestrong.core.stats.RpeLoad.weightFor(e1rm, reps, rpe), settings) * factor)
-    Card(Modifier.fillMaxWidth()) {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.rpe_table_title))
             Text(stringResource(R.string.rpe_table_hint, unit.format(e1rm, withUnit = true)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -355,7 +354,7 @@ private fun RpeLoadCard(vm: ExercisesViewModel, exercise: com.bestrong.core.mode
 @Composable
 private fun CardioBestsCard(exercise: com.bestrong.core.model.Exercise, b: com.bestrong.core.stats.CardioBests) {
     val style = com.bestrong.core.util.PaceStyle.of(exercise.id)
-    Card(Modifier.fillMaxWidth()) {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.cardio_bests))
             b.longestDistance?.let { Text(stringResource(R.string.cardio_best_distance, com.bestrong.mobile.ui.workout.cardioText(it.durationSec, it.distanceM, pace = style))) }
@@ -417,7 +416,7 @@ private fun PlateauHint(vm: ExercisesViewModel, exerciseId: String, progress: Li
         HYPERTROPHY_RANGE, "6-10" -> STRENGTH_RANGE
         else -> HYPERTROPHY_RANGE
     }
-    Card(Modifier.fillMaxWidth()) {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(12.dp)) {
             Text(stringResource(R.string.plateau_hint, stalled), style = MaterialTheme.typography.bodyMedium)
             TextButton(onClick = { vm.snoozePlateau(exerciseId, progress.size) }) { Text(stringResource(R.string.plateau_not_now)) }

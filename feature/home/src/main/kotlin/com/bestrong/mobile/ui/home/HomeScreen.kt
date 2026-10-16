@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,11 +39,9 @@ import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,7 +53,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -146,124 +144,53 @@ fun HomeScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    // La marca con su degradado
-                    Text(
-                        "BeStrong",
-                        style = MaterialTheme.typography.headlineSmall.copy(brush = com.bestrong.mobile.ui.components.brandGradient()),
-                        fontWeight = FontWeight.Black,
-                    )
-                },
-                actions = { GymChip(vm) },
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbar) },
-    ) { padding ->
+    Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         // Rejilla adaptable: 1 columna en el Fold plegado, 2-3 desplegado
         var collapsed by rememberSaveable { mutableStateOf(setOf<String>()) }
         // Buscar rutina (sale con muchas): mientras se busca, se ven todas las que coinciden con sus carpetas abiertas
         var routineQuery by rememberSaveable { mutableStateOf("") }
         val shownRoutines = remember(routines, routineQuery) { filterRoutines(routines, routineQuery) }
+        val full: androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope.() -> GridItemSpan = { GridItemSpan(maxLineSpan) }
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 320.dp),
             modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) { Greeting() }
-            active?.let { w ->
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    val now = rememberNow()
-                    com.bestrong.mobile.ui.components.HeroCard(onClick = onOpenWorkout) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Column(Modifier.weight(1f)) {
-                                Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
-                                Text(w.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
-                                Text(stringResource(R.string.home_in_progress_detail, formatDuration(w.durationSeconds(now)), w.completedSetCount, w.totalSetCount))
-                            }
-                            Box(
-                                Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerLowest),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(Icons.Default.PlayArrow, stringResource(R.string.action_continue), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
-                            }
-                        }
-                        androidx.compose.material3.LinearProgressIndicator(
-                            progress = { if (w.totalSetCount == 0) 0f else w.completedSetCount.toFloat() / w.totalSetCount },
-                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp).height(6.dp).clip(CircleShape),
-                            color = MaterialTheme.colorScheme.surfaceContainerLowest,
-                            trackColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.3f),
-                        )
-                    }
-                }
-            }
+            // 1. Saludo; 2. lo que toca ahora; 3. accesos rápidos; 4. la semana; 5. rutinas; 6. el resto
+            item(span = full) { Greeting { GymChip(vm) } }
+            active?.let { w -> item(span = full) { ActiveWorkoutHero(w, onOpenWorkout) } }
             if (active == null) {
                 today?.let { s ->
-                    item(span = { GridItemSpan(maxLineSpan) }) { TodayCard(s, onStart = { vm.startProgramSession(s, onOpenWorkout) }, onStopProgram = vm::stopProgram) }
+                    item(span = full) { TodayCard(s, onStart = { vm.startProgramSession(s, onOpenWorkout) }, onStopProgram = vm::stopProgram) }
                 } ?: suggested?.let { r ->
-                    item(span = { GridItemSpan(maxLineSpan) }) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }) }
+                    item(span = full) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }) }
                 }
             }
-            item(span = { GridItemSpan(maxLineSpan) }) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) }
-            item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(stringResource(R.string.home_start)) }
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // El botón principal, grande como los de la bienvenida
-                    Button(onClick = { vm.startEmpty(onOpenWorkout) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                        Icon(Icons.Default.Add, null)
-                        Text(stringResource(R.string.home_empty_workout), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    }
-                    history.firstOrNull { it.isFinished }?.let { last ->
-                        FilledTonalButton(onClick = { vm.repeatLast(onOpenWorkout) }) {
-                            Icon(Icons.Default.Replay, null)
-                            Text(stringResource(R.string.home_repeat_last, last.name), Modifier.padding(start = 8.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                    }
-                    FilledTonalButton(onClick = { vm.startOnWatch(null) }) {
-                        Icon(Icons.Default.Watch, null)
-                        Text(stringResource(R.string.home_on_watch), Modifier.padding(start = 8.dp))
-                    }
-                }
+            item(span = full) {
+                QuickActions(
+                    onEmpty = { vm.startEmpty(onOpenWorkout) },
+                    repeatName = history.firstOrNull { it.isFinished }?.name,
+                    onRepeat = { vm.repeatLast(onOpenWorkout) },
+                    onWatch = { vm.startOnWatch(null) },
+                    onPrograms = { showPrograms = true },
+                    onPlan = onOpenPlanning,
+                )
             }
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                // Título y acciones en líneas separadas: con letra grande los botones bajan de línea
+            item(span = full) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) }
+            item(span = full) {
                 Column {
-                    SectionHeader(stringResource(R.string.home_my_routines, routines.count { !it.archived }))
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { onEditRoutine(null) }) { Text(stringResource(R.string.home_new_routine)) }
-                        TextButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_programs)) }
-                        TextButton(onClick = onOpenPlanning) { Text(stringResource(R.string.planning_open)) }
+                    SectionHeader(stringResource(R.string.home_my_routines, routines.count { !it.archived }), large = true) {
+                        TextButton(onClick = { onEditRoutine(null) }) {
+                            Icon(Icons.Default.Add, null, Modifier.size(18.dp))
+                            Text(stringResource(R.string.routine_new_short), Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold)
+                        }
                     }
                     RoutineSearchField(routines.size, routineQuery, nothingShown = shownRoutines.isEmpty()) { routineQuery = it }
                 }
             }
-            if (routines.none { !it.archived }) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    // Sin rutinas: la ilustración de la bienvenida y los dos caminos para empezar
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                        com.bestrong.mobile.ui.help.BrandIllustration(
-                            Icons.Default.CalendarMonth,
-                            listOf(Icons.Default.Repeat, Icons.Default.Star, Icons.Default.Today),
-                            MaterialTheme.colorScheme.secondary,
-                            Modifier.size(160.dp),
-                            animated = false,
-                        )
-                        Text(
-                            stringResource(R.string.home_no_routines),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        )
-                        Button(onClick = { showPrograms = true }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                            Text(stringResource(R.string.home_browse_programs), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
+            if (routines.none { !it.archived }) item(span = full) { NoRoutines(onPrograms = { showPrograms = true }, onNew = { onEditRoutine(null) }) }
             // Buscando, todo abierto (también las archivadas, cuya clave en el conjunto significa «abierta»), y
             // tocar una cabecera no cambia las carpetas de verdad
             routineItems(
@@ -286,7 +213,7 @@ fun HomeScreen(
                     onArchive = { vm.setArchived(routine, !routine.archived) },
                 )
             }
-            // Preparación del día y proteína/agua (al final para no empujar «Empezar»)
+            // Avisos y datos del día, al final para no empujar lo principal
             item { MissedSessionCard(vm, onOpenWorkout) }
             item { YearAgoCard(vm, onOpenExercise) }
             item { CardioWeekCard(vm) }
@@ -295,6 +222,92 @@ fun HomeScreen(
             item { ReadinessCard(vm) }
             item { IntakeCard(vm) }
             item { TipCard("home_reorder", R.string.tip_home) }
+        }
+    }
+}
+
+/** El entreno abierto, lo primero de todo: tocarlo vuelve a él. */
+@Composable
+private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, onOpenWorkout: () -> Unit) {
+    val now = rememberNow()
+    com.bestrong.mobile.ui.components.HeroCard(onClick = onOpenWorkout) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
+                Text(w.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+                Text(stringResource(R.string.home_in_progress_detail, formatDuration(w.durationSeconds(now)), w.completedSetCount, w.totalSetCount))
+            }
+            Box(
+                Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerLowest),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Default.PlayArrow, stringResource(R.string.action_continue), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+            }
+        }
+        androidx.compose.material3.LinearProgressIndicator(
+            progress = { if (w.totalSetCount == 0) 0f else w.completedSetCount.toFloat() / w.totalSetCount },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp).height(6.dp).clip(CircleShape),
+            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+            trackColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.3f),
+        )
+    }
+}
+
+/**
+ * Los accesos de siempre en una fila de botones cuadrados (el entreno libre, destacado y más ancho) y, debajo,
+ * repetir el último entreno.
+ */
+@Composable
+private fun QuickActions(onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: () -> Unit, onPrograms: () -> Unit, onPlan: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
+            val tile = Modifier.fillMaxHeight()
+            com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, stringResource(R.string.home_empty_workout), onEmpty, tile.weight(1.5f), filled = true)
+            com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, stringResource(R.string.home_on_watch), onWatch, tile.weight(1f))
+            com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Star, stringResource(R.string.home_programs), onPrograms, tile.weight(1f))
+            com.bestrong.mobile.ui.components.QuickAction(Icons.Default.CalendarMonth, stringResource(R.string.planning_open), onPlan, tile.weight(1f))
+        }
+        repeatName?.let { name ->
+            com.bestrong.mobile.ui.components.Panel(onClick = onRepeat, contentPadding = 14.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Replay, null, tint = MaterialTheme.colorScheme.primary)
+                    Text(
+                        stringResource(R.string.home_repeat_last, name),
+                        Modifier.weight(1f).padding(start = 12.dp),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Icon(Icons.Default.PlayArrow, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    }
+}
+
+/** Sin rutinas: la ilustración de la bienvenida y los dos caminos para empezar. */
+@Composable
+private fun NoRoutines(onPrograms: () -> Unit, onNew: () -> Unit) {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 24.dp) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            com.bestrong.mobile.ui.help.BrandIllustration(
+                Icons.Default.CalendarMonth,
+                listOf(Icons.Default.Repeat, Icons.Default.Star, Icons.Default.Today),
+                MaterialTheme.colorScheme.secondary,
+                Modifier.size(140.dp),
+                animated = false,
+            )
+            Text(
+                stringResource(R.string.home_no_routines),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            Button(onClick = onPrograms, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                Text(stringResource(R.string.home_browse_programs), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            }
+            OutlinedButton(onClick = onNew, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(stringResource(R.string.home_new_routine)) }
         }
     }
 }
@@ -319,50 +332,54 @@ private fun RoutineCard(
     var sharing by remember { mutableStateOf(false) }
     val context = LocalContext.current
     if (sharing) ShareRoutineDialog(routine) { sharing = false }
-    Card(Modifier.fillMaxWidth().clickable(onClick = onEdit), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
-        Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(routine.displayName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
-                Box {
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.routine_options)) }
-                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text(stringResource(R.string.action_edit)) }, onClick = { menu = false; onEdit() })
-                        // El reloj no recibe las archivadas: empezarla allí abriría un entreno vacío
-                        if (!routine.archived) DropdownMenuItem(text = { Text(stringResource(R.string.routine_start_on_watch)) }, onClick = { menu = false; onStartWatch() })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.action_duplicate)) }, onClick = { menu = false; onDuplicate() })
-                        DropdownMenuItem(
-                            text = { Text(stringResource(if (routine.archived) R.string.routine_unarchive else R.string.routine_archive)) },
-                            onClick = { menu = false; onArchive() },
-                        )
-                        DropdownMenuItem(text = { Text(stringResource(R.string.share_routine_link)) }, onClick = { menu = false; sharing = true })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.export_routine_pdf)) }, onClick = { menu = false; RoutineShare.sharePdf(context, listOf(routine), routine.name) })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; onMoveUp() })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; onMoveDown() })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; onDelete() })
-                    }
+    com.bestrong.mobile.ui.components.Panel(onClick = onEdit) {
+        Row(verticalAlignment = Alignment.Top) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(routine.displayName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                // Cuánto se tarda, más o menos (series × 40 s + descansos), para elegir según el tiempo que haya
+                val minutes = remember(routine) { (WorkoutEditor.estimatedRemainingSeconds(routine.toWorkout(0)) + 59) / 60 }
+                val count = routine.exercises.size
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, count, count))
+                    if (minutes > 0) com.bestrong.mobile.ui.components.MetaPill(stringResource(R.string.routine_estimated, minutes))
+                    gymName?.let { com.bestrong.mobile.ui.components.MetaPill("🏋️ $it") }
                 }
             }
-            // Las imágenes de sus ejercicios, para reconocerla de un vistazo
-            com.bestrong.mobile.ui.components.ExerciseThumbStrip(routine.exercises.map { it.exercise }, 40.dp, modifier = Modifier.padding(vertical = 8.dp))
-            Text(
-                routine.exercises.map { it.exercise.displayName() }.joinToString().ifBlank { stringResource(R.string.routine_no_exercises) },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            // Cuánto se tarda, más o menos (series × 40 s + descansos), para elegir según el tiempo que haya
-            val minutes = remember(routine) { (WorkoutEditor.estimatedRemainingSeconds(routine.toWorkout(0)) + 59) / 60 }
-            val info = listOfNotNull(
-                stringResource(R.string.routine_estimated, minutes).takeIf { minutes > 0 },
-                lastDone?.let { stringResource(R.string.routine_last_done, it) },
-                gymName?.let { "🏋️ $it" },
-            )
-            if (info.isNotEmpty()) Text(info.joinToString(" · "), style = MaterialTheme.typography.labelSmall)
-            Button(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(48.dp), enabled = routine.exercises.isNotEmpty()) {
-                Icon(Icons.Default.PlayArrow, null)
-                Text(stringResource(R.string.routine_start), Modifier.padding(start = 6.dp), fontWeight = FontWeight.Bold)
+            Box {
+                IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.routine_options)) }
+                DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                    DropdownMenuItem(text = { Text(stringResource(R.string.action_edit)) }, onClick = { menu = false; onEdit() })
+                    // El reloj no recibe las archivadas: empezarla allí abriría un entreno vacío
+                    if (!routine.archived) DropdownMenuItem(text = { Text(stringResource(R.string.routine_start_on_watch)) }, onClick = { menu = false; onStartWatch() })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.action_duplicate)) }, onClick = { menu = false; onDuplicate() })
+                    DropdownMenuItem(
+                        text = { Text(stringResource(if (routine.archived) R.string.routine_unarchive else R.string.routine_archive)) },
+                        onClick = { menu = false; onArchive() },
+                    )
+                    DropdownMenuItem(text = { Text(stringResource(R.string.share_routine_link)) }, onClick = { menu = false; sharing = true })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.export_routine_pdf)) }, onClick = { menu = false; RoutineShare.sharePdf(context, listOf(routine), routine.name) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; onMoveUp() })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; onMoveDown() })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; onDelete() })
+                }
             }
+        }
+        // Las imágenes de sus ejercicios (animadas), para reconocerla de un vistazo, y el botón de empezar al lado
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) {
+                if (routine.exercises.isEmpty()) {
+                    Text(stringResource(R.string.routine_no_exercises), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    com.bestrong.mobile.ui.components.ExerciseThumbStrip(routine.exercises.map { it.exercise }, 46.dp, max = 4)
+                }
+            }
+            Button(onClick = onStart, enabled = routine.exercises.isNotEmpty(), modifier = Modifier.height(48.dp)) {
+                Icon(Icons.Default.PlayArrow, null)
+                Text(stringResource(R.string.routine_start), Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold)
+            }
+        }
+        lastDone?.let {
+            Text(stringResource(R.string.routine_last_done, it), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -573,9 +590,9 @@ private val MARKS = Regex("\\p{Mn}+")
 /** A partir de cuántas rutinas sale el buscador. */
 private const val ROUTINE_SEARCH_MIN = 8
 
-/** «Buenos días» con la fecha encima, grande, al abrir la app. */
+/** «Buenos días» con la fecha encima, grande, al abrir la app; [actions] a la derecha (el gimnasio). */
 @Composable
-private fun Greeting() {
+private fun Greeting(actions: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {}) {
     val now = java.time.LocalDateTime.now()
     val greeting = when (now.hour) {
         in 5..11 -> R.string.greeting_morning
@@ -583,8 +600,5 @@ private fun Greeting() {
         else -> R.string.greeting_evening
     }
     val date = java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM", java.util.Locale.getDefault()).format(now)
-    Column(Modifier.padding(top = 4.dp, bottom = 4.dp)) {
-        Text(date.uppercase(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(stringResource(greeting), style = MaterialTheme.typography.displaySmall)
-    }
+    com.bestrong.mobile.ui.components.ScreenTitle(stringResource(greeting), overline = date, actions = actions)
 }

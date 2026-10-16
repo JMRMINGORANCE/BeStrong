@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -84,7 +83,7 @@ private fun VolumeStatus.label(): String = when (this) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun WeeklyMuscleMap(weekly: Map<MuscleGroup, Double>, target: Int = MuscleTargets.MIN_WEEKLY_SETS.toInt(), onTarget: (Int) -> Unit = {}) {
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SectionHeader(stringResource(R.string.muscle_map_title))
             Text(

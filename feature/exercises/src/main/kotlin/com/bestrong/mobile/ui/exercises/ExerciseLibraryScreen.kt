@@ -4,18 +4,23 @@ import android.content.Intent
 import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,7 +32,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +40,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -62,11 +65,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.model.Equipment
@@ -207,66 +213,50 @@ fun ExerciseSearchList(
 
     Column(modifier.fillMaxSize()) {
         if (title != null) {
-            TopAppBar(
-                title = { Text(title) },
-                actions = { IconButton(onClick = { creating = true }) { Icon(Icons.Default.Add, stringResource(R.string.create_exercise)) } },
-            )
+            com.bestrong.mobile.ui.components.ScreenTitle(
+                title,
+                Modifier.padding(horizontal = 20.dp),
+                overline = androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, results.size, results.size),
+            ) {
+                androidx.compose.material3.FilledTonalIconButton(onClick = { creating = true }) { Icon(Icons.Default.Add, stringResource(R.string.create_exercise)) }
+            }
         }
-        OutlinedTextField(
-            value = filter.query,
-            onValueChange = { q -> vm.filter.value = filter.copy(query = q) },
-            leadingIcon = { Icon(Icons.Default.Search, null) },
-            trailingIcon = { VoiceSearchButton { q -> vm.filter.value = vm.filter.value.copy(query = q) } },
-            placeholder = { Text(stringResource(R.string.search_exercise)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        com.bestrong.mobile.ui.components.SearchPill(
+            filter.query,
+            { q -> vm.filter.value = filter.copy(query = q) },
+            stringResource(R.string.search_exercise),
+            Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            trailing = { VoiceSearchButton { q -> vm.filter.value = vm.filter.value.copy(query = q) } },
         )
         FilterChips(vm, filter, onCreate = if (title == null) ({ creating = true }) else null)
-        LazyColumn(Modifier.fillMaxSize()) {
-            items(results, key = { it.id }) { ex ->
-                ListItem(
-                    leadingContent = { com.bestrong.mobile.ui.components.ExerciseThumb(ex) },
-                    headlineContent = { Text(ex.displayName()) },
-                    supportingContent = {
-                        val times = usage[ex.id]
-                        val parts = listOfNotNull(
-                            ex.primaryMuscle.label(),
-                            ex.equipment.label(),
-                            if (ex.isCustom) stringResource(R.string.custom) else null,
-                            times?.let { stringResource(R.string.n_times, it) },
-                        )
-                        Column {
-                            Text(parts.joinToString(" · "))
-                            // Última vez y su mejor serie, para elegir sin abrir la ficha
-                            last[ex.id]?.let { (date, set) ->
-                                Text(
-                                    stringResource(R.string.exercise_last_time, formatShortDate(date), describeSet(set, ex, unit)),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                        }
-                    },
-                    trailingContent = {
-                        if (multiSelect) {
-                            Checkbox(checked = ex.id in selected, onCheckedChange = null)
-                        } else {
-                            val fav = ex.id in favorites
-                            IconToggleButton(checked = fav, onCheckedChange = { vm.toggleFavorite(ex.id) }) {
-                                Icon(
-                                    if (fav) Icons.Default.Star else Icons.Default.StarBorder,
-                                    stringResource(if (fav) R.string.favorite_remove else R.string.favorite_add, ex.displayName()),
-                                )
-                            }
-                        }
-                    },
-                    tonalElevation = if (!multiSelect && ex.id in selected) 4.dp else 0.dp,
-                    // En selección múltiple toda la fila es la casilla (TalkBack: «Press banca, casilla, marcada»)
-                    modifier = if (multiSelect) {
-                        Modifier.toggleable(value = ex.id in selected, role = Role.Checkbox) { onClick(ex) }
-                    } else {
-                        Modifier.clickable { onClick(ex) }
-                    },
+        // Cuadrícula de tarjetas con la animación grande: se reconoce el ejercicio sin leer
+        androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+            columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(minSize = 156.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(results.size, key = { results[it].id }) { i ->
+                val ex = results[i]
+                val times = usage[ex.id]
+                val meta = listOfNotNull(
+                    ex.primaryMuscle.label(),
+                    ex.equipment.label(),
+                    if (ex.isCustom) stringResource(R.string.custom) else null,
+                    times?.let { stringResource(R.string.n_times, it) },
+                ).joinToString(" · ")
+                // Última vez y su mejor serie, para elegir sin abrir la ficha
+                val lastLine = last[ex.id]?.let { (date, set) -> stringResource(R.string.exercise_last_time, formatShortDate(date), describeSet(set, ex, unit)) }
+                ExerciseCard(
+                    ex = ex,
+                    meta = meta,
+                    lastLine = lastLine,
+                    selected = ex.id in selected,
+                    multiSelect = multiSelect,
+                    favorite = ex.id in favorites,
+                    onToggleFavorite = { vm.toggleFavorite(ex.id) },
+                    onClick = { onClick(ex) },
                 )
             }
         }
@@ -282,6 +272,61 @@ fun ExerciseSearchList(
                 if (multiSelect) onClick(ex)
             },
         )
+    }
+}
+
+/** Tarjeta de la cuadrícula: animación arriba (con la estrella o la casilla encima) y nombre y datos debajo. */
+@Composable
+private fun ExerciseCard(
+    ex: Exercise,
+    meta: String,
+    lastLine: String?,
+    selected: Boolean,
+    multiSelect: Boolean,
+    favorite: Boolean,
+    onToggleFavorite: () -> Unit,
+    onClick: () -> Unit,
+) {
+    val shape = MaterialTheme.shapes.large
+    val scheme = MaterialTheme.colorScheme
+    Column(
+        Modifier.fillMaxWidth().clip(shape)
+            .background(if (selected) scheme.primary.copy(alpha = 0.16f) else scheme.surfaceContainer)
+            .then(if (selected) Modifier.border(2.dp, scheme.primary, shape) else Modifier)
+            // En selección múltiple toda la tarjeta es la casilla (TalkBack: «Press banca, casilla, marcada»)
+            .then(if (multiSelect) Modifier.toggleable(value = selected, role = Role.Checkbox) { onClick() } else Modifier.clickable(onClick = onClick)),
+    ) {
+        Box(Modifier.fillMaxWidth().aspectRatio(1.1f).padding(8.dp).clip(RoundedCornerShape(18.dp))) {
+            com.bestrong.mobile.ui.components.ExerciseImage(ex, Modifier.matchParentSize())
+            Box(Modifier.align(Alignment.TopEnd).padding(4.dp)) {
+                if (multiSelect) {
+                    Box(
+                        Modifier.size(30.dp).clip(CircleShape).background(if (selected) scheme.primary else scheme.surfaceContainerLowest.copy(alpha = 0.85f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (selected) Icon(Icons.Default.Check, null, tint = scheme.onPrimary, modifier = Modifier.size(20.dp))
+                    }
+                } else {
+                    IconToggleButton(
+                        checked = favorite,
+                        onCheckedChange = { onToggleFavorite() },
+                        modifier = Modifier.size(36.dp).clip(CircleShape).background(scheme.surfaceContainerLowest.copy(alpha = 0.85f)),
+                    ) {
+                        Icon(
+                            if (favorite) Icons.Default.Star else Icons.Default.StarBorder,
+                            stringResource(if (favorite) R.string.favorite_remove else R.string.favorite_add, ex.displayName()),
+                            tint = if (favorite) scheme.secondary else scheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+            }
+        }
+        Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(ex.displayName(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, minLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(meta, style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            lastLine?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = scheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+        }
     }
 }
 

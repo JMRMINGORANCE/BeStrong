@@ -105,7 +105,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             val weights = list.filter { it.weightKg != null }.sortedBy { it.dateEpochMs }
             if (weights.size >= 2) {
                 item {
-                    Card {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                         Column(Modifier.padding(16.dp)) {
                             SectionHeader(stringResource(R.string.body_weight_unit, unit.label))
                             LineChart(weights.map { ChartPoint(formatShortDate(it.dateEpochMs), it.weightKg!!) }, valueFormatter = { unit.format(it) })
@@ -122,7 +122,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                 val points = list.filter { value(it) != null }.sortedBy { it.dateEpochMs }
                 if (points.size >= 2) {
                     item(key = "chart-$label") {
-                        Card {
+                        com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                             Column(Modifier.padding(16.dp)) {
                                 SectionHeader(label)
                                 LineChart(points.map { ChartPoint(formatShortDate(it.dateEpochMs), value(it)!!) }, valueFormatter = { formatWeight(it) })
@@ -133,7 +133,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             }
             relative?.let { (lift, data) ->
                 item(key = "relative") {
-                    Card {
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                         Column(Modifier.padding(16.dp)) {
                             SectionHeader(stringResource(R.string.relative_strength, ExerciseLibrary.byId(lift)?.displayName() ?: lift))
                             Text(stringResource(R.string.relative_strength_hint), style = MaterialTheme.typography.bodySmall)
@@ -550,7 +550,7 @@ private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement
     val fat = both?.bodyFatPct
     if (waist == null && (weight == null || fat == null)) return
     val height = settings.heightCm
-    Card {
+    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.body_comp_title))
             // La cintura objetivo no necesita la altura
