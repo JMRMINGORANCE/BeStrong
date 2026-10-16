@@ -133,7 +133,7 @@ fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -> Unit) {
         Box(
             Modifier.padding(padding).fillMaxSize().background(
                 if (current == null) {
-                    MaterialTheme.colorScheme.surface
+                    androidx.compose.ui.graphics.Color.Transparent
                 } else if (work) {
                     BeStrongPalette.Orange.copy(alpha = 0.25f)
                 } else {

@@ -34,7 +34,7 @@ fun RestPip(repository: BeStrongRepository, restTimer: RestTimerController) {
     val rest by restTimer.rest.collectAsStateWithLifecycle()
     val now = rememberNow(500)
     val w = workout
-    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface).padding(8.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(com.bestrong.mobile.ui.theme.LocalScreenColor.current).padding(8.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
             val r = rest
             if (r != null) {

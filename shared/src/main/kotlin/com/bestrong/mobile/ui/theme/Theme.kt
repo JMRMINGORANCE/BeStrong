@@ -1,7 +1,9 @@
 package com.bestrong.mobile.ui.theme
 
 import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
@@ -12,8 +14,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -46,6 +50,32 @@ private val NormalStatus = StatusColors(P.VolumeOptimal, P.VolumeLow, P.VolumeHi
 private val ColorblindStatus = StatusColors(Color(0xFF0072B2), Color(0xFFE69F00), Color(0xFFD55E00), colorblind = true)
 
 val LocalStatusColors = staticCompositionLocalOf { NormalStatus }
+
+/**
+ * El fondo real de las pantallas. En el tema, [ColorScheme.background] y [ColorScheme.surface] son transparentes para
+ * que se vea el fondo de marca (color sólido con un resplandor arriba, como en la bienvenida) detrás de barras,
+ * listas y Scaffold; lo que necesite un fondo opaco usa este.
+ */
+val LocalScreenColor = staticCompositionLocalOf { Color(0xFF0E0F13) }
+
+/**
+ * Fondo de marca de una pantalla: el color de fondo y, arriba, un resplandor del color [tint] que se desvanece
+ * (naranja en Entrenar, ámbar en Historial, verde en Ejercicios…).
+ */
+@Composable
+fun ScreenBackdrop(
+    tint: Color = MaterialTheme.colorScheme.primary,
+    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
+    content: @Composable () -> Unit,
+) {
+    val dark = LocalScreenColor.current.luminance() < 0.5f
+    val glow by androidx.compose.animation.animateColorAsState(tint.copy(alpha = if (dark) 0.30f else 0.20f), label = "glow")
+    androidx.compose.foundation.layout.Box(
+        modifier.fillMaxSize()
+            .background(LocalScreenColor.current)
+            .background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to glow, 0.45f to Color.Transparent)),
+    ) { content() }
+}
 val LocalAppearance = staticCompositionLocalOf { Appearance() }
 
 /** Atajo para los colores de estado del tema actual. */
@@ -143,7 +173,8 @@ private fun beStrongTypography(): Typography {
         headlineLarge = base.headlineLarge.heavy(FontWeight.ExtraBold, -0.5f),
         headlineMedium = base.headlineMedium.heavy(FontWeight.ExtraBold, -0.25f),
         headlineSmall = base.headlineSmall.heavy(FontWeight.Bold, 0f),
-        titleLarge = base.titleLarge.heavy(FontWeight.Bold, 0f),
+        // Títulos de las barras: grandes y gruesos, como los de la bienvenida
+        titleLarge = base.titleLarge.copy(fontSize = 24.sp, lineHeight = 30.sp).heavy(FontWeight.Black, -0.3f),
         titleMedium = base.titleMedium.heavy(FontWeight.SemiBold, 0.1f),
         titleSmall = base.titleSmall.heavy(FontWeight.SemiBold, 0.1f),
         labelLarge = base.labelLarge.heavy(FontWeight.SemiBold, 0.3f),
@@ -231,10 +262,19 @@ fun BeStrongTheme(appearance: Appearance = Appearance(), content: @Composable ()
         AppFont.LEGIBLE -> Legible
         AppFont.DYSLEXIA -> Dyslexic
     }
+    val screen = scheme.background
     CompositionLocalProvider(
         LocalAppearance provides appearance,
         LocalStatusColors provides if (appearance.colorblind) ColorblindStatus else NormalStatus,
+        LocalScreenColor provides screen,
     ) {
-        MaterialTheme(colorScheme = scheme, typography = beStrongTypography().withFont(family), shapes = BeStrongShapes, content = content)
+        // Fondo y superficie transparentes: el fondo de marca de [ScreenBackdrop] se ve detrás de todo
+        MaterialTheme(
+            colorScheme = scheme.copy(background = Color.Transparent, surface = Color.Transparent),
+            typography = beStrongTypography().withFont(family),
+            shapes = BeStrongShapes,
+        ) {
+            ScreenBackdrop { content() }
+        }
     }
 }

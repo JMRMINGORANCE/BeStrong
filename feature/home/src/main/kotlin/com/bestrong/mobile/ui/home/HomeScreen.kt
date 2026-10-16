@@ -26,10 +26,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -208,9 +212,10 @@ fun HomeScreen(
             item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(stringResource(R.string.home_start)) }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { vm.startEmpty(onOpenWorkout) }, modifier = Modifier.weight(1f)) {
+                    // El botón principal, grande como los de la bienvenida
+                    Button(onClick = { vm.startEmpty(onOpenWorkout) }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
                         Icon(Icons.Default.Add, null)
-                        Text(stringResource(R.string.home_empty_workout), Modifier.padding(start = 8.dp))
+                        Text(stringResource(R.string.home_empty_workout), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     }
                     history.firstOrNull { it.isFinished }?.let { last ->
                         FilledTonalButton(onClick = { vm.repeatLast(onOpenWorkout) }) {
@@ -238,12 +243,24 @@ fun HomeScreen(
             }
             if (routines.none { !it.archived }) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Sin rutinas: la ilustración de la bienvenida y los dos caminos para empezar
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                        com.bestrong.mobile.ui.help.BrandIllustration(
+                            Icons.Default.CalendarMonth,
+                            listOf(Icons.Default.Repeat, Icons.Default.Star, Icons.Default.Today),
+                            MaterialTheme.colorScheme.secondary,
+                            Modifier.size(160.dp),
+                            animated = false,
+                        )
                         Text(
                             stringResource(R.string.home_no_routines),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         )
-                        FilledTonalButton(onClick = { showPrograms = true }) { Text(stringResource(R.string.home_browse_programs)) }
+                        Button(onClick = { showPrograms = true }, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                            Text(stringResource(R.string.home_browse_programs), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }

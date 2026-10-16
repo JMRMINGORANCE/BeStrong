@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -150,7 +151,7 @@ class UiFlowTest {
     fun programs_folded() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Ver programas predefinidos").performClick()
+        openPrograms()
         settle()
         // Con un diálogo hay dos raíces: se captura la pantalla entera
         captureScreenRoboImage("build/outputs/roborazzi/programs_folded.png")
@@ -224,6 +225,14 @@ class UiFlowTest {
         shot("planning_unfolded")
     }
 
+    /** Sin rutinas el botón de programas queda bajo la ilustración: se desplaza con el reloj en marcha. */
+    private fun openPrograms() {
+        compose.mainClock.autoAdvance = true
+        compose.onNodeWithText("Ver programas predefinidos").performScrollTo()
+        compose.mainClock.autoAdvance = false
+        compose.onNodeWithText("Ver programas predefinidos").performClick()
+    }
+
     /** Lista del diálogo de programas (la rejilla de Inicio también es desplazable). */
     private fun programsList() = compose.onNode(hasTestTag("programs_list"))
 
@@ -232,7 +241,7 @@ class UiFlowTest {
     fun periodized_program_today() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Ver programas predefinidos").performClick()
+        openPrograms()
         settle()
         compose.onNodeWithText("5/3/1 Boring But Big").performClick()
         settle()

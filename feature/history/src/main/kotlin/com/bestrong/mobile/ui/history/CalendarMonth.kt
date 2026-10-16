@@ -83,7 +83,7 @@ fun CalendarMonth(
                             val isSelected = date == selected
                             Box(
                                 Modifier.fillMaxWidth(0.8f).aspectRatio(1f).clip(CircleShape)
-                                    .background(if (trained) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
+                                    .background(if (trained) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .then(if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.tertiary, CircleShape) else Modifier)
                                     .then(
                                         when {

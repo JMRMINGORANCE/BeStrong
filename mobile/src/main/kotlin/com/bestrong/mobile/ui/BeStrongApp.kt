@@ -200,126 +200,134 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 selectedTextColor = scheme.primary,
             ),
         )
-        NavigationSuiteScaffold(
-            layoutType = layoutType,
-            navigationSuiteColors = androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults.colors(
-                navigationBarContainerColor = scheme.surfaceContainerLow,
-                navigationRailContainerColor = scheme.surfaceContainerLow,
-            ),
-            navigationSuiteItems = {
-                TopLevel.entries.forEach { dest ->
-                    item(
-                        colors = itemColors,
-                        selected = dest == topLevel,
-                        onClick = { nav.navigateTopLevel(dest.route) },
-                        icon = { Icon(dest.icon, contentDescription = stringResource(dest.label)) },
-                        label = { Text(stringResource(dest.label), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                    )
-                }
-            },
-        ) {
-            NavHost(nav, startDestination = TopLevel.TRAIN.route) {
-                composable(TopLevel.TRAIN.route) {
-                    HomeScreen(
-                        vm = home,
-                        onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
-                        onEditRoutine = { nav.navigate(Routes.routine(it)) },
-                        onOpenPlanning = { nav.navigate(Routes.PLANNING) },
-                        onOpenMuscle = { muscle -> nav.openMuscle(muscle.name) },
-                        onOpenExercise = { nav.navigate(Routes.exercise(it)) },
-                    )
-                }
-                composable(TopLevel.HISTORY.route) {
-                    HistoryScreen(hiltViewModel<HistoryViewModel>(), onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } })
-                }
-                composable(TopLevel.EXERCISES.route) { entry ->
-                    val exercisesVm = hiltViewModel<ExercisesViewModel>()
-                    // Desde Inicio («vas corto de espalda»): la biblioteca se abre filtrada por ese músculo
-                    val muscle by entry.savedStateHandle.getStateFlow<String?>(KEY_MUSCLE_FILTER, null).collectAsStateWithLifecycle()
-                    LaunchedEffect(muscle) {
-                        muscle?.let { exercisesVm.showMuscle(it) }
-                        entry.savedStateHandle[KEY_MUSCLE_FILTER] = null
+        // Cada pestaña con su color de fondo, como las pantallas de la bienvenida
+        val tabTint = when (topLevel) {
+            TopLevel.entries.getOrNull(1) -> scheme.secondary
+            TopLevel.entries.getOrNull(2) -> scheme.tertiary
+            else -> scheme.primary
+        }
+        com.bestrong.mobile.ui.theme.ScreenBackdrop(tabTint) {
+            NavigationSuiteScaffold(
+                layoutType = layoutType,
+                navigationSuiteColors = androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults.colors(
+                    navigationBarContainerColor = scheme.surfaceContainerLow,
+                    navigationRailContainerColor = scheme.surfaceContainerLow,
+                ),
+                navigationSuiteItems = {
+                    TopLevel.entries.forEach { dest ->
+                        item(
+                            colors = itemColors,
+                            selected = dest == topLevel,
+                            onClick = { nav.navigateTopLevel(dest.route) },
+                            icon = { Icon(dest.icon, contentDescription = stringResource(dest.label)) },
+                            label = { Text(stringResource(dest.label), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                        )
                     }
-                    ExerciseLibraryScreen(exercisesVm)
-                }
-                composable(TopLevel.PROFILE.route) {
-                    ProfileScreen(
-                        vm = hiltViewModel<ProfileViewModel>(),
-                        onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) },
-                        onOpenExercise = { nav.navigate(Routes.exercise(it)) },
-                    )
-                }
-                composable(Routes.WORKOUT) { backStackEntry ->
-                    // Ligado a la Activity: el temporizador de descanso sigue al minimizar el entrenamiento
-                    val activity = LocalActivity.current as ComponentActivity
-                    val vm = hiltViewModel<ActiveWorkoutViewModel>(viewModelStoreOwner = activity)
-                    val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
-                    LaunchedEffect(picked) {
-                        picked?.let {
-                            vm.addExercises(it)
-                            backStackEntry.savedStateHandle[Routes.PICKED] = null
+                },
+            ) {
+                NavHost(nav, startDestination = TopLevel.TRAIN.route) {
+                    composable(TopLevel.TRAIN.route) {
+                        HomeScreen(
+                            vm = home,
+                            onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
+                            onEditRoutine = { nav.navigate(Routes.routine(it)) },
+                            onOpenPlanning = { nav.navigate(Routes.PLANNING) },
+                            onOpenMuscle = { muscle -> nav.openMuscle(muscle.name) },
+                            onOpenExercise = { nav.navigate(Routes.exercise(it)) },
+                        )
+                    }
+                    composable(TopLevel.HISTORY.route) {
+                        HistoryScreen(hiltViewModel<HistoryViewModel>(), onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } })
+                    }
+                    composable(TopLevel.EXERCISES.route) { entry ->
+                        val exercisesVm = hiltViewModel<ExercisesViewModel>()
+                        // Desde Inicio («vas corto de espalda»): la biblioteca se abre filtrada por ese músculo
+                        val muscle by entry.savedStateHandle.getStateFlow<String?>(KEY_MUSCLE_FILTER, null).collectAsStateWithLifecycle()
+                        LaunchedEffect(muscle) {
+                            muscle?.let { exercisesVm.showMuscle(it) }
+                            entry.savedStateHandle[KEY_MUSCLE_FILTER] = null
                         }
+                        ExerciseLibraryScreen(exercisesVm)
                     }
-                    ActiveWorkoutScreen(
-                        vm = vm,
-                        onAddExercises = { nav.navigate(Routes.PICKER) },
-                        onBack = { nav.popBackStack() },
-                        onFinished = { nav.navigateTopLevel(TopLevel.HISTORY.route) },
-                        // Vuelta a Inicio sin restaurar estado guardado (si no, reaparecería la pantalla del entreno vacía)
-                        onDiscarded = { if (!nav.popBackStack(TopLevel.TRAIN.route, inclusive = false)) nav.navigate(TopLevel.TRAIN.route) },
-                    )
-                }
-                composable(Routes.PICKER) {
-                    ExercisePickerScreen(
-                        vm = hiltViewModel<ExercisesViewModel>(),
-                        onBack = { nav.popBackStack() },
-                        onPicked = { ids ->
-                            nav.previousBackStackEntry?.savedStateHandle?.set(Routes.PICKED, ArrayList(ids))
-                            nav.popBackStack()
-                        },
-                    )
-                }
-                composable(Routes.ROUTINE, arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })) { backStackEntry ->
-                    val id = backStackEntry.arguments?.getString("id")
-                    val vm = hiltViewModel<RoutineEditorViewModel>()
-                    val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
-                    LaunchedEffect(picked) {
-                        picked?.let {
-                            vm.addExercises(it)
-                            backStackEntry.savedStateHandle[Routes.PICKED] = null
+                    composable(TopLevel.PROFILE.route) {
+                        ProfileScreen(
+                            vm = hiltViewModel<ProfileViewModel>(),
+                            onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) },
+                            onOpenExercise = { nav.navigate(Routes.exercise(it)) },
+                        )
+                    }
+                    composable(Routes.WORKOUT) { backStackEntry ->
+                        // Ligado a la Activity: el temporizador de descanso sigue al minimizar el entrenamiento
+                        val activity = LocalActivity.current as ComponentActivity
+                        val vm = hiltViewModel<ActiveWorkoutViewModel>(viewModelStoreOwner = activity)
+                        val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
+                        LaunchedEffect(picked) {
+                            picked?.let {
+                                vm.addExercises(it)
+                                backStackEntry.savedStateHandle[Routes.PICKED] = null
+                            }
                         }
+                        ActiveWorkoutScreen(
+                            vm = vm,
+                            onAddExercises = { nav.navigate(Routes.PICKER) },
+                            onBack = { nav.popBackStack() },
+                            onFinished = { nav.navigateTopLevel(TopLevel.HISTORY.route) },
+                            // Vuelta a Inicio sin restaurar estado guardado (si no, reaparecería la pantalla del entreno vacía)
+                            onDiscarded = { if (!nav.popBackStack(TopLevel.TRAIN.route, inclusive = false)) nav.navigate(TopLevel.TRAIN.route) },
+                        )
                     }
-                    RoutineEditorScreen(vm, onAddExercises = { nav.navigate(Routes.PICKER) }, onClose = { nav.popBackStack() })
-                }
-                composable(Routes.EXERCISE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStackEntry ->
-                    val id = backStackEntry.arguments?.getString("id").orEmpty()
-                    ExerciseDetailScreen(hiltViewModel<ExercisesViewModel>(), id, onBack = { nav.popBackStack() })
-                }
-                composable(Routes.MEASUREMENTS) {
-                    MeasurementsScreen(hiltViewModel<ProfileViewModel>(), onBack = { nav.popBackStack() })
-                }
-                composable(Routes.PLANNING) {
-                    PlanningScreen(
-                        vm = hiltViewModel<PlanningViewModel>(),
-                        onBack = { nav.popBackStack() },
-                        onEditProgram = { nav.navigate(Routes.programEditor(it)) },
-                        onTimer = { nav.navigate(Routes.timer(IntervalRoute.encode(it))) },
-                        onGuided = { warmup, focus -> nav.navigate(Routes.guided(warmup, focus.name)) },
-                    )
-                }
-                composable(Routes.PROGRAM_EDITOR, arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })) { backStackEntry ->
-                    val parent = remember(backStackEntry) { nav.getBackStackEntry(Routes.PLANNING) }
-                    ProgramEditorScreen(hiltViewModel<PlanningViewModel>(parent), backStackEntry.arguments?.getString("id"), onClose = { nav.popBackStack() })
-                }
-                composable(Routes.TIMER, arguments = listOf(navArgument("plan") { type = NavType.StringType })) { backStackEntry ->
-                    IntervalTimerScreen(IntervalRoute.decode(backStackEntry.arguments?.getString("plan").orEmpty()), onBack = { nav.popBackStack() })
-                }
-                composable(
-                    Routes.GUIDED,
-                    arguments = listOf(navArgument("warmup") { type = NavType.BoolType }, navArgument("focus") { type = NavType.StringType }),
-                ) { backStackEntry ->
-                    val focus = runCatching { BodyFocus.valueOf(backStackEntry.arguments?.getString("focus").orEmpty()) }.getOrDefault(BodyFocus.FULL)
-                    GuidedSessionScreen(backStackEntry.arguments?.getBoolean("warmup") ?: true, focus, onBack = { nav.popBackStack() })
+                    composable(Routes.PICKER) {
+                        ExercisePickerScreen(
+                            vm = hiltViewModel<ExercisesViewModel>(),
+                            onBack = { nav.popBackStack() },
+                            onPicked = { ids ->
+                                nav.previousBackStackEntry?.savedStateHandle?.set(Routes.PICKED, ArrayList(ids))
+                                nav.popBackStack()
+                            },
+                        )
+                    }
+                    composable(Routes.ROUTINE, arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })) { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id")
+                        val vm = hiltViewModel<RoutineEditorViewModel>()
+                        val picked by backStackEntry.savedStateHandle.getStateFlow<ArrayList<String>?>(Routes.PICKED, null).collectAsStateWithLifecycle()
+                        LaunchedEffect(picked) {
+                            picked?.let {
+                                vm.addExercises(it)
+                                backStackEntry.savedStateHandle[Routes.PICKED] = null
+                            }
+                        }
+                        RoutineEditorScreen(vm, onAddExercises = { nav.navigate(Routes.PICKER) }, onClose = { nav.popBackStack() })
+                    }
+                    composable(Routes.EXERCISE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStackEntry ->
+                        val id = backStackEntry.arguments?.getString("id").orEmpty()
+                        ExerciseDetailScreen(hiltViewModel<ExercisesViewModel>(), id, onBack = { nav.popBackStack() })
+                    }
+                    composable(Routes.MEASUREMENTS) {
+                        MeasurementsScreen(hiltViewModel<ProfileViewModel>(), onBack = { nav.popBackStack() })
+                    }
+                    composable(Routes.PLANNING) {
+                        PlanningScreen(
+                            vm = hiltViewModel<PlanningViewModel>(),
+                            onBack = { nav.popBackStack() },
+                            onEditProgram = { nav.navigate(Routes.programEditor(it)) },
+                            onTimer = { nav.navigate(Routes.timer(IntervalRoute.encode(it))) },
+                            onGuided = { warmup, focus -> nav.navigate(Routes.guided(warmup, focus.name)) },
+                        )
+                    }
+                    composable(Routes.PROGRAM_EDITOR, arguments = listOf(navArgument("id") { type = NavType.StringType; nullable = true })) { backStackEntry ->
+                        val parent = remember(backStackEntry) { nav.getBackStackEntry(Routes.PLANNING) }
+                        ProgramEditorScreen(hiltViewModel<PlanningViewModel>(parent), backStackEntry.arguments?.getString("id"), onClose = { nav.popBackStack() })
+                    }
+                    composable(Routes.TIMER, arguments = listOf(navArgument("plan") { type = NavType.StringType })) { backStackEntry ->
+                        IntervalTimerScreen(IntervalRoute.decode(backStackEntry.arguments?.getString("plan").orEmpty()), onBack = { nav.popBackStack() })
+                    }
+                    composable(
+                        Routes.GUIDED,
+                        arguments = listOf(navArgument("warmup") { type = NavType.BoolType }, navArgument("focus") { type = NavType.StringType }),
+                    ) { backStackEntry ->
+                        val focus = runCatching { BodyFocus.valueOf(backStackEntry.arguments?.getString("focus").orEmpty()) }.getOrDefault(BodyFocus.FULL)
+                        GuidedSessionScreen(backStackEntry.arguments?.getBoolean("warmup") ?: true, focus, onBack = { nav.popBackStack() })
+                    }
                 }
             }
         }

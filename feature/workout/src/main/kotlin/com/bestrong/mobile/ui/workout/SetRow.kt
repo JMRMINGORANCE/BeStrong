@@ -186,7 +186,7 @@ fun SetRow(
                 }
             },
         ) {
-            val bg = if (set.completed) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surface
+            val bg = if (set.completed) MaterialTheme.colorScheme.tertiaryContainer else com.bestrong.mobile.ui.theme.LocalScreenColor.current
             val label = if (set.type == SetType.NORMAL) "${index + 1}" else set.type.short
             Row(
                 Modifier.fillMaxWidth().background(bg).padding(horizontal = 4.dp, vertical = 2.dp).heightIn(min = 48.dp),

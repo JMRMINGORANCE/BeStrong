@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.heading
@@ -128,22 +125,16 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
     }
 }
 
-/** Pantalla vacía: el icono dentro de un halo con el degradado de marca, título fuerte y explicación. */
+/**
+ * Pantalla vacía como las de la bienvenida: la ilustración animada (con [orbit] alrededor, si se dan), título grande y
+ * explicación.
+ */
 @Composable
-fun EmptyState(icon: ImageVector, title: String, subtitle: String, modifier: Modifier = Modifier) {
+fun EmptyState(icon: ImageVector, title: String, subtitle: String, modifier: Modifier = Modifier, orbit: List<ImageVector> = emptyList()) {
     Box(modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(
-                Modifier.size(112.dp).clip(CircleShape).background(
-                    Brush.radialGradient(listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), Color.Transparent)),
-                ),
-                contentAlignment = Alignment.Center,
-            ) {
-                Box(Modifier.size(72.dp).clip(CircleShape).background(brandGradient()), contentAlignment = Alignment.Center) {
-                    Icon(icon, null, Modifier.size(36.dp), tint = MaterialTheme.colorScheme.onPrimary)
-                }
-            }
-            Text(title, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center)
+            com.bestrong.mobile.ui.help.BrandIllustration(icon, orbit, MaterialTheme.colorScheme.primary, Modifier.size(200.dp), animated = false)
+            Text(title, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
             Text(
                 subtitle,
                 style = MaterialTheme.typography.bodyMedium,

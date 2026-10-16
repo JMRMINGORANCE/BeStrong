@@ -112,30 +112,32 @@ private val FAQ = listOf(
 @Composable
 fun HelpDialog(onDismiss: () -> Unit, onReplayTutorial: () -> Unit) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.help)) },
-                    navigationIcon = { IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.action_close)) } },
-                )
-            },
-        ) { padding ->
-            LazyColumn(
-                Modifier.padding(padding).fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                val content = Modifier.widthIn(max = 720.dp).fillMaxWidth().padding(horizontal = 16.dp)
-                item {
-                    OutlinedButton(onClick = onReplayTutorial, modifier = content) { Text(stringResource(R.string.tutorial_replay)) }
+        com.bestrong.mobile.ui.theme.ScreenBackdrop(MaterialTheme.colorScheme.secondary) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text(stringResource(R.string.help)) },
+                        navigationIcon = { IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.action_close)) } },
+                    )
+                },
+            ) { padding ->
+                LazyColumn(
+                    Modifier.padding(padding).fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    val content = Modifier.widthIn(max = 720.dp).fillMaxWidth().padding(horizontal = 16.dp)
+                    item {
+                        OutlinedButton(onClick = onReplayTutorial, modifier = content) { Text(stringResource(R.string.tutorial_replay)) }
+                    }
+                    item { Heading(R.string.whats_new, content) }
+                    item { Text(stringResource(R.string.whats_new_body), content) }
+                    item { Heading(R.string.glossary, content) }
+                    items(GLOSSARY) { (term, def) -> Entry(term, def, content) }
+                    item { Heading(R.string.faq, content) }
+                    items(FAQ) { (q, a) -> Entry(q, a, content) }
+                    item { Spacer(Modifier.padding(16.dp)) }
                 }
-                item { Heading(R.string.whats_new, content) }
-                item { Text(stringResource(R.string.whats_new_body), content) }
-                item { Heading(R.string.glossary, content) }
-                items(GLOSSARY) { (term, def) -> Entry(term, def, content) }
-                item { Heading(R.string.faq, content) }
-                items(FAQ) { (q, a) -> Entry(q, a, content) }
-                item { Spacer(Modifier.padding(16.dp)) }
             }
         }
     }
@@ -204,10 +206,10 @@ fun TutorialDialog(
         val setup = pager.currentPage == TUTORIAL.size
         // Cada pantalla tiñe el fondo con su color (acento, ámbar, verde…)
         val tint = tutorialTint(pager.currentPage)
-        androidx.compose.material3.Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        androidx.compose.material3.Surface(Modifier.fillMaxSize(), color = com.bestrong.mobile.ui.theme.LocalScreenColor.current) {
             Box(
                 Modifier.fillMaxSize().background(
-                    androidx.compose.ui.graphics.Brush.verticalGradient(listOf(tint.copy(alpha = 0.32f), MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background)),
+                    androidx.compose.ui.graphics.Brush.verticalGradient(listOf(tint.copy(alpha = 0.32f), androidx.compose.ui.graphics.Color.Transparent, androidx.compose.ui.graphics.Color.Transparent)),
                 ),
             ) {
                 Column(Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 24.dp, vertical = 16.dp)) {
@@ -265,7 +267,29 @@ private fun TutorialScreen(page: TutorialPage, tint: androidx.compose.ui.graphic
  * alrededor (se mueven despacio, sin distraer).
  */
 @Composable
-private fun TutorialIllustration(page: TutorialPage, tint: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) {
+private fun TutorialIllustration(page: TutorialPage, tint: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) =
+    BrandIllustration(page.icon, page.orbit, tint, modifier)
+
+/**
+ * La ilustración de la bienvenida (icono grande en un círculo con degradado, halos y tres iconos que flotan) para
+ * usarla en toda la app: estados vacíos, tarjetas destacadas…
+ */
+@Composable
+fun BrandIllustration(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    orbit: List<androidx.compose.ui.graphics.vector.ImageVector>,
+    tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
+    modifier: Modifier = Modifier,
+    animated: Boolean = true,
+) {
+    // Fuera de la bienvenida va quieta: una animación infinita detrás de una lista solo gasta batería
+    val float = if (animated) floatingPhase() else 0.5f
+    val on = MaterialTheme.colorScheme.surfaceContainerLowest
+    BrandIllustrationBody(icon, orbit, tint, on, float, modifier)
+}
+
+@Composable
+private fun floatingPhase(): Float {
     val transition = androidx.compose.animation.core.rememberInfiniteTransition(label = "tutorial")
     val float by transition.animateFloat(
         initialValue = 0f,
@@ -276,7 +300,18 @@ private fun TutorialIllustration(page: TutorialPage, tint: androidx.compose.ui.g
         ),
         label = "float",
     )
-    val on = MaterialTheme.colorScheme.surfaceContainerLowest
+    return float
+}
+
+@Composable
+private fun BrandIllustrationBody(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    orbit: List<androidx.compose.ui.graphics.vector.ImageVector>,
+    tint: androidx.compose.ui.graphics.Color,
+    on: androidx.compose.ui.graphics.Color,
+    float: Float,
+    modifier: Modifier,
+) {
     androidx.compose.foundation.layout.BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         // Todo a escala del tamaño de la ilustración (grande en las pantallas, pequeña en la de configuración)
         val bubble = maxWidth * 0.2f
@@ -291,18 +326,18 @@ private fun TutorialIllustration(page: TutorialPage, tint: androidx.compose.ui.g
                 .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(tint, androidx.compose.ui.graphics.lerp(tint, MaterialTheme.colorScheme.secondary, 0.5f)))),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(page.icon, null, Modifier.size(mainIcon), tint = on)
+            Icon(icon, null, Modifier.size(mainIcon), tint = on)
         }
         // Los pequeños, repartidos alrededor y flotando a destiempo
         val spots = listOf(Alignment.TopEnd, Alignment.BottomStart, Alignment.CenterStart)
-        page.orbit.forEachIndexed { i, icon ->
+        orbit.forEachIndexed { i, small ->
             val dy = (if (i % 2 == 0) float else 1f - float) * 14f
             Box(
                 Modifier.align(spots[i % spots.size]).padding(gap).graphicsLayer { translationY = dy * density }
                     .size(bubble).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHigh),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(icon, null, Modifier.size(bubble * 0.5f), tint = tint)
+                Icon(small, null, Modifier.size(bubble * 0.5f), tint = tint)
             }
         }
     }
