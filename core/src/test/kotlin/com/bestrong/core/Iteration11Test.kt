@@ -902,7 +902,7 @@ class CollarTest {
     @Test
     fun measurementCsvReadsHeadersQuotesAndDayFirstDates() {
         val zone = java.time.ZoneOffset.UTC
-        val rows = com.bestrong.core.io.MeasurementCsv.parse("Fecha,Cintura,Peso\n\"02/03/2026\",\"85\",\"80,5\"", zone)
+        val rows = com.bestrong.core.io.MeasurementCsv.read("Fecha,Cintura,Peso\n\"02/03/2026\",\"85\",\"80,5\"", zone, monthFirstByDefault = false).rows
         assertEquals(85.0, rows.single().waistCm!!, 1e-9)
         assertEquals(80.5, rows.single().weightKg!!, 1e-9)
         assertEquals(java.time.LocalDate.of(2026, 3, 2), java.time.Instant.ofEpochMilli(rows.single().dateEpochMs).atZone(zone).toLocalDate())
@@ -935,5 +935,28 @@ class CollarTest {
     fun platesKeepTheUsualLoadWhenItIsAsGood() {
         val load = com.bestrong.core.training.PlateCalculator.calculate(165.0, com.bestrong.core.util.WeightUnit.LB)
         assertEquals(listOf(45.0, 10.0, 5.0), load.perSide)
+    }
+
+    @Test
+    fun measurementCsvHandlesUnitsTwoDigitYearsGermanAndBlankRows() {
+        val zone = java.time.ZoneOffset.UTC
+        fun day(m: com.bestrong.core.model.BodyMeasurement) = java.time.Instant.ofEpochMilli(m.dateEpochMs).atZone(zone).toLocalDate()
+        val r = com.bestrong.core.io.MeasurementCsv.read("Datum;Körpergewicht;Körperfett;Taille (in)\n02/03/26;80,5 kg;22 %;32\n;;;\n", zone, monthFirstByDefault = false)
+        assertEquals(0, r.skipped)
+        val m = r.rows.single()
+        assertEquals(java.time.LocalDate.of(2026, 3, 2), day(m))
+        assertEquals(80.5, m.weightKg!!, 1e-9)
+        assertEquals(22.0, m.bodyFatPct!!, 1e-9)
+        assertEquals(81.28, m.waistCm!!, 1e-6)
+        val us = com.bestrong.core.io.MeasurementCsv.read("date,weight\n10/01/2026,176.4 lbs", zone, monthFirstByDefault = true)
+        assertEquals(java.time.LocalDate.of(2026, 10, 1), day(us.rows.single()))
+        assertEquals(80.0, us.rows.single().weightKg!!, 0.05)
+    }
+
+    @Test
+    fun barbellRoundingInPoundsUsesPoundPlates() {
+        val gym = com.bestrong.core.training.GymProfile.home().copy(barKg = 20.0, collarKg = 0.0)
+        val kg = gym.nearestBarbell(com.bestrong.core.util.WeightUnit.LB.toKg(137.0), com.bestrong.core.util.WeightUnit.LB)
+        assertEquals(135.0, com.bestrong.core.util.WeightUnit.LB.fromKg(kg), 0.01)
     }
 }

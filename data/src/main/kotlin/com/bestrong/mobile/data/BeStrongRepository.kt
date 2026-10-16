@@ -360,13 +360,18 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         val legacy = dao.valueOnce(KEY_IGNORED_HC_WEIGHTS_LEGACY)?.split(',')?.mapNotNull { it.toLongOrNull() }
             ?.map { java.time.Instant.ofEpochMilli(it).atZone(zone).toLocalDate().toEpochDay() }.orEmpty()
         if (legacy.isEmpty()) return days
-        val all = days + legacy
+        // También con la poda de los antiguos (como al añadir)
+        val oldest = java.time.LocalDate.now().toEpochDay() - IGNORED_KEEP_DAYS
+        val all = (days + legacy).filter { it >= oldest }.toSet()
         dao.putValue(KeyValueEntity(KEY_IGNORED_HC_WEIGHTS, all.joinToString(",")))
         dao.deleteValue(KEY_IGNORED_HC_WEIGHTS_LEGACY)
         return all
     }
 
-    suspend fun ignoreHealthWeightDay(epochDay: Long) {
+    /** Leer-cambiar-escribir la lista de días ignorados de uno en uno (borrar dos seguidos no pierde uno). */
+    private val ignoredMutex = Mutex()
+
+    suspend fun ignoreHealthWeightDay(epochDay: Long) = ignoredMutex.withLock {
         val oldest = java.time.LocalDate.now().toEpochDay() - IGNORED_KEEP_DAYS
         val days = (ignoredHealthWeightDays() + epochDay).filter { it >= oldest }
         dao.putValue(KeyValueEntity(KEY_IGNORED_HC_WEIGHTS, days.joinToString(",")))

@@ -456,7 +456,6 @@
     <string name="pip_next">Suivant : %1$s</string>
     <string name="plan_generated_saved">%1$d routines enregistrées</string>
     <string name="plan_program_saved">Programme « %1$s » enregistré</string>
-    <string name="plan_week_duplicated">Semaine copiée sur la suivante</string>
     <string name="planning">Planification</string>
     <string name="planning_open">Planifier</string>
     <string name="planning_subtitle">Générateur, calendrier, programmes, pic de forme, minuteurs et plus</string>
@@ -1195,4 +1194,24 @@
     <string name="hc_restore_none">Aucun poids supprimé à récupérer</string>
     <string name="import_measurements_skipped">%1$d lignes illisibles</string>
     <string name="routine_search_clear">Effacer la recherche</string>
+    <string name="exercise_image_open">Voir l\'animation</string>
+    <string name="greeting_morning">Bonjour</string>
+    <string name="greeting_afternoon">Bon après-midi</string>
+    <string name="greeting_evening">Bonsoir</string>
+    <string name="tut5_t">Ta montre, ton partenaire</string>
+    <string name="tut5_d">Démarre depuis la montre, tourne la lunette pour la charge et les reps, mesure ton pouls et sens la fin du repos au poignet. Tout se synchronise avec le téléphone.</string>
+    <string name="rest_next">Ensuite : %1$s</string>
+    <plurals name="plan_week_duplicated_n">
+        <item quantity="one">Semaine copiée dans %1$d semaine suivante</item>
+        <item quantity="other">Semaine copiée dans les %1$d suivantes</item>
+    </plurals>
+    <plurals name="plan_duplicate_weeks">
+        <item quantity="one">Dans %1$d semaine suivante</item>
+        <item quantity="other">Les %1$d suivantes</item>
+    </plurals>
+    <string name="guided_back">Retour</string>
+    <string name="guided_pause">Pause</string>
+    <string name="guided_resume">Reprendre</string>
+    <string name="plateau_not_now">Pas maintenant</string>
+    <string name="rest_countdown">Compte à rebours 3-2-1 en fin de repos</string>
 </resources>

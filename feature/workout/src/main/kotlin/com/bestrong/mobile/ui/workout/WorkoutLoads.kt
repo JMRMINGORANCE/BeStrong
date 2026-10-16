@@ -8,15 +8,15 @@ import com.bestrong.core.model.Workout
 /** Series pendientes con peso de un ejercicio, al peso más cercano que se puede montar en el gimnasio activo. */
 internal fun refitToGym(e: com.bestrong.core.model.WorkoutExercise, s: com.bestrong.mobile.data.UserSettings): com.bestrong.core.model.WorkoutExercise {
     val gym = s.gymFor(e.exercise.id)
-    // En libras no hay discos del perfil; si el gimnasio nuevo no tiene ese material no hay a qué ajustar
+    // En libras, con los discos de libras; si el gimnasio nuevo no tiene ese material no hay a qué ajustar
     // (se verá el aviso de material)
-    if (s.unit != com.bestrong.core.util.WeightUnit.KG || e.exercise.equipment !in gym.equipment) return e
+    if (e.exercise.equipment !in gym.equipment) return e
     val barbell = e.exercise.equipment == com.bestrong.core.model.Equipment.BARBELL || e.exercise.equipment == com.bestrong.core.model.Equipment.SMITH
     return e.copy(
         sets = e.sets.map { set ->
             // Por debajo de la barra (técnica con barra ligera) no se sube a la barra
             val fits = set.weightKg > 0 && !(barbell && set.weightKg < gym.loadedBarKg)
-            if (!set.completed && fits) set.copy(weightKg = gym.nearestLoad(set.weightKg, e.exercise.equipment)) else set
+            if (!set.completed && fits) set.copy(weightKg = gym.nearestLoad(set.weightKg, e.exercise.equipment, s.unit)) else set
         },
     )
 }

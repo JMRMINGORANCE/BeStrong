@@ -179,10 +179,13 @@ fun GuidedSessionScreen(warmup: Boolean, focus: BodyFocus, onBack: () -> Unit) {
     val steps = remember(warmup, focus) { if (warmup) GuidedRoutines.warmup(focus) else GuidedRoutines.stretching(focus) }
     var index by rememberSaveable { mutableIntStateOf(0) }
     // Fin del paso en reloj monótono: la cuenta no se retrasa aunque el bucle se frene
-    val endAt by rememberSaveable(index) { mutableLongStateOf(SystemClock.elapsedRealtime() + (steps.getOrNull(index)?.seconds ?: 0) * 1_000L) }
+    var endAt by rememberSaveable(index) { mutableLongStateOf(SystemClock.elapsedRealtime() + (steps.getOrNull(index)?.seconds ?: 0) * 1_000L) }
+    // En pausa se guarda lo que quedaba del paso (y al seguir, cuenta desde ahí)
+    var pausedLeftMs by rememberSaveable(index) { mutableStateOf<Long?>(null) }
     var now by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
-    val left = ((endAt - now + 999) / 1_000).coerceAtLeast(0).toInt()
-    LaunchedEffect(index) {
+    val left = (((pausedLeftMs ?: (endAt - now)) + 999) / 1_000).coerceAtLeast(0).toInt()
+    LaunchedEffect(index, pausedLeftMs) {
+        if (pausedLeftMs != null) return@LaunchedEffect
         while (true) {
             now = SystemClock.elapsedRealtime()
             val remaining = endAt - now
@@ -215,6 +218,17 @@ fun GuidedSessionScreen(warmup: Boolean, focus: BodyFocus, onBack: () -> Unit) {
                 Text(formatDuration(left.toLong()), fontSize = 72.sp, fontWeight = FontWeight.Bold)
                 steps.getOrNull(index + 1)?.let { Text(stringResource(R.string.guided_next, it.name(lang)), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Atrás (repetir el anterior), pausa/seguir y saltar
+                    OutlinedButton(onClick = { index-- }, enabled = index > 0) { Text(stringResource(R.string.guided_back)) }
+                    Button(onClick = {
+                        val paused = pausedLeftMs
+                        if (paused == null) {
+                            pausedLeftMs = (endAt - SystemClock.elapsedRealtime()).coerceAtLeast(0)
+                        } else {
+                            endAt = SystemClock.elapsedRealtime() + paused
+                            pausedLeftMs = null
+                        }
+                    }) { Text(stringResource(if (pausedLeftMs == null) R.string.guided_pause else R.string.guided_resume)) }
                     OutlinedButton(onClick = { index++ }) { Text(stringResource(R.string.guided_skip)) }
                 }
             }

@@ -280,7 +280,7 @@ fun ActiveWorkoutScreen(
         snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             Column {
-                if (!expanded && posture != FoldPosture.TABLETOP) rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest) }
+                if (!expanded && posture != FoldPosture.TABLETOP) rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w)) }
                 // Modo una mano: lo importante abajo, al alcance del pulgar
                 if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
             }
@@ -290,9 +290,12 @@ fun ActiveWorkoutScreen(
         val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline, vm::setDeadline, vm::fitToDeadline)
         when {
             posture == FoldPosture.TABLETOP -> Column(content) {
+                // En pausa también se avisa en modo mesa y desplegado (antes solo plegado)
+                if (w.isPaused) PausedBanner(vm::togglePause)
+                RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                 // Mitad superior: lo que se mira desde el banco
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true) }
+                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true, next = nextSetLabel(w)) }
                         ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp), eta)
                 }
                 HorizontalDivider()
@@ -303,7 +306,8 @@ fun ActiveWorkoutScreen(
                     Modifier.weight(0.38f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true) }
+                    if (w.isPaused) PausedBanner(vm::togglePause)
+                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w)) }
                     if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                     if (settings.mediaControls) MediaControls(settings.musicApp)
@@ -597,6 +601,7 @@ private fun ExerciseCard(
         Box(Modifier.width(4.dp).fillMaxHeight().background(supersetColor ?: Color.Transparent))
         Column(Modifier.weight(1f).padding(vertical = 8.dp)) {
             Row(Modifier.padding(start = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                com.bestrong.mobile.ui.components.ExerciseThumb(we.exercise, 44.dp, Modifier.padding(end = 10.dp))
                 Column(Modifier.weight(1f)) {
                     supersetLabel?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = supersetColor ?: Color.Unspecified, fontWeight = FontWeight.Bold) }
                     Text(
@@ -1110,4 +1115,13 @@ fun WorkoutSummaryDialog(
             else -> null
         },
     )
+}
+
+/** «Press banca · 80 kg × 8»: la siguiente serie por hacer, para la barra de descanso. */
+@Composable
+private fun nextSetLabel(w: com.bestrong.core.model.Workout): String? {
+    val unit = LocalWeightUnit.current
+    val next = WorkoutEditor.nextPendingSet(w)
+    val ex = next?.let { (i, _) -> w.exercises.getOrNull(i)?.exercise }
+    return if (next == null || ex == null) null else ex.displayName() + " · " + describeSet(next.second, ex, unit)
 }

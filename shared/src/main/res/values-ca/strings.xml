@@ -456,7 +456,6 @@
     <string name="pip_next">Següent: %1$s</string>
     <string name="plan_generated_saved">%1$d rutines desades</string>
     <string name="plan_program_saved">Programa «%1$s» desat</string>
-    <string name="plan_week_duplicated">Setmana copiada a la següent</string>
     <string name="planning">Planificació</string>
     <string name="planning_open">Planificar</string>
     <string name="planning_subtitle">Generador, calendari, programes, pic, temporitzadors i més</string>
@@ -1195,4 +1194,24 @@
     <string name="hc_restore_none">No hi ha pesos esborrats per recuperar</string>
     <string name="import_measurements_skipped">%1$d files no s\'han entès</string>
     <string name="routine_search_clear">Esborrar cerca</string>
+    <string name="exercise_image_open">Veure l\'animació</string>
+    <string name="greeting_morning">Bon dia</string>
+    <string name="greeting_afternoon">Bona tarda</string>
+    <string name="greeting_evening">Bona nit</string>
+    <string name="tut5_t">El teu rellotge, el teu company</string>
+    <string name="tut5_d">Comença des del rellotge, gira el bisell per al pes i les reps, mesura el pols i el descans et vibra al canell. Tot se sincronitza sol amb el mòbil.</string>
+    <string name="rest_next">Següent: %1$s</string>
+    <plurals name="plan_week_duplicated_n">
+        <item quantity="one">Setmana copiada a la següent</item>
+        <item quantity="other">Setmana copiada a les %1$d següents</item>
+    </plurals>
+    <plurals name="plan_duplicate_weeks">
+        <item quantity="one">A la setmana següent</item>
+        <item quantity="other">A les %1$d següents</item>
+    </plurals>
+    <string name="guided_back">Enrere</string>
+    <string name="guided_pause">Pausa</string>
+    <string name="guided_resume">Continuar</string>
+    <string name="plateau_not_now">Ara no</string>
+    <string name="rest_countdown">Compte enrere 3-2-1 al final del descans</string>
 </resources>

@@ -227,7 +227,7 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
             listOf(30, 45, 60, 75, 90).forEach { m ->
                 FilterChip(selected = ui.state.minutesPerSession == m, onClick = { vm.setMinutesPerSession(m) }, label = { Text("$m") })
             }
-            OutlinedButton(onClick = { vm.duplicateWeek(weekStart) }) { Text(stringResource(R.string.cal_duplicate)) }
+            DuplicateWeekButton { weeks -> vm.duplicateWeek(weekStart, weeks) }
             OutlinedButton(onClick = { vm.exportWeekToCalendar(weekStart) }) { Text(stringResource(R.string.cal_export_ics)) }
         }
     }
@@ -488,4 +488,24 @@ private fun AddToCalendarItem(routine: com.bestrong.core.model.Routine, date: ja
             runCatching { context.startActivity(intent) }.onFailure { android.widget.Toast.makeText(context, noApp, android.widget.Toast.LENGTH_SHORT).show() }
         },
     )
+}
+
+/** «Repetir semana»: en la siguiente o en las 2, 4 u 8 siguientes (hasta el final del mesociclo). */
+@Composable
+private fun DuplicateWeekButton(onDuplicate: (Int) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        OutlinedButton(onClick = { open = true }) { Text(stringResource(R.string.cal_duplicate)) }
+        androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            listOf(1, 2, 4, 8).forEach { n ->
+                androidx.compose.material3.DropdownMenuItem(
+                    text = { Text(androidx.compose.ui.res.pluralStringResource(R.plurals.plan_duplicate_weeks, n, n)) },
+                    onClick = {
+                        open = false
+                        onDuplicate(n)
+                    },
+                )
+            }
+        }
+    }
 }

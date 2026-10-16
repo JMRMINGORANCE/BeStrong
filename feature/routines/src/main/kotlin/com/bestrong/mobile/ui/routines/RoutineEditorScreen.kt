@@ -120,6 +120,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                 Card(content) {
                     Column(Modifier.padding(12.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            com.bestrong.mobile.ui.components.ExerciseThumb(re.exercise, 48.dp, Modifier.padding(end = 12.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(re.exercise.displayName(), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
                                 Text(

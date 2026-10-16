@@ -37,9 +37,11 @@ data class GymProfile(
     }
 
     /** Peso más cercano alcanzable con este material para el ejercicio dado. */
-    fun nearestLoad(targetKg: Double, equipment: Equipment): Double = when (equipment) {
-        Equipment.BARBELL, Equipment.SMITH -> nearestBarbell(targetKg)
-        Equipment.DUMBBELL, Equipment.KETTLEBELL -> if (dumbbellsKg.isEmpty()) targetKg else dumbbellsKg.minBy { kotlin.math.abs(it - targetKg) }
+    fun nearestLoad(targetKg: Double, equipment: Equipment, unit: WeightUnit = WeightUnit.KG): Double = when {
+        equipment == Equipment.BARBELL || equipment == Equipment.SMITH -> nearestBarbell(targetKg, unit)
+        // Las mancuernas del perfil están en kg: en libras no hay con qué redondear
+        unit != WeightUnit.KG -> targetKg
+        equipment == Equipment.DUMBBELL || equipment == Equipment.KETTLEBELL -> if (dumbbellsKg.isEmpty()) targetKg else dumbbellsKg.minBy { kotlin.math.abs(it - targetKg) }
         else -> targetKg
     }
 
@@ -47,25 +49,29 @@ data class GymProfile(
      * El peso más bajo que se puede montar por encima de [currentKg]: para que una subida no se pierda al
      * redondear (p. ej. +1,25 kg con discos de 1,25 por lado en una barra = +2,5).
      */
-    fun loadAbove(currentKg: Double, equipment: Equipment): Double = when (equipment) {
-        Equipment.BARBELL, Equipment.SMITH -> {
-            val step = (platesKg.filter { it > 0 }.minOrNull() ?: 1.25) * 2
-            nearestBarbell(currentKg + step).let { if (it > currentKg + 1e-6) it else currentKg + step }
+    fun loadAbove(currentKg: Double, equipment: Equipment, unit: WeightUnit = WeightUnit.KG): Double = when {
+        equipment == Equipment.BARBELL || equipment == Equipment.SMITH -> {
+            val step = if (unit == WeightUnit.KG) (platesKg.filter { it > 0 }.minOrNull() ?: 1.25) * 2 else unit.toKg(PlateCalculator.LB_PLATES.min() * 2)
+            nearestBarbell(currentKg + step, unit).let { if (it > currentKg + 1e-6) it else currentKg + step }
         }
-        Equipment.DUMBBELL, Equipment.KETTLEBELL -> dumbbellsKg.filter { it > currentKg + 1e-6 }.minOrNull() ?: currentKg
+        unit != WeightUnit.KG -> currentKg
+        equipment == Equipment.DUMBBELL || equipment == Equipment.KETTLEBELL -> dumbbellsKg.filter { it > currentKg + 1e-6 }.minOrNull() ?: currentKg
         else -> currentKg
     }
 
-    /** Peso alcanzable con la barra y los discos (lo mismo que monta la calculadora de discos, por lado). */
-    fun nearestBarbell(targetKg: Double): Double {
-        val base = loadedBarKg
-        if (targetKg <= base) return base
-        val side = PlateCalculator.bestSide((targetKg - base) / 2, platesKg).sum()
-        val below = base + side * 2
+    /**
+     * Peso alcanzable con la barra y los discos (lo mismo que monta la calculadora de discos, por lado). En libras,
+     * con la barra y los discos de libras, como la calculadora; el resultado siempre en kg.
+     */
+    fun nearestBarbell(targetKg: Double, unit: WeightUnit = WeightUnit.KG): Double {
+        val plates = platesKg.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
+        val base = if (unit == WeightUnit.KG) loadedBarKg else barIn(unit, barKg) + unit.fromKg(collarKg)
+        val target = unit.fromKg(targetKg)
+        if (target <= base) return unit.toKg(base)
+        val below = base + PlateCalculator.bestSide((target - base) / 2, plates).sum() * 2
         // Si queda un hueco grande, probamos con el disco más pequeño de más
-        val smallest = platesKg.filter { it > 0 }.minOrNull() ?: return below
-        val above = below + smallest * 2
-        return if (targetKg - below <= above - targetKg) below else above
+        val above = below + (plates.filter { it > 0 }.minOrNull() ?: 0.0) * 2
+        return unit.toKg(if (target - below <= above - target) below else above)
     }
 
     companion object {

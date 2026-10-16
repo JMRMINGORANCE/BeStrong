@@ -259,7 +259,14 @@ fun SetRow(
                 if (columns.previous) {
                     Column(
                         Modifier.weight(1.4f).clickable(enabled = previous != null, onClickLabel = stringResource(R.string.set_copy_previous)) {
-                            previous?.let { onWeightKg(it.weightKg); onReps(it.reps); onDuration(it.durationSec) }
+                            // Todo lo de la última vez: también la distancia y las reps del lado derecho
+                            previous?.let { p ->
+                                onWeightKg(p.weightKg)
+                                onReps(p.reps)
+                                onDuration(p.durationSec)
+                                if (p.distanceM > 0) onDistance(p.distanceM)
+                                p.repsRight?.let(onRepsRight)
+                            }
                         },
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {

@@ -456,7 +456,6 @@
     <string name="pip_next">Next: %1$s</string>
     <string name="plan_generated_saved">%1$d routines saved</string>
     <string name="plan_program_saved">Program “%1$s” saved</string>
-    <string name="plan_week_duplicated">Week copied to the next one</string>
     <string name="planning">Planning</string>
     <string name="planning_open">Plan</string>
     <string name="planning_subtitle">Generator, calendar, programs, peaking, timers and more</string>
@@ -1195,4 +1194,24 @@
     <string name="hc_restore_none">No deleted weights to restore</string>
     <string name="import_measurements_skipped">%1$d rows couldn\'t be read</string>
     <string name="routine_search_clear">Clear search</string>
+    <string name="exercise_image_open">View animation</string>
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="tut5_t">Your watch, your partner</string>
+    <string name="tut5_d">Start from the watch, turn the bezel for weight and reps, track your heart rate and feel the rest end on your wrist. Everything syncs with the phone.</string>
+    <string name="rest_next">Next: %1$s</string>
+    <plurals name="plan_week_duplicated_n">
+        <item quantity="one">Week copied to the next one</item>
+        <item quantity="other">Week copied to the next %1$d</item>
+    </plurals>
+    <plurals name="plan_duplicate_weeks">
+        <item quantity="one">Next week</item>
+        <item quantity="other">The next %1$d weeks</item>
+    </plurals>
+    <string name="guided_back">Back</string>
+    <string name="guided_pause">Pause</string>
+    <string name="guided_resume">Resume</string>
+    <string name="plateau_not_now">Not now</string>
+    <string name="rest_countdown">3-2-1 countdown at the end of rest</string>
 </resources>

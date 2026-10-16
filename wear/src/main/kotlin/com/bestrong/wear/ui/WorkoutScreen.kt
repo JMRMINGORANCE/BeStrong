@@ -72,7 +72,6 @@ fun WorkoutScreen(
     val workout by session.workout.collectAsStateWithLifecycle()
     val index by session.exerciseIndex.collectAsStateWithLifecycle()
     val metrics by session.metrics.collectAsStateWithLifecycle()
-    val target by session.rotaryTarget.collectAsStateWithLifecycle()
     val repCounting by session.repCounting.collectAsStateWithLifecycle()
     // Marcas del móvil: si llegan nuevas, la pista «N reps = récord» se recalcula
     val records by session.recordsVersion.collectAsStateWithLifecycle(initialValue = Unit to Unit)
@@ -204,16 +203,19 @@ fun WorkoutScreen(
                         BigValue("${set.durationSec / 60}", "min", selected = true) {}
                     }
                     else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        if (we.exercise.tracking == TrackingType.WEIGHT_REPS || set.weightKg > 0) {
-                            BigValue(unit.format(set.weightKg), unit.label, selected = target == RotaryTarget.WEIGHT) {
+                        // Lo marcado es lo que mueve el bisel (sin peso a la vista, las reps o los metros)
+                        val effective = session.effectiveTarget(we, set)
+                        if (com.bestrong.wear.session.showsWeight(we, set)) {
+                            BigValue(unit.format(set.weightKg), unit.label, selected = effective == RotaryTarget.WEIGHT) {
                                 session.setRotaryTarget(RotaryTarget.WEIGHT)
                             }
                             Text("×", style = MaterialTheme.typography.titleLarge)
                         }
-                        BigValue(
-                            "${set.reps}", "reps",
-                            selected = target == RotaryTarget.REPS || we.exercise.tracking == TrackingType.REPS_ONLY && set.weightKg == 0.0,
-                        ) { session.setRotaryTarget(RotaryTarget.REPS) }
+                        if (we.exercise.tracking == TrackingType.DISTANCE) {
+                            BigValue("${set.distanceM.toInt()}", "m", selected = effective == RotaryTarget.REPS) { session.setRotaryTarget(RotaryTarget.REPS) }
+                        } else {
+                            BigValue("${set.reps}", "reps", selected = effective == RotaryTarget.REPS) { session.setRotaryTarget(RotaryTarget.REPS) }
+                        }
                     }
                 }
                 if (repCounting) {
@@ -238,12 +240,13 @@ fun WorkoutScreen(
                 set?.targetReps?.takeIf { it != set.reps && we.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { planned ->
                     Text(stringResource(R.string.planned_reps, planned), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                previous?.takeIf { we.exercise.tracking != TrackingType.CARDIO }?.let {
+                previous?.let {
                     Text(
-                        stringResource(R.string.previous, unit.format(it.weightKg), it.reps),
-                        // «La última vez» bien visible: es lo que hay que batir
+                        stringResource(R.string.previous_any, setText(it, we.exercise.tracking, unit)),
+                        // «La última vez» bien visible: es lo que hay que batir; tocarla la copia en esta serie
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.clickable(onClickLabel = stringResource(R.string.copy_previous)) { session.copyPrevious(it) },
                     )
                 }
                 Spacer(Modifier.height(4.dp))

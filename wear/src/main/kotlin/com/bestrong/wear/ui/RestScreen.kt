@@ -93,7 +93,7 @@ fun RestScreen(session: WorkoutSession) {
                 if (record) Text(stringResource(R.string.new_record_live), color = Done, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
                 next?.let { (we, s) ->
                     Text(
-                        stringResource(R.string.next_short, we.exercise.displayName(), unit.format(s.weightKg), s.reps),
+                        stringResource(R.string.next_any, we.exercise.displayName(), setText(s, we.exercise.tracking, unit)),
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

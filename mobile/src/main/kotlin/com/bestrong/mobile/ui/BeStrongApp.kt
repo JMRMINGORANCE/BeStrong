@@ -183,11 +183,33 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             appVm.update { it.copy(dismissedTips = com.bestrong.core.util.DismissedTips.prune(it.dismissedTips + id, java.time.LocalDate.now())) }
         },
     ) {
+        // Barra de navegación sobre una superficie algo más clara que el fondo y la pestaña activa en una
+        // píldora del color de acento
+        val scheme = androidx.compose.material3.MaterialTheme.colorScheme
+        val itemColors = androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults.itemColors(
+            navigationBarItemColors = androidx.compose.material3.NavigationBarItemDefaults.colors(
+                indicatorColor = scheme.primary,
+                selectedIconColor = scheme.onPrimary,
+                selectedTextColor = scheme.primary,
+                unselectedIconColor = scheme.onSurfaceVariant,
+                unselectedTextColor = scheme.onSurfaceVariant,
+            ),
+            navigationRailItemColors = androidx.compose.material3.NavigationRailItemDefaults.colors(
+                indicatorColor = scheme.primary,
+                selectedIconColor = scheme.onPrimary,
+                selectedTextColor = scheme.primary,
+            ),
+        )
         NavigationSuiteScaffold(
             layoutType = layoutType,
+            navigationSuiteColors = androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults.colors(
+                navigationBarContainerColor = scheme.surfaceContainerLow,
+                navigationRailContainerColor = scheme.surfaceContainerLow,
+            ),
             navigationSuiteItems = {
                 TopLevel.entries.forEach { dest ->
                     item(
+                        colors = itemColors,
                         selected = dest == topLevel,
                         onClick = { nav.navigateTopLevel(dest.route) },
                         icon = { Icon(dest.icon, contentDescription = stringResource(dest.label)) },

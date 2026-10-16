@@ -302,6 +302,9 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             checked = settings.progressionEnabled,
                         ) { v -> vm.updateSettings { it.copy(progressionEnabled = v) } }
                         WarmupRestSetting(settings.warmupRestSeconds) { v -> vm.updateSettings { it.copy(warmupRestSeconds = v) } }
+                        SwitchItem(stringResource(R.string.rest_countdown), checked = settings.restCountdown) { v ->
+                            vm.updateSettings { it.copy(restCountdown = v) }
+                        }
                         SwitchItem(stringResource(R.string.vibrate_rest), checked = settings.vibrateOnRestEnd) { v ->
                             vm.updateSettings { it.copy(vibrateOnRestEnd = v) }
                         }

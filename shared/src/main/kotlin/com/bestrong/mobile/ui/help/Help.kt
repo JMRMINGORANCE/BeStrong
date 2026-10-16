@@ -1,19 +1,48 @@
 package com.bestrong.mobile.ui.help
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MonitorWeight
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.SwipeRight
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -40,6 +69,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -49,6 +80,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.bestrong.mobile.shared.R
+import kotlinx.coroutines.launch
 
 private val GLOSSARY = listOf(
     R.string.g_rpe to R.string.g_rpe_d,
@@ -129,14 +161,26 @@ private fun Entry(@StringRes title: Int, @StringRes body: Int, modifier: Modifie
     }
 }
 
-private val TUTORIAL = listOf(
-    R.string.tut1_t to R.string.tut1_d,
-    R.string.tut2_t to R.string.tut2_d,
-    R.string.tut3_t to R.string.tut3_d,
-    R.string.tut4_t to R.string.tut4_d,
+/** Una pantalla de la bienvenida: título, texto, el icono grande y los tres que lo rodean. */
+private data class TutorialPage(
+    @StringRes val title: Int,
+    @StringRes val text: Int,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val orbit: List<androidx.compose.ui.graphics.vector.ImageVector>,
 )
 
-/** Tutorial de bienvenida (primer arranque o desde Ayuda). */
+private val TUTORIAL = listOf(
+    TutorialPage(R.string.tut1_t, R.string.tut1_d, Icons.Default.FitnessCenter, listOf(Icons.Default.Bolt, Icons.Default.Lock, Icons.Default.Watch)),
+    TutorialPage(R.string.tut2_t, R.string.tut2_d, Icons.Default.CalendarMonth, listOf(Icons.Default.Repeat, Icons.Default.Star, Icons.Default.Today)),
+    TutorialPage(R.string.tut3_t, R.string.tut3_d, Icons.Default.CheckCircle, listOf(Icons.Default.Timer, Icons.Default.Vibration, Icons.Default.SwipeRight)),
+    TutorialPage(R.string.tut5_t, R.string.tut5_d, Icons.Default.Watch, listOf(Icons.Default.Favorite, Icons.Default.Timer, Icons.AutoMirrored.Filled.DirectionsRun)),
+    TutorialPage(R.string.tut4_t, R.string.tut4_d, Icons.Default.EmojiEvents, listOf(Icons.Default.Insights, Icons.Default.LocalFireDepartment, Icons.Default.MonitorWeight)),
+)
+
+/**
+ * Bienvenida a pantalla completa (primer arranque o desde Ayuda): una pantalla por idea, con una ilustración grande
+ * y animada, se pasa deslizando o con «Siguiente»; la última deja elegir lo básico para empezar.
+ */
 @Composable
 fun TutorialDialog(
     onDone: () -> Unit,
@@ -146,39 +190,164 @@ fun TutorialDialog(
     onSetup: (com.bestrong.core.util.WeightUnit, Int, Boolean) -> Unit = { _, _, _ -> },
     atHome: Boolean = false,
 ) {
-    var page by rememberSaveable { mutableIntStateOf(0) }
     var chosenUnit by rememberSaveable { mutableStateOf(unit) }
     var chosenGoal by rememberSaveable { mutableIntStateOf(weeklyGoal) }
     var chosenHome by rememberSaveable { mutableStateOf(atHome) }
     val pages = TUTORIAL.size + 1
-    val setup = page == TUTORIAL.size
-    val finish = { onSetup(chosenUnit, chosenGoal, chosenHome); onDone() }
-    AlertDialog(
-        onDismissRequest = {},
-        title = { Text(stringResource(if (setup) R.string.setup_title else TUTORIAL[page].first)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (setup) {
-                    SetupPage(chosenUnit, chosenGoal, { chosenUnit = it }, { chosenGoal = it })
-                    PlaceChoice(chosenHome) { chosenHome = it }
-                } else {
-                    Text(stringResource(TUTORIAL[page].second))
-                }
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    Text(
-                        (0 until pages).joinToString(" ") { if (it == page) "●" else "○" },
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
+    val pager = androidx.compose.foundation.pager.rememberPagerState { pages }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val finish = {
+        onSetup(chosenUnit, chosenGoal, chosenHome)
+        onDone()
+    }
+    Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+        val setup = pager.currentPage == TUTORIAL.size
+        // Cada pantalla tiñe el fondo con su color (acento, ámbar, verde…)
+        val tint = tutorialTint(pager.currentPage)
+        androidx.compose.material3.Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+            Box(
+                Modifier.fillMaxSize().background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(listOf(tint.copy(alpha = 0.32f), MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background)),
+                ),
+            ) {
+                Column(Modifier.fillMaxSize().systemBarsPadding().padding(horizontal = 24.dp, vertical = 16.dp)) {
+                    Row(Modifier.fillMaxWidth().height(48.dp), horizontalArrangement = Arrangement.End, verticalAlignment = Alignment.CenterVertically) {
+                        // «Saltar» lleva a la configuración (lo único que conviene no saltarse)
+                        if (!setup) TextButton(onClick = { scope.launch { pager.animateScrollToPage(TUTORIAL.size) } }) { Text(stringResource(R.string.skip)) }
+                    }
+                    androidx.compose.foundation.pager.HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth()) { page ->
+                        if (page == TUTORIAL.size) {
+                            SetupScreen(chosenUnit, chosenGoal, chosenHome, { chosenUnit = it }, { chosenGoal = it }, { chosenHome = it })
+                        } else {
+                            TutorialScreen(TUTORIAL[page], tutorialTint(page))
+                        }
+                    }
+                    PageDots(pages, pager.currentPage, Modifier.align(Alignment.CenterHorizontally).padding(vertical = 20.dp))
+                    Button(
+                        onClick = { if (setup) finish() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                    ) {
+                        Text(stringResource(if (setup) R.string.start else R.string.next), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
-        },
-        confirmButton = {
-            Button(onClick = { if (setup) finish() else page++ }) { Text(stringResource(if (setup) R.string.start else R.string.next)) }
-        },
-        // «Saltar» lleva a la configuración (lo único que conviene no saltarse)
-        dismissButton = { if (!setup) TextButton(onClick = { page = TUTORIAL.size }) { Text(stringResource(R.string.skip)) } },
+        }
+    }
+}
+
+@Composable
+private fun tutorialTint(page: Int): androidx.compose.ui.graphics.Color = when (page % 3) {
+    0 -> MaterialTheme.colorScheme.primary
+    1 -> MaterialTheme.colorScheme.secondary
+    else -> MaterialTheme.colorScheme.tertiary
+}
+
+/** Una pantalla de la bienvenida: la ilustración arriba y el texto grande debajo. */
+@Composable
+private fun TutorialScreen(page: TutorialPage, tint: androidx.compose.ui.graphics.Color) {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        TutorialIllustration(page, tint, Modifier.size(280.dp))
+        Spacer(Modifier.height(32.dp))
+        Text(stringResource(page.title), style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
+        Spacer(Modifier.height(16.dp))
+        Text(
+            stringResource(page.text),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(max = 480.dp),
+        )
+    }
+}
+
+/**
+ * El icono de la pantalla en un círculo con el degradado de su color, con halos y tres iconos pequeños que flotan
+ * alrededor (se mueven despacio, sin distraer).
+ */
+@Composable
+private fun TutorialIllustration(page: TutorialPage, tint: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) {
+    val transition = androidx.compose.animation.core.rememberInfiniteTransition(label = "tutorial")
+    val float by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+            androidx.compose.animation.core.tween(2600, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+            androidx.compose.animation.core.RepeatMode.Reverse,
+        ),
+        label = "float",
     )
+    val on = MaterialTheme.colorScheme.surfaceContainerLowest
+    androidx.compose.foundation.layout.BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+        // Todo a escala del tamaño de la ilustración (grande en las pantallas, pequeña en la de configuración)
+        val bubble = maxWidth * 0.2f
+        val mainIcon = maxWidth * 0.23f
+        val gap = maxWidth * 0.04f
+        // Halos
+        listOf(1f, 0.78f, 0.58f).forEachIndexed { i, f ->
+            Box(Modifier.fillMaxSize(f).clip(CircleShape).background(tint.copy(alpha = 0.08f + i * 0.06f)))
+        }
+        Box(
+            Modifier.fillMaxSize(0.42f).graphicsLayer { scaleX = 1f + float * 0.04f; scaleY = 1f + float * 0.04f }.clip(CircleShape)
+                .background(androidx.compose.ui.graphics.Brush.linearGradient(listOf(tint, androidx.compose.ui.graphics.lerp(tint, MaterialTheme.colorScheme.secondary, 0.5f)))),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(page.icon, null, Modifier.size(mainIcon), tint = on)
+        }
+        // Los pequeños, repartidos alrededor y flotando a destiempo
+        val spots = listOf(Alignment.TopEnd, Alignment.BottomStart, Alignment.CenterStart)
+        page.orbit.forEachIndexed { i, icon ->
+            val dy = (if (i % 2 == 0) float else 1f - float) * 14f
+            Box(
+                Modifier.align(spots[i % spots.size]).padding(gap).graphicsLayer { translationY = dy * density }
+                    .size(bubble).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(icon, null, Modifier.size(bubble * 0.5f), tint = tint)
+            }
+        }
+    }
+}
+
+/** Puntos de la página: el actual, alargado y del color de acento. */
+@Composable
+private fun PageDots(count: Int, current: Int, modifier: Modifier = Modifier) {
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        repeat(count) { i ->
+            val width by androidx.compose.animation.core.animateDpAsState(if (i == current) 28.dp else 8.dp, label = "dot")
+            Box(
+                Modifier.height(8.dp).width(width).clip(CircleShape)
+                    .background(if (i == current) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
+            )
+        }
+    }
+}
+
+/** Última pantalla: unidad, días por semana y dónde se entrena, en una tarjeta. */
+@Composable
+private fun SetupScreen(
+    unit: com.bestrong.core.util.WeightUnit,
+    goal: Int,
+    home: Boolean,
+    onUnit: (com.bestrong.core.util.WeightUnit) -> Unit,
+    onGoal: (Int) -> Unit,
+    onHome: (Boolean) -> Unit,
+) {
+    Column(
+        Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        TutorialIllustration(TutorialPage(R.string.setup_title, R.string.setup_title, Icons.Default.Tune, listOf(Icons.Default.MonitorWeight, Icons.Default.CalendarMonth, Icons.Default.Home)), MaterialTheme.colorScheme.primary, Modifier.size(180.dp))
+        Spacer(Modifier.height(16.dp))
+        Text(stringResource(R.string.setup_title), style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(16.dp))
+        Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer), modifier = Modifier.widthIn(max = 480.dp)) {
+            Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                SetupPage(unit, goal, onUnit, onGoal)
+                PlaceChoice(home, onHome)
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)

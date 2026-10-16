@@ -225,6 +225,7 @@ fun ExerciseSearchList(
         LazyColumn(Modifier.fillMaxSize()) {
             items(results, key = { it.id }) { ex ->
                 ListItem(
+                    leadingContent = { com.bestrong.mobile.ui.components.ExerciseThumb(ex) },
                     headlineContent = { Text(ex.displayName()) },
                     supportingContent = {
                         val times = usage[ex.id]

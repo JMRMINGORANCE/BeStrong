@@ -139,6 +139,10 @@ class ExercisesViewModel @Inject constructor(
         settingsStore.update { s -> s.copy(plateauSnoozed = s.plateauSnoozed + (exerciseId to sessions.toDouble())) }
     }
 
+    /** «Ahora no»: el aviso de estancamiento descansa unas sesiones sin cambiar nada. */
+    fun snoozePlateau(exerciseId: String, sessions: Int) =
+        settingsStore.update { s -> s.copy(plateauSnoozed = s.plateauSnoozed + (exerciseId to sessions.toDouble())) }
+
     fun setRepRange(exerciseId: String, range: String?) = settingsStore.update { s ->
         s.copy(exerciseRepRange = if (range == null) s.exerciseRepRange - exerciseId else s.exerciseRepRange + (exerciseId to range))
     }

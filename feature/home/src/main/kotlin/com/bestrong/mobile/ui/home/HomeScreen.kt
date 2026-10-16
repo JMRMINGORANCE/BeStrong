@@ -1,6 +1,7 @@
 package com.bestrong.mobile.ui.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -21,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -57,6 +60,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -139,7 +143,19 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("BeStrong", fontWeight = FontWeight.Black) }, actions = { GymChip(vm) }) },
+        topBar = {
+            TopAppBar(
+                title = {
+                    // La marca con su degradado
+                    Text(
+                        "BeStrong",
+                        style = MaterialTheme.typography.headlineSmall.copy(brush = com.bestrong.mobile.ui.components.brandGradient()),
+                        fontWeight = FontWeight.Black,
+                    )
+                },
+                actions = { GymChip(vm) },
+            )
+        },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         // Rejilla adaptable: 1 columna en el Fold plegado, 2-3 desplegado
@@ -154,21 +170,30 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            item(span = { GridItemSpan(maxLineSpan) }) { Greeting() }
             active?.let { w ->
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     val now = rememberNow()
-                    Card(
-                        onClick = onOpenWorkout,
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                    ) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    com.bestrong.mobile.ui.components.HeroCard(onClick = onOpenWorkout) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
-                                Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.labelLarge)
-                                Text(w.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
+                                Text(w.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
                                 Text(stringResource(R.string.home_in_progress_detail, formatDuration(w.durationSeconds(now)), w.completedSetCount, w.totalSetCount))
                             }
-                            Icon(Icons.Default.PlayArrow, stringResource(R.string.action_continue))
+                            Box(
+                                Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerLowest),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(Icons.Default.PlayArrow, stringResource(R.string.action_continue), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                            }
                         }
+                        androidx.compose.material3.LinearProgressIndicator(
+                            progress = { if (w.totalSetCount == 0) 0f else w.completedSetCount.toFloat() / w.totalSetCount },
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp).height(6.dp).clip(CircleShape),
+                            color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                            trackColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.3f),
+                        )
                     }
                 }
             }
@@ -277,10 +302,10 @@ private fun RoutineCard(
     var sharing by remember { mutableStateOf(false) }
     val context = LocalContext.current
     if (sharing) ShareRoutineDialog(routine) { sharing = false }
-    Card(Modifier.fillMaxWidth().clickable(onClick = onEdit)) {
+    Card(Modifier.fillMaxWidth().clickable(onClick = onEdit), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Column(Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(routine.displayName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                Text(routine.displayName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
                 Box {
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.routine_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
@@ -300,6 +325,8 @@ private fun RoutineCard(
                     }
                 }
             }
+            // Las imágenes de sus ejercicios, para reconocerla de un vistazo
+            com.bestrong.mobile.ui.components.ExerciseThumbStrip(routine.exercises.map { it.exercise }, 40.dp, modifier = Modifier.padding(vertical = 8.dp))
             Text(
                 routine.exercises.map { it.exercise.displayName() }.joinToString().ifBlank { stringResource(R.string.routine_no_exercises) },
                 style = MaterialTheme.typography.bodySmall,
@@ -315,8 +342,9 @@ private fun RoutineCard(
                 gymName?.let { "🏋️ $it" },
             )
             if (info.isNotEmpty()) Text(info.joinToString(" · "), style = MaterialTheme.typography.labelSmall)
-            Button(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), enabled = routine.exercises.isNotEmpty()) {
-                Text(stringResource(R.string.routine_start))
+            Button(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 12.dp).height(48.dp), enabled = routine.exercises.isNotEmpty()) {
+                Icon(Icons.Default.PlayArrow, null)
+                Text(stringResource(R.string.routine_start), Modifier.padding(start = 6.dp), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -527,3 +555,19 @@ private val MARKS = Regex("\\p{Mn}+")
 
 /** A partir de cuántas rutinas sale el buscador. */
 private const val ROUTINE_SEARCH_MIN = 8
+
+/** «Buenos días» con la fecha encima, grande, al abrir la app. */
+@Composable
+private fun Greeting() {
+    val now = java.time.LocalDateTime.now()
+    val greeting = when (now.hour) {
+        in 5..11 -> R.string.greeting_morning
+        in 12..19 -> R.string.greeting_afternoon
+        else -> R.string.greeting_evening
+    }
+    val date = java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM", java.util.Locale.getDefault()).format(now)
+    Column(Modifier.padding(top = 4.dp, bottom = 4.dp)) {
+        Text(date.uppercase(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(greeting), style = MaterialTheme.typography.displaySmall)
+    }
+}

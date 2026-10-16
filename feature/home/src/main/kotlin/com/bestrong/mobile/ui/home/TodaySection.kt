@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -75,12 +76,12 @@ import java.time.format.TextStyle
 fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () -> Unit) {
     val unit = LocalWeightUnit.current
     var menu by remember { mutableStateOf(false) }
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    com.bestrong.mobile.ui.components.HeroCard {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.today_title), style = MaterialTheme.typography.labelLarge)
-                    Text(session.routine.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(stringResource(R.string.today_title), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
+                    Text(session.routine.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     val label = if (session.program.weeksPerCycle > 1) {
                         stringResource(R.string.today_cycle_week, session.cycle, session.week, session.program.weeksPerCycle)
                     } else {
@@ -95,6 +96,7 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
                     }
                 }
             }
+            com.bestrong.mobile.ui.components.ExerciseThumbStrip(session.routine.exercises.map { it.exercise }, 44.dp, modifier = Modifier.padding(vertical = 8.dp))
             session.routine.exercises.forEach { re ->
                 val weights = re.sets.map { it.weightKg }.distinct()
                 val reps = re.sets.map { it.reps }.distinct()
@@ -107,11 +109,11 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
                     Text(re.exercise.displayName(), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(load, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 }
-                if (re.notes.isNotBlank()) Text(re.notes, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (re.notes.isNotBlank()) Text(re.notes, style = MaterialTheme.typography.labelSmall)
             }
-            Button(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            HeroButton(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
                 Icon(Icons.Default.PlayArrow, null)
-                Text(stringResource(R.string.today_start), Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.today_start), Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -120,28 +122,53 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
 /** Sin programa: sugerencia de la rutina que toca (la que lleva más tiempo sin hacerse). */
 @Composable
 fun SuggestedRoutineCard(routine: Routine, onStart: () -> Unit) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.today_suggested), style = MaterialTheme.typography.labelLarge)
-                Text(routine.displayName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            }
-            Button(onClick = onStart) { Text(stringResource(R.string.routine_start)) }
+    com.bestrong.mobile.ui.components.HeroCard {
+        Text(stringResource(R.string.today_suggested), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
+        Text(routine.displayName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        com.bestrong.mobile.ui.components.ExerciseThumbStrip(routine.exercises.map { it.exercise }, 44.dp, modifier = Modifier.padding(vertical = 6.dp))
+        HeroButton(onClick = onStart, modifier = Modifier.fillMaxWidth()) {
+            Icon(Icons.Default.PlayArrow, null)
+            Text(stringResource(R.string.routine_start), Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold)
         }
     }
+}
+
+/** Botón sobre el degradado de marca: oscuro (o blanco en el tema claro) para que destaque. */
+@Composable
+fun HeroButton(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = modifier.height(52.dp),
+        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+        content = content,
+    )
 }
 
 /** Semana: días entrenados (L–D), sesiones frente al objetivo y adherencia. */
 @Composable
 fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
-    Card {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // Anillo con las sesiones de la semana frente al objetivo
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.size(64.dp)) {
+                    androidx.compose.material3.CircularProgressIndicator(
+                        progress = { (week.trainedDays.size.toFloat() / week.goal).coerceAtMost(1f) },
+                        modifier = Modifier.size(64.dp),
+                        strokeWidth = 7.dp,
+                        trackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                    )
+                    Text("${week.trainedDays.size}/${week.goal}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
+                }
                 Text(
                     stringResource(R.string.week_sessions, week.trainedDays.size, week.goal),
-                    Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleSmall,
+                    Modifier.weight(1f).padding(start = 14.dp),
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
                 if (canChangeGoal) {
@@ -151,7 +178,6 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
                     TextButton(onClick = { onGoalChange(week.goal + 1) }, enabled = week.goal < 7, modifier = Modifier.semantics { contentDescription = moreGoal }) { Text("+") }
                 }
             }
-            LinearProgressIndicator(progress = { (week.trainedDays.size.toFloat() / week.goal).coerceAtMost(1f) }, modifier = Modifier.fillMaxWidth())
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                 DayOfWeek.entries.forEach { d ->
                     val done = d in week.trainedDays
@@ -160,8 +186,11 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(36.dp)
-                            .then(if (done) Modifier.background(MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
+                            .size(38.dp)
+                            .background(
+                                if (done) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceContainerHighest),
+                                CircleShape,
+                            )
                             .then(if (d == week.today) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
                             .semantics { contentDescription = "$name: $state" },
                     ) {
@@ -169,6 +198,7 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
                             d.getDisplayName(TextStyle.NARROW, locale),
                             color = if (done) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
                         )
                     }
                 }

@@ -121,6 +121,12 @@ class RestTimerController @Inject constructor(
         job = scope.launch {
             val r = _rest.value ?: return@launch
             try {
+                // 3-2-1: tres toques cortos en los últimos tres segundos (si se eligió y hay tiempo)
+                val countdownAt = r.endsAtEpochMs - COUNTDOWN_MS
+                if (settings.settings.value.restCountdown && vibrateEnabled() && countdownAt > System.currentTimeMillis()) {
+                    delay(countdownAt - System.currentTimeMillis())
+                    countdown()
+                }
                 delay((r.endsAtEpochMs - System.currentTimeMillis()).coerceAtLeast(0))
                 _rest.value = null
                 persist(null)
@@ -142,6 +148,16 @@ class RestTimerController @Inject constructor(
         _restEndedAt.value = null
     }
 
+    private fun countdown() {
+        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            context.getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Vibrator::class.java)
+        }
+        vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 60, 940, 60, 940, 60), -1))
+    }
+
     private fun vibrate(short: Boolean = false) {
         val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             context.getSystemService(VibratorManager::class.java)?.defaultVibrator
@@ -156,6 +172,9 @@ class RestTimerController @Inject constructor(
     companion object {
         /** Margen tras el descanso antes de avisar de que se está alargando. */
         const val OVERRUN_ALERT_MS = 60_000L
+
+        /** La cuenta atrás de los últimos segundos. */
+        private const val COUNTDOWN_MS = 3_000L
 
         /** Margen del WakeLock sobre el descanso (se suelta antes al terminar). */
         private const val WAKE_MARGIN_MS = 10_000L

@@ -456,7 +456,6 @@
     <string name="pip_next">Nächste: %1$s</string>
     <string name="plan_generated_saved">%1$d Routinen gespeichert</string>
     <string name="plan_program_saved">Programm „%1$s“ gespeichert</string>
-    <string name="plan_week_duplicated">Woche in die nächste kopiert</string>
     <string name="planning">Planung</string>
     <string name="planning_open">Planen</string>
     <string name="planning_subtitle">Generator, Kalender, Programme, Peaking, Timer und mehr</string>
@@ -1195,4 +1194,24 @@
     <string name="hc_restore_none">Keine gelöschten Gewichte zum Zurückholen</string>
     <string name="import_measurements_skipped">%1$d Zeilen nicht lesbar</string>
     <string name="routine_search_clear">Suche löschen</string>
+    <string name="exercise_image_open">Animation ansehen</string>
+    <string name="greeting_morning">Guten Morgen</string>
+    <string name="greeting_afternoon">Guten Tag</string>
+    <string name="greeting_evening">Guten Abend</string>
+    <string name="tut5_t">Deine Uhr, dein Trainingspartner</string>
+    <string name="tut5_d">Starte auf der Uhr, dreh die Lünette für Gewicht und Wiederholungen, miss den Puls und spür das Pausenende am Handgelenk. Alles synchronisiert sich mit dem Handy.</string>
+    <string name="rest_next">Als Nächstes: %1$s</string>
+    <plurals name="plan_week_duplicated_n">
+        <item quantity="one">Woche in die nächste kopiert</item>
+        <item quantity="other">Woche in die nächsten %1$d kopiert</item>
+    </plurals>
+    <plurals name="plan_duplicate_weeks">
+        <item quantity="one">Nächste Woche</item>
+        <item quantity="other">Die nächsten %1$d Wochen</item>
+    </plurals>
+    <string name="guided_back">Zurück</string>
+    <string name="guided_pause">Pause</string>
+    <string name="guided_resume">Weiter</string>
+    <string name="plateau_not_now">Jetzt nicht</string>
+    <string name="rest_countdown">3-2-1-Countdown am Pausenende</string>
 </resources>

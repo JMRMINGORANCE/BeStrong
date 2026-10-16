@@ -444,3 +444,15 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Buscar rutinas también por ejercicio, con «sin resultados» y botón para borrar
 - [x] Recuperar los pesos de la báscula borrados aquí (vuelven al importar)
 - [x] Calculadora de discos exacta (con 15 y 10 kg, 20 por lado son 10 + 10)
+
+## Fase 53 — Nueva interfaz ✅
+- [x] Interfaz rehecha: colores con profundidad, tipografía con carácter, esquinas generosas, cabeceras y datos nuevos
+- [x] Inicio nuevo: saludo, tarjetas destacadas con degradado, anillo de la semana y rutinas con sus imágenes
+- [x] Bienvenida a pantalla completa con ilustraciones animadas (y una pantalla para el reloj)
+- [x] Imágenes de los ejercicios en el selector, la biblioteca, el editor de rutinas y el entreno (89 de 99)
+- [x] Barra de descanso nueva con la siguiente serie a la vista
+- [x] Reloj: tocar «Anterior» copia la serie de la última vez
+- [x] Redondeo a los discos también en libras (sugerencias iguales que la calculadora)
+- [x] «Ahora no» en el aviso de estancamiento
+- [x] Cuenta atrás 3-2-1 con vibración antes de acabar el descanso
+- [x] Calentamiento guiado con pausa y atrás; repetir la semana planificada 1, 2, 4 u 8 semanas

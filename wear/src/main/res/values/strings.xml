@@ -95,10 +95,8 @@
         <item quantity="other">%1$d ejercicios</item>
     </plurals>
     <string name="n_records">🏆 %1$d récords</string>
-    <string name="next_short">Sig.: %1$s %2$s×%3$d</string>
     <string name="notif_channel">Entrenamiento</string>
     <string name="notif_text">Entrenamiento en curso</string>
-    <string name="previous">Anterior: %1$s×%2$d</string>
     <string name="quick_weights">Pesos recientes</string>
     <string name="recent">Recientes</string>
     <string name="recovered">✓ Recuperado: a por la siguiente</string>
@@ -173,4 +171,7 @@
     <string name="cardio_complication_desc">Cardio esta semana: %1$s %2$s</string>
     <string name="tile_cardio">Cardio %1$s</string>
     <string name="planned_reps">Plan: %1$d reps</string>
+    <string name="previous_any">Anterior: %1$s</string>
+    <string name="next_any">Sig.: %1$s %2$s</string>
+    <string name="copy_previous">Usar lo de la última vez</string>
 </resources>

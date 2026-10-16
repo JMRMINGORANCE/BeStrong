@@ -123,9 +123,11 @@ class PlanningViewModel @Inject constructor(
     }
 
     /** Copia la semana en la siguiente. */
-    fun duplicateWeek(weekStart: LocalDate) = store.update { s ->
-        s.copy(weekPlans = s.weekPlans + (weekStart.plusWeeks(1).toEpochDay() to s.planFor(weekStart)))
-    }.also { _messages.tryEmit(context.getString(R.string.plan_week_duplicated)) }
+    /** La semana de [weekStart] copiada en las [weeks] siguientes (1 = la próxima; 4 = un mes de mesociclo). */
+    fun duplicateWeek(weekStart: LocalDate, weeks: Int = 1) = store.update { s ->
+        val plan = s.planFor(weekStart)
+        s.copy(weekPlans = s.weekPlans + (1..weeks.coerceIn(1, MAX_DUPLICATE_WEEKS)).associate { weekStart.plusWeeks(it.toLong()).toEpochDay() to plan })
+    }.also { _messages.tryEmit(context.resources.getQuantityString(R.plurals.plan_week_duplicated_n, weeks, weeks)) }
 
     fun estimateMinutes(routine: Routine): Int = RoutineTime.estimateMinutes(routine)
 
@@ -175,3 +177,6 @@ class PlanningViewModel @Inject constructor(
 
     fun previousBest(id: String): Double? = WorkoutStats.personalRecords(repo.history.value)[id]?.get(com.bestrong.core.stats.RecordType.BEST_ONE_REP_MAX)?.value
 }
+
+/** Hasta cuántas semanas seguidas se copia una (un mesociclo largo). */
+private const val MAX_DUPLICATE_WEEKS = 8

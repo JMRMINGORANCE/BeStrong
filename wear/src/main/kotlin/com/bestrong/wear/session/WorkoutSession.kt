@@ -82,6 +82,38 @@ private const val RECORD_BANNER_MS = 5_000L
 /** Campo que ajusta el bisel/corona. */
 enum class RotaryTarget { WEIGHT, REPS }
 
+/** Si la pantalla de serie enseña el peso: ejercicios con peso, o una serie con peso (también negativo, asistida). */
+fun showsWeight(we: com.bestrong.core.model.WorkoutExercise, set: com.bestrong.core.model.WorkoutSet): Boolean =
+    we.exercise.tracking == TrackingType.WEIGHT_REPS || set.weightKg != 0.0
+
+/** Terminado ahora con lo medido por el reloj (pulso medio y máximo, calorías y la gráfica de pulso). */
+private fun Workout.finishedWith(m: HealthMetrics, samples: List<com.bestrong.core.model.HeartRateSample>): Workout =
+    WorkoutEditor.finish(this, System.currentTimeMillis()).copy(
+        avgHeartRate = m.avgHeartRate,
+        maxHeartRate = m.maxHeartRate,
+        calories = m.calories,
+        heartRateSamples = samples,
+    )
+
+/** Vibración con el patrón dado (fuera de la sesión: no depende de su estado). */
+private fun Context.haptic(pattern: LongArray) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        ContextCompat.getSystemService(this, VibratorManager::class.java)?.defaultVibrator
+    } else {
+        ContextCompat.getSystemService(this, Vibrator::class.java)
+    }
+    vibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
+}
+
+/** Asistidas (peso negativo, puesto en el móvil) siguen negativas; si no, no baja de 0. */
+private fun nextWeight(current: Double, delta: Double): Double {
+    val next = current + delta
+    return if (current < 0 || next >= 0) next else 0.0
+}
+
+/** Paso del bisel en metros (paseo del granjero, trineo). */
+private const val DISTANCE_STEP_M = 5.0
+
 /**
  * Estado del entrenamiento en el reloj. Vive en el proceso (lo mantiene vivo el
  * [ExerciseService] en primer plano), se persiste en [WearStore] tras cada cambio y se
@@ -226,19 +258,14 @@ class WorkoutSession @Inject constructor(
     fun finish() {
         val w = _workout.value ?: return
         val m = _metrics.value
-        val finished = WorkoutEditor.finish(w, System.currentTimeMillis()).copy(
-            avgHeartRate = m.avgHeartRate,
-            maxHeartRate = m.maxHeartRate,
-            calories = m.calories,
-            heartRateSamples = hr.samples(),
-        )
+        val finished = w.finishedWith(m, hr.samples())
         end()
         if (finished.exercises.isEmpty()) return
         val records = WorkoutStats.newRecordsIn(finished, store.history.value + finished)
         val comparisons = WorkoutStats.compareWithPrevious(finished, store.history.value)
         store.addLocalWorkout(finished)
         _summary.value = Summary(finished, records, comparisons)
-        if (records.isNotEmpty()) haptic(Haptics.RECORD)
+        if (records.isNotEmpty()) context.haptic(Haptics.RECORD)
         scope.launch { phoneSync.sendFinishedWorkout(finished) }
     }
 
@@ -255,12 +282,7 @@ class WorkoutSession @Inject constructor(
 
     private fun sendReplaced(local: Workout) {
         val m = _metrics.value
-        val finished = WorkoutEditor.finish(local, System.currentTimeMillis()).copy(
-            avgHeartRate = m.avgHeartRate,
-            maxHeartRate = m.maxHeartRate,
-            calories = m.calories,
-            heartRateSamples = hr.samples(),
-        )
+        val finished = local.finishedWith(m, hr.samples())
         stopRest()
         stopTempo()
         if (finished.exercises.isNotEmpty()) scope.launch { phoneSync.sendFinishedWorkout(finished) }
@@ -423,14 +445,32 @@ class WorkoutSession @Inject constructor(
         val we = currentExercise() ?: return
         val s = currentSet() ?: return
         val step = store.settings.value.stepKgFor(we.exercise.id)
+        // El peso solo si se ve en pantalla: en dominadas a 0 kg se marca (y se cambia) las reps
+        val target = effectiveTarget(we, s)
         edit { w ->
             WorkoutEditor.updateSet(w, we.id, s.id) { set ->
                 when {
                     we.exercise.tracking == TrackingType.DURATION -> set.copy(durationSec = (set.durationSec + 5 * direction).coerceAtLeast(0))
                     we.exercise.tracking == TrackingType.CARDIO -> set.copy(durationSec = (set.durationSec + 60 * direction).coerceAtLeast(0))
-                    _rotaryTarget.value == RotaryTarget.WEIGHT -> set.copy(weightKg = (set.weightKg + step * direction).coerceAtLeast(0.0))
+                    target == RotaryTarget.WEIGHT -> set.copy(weightKg = nextWeight(set.weightKg, step * direction))
+                    we.exercise.tracking == TrackingType.DISTANCE -> set.copy(distanceM = (set.distanceM + DISTANCE_STEP_M * direction).coerceAtLeast(0.0))
                     else -> set.copy(reps = (set.reps + direction).coerceAtLeast(0))
                 }
+            }
+        }
+    }
+
+    /** El campo que mueve el bisel: el peso solo si se enseña (ejercicio con peso o serie con peso apuntado). */
+    fun effectiveTarget(we: com.bestrong.core.model.WorkoutExercise, set: com.bestrong.core.model.WorkoutSet): RotaryTarget =
+        if (showsWeight(we, set)) _rotaryTarget.value else RotaryTarget.REPS
+
+    /** Tocar «Anterior»: la serie actual con el peso, las reps, el tiempo y la distancia de la última vez. */
+    fun copyPrevious(previous: com.bestrong.core.model.WorkoutSet) {
+        val we = currentExercise() ?: return
+        val s = currentSet() ?: return
+        edit { w ->
+            WorkoutEditor.updateSet(w, we.id, s.id) {
+                it.copy(weightKg = previous.weightKg, reps = previous.reps, durationSec = previous.durationSec, distanceM = previous.distanceM, repsRight = previous.repsRight)
             }
         }
     }
@@ -498,7 +538,7 @@ class WorkoutSession @Inject constructor(
     }
 
     private fun celebrateRecord() {
-        haptic(Haptics.RECORD)
+        context.haptic(Haptics.RECORD)
         _record.value = true
         recordJob?.cancel()
         recordJob = scope.launch {
@@ -517,14 +557,14 @@ class WorkoutSession @Inject constructor(
         if (we.exercise.tracking == TrackingType.CARDIO && !s.isRunning) {
             stopRest()
             edit { WorkoutEditor.startCardio(it, we.id, s.id) }
-            haptic(Haptics.SET_DONE)
+            context.haptic(Haptics.SET_DONE)
             return false
         }
         edit { w -> WorkoutEditor.toggleSetCompleted(withCountedReps(w, we, s), we.id, s.id) }
         repCounter.reset()
         val updated = _workout.value ?: w0
         val done = updated.exercises.firstOrNull { it.id == we.id }?.sets?.firstOrNull { it.id == s.id }
-        if (done != null && isRecord(we.exercise.id, we.exercise.tracking, done)) celebrateRecord() else haptic(Haptics.SET_DONE)
+        if (done != null && isRecord(we.exercise.id, we.exercise.tracking, done)) celebrateRecord() else context.haptic(Haptics.SET_DONE)
         val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index, store.settings.value.warmupRestSeconds)
         next?.let { _exerciseIndex.value = it }
         return if (next != null && restSeconds > 0) {
@@ -582,7 +622,7 @@ class WorkoutSession @Inject constructor(
         restJob = scope.launch {
             if (remaining > 10_000) {
                 delay(remaining - 10_000)
-                haptic(Haptics.REST_WARNING) // aviso: quedan 10 s
+                context.haptic(Haptics.REST_WARNING) // aviso: quedan 10 s
                 delay(10_000)
             } else {
                 delay(remaining.coerceAtLeast(0))
@@ -590,7 +630,7 @@ class WorkoutSession @Inject constructor(
             _rest.value = null
             store.activeRest = null
             repCounter.reset()
-            haptic(store.settings.value.restVibration.pattern)
+            context.haptic(store.settings.value.restVibration.pattern)
             releaseRestWakeLock()
         }
     }
@@ -657,11 +697,11 @@ class WorkoutSession @Inject constructor(
         val reps = currentSet()?.reps?.takeIf { it > 0 } ?: 10
         _tempoActive.value = true
         tempoJob = scope.launch {
-            haptic(longArrayOf(0, 60, 120, 60, 120, 60)) // preparados
+            context.haptic(longArrayOf(0, 60, 120, 60, 120, 60)) // preparados
             delay(1_500)
             repeat(reps) {
                 tempo.guidePhases.forEach { (phase, seconds) ->
-                    haptic(
+                    context.haptic(
                         when (phase) {
                             Tempo.Phase.ECCENTRIC -> longArrayOf(0, 180)
                             Tempo.Phase.CONCENTRIC -> longArrayOf(0, 60, 80, 60)
@@ -671,7 +711,7 @@ class WorkoutSession @Inject constructor(
                     delay(seconds * 1_000L)
                 }
             }
-            haptic(longArrayOf(0, 400))
+            context.haptic(longArrayOf(0, 400))
             _tempoActive.value = false
         }
     }
@@ -680,15 +720,6 @@ class WorkoutSession @Inject constructor(
         tempoJob?.cancel()
         tempoJob = null
         _tempoActive.value = false
-    }
-
-    private fun haptic(pattern: LongArray) {
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ContextCompat.getSystemService(context, VibratorManager::class.java)?.defaultVibrator
-        } else {
-            ContextCompat.getSystemService(context, Vibrator::class.java)
-        }
-        vibrator?.vibrate(VibrationEffect.createWaveform(pattern, -1))
     }
 
     // --- Pulso: zonas y recuperación, bajo consumo --------------------------------------------
@@ -750,7 +781,7 @@ class WorkoutSession @Inject constructor(
                 )
             }
         }
-        haptic(Haptics.VOICE_OK)
+        context.haptic(Haptics.VOICE_OK)
         return true
     }
 
@@ -818,7 +849,7 @@ class WorkoutSession @Inject constructor(
             val restedSec = ((System.currentTimeMillis() - (rest.endsAtEpochMs - rest.totalSeconds * 1000L)) / 1000).toInt()
             if (HeartRate.isRecovered(bpm, restPeakBpm, restedSec, maxHr = store.maxHeartRate)) {
                 _recovered.value = true
-                haptic(Haptics.RECOVERED)
+                context.haptic(Haptics.RECOVERED)
             }
         }
         publishHeartRate()

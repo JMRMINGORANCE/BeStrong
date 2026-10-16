@@ -456,7 +456,6 @@
     <string name="pip_next">Seguinte: %1$s</string>
     <string name="plan_generated_saved">%1$d rotinas guardadas</string>
     <string name="plan_program_saved">Programa “%1$s” guardado</string>
-    <string name="plan_week_duplicated">Semana copiada para a seguinte</string>
     <string name="planning">Planeamento</string>
     <string name="planning_open">Planear</string>
     <string name="planning_subtitle">Gerador, calendário, programas, peaking, temporizadores e mais</string>
@@ -1195,4 +1194,24 @@
     <string name="hc_restore_none">Não há pesos apagados para recuperar</string>
     <string name="import_measurements_skipped">%1$d linhas não foram entendidas</string>
     <string name="routine_search_clear">Limpar pesquisa</string>
+    <string name="exercise_image_open">Ver a animação</string>
+    <string name="greeting_morning">Bom dia</string>
+    <string name="greeting_afternoon">Boa tarde</string>
+    <string name="greeting_evening">Boa noite</string>
+    <string name="tut5_t">O teu relógio, o teu parceiro</string>
+    <string name="tut5_d">Começa no relógio, roda a coroa para o peso e as reps, mede o pulso e o descanso vibra no pulso. Tudo sincroniza sozinho com o telemóvel.</string>
+    <string name="rest_next">A seguir: %1$s</string>
+    <plurals name="plan_week_duplicated_n">
+        <item quantity="one">Semana copiada para %1$d semana seguinte</item>
+        <item quantity="other">Semana copiada para as %1$d seguintes</item>
+    </plurals>
+    <plurals name="plan_duplicate_weeks">
+        <item quantity="one">Em %1$d semana seguinte</item>
+        <item quantity="other">Nas %1$d seguintes</item>
+    </plurals>
+    <string name="guided_back">Atrás</string>
+    <string name="guided_pause">Pausa</string>
+    <string name="guided_resume">Continuar</string>
+    <string name="plateau_not_now">Agora não</string>
+    <string name="rest_countdown">Contagem 3-2-1 no fim do descanso</string>
 </resources>

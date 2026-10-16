@@ -9,6 +9,16 @@
   "wgerName": "wheel rollout",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "archer_push_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/A9qxk2F.gif",
+  "wgerName": "archer push up",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "arnold_press": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -17,6 +27,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/eOrFCnx.gif",
   "wgerName": "dumbbell arnold press",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "band_pull_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/r1XNRYB.gif",
+  "wgerName": "band assisted pull-up",
   "wgerUrl": "https://exercisedb.dev"
  },
  "barbell_curl": {
@@ -79,6 +99,16 @@
   "wgerName": "cable standing fly",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "cable_crunch": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/WW95auq.gif",
+  "wgerName": "cable kneeling crunch",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "cable_curl": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -97,6 +127,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/goJ6ezq.gif",
   "wgerName": "cable lateral raise",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "chest_to_bar": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/lBDjFxJ.gif",
+  "wgerName": "pull-up",
   "wgerUrl": "https://exercisedb.dev"
  },
  "chin_up": {
@@ -141,6 +181,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/TFqbd8t.gif",
   "wgerName": "crunch floor",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "cycling": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/H1PESYI.gif",
+  "wgerName": "stationary bike run",
   "wgerUrl": "https://exercisedb.dev"
  },
  "db_bench_press": {
@@ -225,6 +275,16 @@
   "wgerName": "barbell decline bench press",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "diamond_push_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/soIB2rj.gif",
+  "wgerName": "diamond push-up",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "dips": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -233,6 +293,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/9WTm7dq.gif",
   "wgerName": "chest dip",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "elliptical": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/rjtuP6X.gif",
+  "wgerName": "walk elliptical cross trainer",
   "wgerUrl": "https://exercisedb.dev"
  },
  "face_pull": {
@@ -277,6 +347,16 @@
   "wgerName": "barbell front squat",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "glute_kickback": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/HEJ6DIX.gif",
+  "wgerName": "cable kickback",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "goblet_squat": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -285,6 +365,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/yn8yg1r.gif",
   "wgerName": "dumbbell goblet squat",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "hack_squat": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/Qa55kX1.gif",
+  "wgerName": "sled hack squat",
   "wgerUrl": "https://exercisedb.dev"
  },
  "hammer_curl": {
@@ -305,6 +395,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/I3tsCnC.gif",
   "wgerName": "hanging leg raise",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "hip_abduction": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/7WaDzyL.gif",
+  "wgerName": "side hip abduction",
   "wgerUrl": "https://exercisedb.dev"
  },
  "hip_thrust": {
@@ -339,6 +439,36 @@
   "wgerName": "barbell incline bench press",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "incline_db_curl": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/ae9UoXQ.gif",
+  "wgerName": "dumbbell incline curl",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "incline_push_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/B1EVP9F.gif",
+  "wgerName": "incline push-up",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "jump_rope": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/e1e76I2.gif",
+  "wgerName": "jump rope",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "kb_swing": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -347,6 +477,26 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/UHJlbu3.gif",
   "wgerName": "kettlebell swing",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "knee_push_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/v3vLFW0.gif",
+  "wgerName": "close-grip push-up (on knees)",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "l_sit": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/UpWmA5E.gif",
+  "wgerName": "l-sit on floor",
   "wgerUrl": "https://exercisedb.dev"
  },
  "lat_pulldown": {
@@ -423,6 +573,36 @@
   "wgerName": "Machine Chest Press",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "muscle_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/yJUHKTn.gif",
+  "wgerName": "muscle up",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "negative_pull_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/lBDjFxJ.gif",
+  "wgerName": "pull-up",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "one_arm_push_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/MUic5zN.gif",
+  "wgerName": "single arm push-up",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "overhead_press": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -444,6 +624,26 @@
   "url": "https://wger.de/media/exercise-images/1519/fab7f641-27d4-40b5-8edd-1a0a137bfd94.gif",
   "wgerName": "Overhead Triceps Extension",
   "wgerUrl": "https://wger.de/exercise/1519/view/"
+ },
+ "pendlay_row": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/r0z6xzQ.gif",
+  "wgerName": "barbell pendlay row",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "pistol_squat": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/5bpPTHv.gif",
+  "wgerName": "kettlebell pistol squat",
+  "wgerUrl": "https://exercisedb.dev"
  },
  "plank": {
   "author": "utkb",
@@ -507,6 +707,16 @@
   "wgerName": "barbell romanian deadlift",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "running": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/y5p0H8a.gif",
+  "wgerName": "run (equipment)",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "russian_twist": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -515,6 +725,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/XVDdcoj.gif",
   "wgerName": "russian twist",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "scapular_pull_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/uTBt1HV.gif",
+  "wgerName": "scapular pull-up",
   "wgerUrl": "https://exercisedb.dev"
  },
  "seated_cable_row": {
@@ -527,6 +747,16 @@
   "wgerName": "cable seated row",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "seated_calf_raise": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/ktsFQAZ.gif",
+  "wgerName": "barbell seated calf raise",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "shrug": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -535,6 +765,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/dG7tG5y.gif",
   "wgerName": "barbell shrug",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "side_plank": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/RKjH6Lt.gif",
+  "wgerName": "side bridge",
   "wgerUrl": "https://exercisedb.dev"
  },
  "skull_crusher": {
@@ -569,6 +809,16 @@
   "wgerName": "Barbell Full Squat",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "stair_climber": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/j9Q5crt.gif",
+  "wgerName": "walking on stepmill",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "standing_calf_raise": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -577,6 +827,16 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/8ozhUIZ.gif",
   "wgerName": "barbell standing calf raise",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "stationary_bike": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/H1PESYI.gif",
+  "wgerName": "stationary bike run",
   "wgerUrl": "https://exercisedb.dev"
  },
  "straight_arm_pulldown": {
@@ -590,6 +850,16 @@
   "url": "https://wger.de/media/exercise-images/1726/2e7e541b-5f55-405a-ae78-3e71b3f42db4.png",
   "wgerName": "Straight-Arm Pulldown (Cable)",
   "wgerUrl": "https://wger.de/exercise/1726/view/"
+ },
+ "treadmill": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/rjiM4L3.gif",
+  "wgerName": "walking on incline treadmill",
+  "wgerUrl": "https://exercisedb.dev"
  },
  "triceps_pushdown": {
   "author": "AscendAPI (ExerciseDB)",
@@ -609,6 +879,36 @@
   "source": "exercisedb",
   "url": "https://static.exercisedb.dev/media/1oE78pm.gif",
   "wgerName": "barbell upright row",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "walking": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/rjiM4L3.gif",
+  "wgerName": "walking on incline treadmill",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "wall_push_up": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/NCmbLCw.gif",
+  "wgerName": "push-up (wall)",
+  "wgerUrl": "https://exercisedb.dev"
+ },
+ "wrist_curl": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/6kSxYnw.gif",
+  "wgerName": "barbell wrist curl",
   "wgerUrl": "https://exercisedb.dev"
  }
 }

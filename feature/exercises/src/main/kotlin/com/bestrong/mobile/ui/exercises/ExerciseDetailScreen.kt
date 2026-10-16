@@ -420,6 +420,7 @@ private fun PlateauHint(vm: ExercisesViewModel, exerciseId: String, progress: Li
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp)) {
             Text(stringResource(R.string.plateau_hint, stalled), style = MaterialTheme.typography.bodyMedium)
+            TextButton(onClick = { vm.snoozePlateau(exerciseId, progress.size) }) { Text(stringResource(R.string.plateau_not_now)) }
             TextButton(onClick = { vm.tryRangeForPlateau(exerciseId, next, progress.size) }) { Text(stringResource(R.string.plateau_try_range, next.replace("-", "–"))) }
         }
     }

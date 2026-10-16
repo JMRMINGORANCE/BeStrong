@@ -93,6 +93,8 @@ data class UserSettings(
     val weeklyCardioMin: Int? = null,
     /** Aviso del jueves si el cardio de la semana va por detrás del objetivo. */
     val cardioNudge: Boolean = true,
+    /** Cuenta atrás con tres toques (3-2-1) antes de que acabe el descanso. */
+    val restCountdown: Boolean = false,
     /** Día del aviso (1 = lunes … 7 = domingo); el jueves por defecto. */
     val cardioNudgeDay: Int = 4,
     /** Cintura objetivo (cm); null = sin objetivo. */
@@ -183,6 +185,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         weeklyCardioMin = prefs.getString("weekly_cardio_min", null)?.toIntOrNull()?.takeIf { it > 0 },
         cardioNudge = prefs.getBoolean("cardio_nudge", true),
         cardioNudgeDay = prefs.getInt("cardio_nudge_day", 4).coerceIn(1, 7),
+        restCountdown = prefs.getBoolean("rest_countdown", false),
         plateauSnoozed = prefs.decodeMap("plateau_snoozed", INCREMENTS),
     )
 
@@ -262,6 +265,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         putBoolean("cardio_nudge", s.cardioNudge)
         putString("plateau_snoozed", SyncContract.json.encodeToString(INCREMENTS, s.plateauSnoozed))
         putInt("cardio_nudge_day", s.cardioNudgeDay)
+        putBoolean("rest_countdown", s.restCountdown)
     }
 
     /** Estado de la copia automática (propio de este móvil: no viaja en las copias). */
@@ -275,8 +279,12 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
 
     @Synchronized
     fun update(block: (UserSettings) -> UserSettings) {
-        // El descanso del aviso de estancamiento solo tiene sentido con un rango puesto (se quite donde se quite)
-        val s = block(_settings.value).let { n -> n.copy(plateauSnoozed = n.plateauSnoozed.filterKeys { it in n.exerciseRepRange }) }
+        // Al quitar el rango de un ejercicio (se quite donde se quite) se quita también el descanso de su aviso de
+        // estancamiento; los «Ahora no» (sin rango) se quedan
+        val before = _settings.value
+        val s = block(before).let { n ->
+            n.copy(plateauSnoozed = n.plateauSnoozed.filterKeys { it !in before.exerciseRepRange || it in n.exerciseRepRange })
+        }
         prefs.edit {
             putInt("rest", s.defaultRestSeconds)
             putBoolean("hc", s.healthConnectExport)
