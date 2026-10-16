@@ -66,12 +66,19 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         image?.let { img ->
             Card(Modifier.fillMaxWidth()) {
-                AsyncImage(
-                    model = img.url,
-                    contentDescription = stringResource(R.string.exercise_image_desc, img.wgerName.ifBlank { exercise.name }),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxWidth().height(200.dp).background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                )
+                // La animación de internet sobre la miniatura de la app: sin conexión se ve al menos la postura
+                val thumb = remember(exercise.id) { com.bestrong.mobile.ui.components.ExerciseImageIndex.thumb(context, exercise.id) }
+                androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().height(220.dp).background(androidx.compose.ui.graphics.Color.White)) {
+                    if (thumb != null && thumb != img.url) {
+                        AsyncImage(model = thumb, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.matchParentSize())
+                    }
+                    AsyncImage(
+                        model = img.url,
+                        contentDescription = stringResource(R.string.exercise_image_desc, img.wgerName.ifBlank { exercise.name }),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.matchParentSize(),
+                    )
+                }
                 // Atribución obligatoria: AscendAPI (ExerciseDB) o autor + licencia CC-BY-SA (wger)
                 Text(
                     if (img.source == "exercisedb") {

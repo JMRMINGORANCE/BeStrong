@@ -140,6 +140,7 @@ fun SubstituteDialog(vm: ActiveWorkoutViewModel, weId: String, onDismiss: () -> 
                         ListItem(
                             headlineContent = { Text(ex.displayName()) },
                             supportingContent = { Text(ex.equipment.label()) },
+                            leadingContent = { com.bestrong.mobile.ui.components.ExerciseThumb(ex, 44.dp, enlargeOnTap = false) },
                             modifier = Modifier.clickable {
                                 vm.substitute(weId, ex.id)
                                 onDismiss()

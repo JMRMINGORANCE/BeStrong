@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -52,10 +51,23 @@ import kotlinx.serialization.json.jsonPrimitive
 object ExerciseImageIndex {
     @Volatile private var urls: Map<String, String>? = null
 
+    @Volatile private var bundled: Set<String>? = null
+
     fun url(context: Context, exerciseId: String): Any? {
         val map = urls ?: load(context).also { urls = it }
         return map[exerciseId] ?: ownPhoto(context, exerciseId)
     }
+
+    /**
+     * Para las listas: la miniatura que va dentro de la app (se ve sin conexión y al instante); si no hay,
+     * la imagen de internet o la foto propia.
+     */
+    fun thumb(context: Context, exerciseId: String): Any? {
+        val inApp = bundled ?: runCatching { context.assets.list(THUMBS).orEmpty().toSet() }.getOrDefault(emptySet()).also { bundled = it }
+        return if ("$exerciseId.webp" in inApp) "file:///android_asset/$THUMBS/$exerciseId.webp" else url(context, exerciseId)
+    }
+
+    private const val THUMBS = "exercise_thumbs"
 
     private fun load(context: Context): Map<String, String> = runCatching {
         val text = context.assets.open("exercise_media.json").use { it.readBytes().decodeToString() }
@@ -77,6 +89,7 @@ object ExerciseImageIndex {
 fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Modifier, enlargeOnTap: Boolean = true) {
     val context = LocalContext.current
     val model = remember(exercise.id) { ExerciseImageIndex.url(context, exercise.id) }
+    val thumb = remember(exercise.id) { ExerciseImageIndex.thumb(context, exercise.id) }
     var big by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(size * 0.28f)
     val description = stringResource(R.string.exercise_image_desc, exercise.displayName())
@@ -102,9 +115,11 @@ fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Mod
         // El icono hasta que llega la imagen (o si no hay conexión); con ella, fondo blanco como el de las animaciones
         var loaded by remember(exercise.id) { mutableStateOf(false) }
         if (!loaded) Icon(Icons.Default.FitnessCenter, null, Modifier.size(size * 0.5f), tint = MaterialTheme.colorScheme.onPrimaryContainer)
-        if (model != null) {
+        if (thumb != null) {
             AsyncImage(
-                model = ImageRequest.Builder(context).data(model).decoderFactory(BitmapFactoryDecoder.Factory()).crossfade(true).build(),
+                model = ImageRequest.Builder(context).data(thumb).decoderFactory(BitmapFactoryDecoder.Factory())
+                    // La de la app llega al instante: el fundido solo para la de internet
+                    .crossfade(thumb !is String || !thumb.startsWith("file:")).build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 onSuccess = { loaded = true },
@@ -117,14 +132,16 @@ fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Mod
             onDismissRequest = { big = false },
             title = { Text(exercise.displayName()) },
             text = {
-                Column {
-                    // Animada (GIF) en grande, para ver la técnica
+                // Animada (GIF) en grande, para ver la técnica; debajo la miniatura, por si no hay conexión
+                Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(16.dp)).background(androidx.compose.ui.graphics.Color.White)) {
+                    if (thumb != null && thumb != model) {
+                        AsyncImage(model = thumb, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.matchParentSize())
+                    }
                     AsyncImage(
                         model = model,
                         contentDescription = stringResource(R.string.exercise_image_desc, exercise.displayName()),
                         contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(16.dp))
-                            .background(androidx.compose.ui.graphics.Color.White),
+                        modifier = Modifier.matchParentSize(),
                     )
                 }
             },
