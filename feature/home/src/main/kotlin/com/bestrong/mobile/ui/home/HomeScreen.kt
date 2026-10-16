@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -29,6 +28,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
@@ -38,7 +39,6 @@ import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,7 +65,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -73,10 +72,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bestrong.core.library.TrainingProgram
 import com.bestrong.core.model.Routine
 import com.bestrong.core.session.WorkoutEditor
-import com.bestrong.core.training.PeriodizedProgram
 import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.share.RoutineShare
 import com.bestrong.mobile.shared.R
@@ -85,7 +82,6 @@ import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatTime
 import com.bestrong.mobile.ui.components.rememberNow
-import com.bestrong.mobile.ui.components.uiLanguage
 import com.bestrong.mobile.ui.help.TipCard
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -134,14 +130,15 @@ fun HomeScreen(
             },
         )
     }
+    // Programas: pantalla completa para crear uno a medida (o elegir un clásico)
     if (showPrograms) {
-        ProgramsDialog(
-            periodized = vm.periodizedPrograms,
-            programs = vm.programs,
+        ProgramBuilderScreen(
+            vm = vm,
             onPickPeriodized = { setupProgramId = it.id; showPrograms = false },
-            onPick = { vm.addProgram(it); showPrograms = false },
+            onPickClassic = { vm.addProgram(it); showPrograms = false },
             onDismiss = { showPrograms = false },
         )
+        return
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
@@ -384,55 +381,6 @@ private fun RoutineCard(
     }
 }
 
-/** Programas predefinidos: al elegir uno se crean todas sus rutinas. */
-@Composable
-private fun ProgramsDialog(
-    periodized: List<PeriodizedProgram>,
-    programs: List<TrainingProgram>,
-    onPickPeriodized: (PeriodizedProgram) -> Unit,
-    onPick: (TrainingProgram) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val lang = uiLanguage()
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.programs_title)) },
-        text = {
-            LazyColumn(Modifier.testTag("programs_list"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                item { Text(stringResource(R.string.programs_periodized), style = MaterialTheme.typography.titleSmall) }
-                items(periodized, key = { "p-" + it.id }) { p ->
-                    Card(onClick = { onPickPeriodized(p) }, modifier = Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text(p.name(lang), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            Text(
-                                stringResource(R.string.program_meta_periodized, p.daysPerWeek),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                            Text(p.description(lang), style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                }
-                item { Text(stringResource(R.string.programs_templates), style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp)) }
-                items(programs, key = { it.id }) { p ->
-                    Card(onClick = { onPick(p) }, modifier = Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text(p.name(lang), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            Text(
-                                stringResource(R.string.program_meta, p.daysPerWeek, p.routines.size),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                            Text(p.description(lang), style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
-    )
-}
-
 /** QR y enlace de una rutina para pasarla a otro móvil con BeStrong. */
 @Composable
 private fun ShareRoutineDialog(routine: Routine, onDismiss: () -> Unit) {
@@ -468,18 +416,26 @@ private fun UndoRoutineDelete(vm: HomeViewModel, snackbar: SnackbarHostState) {
     }
 }
 
-/** Cabecera de una carpeta de rutinas; tocarla la pliega o despliega. */
+/** Cabecera de una carpeta de rutinas: icono, nombre y cuántas tiene; tocarla la pliega o despliega. */
 @Composable
 private fun FolderHeader(name: String, count: Int, folded: Boolean, icon: String = "📁", onToggle: () -> Unit) {
     val state = stringResource(if (folded) R.string.folder_collapsed else R.string.folder_expanded)
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(vertical = 8.dp)
+        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).clickable(onClick = onToggle).padding(vertical = 10.dp, horizontal = 4.dp)
             .semantics { stateDescription = state },
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(if (folded) "▸" else "▾", Modifier.padding(end = 8.dp), color = MaterialTheme.colorScheme.primary)
-        Text("$icon $name", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-        Text("$count", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Box(Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
+            Text(icon)
+        }
+        Text(name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f).padding(start = 12.dp))
+        com.bestrong.mobile.ui.components.MetaPill("$count")
+        Icon(
+            if (folded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,
+            null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 8.dp),
+        )
     }
 }
 

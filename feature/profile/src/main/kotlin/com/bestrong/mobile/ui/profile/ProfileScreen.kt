@@ -124,8 +124,9 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             onDone = { showTutorial = false },
             unit = settings.unit,
             weeklyGoal = settings.weeklyGoal,
-            onSetup = { unit, goal, home -> vm.updateSettings { it.copy(unit = unit, weeklyGoal = goal).trainingAt(home) } },
+            onSetup = { unit, goal, home, training -> vm.updateSettings { it.copy(unit = unit, weeklyGoal = goal, trainingGoal = training).trainingAt(home) } },
             atHome = com.bestrong.core.model.Equipment.BARBELL !in settings.activeGym.equipment,
+            trainingGoal = settings.trainingGoal,
         )
     }
     editingGym?.let { g ->

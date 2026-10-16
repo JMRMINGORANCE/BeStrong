@@ -393,6 +393,18 @@ class HomeViewModel @Inject constructor(
 
     val programs: List<TrainingProgram> = Programs.all
 
+    /** Programa a medida (sin guardar): para enseñarlo antes de crearlo. */
+    fun buildProgram(days: Int, goal: com.bestrong.core.training.Goal, kit: Kit, minutes: Int): com.bestrong.core.training.GeneratedProgram =
+        com.bestrong.core.training.ProgramGenerator.build(days, goal, kit.equipment, minutes, context.uiLanguage())
+
+    /** Guarda las rutinas del programa a medida (en su carpeta). */
+    fun addGenerated(program: com.bestrong.core.training.GeneratedProgram, goal: com.bestrong.core.training.Goal) = viewModelScope.launch {
+        repo.addRoutines(program.routines)
+        // El objetivo de la semana pasa a ser los días del programa, y se recuerda el objetivo elegido
+        settingsStore.update { it.copy(weeklyGoal = program.routines.size.coerceIn(1, 7), trainingGoal = goal) }
+        _messages.tryEmit(context.getString(R.string.msg_program_added, program.name, program.routines.size))
+    }
+
     /** Crea las rutinas del programa elegido en el idioma de la app. */
     fun addProgram(program: TrainingProgram) = viewModelScope.launch {
         val routines = program.toRoutines(context.uiLanguage())
@@ -461,3 +473,10 @@ private const val HOUR_MS = 60 * 60 * 1000L
 
 /** Días sin hacer una rutina a partir de los cuales se propone archivarla. */
 private const val STALE_DAYS = 60
+
+/** Material con el que se entrena: decide qué ejercicios entran en el programa a medida. */
+enum class Kit(val equipment: Set<com.bestrong.core.model.Equipment>) {
+    GYM(com.bestrong.core.model.Equipment.entries.toSet()),
+    DUMBBELLS(setOf(com.bestrong.core.model.Equipment.DUMBBELL, com.bestrong.core.model.Equipment.BODYWEIGHT, com.bestrong.core.model.Equipment.KETTLEBELL)),
+    BODYWEIGHT(setOf(com.bestrong.core.model.Equipment.BODYWEIGHT)),
+}

@@ -238,12 +238,37 @@ class UiFlowTest {
 
     @Test
     @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
+    fun generated_program_folded() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        openPrograms()
+        settle()
+        // Objetivo y días: el programa a medida cambia al momento
+        compose.onNodeWithText("Perder grasa").performClick()
+        compose.mainClock.autoAdvance = true
+        programsList().performScrollToNode(hasText("4"))
+        compose.onNodeWithText("4").performClick()
+        compose.mainClock.autoAdvance = false
+        settle()
+        captureScreenRoboImage("build/outputs/roborazzi/builder_folded.png")
+        compose.onNodeWithText("Crear programa").performClick()
+        settle(25)
+        // Sus cuatro rutinas, juntas en la carpeta del programa
+        assertTrue(compose.onAllNodesWithText("Definición · 4 días", substring = true).fetchSemanticsNodes().isNotEmpty())
+        shot("generated_added_folded")
+    }
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun periodized_program_today() {
         compose.mainClock.autoAdvance = false
         settle()
         openPrograms()
         settle()
+        compose.mainClock.autoAdvance = true
+        programsList().performScrollToNode(hasText("5/3/1 Boring But Big"))
         compose.onNodeWithText("5/3/1 Boring But Big").performClick()
+        compose.mainClock.autoAdvance = false
         settle()
         // Sin TM en todos los básicos no se puede empezar
         compose.onNodeWithText("Empezar programa").assertIsNotEnabled()

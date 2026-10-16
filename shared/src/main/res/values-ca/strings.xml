@@ -504,16 +504,12 @@
     <string name="prog_search">Cercar exercici</string>
     <string name="prog_sets">Sèries</string>
     <string name="prog_title">Els meus programes</string>
-    <string name="program_meta">%1$d dies/setmana · %2$d rutines</string>
-    <string name="program_meta_periodized">%1$d dies/setmana · càrregues calculades</string>
     <string name="program_start">Començar programa</string>
     <string name="program_stop">Deixar el programa</string>
     <string name="program_tm_help">Training max (TM): el 90 % del teu 1RM. L’omplim amb el teu historial; ajusta’l si cal.</string>
     <string name="program_tm_required">Posa un training max més gran que 0 a cada exercici</string>
     <string name="program_tm_label">TM %1$s (%2$s)</string>
     <string name="programs_periodized">Amb progressió automàtica</string>
-    <string name="programs_templates">Plantilles de rutines</string>
-    <string name="programs_title">Programes d’entrenament</string>
     <string name="progress_add">Afegir foto</string>
     <string name="progress_compare">Comparar</string>
     <string name="progress_compare_hint">Tria dues fotos per comparar-les</string>
@@ -1227,4 +1223,28 @@
         <item quantity="other">%1$d sèries</item>
     </plurals>
     <string name="profile_progress">Progrés</string>
+    <string name="goal_fat_loss">Perdre greix</string>
+    <string name="goal_general">Salut i forma</string>
+    <string name="goal_muscle">Guanyar múscul</string>
+    <string name="goal_strength_desc">Aixecar més pes: poques repeticions i descansos llargs</string>
+    <string name="goal_hypertrophy_desc">Més massa muscular amb volum moderat</string>
+    <string name="goal_fat_loss_desc">Cremar més: superseries, descansos curts i remat final</string>
+    <string name="goal_endurance_desc">Aguantar més: moltes repeticions i poc descans</string>
+    <string name="goal_general_desc">Posar-te en forma amb una mica de tot</string>
+    <string name="builder_title">Crea el teu programa</string>
+    <string name="builder_subtitle">Tria l\'objectiu i els dies: el muntem a la teva mida</string>
+    <string name="builder_goal">Quin és el teu objectiu?</string>
+    <string name="builder_days">Quants dies per setmana?</string>
+    <string name="builder_equipment">Amb quin material?</string>
+    <string name="builder_minutes">Quant temps per sessió?</string>
+    <string name="builder_gym">Gimnàs</string>
+    <string name="builder_dumbbells">Manuelles</string>
+    <string name="builder_bodyweight">Sense material</string>
+    <string name="builder_preview">El teu programa</string>
+    <string name="programs_classic">Programes clàssics</string>
+    <string name="builder_create">Crear programa</string>
+    <plurals name="days_count">
+        <item quantity="one">%1$d dia</item>
+        <item quantity="other">%1$d dies</item>
+    </plurals>
 </resources>

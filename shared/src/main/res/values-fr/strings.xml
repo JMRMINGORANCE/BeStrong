@@ -504,16 +504,12 @@
     <string name="prog_search">Rechercher un exercice</string>
     <string name="prog_sets">Séries</string>
     <string name="prog_title">Mes programmes</string>
-    <string name="program_meta">%1$d jours/semaine · %2$d routines</string>
-    <string name="program_meta_periodized">%1$d jours/semaine · charges calculées</string>
     <string name="program_start">Lancer le programme</string>
     <string name="program_stop">Quitter le programme</string>
     <string name="program_tm_help">Training max (TM) : 90 % de ton 1RM. Prérempli d’après ton historique ; ajuste-le si besoin.</string>
     <string name="program_tm_required">Indique un training max supérieur à 0 pour chaque exercice</string>
     <string name="program_tm_label">TM %1$s (%2$s)</string>
     <string name="programs_periodized">Avec progression automatique</string>
-    <string name="programs_templates">Modèles de routines</string>
-    <string name="programs_title">Programmes d’entraînement</string>
     <string name="progress_add">Ajouter une photo</string>
     <string name="progress_compare">Comparer</string>
     <string name="progress_compare_hint">Choisis deux photos à comparer</string>
@@ -1227,4 +1223,28 @@
         <item quantity="other">%1$d séries</item>
     </plurals>
     <string name="profile_progress">Progrès</string>
+    <string name="goal_fat_loss">Perdre du gras</string>
+    <string name="goal_general">Santé et forme</string>
+    <string name="goal_muscle">Prendre du muscle</string>
+    <string name="goal_strength_desc">Soulever plus lourd : peu de répétitions, longs repos</string>
+    <string name="goal_hypertrophy_desc">Plus de muscle avec un volume modéré</string>
+    <string name="goal_fat_loss_desc">Brûler plus : supersets, repos courts et finisher</string>
+    <string name="goal_endurance_desc">Tenir plus longtemps : beaucoup de répétitions, peu de repos</string>
+    <string name="goal_general_desc">Se mettre en forme avec un peu de tout</string>
+    <string name="builder_title">Crée ton programme</string>
+    <string name="builder_subtitle">Choisis ton objectif et tes jours : on l\'adapte à toi</string>
+    <string name="builder_goal">Quel est ton objectif ?</string>
+    <string name="builder_days">Combien de jours par semaine ?</string>
+    <string name="builder_equipment">Quel matériel ?</string>
+    <string name="builder_minutes">Combien de temps par séance ?</string>
+    <string name="builder_gym">Salle</string>
+    <string name="builder_dumbbells">Haltères</string>
+    <string name="builder_bodyweight">Sans matériel</string>
+    <string name="builder_preview">Ton programme</string>
+    <string name="programs_classic">Programmes classiques</string>
+    <string name="builder_create">Créer le programme</string>
+    <plurals name="days_count">
+        <item quantity="one">%1$d jour</item>
+        <item quantity="other">%1$d jours</item>
+    </plurals>
 </resources>

@@ -504,16 +504,12 @@
     <string name="prog_search">Search exercise</string>
     <string name="prog_sets">Sets</string>
     <string name="prog_title">My programs</string>
-    <string name="program_meta">%1$d days/week · %2$d routines</string>
-    <string name="program_meta_periodized">%1$d days/week · loads calculated</string>
     <string name="program_start">Start program</string>
     <string name="program_stop">Leave program</string>
     <string name="program_tm_help">Training max (TM): 90% of your 1RM. Pre-filled from your history; adjust if needed.</string>
     <string name="program_tm_required">Enter a training max above 0 for each lift</string>
     <string name="program_tm_label">TM %1$s (%2$s)</string>
     <string name="programs_periodized">With automatic progression</string>
-    <string name="programs_templates">Routine templates</string>
-    <string name="programs_title">Training programs</string>
     <string name="progress_add">Add photo</string>
     <string name="progress_compare">Compare</string>
     <string name="progress_compare_hint">Pick two photos to compare</string>
@@ -1227,4 +1223,28 @@
         <item quantity="other">%1$d sets</item>
     </plurals>
     <string name="profile_progress">Progress</string>
+    <string name="goal_fat_loss">Lose fat</string>
+    <string name="goal_general">Health &amp; fitness</string>
+    <string name="goal_muscle">Build muscle</string>
+    <string name="goal_strength_desc">Lift heavier: low reps and long rests</string>
+    <string name="goal_hypertrophy_desc">More muscle with moderate volume</string>
+    <string name="goal_fat_loss_desc">Burn more: supersets, short rests and a finisher</string>
+    <string name="goal_endurance_desc">Last longer: high reps and little rest</string>
+    <string name="goal_general_desc">Get fit with a bit of everything</string>
+    <string name="builder_title">Build your program</string>
+    <string name="builder_subtitle">Pick your goal and your days: we tailor it to you</string>
+    <string name="builder_goal">What is your goal?</string>
+    <string name="builder_days">How many days a week?</string>
+    <string name="builder_equipment">What equipment?</string>
+    <string name="builder_minutes">How long per session?</string>
+    <string name="builder_gym">Gym</string>
+    <string name="builder_dumbbells">Dumbbells</string>
+    <string name="builder_bodyweight">No equipment</string>
+    <string name="builder_preview">Your program</string>
+    <string name="programs_classic">Classic programs</string>
+    <string name="builder_create">Create program</string>
+    <plurals name="days_count">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
 </resources>

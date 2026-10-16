@@ -504,16 +504,12 @@
     <string name="prog_search">Buscar exercicio</string>
     <string name="prog_sets">Series</string>
     <string name="prog_title">Os meus programas</string>
-    <string name="program_meta">%1$d días/semana · %2$d rutinas</string>
-    <string name="program_meta_periodized">%1$d días/semana · cargas calculadas</string>
     <string name="program_start">Comezar programa</string>
     <string name="program_stop">Deixar o programa</string>
     <string name="program_tm_help">Training max (TM): o 90 % do teu 1RM. Enchémolo co teu historial; axústao se fai falta.</string>
     <string name="program_tm_required">Pon un training max maior ca 0 en cada exercicio</string>
     <string name="program_tm_label">TM %1$s (%2$s)</string>
     <string name="programs_periodized">Con progresión automática</string>
-    <string name="programs_templates">Modelos de rutinas</string>
-    <string name="programs_title">Programas de adestramento</string>
     <string name="progress_add">Engadir foto</string>
     <string name="progress_compare">Comparar</string>
     <string name="progress_compare_hint">Escolle dúas fotos para comparalas</string>
@@ -1227,4 +1223,28 @@
         <item quantity="other">%1$d series</item>
     </plurals>
     <string name="profile_progress">Progreso</string>
+    <string name="goal_fat_loss">Perder graxa</string>
+    <string name="goal_general">Saúde e forma</string>
+    <string name="goal_muscle">Gañar músculo</string>
+    <string name="goal_strength_desc">Levantar máis peso: poucas repeticións e descansos longos</string>
+    <string name="goal_hypertrophy_desc">Máis masa muscular con volume moderado</string>
+    <string name="goal_fat_loss_desc">Queimar máis: superseries, descansos curtos e remate final</string>
+    <string name="goal_endurance_desc">Aguantar máis: moitas repeticións e pouco descanso</string>
+    <string name="goal_general_desc">Poñerte en forma cun pouco de todo</string>
+    <string name="builder_title">Crea o teu programa</string>
+    <string name="builder_subtitle">Escolle o obxectivo e os días: montámolo á túa medida</string>
+    <string name="builder_goal">Cal é o teu obxectivo?</string>
+    <string name="builder_days">Cantos días por semana?</string>
+    <string name="builder_equipment">Con que material?</string>
+    <string name="builder_minutes">Canto tempo por sesión?</string>
+    <string name="builder_gym">Ximnasio</string>
+    <string name="builder_dumbbells">Mancuernas</string>
+    <string name="builder_bodyweight">Sen material</string>
+    <string name="builder_preview">O teu programa</string>
+    <string name="programs_classic">Programas clásicos</string>
+    <string name="builder_create">Crear programa</string>
+    <plurals name="days_count">
+        <item quantity="one">%1$d día</item>
+        <item quantity="other">%1$d días</item>
+    </plurals>
 </resources>

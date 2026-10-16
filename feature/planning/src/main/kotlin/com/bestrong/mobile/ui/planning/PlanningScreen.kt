@@ -234,6 +234,7 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
 
 // --- Fatiga y mesociclo --------------------------------------------------------------------------
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FatigueCard(vm: PlanningViewModel, ui: PlanningUi) {
     PlanCard(stringResource(R.string.fatigue_title)) {
@@ -252,7 +253,8 @@ private fun FatigueCard(vm: PlanningViewModel, ui: PlanningUi) {
         }
         val meso = ui.state.mesocycle
         if (meso == null) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            // Bajan de línea si no caben (columna estrecha del Fold desplegado)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf(3, 4, 5).forEach { w -> AssistChip(onClick = { vm.startMesocycle(w) }, label = { Text(stringResource(R.string.meso_start, w)) }) }
             }
         } else {
@@ -280,7 +282,7 @@ private fun GeneratorCard(vm: PlanningViewModel) {
         }
         Text(stringResource(R.string.gen_goal), style = MaterialTheme.typography.labelMedium)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(Goal.STRENGTH to R.string.goal_strength, Goal.HYPERTROPHY to R.string.goal_hypertrophy, Goal.ENDURANCE to R.string.goal_endurance).forEach { (g, l) ->
+            listOf(Goal.STRENGTH to R.string.goal_strength, Goal.HYPERTROPHY to R.string.goal_hypertrophy, Goal.FAT_LOSS to R.string.goal_fat_loss, Goal.ENDURANCE to R.string.goal_endurance, Goal.GENERAL to R.string.goal_general).forEach { (g, l) ->
                 FilterChip(selected = goal == g, onClick = { goal = g }, label = { Text(stringResource(l)) })
             }
         }

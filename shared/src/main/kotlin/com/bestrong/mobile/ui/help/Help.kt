@@ -189,24 +189,26 @@ fun TutorialDialog(
     unit: com.bestrong.core.util.WeightUnit = com.bestrong.core.util.WeightUnit.KG,
     weeklyGoal: Int = 3,
     /** Última página: lo básico para empezar (unidad, días por semana y si se entrena en casa). */
-    onSetup: (com.bestrong.core.util.WeightUnit, Int, Boolean) -> Unit = { _, _, _ -> },
+    onSetup: (com.bestrong.core.util.WeightUnit, Int, Boolean, com.bestrong.core.training.Goal) -> Unit = { _, _, _, _ -> },
     atHome: Boolean = false,
+    trainingGoal: com.bestrong.core.training.Goal = com.bestrong.core.training.Goal.HYPERTROPHY,
 ) {
     var chosenUnit by rememberSaveable { mutableStateOf(unit) }
     var chosenGoal by rememberSaveable { mutableIntStateOf(weeklyGoal) }
     var chosenHome by rememberSaveable { mutableStateOf(atHome) }
+    var chosenTraining by rememberSaveable { mutableStateOf(trainingGoal) }
     val pages = TUTORIAL.size + 1
     val pager = androidx.compose.foundation.pager.rememberPagerState { pages }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val finish = {
-        onSetup(chosenUnit, chosenGoal, chosenHome)
+        onSetup(chosenUnit, chosenGoal, chosenHome, chosenTraining)
         onDone()
     }
     Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         val setup = pager.currentPage == TUTORIAL.size
         // Cada pantalla tiñe el fondo con su color (acento, ámbar, verde…)
         val tint = tutorialTint(pager.currentPage)
-        androidx.compose.material3.Surface(Modifier.fillMaxSize(), color = com.bestrong.mobile.ui.theme.LocalScreenColor.current) {
+        androidx.compose.material3.Surface(Modifier.fillMaxSize(), color = com.bestrong.mobile.ui.theme.LocalScreenColor.current, contentColor = MaterialTheme.colorScheme.onBackground) {
             Box(
                 Modifier.fillMaxSize().background(
                     androidx.compose.ui.graphics.Brush.verticalGradient(listOf(tint.copy(alpha = 0.32f), androidx.compose.ui.graphics.Color.Transparent, androidx.compose.ui.graphics.Color.Transparent)),
@@ -219,7 +221,7 @@ fun TutorialDialog(
                     }
                     androidx.compose.foundation.pager.HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth()) { page ->
                         if (page == TUTORIAL.size) {
-                            SetupScreen(chosenUnit, chosenGoal, chosenHome, { chosenUnit = it }, { chosenGoal = it }, { chosenHome = it })
+                            SetupScreen(chosenUnit, chosenGoal, chosenHome, { chosenUnit = it }, { chosenGoal = it }, { chosenHome = it }, chosenTraining) { chosenTraining = it }
                         } else {
                             TutorialScreen(TUTORIAL[page], tutorialTint(page))
                         }
@@ -366,6 +368,8 @@ private fun SetupScreen(
     onUnit: (com.bestrong.core.util.WeightUnit) -> Unit,
     onGoal: (Int) -> Unit,
     onHome: (Boolean) -> Unit,
+    training: com.bestrong.core.training.Goal,
+    onTraining: (com.bestrong.core.training.Goal) -> Unit,
 ) {
     Column(
         Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState()),
@@ -378,6 +382,7 @@ private fun SetupScreen(
         Spacer(Modifier.height(16.dp))
         Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer), modifier = Modifier.widthIn(max = 480.dp)) {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                TrainingGoalChoice(training, onTraining)
                 SetupPage(unit, goal, onUnit, onGoal)
                 PlaceChoice(home, onHome)
             }
@@ -411,6 +416,27 @@ private fun SetupPage(
         Text(stringResource(R.string.setup_import_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
+
+/** «¿Cuál es tu objetivo?»: ganar músculo, fuerza, perder grasa, resistencia o salud. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun TrainingGoalChoice(selected: com.bestrong.core.training.Goal, onChange: (com.bestrong.core.training.Goal) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.builder_goal), style = MaterialTheme.typography.labelLarge)
+        androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            trainingGoals().forEach { (g, label) -> FilterChip(selected = g == selected, onClick = { onChange(g) }, label = { Text(stringResource(label)) }) }
+        }
+    }
+}
+
+/** Los objetivos con su nombre, en el orden en que se ofrecen. */
+fun trainingGoals(): List<Pair<com.bestrong.core.training.Goal, Int>> = listOf(
+    com.bestrong.core.training.Goal.HYPERTROPHY to R.string.goal_muscle,
+    com.bestrong.core.training.Goal.FAT_LOSS to R.string.goal_fat_loss,
+    com.bestrong.core.training.Goal.STRENGTH to R.string.goal_strength,
+    com.bestrong.core.training.Goal.ENDURANCE to R.string.goal_endurance,
+    com.bestrong.core.training.Goal.GENERAL to R.string.goal_general,
+)
 
 /** «¿Dónde entrenas?»: elige el perfil de material (discos y barra o mancuernas de casa) para los pesos sugeridos. */
 @Composable
