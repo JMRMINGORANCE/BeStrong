@@ -109,18 +109,17 @@ fun Panel(
     )
 }
 
-/** Acceso rápido: icono en un círculo de color y la etiqueta debajo; [filled] para el principal. */
+/**
+ * Acceso rápido: icono en un círculo de color y la etiqueta debajo (o al lado con [horizontal], para letra grande);
+ * [filled] para el principal.
+ */
 @Composable
-fun QuickAction(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier, filled: Boolean = false) {
+fun QuickAction(icon: ImageVector, label: String, onClick: () -> Unit, modifier: Modifier = Modifier, filled: Boolean = false, horizontal: Boolean = false) {
     val scheme = MaterialTheme.colorScheme
-    Column(
-        modifier.clip(MaterialTheme.shapes.large)
-            .background(if (filled) brandGradient() else androidx.compose.ui.graphics.SolidColor(scheme.surfaceContainer))
-            .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
-            .padding(horizontal = 6.dp, vertical = 14.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-    ) {
+    val base = modifier.clip(MaterialTheme.shapes.large)
+        .background(if (filled) brandGradient() else androidx.compose.ui.graphics.SolidColor(scheme.surfaceContainer))
+        .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+    val bubble: @Composable () -> Unit = {
         Box(
             Modifier.size(44.dp).clip(androidx.compose.foundation.shape.CircleShape)
                 .background(if (filled) scheme.surfaceContainerLowest.copy(alpha = 0.25f) else scheme.primary.copy(alpha = 0.14f)),
@@ -128,15 +127,33 @@ fun QuickAction(icon: ImageVector, label: String, onClick: () -> Unit, modifier:
         ) {
             androidx.compose.material3.Icon(icon, null, tint = if (filled) scheme.onPrimary else scheme.primary)
         }
+    }
+    val text: @Composable (Modifier) -> Unit = { m ->
         Text(
             label,
+            m,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             color = if (filled) scheme.onPrimary else scheme.onSurface,
-            textAlign = TextAlign.Center,
+            textAlign = if (horizontal) TextAlign.Start else TextAlign.Center,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
+    }
+    if (horizontal) {
+        Row(base.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            bubble()
+            text(Modifier.padding(start = 10.dp).weight(1f))
+        }
+    } else {
+        Column(
+            base.padding(horizontal = 6.dp, vertical = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        ) {
+            bubble()
+            text(Modifier)
+        }
     }
 }
 

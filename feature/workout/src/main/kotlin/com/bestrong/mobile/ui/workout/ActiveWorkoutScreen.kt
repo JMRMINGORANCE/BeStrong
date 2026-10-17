@@ -461,6 +461,16 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
             StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}/${w.totalSetCount}", Modifier.weight(1f))
             metrics?.heartRate?.let { StatTile(stringResource(R.string.stat_watch_hr), "$it", Modifier.weight(0.8f)) }
         }
+        // Barra de progreso del entreno (series hechas sobre el total), animada
+        if (w.totalSetCount > 0) {
+            val progress by androidx.compose.animation.core.animateFloatAsState(w.completedSetCount.toFloat() / w.totalSetCount, label = "progress")
+            Box(
+                Modifier.fillMaxWidth().padding(top = 4.dp).height(8.dp).clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+            ) {
+                Box(Modifier.fillMaxWidth(progress).fillMaxHeight().clip(androidx.compose.foundation.shape.CircleShape).background(com.bestrong.mobile.ui.components.brandGradient()))
+            }
+        }
         // Tiempo aproximado para terminar (series pendientes + descansos) y a qué hora
         val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now, warmupRestSeconds = eta.warmupRestSeconds, restEndsAtEpochMs = eta.restEndsAtEpochMs)
         if (remaining > 0) {

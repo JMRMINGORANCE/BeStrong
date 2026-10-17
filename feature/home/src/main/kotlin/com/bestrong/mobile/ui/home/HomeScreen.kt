@@ -260,12 +260,35 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, onOpenWorkout:
 @Composable
 private fun QuickActions(onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: () -> Unit, onPrograms: () -> Unit, onPlan: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
-            val tile = Modifier.fillMaxHeight()
-            com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, stringResource(R.string.home_empty_workout), onEmpty, tile.weight(1.5f), filled = true)
-            com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, stringResource(R.string.home_on_watch), onWatch, tile.weight(1f))
-            com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Star, stringResource(R.string.home_programs), onPrograms, tile.weight(1f))
-            com.bestrong.mobile.ui.components.QuickAction(Icons.Default.CalendarMonth, stringResource(R.string.planning_open), onPlan, tile.weight(1f))
+        // Con letra grande no caben cuatro en fila sin partir palabras: 2 × 2 con el texto al lado del icono
+        val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+        val empty = stringResource(R.string.home_empty_workout)
+        val watch = stringResource(R.string.home_on_watch)
+        val programs = stringResource(R.string.home_programs)
+        val plan = stringResource(R.string.planning_open)
+        val actions = listOf(
+            Triple(Icons.Default.Add, empty, onEmpty),
+            Triple(Icons.Default.Watch, watch, onWatch),
+            Triple(Icons.Default.Star, programs, onPrograms),
+            Triple(Icons.Default.CalendarMonth, plan, onPlan),
+        )
+        if (scale > LARGE_FONT) {
+            // Muy grande: uno por fila; grande: 2 × 2
+            actions.chunked(if (scale > HUGE_FONT) 1 else 2).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    row.forEach { (icon, label, onClick) ->
+                        com.bestrong.mobile.ui.components.QuickAction(icon, label, onClick, Modifier.weight(1f), filled = label == empty, horizontal = true)
+                    }
+                }
+            }
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
+                val tile = Modifier.fillMaxHeight()
+                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, empty, onEmpty, tile.weight(1.5f), filled = true)
+                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, watch, onWatch, tile.weight(1f))
+                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Star, programs, onPrograms, tile.weight(1f))
+                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.CalendarMonth, plan, onPlan, tile.weight(1f))
+            }
         }
         repeatName?.let { name ->
             com.bestrong.mobile.ui.components.Panel(onClick = onRepeat, contentPadding = 14.dp) {
@@ -469,6 +492,12 @@ private fun LazyGridScope.routineItems(
         if (open) items(archived, key = { it.id }) { card(it) }
     }
 }
+
+/** Escala de letra a partir de la cual los accesos rápidos van en 2 × 2. */
+private const val LARGE_FONT = 1.3f
+
+/** A partir de esta, uno por fila. */
+private const val HUGE_FONT = 1.6f
 
 /** Clave de la sección de rutinas archivadas (no puede coincidir con una carpeta: lleva un carácter de control). */
 private const val ARCHIVE_KEY = "\u0000archived"
