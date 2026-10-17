@@ -71,8 +71,11 @@ object Backup {
         return BackupData(
             history = root["history"]?.jsonArray?.mapNotNull { runCatching { Persistence.decodeWorkout(stamped(it)) }.getOrNull() }.orEmpty(),
             routines = root["routines"]?.jsonArray?.mapNotNull { runCatching { Persistence.decodeRoutine(stamped(it)) }.getOrNull() }.orEmpty(),
-            customExercises = root["customExercises"]?.let { runCatching { json.decodeFromJsonElement(ListSerializer(Exercise.serializer()), it) }.getOrNull() }.orEmpty(),
-            measurements = root["measurements"]?.let { runCatching { json.decodeFromJsonElement(ListSerializer(BodyMeasurement.serializer()), it) }.getOrNull() }.orEmpty(),
+            // Uno a uno: un elemento dañado no se lleva por delante los demás
+            customExercises = (root["customExercises"] as? kotlinx.serialization.json.JsonArray)
+                ?.mapNotNull { runCatching { json.decodeFromJsonElement(Exercise.serializer(), it) }.getOrNull() }.orEmpty(),
+            measurements = (root["measurements"] as? kotlinx.serialization.json.JsonArray)
+                ?.mapNotNull { runCatching { json.decodeFromJsonElement(BodyMeasurement.serializer(), it) }.getOrNull() }.orEmpty(),
             activeProgram = root["activeProgram"]?.let { runCatching { json.decodeFromJsonElement(ActiveProgram.serializer(), it) }.getOrNull() },
             planning = root["planning"] as? JsonObject,
             settings = root["settings"] as? JsonObject,

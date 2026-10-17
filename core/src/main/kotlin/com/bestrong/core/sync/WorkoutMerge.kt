@@ -14,6 +14,8 @@ import com.bestrong.core.model.WorkoutSet
  *   con los valores del lado en que se completó (o del más reciente si ambos la completaron).
  * - Un ejercicio o serie que solo existe en el lado antiguo se conserva si tiene trabajo
  *   completado; si no, se asume que el lado reciente lo borró.
+ * - Lo borrado a propósito (en [Workout.deletedIds] de cualquiera de los dos) no vuelve, y desmarcar una serie
+ *   después de completarla gana a esa marca (se compara cuándo se hizo cada cosa).
  */
 object WorkoutMerge {
 
@@ -23,15 +25,17 @@ object WorkoutMerge {
         val olderById = older.exercises.associateBy { it.id }
         val newerIds = newer.exercises.map { it.id }.toSet()
 
-        val merged = newer.exercises.map { ne -> olderById[ne.id]?.let { mergeExercise(it, ne) } ?: ne }.toMutableList()
+        val deleted = (a.deletedIds.keys + b.deletedIds.keys).associateWith { a.deletedIds[it].orEmpty() + b.deletedIds[it].orEmpty() }
+        val merged = newer.exercises.map { ne -> olderById[ne.id]?.let { mergeExercise(it, ne, deleted) } ?: ne }.toMutableList()
         // Ejercicios que solo están en el lado antiguo: se conservan si tienen series hechas
         older.exercises.forEachIndexed { index, oe ->
-            if (oe.id !in newerIds && oe.sets.any { it.completed }) {
+            if (oe.id !in newerIds && !gone(oe, deleted) && oe.sets.any { it.completed }) {
                 merged.add(index.coerceAtMost(merged.size), oe)
             }
         }
         return newer.copy(
-            exercises = merged,
+            exercises = merged.filterNot { gone(it, deleted) }.map { we -> we.copy(sets = we.sets.filterNot { gone(it, deleted) }) },
+            deletedIds = deleted,
             updatedAtEpochMs = maxOf(a.updatedAtEpochMs, b.updatedAtEpochMs),
             avgHeartRate = newer.avgHeartRate ?: older.avgHeartRate,
             maxHeartRate = newer.maxHeartRate ?: older.maxHeartRate,
@@ -40,12 +44,19 @@ object WorkoutMerge {
         )
     }
 
-    private fun mergeExercise(older: WorkoutExercise, newer: WorkoutExercise): WorkoutExercise {
+    /** Borrado a propósito y sin series hechas que quien lo borró no conocía. */
+    private fun gone(we: WorkoutExercise, deleted: Map<String, Set<String>>): Boolean =
+        deleted[we.id]?.let { known -> we.sets.filter { it.completed }.all { it.id in known } } == true
+
+    private fun gone(set: WorkoutSet, deleted: Map<String, Set<String>>): Boolean =
+        deleted[set.id]?.let { known -> !set.completed || set.id in known } == true
+
+    private fun mergeExercise(older: WorkoutExercise, newer: WorkoutExercise, deleted: Map<String, Set<String>>): WorkoutExercise {
         val olderById = older.sets.associateBy { it.id }
         val newerIds = newer.sets.map { it.id }.toSet()
         val sets = newer.sets.map { ns -> olderById[ns.id]?.let { mergeSet(it, ns) } ?: ns }.toMutableList()
         older.sets.forEachIndexed { index, os ->
-            if (os.id !in newerIds && os.completed) sets.add(index.coerceAtMost(sets.size), os)
+            if (os.id !in newerIds && !gone(os, deleted) && os.completed) sets.add(index.coerceAtMost(sets.size), os)
         }
         return newer.copy(sets = sets)
     }
@@ -70,10 +81,17 @@ object WorkoutMerge {
         }
     }
 
-    private fun mergeSet(older: WorkoutSet, newer: WorkoutSet): WorkoutSet = when {
-        newer.completed -> newer
-        older.completed -> older
-        // Un cronómetro de cardio arrancado en un lado no lo para una edición del otro que no lo sabía
-        else -> newer.copy(startedAtEpochMs = newer.startedAtEpochMs ?: older.startedAtEpochMs)
+    private fun mergeSet(older: WorkoutSet, newer: WorkoutSet): WorkoutSet {
+        // Desmarcada después de completarse (en cualquier lado): gana el desmarcado
+        val uncompletedAt = listOfNotNull(older.uncompletedAtEpochMs, newer.uncompletedAtEpochMs).maxOrNull()
+        fun stillDone(s: WorkoutSet) = s.completed && (uncompletedAt == null || (s.completedAtEpochMs ?: 0L) > uncompletedAt)
+        return when {
+            stillDone(newer) -> newer
+            stillDone(older) -> older
+            newer.completed || older.completed -> (if (!newer.completed) newer else newer.copy(completed = false, completedAtEpochMs = null, startedAtEpochMs = null))
+                .copy(uncompletedAtEpochMs = uncompletedAt)
+            // Un cronómetro de cardio arrancado en un lado no lo para una edición del otro que no lo sabía
+            else -> newer.copy(startedAtEpochMs = newer.startedAtEpochMs ?: older.startedAtEpochMs)
+        }
     }
 }

@@ -46,6 +46,11 @@ data class WorkoutSet(
     val startedAtEpochMs: Long? = null,
     /** Reps planeadas en la rutina (null = sin plan): «la próxima vez» compara lo hecho con esto. */
     val targetReps: Int? = null,
+    /**
+     * Cuándo se desmarcó (deshacer): al fusionar el móvil y el reloj gana el cambio más reciente, también si fue
+     * quitar la marca.
+     */
+    val uncompletedAtEpochMs: Long? = null,
 ) {
     /** Cronómetro de cardio en marcha. */
     val isRunning: Boolean get() = startedAtEpochMs != null && !completed
@@ -139,6 +144,11 @@ data class Workout(
     val caloriesSource: CaloriesSource? = null,
     /** Calorías activas: las totales menos lo que habrías gastado en reposo en ese tiempo. */
     val activeCalories: Int? = null,
+    /**
+     * Ejercicios y series borrados durante el entreno, con las series hechas que se conocían al borrar: al fusionar
+     * con el reloj no vuelven, salvo que el otro lado tenga trabajo hecho que quien borró no conocía.
+     */
+    val deletedIds: Map<String, Set<String>> = emptyMap(),
 ) {
     /** Calorías calculadas (pulso o MET), no medidas directamente por el reloj. */
     val caloriesEstimated: Boolean get() = caloriesSource != null && caloriesSource != CaloriesSource.WATCH

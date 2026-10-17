@@ -117,7 +117,12 @@ object WorkoutEditor {
         }
 
     fun removeExercise(workout: Workout, workoutExerciseId: String): Workout =
-        dropLoneSupersets(workout.copy(exercises = workout.exercises.filterNot { it.id == workoutExerciseId }))
+        dropLoneSupersets(
+            workout.copy(
+                exercises = workout.exercises.filterNot { it.id == workoutExerciseId },
+                deletedIds = workout.deletedIds + (workoutExerciseId to workout.exercises.firstOrNull { it.id == workoutExerciseId }?.sets.orEmpty().filter { it.completed }.map { it.id }.toSet()),
+            ),
+        )
 
     /** Una superserie de un solo ejercicio ya no lo es (p. ej. tras quitar a su pareja). */
     fun dropLoneSupersets(workout: Workout): Workout {
@@ -149,7 +154,9 @@ object WorkoutEditor {
             removedExercises.filter { r -> exercises.none { it.id == r.value.id } }.forEach { (index, we) ->
                 exercises = exercises.toMutableList().apply { add(index.coerceAtMost(size), we) }
             }
-            w.copy(exercises = exercises)
+            // Lo recuperado deja de estar borrado (si no, la fusión con el reloj lo volvería a quitar)
+            val restored = removedExercises.map { it.value.id } + removedSets.map { it.third.id }
+            w.copy(exercises = exercises, deletedIds = w.deletedIds - restored.toSet())
         }
     }
 
@@ -319,6 +326,10 @@ object WorkoutEditor {
 
     fun removeSet(workout: Workout, workoutExerciseId: String, setId: String): Workout =
         updateExercise(workout, workoutExerciseId) { we -> we.copy(sets = we.sets.filterNot { it.id == setId }) }
+            .let { w ->
+                val wasDone = workout.exercises.firstOrNull { it.id == workoutExerciseId }?.sets?.firstOrNull { it.id == setId }?.completed == true
+                w.copy(deletedIds = w.deletedIds + (setId to if (wasDone) setOf(setId) else emptySet()))
+            }
 
     fun updateSet(workout: Workout, workoutExerciseId: String, setId: String, block: (WorkoutSet) -> WorkoutSet): Workout =
         updateExercise(workout, workoutExerciseId) { we -> we.copy(sets = we.sets.map { if (it.id == setId) block(it) else it }) }
@@ -366,7 +377,11 @@ object WorkoutEditor {
                 // Marcar un cardio en marcha lo termina con el tiempo del cronómetro
                 it.copy(durationSec = ((nowEpochMs - started) / 1000).toInt().coerceAtLeast(1), completed = true, completedAtEpochMs = nowEpochMs)
             } else {
-                it.copy(completed = !it.completed, completedAtEpochMs = if (it.completed) null else nowEpochMs)
+                it.copy(
+                    completed = !it.completed,
+                    completedAtEpochMs = if (it.completed) null else nowEpochMs,
+                    uncompletedAtEpochMs = if (it.completed) nowEpochMs else it.uncompletedAtEpochMs,
+                )
             }
         }
 
@@ -400,8 +415,8 @@ object WorkoutEditor {
      * Vuelve a dejar pendiente una serie hecha (deshacer). En el cardio se quita también la hora de
      * arranque: si no, el cronómetro volvería a correr desde el principio y falsearía la duración.
      */
-    fun uncompleteSet(workout: Workout, workoutExerciseId: String, setId: String): Workout =
-        updateSet(workout, workoutExerciseId, setId) { it.copy(completed = false, completedAtEpochMs = null, startedAtEpochMs = null) }
+    fun uncompleteSet(workout: Workout, workoutExerciseId: String, setId: String, nowEpochMs: Long = System.currentTimeMillis()): Workout =
+        updateSet(workout, workoutExerciseId, setId) { it.copy(completed = false, completedAtEpochMs = null, startedAtEpochMs = null, uncompletedAtEpochMs = nowEpochMs) }
 
     /** Descarta el cronómetro sin completar la serie. */
     fun cancelCardio(workout: Workout, workoutExerciseId: String, setId: String): Workout =

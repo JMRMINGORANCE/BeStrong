@@ -3,6 +3,7 @@ package com.bestrong.mobile.sync
 import android.util.Log
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.SyncContract
+import com.bestrong.core.sync.WorkoutMerge
 import com.bestrong.mobile.WatchMetricsStore
 import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
@@ -53,8 +54,19 @@ class WatchSyncService : WearableListenerService() {
     private suspend fun completeFromWatch(received: com.bestrong.core.model.Workout, stored: com.bestrong.core.model.Workout?): com.bestrong.core.model.Workout {
         val full = received.copy(exercises = received.exercises.map { we -> we.copy(exercise = repository.exercise(we.exercise.id) ?: we.exercise) })
         val completed = energy.complete(full, watchKcal = received.calories)
-        // Reenvío: el gimnasio que ya tiene guardado (aunque sea «sin gimnasio», p. ej. corregido a mano)
-        if (stored != null) return completed.copy(gymName = stored.gymName)
+        // Ya estaba guardado (terminado también en el móvil o reenvío): se fusionan las series y se conserva lo puesto
+        // aquí después (valoración, notas, gimnasio corregido a mano, datos de pulso)
+        if (stored != null) {
+            return WorkoutMerge.merge(stored, completed).copy(
+                finishedAtEpochMs = stored.finishedAtEpochMs ?: completed.finishedAtEpochMs,
+                gymName = stored.gymName,
+                rating = stored.rating ?: completed.rating,
+                notes = stored.notes.ifBlank { completed.notes },
+                avgHeartRate = stored.avgHeartRate ?: completed.avgHeartRate,
+                maxHeartRate = stored.maxHeartRate ?: completed.maxHeartRate,
+                heartRateSamples = stored.heartRateSamples.ifEmpty { completed.heartRateSamples },
+            )
+        }
         // Uno que ya no existe (renombrado mientras se entrenaba en el reloj) cuenta como el activo
         val known = completed.gymName?.takeIf { n -> settings.settings.value.gyms.any { it.name == n } }
         return actions.withGym(completed.copy(gymName = known))
@@ -71,7 +83,10 @@ class WatchSyncService : WearableListenerService() {
                         val received = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                             ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
                         val stored = repository.storedWorkout(received.id)
-                        val workout = completeFromWatch(received, stored)
+                        // Series hechas en el móvil que el reloj no llegó a recibir: se fusionan con su terminado
+                        val withLocal = repository.localCopyOf(received.id)
+                            ?.let { WorkoutMerge.merge(it, received).copy(finishedAtEpochMs = received.finishedAtEpochMs) } ?: received
+                        val workout = completeFromWatch(withLocal, stored)
                         val isNew = stored == null
                         repository.saveWorkout(workout)
                         repository.clearRemoteActive(workout.id)

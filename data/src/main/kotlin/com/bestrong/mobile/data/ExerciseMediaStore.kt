@@ -63,8 +63,15 @@ class ExerciseMediaStore @Inject constructor(@ApplicationContext private val con
             else -> "jpg"
         }
         val target = File(dir(exerciseId).apply { mkdirs() }, "${UUID.randomUUID()}.$ext")
-        context.contentResolver.openInputStream(uri)?.use { input -> target.outputStream().use { input.copyTo(it) } }
-            ?: error("No se pudo leer el archivo")
+        // A un temporal y luego se renombra: si la copia falla a medias no queda un archivo roto en la galería
+        val tmp = File(target.parentFile, target.name + ".part")
+        try {
+            context.contentResolver.openInputStream(uri)?.use { input -> tmp.outputStream().use { input.copyTo(it) } }
+                ?: error("No se pudo leer el archivo")
+            check(tmp.renameTo(target)) { "No se pudo guardar el archivo" }
+        } finally {
+            tmp.delete()
+        }
         _version.value++
     }
 

@@ -147,6 +147,8 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     suspend fun setActive(workout: Workout?) = activeMutex.withLock {
         // Con un entreno nuevo ya no se ofrece recuperar el descartado
         if (workout != null) _discarded.value = null
+        // Recuperado (deshacer descartar): ya no cuenta como terminado para la sincronización
+        workout?.let { forgetEnded(it.id) }
         write(workout?.copy(updatedAtEpochMs = System.currentTimeMillis()))
     }
 
@@ -158,6 +160,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     /** [restEndsAtEpochMs]: fin del descanso en marcha al descartar, para retomarlo al deshacer. */
     suspend fun discardActive(restEndsAtEpochMs: Long? = null, restTotalSeconds: Int = 0) = activeMutex.withLock {
         _discarded.value = currentActive()
+        currentActive()?.let { markEnded(it.id) }
         discardedAt = System.currentTimeMillis()
         discardedRestEnd = restEndsAtEpochMs?.let { it to restTotalSeconds }
         write(null)
@@ -211,7 +214,10 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** Lee y quita el entreno activo de una vez (al terminarlo no se pierde ningún cambio de última hora). */
     suspend fun takeActive(): Workout? = activeMutex.withLock {
-        currentActive()?.also { write(null) }
+        currentActive()?.also {
+            markEnded(it.id)
+            write(null)
+        }
     }
 
     private suspend fun currentActive(): Workout? =
@@ -250,6 +256,8 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     /** Estado que llega del reloj: se fusiona serie a serie con el local (no se pierde ninguna serie hecha). */
     suspend fun applyRemoteActive(remote: Workout) = activeMutex.withLock {
         val local = currentActive()
+        // Un mensaje atrasado de un entreno ya terminado o descartado aquí no lo resucita
+        if (local?.id != remote.id && (remote.id in endedIds() || storedWorkout(remote.id) != null)) return@withLock
         if (local != null) WorkoutMerge.conflicts(local, remote).takeIf { it.isNotEmpty() }?.let { _syncConflicts.tryEmit(it) }
         val merged = if (local == null) remote else WorkoutMerge.merge(local, remote)
         keepReplacedLocal(local, merged)
@@ -272,7 +280,30 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     /** El reloj terminó o descartó el entreno: lo quitamos sin guardarlo (el terminado llega aparte). */
     suspend fun clearRemoteActive(workoutId: String?) = activeMutex.withLock {
         val local = currentActive() ?: return@withLock
-        if (workoutId == null || local.id == workoutId) write(null)
+        if (workoutId == null || local.id == workoutId) {
+            // Se guarda lo de aquí: si tenía series que el reloj no recibió, se fusionan con el terminado al llegar
+            dao.putValue(KeyValueEntity(KEY_DROPPED_ACTIVE, Persistence.encodeWorkout(local)))
+            markEnded(local.id)
+            write(null)
+        }
+    }
+
+    /** El entreno en curso de aquí (o el que se quitó al terminarlo en el reloj) con ese id, para fusionarlo con el terminado. */
+    suspend fun localCopyOf(id: String): Workout? = activeMutex.withLock {
+        currentActive()?.takeIf { it.id == id }
+            ?: dao.valueOnce(KEY_DROPPED_ACTIVE)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }?.takeIf { it.id == id }
+    }
+
+    /** Ids de los últimos entrenos terminados o descartados (unos pocos bastan para los mensajes atrasados). */
+    private suspend fun endedIds(): List<String> = dao.valueOnce(KEY_ENDED)?.split(',')?.filter { it.isNotBlank() }.orEmpty()
+
+    private suspend fun markEnded(id: String) {
+        dao.putValue(KeyValueEntity(KEY_ENDED, (endedIds() - id + id).takeLast(ENDED_KEEP).joinToString(",")))
+    }
+
+    private suspend fun forgetEnded(id: String) {
+        val ids = endedIds()
+        if (id in ids) dao.putValue(KeyValueEntity(KEY_ENDED, (ids - id).joinToString(",")))
     }
 
     // --- Importación ---------------------------------------------------------------------------
@@ -523,6 +554,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         const val KEY_TRASH = "trash"
         const val KEY_PENDING_HEALTH = "pending_watch_health:"
         const val KEY_WATCH_KNOWN = "watch_known_workout"
+        const val KEY_DROPPED_ACTIVE = "dropped_active_workout"
+        const val KEY_ENDED = "ended_workout_ids"
+        const val ENDED_KEEP = 10
         const val KEY_IGNORED_HC_WEIGHTS = "ignored_hc_weight_days"
         const val KEY_IGNORED_HC_WEIGHTS_LEGACY = "ignored_hc_weights"
         const val IGNORED_KEEP_DAYS = 180L

@@ -129,6 +129,11 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         get() = prefs.getString(KEY_PHONE_KNOWN, null)
         set(value) = prefs.edit { putString(KEY_PHONE_KNOWN, value) }
 
+    /** Último entreno terminado o descartado en el reloj: un mensaje atrasado del móvil no lo vuelve a abrir. */
+    var lastEndedWorkoutId: String?
+        get() = prefs.getString(KEY_LAST_ENDED, null)
+        set(value) = prefs.edit { putString(KEY_LAST_ENDED, value) }
+
     /** Umbral calibrado del contador de repeticiones (m/s²). */
     var repThreshold: Float
         get() = prefs.getFloat(KEY_REP_THRESHOLD, 1.2f)
@@ -211,6 +216,7 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_MAX_HR = "max_hr"
         const val KEY_SEGMENTS_KCAL = "segments_kcal"
         const val KEY_REP_THRESHOLD = "rep_threshold"
+        const val KEY_LAST_ENDED = "last_ended_workout"
         const val KEY_PHONE_KNOWN = "phone_known_workout"
         const val KEY_REST = "active_rest"
         const val KEY_CARDIO = "active_cardio"

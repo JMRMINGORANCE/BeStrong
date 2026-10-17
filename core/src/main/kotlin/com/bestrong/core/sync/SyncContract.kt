@@ -44,7 +44,8 @@ object SyncContract {
     const val DEEP_LINK_HOST = "start"
     const val DEEP_LINK_PARAM_ROUTINE = "routine"
 
-    val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    // coerceInputValues: un valor de enum nuevo (de una versión más reciente del otro lado) usa el de por defecto en vez de romper
+    val json = Json { ignoreUnknownKeys = true; encodeDefaults = true; coerceInputValues = true }
 
     private val workoutList = ListSerializer(Workout.serializer())
     private val routineList = ListSerializer(Routine.serializer())

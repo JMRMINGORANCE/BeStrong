@@ -272,6 +272,7 @@ class WorkoutSession @Inject constructor(
     fun discard() = end()
 
     private fun end() {
+        _workout.value?.let { store.lastEndedWorkoutId = it.id }
         stopRest()
         // Terminar o descartar en mitad de una guía de tempo no la deja vibrando
         stopTempo()
@@ -297,6 +298,8 @@ class WorkoutSession @Inject constructor(
     /** Llega el entreno desde el móvil: se fusiona serie a serie con el local (no se pierde ninguna serie hecha). */
     fun applyRemote(incoming: Workout) {
         val local = _workout.value
+        // Recién terminado o descartado aquí: el eco atrasado del móvil no lo resucita
+        if (local?.id != incoming.id && incoming.id == store.lastEndedWorkoutId) return
         // Se lee antes de apuntar el que llega: ¿tuvo el móvil alguna vez el entreno local?
         val phoneKnew = store.phoneKnownWorkoutId
         if (phoneKnew != incoming.id) store.phoneKnownWorkoutId = incoming.id
@@ -309,18 +312,23 @@ class WorkoutSession @Inject constructor(
         if (isNew && unknownToPhone && local.exercises.any { we -> we.sets.any { it.completed } }) sendReplaced(local)
         _workout.value = remote
         store.activeWorkout = remote
-        if (isNew) {
-            _summary.value = null
-            _metrics.value = HealthMetrics()
-            hr = HeartRateTracker(remote.startedAtEpochMs)
-            platformHr = null
-            resetHealthSegments()
-            _exerciseIndex.value = WorkoutEditor.nextPendingSet(remote)?.first ?: 0
-            // Empezado en el móvil: el reloj mide el pulso automáticamente (con la app en segundo
-            // plano no se puede arrancar el servicio; lo hará MainActivity al abrirla)
-            if (isInForeground()) ExerciseService.start(context)
-            if (_repCounting.value) repCounter.start()
-        }
+        // Se sigue en el mismo ejercicio aunque el móvil haya borrado o movido otros
+        if (!isNew) _exerciseIndex.value = keptExerciseIndex(local, remote, _exerciseIndex.value)
+        if (isNew) startedFromPhone(remote)
+    }
+
+    /** Entreno nuevo llegado del móvil: se empieza a medir desde cero en el reloj. */
+    private fun startedFromPhone(remote: Workout) {
+        _summary.value = null
+        _metrics.value = HealthMetrics()
+        hr = HeartRateTracker(remote.startedAtEpochMs)
+        platformHr = null
+        resetHealthSegments()
+        _exerciseIndex.value = WorkoutEditor.nextPendingSet(remote)?.first ?: 0
+        // Empezado en el móvil: el reloj mide el pulso automáticamente (con la app en segundo
+        // plano no se puede arrancar el servicio; lo hará MainActivity al abrirla)
+        if (isInForeground()) ExerciseService.start(context)
+        if (_repCounting.value) repCounter.start()
     }
 
     /** El móvil terminó o descartó el entreno. */
@@ -921,3 +929,13 @@ enum class StemAction { COMPLETE_SET, SKIP_REST, NEXT_EXERCISE }
 
 /** Ejercicios en los que el acelerómetro cuenta repeticiones (no los de tiempo ni el cardio). */
 private val REP_TRACKING = setOf(TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY, TrackingType.DISTANCE)
+
+/** Dónde queda el ejercicio que se estaba viendo tras una edición del móvil (o el siguiente pendiente). */
+private fun keptExerciseIndex(local: Workout?, remote: Workout, index: Int): Int {
+    val currentId = local?.exercises?.getOrNull(index)?.id
+    val at = remote.exercises.indexOfFirst { it.id == currentId }
+    return when {
+        at >= 0 -> at
+        else -> WorkoutEditor.nextPendingSet(remote)?.first ?: index.coerceIn(0, (remote.exercises.size - 1).coerceAtLeast(0))
+    }
+}
