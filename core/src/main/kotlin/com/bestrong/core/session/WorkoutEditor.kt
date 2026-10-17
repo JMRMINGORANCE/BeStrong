@@ -275,7 +275,12 @@ object WorkoutEditor {
             val (i, setId) = target
             val we = w.exercises[i]
             val sets = we.sets.filterNot { it.id == setId }
-            w = w.copy(exercises = if (sets.isEmpty()) w.exercises.filterIndexed { j, _ -> j != i } else w.exercises.map { if (it.id == we.id) it.copy(sets = sets) else it })
+            // Lo recortado queda como borrado: la fusión con el reloj no lo devuelve
+            val gone = if (sets.isEmpty()) we.id to we.sets.filter { it.completed }.map { it.id }.toSet() else setId to emptySet()
+            w = w.copy(
+                exercises = if (sets.isEmpty()) w.exercises.filterIndexed { j, _ -> j != i } else w.exercises.map { if (it.id == we.id) it.copy(sets = sets) else it },
+                deletedIds = w.deletedIds + gone,
+            )
         }
         // Si no se pudo quitar nada, el entreno sale tal cual (sin «arreglos» que harían creer que se recortó)
         return if (w === workout) workout else dropLoneSupersets(w)
@@ -384,6 +389,8 @@ object WorkoutEditor {
                     completed = !it.completed,
                     completedAtEpochMs = if (it.completed) null else nowEpochMs,
                     uncompletedAtEpochMs = if (it.completed) nowEpochMs else it.uncompletedAtEpochMs,
+                    // Desmarcar un cardio ya terminado no vuelve a poner en marcha su cronómetro
+                    startedAtEpochMs = if (it.completed) null else it.startedAtEpochMs,
                 )
             }
         }

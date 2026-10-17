@@ -175,10 +175,18 @@ object Progression {
     fun isStalled(exerciseId: String, history: List<Workout>, sessions: Int = 3): Boolean {
         val points = WorkoutStats.exerciseProgress(exerciseId, history)
         if (points.size < sessions + 1) return false
-        val before = points.dropLast(sessions).maxOf { it.bestOneRepMax }
-        // Sin carga (1RM 0) no hay forma de medir el estancamiento
-        return before > 0.0 && points.takeLast(sessions).all { it.bestOneRepMax <= before }
+        val earlier = points.dropLast(sessions)
+        val before = earlier.maxOf { it.bestOneRepMax }
+        val heaviest = earlier.maxOf { it.heaviestWeight }
+        val window = points.takeLast(sessions)
+        // Una sesión claramente más ligera en la ventana es una descarga (o un reinicio): aún no se puede juzgar,
+        // y así la descarga no se pide una y otra vez. Sin carga (1RM 0) no hay forma de medir el estancamiento.
+        val deloaded = window.any { it.heaviestWeight < heaviest * DELOAD_SIGN }
+        return !deloaded && before > 0.0 && window.all { it.bestOneRepMax <= before }
     }
+
+    /** Por debajo de este % del peso más alto usado antes, la sesión cuenta como descarga. */
+    private const val DELOAD_SIGN = 0.95
 
     private fun roundTo(value: Double, step: Double) = Math.round(value / step) * step
 

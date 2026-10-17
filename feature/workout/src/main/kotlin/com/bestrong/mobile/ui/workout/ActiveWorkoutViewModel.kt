@@ -111,7 +111,18 @@ class ActiveWorkoutViewModel @Inject constructor(
                     id = com.bestrong.core.util.newId(),
                     name = "$name · ${w.name}",
                     startedAtEpochMs = now,
+                    updatedAtEpochMs = now,
                     athlete = name,
+                    // Lo suyo empieza de cero: ni tus pausas, ni tu pulso, ni tu valoración o notas
+                    pausedAtEpochMs = null,
+                    pausedTotalMs = 0,
+                    heartRateSamples = emptyList(),
+                    avgHeartRate = null,
+                    maxHeartRate = null,
+                    calories = null,
+                    rating = null,
+                    notes = "",
+                    deletedIds = emptyMap(),
                     exercises = w.exercises.map { we ->
                         val sets = theirs(we.exercise.id).filter { it.type != com.bestrong.core.model.SetType.WARMUP }
                             .map { it.asPending() }
@@ -187,7 +198,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             val (before, after) = update(partner) { w ->
                 WorkoutEditor.trimToFit(w, budget) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = now, warmupRestSeconds = warmup, restEndsAtEpochMs = restEnds) }
             } ?: return@launch
-            if (before == after) return@launch
+            // Se compara lo que importa: la hora de modificación siempre cambia
+            if (before.exercises == after.exercises) return@launch
             _events.tryEmit(WorkoutEvent.Undoable(UndoKind.TRIM, partner, before.id, restore = WorkoutEditor.undoRemoval(before, after)))
         }
     }
@@ -419,7 +431,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 WorkoutEvent.Undoable(UndoKind.SET, partner, before.id) { w ->
                     WorkoutEditor.updateExercise(w, weId) { we ->
                         if (we.sets.any { it.id == setId }) we else we.copy(sets = we.sets.toMutableList().apply { add(index.coerceAtMost(size), removed) })
-                    }
+                    }.let { it.copy(deletedIds = it.deletedIds - setId) } // si no, la fusión con el reloj la volvería a quitar
                 },
             )
         }

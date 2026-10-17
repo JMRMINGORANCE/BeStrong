@@ -67,7 +67,8 @@ class WorkoutForegroundService : LifecycleService() {
                 stopSelf()
                 return START_NOT_STICKY
             }
-            lifecycleScope.launch {
+            collector?.cancel()
+            collector = lifecycleScope.launch {
                 if (repository.activeOnce() == null) return@launch stop()
                 combine(repository.activeWorkout, restTimer.rest) { w, r -> w to r }.collect { (w, r) ->
                     when {
@@ -83,6 +84,9 @@ class WorkoutForegroundService : LifecycleService() {
 
     private var started = false
 
+    /** Lo que mantiene la notificación al día (se cancela al parar para no duplicarlo si vuelve a arrancar). */
+    private var collector: kotlinx.coroutines.Job? = null
+
     /** «3/12 series · ≈ 25 min, fin 18:45» (la hora de fin no cambia cada minuto, así que sirve aunque no se refresque). */
     private fun progressText(w: Workout): String {
         val now = System.currentTimeMillis()
@@ -94,6 +98,10 @@ class WorkoutForegroundService : LifecycleService() {
     }
 
     private fun stop() {
+        // Si el mismo servicio vuelve a arrancar (deshacer o empezar otro enseguida), tiene que volver a primer plano
+        started = false
+        collector?.cancel()
+        collector = null
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
@@ -150,9 +158,12 @@ class WorkoutForegroundService : LifecycleService() {
                 .addAction(0, getString(R.string.rest_plus_15), action(ACTION_PLUS_15, 1))
                 .addAction(0, getString(R.string.rest_skip), action(ACTION_SKIP, 2))
         } else {
+            // El cronómetro descuenta las pausas (como la app) y en pausa se queda quieto
             b.setContentTitle(w.name)
                 .setContentText(progressText(w))
-                .setWhen(w.startedAtEpochMs)
+                .setWhen(System.currentTimeMillis() - w.durationSeconds() * 1000)
+                .setUsesChronometer(!w.isPaused)
+                .setShowWhen(!w.isPaused)
                 .setChronometerCountDown(false)
                 // Texto corto del chip (en descanso se muestra la cuenta atrás)
                 .setShortCriticalText("${w.completedSetCount}/${w.totalSetCount}")

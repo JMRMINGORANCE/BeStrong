@@ -166,6 +166,8 @@ object WorkoutCsv {
                                 weightKg = weightKg,
                                 reps = num(r.get("reps"))?.toInt() ?: 0,
                                 durationSec = num(r.get("duration_seconds"))?.toInt() ?: 0,
+                                // La distancia del cardio (en km o millas según la cuenta)
+                                distanceM = num(r.get("distance_km"))?.times(1000) ?: num(r.get("distance_miles"))?.times(METERS_PER_MILE) ?: 0.0,
                                 type = when (r.get("set_type").lowercase()) {
                                     "warmup" -> SetType.WARMUP
                                     "dropset" -> SetType.DROP
@@ -201,15 +203,22 @@ object WorkoutCsv {
                         val start = parseStrong(r.get("date"), zone)
                         val ex = resolver.resolve(r.get("exercise name"))
                         val order = r.get("set order")
+                        // Strong 6 mete filas del temporizador de descanso entre las series: no son series
+                        if (order.equals("rest timer", ignoreCase = true)) return@mapNotNull null
                         val durationMin = parseStrongDuration(r.get("duration"))
                         Row(
                             key = r.get("date") + "|" + r.get("workout name"), name = r.get("workout name"),
                             start = start, end = durationMin?.let { start + it * 60_000L },
                             notes = r.get("workout notes"), exercise = ex, exNotes = r.get("notes"), superset = null,
                             set = WorkoutSet(
-                                weightKg = strongUnit.toKg(num(r.get("weight")) ?: 0.0),
+                                // Strong antiguo: «Weight» en la unidad elegida; el nuevo: «Weight (kg)» o «Weight (lbs)»
+                                weightKg = num(r.get("weight"))?.let(strongUnit::toKg) ?: num(r.get("weight (kg)"))
+                                    ?: num(r.get("weight (lbs)"))?.let { WeightUnit.LB.toKg(it) } ?: 0.0,
                                 reps = num(r.get("reps"))?.toInt() ?: 0,
-                                durationSec = num(r.get("seconds"))?.toInt() ?: 0,
+                                durationSec = (num(r.get("seconds")) ?: num(r.get("duration (sec)")))?.toInt() ?: 0,
+                                distanceM = num(r.get("distance (meters)")) ?: num(r.get("distance"))?.let { d ->
+                                    if (strongUnit == WeightUnit.LB) d * METERS_PER_MILE else d * 1000
+                                } ?: 0.0,
                                 type = when (order.uppercase()) { "W" -> SetType.WARMUP; "D" -> SetType.DROP; "F" -> SetType.FAILURE; else -> SetType.NORMAL },
                                 rpe = num(r.get("rpe")),
                                 completed = true,
@@ -359,7 +368,11 @@ object WorkoutCsv {
                 else -> Equipment.OTHER
             }
             val ex = Exercise(
-                id = "custom_import_" + n.replace(Regex("[^a-z0-9]+"), "_").trim('_'),
+                // Con nombres en otro alfabeto (ruso, chino…) el texto queda vacío: se añade un resumen del nombre para
+                // que dos ejercicios distintos no compartan id
+                id = "custom_import_" + n.replace(Regex("[^a-z0-9]+"), "_").trim('_').let { slug ->
+                    if (slug.isEmpty() || slug.length < n.count { it.isLetterOrDigit() }) slug.ifEmpty { "x" } + "_" + n.hashCode().toUInt().toString(16) else slug
+                },
                 name = name.trim(),
                 primaryMuscle = MuscleGroup.FULL_BODY,
                 equipment = equipment,
@@ -371,3 +384,6 @@ object WorkoutCsv {
         }
     }
 }
+
+/** Metros en una milla. */
+private const val METERS_PER_MILE = 1609.344

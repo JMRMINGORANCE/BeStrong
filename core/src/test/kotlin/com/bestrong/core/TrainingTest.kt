@@ -82,6 +82,9 @@ class TrainingTest {
         assertEquals(SuggestionKind.DELOAD, s.kind)
         assertEquals(90.0, s.sets.single().weightKg, 0.0)
         assertFalse(Progression.isStalled(bench.id, h.take(2)))
+        // Tras la descarga (90 kg) no se vuelve a pedir otra enseguida
+        val afterDeload = h + finishedWorkout("5", d.plusDays(12), bench to listOf(done(90.0, 5)))
+        assertFalse(Progression.isStalled(bench.id, afterDeload))
     }
 
     @Test fun supersetFlow() {

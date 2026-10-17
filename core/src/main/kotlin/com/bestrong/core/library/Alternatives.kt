@@ -33,10 +33,21 @@ object Alternatives {
      */
     fun convertSets(from: Exercise, to: Exercise, sets: List<WorkoutSet>, previousOfNew: List<WorkoutSet>, stepKg: Double): List<WorkoutSet> {
         if (previousOfNew.isNotEmpty()) {
-            return sets.mapIndexed { i, s ->
-                val p = previousOfNew.getOrNull(i) ?: previousOfNew.last()
+            // Calentamientos con calentamientos y efectivas con efectivas (si no, un calentamiento se lleva el peso de trabajo)
+            val (prevWarm, prevWork) = previousOfNew.partition { it.type == com.bestrong.core.model.SetType.WARMUP }
+            var warmIndex = 0
+            var workIndex = 0
+            return sets.map { s ->
+                val warm = s.type == com.bestrong.core.model.SetType.WARMUP
+                val pool = if (warm) prevWarm else prevWork
+                val i = if (warm) warmIndex++ else workIndex++
+                val p = pool.getOrNull(i) ?: pool.lastOrNull()
                 // Las reps planeadas eran del ejercicio de antes: ya no sirven para comparar
-                if (s.completed) s else s.copy(weightKg = p.weightKg, reps = p.reps, durationSec = p.durationSec, targetReps = null)
+                when {
+                    s.completed -> s
+                    p == null -> s.copy(targetReps = null)
+                    else -> s.copy(weightKg = p.weightKg, reps = p.reps, durationSec = p.durationSec, targetReps = null)
+                }
             }
         }
         val ff = factor(from.equipment)
