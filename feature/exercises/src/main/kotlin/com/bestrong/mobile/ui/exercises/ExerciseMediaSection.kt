@@ -52,7 +52,7 @@ import com.bestrong.mobile.ui.components.SectionHeader
 
 /** Imagen del ejercicio (wger, con atribución) y notas de técnica propias con foto/vídeo. */
 @Composable
-fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise) {
+fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise, afterImage: @Composable () -> Unit = {}) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val version by vm.mediaVersion.collectAsStateWithLifecycle()
@@ -89,6 +89,8 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise) {
                 )
             }
         }
+        // Debajo de la animación: qué trabaja y cómo se hace
+        afterImage()
         SectionHeader(stringResource(R.string.technique_notes))
         OutlinedTextField(
             value = note,

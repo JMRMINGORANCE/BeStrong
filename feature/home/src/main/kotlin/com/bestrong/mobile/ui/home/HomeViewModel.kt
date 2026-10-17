@@ -185,6 +185,7 @@ class HomeViewModel @Inject constructor(
             goal = goal,
             adherence = if (history.isEmpty()) null else Periodization.adherence(history, goal, today, zone, since = since),
             today = today.dayOfWeek,
+            streak = com.bestrong.core.stats.WorkoutStats.weeklyStreak(history.filter { it.isFinished }, today, zone),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 
@@ -512,6 +513,8 @@ data class WeekProgress(
     val goal: Int = 3,
     val adherence: Double? = null,
     val today: DayOfWeek = DayOfWeek.MONDAY,
+    /** Semanas seguidas entrenando. */
+    val streak: Int = 0,
 )
 
 /** Cada cuánto se revisa lo que depende de la fecha. */

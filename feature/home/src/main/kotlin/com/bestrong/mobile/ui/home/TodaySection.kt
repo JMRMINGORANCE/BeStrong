@@ -183,6 +183,13 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
                     Text(stringResource(R.string.week_adherence, (it * 100).toInt()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
+            // Racha de semanas seguidas, como motivación
+            if (week.streak >= 2) {
+                com.bestrong.mobile.ui.components.MetaPill(
+                    androidx.compose.ui.res.pluralStringResource(R.plurals.week_streak, week.streak, week.streak),
+                    Modifier.padding(end = 8.dp),
+                )
+            }
             if (canChangeGoal) Icon(Icons.Default.Edit, stringResource(R.string.week_goal_title), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {

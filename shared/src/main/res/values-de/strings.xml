@@ -1267,4 +1267,9 @@
     <string name="search_create_named">„%1$s“ erstellen</string>
     <string name="history_empty_action">Training starten</string>
     <string name="builder_weekdays_hint">Tippe auf deine Trainingstage (2 bis 6): die Routinen kommen in deinen Kalender.</string>
+    <string name="exercise_how_title">So geht’s</string>
+    <plurals name="week_streak">
+        <item quantity="one">🔥 %1$d Woche</item>
+        <item quantity="other">🔥 %1$d Wochen</item>
+    </plurals>
 </resources>

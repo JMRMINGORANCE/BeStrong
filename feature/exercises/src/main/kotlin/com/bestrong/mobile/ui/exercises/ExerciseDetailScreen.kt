@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.exercises
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -110,7 +112,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             },
         )
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            item { ExerciseMediaSection(vm, s.exercise) }
+            item { ExerciseMediaSection(vm, s.exercise) { ExerciseAbout(s.exercise) } }
             if (com.bestrong.core.stats.ExerciseGoals.supports(s.exercise.tracking)) item { ExerciseGoalCard(vm, s) }
             if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RepRangeCard(vm, s.exercise.id) }
             if (s.variants.size > 1) {
@@ -432,3 +434,32 @@ private const val STRENGTH_RANGE = "3-5"
 
 /** Sesiones sin récord de 1RM estimado a partir de las que se habla de estancamiento. */
 private const val PLATEAU_SESSIONS = 4
+
+/** Qué trabaja (principal y secundarios), con qué material y cómo se hace, arriba de la ficha. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun ExerciseAbout(exercise: com.bestrong.core.model.Exercise) {
+    val howTo = com.bestrong.core.library.ExerciseInfo.instructions(exercise.id, com.bestrong.mobile.ui.components.uiLanguage())
+    androidx.compose.foundation.layout.FlowRow(
+        Modifier.fillMaxWidth().padding(top = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        // El músculo principal, destacado
+        Text(
+            exercise.primaryMuscle.label(),
+            Modifier.clip(androidx.compose.foundation.shape.CircleShape).background(MaterialTheme.colorScheme.primary).padding(horizontal = 12.dp, vertical = 5.dp),
+            color = MaterialTheme.colorScheme.onPrimary,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+        )
+        exercise.secondaryMuscles.forEach { com.bestrong.mobile.ui.components.MetaPill(it.label()) }
+        com.bestrong.mobile.ui.components.MetaPill("🏋️ " + exercise.equipment.label())
+    }
+    howTo?.let {
+        com.bestrong.mobile.ui.components.Panel(Modifier.padding(top = 8.dp)) {
+            Text(stringResource(R.string.exercise_how_title), style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold)
+            Text(it, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}

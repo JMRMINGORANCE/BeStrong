@@ -1267,4 +1267,9 @@
     <string name="search_create_named">Criar «%1$s»</string>
     <string name="history_empty_action">Começar a treinar</string>
     <string name="builder_weekdays_hint">Toca nos dias em que vais treinar (2 a 6): as rotinas vão para o teu calendário.</string>
+    <string name="exercise_how_title">Como se faz</string>
+    <plurals name="week_streak">
+        <item quantity="one">🔥 %1$d semana</item>
+        <item quantity="other">🔥 %1$d semanas</item>
+    </plurals>
 </resources>
