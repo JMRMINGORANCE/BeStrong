@@ -3,6 +3,7 @@ package com.bestrong.mobile.widget
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,6 +48,19 @@ class MuscleWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val entry = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
+        val first = rows(entry)
+        provideContent {
+            // Se recalcula al cambiar el historial o el objetivo mientras la sesión del widget sigue viva
+            val data by androidx.compose.runtime.produceState(first) {
+                kotlinx.coroutines.flow.combine(entry.repository().history, entry.settings().settings) { _, _ -> }
+                    .collect { value = rows(entry) }
+            }
+            GlanceTheme { Content(context, data.first, data.second) }
+        }
+    }
+
+    /** Filas (músculo, series de la semana) y el objetivo de series. */
+    private suspend fun rows(entry: WidgetEntryPoint): Pair<List<Pair<MuscleGroup, Double>>, Double> {
         val repo = entry.repository()
         val target = entry.settings().settings.value.weeklySetsTarget.toDouble()
         val history = repo.historyOnce()
@@ -54,8 +68,7 @@ class MuscleWidget : GlanceAppWidget() {
         val today = LocalDate.now(zone)
         val week = WorkoutStats.weeklySetsPerMuscle(history, today, zone)
         val lagging = WorkoutStats.laggingMuscles(history, today, zone, limit = MAX_ROWS, minSets = target)
-        val rows = (lagging.map { it.first } + week.keys).distinct().take(MAX_ROWS).map { it to (week[it] ?: 0.0) }
-        provideContent { GlanceTheme { Content(context, rows, target) } }
+        return (lagging.map { it.first } + week.keys).distinct().take(MAX_ROWS).map { it to (week[it] ?: 0.0) } to target
     }
 
     @Composable

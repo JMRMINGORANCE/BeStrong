@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
@@ -388,11 +389,13 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             }
             if (records.isNotEmpty()) {
                 item {
-                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text(stringResource(R.string.n_records, records.size), fontWeight = FontWeight.Bold)
-                            records.forEach { Text(stringResource(R.string.record_line, it.exerciseName, it.type.label(), unit.format(it.value)), style = MaterialTheme.typography.bodySmall) }
+                    // Los récords, destacados con el degradado de marca
+                    com.bestrong.mobile.ui.components.HeroCard {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.EmojiEvents, null, Modifier.size(28.dp))
+                            Text(stringResource(R.string.n_records, records.size), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
                         }
+                        records.forEach { Text(stringResource(R.string.record_line, it.exerciseName, it.type.label(), unit.format(it.value)), style = MaterialTheme.typography.bodyMedium) }
                     }
                 }
             }
@@ -402,7 +405,11 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             items(w.exercises, key = { it.id }) { we ->
                 com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                     Column(Modifier.padding(12.dp)) {
-                        Text(we.exercise.displayName(), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                        // Su imagen y el nombre, como en el entreno
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 6.dp)) {
+                            com.bestrong.mobile.ui.components.ExerciseThumb(we.exercise, 44.dp, Modifier.padding(end = 12.dp))
+                            Text(we.exercise.displayName(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+                        }
                         we.sets.forEachIndexed { i, set ->
                             Row(if (editing) Modifier.clickable { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)

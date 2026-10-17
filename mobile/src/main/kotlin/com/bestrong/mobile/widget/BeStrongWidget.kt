@@ -3,6 +3,7 @@ package com.bestrong.mobile.widget
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,8 +47,28 @@ import java.time.ZoneId
 /** Widget: racha, entrenos de la semana, "Entrenar" y dos rutinas: la planificada para hoy y la que más tiempo lleva sin hacerse. */
 class BeStrongWidget : GlanceAppWidget() {
 
+    /** Lo que enseña el widget. */
+    private data class Snapshot(val week: Int, val streak: Int, val routines: List<Routine>, val cardio: String?)
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val entry = EntryPointAccessors.fromApplication(context, WidgetEntryPoint::class.java)
+        val first = snapshot(context, entry)
+        provideContent {
+            // Mientras la sesión del widget sigue viva, una actualización no vuelve a llamar a provideGlance: se
+            // recalcula al cambiar el historial, las rutinas, el plan o los ajustes (si no, se quedaría atrasado)
+            val data by androidx.compose.runtime.produceState(first) {
+                kotlinx.coroutines.flow.combine(
+                    entry.repository().history,
+                    entry.repository().routines,
+                    entry.planning().state,
+                    entry.settings().settings,
+                ) { _, _, _, _ -> }.collect { value = snapshot(context, entry) }
+            }
+            GlanceTheme { Content(context, data.week, data.streak, data.routines, data.cardio) }
+        }
+    }
+
+    private suspend fun snapshot(context: Context, entry: WidgetEntryPoint): Snapshot {
         val repo = entry.repository()
         val history = repo.historyOnce()
         val zone = ZoneId.systemDefault()
@@ -76,7 +97,7 @@ class BeStrongWidget : GlanceAppWidget() {
             }
             if (cardioStreak >= 2) line + " · " + context.getString(R.string.cardio_streak_short, cardioStreak) else line
         }
-        provideContent { GlanceTheme { Content(context, week, streak, routines, cardio) } }
+        return Snapshot(week, streak, routines, cardio)
     }
 
     @Composable
