@@ -43,4 +43,47 @@ class ProgramGeneratorTest {
         val p = ProgramGenerator.build(4, Goal.GENERAL, setOf(Equipment.BODYWEIGHT), 45)
         assertTrue(p.routines.all { r -> r.exercises.all { it.exercise.equipment == Equipment.BODYWEIGHT } })
     }
+
+    @Test fun uniqueDayNamesAndFullDaysWithoutWeights() {
+        for (goal in Goal.entries) {
+            for (days in 2..6) {
+                val names = ProgramGenerator.build(days, goal, gym, 60).routines.map { it.name }
+                assertEquals("$goal $days $names", names.size, names.toSet().size)
+                val home = ProgramGenerator.build(days, goal, setOf(Equipment.BODYWEIGHT), 60).routines
+                assertTrue("$goal $days", home.all { it.exercises.size >= 3 })
+            }
+        }
+    }
+
+    @Test fun finisherWithinBudgetAndAlone() {
+        val day = ProgramGenerator.build(3, Goal.FAT_LOSS, gym, 30).routines.first()
+        val max = ProgramGenerator.build(3, Goal.FAT_LOSS, gym, 30).routines.maxOf { it.exercises.size }
+        assertTrue(max <= 8)
+        assertEquals(null, day.exercises.last().supersetId)
+        // Ninguna superserie se queda con un solo ejercicio
+        assertTrue(day.exercises.groupBy { it.supersetId }.filterKeys { it != null }.values.all { it.size == 2 })
+    }
+
+    @Test fun allowedFilterIsRespected() {
+        val p = ProgramGenerator.build(4, Goal.STRENGTH, gym, 60, allowed = { it.id != "squat" })
+        assertTrue(p.routines.none { r -> r.exercises.any { it.exercise.id == "squat" } })
+    }
+
+    @Test fun levelChangesSets() {
+        val beginner = ProgramGenerator.build(3, Goal.HYPERTROPHY, gym, 60, level = com.bestrong.core.training.Level.BEGINNER).routines.first()
+        val advanced = ProgramGenerator.build(3, Goal.HYPERTROPHY, gym, 60, level = com.bestrong.core.training.Level.ADVANCED).routines.first()
+        assertEquals(3, beginner.exercises.first().sets.size)
+        assertEquals(5, advanced.exercises.first().sets.size)
+    }
+
+    @Test fun scheduleFillsChosenDaysWithoutOverwriting() {
+        val monday = java.time.LocalDate.of(2026, 10, 12)
+        val existing = mapOf(monday.toEpochDay() to com.bestrong.core.training.WeekPlan().assign(java.time.DayOfWeek.MONDAY, "mine"))
+        val plans = ProgramGenerator.schedule(existing, listOf("a", "b", "c"), ProgramGenerator.defaultWeekdays(3), monday, weeks = 2)
+        val first = plans.getValue(monday.toEpochDay())
+        assertEquals("mine", first.routineFor(java.time.DayOfWeek.MONDAY))
+        assertEquals("b", first.routineFor(java.time.DayOfWeek.WEDNESDAY))
+        assertEquals("a", plans.getValue(monday.plusWeeks(1).toEpochDay()).routineFor(java.time.DayOfWeek.MONDAY))
+        assertEquals(listOf(1, 2, 4, 5), ProgramGenerator.defaultWeekdays(4))
+    }
 }

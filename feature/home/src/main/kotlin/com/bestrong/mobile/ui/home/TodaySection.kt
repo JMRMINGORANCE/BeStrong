@@ -124,6 +124,15 @@ fun SuggestedRoutineCard(routine: Routine, onStart: () -> Unit) {
     com.bestrong.mobile.ui.components.HeroCard {
         Text(stringResource(R.string.today_suggested), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
         Text(routine.displayName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        // Cuántos ejercicios y cuánto se tarda, para decidir de un vistazo
+        val minutes = remember(routine) { (com.bestrong.core.session.WorkoutEditor.estimatedRemainingSeconds(routine.toWorkout(0)) + 59) / 60 }
+        Text(
+            listOfNotNull(
+                androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, routine.exercises.size, routine.exercises.size),
+                stringResource(R.string.routine_estimated, minutes).takeIf { minutes > 0 },
+            ).joinToString(" · "),
+            style = MaterialTheme.typography.bodyMedium,
+        )
         com.bestrong.mobile.ui.components.ExerciseThumbStrip(routine.exercises.map { it.exercise }, 44.dp, modifier = Modifier.padding(vertical = 6.dp))
         HeroButton(onClick = onStart, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Default.PlayArrow, null)
@@ -151,7 +160,7 @@ fun HeroButton(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Com
 fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     var editing by remember { mutableStateOf(false) }
-    com.bestrong.mobile.ui.components.Panel(onClick = if (canChangeGoal) ({ editing = true }) else null) {
+    com.bestrong.mobile.ui.components.Panel(onClick = if (canChangeGoal) ({ editing = true }) else null, onClickLabel = stringResource(R.string.week_goal_title)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.size(58.dp)) {
                 androidx.compose.material3.CircularProgressIndicator(

@@ -111,6 +111,11 @@ fun HomeScreen(
     }
     val snackbar = remember { SnackbarHostState() }
     var showPrograms by rememberSaveable { mutableStateOf(false) }
+    // Fuera de la rejilla: al volver de «Programas» siguen el desplazamiento, la búsqueda y las carpetas plegadas
+    var collapsed by rememberSaveable { mutableStateOf(setOf<String>()) }
+    // Buscar rutina (sale con muchas): mientras se busca, se ven todas las que coinciden con sus carpetas abiertas
+    var routineQuery by rememberSaveable { mutableStateOf("") }
+    val gridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
     UndoRoutineDelete(vm, snackbar)
     UndoDiscard(vm, snackbar, onOpenWorkout)
@@ -143,13 +148,11 @@ fun HomeScreen(
 
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         // Rejilla adaptable: 1 columna en el Fold plegado, 2-3 desplegado
-        var collapsed by rememberSaveable { mutableStateOf(setOf<String>()) }
-        // Buscar rutina (sale con muchas): mientras se busca, se ven todas las que coinciden con sus carpetas abiertas
-        var routineQuery by rememberSaveable { mutableStateOf("") }
         val shownRoutines = remember(routines, routineQuery) { filterRoutines(routines, routineQuery) }
         val full: androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope.() -> GridItemSpan = { GridItemSpan(maxLineSpan) }
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 320.dp),
+            state = gridState,
             modifier = Modifier.padding(padding).fillMaxSize(),
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),

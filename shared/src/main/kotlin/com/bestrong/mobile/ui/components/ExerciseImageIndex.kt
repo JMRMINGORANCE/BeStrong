@@ -82,7 +82,7 @@ object ExerciseImageIndex {
 }
 
 /**
- * Miniatura del ejercicio (fotograma fijo, ligera para listas largas); tocarla abre la animación en grande.
+ * Miniatura animada del ejercicio (la que va en la app, ligera: 192 px); tocarla la abre en grande.
  * Sin imagen, un icono sobre el color de su grupo.
  */
 @Composable
@@ -103,7 +103,7 @@ fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Mod
                 ),
             )
             .then(
-                if (enlargeOnTap && model != null) {
+                if (enlargeOnTap && (thumb ?: model) != null) {
                     Modifier.clickable(onClickLabel = stringResource(R.string.exercise_image_open)) { big = true }
                         .semantics { contentDescription = description }
                 } else {

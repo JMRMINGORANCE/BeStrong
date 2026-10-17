@@ -170,7 +170,10 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             // Dos pestañas: el progreso (lo que se mira a menudo) y los ajustes (lo que se toca de vez en cuando)
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    com.bestrong.mobile.ui.components.ScreenTitle(stringResource(R.string.nav_profile))
+                    com.bestrong.mobile.ui.components.ScreenTitle(
+                        stringResource(R.string.nav_profile),
+                        overline = androidx.compose.ui.res.pluralStringResource(R.plurals.workout_count, stats.totalWorkouts, stats.totalWorkouts),
+                    )
                     ProfileTabs(tab) { tab = it }
                 }
             }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -43,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -103,6 +106,20 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             val weights = list.filter { it.weightKg != null }.sortedBy { it.dateEpochMs }
+            // Sin medidas: qué se puede apuntar y el botón para la primera, en grande
+            if (list.isEmpty()) {
+                item(key = "empty") {
+                    com.bestrong.mobile.ui.components.HeroCard(onClick = {
+                        editingId = null
+                        adding = true
+                    }) {
+                        Icon(Icons.Default.MonitorWeight, null, Modifier.size(40.dp))
+                        Text(stringResource(R.string.measurements_empty_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
+                        Text(stringResource(R.string.measurements_empty_body), style = MaterialTheme.typography.bodyMedium)
+                        Text("+ " + stringResource(R.string.add_measurement), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))
+                    }
+                }
+            }
             if (weights.size >= 2) {
                 item {
                     com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
@@ -117,7 +134,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             }
             item { BodyCompositionCard(vm, list) }
             // Siempre visible: sirve precisamente para empezar a pesarse con regularidad
-            item { Card { Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp)) { WeighInReminder(vm) } } }
+            item { com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) { Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 12.dp)) { WeighInReminder(vm) } } }
             others.forEach { (label, value) ->
                 val points = list.filter { value(it) != null }.sortedBy { it.dateEpochMs }
                 if (points.size >= 2) {

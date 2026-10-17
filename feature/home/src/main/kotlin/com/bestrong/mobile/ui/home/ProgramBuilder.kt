@@ -55,6 +55,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -101,11 +103,13 @@ fun ProgramBuilderScreen(
     val settings by vm.settings.collectAsStateWithLifecycle()
     var goal by rememberSaveable { mutableStateOf(settings.trainingGoal) }
     var days by rememberSaveable { mutableIntStateOf(settings.weeklyGoal.coerceIn(2, 6)) }
-    var kit by rememberSaveable {
-        mutableStateOf(if (com.bestrong.core.model.Equipment.BARBELL in settings.activeGym.equipment) Kit.GYM else Kit.DUMBBELLS)
-    }
+    var kit by rememberSaveable { mutableStateOf(defaultKit(settings.activeGym.equipment)) }
     var minutes by rememberSaveable { mutableIntStateOf(60) }
-    val program = remember(goal, days, kit, minutes) { vm.buildProgram(days, goal, kit, minutes) }
+    var level by rememberSaveable { mutableStateOf(com.bestrong.core.training.Level.INTERMEDIATE) }
+    // Qué días de la semana (1 = lunes), como texto para guardarlo al girar: «1,3,5»
+    var weekdaysText by rememberSaveable { mutableStateOf(com.bestrong.core.training.ProgramGenerator.defaultWeekdays(days).joinToString(",")) }
+    val weekdays = weekdaysText.split(',').mapNotNull { it.toIntOrNull() }
+    val program = remember(goal, days, kit, minutes, level) { vm.buildProgram(days, goal, kit, minutes, level) }
     val lang = uiLanguage()
     BackHandler(onBack = onDismiss)
     Scaffold(
@@ -117,7 +121,7 @@ fun ProgramBuilderScreen(
         },
         bottomBar = {
             Button(
-                onClick = { vm.addGenerated(program, goal); onDismiss() },
+                onClick = { vm.addGenerated(program, goal, weekdays); onDismiss() },
                 modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp).height(56.dp),
             ) {
                 Icon(Icons.Default.Check, null)
@@ -139,14 +143,37 @@ fun ProgramBuilderScreen(
             item { SectionHeader(stringResource(R.string.builder_goal), large = true) }
             items(GOALS, key = { it.goal.name }) { g -> GoalCard(g, selected = goal == g.goal) { goal = g.goal } }
             item { SectionHeader(stringResource(R.string.builder_days), large = true) }
-            item { DaysPicker(days) { days = it } }
+            item {
+                DaysPicker(days) {
+                    days = it
+                    weekdaysText = com.bestrong.core.training.ProgramGenerator.defaultWeekdays(it).joinToString(",")
+                }
+            }
+            // Y cuáles: tocar un día lo quita o lo pone (entre 2 y 6)
+            item {
+                WeekdayPicker(weekdays) { d ->
+                    val next = if (d in weekdays) weekdays - d else (weekdays + d).sorted()
+                    if (next.size in 2..6) {
+                        weekdaysText = next.joinToString(",")
+                        days = next.size
+                    }
+                }
+            }
+            item { SectionHeader(stringResource(R.string.builder_level), large = true) }
+            item {
+                val levels = com.bestrong.core.training.Level.entries
+                Segmented(
+                    listOf(stringResource(R.string.level_beginner), stringResource(R.string.level_intermediate), stringResource(R.string.level_advanced)),
+                    levels.indexOf(level),
+                ) { level = levels[it] }
+            }
             item { SectionHeader(stringResource(R.string.builder_equipment), large = true) }
             item { KitPicker(kit) { kit = it } }
             item { SectionHeader(stringResource(R.string.builder_minutes), large = true) }
             item { Segmented(MINUTES.map { "$it min" }, MINUTES.indexOf(minutes)) { minutes = MINUTES[it] } }
             item { SectionHeader(stringResource(R.string.builder_preview), large = true) }
             item { ProgramHeader(program.name, program.description) }
-            items(program.routines, key = { "gen-" + it.name }) { r -> GeneratedRoutineCard(r) }
+            items(program.routines.size, key = { "gen-$it" }) { i -> GeneratedRoutineCard(program.routines[i]) }
             // Los clásicos: primero los de esos días
             item { SectionHeader(stringResource(R.string.programs_classic), large = true) }
             val periodized = vm.periodizedPrograms.sortedBy { kotlin.math.abs(it.daysPerWeek - days) }
@@ -298,5 +325,37 @@ private fun ClassicCard(name: String, description: String, days: Int, tag: Strin
             tag?.let { MetaPill(it) }
         }
         Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** Material de partida según el gimnasio activo: con máquinas o barra, gimnasio; con mancuernas, mancuernas; si no, nada. */
+private fun defaultKit(equipment: Set<com.bestrong.core.model.Equipment>): Kit = when {
+    equipment.any { it == com.bestrong.core.model.Equipment.BARBELL || it == com.bestrong.core.model.Equipment.MACHINE || it == com.bestrong.core.model.Equipment.CABLE } -> Kit.GYM
+    com.bestrong.core.model.Equipment.DUMBBELL in equipment -> Kit.DUMBBELLS
+    else -> Kit.BODYWEIGHT
+}
+
+/** Días de la semana (L–D) en píldoras: los elegidos, con el degradado. */
+@Composable
+private fun WeekdayPicker(selected: List<Int>, onToggle: (Int) -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        java.time.DayOfWeek.entries.forEach { d ->
+            val on = d.value in selected
+            Box(
+                Modifier.size(42.dp).clip(CircleShape)
+                    .background(if (on) brandGradient() else SolidColor(scheme.surfaceContainer))
+                    .selectable(selected = on, role = Role.Checkbox) { onToggle(d.value) }
+                    .semantics { contentDescription = d.getDisplayName(java.time.format.TextStyle.FULL, locale) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    d.getDisplayName(java.time.format.TextStyle.NARROW, locale),
+                    fontWeight = FontWeight.Bold,
+                    color = if (on) scheme.onPrimary else scheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }

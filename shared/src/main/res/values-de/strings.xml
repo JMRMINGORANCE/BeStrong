@@ -684,7 +684,6 @@
     <string name="summary_kcal"> · %1$d kcal</string>
     <string name="summary_next_line">%1$s %2$s: %3$s × %4$d</string>
     <string name="summary_next_time">Nächstes Mal</string>
-    <string name="summary_sets_exercises">%1$d Sätze · %2$d Übungen</string>
     <string name="summary_vs_last">Im Vergleich zum letzten Mal</string>
     <string name="summary_vs_line">%1$s: %2$s</string>
     <string name="superset_label">Supersatz %1$s</string>
@@ -1247,4 +1246,19 @@
         <item quantity="one">%1$d Tag</item>
         <item quantity="other">%1$d Tage</item>
     </plurals>
+    <string name="routine_more_options">Weitere Optionen (Emoji, Ordner, Studio…)</string>
+    <string name="routine_exercise_extras">Notizen, Tempo und RPE</string>
+    <string name="routine_empty_title">Leere Routine</string>
+    <string name="routine_empty_body">Füge die Übungen hinzu, die du machen willst: unten ist der Knopf.</string>
+    <string name="day_full">Ganzkörper</string>
+    <string name="day_upper">Oberkörper</string>
+    <string name="day_lower">Unterkörper</string>
+    <string name="day_push">Drücken</string>
+    <string name="day_pull">Ziehen</string>
+    <string name="day_legs">Beine</string>
+    <string name="program_generated_desc">%1$s. Grundübungen %2$d×%3$d (Pause %4$d s), Zusatzübungen %5$d×%6$d (Pause %7$d s).</string>
+    <string name="program_generated_name">%1$s · %2$s</string>
+    <string name="measurements_empty_title">Fang an, deinen Fortschritt zu messen</string>
+    <string name="measurements_empty_body">Gewicht, Körperfett, Taille, Brust, Arme… Ab zwei Einträgen siehst du deinen Verlauf in Diagrammen.</string>
+    <string name="builder_level">Wie ist dein Niveau?</string>
 </resources>

@@ -162,9 +162,14 @@ class HomeViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), settingsStore.settings.value.gyms.associate { it.id to it.name })
 
     /** Si no hay programa: la rutina que lleva más tiempo sin hacerse. */
-    val suggestedRoutine: StateFlow<Routine?> = combine(repo.routines, repo.history) { routines, history ->
+    val suggestedRoutine: StateFlow<Routine?> = combine(repo.routines, repo.history, planning.state) { routines, history, plan ->
         val last = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
-        routines.filter { it.exercises.isNotEmpty() && !it.archived }.minByOrNull { last[it.id] ?: 0L }
+        val usable = routines.filter { it.exercises.isNotEmpty() && !it.archived }
+        // La planificada para hoy (si aún no se ha hecho hoy); si no, la que lleva más tiempo sin hacerse
+        val today = LocalDate.now()
+        val startOfToday = today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val planned = plan.planFor(today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))).routineFor(today.dayOfWeek)
+        usable.firstOrNull { it.id == planned && (last[it.id] ?: 0L) < startOfToday } ?: usable.minByOrNull { last[it.id] ?: 0L }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Semana actual: días entrenados frente al objetivo y adherencia de las 8 semanas anteriores. */
@@ -393,16 +398,57 @@ class HomeViewModel @Inject constructor(
 
     val programs: List<TrainingProgram> = Programs.all
 
-    /** Programa a medida (sin guardar): para enseñarlo antes de crearlo. */
-    fun buildProgram(days: Int, goal: com.bestrong.core.training.Goal, kit: Kit, minutes: Int): com.bestrong.core.training.GeneratedProgram =
-        com.bestrong.core.training.ProgramGenerator.build(days, goal, kit.equipment, minutes, context.uiLanguage())
+    /** Programa a medida (sin guardar): para enseñarlo antes de crearlo. Sin los ejercicios que no van con tus lesiones. */
+    fun buildProgram(
+        days: Int,
+        goal: com.bestrong.core.training.Goal,
+        kit: Kit,
+        minutes: Int,
+        level: com.bestrong.core.training.Level = com.bestrong.core.training.Level.INTERMEDIATE,
+    ): com.bestrong.core.training.GeneratedProgram {
+        val injuries = planning.state.value.injuries
+        val res = context.resources
+        val goalLabel = context.getString(GOAL_LABELS.getValue(goal))
+        val texts = com.bestrong.core.training.ProgramGenerator.Texts(
+            name = context.getString(R.string.program_generated_name, goalLabel, res.getQuantityString(R.plurals.days_count, days, days)),
+            describe = { split, m, a -> context.getString(R.string.program_generated_desc, split, m.sets, m.reps, m.restSeconds, a.sets, a.reps, a.restSeconds) },
+            dayLabels = mapOf(
+                "full" to context.getString(R.string.day_full),
+                "upper" to context.getString(R.string.day_upper),
+                "lower" to context.getString(R.string.day_lower),
+                "push" to context.getString(R.string.day_push),
+                "pull" to context.getString(R.string.day_pull),
+                "legs" to context.getString(R.string.day_legs),
+            ),
+        )
+        return com.bestrong.core.training.ProgramGenerator.build(
+            days,
+            goal,
+            kit.equipment,
+            minutes,
+            context.uiLanguage(),
+            allowed = { com.bestrong.core.training.Injuries.isSafe(it, injuries) },
+            texts = texts,
+            level = level,
+        )
+    }
 
     /** Guarda las rutinas del programa a medida (en su carpeta). */
-    fun addGenerated(program: com.bestrong.core.training.GeneratedProgram, goal: com.bestrong.core.training.Goal) = viewModelScope.launch {
-        repo.addRoutines(program.routines)
+    fun addGenerated(
+        program: com.bestrong.core.training.GeneratedProgram,
+        goal: com.bestrong.core.training.Goal,
+        /** Días de la semana elegidos (1 = lunes): las rutinas se ponen en el calendario de las próximas semanas. */
+        weekdays: List<Int> = emptyList(),
+    ) = viewModelScope.launch {
+        // Si ya hay una carpeta con ese nombre (el mismo programa otra vez), la nueva lleva « 2», « 3»…
+        val folders = routines.value.mapNotNull { it.folder }.toSet()
+        val folder = generateSequence(2) { it + 1 }.map { "${program.name} $it" }.let { more -> if (program.name !in folders) program.name else more.first { it !in folders } }
+        repo.addRoutines(program.routines.map { it.copy(folder = folder) })
+        val monday = LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        planning.update { st -> st.copy(weekPlans = com.bestrong.core.training.ProgramGenerator.schedule(st.weekPlans, program.routines.map { it.id }, weekdays, monday)) }
         // El objetivo de la semana pasa a ser los días del programa, y se recuerda el objetivo elegido
         settingsStore.update { it.copy(weeklyGoal = program.routines.size.coerceIn(1, 7), trainingGoal = goal) }
-        _messages.tryEmit(context.getString(R.string.msg_program_added, program.name, program.routines.size))
+        _messages.tryEmit(context.getString(R.string.msg_program_added, folder, program.routines.size))
     }
 
     /** Crea las rutinas del programa elegido en el idioma de la app. */
@@ -473,6 +519,15 @@ private const val HOUR_MS = 60 * 60 * 1000L
 
 /** Días sin hacer una rutina a partir de los cuales se propone archivarla. */
 private const val STALE_DAYS = 60
+
+/** Nombre de cada objetivo. */
+val GOAL_LABELS = mapOf(
+    com.bestrong.core.training.Goal.HYPERTROPHY to R.string.goal_muscle,
+    com.bestrong.core.training.Goal.STRENGTH to R.string.goal_strength,
+    com.bestrong.core.training.Goal.FAT_LOSS to R.string.goal_fat_loss,
+    com.bestrong.core.training.Goal.ENDURANCE to R.string.goal_endurance,
+    com.bestrong.core.training.Goal.GENERAL to R.string.goal_general,
+)
 
 /** Material con el que se entrena: decide qué ejercicios entran en el programa a medida. */
 enum class Kit(val equipment: Set<com.bestrong.core.model.Equipment>) {

@@ -127,6 +127,9 @@ object Peaking {
 /** Objetivo de la persona: cambia el reparto de días, las series × reps, los descansos y si hay remate de cardio. */
 enum class Goal { STRENGTH, HYPERTROPHY, FAT_LOSS, ENDURANCE, GENERAL }
 
+/** Experiencia: cambia cuántas series se hacen (menos al empezar, más con años de gimnasio). */
+enum class Level(val extraSets: Int) { BEGINNER(-1), INTERMEDIATE(0), ADVANCED(1) }
+
 /** Series, reps y descanso de un ejercicio. */
 data class Prescription(val sets: Int, val reps: Int, val restSeconds: Int)
 
@@ -160,24 +163,24 @@ object RoutineGenerator {
         ),
         "push" to listOf(
             listOf("bench_press", "db_bench_press", "push_up"),
-            listOf("overhead_press", "db_shoulder_press"),
+            listOf("overhead_press", "db_shoulder_press", "pike_push_up"),
             listOf("incline_bench_press", "db_incline_press", "incline_push_up"),
-            listOf("lateral_raise", "cable_lateral_raise"),
+            listOf("lateral_raise", "cable_lateral_raise", "archer_push_up"),
             listOf("triceps_pushdown", "overhead_triceps_ext", "dips", "diamond_push_up"),
         ),
         "pull" to listOf(
-            listOf("deadlift", "romanian_deadlift", "kb_swing"),
+            listOf("deadlift", "romanian_deadlift", "kb_swing", "hyperextension"),
             listOf("pull_up", "lat_pulldown", "band_pull_up"),
-            listOf("barbell_row", "db_row", "seated_cable_row"),
-            listOf("face_pull", "rear_delt_fly"),
-            listOf("barbell_curl", "db_curl", "hammer_curl"),
+            listOf("barbell_row", "db_row", "seated_cable_row", "negative_pull_up"),
+            listOf("face_pull", "rear_delt_fly", "scapular_pull_up"),
+            listOf("barbell_curl", "db_curl", "hammer_curl", "chin_up"),
         ),
         "legs" to listOf(
             listOf("squat", "hack_squat", "leg_press", "goblet_squat", "air_squat"),
             listOf("romanian_deadlift", "hip_thrust"),
             listOf("bulgarian_split_squat", "lunge", "pistol_squat"),
             listOf("leg_extension", "wall_sit"),
-            listOf("leg_curl", "seated_leg_curl"),
+            listOf("leg_curl", "seated_leg_curl", "hyperextension"),
             listOf("standing_calf_raise", "seated_calf_raise"),
         ),
     )
@@ -185,7 +188,7 @@ object RoutineGenerator {
     private val dayNames = mapOf(
         "full" to ("Cuerpo completo" to "Full body"),
         "upper" to ("Torso" to "Upper"),
-        "lower" to ("Pierna" to "Lower"),
+        "lower" to ("Tren inferior" to "Lower"),
         "push" to ("Empuje" to "Push"),
         "pull" to ("Tirón" to "Pull"),
         "legs" to ("Pierna" to "Legs"),
@@ -195,7 +198,11 @@ object RoutineGenerator {
      * Qué toca cada día según los días y el objetivo: cuerpo completo con pocos días; con más, divisiones que dejan
      * descansar cada músculo (para ganar músculo, empuje/tirón/pierna antes; para fuerza, torso/pierna).
      */
-    fun split(days: Int, goal: Goal = Goal.HYPERTROPHY): List<String> = when (days.coerceIn(1, 6)) {
+    fun split(days: Int, goal: Goal = Goal.HYPERTROPHY, limitedEquipment: Boolean = false): List<String> =
+        // Sin pesas no hay ejercicios para llenar un día de tirón o de empuje: se reparte como para salud
+        if (limitedEquipment && goal != Goal.GENERAL) split(days, Goal.GENERAL) else splitFor(days, goal)
+
+    private fun splitFor(days: Int, goal: Goal): List<String> = when (days.coerceIn(1, 6)) {
         1 -> listOf("full")
         2 -> listOf("full", "full")
         3 -> if (goal == Goal.HYPERTROPHY) listOf("push", "pull", "legs") else listOf("full", "full", "full")
@@ -231,6 +238,9 @@ object RoutineGenerator {
         Goal.GENERAL -> Prescription(3, 12, 60)
     }
 
+    /** Series según el nivel (siempre al menos 2). */
+    private fun Prescription.withLevel(level: Level) = copy(sets = (sets + level.extraSets).coerceAtLeast(2))
+
     /** Para perder grasa o ganar resistencia, el día acaba con un remate metabólico. */
     private fun finisher(goal: Goal): String? = if (goal == Goal.FAT_LOSS || goal == Goal.ENDURANCE) "burpee" else null
 
@@ -238,25 +248,40 @@ object RoutineGenerator {
      * Rutinas para [daysPerWeek] días con el material disponible y el objetivo. Cuantos más
      * minutos por sesión, más ejercicios. Perder grasa y resistencia emparejan los accesorios en superseries.
      */
-    fun generate(daysPerWeek: Int, equipment: Set<Equipment>, goal: Goal, minutesPerSession: Int, lang: String = "es"): List<Routine> {
-        val main = main(goal)
-        val acc = accessory(goal)
+    fun generate(
+        daysPerWeek: Int,
+        equipment: Set<Equipment>,
+        goal: Goal,
+        minutesPerSession: Int,
+        lang: String = "es",
+        /** Ejercicios que se pueden usar (p. ej. los seguros con las lesiones apuntadas). */
+        allowed: (Exercise) -> Boolean = { true },
+        /** Nombres de cada tipo de día en el idioma de la app (si no, español o inglés). */
+        dayLabels: Map<String, String> = emptyMap(),
+        level: Level = Level.INTERMEDIATE,
+    ): List<Routine> {
+        val main = main(goal).withLevel(level)
+        val acc = accessory(goal).withLevel(level)
         val perExercise = (main.sets * (40 + main.restSeconds) + acc.sets * (40 + acc.restSeconds)) / 2 / 60.0
         val maxExercises = (minutesPerSession / perExercise).toInt().coerceIn(3, 8)
-        val usable: (Exercise) -> Boolean = { it.equipment in equipment || it.equipment == Equipment.BODYWEIGHT }
-        val days = split(daysPerWeek, goal)
+        val usable: (Exercise) -> Boolean = { (it.equipment in equipment || it.equipment == Equipment.BODYWEIGHT) && allowed(it) }
+        val limited = equipment.none { it == Equipment.BARBELL || it == Equipment.DUMBBELL || it == Equipment.MACHINE || it == Equipment.CABLE }
+        val days = split(daysPerWeek, goal, limited)
+        val finisherEx = finisher(goal)?.let(ExerciseLibrary::byId)?.takeIf(usable)
         return days.mapIndexed { dayIndex, type ->
             // Segundo/tercer día del mismo tipo (A/B/C): otra opción de cada hueco para variar
             val variant = days.take(dayIndex).count { it == type }
+            // El remate cuenta dentro del tiempo de la sesión
+            val room = if (finisherEx != null) maxExercises - 1 else maxExercises
             val picks = slots.getValue(type).mapNotNull { options ->
                 val available = options.mapNotNull { ExerciseLibrary.byId(it) }.filter(usable)
                 if (available.isEmpty()) null else available[variant % available.size]
-            }.distinctBy { it.id }.take(maxExercises)
-            val withFinisher = finisher(goal)?.let(ExerciseLibrary::byId)?.takeIf { f -> picks.none { it.id == f.id } }?.let { picks + it } ?: picks
-            val (es, en) = dayNames.getValue(type)
+            }.distinctBy { it.id }.filter { it.id != finisherEx?.id }.take(room)
+            val label = dayLabels[type] ?: dayNames.getValue(type).let { (es, en) -> if (lang == "en") en else es }
             val letter = if (days.count { it == type } > 1) " " + ('A' + variant) else ""
-            val exercises = withFinisher.mapIndexed { i, ex -> routineExercise(ex, if (i < 2) main else acc) }
-            Routine(name = (if (lang == "en") en else es) + letter, exercises = pairAccessories(exercises, goal))
+            // Superseries solo entre accesorios; el remate va suelto al final
+            val exercises = pairAccessories(picks.mapIndexed { i, ex -> routineExercise(ex, if (i < 2) main else acc) }, goal)
+            Routine(name = label + letter, exercises = exercises + listOfNotNull(finisherEx?.let { routineExercise(it, acc) }))
         }
     }
 
@@ -289,6 +314,45 @@ data class GeneratedProgram(val name: String, val description: String, val routi
 
 /** Programa a medida a partir del objetivo, los días, el material y el tiempo. */
 object ProgramGenerator {
+    /**
+     * Días de la semana (1 = lunes) para [days] sesiones, repartidos para descansar entre medias: 3 → L X V,
+     * 4 → L M J V…
+     */
+    fun defaultWeekdays(days: Int): List<Int> = when (days.coerceIn(1, 7)) {
+        1 -> listOf(1)
+        2 -> listOf(1, 4)
+        3 -> listOf(1, 3, 5)
+        4 -> listOf(1, 2, 4, 5)
+        5 -> listOf(1, 2, 3, 4, 5)
+        6 -> listOf(1, 2, 3, 4, 5, 6)
+        else -> (1..7).toList()
+    }
+
+    /**
+     * Pone las rutinas (por orden) en los días elegidos de [weeks] semanas desde [firstMonday], sin tocar los días
+     * que ya tengan algo planificado.
+     */
+    fun schedule(
+        plans: Map<Long, WeekPlan>,
+        routineIds: List<String>,
+        weekdays: List<Int>,
+        firstMonday: LocalDate,
+        weeks: Int = 12,
+    ): Map<Long, WeekPlan> {
+        if (routineIds.isEmpty() || weekdays.isEmpty()) return plans
+        val out = plans.toMutableMap()
+        repeat(weeks) { w ->
+            val key = firstMonday.plusWeeks(w.toLong()).toEpochDay()
+            var plan = out[key] ?: WeekPlan()
+            weekdays.sorted().forEachIndexed { i, d ->
+                val day = DayOfWeek.of(d)
+                if (plan.routineFor(day) == null) plan = plan.assign(day, routineIds[i % routineIds.size])
+            }
+            out[key] = plan
+        }
+        return out
+    }
+
     private val goalNames = mapOf(
         Goal.STRENGTH to ("Fuerza" to "Strength"),
         Goal.HYPERTROPHY to ("Músculo" to "Muscle"),
@@ -297,15 +361,27 @@ object ProgramGenerator {
         Goal.GENERAL to ("Forma física" to "Fitness"),
     )
 
-    fun build(daysPerWeek: Int, goal: Goal, equipment: Set<Equipment>, minutesPerSession: Int, lang: String = "es"): GeneratedProgram {
+    /** Nombre y descripción a medida (para los idiomas que no son español ni inglés): días, básicos y accesorios. */
+    data class Texts(val name: String, val describe: (split: String, main: Prescription, accessory: Prescription) -> String, val dayLabels: Map<String, String>)
+
+    fun build(
+        daysPerWeek: Int,
+        goal: Goal,
+        equipment: Set<Equipment>,
+        minutesPerSession: Int,
+        lang: String = "es",
+        allowed: (Exercise) -> Boolean = { true },
+        texts: Texts? = null,
+        level: Level = Level.INTERMEDIATE,
+    ): GeneratedProgram {
         val days = daysPerWeek.coerceIn(1, 6)
-        val routines = RoutineGenerator.generate(days, equipment, goal, minutesPerSession, lang)
+        val routines = RoutineGenerator.generate(days, equipment, goal, minutesPerSession, lang, allowed, texts?.dayLabels.orEmpty(), level)
         val (es, en) = goalNames.getValue(goal)
-        val name = if (lang == "en") "$en · $days days" else "$es · $days días"
-        val m = RoutineGenerator.main(goal)
-        val a = RoutineGenerator.accessory(goal)
+        val name = texts?.name ?: if (lang == "en") "$en · $days days" else "$es · $days días"
+        val m = RoutineGenerator.main(goal).let { it.copy(sets = (it.sets + level.extraSets).coerceAtLeast(2)) }
+        val a = RoutineGenerator.accessory(goal).let { it.copy(sets = (it.sets + level.extraSets).coerceAtLeast(2)) }
         val split = routines.joinToString(" / ") { it.name }
-        val description = if (lang == "en") {
+        val description = texts?.describe?.invoke(split, m, a) ?: if (lang == "en") {
             "$split. Main lifts ${m.sets}×${m.reps} (rest ${m.restSeconds}s), accessories ${a.sets}×${a.reps} (rest ${a.restSeconds}s)."
         } else {
             "$split. Básicos ${m.sets}×${m.reps} (descanso ${m.restSeconds} s), accesorios ${a.sets}×${a.reps} (descanso ${a.restSeconds} s)."

@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -211,7 +212,8 @@ fun ExerciseSearchList(
     val unit = LocalWeightUnit.current
     var creating by rememberSaveable { mutableStateOf(false) }
 
-    Column(modifier.fillMaxSize()) {
+    // Sin barra superior: el título no puede quedar bajo la barra de estado (en el selector ya la pone el Scaffold)
+    Column(modifier.fillMaxSize().then(if (title != null) Modifier.statusBarsPadding() else Modifier)) {
         if (title != null) {
             com.bestrong.mobile.ui.components.ScreenTitle(
                 title,

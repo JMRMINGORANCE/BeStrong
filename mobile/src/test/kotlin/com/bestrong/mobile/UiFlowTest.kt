@@ -254,7 +254,7 @@ class UiFlowTest {
         compose.onNodeWithText("Crear programa").performClick()
         settle(25)
         // Sus cuatro rutinas, juntas en la carpeta del programa
-        assertTrue(compose.onAllNodesWithText("Definición · 4 días", substring = true).fetchSemanticsNodes().isNotEmpty())
+        assertTrue(compose.onAllNodesWithText("Perder grasa · 4 días", substring = true).fetchSemanticsNodes().isNotEmpty())
         shot("generated_added_folded")
     }
 

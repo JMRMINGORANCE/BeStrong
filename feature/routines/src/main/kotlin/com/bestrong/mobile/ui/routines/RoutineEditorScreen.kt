@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,11 +23,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -61,7 +65,6 @@ import com.bestrong.mobile.ui.components.displayName
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, onClose: () -> Unit) {
-    val unit = LocalWeightUnit.current
     val routine by vm.routine.collectAsStateWithLifecycle()
     val tempoVersion by vm.tempoVersion.collectAsStateWithLifecycle()
     // Leído aquí para que el título y el botón de borrar cambien si el borrador pasa a ser rutina nueva
@@ -96,7 +99,18 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                 },
             )
         },
+        // Siempre a mano, aunque la rutina sea larga
+        bottomBar = {
+            Button(
+                onClick = onAddExercises,
+                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp).height(52.dp),
+            ) {
+                Icon(Icons.Default.Add, null)
+                Text(stringResource(R.string.add_exercises), Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold)
+            }
+        },
     ) { padding ->
+        var moreOptions by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
         LazyColumn(
             Modifier.padding(padding).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -106,89 +120,53 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
             val content = Modifier.widthIn(max = 720.dp).fillMaxWidth().padding(horizontal = 16.dp)
             item {
                 Column(content, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(routine.name, vm::rename, label = { Text(stringResource(R.string.routine_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        routine.name,
+                        vm::rename,
+                        label = { Text(stringResource(R.string.routine_name)) },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                     OutlinedTextField(routine.notes, vm::setNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.fillMaxWidth())
-                    EmojiPicker(routine.emoji, vm::setEmoji)
-                    FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
-                    RoutineGymRow(vm, routine)
-                    RoutineRangeRow(vm, routine)
-                    RoutineRpeRow(vm, routine)
-                    RoutineTempoRow(vm, routine)
-                }
-            }
-            itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
-                Card(content) {
-                    Column(Modifier.padding(12.dp)) {
+                    // Lo que se toca poco (emoji, carpeta, gimnasio y los ajustes para toda la rutina), plegado
+                    com.bestrong.mobile.ui.components.Panel(onClick = { moreOptions = !moreOptions }, contentPadding = 14.dp) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            com.bestrong.mobile.ui.components.ExerciseThumb(re.exercise, 48.dp, Modifier.padding(end = 12.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(re.exercise.displayName(), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
-                                Text(
-                                    stringResource(R.string.rest_value, formatDuration(re.restSeconds.toLong())),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.secondary,
-                                    modifier = Modifier.clickable { restFor = re.id },
-                                )
-                            }
-                            IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.action_move_up)) }
-                            IconButton(onClick = { vm.moveExercise(index, index + 1) }, enabled = index < routine.exercises.lastIndex) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.action_move_down)) }
-                            IconButton(onClick = { vm.duplicateExercise(re.id) }) { Icon(Icons.Default.ContentCopy, stringResource(R.string.duplicate_named, re.exercise.displayName())) }
-                            IconButton(onClick = { vm.removeExercise(re.id) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_named, re.exercise.displayName())) }
+                            Icon(Icons.Default.Tune, null, tint = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(R.string.routine_more_options), Modifier.weight(1f).padding(start = 12.dp), fontWeight = FontWeight.Bold)
+                            Icon(if (moreOptions) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, null)
                         }
-                        if (index < routine.exercises.lastIndex) {
-                            val linked = re.supersetId != null && re.supersetId == routine.exercises[index + 1].supersetId
-                            FilterChip(
-                                selected = linked,
-                                onClick = { vm.toggleSupersetWithNext(re.id) },
-                                label = { Text(stringResource(if (linked) R.string.in_superset_with_next else R.string.superset_with_next)) },
-                            )
-                        }
-                        ExerciseExtras(
-                            notes = re.notes,
-                            tempo = re.tempo.orEmpty(),
-                            showTempo = re.exercise.tracking != TrackingType.CARDIO,
-                            onNotes = { vm.setExerciseNotes(re.id, it) },
-                            onTempo = { vm.setTempo(re.id, it) },
-                            resetKey = tempoVersion,
+                    }
+                    if (moreOptions) {
+                        EmojiPicker(routine.emoji, vm::setEmoji)
+                        FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
+                        RoutineGymRow(vm, routine)
+                        RoutineRangeRow(vm, routine)
+                        RoutineRpeRow(vm, routine)
+                        RoutineTempoRow(vm, routine)
+                    }
+                    if (routine.exercises.isNotEmpty()) {
+                        com.bestrong.mobile.ui.components.SectionHeader(
+                            androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, routine.exercises.size, routine.exercises.size),
+                            large = true,
                         )
-                        com.bestrong.mobile.ui.components.TargetRpeChips(re.exercise.tracking, re.targetRpe) { vm.setTargetRpe(re.id, it) }
-                        re.sets.forEachIndexed { i, set ->
-                            key(re.id, i, re.sets.size) {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    // Tocar el número cambia el tipo de serie (C calentamiento, D drop, F al fallo)
-                                    Text(
-                                        set.type.short.ifEmpty { "${i + 1}" },
-                                        Modifier.widthIn(min = 24.dp).clickable { vm.cycleSetType(re.id, i) }.padding(vertical = 8.dp),
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (set.type == SetType.NORMAL) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.tertiary,
-                                    )
-                                    if (re.exercise.tracking == TrackingType.CARDIO) {
-                                        SmallNumberField(stringResource(R.string.set_minutes), (set.durationSec / 60).toString(), Modifier.weight(1f)) { v ->
-                                            vm.updateSet(re.id, i) { it.copy(durationSec = (v.toIntOrNull() ?: 0) * 60) }
-                                        }
-                                    } else if (re.exercise.tracking == TrackingType.DURATION) {
-                                        SmallNumberField(stringResource(R.string.seconds_short), set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
-                                    } else {
-                                        SmallNumberField(unit.label, unit.format(set.weightKg), Modifier.weight(1f), decimal = true) { v ->
-                                            vm.updateSet(re.id, i) { it.copy(weightKg = unit.parseToKg(v) ?: 0.0) }
-                                        }
-                                        SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
-                                    }
-                                    IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set)) }
-                                }
-                            }
-                        }
-                        OutlinedButton(onClick = { vm.addSet(re.id) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.add_set)) }
                     }
                 }
             }
-            item { RoutineMusclesCard(routine, content) }
-            item {
-                Button(onClick = onAddExercises, modifier = content) {
-                    Icon(Icons.Default.Add, null)
-                    Text(stringResource(R.string.add_exercises), Modifier.padding(start = 8.dp))
+            if (routine.exercises.isEmpty()) {
+                item {
+                    com.bestrong.mobile.ui.components.EmptyState(
+                        Icons.Default.FitnessCenter,
+                        stringResource(R.string.routine_empty_title),
+                        stringResource(R.string.routine_empty_body),
+                        Modifier.heightIn(min = 360.dp),
+                    )
                 }
             }
+            itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
+                RoutineExerciseCard(vm, routine, index, re, content, tempoVersion) { restFor = it }
+            }
+            if (routine.exercises.isNotEmpty()) item { RoutineMusclesCard(routine, content) }
         }
     }
 }
@@ -403,5 +381,95 @@ private fun CloseIfMissing(vm: RoutineEditorViewModel, onClose: () -> Unit) {
             vm.recoveredNoticeShown = true
             android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_LONG).show()
         }
+    }
+}
+
+/** Un ejercicio de la rutina: cabecera con sus acciones, superserie, extras plegables y sus series. */
+@Composable
+private fun RoutineExerciseCard(
+    vm: RoutineEditorViewModel,
+    routine: com.bestrong.core.model.Routine,
+    index: Int,
+    re: com.bestrong.core.model.RoutineExercise,
+    content: Modifier,
+    tempoVersion: Int,
+    onEditRest: (String) -> Unit,
+) {
+    var extras by androidx.compose.runtime.saveable.rememberSaveable(re.id) { mutableStateOf(re.notes.isNotBlank() || !re.tempo.isNullOrBlank() || re.targetRpe != null) }
+    com.bestrong.mobile.ui.components.Panel(content, contentPadding = 0.dp) {
+        Column(Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                com.bestrong.mobile.ui.components.ExerciseThumb(re.exercise, 48.dp, Modifier.padding(end = 12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(re.exercise.displayName(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
+                    Text(
+                        stringResource(R.string.rest_value, formatDuration(re.restSeconds.toLong())),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.clickable { onEditRest(re.id) },
+                    )
+                }
+                IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.action_move_up)) }
+                IconButton(onClick = { vm.moveExercise(index, index + 1) }, enabled = index < routine.exercises.lastIndex) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.action_move_down)) }
+                IconButton(onClick = { vm.duplicateExercise(re.id) }) { Icon(Icons.Default.ContentCopy, stringResource(R.string.duplicate_named, re.exercise.displayName())) }
+                IconButton(onClick = { vm.removeExercise(re.id) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_named, re.exercise.displayName())) }
+            }
+            if (index < routine.exercises.lastIndex) {
+                val linked = re.supersetId != null && re.supersetId == routine.exercises[index + 1].supersetId
+                FilterChip(
+                    selected = linked,
+                    onClick = { vm.toggleSupersetWithNext(re.id) },
+                    label = { Text(stringResource(if (linked) R.string.in_superset_with_next else R.string.superset_with_next)) },
+                )
+            }
+            // Notas, tempo y RPE: plegados salvo que ya tengan algo
+            TextButton(onClick = { extras = !extras }) {
+                Text(stringResource(R.string.routine_exercise_extras))
+                Icon(if (extras) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, null)
+            }
+            if (extras) {
+                ExerciseExtras(
+                    notes = re.notes,
+                    tempo = re.tempo.orEmpty(),
+                    showTempo = re.exercise.tracking != TrackingType.CARDIO,
+                    onNotes = { vm.setExerciseNotes(re.id, it) },
+                    onTempo = { vm.setTempo(re.id, it) },
+                    resetKey = tempoVersion,
+                )
+                com.bestrong.mobile.ui.components.TargetRpeChips(re.exercise.tracking, re.targetRpe) { vm.setTargetRpe(re.id, it) }
+            }
+            re.sets.forEachIndexed { i, set ->
+                key(re.id, i, re.sets.size) { RoutineSetRow(vm, re, i, set) }
+            }
+            OutlinedButton(onClick = { vm.addSet(re.id) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.add_set)) }
+        }
+    }
+}
+
+/** Una serie de la plantilla: tipo (tocando el número), peso y reps, minutos o segundos según el ejercicio. */
+@Composable
+private fun RoutineSetRow(vm: RoutineEditorViewModel, re: com.bestrong.core.model.RoutineExercise, i: Int, set: com.bestrong.core.model.RoutineSet) {
+    val unit = LocalWeightUnit.current
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // Tocar el número cambia el tipo de serie (C calentamiento, D drop, F al fallo)
+        Text(
+            set.type.short.ifEmpty { "${i + 1}" },
+            Modifier.widthIn(min = 24.dp).clickable { vm.cycleSetType(re.id, i) }.padding(vertical = 8.dp),
+            fontWeight = FontWeight.Bold,
+            color = if (set.type == SetType.NORMAL) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.tertiary,
+        )
+        if (re.exercise.tracking == TrackingType.CARDIO) {
+            SmallNumberField(stringResource(R.string.set_minutes), (set.durationSec / 60).toString(), Modifier.weight(1f)) { v ->
+                vm.updateSet(re.id, i) { it.copy(durationSec = (v.toIntOrNull() ?: 0) * 60) }
+            }
+        } else if (re.exercise.tracking == TrackingType.DURATION) {
+            SmallNumberField(stringResource(R.string.seconds_short), set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
+        } else {
+            SmallNumberField(unit.label, unit.format(set.weightKg), Modifier.weight(1f), decimal = true) { v ->
+                vm.updateSet(re.id, i) { it.copy(weightKg = unit.parseToKg(v) ?: 0.0) }
+            }
+            SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
+        }
+        IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set)) }
     }
 }

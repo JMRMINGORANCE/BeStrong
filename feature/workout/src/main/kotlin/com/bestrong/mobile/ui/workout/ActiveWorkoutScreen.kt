@@ -251,8 +251,13 @@ fun ActiveWorkoutScreen(
             TopAppBar(
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.workout_minimize)) } },
                 title = {
-                    TextButton(onClick = { renaming = true }, contentPadding = PaddingValues(0.dp)) {
-                        Text(w.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    // El nombre, en grande y del color del texto (tocarlo lo cambia)
+                    TextButton(
+                        onClick = { renaming = true },
+                        contentPadding = PaddingValues(0.dp),
+                        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                    ) {
+                        Text(w.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 },
                 actions = {
@@ -594,9 +599,10 @@ private fun ExerciseCard(
     // Cada ejercicio en su bloque redondeado (las superseries, juntas y con su barra de color)
     Row(
         Modifier.fillMaxWidth()
+            // El alto incluye el margen: arrastrar N tarjetas mueve N puestos
+            .onSizeChanged { cardHeight = it.height.coerceAtLeast(1) }
             .padding(start = 12.dp, end = 12.dp, top = 6.dp, bottom = if (nextInSuperset) 0.dp else 6.dp)
             .height(IntrinsicSize.Min)
-            .onSizeChanged { cardHeight = it.height.coerceAtLeast(1) }
             .graphicsLayer { translationY = dragY }
             .zIndex(if (dragY != 0f) 1f else 0f)
             .clip(MaterialTheme.shapes.large)
@@ -1046,12 +1052,17 @@ fun WorkoutSummaryDialog(
         icon = { Icon(Icons.Default.EmojiEvents, null) },
         title = { Text(stringResource(R.string.workout_completed)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Con récords, comparaciones y próxima vez puede no caber: se desplaza
+            Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f))
                     StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
                 }
-                Text(stringResource(R.string.summary_sets_exercises, w.completedSetCount, w.exercises.size))
+                // «1 serie · 1 ejercicio»: con plurales
+                Text(
+                    androidx.compose.ui.res.pluralStringResource(R.plurals.history_sets_done, w.completedSetCount, w.completedSetCount) + " · " +
+                        androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, w.exercises.size, w.exercises.size),
+                )
                 val kcal = w.calories?.let { c -> (if (w.caloriesEstimated) "≈" else "") + stringResource(R.string.kcal_value, c) }
                 listOfNotNull(w.avgHeartRate?.let { stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") }, kcal)
                     .takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(" · ")) }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -142,7 +143,8 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
             navigator = navigator,
             listPane = {
                 AnimatedPane {
-                    Column(Modifier.fillMaxSize()) {
+                    // Sin barra superior: el título no puede quedar bajo la barra de estado
+                    Column(Modifier.fillMaxSize().statusBarsPadding()) {
                         com.bestrong.mobile.ui.components.ScreenTitle(
                             stringResource(R.string.nav_history),
                             Modifier.padding(horizontal = 20.dp),

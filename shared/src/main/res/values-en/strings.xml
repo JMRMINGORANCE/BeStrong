@@ -684,7 +684,6 @@
     <string name="summary_kcal"> · %1$d kcal</string>
     <string name="summary_next_line">%1$s %2$s: %3$s × %4$d</string>
     <string name="summary_next_time">Next time</string>
-    <string name="summary_sets_exercises">%1$d sets · %2$d exercises</string>
     <string name="summary_vs_last">Compared with last time</string>
     <string name="summary_vs_line">%1$s: %2$s</string>
     <string name="superset_label">Superset %1$s</string>
@@ -1247,4 +1246,19 @@
         <item quantity="one">%1$d day</item>
         <item quantity="other">%1$d days</item>
     </plurals>
+    <string name="routine_more_options">More options (emoji, folder, gym…)</string>
+    <string name="routine_exercise_extras">Notes, tempo and RPE</string>
+    <string name="routine_empty_title">Empty routine</string>
+    <string name="routine_empty_body">Add the exercises you want to do: the button is at the bottom.</string>
+    <string name="day_full">Full body</string>
+    <string name="day_upper">Upper</string>
+    <string name="day_lower">Lower</string>
+    <string name="day_push">Push</string>
+    <string name="day_pull">Pull</string>
+    <string name="day_legs">Legs</string>
+    <string name="program_generated_desc">%1$s. Main lifts %2$d×%3$d (rest %4$ds), accessories %5$d×%6$d (rest %7$ds).</string>
+    <string name="program_generated_name">%1$s · %2$s</string>
+    <string name="measurements_empty_title">Start tracking your progress</string>
+    <string name="measurements_empty_body">Weight, body fat, waist, chest, arms… With two entries you will see your trend in charts.</string>
+    <string name="builder_level">What is your level?</string>
 </resources>

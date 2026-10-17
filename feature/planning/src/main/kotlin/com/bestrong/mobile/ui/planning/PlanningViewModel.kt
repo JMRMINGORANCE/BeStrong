@@ -104,8 +104,8 @@ class PlanningViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     fun generate(days: Int, equipment: Set<Equipment>, goal: Goal, minutes: Int): List<Routine> =
-        RoutineGenerator.generate(days, equipment, goal, minutes, context.uiLanguage())
-            .map { r -> r.copy(exercises = r.exercises.filter { com.bestrong.core.training.Injuries.isSafe(it.exercise, store.state.value.injuries) }) }
+        // Se filtra antes de emparejar superseries: así ninguna se queda con un solo ejercicio
+        RoutineGenerator.generate(days, equipment, goal, minutes, context.uiLanguage(), allowed = { com.bestrong.core.training.Injuries.isSafe(it, store.state.value.injuries) })
 
     fun saveGenerated(routines: List<Routine>) = viewModelScope.launch {
         repo.addRoutines(routines)

@@ -684,7 +684,6 @@
     <string name="summary_kcal"> · %1$d kcal</string>
     <string name="summary_next_line">%1$s %2$s: %3$s × %4$d</string>
     <string name="summary_next_time">La propera vegada</string>
-    <string name="summary_sets_exercises">%1$d sèries · %2$d exercicis</string>
     <string name="summary_vs_last">Respecte a l’última vegada</string>
     <string name="summary_vs_line">%1$s: %2$s</string>
     <string name="superset_label">Supersèrie %1$s</string>
@@ -1247,4 +1246,19 @@
         <item quantity="one">%1$d dia</item>
         <item quantity="other">%1$d dies</item>
     </plurals>
+    <string name="routine_more_options">Més opcions (emoji, carpeta, gimnàs…)</string>
+    <string name="routine_exercise_extras">Notes, tempo i RPE</string>
+    <string name="routine_empty_title">Rutina buida</string>
+    <string name="routine_empty_body">Afegeix els exercicis que vulguis fer: a baix tens el botó.</string>
+    <string name="day_full">Cos sencer</string>
+    <string name="day_upper">Tors</string>
+    <string name="day_lower">Tren inferior</string>
+    <string name="day_push">Empenta</string>
+    <string name="day_pull">Estirada</string>
+    <string name="day_legs">Cama</string>
+    <string name="program_generated_desc">%1$s. Bàsics %2$d×%3$d (descans %4$d s), accessoris %5$d×%6$d (descans %7$d s).</string>
+    <string name="program_generated_name">%1$s · %2$s</string>
+    <string name="measurements_empty_title">Comença a mesurar el teu progrés</string>
+    <string name="measurements_empty_body">Pes, greix corporal, cintura, pit, braços… Amb dues mesures veuràs la teva evolució en gràfiques.</string>
+    <string name="builder_level">Quin nivell tens?</string>
 </resources>

@@ -94,12 +94,14 @@ fun Panel(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     contentPadding: Dp = 18.dp,
+    /** Qué hace tocarlo (TalkBack: «toca dos veces para…»). */
+    onClickLabel: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = MaterialTheme.shapes.large
     val base = modifier.fillMaxWidth().clip(shape).background(MaterialTheme.colorScheme.surfaceContainer)
     Column(
-        (if (onClick != null) base.clickable(onClick = onClick) else base).padding(contentPadding),
+        (if (onClick != null) base.clickable(onClickLabel = onClickLabel, onClick = onClick) else base).padding(contentPadding),
         verticalArrangement = Arrangement.spacedBy(10.dp),
         content = content,
     )
