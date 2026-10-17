@@ -173,7 +173,7 @@ class HomeViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Semana actual: días entrenados frente al objetivo y adherencia de las 8 semanas anteriores. */
-    val week: StateFlow<WeekProgress> = combine(repo.history, repo.activeProgram, settingsStore.settings) { history, active, s ->
+    val week: StateFlow<WeekProgress> = combine(repo.history, repo.activeProgram, settingsStore.settings, planning.state) { history, active, s, plan ->
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val goal = active?.weeklyGoal ?: s.weeklyGoal
@@ -186,6 +186,8 @@ class HomeViewModel @Inject constructor(
             adherence = if (history.isEmpty()) null else Periodization.adherence(history, goal, today, zone, since = since),
             today = today.dayOfWeek,
             streak = com.bestrong.core.stats.WorkoutStats.weeklyStreak(history.filter { it.isFinished }, today, zone),
+            // Días con una rutina planificada (Planificar o el programa a medida)
+            plannedDays = plan.planFor(today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))).days.keys.map { DayOfWeek.of(it) }.toSet(),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 
@@ -515,6 +517,8 @@ data class WeekProgress(
     val today: DayOfWeek = DayOfWeek.MONDAY,
     /** Semanas seguidas entrenando. */
     val streak: Int = 0,
+    /** Días de esta semana con algo planificado. */
+    val plannedDays: Set<DayOfWeek> = emptySet(),
 )
 
 /** Cada cuánto se revisa lo que depende de la fecha. */

@@ -1272,4 +1272,5 @@
         <item quantity="one">🔥 %1$d Woche</item>
         <item quantity="other">🔥 %1$d Wochen</item>
     </plurals>
+    <string name="day_planned">geplant</string>
 </resources>

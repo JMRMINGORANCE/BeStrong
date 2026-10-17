@@ -1272,4 +1272,5 @@
         <item quantity="one">🔥 %1$d semana</item>
         <item quantity="other">🔥 %1$d semanas</item>
     </plurals>
+    <string name="day_planned">planeado</string>
 </resources>

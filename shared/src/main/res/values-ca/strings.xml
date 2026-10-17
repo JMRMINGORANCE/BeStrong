@@ -1272,4 +1272,5 @@
         <item quantity="one">🔥 %1$d setmana</item>
         <item quantity="other">🔥 %1$d setmanes</item>
     </plurals>
+    <string name="day_planned">planificat</string>
 </resources>

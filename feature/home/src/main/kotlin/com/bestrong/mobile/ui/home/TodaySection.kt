@@ -195,8 +195,15 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             DayOfWeek.entries.forEach { d ->
                 val done = d in week.trainedDays
+                val planned = d in week.plannedDays && !done
                 val name = d.getDisplayName(TextStyle.FULL, locale)
-                val state = stringResource(if (done) R.string.day_trained else R.string.day_not_trained)
+                val state = stringResource(
+                    when {
+                        done -> R.string.day_trained
+                        planned -> R.string.day_planned
+                        else -> R.string.day_not_trained
+                    },
+                )
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -205,7 +212,14 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
                             if (done) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceContainerHighest),
                             CircleShape,
                         )
-                        .then(if (d == week.today) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
+                        .then(
+                            when {
+                                d == week.today -> Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                                // Planificado y aún sin hacer: un aro más suave
+                                planned -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), CircleShape)
+                                else -> Modifier
+                            },
+                        )
                         .semantics { contentDescription = "$name: $state" },
                 ) {
                     Text(
