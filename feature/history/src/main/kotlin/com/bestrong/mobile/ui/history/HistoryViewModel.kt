@@ -229,6 +229,10 @@ class HistoryViewModel @Inject constructor(
     }
 
     /** Nombre de la pareja si hay entrenos suyos (para apuntar uno pasado a su nombre). */
+    /** Mancuernas: el peso se ve y se escribe como el total del par (×2) si así está en Ajustes. */
+    fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =
+        if (exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL && settingsStore.settings.value.dumbbellTotal) 2 else 1
+
     fun partnerName(): String? = settingsStore.settings.value.partnerAthlete.takeIf { repo.partnerHistory.value.isNotEmpty() }
 
     fun logPast(routine: Routine, startMs: Long, endMs: Long, forPartner: Boolean, onLogged: (String) -> Unit) = viewModelScope.launch {
@@ -246,6 +250,8 @@ class HistoryViewModel @Inject constructor(
             exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { it.copy(completed = true, completedAtEpochMs = endMs) }) },
         )
         repo.saveWorkout(done)
+        // Como al copiarlo o editarlo: también a Health Connect
+        if (done.athlete == null) actions.exportToHealthConnectIfEnabled(done)
         onLogged(done.id)
     }
 
@@ -267,10 +273,13 @@ class HistoryViewModel @Inject constructor(
     }
 
     /** Cambia la fecha, la hora y la duración de un entreno pasado. */
-    fun retime(workout: Workout, startMs: Long, endMs: Long) = editWorkout(workout) { w ->
+    fun retime(workout: Workout, startMs: Long, endMs: Long, name: String = workout.name, notes: String = workout.notes) = editWorkout(workout) { w ->
         val shift = startMs - w.startedAtEpochMs
-        // La duración que se escribe es la de entreno: las pausas ya no cuentan aparte
+        // La duración que se escribe es la de entreno: las pausas ya no cuentan aparte (y se guardan también el
+        // nombre y las notas cambiados en el mismo diálogo)
         w.copy(
+            name = name,
+            notes = notes,
             startedAtEpochMs = startMs,
             finishedAtEpochMs = endMs,
             pausedTotalMs = 0,

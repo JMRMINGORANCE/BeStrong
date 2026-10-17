@@ -113,7 +113,7 @@ object WorkoutStats {
         RecordType.HEAVIEST_WEIGHT -> set.weightKg
         RecordType.BEST_ONE_REP_MAX -> set.estimatedOneRepMax
         RecordType.BEST_SET_VOLUME -> set.volume
-        RecordType.MOST_REPS -> set.reps.toDouble()
+        RecordType.MOST_REPS -> set.recordReps.toDouble()
     }
 
     /**

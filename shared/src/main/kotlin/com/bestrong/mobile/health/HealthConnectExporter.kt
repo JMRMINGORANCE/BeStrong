@@ -59,7 +59,8 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
     suspend fun hasPermissions(): Boolean = sessionPermission in granted()
 
     /** Permisos de peso y grasa (nuevos: quien ya exportaba no los tenía). */
-    suspend fun hasAllPermissions(): Boolean = granted().containsAll(setOf(weightPermission, bodyFatPermission))
+    // Todos los que usa la app: si falta alguno (calorías, pulso, distancia…) se ofrece concederlo
+    suspend fun hasAllPermissions(): Boolean = granted().containsAll(permissions)
 
     /** Borra de Health Connect el peso y la grasa de una medida borrada en la app (o solo el que se quitó). */
     suspend fun deleteMeasurement(id: String, weight: Boolean = true, fat: Boolean = true) {

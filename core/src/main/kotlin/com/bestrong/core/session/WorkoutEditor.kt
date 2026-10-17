@@ -312,6 +312,9 @@ object WorkoutEditor {
                 reps = last?.reps ?: 10,
                 durationSec = last?.durationSec ?: 0,
                 type = if (last?.type == SetType.WARMUP) SetType.NORMAL else last?.type ?: SetType.NORMAL,
+                // También la distancia y el lado derecho (cardio por distancia y unilaterales)
+                distanceM = last?.distanceM ?: 0.0,
+                repsRight = last?.repsRight,
             ),
         )
     }

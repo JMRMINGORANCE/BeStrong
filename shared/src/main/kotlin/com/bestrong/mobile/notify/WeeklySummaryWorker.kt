@@ -24,9 +24,11 @@ class WeeklySummaryWorker(context: Context, params: WorkerParameters) : Coroutin
             val settings = deps.settings().settings.value
             val zone = ZoneId.systemDefault()
             val history = deps.repository().historyOnce()
-            val week = Strength.weekSummary(history, LocalDate.now(zone), zone)
+            // Programado el domingo a las 19:00: si el sistema lo retrasa al lunes, se resume la semana que acabó
+            val today = LocalDate.now(zone).let { if (it.dayOfWeek == java.time.DayOfWeek.MONDAY) it.minusDays(1) else it }
+            val week = Strength.weekSummary(history, today, zone)
             // Si la carga ha subido de golpe, el resumen lo avisa (riesgo de lesión)
-            val loadRatio = TrainingLoad.weekly(history, LocalDate.now(zone), zone).takeIf { it.tooHigh }?.acuteChronicRatio
+            val loadRatio = TrainingLoad.weekly(history, today, zone).takeIf { it.tooHigh }?.acuteChronicRatio
             if (week.workouts > 0) Notifier.weeklySummary(applicationContext, week, settings.unit, loadRatio)
         } finally {
             runCatching { schedule(applicationContext, force = true) }.onFailure { Log.w("WeeklySummary", "No se pudo reprogramar", it) }

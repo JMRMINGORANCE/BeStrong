@@ -194,6 +194,8 @@ object Notifier {
     /** Tras contestar: confirmación con el peso guardado; se quita sola y sin volver a sonar. */
     @Suppress("MissingPermission")
     fun weighInResult(context: Context, saved: String) {
+        // El canal puede no existir aún (instalación nueva): sin él, el aviso se pierde
+        ensureChannels(context)
         if (!canPost(context)) return
         val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
@@ -213,6 +215,8 @@ object Notifier {
     /** A mitad de semana, si el cardio va por detrás del objetivo: lo que falta y a qué ritmo. */
     @Suppress("MissingPermission")
     fun cardioNudge(context: Context, pace: String) {
+        // El canal puede no existir aún (instalación nueva): sin él, el aviso se pierde
+        ensureChannels(context)
         if (!canPost(context)) return
         val n = NotificationCompat.Builder(context, CHANNEL_GOALS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
@@ -227,6 +231,8 @@ object Notifier {
     /** Objetivo semanal de cardio cumplido (una vez por semana). */
     @Suppress("MissingPermission")
     fun cardioGoal(context: Context, progress: String) {
+        // El canal puede no existir aún (instalación nueva): sin él, el aviso se pierde
+        ensureChannels(context)
         if (!canPost(context)) return
         val n = NotificationCompat.Builder(context, CHANNEL_GOALS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)

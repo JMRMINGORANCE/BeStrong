@@ -51,13 +51,15 @@ class WorkoutTimeState(startEpochMs: Long, durationMin: Long) {
     // Hasta una semana: un entreno que se quedó abierto por error también se puede corregir
     private val parsedMinutes: Long? get() = minutes.trim().toLongOrNull()?.takeIf { it in 1..7 * 24 * 60 }
 
-    /** Inicio y fin en milisegundos, o null si algo no es válido o queda en el futuro. */
+    /** Inicio y fin en milisegundos, o null si algo no es válido o acaba en el futuro. */
     val range: Pair<Long, Long>? get() {
         val t = parsedTime ?: return null
         val m = parsedMinutes ?: return null
         val startMs = LocalDateTime.of(date, t).atZone(zone).toInstant().toEpochMilli()
-        if (startMs > System.currentTimeMillis()) return null
-        return startMs to startMs + m * 60_000
+        // Ni empezar ni acabar en el futuro (las estadísticas y Health Connect no lo admiten)
+        val endMs = startMs + m * 60_000
+        if (endMs > System.currentTimeMillis() + FUTURE_TOLERANCE_MS) return null
+        return startMs to endMs
     }
 
     /** Lo que se mostró al abrir: si [range] sigue igual, el usuario no tocó fecha, hora ni duración. */
@@ -202,3 +204,6 @@ fun CopyToDayDialog(durationMin: Long, exercises: List<Pair<String, String>>, on
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }
+
+/** Margen para el fin «ahora» (la hora se escribe sin segundos y el diálogo puede llevar un rato abierto). */
+private const val FUTURE_TOLERANCE_MS = 5 * 60_000L

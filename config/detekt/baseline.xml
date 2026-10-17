@@ -8,7 +8,7 @@
     <ID>CyclomaticComplexMethod:AppearanceCard.kt$@Composable fun AppearanceCard(settings: UserSettings, onUpdate: ((UserSettings) -&gt; UserSettings) -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:BeStrongApp.kt$@Composable fun BeStrongApp(launchRequest: StateFlow&lt;LaunchRequest?&gt;, onLaunchHandled: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:Csv.kt$Csv$fun parse(text: String, delimiter: Char = detectDelimiter(text)): List&lt;List&lt;String&gt;&gt;</ID>
-    <ID>CyclomaticComplexMethod:EditPastWorkout.kt$@Composable fun EditPastSetDialog(set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutSet) -&gt; Unit, onDelete: () -&gt; Unit, onDismiss: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:EditPastWorkout.kt$@Composable fun EditPastSetDialog( set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutSet) -&gt; Unit, onDelete: () -&gt; Unit, onDismiss: () -&gt; Unit, /** 2 con «suma de las dos mancuernas»: se ve y se escribe el total del par, y se guarda el de una. */ weightFactor: Int = 1, )</ID>
     <ID>CyclomaticComplexMethod:ExerciseDetailScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (() -&gt; Unit)?)</ID>
     <ID>CyclomaticComplexMethod:GymProfiles.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) -&gt; Unit, onDelete: () -&gt; Unit, onDismiss: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:HistoryScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -&gt; Unit)?, onWorkoutStarted: () -&gt; Unit)</ID>

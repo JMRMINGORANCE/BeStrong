@@ -311,7 +311,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
         EditPastWorkoutInfoDialog(
             w.name, w.notes, w.startedAtEpochMs, w.durationSeconds() / 60,
             onSave = { n, t, range ->
-                if (range != null) vm.retime(w.copy(name = n, notes = t), range.first, range.second) else vm.editWorkout(w) { it.copy(name = n, notes = t) }
+                if (range != null) vm.retime(w, range.first, range.second, n, t) else vm.editWorkout(w) { it.copy(name = n, notes = t) }
                 editInfo = false
             },
             onDismiss = { editInfo = false },
@@ -326,6 +326,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             EditPastSetDialog(
                 set = set,
                 tracking = we.exercise.tracking,
+                weightFactor = vm.weightFactor(we.exercise),
                 onSave = { s -> vm.editWorkout(w) { WorkoutEditor.updateSet(it, weId, setId) { s } }; editSet = null },
                 onDelete = { vm.editWorkout(w) { WorkoutEditor.removeSet(it, weId, setId) }; editSet = null },
                 onDismiss = { editSet = null },
@@ -405,7 +406,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                         we.sets.forEachIndexed { i, set ->
                             Row(if (editing) Modifier.clickable { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
-                                Text(describeSet(set, we.exercise, unit), Modifier.weight(1f))
+                                Text(describeSet(set, we.exercise, unit, vm.weightFactor(we.exercise)), Modifier.weight(1f))
                                 if (set.estimatedOneRepMax > 0) Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax)), style = MaterialTheme.typography.bodySmall)
                             }
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)

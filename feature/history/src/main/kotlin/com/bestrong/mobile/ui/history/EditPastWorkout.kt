@@ -22,9 +22,17 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 
 /** Corrige una serie de un entreno ya guardado (peso, reps, segundos o metros) o la borra. */
 @Composable
-fun EditPastSetDialog(set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutSet) -> Unit, onDelete: () -> Unit, onDismiss: () -> Unit) {
+fun EditPastSetDialog(
+    set: WorkoutSet,
+    tracking: TrackingType,
+    onSave: (WorkoutSet) -> Unit,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit,
+    /** 2 con «suma de las dos mancuernas»: se ve y se escribe el total del par, y se guarda el de una. */
+    weightFactor: Int = 1,
+) {
     val unit = LocalWeightUnit.current
-    var weight by remember { mutableStateOf(if (set.weightKg == 0.0) "" else unit.format(set.weightKg)) }
+    var weight by remember { mutableStateOf(if (set.weightKg == 0.0) "" else unit.format(set.weightKg * weightFactor)) }
     var reps by remember { mutableStateOf(set.reps.toString()) }
     var seconds by remember { mutableStateOf(set.durationSec.toString()) }
     var meters by remember { mutableStateOf(set.distanceM.toInt().toString()) }
@@ -90,8 +98,8 @@ fun EditPastSetDialog(set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutS
             TextButton(onClick = {
                 val kg = when {
                     !hasWeight || weight.isBlank() -> 0.0
-                    weight.startsWith("-") -> -(unit.parseToKg(weight.drop(1)) ?: 0.0)
-                    else -> unit.parseToKg(weight) ?: set.weightKg
+                    weight.startsWith("-") -> -(unit.parseToKg(weight.drop(1)) ?: 0.0) / weightFactor
+                    else -> unit.parseToKg(weight)?.div(weightFactor) ?: set.weightKg
                 }
                 onSave(
                     set.copy(

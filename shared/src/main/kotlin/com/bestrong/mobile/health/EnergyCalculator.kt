@@ -24,7 +24,8 @@ class EnergyCalculator @Inject constructor(
     suspend fun profile(): BodyProfile {
         val s = settings.settings.value
         val snapshot = runCatching { reader.read() }.getOrNull()
-        val weight = repository.measurements.value.sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg }
+        // De la base de datos: al arrancar la app en frío (entreno llegado del reloj) la lista en memoria aún está vacía
+        val weight = repository.measurementsOnce().sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg }
             ?: snapshot?.weights?.maxByOrNull { it.first }?.second
         return BodyProfile(
             weightKg = weight,

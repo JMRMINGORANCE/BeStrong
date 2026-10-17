@@ -48,9 +48,14 @@ object RpeLoad {
         gym: com.bestrong.core.training.GymProfile?,
         equipment: com.bestrong.core.model.Equipment,
     ): Double {
-        val viaGym = gym?.takeIf { unit == com.bestrong.core.util.WeightUnit.KG }?.nearestLoad(kg, equipment)?.takeIf { kotlin.math.abs(it - kg) > 1e-9 }
+        // ¿Tiene el gimnasio discos o mancuernas para este material? Se prueba con un peso imposible: si lo cambia,
+        // es que redondea (y entonces un peso que ya se puede montar se queda tal cual)
+        val kgGym = gym?.takeIf { unit == com.bestrong.core.util.WeightUnit.KG }
+        val probe = kg + PROBE_KG
+        val viaGym = kgGym?.takeIf { kotlin.math.abs(it.nearestLoad(probe, equipment) - probe) > 1e-9 }?.nearestLoad(kg, equipment)
         val step = unit.fromKg(stepKg)
-        return viaGym ?: if (step <= 0) kg else unit.toKg(kotlin.math.round(unit.fromKg(kg) / step) * step)
+        // Redondeo «a la mitad hacia arriba» (62,5 con paso de 5 → 65, no 60 como el redondeo al par)
+        return viaGym ?: if (step <= 0) kg else unit.toKg(kotlin.math.floor(unit.fromKg(kg) / step + 0.5) * step)
     }
 
     /**
@@ -65,4 +70,7 @@ object RpeLoad {
         val finished = history.filter { it.isFinished }
         return best(finished.filter { it.startedAtEpochMs >= nowEpochMs - RECENT_WEEKS * WEEK_MS }) ?: best(finished)
     }
+
+    /** Peso de prueba que ningún disco ni mancuerna da (para saber si el gimnasio redondea ese material). */
+    private const val PROBE_KG = 0.137
 }

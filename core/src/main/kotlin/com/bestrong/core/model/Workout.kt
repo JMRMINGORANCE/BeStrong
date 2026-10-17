@@ -76,12 +76,15 @@ data class WorkoutSet(
             return if (max <= 0) null else kotlin.math.abs(reps - right).toDouble() / max
         }
 
-    /** 1RM estimado (Epley). Las series de calentamiento no cuentan. */
+    /** Reps que cuentan para récords: en unilaterales, las del lado más flojo. */
+    val recordReps: Int get() = repsRight?.let { minOf(reps, it) } ?: reps
+
+    /** 1RM estimado (Epley). Las series de calentamiento no cuentan; en unilaterales, con el lado más flojo. */
     val estimatedOneRepMax: Double
         get() = when {
-            !countsForRecords || reps <= 0 || weightKg <= 0 -> 0.0
-            reps == 1 -> weightKg
-            else -> weightKg * (1 + reps / 30.0)
+            !countsForRecords || recordReps <= 0 || weightKg <= 0 -> 0.0
+            recordReps == 1 -> weightKg
+            else -> weightKg * (1 + recordReps / 30.0)
         }
 
     /** Volumen (kg × reps). El peso negativo (asistencia) no suma. */

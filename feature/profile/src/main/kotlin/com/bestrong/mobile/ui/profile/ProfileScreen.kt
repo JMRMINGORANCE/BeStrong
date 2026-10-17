@@ -155,7 +155,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             onDismiss = { showReminders = false },
         )
     }
-    LaunchedEffect(Unit) { vm.refreshHealthConnect() }
+    // Cada vez que se vuelve a la pantalla (p. ej. tras cambiar permisos en Health Connect)
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        vm.refreshHealthConnect()
+        onPauseOrDispose {}
+    }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
 
     var tab by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
