@@ -151,6 +151,9 @@ fun ProgramBuilderScreen(
             }
             // Y cuáles: tocar un día lo quita o lo pone (entre 2 y 6)
             item {
+                Text(stringResource(R.string.builder_weekdays_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            item {
                 WeekdayPicker(weekdays) { d ->
                     val next = if (d in weekdays) weekdays - d else (weekdays + d).sorted()
                     if (next.size in 2..6) {
@@ -301,6 +304,9 @@ private fun GeneratedRoutineCard(r: Routine) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(r.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
             MetaPill(pluralStringResource(R.plurals.exercise_count, r.exercises.size, r.exercises.size))
+            // Cuánto dura, más o menos: para ver si encaja en el tiempo elegido
+            val minutes = remember(r) { (com.bestrong.core.session.WorkoutEditor.estimatedRemainingSeconds(r.toWorkout(0)) + 59) / 60 }
+            if (minutes > 0) MetaPill(stringResource(R.string.routine_estimated, minutes), Modifier.padding(start = 6.dp))
         }
         ExerciseThumbStrip(r.exercises.map { it.exercise }, 44.dp, max = 6)
         r.exercises.forEach { re ->

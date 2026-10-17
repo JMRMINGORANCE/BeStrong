@@ -482,6 +482,8 @@ private fun NumberField(
             .padding(vertical = 10.dp)
             .onFocusChanged {
                 if (focused != it.isFocused) onFocus(it.isFocused)
+                // Al salir del campo se ve lo guardado («82,» → «82», «-» → «0»)
+                if (focused && !it.isFocused) text = value
                 focused = it.isFocused
             }
             .semantics { contentDescription = description },

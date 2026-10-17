@@ -87,7 +87,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
+fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain: () -> Unit = {}) {
     val history by vm.history.collectAsStateWithLifecycle()
     val days by vm.trainingDays.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
@@ -156,7 +156,12 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit) {
                             }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
                         }
                         if (history.isEmpty() && partnerWorkouts.isEmpty()) {
-                            EmptyState(Icons.Default.History, stringResource(R.string.history_empty_title), stringResource(R.string.history_empty_body))
+                            EmptyState(
+                                Icons.Default.History,
+                                stringResource(R.string.history_empty_title),
+                                stringResource(R.string.history_empty_body),
+                                action = stringResource(R.string.history_empty_action) to onGoTrain,
+                            )
                             return@Column
                         }
                         // Primero el calendario (lo que más se mira), luego el año y la lista con su buscador

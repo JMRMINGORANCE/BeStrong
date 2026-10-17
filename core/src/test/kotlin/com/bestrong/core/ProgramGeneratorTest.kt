@@ -82,8 +82,15 @@ class ProgramGeneratorTest {
         val plans = ProgramGenerator.schedule(existing, listOf("a", "b", "c"), ProgramGenerator.defaultWeekdays(3), monday, weeks = 2)
         val first = plans.getValue(monday.toEpochDay())
         assertEquals("mine", first.routineFor(java.time.DayOfWeek.MONDAY))
-        assertEquals("b", first.routineFor(java.time.DayOfWeek.WEDNESDAY))
-        assertEquals("a", plans.getValue(monday.plusWeeks(1).toEpochDay()).routineFor(java.time.DayOfWeek.MONDAY))
+        // A, B, C por orden en los días libres
+        assertEquals("a", first.routineFor(java.time.DayOfWeek.WEDNESDAY))
+        assertEquals("b", first.routineFor(java.time.DayOfWeek.FRIDAY))
+        assertEquals("c", plans.getValue(monday.plusWeeks(1).toEpochDay()).routineFor(java.time.DayOfWeek.MONDAY))
+        // Creado un jueves: el lunes y el miércoles ya pasados quedan libres y el viernes empieza por la A
+        val thursday = ProgramGenerator.schedule(emptyMap(), listOf("a", "b", "c"), listOf(1, 3, 5), monday, weeks = 1, from = monday.plusDays(3))
+            .getValue(monday.toEpochDay())
+        assertEquals(null, thursday.routineFor(java.time.DayOfWeek.MONDAY))
+        assertEquals("a", thursday.routineFor(java.time.DayOfWeek.FRIDAY))
         assertEquals(listOf(1, 2, 4, 5), ProgramGenerator.defaultWeekdays(4))
     }
 }

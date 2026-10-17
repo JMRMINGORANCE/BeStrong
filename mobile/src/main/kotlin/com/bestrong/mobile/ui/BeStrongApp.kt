@@ -238,7 +238,11 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         )
                     }
                     composable(TopLevel.HISTORY.route) {
-                        HistoryScreen(hiltViewModel<HistoryViewModel>(), onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } })
+                        HistoryScreen(
+                            hiltViewModel<HistoryViewModel>(),
+                            onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
+                            onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
+                        )
                     }
                     composable(TopLevel.EXERCISES.route) { entry ->
                         val exercisesVm = hiltViewModel<ExercisesViewModel>()

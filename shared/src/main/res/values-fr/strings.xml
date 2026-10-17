@@ -1261,4 +1261,10 @@
     <string name="measurements_empty_title">Commence à suivre tes progrès</string>
     <string name="measurements_empty_body">Poids, masse grasse, tour de taille, poitrine, bras… Avec deux mesures, tu verras ton évolution en graphiques.</string>
     <string name="builder_level">Quel est ton niveau ?</string>
+    <string name="search_no_results">Aucun résultat</string>
+    <string name="search_no_results_for">Rien pour « %1$s »</string>
+    <string name="search_clear_filters">Effacer les filtres</string>
+    <string name="search_create_named">Créer « %1$s »</string>
+    <string name="history_empty_action">Commencer à s\'entraîner</string>
+    <string name="builder_weekdays_hint">Touche les jours où tu t\'entraîneras (2 à 6) : les routines iront dans ton calendrier.</string>
 </resources>

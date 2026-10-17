@@ -239,6 +239,17 @@ fun ExerciseSearchList(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // Nada encontrado: quitar filtros o crear el ejercicio con lo buscado
+            if (results.isEmpty()) {
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                    NoResults(
+                        query = filter.query.trim(),
+                        filtered = filter.copy(query = "", sort = ExerciseSort.RECENT) != ExerciseFilter(),
+                        onClearFilters = { vm.filter.value = ExerciseFilter(query = filter.query, sort = filter.sort) },
+                        onCreate = { creating = true },
+                    )
+                }
+            }
             items(results.size, key = { results[it].id }) { i ->
                 val ex = results[i]
                 val times = usage[ex.id]
@@ -267,6 +278,7 @@ fun ExerciseSearchList(
     if (creating) {
         ExerciseFormDialog(
             initial = null,
+            presetName = filter.query.trim(),
             onDismiss = { creating = false },
             onSave = { draft ->
                 val ex = vm.createCustom(draft)
@@ -332,6 +344,31 @@ private fun ExerciseCard(
     }
 }
 
+/** Búsqueda sin resultados: qué pasó y las dos salidas (quitar filtros, crear el ejercicio). */
+@Composable
+private fun NoResults(query: String, filtered: Boolean, onClearFilters: () -> Unit, onCreate: () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().padding(vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(Icons.Default.Search, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            if (query.isNotEmpty()) stringResource(R.string.search_no_results_for, query) else stringResource(R.string.search_no_results),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+        if (filtered) androidx.compose.material3.OutlinedButton(onClick = onClearFilters) { Text(stringResource(R.string.search_clear_filters)) }
+        if (query.isNotEmpty()) {
+            Button(onClick = onCreate) {
+                Icon(Icons.Default.Add, null)
+                Text(stringResource(R.string.search_create_named, query), Modifier.padding(start = 6.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
+    }
+}
+
 @Composable
 private fun SortChip(selected: ExerciseSort, onSelect: (ExerciseSort) -> Unit) {
     var open by remember { mutableStateOf(false) }
@@ -370,8 +407,8 @@ private fun <T> EnumFilter(label: String, values: List<T>, selected: T?, name: @
 
 /** Crear (initial = null) o editar un ejercicio personalizado; devuelve un borrador sin id definitivo. */
 @Composable
-fun ExerciseFormDialog(initial: Exercise?, onDismiss: () -> Unit, onSave: (Exercise) -> Unit) {
-    var name by rememberSaveable { mutableStateOf(initial?.name.orEmpty()) }
+fun ExerciseFormDialog(initial: Exercise?, onDismiss: () -> Unit, presetName: String = "", onSave: (Exercise) -> Unit) {
+    var name by rememberSaveable { mutableStateOf(initial?.name ?: presetName) }
     var muscle by rememberSaveable { mutableStateOf(initial?.primaryMuscle ?: MuscleGroup.CHEST) }
     var secondary by rememberSaveable { mutableStateOf(initial?.secondaryMuscles.orEmpty()) }
     var equipment by rememberSaveable { mutableStateOf(initial?.equipment ?: Equipment.BARBELL) }

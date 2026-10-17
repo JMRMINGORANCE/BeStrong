@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -50,6 +53,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -88,7 +93,9 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
         onDismissDelete = { confirmDelete = false },
         onDismissRest = { restFor = null },
     )
+    // El teclado también cuenta como borde: así las series de abajo pueden subir por encima de él
     Scaffold(
+        contentWindowInsets = androidx.compose.material3.ScaffoldDefaults.contentWindowInsets.union(WindowInsets.ime),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(if (isNew) R.string.routine_new else R.string.routine_edit)) },
@@ -130,7 +137,12 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                     )
                     OutlinedTextField(routine.notes, vm::setNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.fillMaxWidth())
                     // Lo que se toca poco (emoji, carpeta, gimnasio y los ajustes para toda la rutina), plegado
-                    com.bestrong.mobile.ui.components.Panel(onClick = { moreOptions = !moreOptions }, contentPadding = 14.dp) {
+                    val moreState = stringResource(if (moreOptions) R.string.folder_expanded else R.string.folder_collapsed)
+                    com.bestrong.mobile.ui.components.Panel(
+                        onClick = { moreOptions = !moreOptions },
+                        contentPadding = 14.dp,
+                        modifier = Modifier.semantics { stateDescription = moreState },
+                    ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Tune, null, tint = MaterialTheme.colorScheme.primary)
                             Text(stringResource(R.string.routine_more_options), Modifier.weight(1f).padding(start = 12.dp), fontWeight = FontWeight.Bold)
@@ -395,7 +407,7 @@ private fun RoutineExerciseCard(
     tempoVersion: Int,
     onEditRest: (String) -> Unit,
 ) {
-    var extras by androidx.compose.runtime.saveable.rememberSaveable(re.id) { mutableStateOf(re.notes.isNotBlank() || !re.tempo.isNullOrBlank() || re.targetRpe != null) }
+    var extras by androidx.compose.runtime.saveable.rememberSaveable(re.id, tempoVersion) { mutableStateOf(re.notes.isNotBlank() || !re.tempo.isNullOrBlank() || re.targetRpe != null) }
     com.bestrong.mobile.ui.components.Panel(content, contentPadding = 0.dp) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -445,7 +445,7 @@ class HomeViewModel @Inject constructor(
         val folder = generateSequence(2) { it + 1 }.map { "${program.name} $it" }.let { more -> if (program.name !in folders) program.name else more.first { it !in folders } }
         repo.addRoutines(program.routines.map { it.copy(folder = folder) })
         val monday = LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-        planning.update { st -> st.copy(weekPlans = com.bestrong.core.training.ProgramGenerator.schedule(st.weekPlans, program.routines.map { it.id }, weekdays, monday)) }
+        planning.update { st -> st.copy(weekPlans = com.bestrong.core.training.ProgramGenerator.schedule(st.weekPlans, program.routines.map { it.id }, weekdays, monday, from = LocalDate.now())) }
         // El objetivo de la semana pasa a ser los días del programa, y se recuerda el objetivo elegido
         settingsStore.update { it.copy(weeklyGoal = program.routines.size.coerceIn(1, 7), trainingGoal = goal) }
         _messages.tryEmit(context.getString(R.string.msg_program_added, folder, program.routines.size))

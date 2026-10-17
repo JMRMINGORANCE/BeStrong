@@ -1261,4 +1261,10 @@
     <string name="measurements_empty_title">Start tracking your progress</string>
     <string name="measurements_empty_body">Weight, body fat, waist, chest, arms… With two entries you will see your trend in charts.</string>
     <string name="builder_level">What is your level?</string>
+    <string name="search_no_results">No results</string>
+    <string name="search_no_results_for">Nothing for “%1$s”</string>
+    <string name="search_clear_filters">Clear filters</string>
+    <string name="search_create_named">Create “%1$s”</string>
+    <string name="history_empty_action">Start training</string>
+    <string name="builder_weekdays_hint">Tap the days you will train (2 to 6): the routines go to your calendar.</string>
 </resources>

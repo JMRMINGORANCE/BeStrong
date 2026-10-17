@@ -128,13 +128,16 @@ class RestTimerController @Inject constructor(
                     countdown()
                 }
                 delay((r.endsAtEpochMs - System.currentTimeMillis()).coerceAtLeast(0))
-                _rest.value = null
+                // Solo se quita el descanso de este temporizador: si justo empezó otro (serie marcada a la vez en el
+                // móvil o el reloj), ese sigue y aquí no se avisa de nada
+                if (generation.get() != gen || !_rest.compareAndSet(r, null)) return@launch
                 persist(null)
                 if (vibrateEnabled()) vibrate()
                 announcer.say(context.getString(com.bestrong.mobile.shared.R.string.tts_go))
             } finally {
                 if (generation.get() == gen) releaseWakeLock()
             }
+            if (generation.get() != gen) return@launch
             // Si pasa un buen rato sin empezar la serie, un toque suave de recordatorio
             val ended = System.currentTimeMillis()
             _restEndedAt.value = ended

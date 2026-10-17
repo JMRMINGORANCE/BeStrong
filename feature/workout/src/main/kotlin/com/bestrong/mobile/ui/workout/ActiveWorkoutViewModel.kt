@@ -668,7 +668,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         val partner = partnerMode.value
         viewModelScope.launch {
             // Se decide con el estado real del cambio (bajo el cerrojo), no con una copia que puede ir atrasada
-            val (before, updated) = update { WorkoutEditor.toggleSetCompleted(it, weId, setId) } ?: return@launch
+            val (before, updated) = update(partner) { WorkoutEditor.toggleSetCompleted(it, weId, setId) } ?: return@launch
             val index = updated.exercises.indexOfFirst { it.id == weId }
             fun done(w: Workout) = w.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId }?.completed == true
             if (index >= 0 && !done(before) && done(updated)) {

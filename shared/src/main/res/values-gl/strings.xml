@@ -1261,4 +1261,10 @@
     <string name="measurements_empty_title">Comeza a medir o teu progreso</string>
     <string name="measurements_empty_body">Peso, graxa corporal, cintura, peito, brazos… Con dúas medidas verás a túa evolución en gráficas.</string>
     <string name="builder_level">Que nivel tes?</string>
+    <string name="search_no_results">Sen resultados</string>
+    <string name="search_no_results_for">Nada para «%1$s»</string>
+    <string name="search_clear_filters">Quitar filtros</string>
+    <string name="search_create_named">Crear «%1$s»</string>
+    <string name="history_empty_action">Comezar a adestrar</string>
+    <string name="builder_weekdays_hint">Toca os días que adestrarás (de 2 a 6): as rutinas irán ao teu calendario.</string>
 </resources>

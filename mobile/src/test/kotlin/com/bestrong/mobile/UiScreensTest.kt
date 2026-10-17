@@ -109,4 +109,25 @@ class UiScreensTest {
         captureScreenRoboImage("build/outputs/roborazzi/workout_summary.png")
         assertTrue(true)
     }
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-night-xxhdpi")
+    fun builder_dark() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNodeWithText("Programas").performClick()
+        settle()
+        shot("builder_dark")
+    }
+
+    @Test
+    @Config(qualifiers = "es-w411dp-h891dp-night-xxhdpi")
+    fun routine_editor_dark() {
+        compose.mainClock.autoAdvance = false
+        settle()
+        compose.onNodeWithText("Nueva").performClick()
+        settle()
+        pickBench()
+        shot("routine_editor_dark")
+    }
 }

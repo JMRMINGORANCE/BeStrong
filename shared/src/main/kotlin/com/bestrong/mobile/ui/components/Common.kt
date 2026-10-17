@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -207,7 +209,15 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
  * explicación.
  */
 @Composable
-fun EmptyState(icon: ImageVector, title: String, subtitle: String, modifier: Modifier = Modifier, orbit: List<ImageVector> = emptyList()) {
+fun EmptyState(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier,
+    orbit: List<ImageVector> = emptyList(),
+    /** Botón para salir del vacío («Empezar a entrenar»). */
+    action: Pair<String, () -> Unit>? = null,
+) {
     Box(modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             com.bestrong.mobile.ui.help.BrandIllustration(icon, orbit, MaterialTheme.colorScheme.primary, Modifier.size(200.dp), animated = false)
@@ -219,6 +229,11 @@ fun EmptyState(icon: ImageVector, title: String, subtitle: String, modifier: Mod
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
+            action?.let { (label, onClick) ->
+                androidx.compose.material3.Button(onClick = onClick, modifier = Modifier.padding(top = 8.dp).height(52.dp)) {
+                    Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                }
+            }
         }
     }
 }
@@ -236,7 +251,16 @@ fun SearchPill(
         value = value,
         onValueChange = onValueChange,
         leadingIcon = { androidx.compose.material3.Icon(Icons.Default.Search, null) },
-        trailingIcon = trailing,
+        // Con texto, una X para borrarlo; sin texto, lo que se pida (p. ej. el micrófono)
+        trailingIcon = if (value.isNotEmpty()) {
+            {
+                androidx.compose.material3.IconButton(onClick = { onValueChange("") }) {
+                    androidx.compose.material3.Icon(Icons.Default.Close, androidx.compose.ui.res.stringResource(com.bestrong.mobile.shared.R.string.routine_search_clear))
+                }
+            }
+        } else {
+            trailing
+        },
         placeholder = { Text(placeholder) },
         singleLine = true,
         shape = androidx.compose.foundation.shape.CircleShape,

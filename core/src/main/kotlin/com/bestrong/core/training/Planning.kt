@@ -329,8 +329,9 @@ object ProgramGenerator {
     }
 
     /**
-     * Pone las rutinas (por orden) en los días elegidos de [weeks] semanas desde [firstMonday], sin tocar los días
-     * que ya tengan algo planificado.
+     * Pone las rutinas (por orden, A, B, C…) en los días elegidos de [weeks] semanas desde [firstMonday], empezando por
+     * [from] (los días ya pasados de esta semana no se planifican: saldrían como sesiones «saltadas») y sin tocar los
+     * días que ya tengan algo.
      */
     fun schedule(
         plans: Map<Long, WeekPlan>,
@@ -338,15 +339,21 @@ object ProgramGenerator {
         weekdays: List<Int>,
         firstMonday: LocalDate,
         weeks: Int = 12,
+        from: LocalDate = firstMonday,
     ): Map<Long, WeekPlan> {
         if (routineIds.isEmpty() || weekdays.isEmpty()) return plans
         val out = plans.toMutableMap()
+        var next = 0
         repeat(weeks) { w ->
-            val key = firstMonday.plusWeeks(w.toLong()).toEpochDay()
+            val monday = firstMonday.plusWeeks(w.toLong())
+            val key = monday.toEpochDay()
             var plan = out[key] ?: WeekPlan()
-            weekdays.sorted().forEachIndexed { i, d ->
+            weekdays.sorted().forEach { d ->
                 val day = DayOfWeek.of(d)
-                if (plan.routineFor(day) == null) plan = plan.assign(day, routineIds[i % routineIds.size])
+                if (!monday.plusDays(d - 1L).isBefore(from) && plan.routineFor(day) == null) {
+                    plan = plan.assign(day, routineIds[next % routineIds.size])
+                    next++
+                }
             }
             out[key] = plan
         }

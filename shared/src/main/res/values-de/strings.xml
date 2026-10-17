@@ -1261,4 +1261,10 @@
     <string name="measurements_empty_title">Fang an, deinen Fortschritt zu messen</string>
     <string name="measurements_empty_body">Gewicht, Körperfett, Taille, Brust, Arme… Ab zwei Einträgen siehst du deinen Verlauf in Diagrammen.</string>
     <string name="builder_level">Wie ist dein Niveau?</string>
+    <string name="search_no_results">Keine Ergebnisse</string>
+    <string name="search_no_results_for">Nichts für „%1$s“</string>
+    <string name="search_clear_filters">Filter entfernen</string>
+    <string name="search_create_named">„%1$s“ erstellen</string>
+    <string name="history_empty_action">Training starten</string>
+    <string name="builder_weekdays_hint">Tippe auf deine Trainingstage (2 bis 6): die Routinen kommen in deinen Kalender.</string>
 </resources>

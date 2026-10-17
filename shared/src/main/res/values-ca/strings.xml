@@ -1261,4 +1261,10 @@
     <string name="measurements_empty_title">Comença a mesurar el teu progrés</string>
     <string name="measurements_empty_body">Pes, greix corporal, cintura, pit, braços… Amb dues mesures veuràs la teva evolució en gràfiques.</string>
     <string name="builder_level">Quin nivell tens?</string>
+    <string name="search_no_results">Sense resultats</string>
+    <string name="search_no_results_for">Res per a «%1$s»</string>
+    <string name="search_clear_filters">Treure filtres</string>
+    <string name="search_create_named">Crear «%1$s»</string>
+    <string name="history_empty_action">Començar a entrenar</string>
+    <string name="builder_weekdays_hint">Toca els dies que entrenaràs (de 2 a 6): les rutines aniran al teu calendari.</string>
 </resources>
