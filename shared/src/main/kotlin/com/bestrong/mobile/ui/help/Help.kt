@@ -477,20 +477,18 @@ fun TipCard(id: String, @StringRes text: Int, modifier: Modifier = Modifier) {
         shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
     ) {
-        Row(Modifier.padding(start = 14.dp, top = 12.dp, bottom = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(start = 14.dp, end = 4.dp, top = 12.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(Icons.Default.Lightbulb, null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(20.dp))
             }
-            Text(
-                stringResource(text),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
-            )
-            TextButton(onClick = { tips.onDismiss(id) }) { Text(stringResource(R.string.got_it)) }
+            // El botón debajo: al lado estrechaba el consejo a una palabra por línea
+            Column(Modifier.weight(1f).padding(horizontal = 8.dp)) {
+                Text(stringResource(text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                TextButton(onClick = { tips.onDismiss(id) }, modifier = Modifier.align(Alignment.End)) { Text(stringResource(R.string.got_it)) }
+            }
         }
     }
 }

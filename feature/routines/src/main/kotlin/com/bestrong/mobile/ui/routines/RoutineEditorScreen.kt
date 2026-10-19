@@ -420,7 +420,7 @@ private fun RoutineExerciseCard(
                     Text(
                         stringResource(R.string.rest_value, formatDuration(re.restSeconds.toLong())),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.minimumInteractiveComponentSize().clickable(onClickLabel = stringResource(R.string.rest)) { onEditRest(re.id) },
                     )
                 }
@@ -465,7 +465,7 @@ private fun RoutineExerciseCard(
 @Composable
 private fun RoutineSetRow(vm: RoutineEditorViewModel, re: com.bestrong.core.model.RoutineExercise, i: Int, set: com.bestrong.core.model.RoutineSet) {
     val unit = LocalWeightUnit.current
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(Modifier.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         // Tocar el número cambia el tipo de serie (C calentamiento, D drop, F al fallo)
         Text(
             set.type.short.ifEmpty { "${i + 1}" },
@@ -486,6 +486,6 @@ private fun RoutineSetRow(vm: RoutineEditorViewModel, re: com.bestrong.core.mode
             }
             SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
         }
-        IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set)) }
+        IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
 }

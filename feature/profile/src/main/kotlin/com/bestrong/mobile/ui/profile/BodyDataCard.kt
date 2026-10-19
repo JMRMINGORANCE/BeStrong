@@ -58,7 +58,7 @@ fun BodyDataCard(settings: UserSettings, onUpdate: ((UserSettings) -> UserSettin
                     label = { Text(stringResource(R.string.birth_year), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1.4f),
                 )
                 OutlinedTextField(
                     value = height,

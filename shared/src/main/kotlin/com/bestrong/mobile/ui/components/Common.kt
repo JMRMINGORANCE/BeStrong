@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -210,15 +211,24 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
     ) {
         Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
             Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            // Con letra grande la etiqueta encoge antes de cortarse («Duraci…»)
+            AutoSizeLabel(label)
         }
     }
+}
+
+/** Etiqueta de una línea que reduce la letra para caber entera (con letra del sistema grande). */
+@Composable
+fun AutoSizeLabel(label: String, modifier: Modifier = Modifier, textAlign: androidx.compose.ui.text.style.TextAlign? = null) {
+    val style = MaterialTheme.typography.labelSmall
+    androidx.compose.foundation.text.BasicText(
+        label,
+        modifier = modifier,
+        style = style.copy(color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = textAlign ?: style.textAlign),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 7.sp, maxFontSize = style.fontSize),
+    )
 }
 
 /**

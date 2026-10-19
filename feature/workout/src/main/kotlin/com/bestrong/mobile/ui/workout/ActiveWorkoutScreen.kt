@@ -272,7 +272,12 @@ fun ActiveWorkoutScreen(
                             Icon(Icons.Default.Pause, stringResource(R.string.workout_pause))
                         }
                     }
-                    if (!oneHanded) Button(onClick = { confirmFinish = true }) { Text(stringResource(R.string.workout_finish)) }
+                    // Botón compacto: con el relleno por defecto el nombre del entreno se cortaba
+                    if (!oneHanded) {
+                        Button(onClick = { confirmFinish = true }, contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)) {
+                            Text(stringResource(R.string.workout_finish), maxLines = 1)
+                        }
+                    }
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })

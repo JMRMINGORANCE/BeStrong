@@ -532,7 +532,9 @@ private fun GymChip(vm: HomeViewModel) {
     if (settings.gyms.size < 2) return
     var open by remember { mutableStateOf(false) }
     TextButton(onClick = { open = true }, modifier = Modifier.widthIn(max = GYM_CHIP_MAX_WIDTH)) {
-        Text("🏋️ " + settings.activeGym.name, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+        // Con letra grande sobra el emoji: se deja sitio al nombre
+        val big = androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.3f
+        Text((if (big) "" else "🏋️ ") + settings.activeGym.name, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
     }
     if (open) com.bestrong.mobile.ui.components.GymPickerDialog(settings.gyms, settings.activeGym.id, vm::setActiveGym) { open = false }
 }

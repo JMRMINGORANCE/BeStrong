@@ -75,7 +75,7 @@ fun SetHeader(tracking: TrackingType, dumbbell: Boolean = false, dumbbellTotal: 
         (if (dumbbell) " " + stringResource(if (dumbbellTotal) R.string.col_total else R.string.col_each) else "")
     Row(Modifier.fillMaxWidth().padding(horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         val style = MaterialTheme.typography.labelSmall
-        Text(stringResource(R.string.set_col_set), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(0.6f), textAlign = TextAlign.Center)
+        com.bestrong.mobile.ui.components.AutoSizeLabel(stringResource(R.string.set_col_set), Modifier.weight(0.6f), TextAlign.Center)
         if (LocalSetColumns.current.previous) {
             Text(stringResource(R.string.set_col_previous), style = style, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1.4f), textAlign = TextAlign.Center)
         }
@@ -500,7 +500,7 @@ private fun NumberField(
                     Text(
                         "0",
                         style = TextStyle(fontSize = MaterialTheme.typography.bodyLarge.fontSize),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
                 }
