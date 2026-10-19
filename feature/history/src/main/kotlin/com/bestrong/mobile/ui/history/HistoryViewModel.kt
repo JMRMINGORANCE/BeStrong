@@ -101,7 +101,15 @@ class HistoryViewModel @Inject constructor(
     /** Texto de búsqueda ya normalizado por entreno (se rehace solo si el entreno cambia). */
     private val searchCache = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, String>>()
 
+    /** Idioma con el que se llenó la caché (los nombres de ejercicio cambian con él). */
+    @Volatile private var searchCacheLanguage: String? = null
+
     private fun searchTextOf(w: Workout): String {
+        val lang = context.resources.configuration.locales[0].language
+        if (lang != searchCacheLanguage) {
+            searchCache.clear()
+            searchCacheLanguage = lang
+        }
         searchCache[w.id]?.takeIf { it.first == w.updatedAtEpochMs }?.let { return it.second }
         return WorkoutStats.searchText(w) { it.displayName(context) }.also { searchCache[w.id] = w.updatedAtEpochMs to it }
     }

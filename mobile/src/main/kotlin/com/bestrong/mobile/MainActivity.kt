@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.withResumed
 import com.bestrong.core.io.RoutineLink
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
@@ -70,6 +71,9 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             lifecycleScope.launch {
                 repository.activeWorkout.first { it != null }
+                // Solo con la app delante: un entreno empezado en el reloj con la app en segundo plano no abre el diálogo
+                // encima de otra app (ni se pierde la pregunta): espera a que se vuelva a ella
+                lifecycle.withResumed { }
                 val granted = androidx.core.content.ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) ==
                     android.content.pm.PackageManager.PERMISSION_GRANTED
                 if (!granted) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
