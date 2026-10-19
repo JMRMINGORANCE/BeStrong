@@ -43,6 +43,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 /** Widget: racha, entrenos de la semana, "Entrenar" y dos rutinas: la planificada para hoy y la que más tiempo lleva sin hacerse. */
 class BeStrongWidget : GlanceAppWidget() {
@@ -62,7 +63,8 @@ class BeStrongWidget : GlanceAppWidget() {
                     entry.repository().routines,
                     entry.planning().state,
                     entry.settings().settings,
-                ) { _, _, _, _ -> }.collect { value = snapshot(context, entry) }
+                    dayTicks(),
+                ) { _, _, _, _, _ -> }.collect { value = snapshot(context, entry) }
             }
             GlanceTheme { Content(context, data.week, data.streak, data.routines, data.cardio) }
         }
@@ -163,3 +165,13 @@ interface WidgetEntryPoint {
 class BeStrongWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = BeStrongWidget()
 }
+
+/** Emite la fecha de hoy y vuelve a emitir al cambiar de día (la semana, la racha y lo planificado dependen de ella). */
+internal fun dayTicks() = kotlinx.coroutines.flow.flow {
+    while (true) {
+        emit(java.time.LocalDate.now())
+        kotlinx.coroutines.delay(DAY_TICK_MS)
+    }
+}.distinctUntilChanged()
+
+private const val DAY_TICK_MS = 60_000L

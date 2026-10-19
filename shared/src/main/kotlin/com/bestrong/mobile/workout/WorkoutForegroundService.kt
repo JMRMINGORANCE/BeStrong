@@ -161,9 +161,11 @@ class WorkoutForegroundService : LifecycleService() {
             // El cronómetro descuenta las pausas (como la app) y en pausa se queda quieto
             b.setContentTitle(w.name)
                 .setContentText(progressText(w))
-                .setWhen(System.currentTimeMillis() - w.durationSeconds() * 1000)
+                // Base fija (no salta al refrescar); en pausa, el tiempo congelado va en el texto
+                .setWhen(w.startedAtEpochMs + w.pausedTotalMs)
                 .setUsesChronometer(!w.isPaused)
                 .setShowWhen(!w.isPaused)
+                .apply { if (w.isPaused) setSubText(com.bestrong.core.util.formatDuration(w.durationSeconds())) }
                 .setChronometerCountDown(false)
                 // Texto corto del chip (en descanso se muestra la cuenta atrás)
                 .setShortCriticalText("${w.completedSetCount}/${w.totalSetCount}")

@@ -177,7 +177,9 @@ object Progression {
         if (points.size < sessions + 1) return false
         val earlier = points.dropLast(sessions)
         val before = earlier.maxOf { it.bestOneRepMax }
-        val heaviest = earlier.maxOf { it.heaviestWeight }
+        // La sesión justo antes de la ventana (no el máximo de siempre: un bloque pesado de hace meses no puede
+        // hacer que todo lo de ahora parezca descarga)
+        val heaviest = earlier.last().heaviestWeight
         val window = points.takeLast(sessions)
         // Una sesión claramente más ligera en la ventana es una descarga (o un reinicio): aún no se puede juzgar,
         // y así la descarga no se pide una y otra vez. Sin carga (1RM 0) no hay forma de medir el estancamiento.

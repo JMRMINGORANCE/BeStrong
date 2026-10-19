@@ -184,7 +184,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             }
             if (tab == 0) {
                 // Sin entrenos: un solo aviso con su botón (no cuatro ceros y varias gráficas vacías)
-                if (stats.totalWorkouts == 0) {
+                // Mientras se calculan (un instante) no se enseña ni el aviso de vacío ni las gráficas
+                if (stats.loaded && stats.totalWorkouts == 0) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         com.bestrong.mobile.ui.components.EmptyState(
                             Icons.Default.FitnessCenter,
@@ -194,7 +195,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                             action = stringResource(R.string.history_empty_action) to onGoTrain,
                         )
                     }
-                } else {
+                } else if (stats.loaded) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         // 4 en fila en el Fold desplegado; 2 × 2 en la pantalla exterior
                         BoxWithConstraints {

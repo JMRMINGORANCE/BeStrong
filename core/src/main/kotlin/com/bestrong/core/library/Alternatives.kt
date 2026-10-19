@@ -41,13 +41,10 @@ object Alternatives {
                 val warm = s.type == com.bestrong.core.model.SetType.WARMUP
                 val pool = if (warm) prevWarm else prevWork
                 val i = if (warm) warmIndex++ else workIndex++
-                val p = pool.getOrNull(i) ?: pool.lastOrNull()
+                // Sin calentamientos (o sin efectivas) la otra vez: se usa lo que haya del ejercicio nuevo
+                val p = pool.getOrNull(i) ?: pool.lastOrNull() ?: previousOfNew.last()
                 // Las reps planeadas eran del ejercicio de antes: ya no sirven para comparar
-                when {
-                    s.completed -> s
-                    p == null -> s.copy(targetReps = null)
-                    else -> s.copy(weightKg = p.weightKg, reps = p.reps, durationSec = p.durationSec, targetReps = null)
-                }
+                if (s.completed) s else s.copy(weightKg = p.weightKg, reps = p.reps, durationSec = p.durationSec, targetReps = null)
             }
         }
         val ff = factor(from.equipment)

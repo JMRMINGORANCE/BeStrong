@@ -52,7 +52,7 @@ class MuscleWidget : GlanceAppWidget() {
         provideContent {
             // Se recalcula al cambiar el historial o el objetivo mientras la sesión del widget sigue viva
             val data by androidx.compose.runtime.produceState(first) {
-                kotlinx.coroutines.flow.combine(entry.repository().history, entry.settings().settings) { _, _ -> }
+                kotlinx.coroutines.flow.combine(entry.repository().history, entry.settings().settings, dayTicks()) { _, _, _ -> }
                     .collect { value = rows(entry) }
             }
             GlanceTheme { Content(context, data.first, data.second) }

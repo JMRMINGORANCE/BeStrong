@@ -58,6 +58,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 data class ProfileStats(
+    /** Ya calculadas (hasta entonces no se enseña «aún no hay entrenos», que sería un parpadeo). */
+    val loaded: Boolean = false,
     val totalWorkouts: Int = 0,
     val totalVolume: Double = 0.0,
     val totalDurationSec: Long = 0,
@@ -137,6 +139,7 @@ class ProfileViewModel @Inject constructor(
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         ProfileStats(
+            loaded = true,
             totalWorkouts = history.size,
             totalVolume = history.sumOf { it.totalVolume },
             totalDurationSec = history.sumOf { it.durationSeconds() },

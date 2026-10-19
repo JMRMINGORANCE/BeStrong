@@ -155,7 +155,8 @@ object WorkoutEditor {
                 exercises = exercises.toMutableList().apply { add(index.coerceAtMost(size), we) }
             }
             // Lo recuperado deja de estar borrado (si no, la fusión con el reloj lo volvería a quitar)
-            val restored = removedExercises.map { it.value.id } + removedSets.map { it.third.id }
+            // (también las series de un ejercicio recuperado entero, que pudieron quedar marcadas antes al recortar)
+            val restored = removedExercises.flatMap { listOf(it.value.id) + it.value.sets.map { s -> s.id } } + removedSets.map { it.third.id }
             w.copy(exercises = exercises, deletedIds = w.deletedIds - restored.toSet())
         }
     }
