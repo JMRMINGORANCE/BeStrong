@@ -67,7 +67,7 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise, afterImage:
             com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                 // La animación que va en la app (sin conexión); si no la hay, la de internet
                 val thumb = remember(exercise.id) { com.bestrong.mobile.ui.components.ExerciseImageIndex.thumb(context, exercise.id) }
-                androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().height(220.dp).background(androidx.compose.ui.graphics.Color.White)) {
+                androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().height(220.dp).background(com.bestrong.mobile.ui.components.exerciseImageBackground()).then(com.bestrong.mobile.ui.components.exerciseImageDim())) {
                     AsyncImage(
                         // La de la app, sin fundido (llega al instante)
                         model = coil.request.ImageRequest.Builder(context).data(thumb ?: img.url).crossfade(thumb == null).build(),

@@ -73,7 +73,8 @@ fun ScreenBackdrop(
     androidx.compose.foundation.layout.Box(
         modifier.fillMaxSize()
             .background(LocalScreenColor.current)
-            .background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to glow, 0.45f to Color.Transparent)),
+            // Cola suave (sin cambio brusco de pendiente: se veía una línea a media pantalla)
+            .background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to glow, 0.18f to glow.copy(alpha = glow.alpha * 0.55f), 0.32f to glow.copy(alpha = glow.alpha * 0.2f), 0.5f to Color.Transparent)),
     ) { content() }
 }
 val LocalAppearance = staticCompositionLocalOf { Appearance() }

@@ -1125,8 +1125,14 @@ fun WorkoutSummaryDialog(
                 // Los datos con el color normal del texto (el diálogo los atenuaría)
                 androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f))
-                        StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
+                        // Un tono más que el diálogo (si no, las tarjetas se funden con él); sin peso, las series en vez de «0 kg»
+                        val tile = MaterialTheme.colorScheme.surfaceContainerHighest
+                        StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f), container = tile)
+                        if (w.totalVolume > 0) {
+                            StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f), container = tile)
+                        } else {
+                            StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}", Modifier.weight(1f), container = tile)
+                        }
                     }
                 }
                 // «1 serie · 1 ejercicio»: con plurales
@@ -1148,6 +1154,13 @@ fun WorkoutSummaryDialog(
                 }
                 summary.weeklyGoalReached?.let { goal ->
                     Text(stringResource(R.string.weekly_goal_reached, goal), fontWeight = FontWeight.Bold, color = statusColors.good)
+                }
+                // Los récords arriba, antes de la valoración: es lo primero que se quiere ver
+                if (summary.records.isNotEmpty()) {
+                    Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
+                    summary.records.forEach { pr ->
+                        Text(stringResource(R.string.record_line, pr.exerciseName, pr.type.label(), pr.type.formatValue(pr.value, unit)), style = MaterialTheme.typography.bodySmall)
+                    }
                 }
                 // Frente a la última vez que hiciste cada ejercicio
                 SummaryComparisons(summary)
@@ -1180,12 +1193,6 @@ fun WorkoutSummaryDialog(
                     }
                 }
                 SessionRatingPicker(onRate)
-                if (summary.records.isNotEmpty()) {
-                    Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
-                    summary.records.forEach { pr ->
-                        Text(stringResource(R.string.record_line, pr.exerciseName, pr.type.label(), pr.type.formatValue(pr.value, unit)), style = MaterialTheme.typography.bodySmall)
-                    }
-                }
                 OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Default.Share, null)
                     Text(stringResource(R.string.share_workout), Modifier.padding(start = 8.dp))

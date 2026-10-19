@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -324,7 +325,7 @@ private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatNam
 @Composable
 private fun NoRoutines(onPrograms: () -> Unit, onNew: () -> Unit) {
     com.bestrong.mobile.ui.components.Panel(contentPadding = 24.dp) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth().wrapContentWidth().widthIn(max = 480.dp)) {
             com.bestrong.mobile.ui.help.BrandIllustration(
                 Icons.Default.CalendarMonth,
                 listOf(Icons.Default.Repeat, Icons.Default.Star, Icons.Default.Today),

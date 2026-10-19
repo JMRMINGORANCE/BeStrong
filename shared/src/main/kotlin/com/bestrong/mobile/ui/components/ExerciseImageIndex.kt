@@ -26,7 +26,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -123,7 +125,7 @@ fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Mod
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 onSuccess = { loaded = true },
-                modifier = Modifier.size(size).then(if (loaded) Modifier.background(androidx.compose.ui.graphics.Color.White) else Modifier),
+                modifier = Modifier.size(size).then(if (loaded) Modifier.background(exerciseImageBackground()).then(exerciseImageDim()) else Modifier),
             )
         }
     }
@@ -133,7 +135,7 @@ fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Mod
             title = { Text(exercise.displayName()) },
             text = {
                 // La animación en grande, para ver la técnica (la de la app no necesita conexión)
-                Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(16.dp)).background(androidx.compose.ui.graphics.Color.White)) {
+                Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(16.dp)).background(exerciseImageBackground()).then(exerciseImageDim())) {
                     AsyncImage(
                         model = ImageRequest.Builder(context).data(thumb ?: model).crossfade(thumb == null).build(),
                         contentDescription = stringResource(R.string.exercise_image_desc, exercise.displayName()),
@@ -187,11 +189,11 @@ fun ExerciseImage(exercise: Exercise, modifier: Modifier = Modifier) {
     Box(
         modifier.background(
             if (loaded) {
-                androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.White)
+                androidx.compose.ui.graphics.SolidColor(exerciseImageBackground())
             } else {
                 Brush.linearGradient(listOf(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainerHighest))
             },
-        ),
+        ).then(if (loaded) exerciseImageDim() else Modifier),
         contentAlignment = Alignment.Center,
     ) {
         if (!loaded) Icon(Icons.Default.FitnessCenter, null, Modifier.size(40.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
@@ -206,3 +208,20 @@ fun ExerciseImage(exercise: Exercise, modifier: Modifier = Modifier) {
         }
     }
 }
+
+private val isDarkContent: Boolean
+    @Composable get() = MaterialTheme.colorScheme.onSurface.luminance() > 0.5f
+
+/** Fondo de las imágenes de ejercicios (llevan fondo blanco opaco); en modo oscuro lo atenúa [exerciseImageDim] con ellas. */
+@Composable
+fun exerciseImageBackground(): androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.White
+
+/**
+ * Velo oscuro sobre la imagen en modo oscuro: las animaciones llevan fondo blanco opaco y deslumbran entre
+ * fondos oscuros (un filtro de color no se aplica a todas las animaciones; dibujar encima, sí).
+ */
+@Composable
+fun exerciseImageDim(): Modifier =
+    if (isDarkContent) Modifier.drawWithContent { drawContent(); drawRect(androidx.compose.ui.graphics.Color.Black.copy(alpha = DIM_ALPHA)) } else Modifier
+
+private const val DIM_ALPHA = 0.18f

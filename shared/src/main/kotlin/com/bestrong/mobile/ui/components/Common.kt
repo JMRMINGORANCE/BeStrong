@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -204,7 +205,7 @@ fun HeroCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, onCli
 
 /** Dato grande con su etiqueta: número muy visible sobre un fondo con un toque del acento. */
 @Composable
-fun StatTile(label: String, value: String, modifier: Modifier = Modifier, spokenValue: String = value) {
+fun StatTile(label: String, value: String, modifier: Modifier = Modifier, spokenValue: String = value, container: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surfaceContainerHigh) {
     Box(
         // Una sola parada para TalkBack y en orden natural: «Duración: 45:12»
         modifier.clearAndSetSemantics { contentDescription = "$label: $spokenValue" }
@@ -212,8 +213,8 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier, spoken
             .background(
                 Brush.verticalGradient(
                     listOf(
-                        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, MaterialTheme.colorScheme.primary, 0.08f),
-                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        lerp(container, MaterialTheme.colorScheme.primary, 0.08f),
+                        container,
                     ),
                 ),
             ),
@@ -255,7 +256,8 @@ fun EmptyState(
     action: Pair<String, () -> Unit>? = null,
 ) {
     Box(modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // En pantallas anchas (Fold abierto, tablet) no se estira de lado a lado
+        Column(Modifier.widthIn(max = 480.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             com.bestrong.mobile.ui.help.BrandIllustration(icon, orbit, MaterialTheme.colorScheme.primary, Modifier.size(200.dp), animated = false)
             Text(title, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
             Text(
