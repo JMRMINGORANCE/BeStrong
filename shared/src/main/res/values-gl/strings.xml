@@ -1183,6 +1183,7 @@
     <string name="cardio_pace_min">Faltan %1$d min · %2$d min ao día</string>
     <string name="cardio_streak_short">%1$d sem. seguidas</string>
     <string name="action_open">Abrir</string>
+    <string name="action_drag_share">Arrastrar a outra app</string>
     <string name="copy_to_day_done">Adestramento copiado</string>
     <string name="notif_cardio_nudge">O cardio da semana vai por detrás</string>
     <string name="summary_next_needs_rpe">Cunha soa serie pesada ao final, apunta o seu RPE para que poida suxerir subir</string>

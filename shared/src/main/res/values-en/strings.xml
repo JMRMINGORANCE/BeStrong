@@ -1183,6 +1183,7 @@
     <string name="cardio_pace_min">%1$d min to go · %2$d min a day</string>
     <string name="cardio_streak_short">%1$d wks in a row</string>
     <string name="action_open">Open</string>
+    <string name="action_drag_share">Drag to another app</string>
     <string name="copy_to_day_done">Workout copied</string>
     <string name="notif_cardio_nudge">This week\'s cardio is behind</string>
     <string name="summary_next_needs_rpe">With a single heavy set at the end, log its RPE so it can suggest going up</string>

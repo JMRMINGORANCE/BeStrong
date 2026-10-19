@@ -1183,6 +1183,7 @@
     <string name="cardio_pace_min">Noch %1$d Min. · %2$d Min. pro Tag</string>
     <string name="cardio_streak_short">%1$d Wo. in Folge</string>
     <string name="action_open">Öffnen</string>
+    <string name="action_drag_share">In andere App ziehen</string>
     <string name="copy_to_day_done">Training kopiert</string>
     <string name="notif_cardio_nudge">Das Cardio dieser Woche hinkt hinterher</string>
     <string name="summary_next_needs_rpe">Bei nur einem schweren Satz am Ende den RPE eintragen, damit eine Steigerung vorgeschlagen werden kann</string>

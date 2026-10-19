@@ -1183,6 +1183,7 @@
     <string name="cardio_pace_min">Encore %1$d min · %2$d min par jour</string>
     <string name="cardio_streak_short">%1$d sem. d\'affilée</string>
     <string name="action_open">Ouvrir</string>
+    <string name="action_drag_share">Glisser vers une autre app</string>
     <string name="copy_to_day_done">Séance copiée</string>
     <string name="notif_cardio_nudge">Le cardio de la semaine est en retard</string>
     <string name="summary_next_needs_rpe">Avec une seule série lourde à la fin, note son RPE pour qu\'il puisse proposer d\'augmenter</string>

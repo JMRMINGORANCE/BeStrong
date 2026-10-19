@@ -212,6 +212,9 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
                                     w,
                                     records,
                                     Modifier.clip(MaterialTheme.shapes.large).combinedClickable(
+                                        // Con etiquetas, TalkBack ofrece también la pulsación larga (si no, no se descubre)
+                                        onClickLabel = stringResource(R.string.action_open),
+                                        onLongClickLabel = stringResource(R.string.action_drag_share),
                                         onLongClick = { DragShare.start(view, w.name, dragText) },
                                         onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } },
                                     ),

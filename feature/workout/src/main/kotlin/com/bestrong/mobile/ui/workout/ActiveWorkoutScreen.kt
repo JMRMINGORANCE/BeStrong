@@ -26,10 +26,13 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
@@ -82,6 +85,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -881,12 +885,13 @@ private fun ExerciseCard(
             onDismissRequest = { editRest = false },
             title = { Text(stringResource(R.string.rest)) },
             text = {
-                Column {
+                // Opciones excluyentes: TalkBack dice cuál está elegida y «3 de 10»
+                Column(Modifier.selectableGroup()) {
                     options.forEach { s ->
                         ListItem(
                             headlineContent = { Text(if (s == 0) stringResource(R.string.no_rest) else formatDuration(s.toLong())) },
-                            modifier = Modifier.clickable { vm.setRestSeconds(we.id, s); editRest = false },
-                            trailingContent = { if (s == we.restSeconds) Text("✓") },
+                            modifier = Modifier.selectable(selected = s == we.restSeconds, role = Role.RadioButton) { vm.setRestSeconds(we.id, s); editRest = false },
+                            trailingContent = { if (s == we.restSeconds) Icon(Icons.Default.Check, null) },
                         )
                     }
                 }
