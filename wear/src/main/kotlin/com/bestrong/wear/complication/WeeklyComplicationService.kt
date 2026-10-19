@@ -41,7 +41,7 @@ class WeeklyComplicationService : SuspendingComplicationDataSourceService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val icon = MonochromaticImage.Builder(Icon.createWithResource(this, R.drawable.ic_dumbbell)).build()
-        val description = PlainComplicationText.Builder(getString(R.string.complication_desc, count)).build()
+        val description = PlainComplicationText.Builder(resources.getQuantityString(R.plurals.complication_desc, count, count)).build()
         return when (type) {
             ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(
                 PlainComplicationText.Builder("$count").build(),

@@ -44,7 +44,7 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
             item { ListHeader { Text("BeStrong", color = Brand, style = MaterialTheme.typography.titleLarge) } }
             item {
                 Text(
-                    stringResource(R.string.week_summary, thisWeek, streak),
+                    pluralStringResource(R.plurals.week_summary, thisWeek, thisWeek, streak),
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,
                 )

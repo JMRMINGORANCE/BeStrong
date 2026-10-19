@@ -68,7 +68,7 @@ class TodayTileService : TileService() {
             )
         routine?.let {
             content.addContent(
-                Text.Builder(this, getString(R.string.tile_today_detail, it.exercises.size))
+                Text.Builder(this, resources.getQuantityString(R.plurals.n_exercises, it.exercises.size, it.exercises.size))
                     .setTypography(Typography.TYPOGRAPHY_CAPTION2)
                     .setColor(argb(0xFFBDBDBD.toInt()))
                     .build(),

@@ -272,7 +272,7 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
             item { ListHeader { Text(stringResource(R.string.completed), color = Brand) } }
             item { Text(w.name, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center) }
             item { Text(stringResource(R.string.summary_duration, formatDuration(w.durationSeconds()))) }
-            item { Text(stringResource(R.string.summary_volume, unit.formatVolume(w.totalVolume), w.completedSetCount)) }
+            item { Text(pluralStringResource(R.plurals.summary_volume, w.completedSetCount, unit.formatVolume(w.totalVolume), w.completedSetCount)) }
             w.avgHeartRate?.let { item { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--"), color = HeartRed) } }
             w.calories?.let { item { Text(stringResource(R.string.summary_kcal, it)) } }
             // Solo los ejercicios que tienen con qué compararse (ComparisonKind.NONE no sale)

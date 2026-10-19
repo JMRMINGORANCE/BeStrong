@@ -31,7 +31,10 @@
     <string name="chart_point">%1$s: %2$s</string>
     <string name="complete_set">Completar sèrie</string>
     <string name="completed">Completat! 💪</string>
-    <string name="complication_desc">%1$d entrenaments aquesta setmana</string>
+    <plurals name="complication_desc">
+        <item quantity="one">%1$d entrenament aquesta setmana</item>
+        <item quantity="other">%1$d entrenaments aquesta setmana</item>
+    </plurals>
     <string name="complication_label">Entrenaments aquesta setmana</string>
     <string name="complication_today_desc">Avui toca: %1$s</string>
     <string name="complication_today_label">Avui toca</string>
@@ -123,14 +126,16 @@
     <string name="summary_duration">⏱ %1$s</string>
     <string name="summary_hr">♥ mitjana %1$d · màx %2$s</string>
     <string name="summary_kcal">🔥 %1$d kcal</string>
-    <string name="summary_volume">🏋 %1$s · %2$d sèries</string>
+    <plurals name="summary_volume">
+        <item quantity="one">🏋 %1$s · %2$d sèrie</item>
+        <item quantity="other">🏋 %1$s · %2$d sèries</item>
+    </plurals>
     <string name="superset">Supersèrie</string>
     <string name="syncs_with_phone">Se sincronitza amb el mòbil</string>
     <string name="tap_again_discard">Toca de nou per descartar</string>
     <string name="tile_start">Començar</string>
     <string name="tile_streak">🔥 %1$d setm. · %2$s</string>
     <string name="tile_today">Avui toca</string>
-    <string name="tile_today_detail">%1$d exercicis</string>
     <string name="tile_today_none">Sense rutines: crea-les al mòbil</string>
     <string name="tile_week">entrenaments aquesta setmana</string>
     <string name="train">Entrenar</string>
@@ -145,7 +150,10 @@
     <string name="vs_last">Respecte a l’última vegada</string>
     <string name="vs_line">%1$s: %2$s</string>
     <string name="week_short">setm.</string>
-    <string name="week_summary">%1$d entrenaments aquesta setmana · 🔥 %2$d</string>
+    <plurals name="week_summary">
+        <item quantity="one">%1$d entrenament aquesta setmana · 🔥 %2$d</item>
+        <item quantity="other">%1$d entrenaments aquesta setmana · 🔥 %2$d</item>
+    </plurals>
     <string name="with_accelerometer">Amb l’acceleròmetre</string>
     <string name="workout_afternoon">Entrenament de tarda</string>
     <string name="workout_midday">Entrenament de migdia</string>
@@ -180,4 +188,5 @@
     <string name="previous_any">Anterior: %1$s</string>
     <string name="next_any">Seg.: %1$s %2$s</string>
     <string name="copy_previous">Fer servir el de l\'última vegada</string>
+    <string name="unit_reps">reps</string>
 </resources>

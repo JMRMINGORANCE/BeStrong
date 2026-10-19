@@ -31,7 +31,10 @@
     <string name="chart_point">%1$s: %2$s</string>
     <string name="complete_set">Completar serie</string>
     <string name="completed">¡Completado! 💪</string>
-    <string name="complication_desc">%1$d entrenamientos esta semana</string>
+    <plurals name="complication_desc">
+        <item quantity="one">%1$d entrenamiento esta semana</item>
+        <item quantity="other">%1$d entrenamientos esta semana</item>
+    </plurals>
     <string name="complication_label">Entrenos esta semana</string>
     <string name="complication_today_desc">Hoy toca: %1$s</string>
     <string name="complication_today_label">Hoy toca</string>
@@ -123,14 +126,16 @@
     <string name="summary_duration">⏱ %1$s</string>
     <string name="summary_hr">♥ media %1$d · máx %2$s</string>
     <string name="summary_kcal">🔥 %1$d kcal</string>
-    <string name="summary_volume">🏋 %1$s · %2$d series</string>
+    <plurals name="summary_volume">
+        <item quantity="one">🏋 %1$s · %2$d serie</item>
+        <item quantity="other">🏋 %1$s · %2$d series</item>
+    </plurals>
     <string name="superset">Superserie</string>
     <string name="syncs_with_phone">Se sincroniza con el móvil</string>
     <string name="tap_again_discard">Toca otra vez para descartar</string>
     <string name="tile_start">Empezar</string>
     <string name="tile_streak">🔥 %1$d sem · %2$s</string>
     <string name="tile_today">Hoy toca</string>
-    <string name="tile_today_detail">%1$d ejercicios</string>
     <string name="tile_today_none">Sin rutinas: créalas en el móvil</string>
     <string name="tile_week">entrenos esta semana</string>
     <string name="train">Entrenar</string>
@@ -145,7 +150,10 @@
     <string name="vs_last">Frente a la última vez</string>
     <string name="vs_line">%1$s: %2$s</string>
     <string name="week_short">sem</string>
-    <string name="week_summary">%1$d entrenos esta semana · 🔥 %2$d</string>
+    <plurals name="week_summary">
+        <item quantity="one">%1$d entreno esta semana · 🔥 %2$d</item>
+        <item quantity="other">%1$d entrenos esta semana · 🔥 %2$d</item>
+    </plurals>
     <string name="with_accelerometer">Con el acelerómetro</string>
     <string name="workout_afternoon">Entrenamiento de tarde</string>
     <string name="workout_midday">Entrenamiento de mediodía</string>
@@ -180,4 +188,5 @@
     <string name="previous_any">Anterior: %1$s</string>
     <string name="next_any">Sig.: %1$s %2$s</string>
     <string name="copy_previous">Usar lo de la última vez</string>
+    <string name="unit_reps">reps</string>
 </resources>

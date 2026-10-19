@@ -31,7 +31,10 @@
     <string name="chart_point">%1$s : %2$s</string>
     <string name="complete_set">Valider la série</string>
     <string name="completed">Terminé ! 💪</string>
-    <string name="complication_desc">%1$d séances cette semaine</string>
+    <plurals name="complication_desc">
+        <item quantity="one">%1$d séance cette semaine</item>
+        <item quantity="other">%1$d séances cette semaine</item>
+    </plurals>
     <string name="complication_label">Séances cette semaine</string>
     <string name="complication_today_desc">Aujourd’hui : %1$s</string>
     <string name="complication_today_label">Aujourd’hui</string>
@@ -123,14 +126,16 @@
     <string name="summary_duration">⏱ %1$s</string>
     <string name="summary_hr">♥ moy. %1$d · max %2$s</string>
     <string name="summary_kcal">🔥 %1$d kcal</string>
-    <string name="summary_volume">🏋 %1$s · %2$d séries</string>
+    <plurals name="summary_volume">
+        <item quantity="one">🏋 %1$s · %2$d série</item>
+        <item quantity="other">🏋 %1$s · %2$d séries</item>
+    </plurals>
     <string name="superset">Superset</string>
     <string name="syncs_with_phone">Se synchronise avec ton téléphone</string>
     <string name="tap_again_discard">Touche à nouveau pour abandonner</string>
     <string name="tile_start">Démarrer</string>
     <string name="tile_streak">🔥 %1$d sem. · %2$s</string>
     <string name="tile_today">Aujourd’hui</string>
-    <string name="tile_today_detail">%1$d exercices</string>
     <string name="tile_today_none">Aucune routine : crée-les sur ton téléphone</string>
     <string name="tile_week">séances cette semaine</string>
     <string name="train">S’entraîner</string>
@@ -145,7 +150,10 @@
     <string name="vs_last">Vs dernière fois</string>
     <string name="vs_line">%1$s : %2$s</string>
     <string name="week_short">sem.</string>
-    <string name="week_summary">%1$d séances cette semaine · 🔥 %2$d</string>
+    <plurals name="week_summary">
+        <item quantity="one">%1$d séance cette semaine · 🔥 %2$d</item>
+        <item quantity="other">%1$d séances cette semaine · 🔥 %2$d</item>
+    </plurals>
     <string name="with_accelerometer">Via l’accéléromètre</string>
     <string name="workout_afternoon">Séance de l’après-midi</string>
     <string name="workout_midday">Séance de midi</string>
@@ -180,4 +188,5 @@
     <string name="previous_any">Avant : %1$s</string>
     <string name="next_any">Suiv. : %1$s %2$s</string>
     <string name="copy_previous">Reprendre la dernière fois</string>
+    <string name="unit_reps">rép.</string>
 </resources>

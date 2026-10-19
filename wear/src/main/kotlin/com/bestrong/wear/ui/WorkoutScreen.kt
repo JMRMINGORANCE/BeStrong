@@ -213,7 +213,7 @@ fun WorkoutScreen(
                         if (we.exercise.tracking == TrackingType.DISTANCE) {
                             BigValue("${set.distanceM.toInt()}", "m", selected = effective == RotaryTarget.REPS) { session.setRotaryTarget(RotaryTarget.REPS) }
                         } else {
-                            BigValue("${set.reps}", "reps", selected = effective == RotaryTarget.REPS) { session.setRotaryTarget(RotaryTarget.REPS) }
+                            BigValue("${set.reps}", stringResource(R.string.unit_reps), selected = effective == RotaryTarget.REPS) { session.setRotaryTarget(RotaryTarget.REPS) }
                         }
                     }
                 }

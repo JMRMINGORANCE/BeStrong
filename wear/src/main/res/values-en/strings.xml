@@ -31,7 +31,10 @@
     <string name="chart_point">%1$s: %2$s</string>
     <string name="complete_set">Complete set</string>
     <string name="completed">Done! 💪</string>
-    <string name="complication_desc">%1$d workouts this week</string>
+    <plurals name="complication_desc">
+        <item quantity="one">%1$d workout this week</item>
+        <item quantity="other">%1$d workouts this week</item>
+    </plurals>
     <string name="complication_label">Workouts this week</string>
     <string name="complication_today_desc">Today: %1$s</string>
     <string name="complication_today_label">Today</string>
@@ -123,14 +126,16 @@
     <string name="summary_duration">⏱ %1$s</string>
     <string name="summary_hr">♥ avg %1$d · max %2$s</string>
     <string name="summary_kcal">🔥 %1$d kcal</string>
-    <string name="summary_volume">🏋 %1$s · %2$d sets</string>
+    <plurals name="summary_volume">
+        <item quantity="one">🏋 %1$s · %2$d set</item>
+        <item quantity="other">🏋 %1$s · %2$d sets</item>
+    </plurals>
     <string name="superset">Superset</string>
     <string name="syncs_with_phone">Syncs with your phone</string>
     <string name="tap_again_discard">Tap again to discard</string>
     <string name="tile_start">Start</string>
     <string name="tile_streak">🔥 %1$d wk · %2$s</string>
     <string name="tile_today">Today</string>
-    <string name="tile_today_detail">%1$d exercises</string>
     <string name="tile_today_none">No routines: create them on your phone</string>
     <string name="tile_week">workouts this week</string>
     <string name="train">Train</string>
@@ -145,7 +150,10 @@
     <string name="vs_last">Vs last time</string>
     <string name="vs_line">%1$s: %2$s</string>
     <string name="week_short">wk</string>
-    <string name="week_summary">%1$d workouts this week · 🔥 %2$d</string>
+    <plurals name="week_summary">
+        <item quantity="one">%1$d workout this week · 🔥 %2$d</item>
+        <item quantity="other">%1$d workouts this week · 🔥 %2$d</item>
+    </plurals>
     <string name="with_accelerometer">Using the accelerometer</string>
     <string name="workout_afternoon">Afternoon workout</string>
     <string name="workout_midday">Midday workout</string>
@@ -180,4 +188,5 @@
     <string name="previous_any">Last: %1$s</string>
     <string name="next_any">Next: %1$s %2$s</string>
     <string name="copy_previous">Use last time\'s</string>
+    <string name="unit_reps">reps</string>
 </resources>
