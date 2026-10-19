@@ -74,6 +74,12 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
     /** Rutinas creadas aquí que el móvil aún no ha devuelto: una lista suya sin ellas no las borra. */
     private fun pendingRoutineIds(): Set<String> = prefs.getStringSet(KEY_PENDING_ROUTINES, emptySet()).orEmpty()
 
+    /** El móvil ya guardó (y borró el aviso de) esta rutina creada aquí: su lista vuelve a mandar. */
+    fun routineDelivered(id: String) {
+        val pending = pendingRoutineIds()
+        if (id in pending) prefs.edit { putStringSet(KEY_PENDING_ROUTINES, pending - id) }
+    }
+
     /** Lista de rutinas del móvil: manda, salvo las creadas aquí que todavía no conoce. */
     fun setPhoneRoutines(routines: List<Routine>) {
         val phoneIds = routines.map { it.id }.toSet()

@@ -88,8 +88,17 @@ class PhoneSync @Inject constructor(@ApplicationContext private val context: Con
      */
     suspend fun resendPendingWorkouts() {
         val now = System.currentTimeMillis()
+        // Solo los que aún tienen su aviso sin procesar: el móvil lo borra al guardarlos, así que si ya no está, lo
+        // recibió (y quizá luego lo borró a propósito: reenviarlo lo resucitaría)
+        val items = runCatching { dataClient.dataItems.await() }.getOrNull() ?: return
+        val waiting = try {
+            items.mapNotNull { it.uri.path?.takeIf { p -> p.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) } }
+                .map { it.removePrefix(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) }.toSet()
+        } finally {
+            items.release()
+        }
         store.pendingForPhone
-            .filter { w -> w.finishedAtEpochMs?.let { now - it in RESEND_AFTER_MS..RESEND_WINDOW_MS } == true }
+            .filter { w -> w.id in waiting && w.finishedAtEpochMs?.let { now - it in RESEND_AFTER_MS..RESEND_WINDOW_MS } == true }
             .forEach { sendFinishedWorkout(it) }
     }
 

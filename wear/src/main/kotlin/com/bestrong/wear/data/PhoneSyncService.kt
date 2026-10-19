@@ -33,6 +33,10 @@ class PhoneSyncService : WearableListenerService() {
                         ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }
                         ?.let { w -> { container.session.applyRemote(w) } }
                 }
+            } else if (event.type == DataEvent.TYPE_DELETED && path.startsWith(SyncContract.PATH_WATCH_ROUTINE_PREFIX)) {
+                // El móvil borra el aviso de la rutina al guardarla: ya no hace falta conservarla aparte
+                val id = path.removePrefix(SyncContract.PATH_WATCH_ROUTINE_PREFIX)
+                return@mapNotNull { container.store.routineDelivered(id) }
             } else if (event.type == DataEvent.TYPE_CHANGED) {
                 val payload = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                 return@mapNotNull { PhoneSync.applyDataItem(container.store, path, payload) }

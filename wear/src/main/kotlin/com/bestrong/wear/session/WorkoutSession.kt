@@ -348,8 +348,7 @@ class WorkoutSession @Inject constructor(
         stopTempo()
         stopRest()
         repCounter.stop()
-        // También cuenta como cerrado: una copia atrasada (al reabrir la app) no lo resucita
-        store.markEnded(w.id)
+        // Sin marcarlo como terminado: el móvil puede deshacer el descarte y devolver el mismo entreno
         _workout.value = null
         store.activeWorkout = null
         // Con una carrera en marcha el ejercicio de Health Services es de los dos: no se corta
