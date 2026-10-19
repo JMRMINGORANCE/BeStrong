@@ -172,6 +172,12 @@ class HomeViewModel @Inject constructor(
         usable.firstOrNull { it.id == planned && (last[it.id] ?: 0L) < startOfToday } ?: usable.minByOrNull { last[it.id] ?: 0L }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    /** Rutina → días de esta semana en que está planificada (para enseñarlo en su tarjeta). */
+    val plannedDays: StateFlow<Map<String, List<DayOfWeek>>> = planning.state.map { plan ->
+        val monday = LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        plan.planFor(monday).days.entries.groupBy({ it.value }, { DayOfWeek.of(it.key) }).mapValues { (_, d) -> d.sorted() }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
     /** Semana actual: días entrenados frente al objetivo y adherencia de las 8 semanas anteriores. */
     val week: StateFlow<WeekProgress> = combine(repo.history, repo.activeProgram, settingsStore.settings, planning.state) { history, active, s, plan ->
         val zone = ZoneId.systemDefault()

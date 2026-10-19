@@ -103,6 +103,7 @@ fun HomeScreen(
     val today by vm.today.collectAsStateWithLifecycle()
     val suggested by vm.suggestedRoutine.collectAsStateWithLifecycle()
     val week by vm.week.collectAsStateWithLifecycle()
+    val plannedDays by vm.plannedDays.collectAsStateWithLifecycle()
     // Se guarda el id (no el programa) para que la preparación sobreviva al giro
     var setupProgramId by rememberSaveable { mutableStateOf<String?>(null) }
     setupProgramId?.let { id -> vm.periodizedPrograms.firstOrNull { it.id == id } }?.let { p ->
@@ -192,6 +193,7 @@ fun HomeScreen(
                 val last = history.firstOrNull { it.routineId == routine.id }
                 RoutineCard(
                     routine = routine,
+                    plannedDays = plannedDays[routine.id].orEmpty(),
                     lastDone = last?.let { formatDate(it.startedAtEpochMs) },
                     gymNames = gymNames,
                     onStart = { vm.startRoutine(routine, onOpenWorkout) },
@@ -336,6 +338,8 @@ private fun NoRoutines(onPrograms: () -> Unit, onNew: () -> Unit) {
 private fun RoutineCard(
     routine: Routine,
     lastDone: String?,
+    /** Días de esta semana en que está planificada. */
+    plannedDays: List<java.time.DayOfWeek> = emptyList(),
     onStart: () -> Unit,
     onStartWatch: () -> Unit,
     onEdit: () -> Unit,
@@ -363,6 +367,10 @@ private fun RoutineCard(
                     com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, count, count))
                     if (minutes > 0) com.bestrong.mobile.ui.components.MetaPill(stringResource(R.string.routine_estimated, minutes))
                     gymName?.let { com.bestrong.mobile.ui.components.MetaPill("🏋️ $it") }
+                    if (plannedDays.isNotEmpty()) {
+                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+                        com.bestrong.mobile.ui.components.MetaPill("📅 " + plannedDays.joinToString(" · ") { it.getDisplayName(java.time.format.TextStyle.SHORT, locale) })
+                    }
                 }
             }
             Box {
