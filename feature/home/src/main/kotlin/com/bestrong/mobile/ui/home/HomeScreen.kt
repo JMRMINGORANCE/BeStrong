@@ -113,10 +113,6 @@ fun HomeScreen(
     val plannedDays by vm.plannedDays.collectAsStateWithLifecycle()
     // Se guarda el id (no el programa) para que la preparación sobreviva al giro
     var setupProgramId by rememberSaveable { mutableStateOf<String?>(null) }
-    setupProgramId?.let { id -> vm.periodizedPrograms.firstOrNull { it.id == id } }?.let { p ->
-        ProgramSetupScreen(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgramId = null }, onDismiss = { setupProgramId = null })
-        return
-    }
     val snackbar = remember { SnackbarHostState() }
     var showPrograms by rememberSaveable { mutableStateOf(false) }
     OpenBuilderAfterWelcome(vm) { showPrograms = true }
@@ -126,6 +122,11 @@ fun HomeScreen(
     var routineQuery by rememberSaveable { mutableStateOf("") }
     val gridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
+    // Después del estado de la rejilla: al volver de preparar un programa sigue igual que estaba
+    setupProgramId?.let { id -> vm.periodizedPrograms.firstOrNull { it.id == id } }?.let { p ->
+        ProgramSetupScreen(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgramId = null }, onDismiss = { setupProgramId = null })
+        return
+    }
     UndoRoutineDelete(vm, snackbar)
     UndoDiscard(vm, snackbar, onOpenWorkout)
     ForgottenWorkoutDialog(vm)
@@ -208,8 +209,8 @@ fun HomeScreen(
                     onEdit = { onEditRoutine(routine.id) },
                     onDuplicate = { vm.duplicate(routine) },
                     onDelete = { vm.delete(routine) },
-                    onMoveUp = { vm.move(routine, -1) },
-                    onMoveDown = { vm.move(routine, 1) },
+                    onMoveUp = { vm.move(routine, -1); Unit }.takeIf { routineQuery.isBlank() },
+                    onMoveDown = { vm.move(routine, 1); Unit }.takeIf { routineQuery.isBlank() },
                     onArchive = { vm.setArchived(routine, !routine.archived) },
                 )
             }
@@ -357,8 +358,8 @@ private fun RoutineCard(
     onEdit: () -> Unit,
     onDuplicate: () -> Unit,
     onDelete: () -> Unit,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit,
+    onMoveUp: (() -> Unit)?,
+    onMoveDown: (() -> Unit)?,
     onArchive: () -> Unit = {},
     /** Id → nombre de los gimnasios: se enseña el de la rutina, si tiene (y sigue existiendo). */
     gymNames: Map<String, String> = emptyMap(),
@@ -398,8 +399,9 @@ private fun RoutineCard(
                     )
                     DropdownMenuItem(text = { Text(stringResource(R.string.share_routine_link)) }, onClick = { menu = false; sharing = true })
                     DropdownMenuItem(text = { Text(stringResource(R.string.export_routine_pdf)) }, onClick = { menu = false; RoutineShare.sharePdf(context, listOf(routine), routine.name) })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; onMoveUp() })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; onMoveDown() })
+                    // Con una búsqueda activa no se reordena: el vecino real podría estar oculto
+                    onMoveUp?.let { up -> DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; up() }) }
+                    onMoveDown?.let { down -> DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; down() }) }
                     DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; onDelete() })
                 }
             }

@@ -234,7 +234,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         HomeScreen(
                             vm = home,
                             onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
-                            onEditRoutine = { nav.navigate(Routes.routine(it)) },
+                            // Un doble toque no abre dos editores (el de debajo pisaría lo guardado en el de arriba)
+                            onEditRoutine = { if (entry?.destination?.route == TopLevel.TRAIN.route) nav.navigate(Routes.routine(it)) { launchSingleTop = true } },
                             onOpenPlanning = { nav.navigate(Routes.PLANNING) },
                             onOpenMuscle = { muscle -> nav.openMuscle(muscle.name) },
                             onOpenExercise = { nav.navigate(Routes.exercise(it)) },
@@ -280,7 +281,11 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             vm = vm,
                             onAddExercises = { nav.navigate(Routes.PICKER) },
                             onBack = { nav.popBackStack() },
-                            onFinished = { nav.navigateTopLevel(TopLevel.HISTORY.route) },
+                            // Se quita antes la pantalla del entreno: si no, Entrenar la restauraba vacía («sin entreno»)
+                            onFinished = {
+                                nav.popBackStack(Routes.WORKOUT, inclusive = true)
+                                nav.navigateTopLevel(TopLevel.HISTORY.route)
+                            },
                             // Vuelta a Inicio sin restaurar estado guardado (si no, reaparecería la pantalla del entreno vacía)
                             onDiscarded = { if (!nav.popBackStack(TopLevel.TRAIN.route, inclusive = false)) nav.navigate(TopLevel.TRAIN.route) },
                         )
@@ -290,8 +295,11 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             vm = hiltViewModel<ExercisesViewModel>(),
                             onBack = { nav.popBackStack() },
                             onPicked = { ids ->
-                                nav.previousBackStackEntry?.savedStateHandle?.set(Routes.PICKED, ArrayList(ids))
-                                nav.popBackStack()
+                                // Solo desde el selector visible: un segundo toque durante la animación cerraba también el editor
+                                if (nav.currentBackStackEntry?.destination?.route == Routes.PICKER) {
+                                    nav.previousBackStackEntry?.savedStateHandle?.set(Routes.PICKED, ArrayList(ids))
+                                    nav.popBackStack()
+                                }
                             },
                         )
                     }

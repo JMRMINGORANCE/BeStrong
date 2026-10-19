@@ -76,10 +76,15 @@ class MainActivity : ComponentActivity() {
             val userSettings by settings.settings.collectAsStateWithLifecycle()
             BeStrongTheme(userSettings.appearance) {
                 val pip by inPip.collectAsStateWithLifecycle()
+                // Al pasar a PiP la app sale de la composición: con esto, al volver se recupera la pila de pantallas
+                // y lo escrito (si no, se volvía a Entrenar desde cero y se perdían los cambios del editor)
+                val holder = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
                 if (pip) {
                     RestPip(repository, restTimer)
                 } else {
-                    BeStrongApp(launchRequest = launchRequest, onLaunchHandled = { launchRequest.value = null })
+                    holder.SaveableStateProvider("app") {
+                        BeStrongApp(launchRequest = launchRequest, onLaunchHandled = { launchRequest.value = null })
+                    }
                 }
             }
         }

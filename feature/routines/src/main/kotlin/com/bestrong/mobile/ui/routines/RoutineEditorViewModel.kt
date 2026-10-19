@@ -32,14 +32,27 @@ class RoutineEditorViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val settingsStore: com.bestrong.mobile.data.SettingsStore,
 ) : ViewModel() {
-    /** Pone (o quita) el mismo rango de repeticiones a todos los ejercicios con peso de la rutina. */
+    /** Rango elegido para toda la rutina, pendiente de guardar (así «Descartar» lo deshace como lo demás). */
+    private data class RangeChange(val range: String?)
+
+    private var pendingRange: RangeChange? = null
+
+    /** Pone (o quita) el mismo rango de repeticiones a todos los ejercicios con peso de la rutina (al guardar). */
     fun setRangeForAll(range: String?) {
+        pendingRange = RangeChange(range)
+    }
+
+    private fun applyPendingRange() {
+        val change = pendingRange ?: return
         val ids = _routine.value.exercises.filter { it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }.map { it.exercise.id }
+        val range = change.range
         settingsStore.update { s -> s.copy(exerciseRepRange = if (range == null) s.exerciseRepRange - ids.toSet() else s.exerciseRepRange + ids.associateWith { range }) }
+        pendingRange = null
     }
 
     /** El rango común de la rutina; [MIXED_RANGE] si sus ejercicios tienen rangos distintos (no se marca ninguno). */
     fun commonRange(): String? {
+        pendingRange?.let { return it.range }
         val ids = _routine.value.exercises.filter { it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }.map { it.exercise.id }
         val ranges = ids.map { settingsStore.settings.value.exerciseRepRange[it] }.distinct()
         return if (ranges.size == 1) ranges.single() else MIXED_RANGE
@@ -84,7 +97,7 @@ class RoutineEditorViewModel @Inject constructor(
             field = value
             savedStateHandle[KEY_ORIGINAL] = com.bestrong.core.io.Persistence.encodeRoutine(value)
         }
-    val hasChanges: Boolean get() = _routine.value != original
+    val hasChanges: Boolean get() = _routine.value != original || pendingRange != null
 
     /** La rutina pedida ya no existe (borrada, enlace antiguo): la pantalla se cierra en vez de crear otra vacía. */
     private val _missing = MutableStateFlow(false)
@@ -229,14 +242,26 @@ class RoutineEditorViewModel @Inject constructor(
         )
     }
 
-    fun save(onSaved: () -> Unit) = viewModelScope.launch {
-        val r = _routine.value
-        repo.saveRoutine(r.copy(name = r.name.ifBlank { context.getString(R.string.routine_untitled) }))
-        onSaved()
+    /** Guardando: un doble toque no guarda (ni cierra la pantalla) dos veces. */
+    private var busy = false
+
+    fun save(onSaved: () -> Unit) {
+        if (busy) return
+        busy = true
+        viewModelScope.launch {
+            val r = _routine.value
+            repo.saveRoutine(r.copy(name = r.name.ifBlank { context.getString(R.string.routine_untitled) }))
+            applyPendingRange()
+            onSaved()
+        }
     }
 
-    fun delete(onDeleted: () -> Unit) = viewModelScope.launch {
-        repo.deleteRoutine(_routine.value.id)
-        onDeleted()
+    fun delete(onDeleted: () -> Unit) {
+        if (busy) return
+        busy = true
+        viewModelScope.launch {
+            repo.deleteRoutine(_routine.value.id)
+            onDeleted()
+        }
     }
 }
