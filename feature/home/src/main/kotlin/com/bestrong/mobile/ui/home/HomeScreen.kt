@@ -111,6 +111,7 @@ fun HomeScreen(
     }
     val snackbar = remember { SnackbarHostState() }
     var showPrograms by rememberSaveable { mutableStateOf(false) }
+    OpenBuilderAfterWelcome(vm) { showPrograms = true }
     // Fuera de la rejilla: al volver de «Programas» siguen el desplazamiento, la búsqueda y las carpetas plegadas
     var collapsed by rememberSaveable { mutableStateOf(setOf<String>()) }
     // Buscar rutina (sale con muchas): mientras se busca, se ven todas las que coinciden con sus carpetas abiertas
@@ -323,7 +324,8 @@ private fun NoRoutines(onPrograms: () -> Unit, onNew: () -> Unit) {
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
             )
             Button(onClick = onPrograms, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                Text(stringResource(R.string.home_browse_programs), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Icon(Icons.Default.Star, null)
+                Text(stringResource(R.string.home_browse_programs), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
             OutlinedButton(onClick = onNew, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(stringResource(R.string.home_new_routine)) }
         }
@@ -603,5 +605,17 @@ private fun ForgottenWorkoutDialog(vm: HomeViewModel) {
                 }
             },
         )
+    }
+}
+
+/** Recién terminada la bienvenida y sin rutinas: directo a «Crea tu programa» (con lo que se acaba de elegir). */
+@Composable
+private fun OpenBuilderAfterWelcome(vm: HomeViewModel, open: () -> Unit) {
+    val pendingBuilder = vm.settings.collectAsStateWithLifecycle().value.pendingBuilder
+    LaunchedEffect(pendingBuilder) {
+        if (pendingBuilder) {
+            if (vm.hasNoRoutines()) open()
+            vm.clearPendingBuilder()
+        }
     }
 }

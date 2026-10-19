@@ -44,6 +44,8 @@ data class UserSettings(
     val backupFolderSetEpochMs: Long = 0,
     /** Sesiones por semana que el usuario se propone (si no sigue un programa). */
     val weeklyGoal: Int = 3,
+    /** Recién terminada la bienvenida: Inicio abre «Crea tu programa» (si aún no hay rutinas). */
+    val pendingBuilder: Boolean = false,
     /** Objetivo de entrenamiento (de la bienvenida): el programa a medida empieza con él. */
     val trainingGoal: com.bestrong.core.training.Goal = com.bestrong.core.training.Goal.HYPERTROPHY,
     /** Botones principales abajo en la pantalla exterior del Fold (uso con una mano). */
@@ -211,6 +213,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         reminderHour = prefs.getInt("reminder_hour", 18),
         reminderMinute = prefs.getInt("reminder_minute", 0),
         weeklyGoal = prefs.getInt("weekly_goal", 3),
+        pendingBuilder = prefs.getBoolean("pending_builder", false),
         trainingGoal = runCatching { com.bestrong.core.training.Goal.valueOf(prefs.getString("training_goal", null) ?: "HYPERTROPHY") }
             .getOrDefault(com.bestrong.core.training.Goal.HYPERTROPHY),
         oneHanded = prefs.getBoolean("one_handed", false),
@@ -302,6 +305,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBackupState(s)
             putInt("weekly_goal", s.weeklyGoal)
             putString("training_goal", s.trainingGoal.name)
+            putBoolean("pending_builder", s.pendingBuilder)
             putBoolean("one_handed", s.oneHanded)
             putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))
             putString("active_gym", s.activeGymId)

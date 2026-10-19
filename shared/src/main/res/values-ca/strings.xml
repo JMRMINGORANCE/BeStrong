@@ -296,7 +296,7 @@
     <string name="history_search">Cercar per exercici, nom o nota</string>
     <string name="history_workout_name">Nom</string>
     <string name="history_workout_notes">Notes</string>
-    <string name="home_browse_programs">Veure programes predefinits</string>
+    <string name="home_browse_programs">Crear el meu programa</string>
     <string name="home_empty_workout">Entrenament buit</string>
     <string name="home_in_progress">Entrenament en curs</string>
     <string name="home_in_progress_detail">%1$s · %2$d/%3$d sèries</string>

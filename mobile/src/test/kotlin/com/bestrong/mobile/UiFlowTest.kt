@@ -228,9 +228,9 @@ class UiFlowTest {
     /** Sin rutinas el botón de programas queda bajo la ilustración: se desplaza con el reloj en marcha. */
     private fun openPrograms() {
         compose.mainClock.autoAdvance = true
-        compose.onNodeWithText("Ver programas predefinidos").performScrollTo()
+        compose.onNodeWithText("Crear mi programa").performScrollTo()
         compose.mainClock.autoAdvance = false
-        compose.onNodeWithText("Ver programas predefinidos").performClick()
+        compose.onNodeWithText("Crear mi programa").performClick()
     }
 
     /** Lista del diálogo de programas (la rejilla de Inicio también es desplazable). */

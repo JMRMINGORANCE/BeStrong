@@ -244,6 +244,12 @@ class HomeViewModel @Inject constructor(
 
     fun stopProgram() = viewModelScope.launch { repo.setActiveProgram(null) }
 
+    /** Sin rutinas activas (mirado en la base de datos: la lista en memoria puede no haber llegado). */
+    suspend fun hasNoRoutines(): Boolean = repo.routinesOnce().none { !it.archived }
+
+    /** Ya se abrió (o no hacía falta) «Crea tu programa» tras la bienvenida. */
+    fun clearPendingBuilder() = settingsStore.update { it.copy(pendingBuilder = false) }
+
     fun setWeeklyGoal(goal: Int) = settingsStore.update { it.copy(weeklyGoal = goal.coerceIn(1, 7)) }
 
     /** Empieza la sesión del programa con las cargas prescritas (sin sustituirlas por la última vez). */

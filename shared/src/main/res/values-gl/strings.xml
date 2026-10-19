@@ -296,7 +296,7 @@
     <string name="history_search">Buscar por exercicio, nome ou nota</string>
     <string name="history_workout_name">Nome</string>
     <string name="history_workout_notes">Notas</string>
-    <string name="home_browse_programs">Ver programas predefinidos</string>
+    <string name="home_browse_programs">Crear o meu programa</string>
     <string name="home_empty_workout">Adestramento baleiro</string>
     <string name="home_in_progress">Adestramento en curso</string>
     <string name="home_in_progress_detail">%1$s · %2$d/%3$d series</string>
