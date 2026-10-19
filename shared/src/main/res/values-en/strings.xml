@@ -402,7 +402,10 @@
         <item quantity="one">🏆 %1$d record</item>
         <item quantity="other">🏆 %1$d records</item>
     </plurals>
-    <string name="n_reps">%1$d reps</string>
+    <plurals name="n_reps">
+        <item quantity="one">%1$d rep</item>
+        <item quantity="other">%1$d reps</item>
+    </plurals>
     <string name="n_sets">%1$s sets</string>
     <string name="n_sets_value">%1$s sets</string>
     <plurals name="n_times">
@@ -658,7 +661,10 @@
     <string name="settings">Settings</string>
     <string name="sex_female">Female</string>
     <string name="sex_male">Male</string>
-    <string name="share_more_exercises">+ %1$d more exercises</string>
+    <plurals name="share_more_exercises">
+        <item quantity="one">+ %1$d more exercise</item>
+        <item quantity="other">+ %1$d more exercises</item>
+    </plurals>
     <string name="share_routine_hint">Scan the QR with another phone running BeStrong or send the link.</string>
     <string name="share_routine_link">Share link or QR</string>
     <string name="share_routine_send">Send link</string>

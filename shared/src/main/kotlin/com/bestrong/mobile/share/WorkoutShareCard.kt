@@ -104,7 +104,7 @@ object WorkoutShareCard {
             y += rowHeight
         }
         if (done.size > MAX_EXERCISES) {
-            c.drawText(context.getString(R.string.share_more_exercises, done.size - MAX_EXERCISES), PAD, y, detailP)
+            c.drawText((done.size - MAX_EXERCISES).let { n -> context.resources.getQuantityString(R.plurals.share_more_exercises, n, n) }, PAD, y, detailP)
             y += 64f
         }
 
