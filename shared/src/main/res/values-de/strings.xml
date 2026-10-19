@@ -1313,4 +1313,5 @@
     <string name="picker_already_added">Schon hinzugefügt</string>
     <string name="gym_default_gym">Fitnessstudio</string>
     <string name="gym_default_home">Zuhause</string>
+    <string name="setup_sex">Geschlecht (für Kalorien und Kraftniveaus)</string>
 </resources>

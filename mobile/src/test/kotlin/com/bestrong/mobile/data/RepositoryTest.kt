@@ -86,9 +86,12 @@ class RepositoryTest {
     @Test fun activeProgramRoundTrip() = runBlocking {
         val p = ActiveProgram("gzclp", 123, mapOf("squat" to 100.0), weeklyGoal = 4)
         repo.setActiveProgram(p)
-        assertEquals(p, withTimeout(5_000) { repo.activeProgram.filterNotNull().first() })
+        // Lo guardado, de la base de datos (determinista); el flujo puede tardar en avisar con Robolectric cargado
+        assertEquals(p, repo.activeProgramOnce())
+        assertEquals(p, withTimeout(20_000) { repo.activeProgram.filterNotNull().first() })
         repo.setActiveProgram(null)
-        assertNull(withTimeout(5_000) { repo.activeProgram.first { it == null } })
+        assertNull(repo.activeProgramOnce())
+        assertNull(withTimeout(20_000) { repo.activeProgram.first { it == null } })
     }
 
     @Test fun backupCarriesActiveProgramAndExtras() = runBlocking {

@@ -155,6 +155,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 },
                 atHome = com.bestrong.core.model.Equipment.BARBELL !in settings.activeGym.equipment,
                 trainingGoal = settings.trainingGoal,
+                sex = settings.sex,
+                onSex = { sex -> appVm.update { it.copy(sex = sex) } },
             )
         } else if (settings.lastSeenVersion < BuildConfig.VERSION_CODE) {
             WhatsNewDialog { appVm.update { it.copy(lastSeenVersion = BuildConfig.VERSION_CODE) } }

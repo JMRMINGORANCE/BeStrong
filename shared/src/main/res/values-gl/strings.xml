@@ -1313,4 +1313,5 @@
     <string name="picker_already_added">Xa engadido</string>
     <string name="gym_default_gym">Ximnasio</string>
     <string name="gym_default_home">Casa</string>
+    <string name="setup_sex">Sexo (para calorías e niveis de forza)</string>
 </resources>

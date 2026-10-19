@@ -192,7 +192,11 @@ fun TutorialDialog(
     onSetup: (com.bestrong.core.util.WeightUnit, Int, Boolean, com.bestrong.core.training.Goal) -> Unit = { _, _, _, _ -> },
     atHome: Boolean = false,
     trainingGoal: com.bestrong.core.training.Goal = com.bestrong.core.training.Goal.HYPERTROPHY,
+    /** Para las calorías y los niveles de fuerza (antes se suponía hombre sin preguntar). */
+    sex: com.bestrong.core.stats.Sex = com.bestrong.core.stats.Sex.MALE,
+    onSex: (com.bestrong.core.stats.Sex) -> Unit = {},
 ) {
+    var chosenSex by rememberSaveable { mutableStateOf(sex) }
     var chosenUnit by rememberSaveable { mutableStateOf(unit) }
     var chosenGoal by rememberSaveable { mutableIntStateOf(weeklyGoal) }
     var chosenHome by rememberSaveable { mutableStateOf(atHome) }
@@ -202,6 +206,7 @@ fun TutorialDialog(
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     val finish = {
         onSetup(chosenUnit, chosenGoal, chosenHome, chosenTraining)
+        onSex(chosenSex)
         onDone()
     }
     Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
@@ -221,7 +226,7 @@ fun TutorialDialog(
                     }
                     androidx.compose.foundation.pager.HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth()) { page ->
                         if (page == TUTORIAL.size) {
-                            SetupScreen(chosenUnit, chosenGoal, chosenHome, { chosenUnit = it }, { chosenGoal = it }, { chosenHome = it }, chosenTraining) { chosenTraining = it }
+                            SetupScreen(chosenUnit, chosenGoal, chosenHome, { chosenUnit = it }, { chosenGoal = it }, { chosenHome = it }, chosenTraining, { chosenTraining = it }, chosenSex) { chosenSex = it }
                         } else {
                             TutorialScreen(TUTORIAL[page], tutorialTint(page))
                         }
@@ -370,6 +375,8 @@ private fun SetupScreen(
     onHome: (Boolean) -> Unit,
     training: com.bestrong.core.training.Goal,
     onTraining: (com.bestrong.core.training.Goal) -> Unit,
+    sex: com.bestrong.core.stats.Sex,
+    onSex: (com.bestrong.core.stats.Sex) -> Unit,
 ) {
     Column(
         Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState()),
@@ -386,6 +393,7 @@ private fun SetupScreen(
                 TrainingGoalChoice(training, onTraining)
                 SetupPage(unit, goal, onUnit, onGoal)
                 PlaceChoice(home, onHome)
+                SexChoice(sex, onSex)
                 // La pista al final: antes quedaba entre medias y empujaba «¿Dónde entrenas?» por debajo del botón
                 Text(stringResource(R.string.setup_import_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -496,3 +504,15 @@ fun TipCard(id: String, @StringRes text: Int, modifier: Modifier = Modifier) {
 }
 
 private val SETUP_ART = 96.dp
+
+/** Sexo para las fórmulas de calorías y niveles de fuerza (se puede cambiar luego en Perfil). */
+@Composable
+private fun SexChoice(selected: com.bestrong.core.stats.Sex, onChange: (com.bestrong.core.stats.Sex) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.setup_sex), style = MaterialTheme.typography.labelLarge)
+        androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            FilterChip(selected = selected == com.bestrong.core.stats.Sex.MALE, onClick = { onChange(com.bestrong.core.stats.Sex.MALE) }, label = { Text(stringResource(R.string.sex_male)) })
+            FilterChip(selected = selected == com.bestrong.core.stats.Sex.FEMALE, onClick = { onChange(com.bestrong.core.stats.Sex.FEMALE) }, label = { Text(stringResource(R.string.sex_female)) })
+        }
+    }
+}
