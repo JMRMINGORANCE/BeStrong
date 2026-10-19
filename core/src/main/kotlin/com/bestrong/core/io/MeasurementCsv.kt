@@ -29,7 +29,7 @@ object MeasurementCsv {
      * exportación.
      */
     fun read(text: String, zone: ZoneId = ZoneId.systemDefault(), monthFirstByDefault: Boolean = java.util.Locale.getDefault().country == "US"): Result {
-        val lines = text.lines().map { it.trim().removePrefix("") }.filter { it.isNotEmpty() }
+        val lines = text.lines().map { it.trim().removePrefix("\uFEFF") }.filter { it.isNotEmpty() }
         val first = lines.firstOrNull() ?: return Result(emptyList(), 0)
         val delimiter = if (first.contains(';')) ';' else ','
         val header = split(first, delimiter)

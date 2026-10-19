@@ -227,10 +227,10 @@ object Strength {
     }
 
     /** Resumen de un periodo [from, to) frente al periodo anterior de la misma duración. */
-    fun summary(history: List<Workout>, from: Long, to: Long, all: List<Workout> = history): PeriodSummary {
+    fun summary(history: List<Workout>, from: Long, to: Long, all: List<Workout> = history, prevFrom: Long = from - (to - from)): PeriodSummary {
         val done = history.filter { it.isFinished }
         val inPeriod = done.filter { it.startedAtEpochMs in from until to }
-        val before = done.filter { it.startedAtEpochMs in (from - (to - from)) until from }
+        val before = done.filter { it.startedAtEpochMs in prevFrom until from }
         val volume = inPeriod.sumOf { it.totalVolume }
         val prevVolume = before.sumOf { it.totalVolume }
         val ids = inPeriod.mapTo(HashSet()) { it.id }
@@ -340,7 +340,9 @@ object Strength {
     fun monthSummary(history: List<Workout>, month: YearMonth, zone: ZoneId): PeriodSummary {
         val from = month.atDay(1).atStartOfDay(zone).toInstant().toEpochMilli()
         val to = month.plusMonths(1).atDay(1).atStartOfDay(zone).toInstant().toEpochMilli()
-        return summary(history, from, to)
+        // Frente al mes natural anterior (no a los mismos días hacia atrás: febrero no se compara con 28 días de enero)
+        val prevFrom = month.minusMonths(1).atDay(1).atStartOfDay(zone).toInstant().toEpochMilli()
+        return summary(history, from, to, prevFrom = prevFrom)
     }
 
     /** Días desde la última vez que se entrenó cada músculo (como principal). Null = nunca. */

@@ -8,12 +8,14 @@ object Csv {
         val field = StringBuilder()
         var inQuotes = false
         var i = 0
-        val src = text.removePrefix("﻿")
+        val src = text.removePrefix("\uFEFF")
         while (i < src.length) {
             val c = src[i]
             when {
                 inQuotes && c == '"' && i + 1 < src.length && src[i + 1] == '"' -> { field.append('"'); i++ }
-                c == '"' -> inQuotes = !inQuotes
+                // Las comillas solo abren al principio del campo: un 5" suelto (pulgadas) no se traga el resto del archivo
+                c == '"' && inQuotes -> inQuotes = false
+                c == '"' && field.isEmpty() -> inQuotes = true
                 !inQuotes && c == delimiter -> { row.add(field.toString()); field.clear() }
                 !inQuotes && (c == '\n' || c == '\r') -> {
                     if (c == '\r' && i + 1 < src.length && src[i + 1] == '\n') i++
@@ -33,7 +35,7 @@ object Csv {
     }
 
     fun detectDelimiter(text: String): Char {
-        val header = text.removePrefix("﻿").lineSequence().firstOrNull().orEmpty()
+        val header = text.removePrefix("\uFEFF").lineSequence().firstOrNull().orEmpty()
         return if (header.count { it == ';' } > header.count { it == ',' }) ';' else ','
     }
 

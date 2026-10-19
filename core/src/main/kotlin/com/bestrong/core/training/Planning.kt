@@ -104,7 +104,8 @@ object Peaking {
      */
     fun plan(today: LocalDate, meetDate: LocalDate): List<PeakWeek> {
         if (meetDate.isBefore(today)) return emptyList()
-        val weeks = ChronoUnit.WEEKS.between(today, meetDate).toInt().coerceIn(1, 12)
+        // Redondeado hacia arriba: con 13 días quedan 2 semanas (aproximación + descarga), no 1
+        val weeks = ((ChronoUnit.DAYS.between(today, meetDate) + 6) / 7).toInt().coerceIn(1, 12)
         return (weeks downTo 1).map { out ->
             when {
                 out >= 9 -> PeakWeek(out, "Volumen", "Volume", 5, 5, 0.75)
@@ -273,16 +274,31 @@ object RoutineGenerator {
             val variant = days.take(dayIndex).count { it == type }
             // El remate cuenta dentro del tiempo de la sesión
             val room = if (finisherEx != null) maxExercises - 1 else maxExercises
-            val picks = slots.getValue(type).mapNotNull { options ->
-                val available = options.mapNotNull { ExerciseLibrary.byId(it) }.filter(usable)
-                if (available.isEmpty()) null else available[variant % available.size]
-            }.distinctBy { it.id }.filter { it.id != finisherEx?.id }.take(room)
+            val picks = picksFor(type, variant, usable, finisherEx, room)
             val label = dayLabels[type] ?: dayNames.getValue(type).let { (es, en) -> if (lang == "en") en else es }
             val letter = if (days.count { it == type } > 1) " " + ('A' + variant) else ""
             // Superseries solo entre accesorios; el remate va suelto al final
             val exercises = pairAccessories(picks.mapIndexed { i, ex -> routineExercise(ex, if (i < 2) main else acc) }, goal)
             Routine(name = label + letter, exercises = exercises + listOfNotNull(finisherEx?.let { routineExercise(it, acc) }))
         }
+    }
+
+    /** Una opción de cada hueco del tipo de día (la [variant]-ésima de las que se pueden hacer). */
+    private fun picksFor(type: String, variant: Int, usable: (Exercise) -> Boolean, finisher: Exercise?, room: Int): List<Exercise> {
+        val base = slots.getValue(type).mapNotNull { options ->
+            val available = options.mapNotNull { ExerciseLibrary.byId(it) }.filter(usable)
+            if (available.isEmpty()) null else available[variant % available.size]
+        }.distinctBy { it.id }.filter { it.id != finisher?.id }.take(room)
+        // Con lesiones o poco material un día puede quedarse con 0-1 ejercicios: se completa con lo que se
+        // pueda hacer de los demás tipos de día (mejor un día algo distinto que uno vacío)
+        return if (base.size >= MIN_DAY_EXERCISES) base else topUp(base, usable, finisher, minOf(room, MIN_DAY_EXERCISES))
+    }
+
+    private fun topUp(base: List<Exercise>, usable: (Exercise) -> Boolean, finisher: Exercise?, target: Int): List<Exercise> {
+        val used = base.mapTo(HashSet()) { it.id } + listOfNotNull(finisher?.id)
+        val extra = slots.values.flatten().flatten().distinct().mapNotNull { ExerciseLibrary.byId(it) }
+            .filter { it.id !in used && usable(it) }
+        return base + extra.take((target - base.size).coerceAtLeast(0))
     }
 
     private fun routineExercise(ex: Exercise, p: Prescription): RoutineExercise {
@@ -646,3 +662,5 @@ fun WeekPlan.missedSessions(
         val date = weekStart.plusDays(d - 1L)
         if (date.isBefore(today) && date !in trainedDays && !routineDone(id, date)) java.time.DayOfWeek.of(d) to id else null
     }.sortedByDescending { it.first }
+
+private const val MIN_DAY_EXERCISES = 3

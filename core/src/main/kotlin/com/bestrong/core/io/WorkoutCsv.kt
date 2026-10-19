@@ -122,6 +122,8 @@ object WorkoutCsv {
             val exNotes: String, val superset: String?, val set: WorkoutSet,
             val targetRpe: Double? = null, val tempo: String? = null,
             val gym: String? = null, val athlete: String? = null,
+            /** En nuestro formato, la serie 0 empieza una entrada nueva aunque repita ejercicio (press pesado y ligero). */
+            val startsEntry: Boolean = false,
         )
 
         val parsed = rows.drop(1).mapNotNull { r ->
@@ -130,6 +132,7 @@ object WorkoutCsv {
                     CsvFormat.BESTRONG -> {
                         val ex = resolver.resolve(r.get("exercise_name"), r.get("exercise_id"))
                         Row(
+                            startsEntry = r.get("set_index") == "0",
                             key = r.get("workout_id"), name = r.get("workout_name"),
                             start = parseIso(r.get("date"), zone), end = r.get("end_date").takeIf { it.isNotBlank() }?.let { parseIso(it, zone) },
                             notes = r.get("workout_notes"), exercise = ex, exNotes = r.get("exercise_notes"),
@@ -238,7 +241,7 @@ object WorkoutCsv {
             val exercises = mutableListOf<WorkoutExercise>()
             group.forEach { row ->
                 val last = exercises.lastOrNull()
-                if (last != null && last.exercise.id == row.exercise.id) {
+                if (last != null && last.exercise.id == row.exercise.id && !row.startsEntry) {
                     exercises[exercises.lastIndex] = last.copy(sets = last.sets + row.set)
                 } else {
                     exercises += WorkoutExercise(exercise = row.exercise, sets = listOf(row.set), notes = row.exNotes, supersetId = row.superset, targetRpe = row.targetRpe, tempo = row.tempo)

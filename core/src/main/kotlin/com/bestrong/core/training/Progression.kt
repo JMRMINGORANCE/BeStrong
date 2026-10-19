@@ -115,8 +115,10 @@ object Progression {
 
     /** Doble progresión clásica: las reps de la primera serie en todas → más peso; si no, igualarlas. */
     private fun fixedReps(last: List<WorkoutSet>, incrementKg: Double, easy: Boolean): ProgressionSuggestion {
-        val targetReps = last.first().reps
-        val hitAll = last.all { it.reps >= targetReps }
+        // Drop sets y similares no cuentan: menos reps a menos peso es lo esperado, no un fallo
+        val work = last.filter { it.type == SetType.NORMAL || it.type == SetType.FAILURE || it.type == SetType.CLUSTER }.ifEmpty { last }
+        val targetReps = work.first().reps
+        val hitAll = work.all { it.reps >= targetReps }
         return when {
             hitAll && easy -> {
                 val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = targetReps, completed = false, rpe = null) }
