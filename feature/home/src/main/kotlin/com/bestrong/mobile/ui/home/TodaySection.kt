@@ -193,43 +193,7 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
             if (canChangeGoal) Icon(Icons.Default.Edit, stringResource(R.string.week_goal_title), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            DayOfWeek.entries.forEach { d ->
-                val done = d in week.trainedDays
-                val planned = d in week.plannedDays && !done
-                val name = d.getDisplayName(TextStyle.FULL, locale)
-                val state = stringResource(
-                    when {
-                        done -> R.string.day_trained
-                        planned -> R.string.day_planned
-                        else -> R.string.day_not_trained
-                    },
-                )
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(
-                            if (done) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceContainerHighest),
-                            CircleShape,
-                        )
-                        .then(
-                            when {
-                                d == week.today -> Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                                // Planificado y aún sin hacer: un aro más suave
-                                planned -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), CircleShape)
-                                else -> Modifier
-                            },
-                        )
-                        .semantics { contentDescription = "$name: $state" },
-                ) {
-                    Text(
-                        d.getDisplayName(TextStyle.NARROW, locale),
-                        color = if (done) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-            }
+            DayOfWeek.entries.forEach { d -> DayCircle(d, week, locale) }
         }
     }
     if (editing) WeekGoalDialog(week.goal, onPick = { onGoalChange(it); editing = false }) { editing = false }
@@ -654,5 +618,45 @@ private fun CardioNudgeSwitch(vm: HomeViewModel) {
                 )
             }
         }
+    }
+}
+
+/** Un día de la semana: relleno si se entrenó, con aro si es hoy o tiene algo planificado. */
+@Composable
+private fun DayCircle(d: DayOfWeek, week: WeekProgress, locale: java.util.Locale) {
+    val done = d in week.trainedDays
+    val planned = d in week.plannedDays && !done
+    val name = d.getDisplayName(TextStyle.FULL, locale)
+    val state = stringResource(
+        when {
+            done -> R.string.day_trained
+            planned -> R.string.day_planned
+            else -> R.string.day_not_trained
+        },
+    )
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(36.dp)
+            .background(
+                if (done) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceContainerHighest),
+                CircleShape,
+            )
+            .then(
+                when {
+                    d == week.today -> Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    // Planificado y aún sin hacer: un aro más suave
+                    planned -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), CircleShape)
+                    else -> Modifier
+                },
+            )
+            .semantics { contentDescription = "$name: $state" },
+    ) {
+        Text(
+            d.getDisplayName(TextStyle.NARROW, locale),
+            color = if (done) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }

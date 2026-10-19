@@ -85,7 +85,8 @@ private val GOALS = listOf(
     GoalOption(Goal.GENERAL, Icons.Default.Favorite, R.string.goal_general, R.string.goal_general_desc),
 )
 
-private val MINUTES = listOf(30, 45, 60, 75)
+// Las mismas opciones que en Planificar
+private val MINUTES = listOf(30, 45, 60, 75, 90)
 
 /**
  * «Crea tu programa»: el objetivo, los días por semana, el material y el tiempo, y el programa a medida al momento;
@@ -173,7 +174,7 @@ fun ProgramBuilderScreen(
             item { SectionHeader(stringResource(R.string.builder_equipment), large = true) }
             item { KitPicker(kit) { kit = it } }
             item { SectionHeader(stringResource(R.string.builder_minutes), large = true) }
-            item { Segmented(MINUTES.map { "$it min" }, MINUTES.indexOf(minutes)) { minutes = MINUTES[it] } }
+            item { Segmented(MINUTES.map { "$it" }, MINUTES.indexOf(minutes)) { minutes = MINUTES[it] } }
             item { SectionHeader(stringResource(R.string.builder_preview), large = true) }
             item { ProgramHeader(program.name, program.description) }
             items(program.routines.size, key = { "gen-$it" }) { i -> GeneratedRoutineCard(program.routines[i]) }

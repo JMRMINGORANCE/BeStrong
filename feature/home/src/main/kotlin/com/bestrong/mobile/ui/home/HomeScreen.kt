@@ -119,22 +119,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
     UndoRoutineDelete(vm, snackbar)
     UndoDiscard(vm, snackbar, onOpenWorkout)
-    // ¿Se quedó un entreno abierto sin querer? Ofrecer terminarlo a la hora de la última serie
-    var forgotten by remember { mutableStateOf(vm.forgottenWorkout()) }
-    forgotten?.let { fw ->
-        AlertDialog(
-            onDismissRequest = { forgotten = null },
-            title = { Text(stringResource(R.string.forgotten_title)) },
-            text = { Text(stringResource(R.string.forgotten_body, fw.name, formatTime(fw.updatedAtEpochMs))) },
-            confirmButton = { Button(onClick = { vm.finishForgotten(); forgotten = null }) { Text(stringResource(R.string.forgotten_finish)) } },
-            dismissButton = {
-                Row {
-                    TextButton(onClick = { vm.discardActive(); forgotten = null }) { Text(stringResource(R.string.action_discard)) }
-                    TextButton(onClick = { forgotten = null }) { Text(stringResource(R.string.forgotten_continue)) }
-                }
-            },
-        )
-    }
+    ForgottenWorkoutDialog(vm)
     // Programas: pantalla completa para crear uno a medida (o elegir un clásico)
     if (showPrograms) {
         ProgramBuilderScreen(
@@ -170,6 +155,8 @@ fun HomeScreen(
             }
             item(span = full) {
                 QuickActions(
+                    // Si arriba ya hay una tarjeta destacada (entreno abierto, lo que toca), el entreno libre no compite con ella
+                    highlightEmpty = active == null && today == null && suggested == null,
                     onEmpty = { vm.startEmpty(onOpenWorkout) },
                     repeatName = history.firstOrNull { it.isFinished }?.name,
                     onRepeat = { vm.repeatLast(onOpenWorkout) },
@@ -182,9 +169,12 @@ fun HomeScreen(
             item(span = full) {
                 Column {
                     SectionHeader(stringResource(R.string.home_my_routines, routines.count { !it.archived }), large = true) {
-                        TextButton(onClick = { onEditRoutine(null) }) {
-                            Icon(Icons.Default.Add, null, Modifier.size(18.dp))
-                            Text(stringResource(R.string.routine_new_short), Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold)
+                        // Sin rutinas ya está el botón grande de abajo
+                        if (routines.any { !it.archived }) {
+                            TextButton(onClick = { onEditRoutine(null) }) {
+                                Icon(Icons.Default.Add, null, Modifier.size(18.dp))
+                                Text(stringResource(R.string.routine_new_short), Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                     RoutineSearchField(routines.size, routineQuery, nothingShown = shownRoutines.isEmpty()) { routineQuery = it }
@@ -214,14 +204,19 @@ fun HomeScreen(
                 )
             }
             // Avisos y datos del día, al final para no empujar lo principal
-            item { MissedSessionCard(vm, onOpenWorkout) }
-            item { YearAgoCard(vm, onOpenExercise) }
-            item { CardioWeekCard(vm) }
-            item { StaleRoutineCard(vm) }
-            item { LaggingMusclesCard(vm, onOpenMuscle) }
-            item { ReadinessCard(vm) }
-            item { IntakeCard(vm) }
-            item { TipCard("home_reorder", R.string.tip_home) }
+            // En una sola columna: las tarjetas que no tienen nada que enseñar no dejan huecos en la rejilla
+            item(span = full) {
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    MissedSessionCard(vm, onOpenWorkout)
+                    YearAgoCard(vm, onOpenExercise)
+                    CardioWeekCard(vm)
+                    StaleRoutineCard(vm)
+                    LaggingMusclesCard(vm, onOpenMuscle)
+                    ReadinessCard(vm)
+                    IntakeCard(vm)
+                    TipCard("home_reorder", R.string.tip_home)
+                }
+            }
         }
     }
 }
@@ -258,7 +253,7 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, onOpenWorkout:
  * repetir el último entreno.
  */
 @Composable
-private fun QuickActions(onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: () -> Unit, onPrograms: () -> Unit, onPlan: () -> Unit) {
+private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: () -> Unit, onPrograms: () -> Unit, onPlan: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // Con letra grande no caben cuatro en fila sin partir palabras: 2 × 2 con el texto al lado del icono
         val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
@@ -277,14 +272,14 @@ private fun QuickActions(onEmpty: () -> Unit, repeatName: String?, onRepeat: () 
             actions.chunked(if (scale > HUGE_FONT) 1 else 2).forEach { row ->
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     row.forEach { (icon, label, onClick) ->
-                        com.bestrong.mobile.ui.components.QuickAction(icon, label, onClick, Modifier.weight(1f), filled = label == empty, horizontal = true)
+                        com.bestrong.mobile.ui.components.QuickAction(icon, label, onClick, Modifier.weight(1f), filled = highlightEmpty && label == empty, horizontal = true)
                     }
                 }
             }
         } else {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
                 val tile = Modifier.fillMaxHeight()
-                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, empty, onEmpty, tile.weight(1.5f), filled = true)
+                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, empty, onEmpty, tile.weight(1.5f), filled = highlightEmpty)
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, watch, onWatch, tile.weight(1f))
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Star, programs, onPrograms, tile.weight(1f))
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.CalendarMonth, plan, onPlan, tile.weight(1f))
@@ -589,4 +584,24 @@ private fun Greeting(actions: @Composable androidx.compose.foundation.layout.Row
     }
     val date = java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM", java.util.Locale.getDefault()).format(now)
     com.bestrong.mobile.ui.components.ScreenTitle(stringResource(greeting), overline = date, actions = actions)
+}
+
+/** ¿Se quedó un entreno abierto sin querer? Ofrecer terminarlo a la hora de la última serie. */
+@Composable
+private fun ForgottenWorkoutDialog(vm: HomeViewModel) {
+    var forgotten by remember { mutableStateOf(vm.forgottenWorkout()) }
+    forgotten?.let { fw ->
+        AlertDialog(
+            onDismissRequest = { forgotten = null },
+            title = { Text(stringResource(R.string.forgotten_title)) },
+            text = { Text(stringResource(R.string.forgotten_body, fw.name, formatTime(fw.updatedAtEpochMs))) },
+            confirmButton = { Button(onClick = { vm.finishForgotten(); forgotten = null }) { Text(stringResource(R.string.forgotten_finish)) } },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = { vm.discardActive(); forgotten = null }) { Text(stringResource(R.string.action_discard)) }
+                    TextButton(onClick = { forgotten = null }) { Text(stringResource(R.string.forgotten_continue)) }
+                }
+            },
+        )
+    }
 }

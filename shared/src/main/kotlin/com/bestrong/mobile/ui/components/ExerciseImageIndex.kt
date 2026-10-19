@@ -167,7 +167,8 @@ fun ExerciseThumbStrip(exercises: List<Exercise>, size: Dp = 40.dp, max: Int = 5
             Text(
                 "+$rest",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                // Del color del texto de alrededor: legible también sobre el degradado naranja
+                color = androidx.compose.material3.LocalContentColor.current.copy(alpha = 0.85f),
                 modifier = Modifier.offset(x = -(size * 0.22f) * (shown.size - 1) + 6.dp),
             )
         }

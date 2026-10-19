@@ -34,9 +34,9 @@ import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.SwipeRight
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Today
@@ -176,7 +176,7 @@ private val TUTORIAL = listOf(
     TutorialPage(R.string.tut2_t, R.string.tut2_d, Icons.Default.CalendarMonth, listOf(Icons.Default.Repeat, Icons.Default.Star, Icons.Default.Today)),
     TutorialPage(R.string.tut3_t, R.string.tut3_d, Icons.Default.CheckCircle, listOf(Icons.Default.Timer, Icons.Default.Vibration, Icons.Default.SwipeRight)),
     TutorialPage(R.string.tut5_t, R.string.tut5_d, Icons.Default.Watch, listOf(Icons.Default.Favorite, Icons.Default.Timer, Icons.AutoMirrored.Filled.DirectionsRun)),
-    TutorialPage(R.string.tut4_t, R.string.tut4_d, Icons.Default.EmojiEvents, listOf(Icons.Default.Insights, Icons.Default.LocalFireDepartment, Icons.Default.MonitorWeight)),
+    TutorialPage(R.string.tut4_t, R.string.tut4_d, Icons.Default.EmojiEvents, listOf(Icons.Default.Insights, Icons.Default.LocalFireDepartment, Icons.Default.Straighten)),
 )
 
 /**
@@ -376,7 +376,7 @@ private fun SetupScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        TutorialIllustration(TutorialPage(R.string.setup_title, R.string.setup_title, Icons.Default.Tune, listOf(Icons.Default.MonitorWeight, Icons.Default.CalendarMonth, Icons.Default.Home)), MaterialTheme.colorScheme.primary, Modifier.size(180.dp))
+        TutorialIllustration(TutorialPage(R.string.setup_title, R.string.setup_title, Icons.Default.Tune, listOf(Icons.Default.Straighten, Icons.Default.CalendarMonth, Icons.Default.Home)), MaterialTheme.colorScheme.primary, Modifier.size(180.dp))
         Spacer(Modifier.height(16.dp))
         Text(stringResource(R.string.setup_title), style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))

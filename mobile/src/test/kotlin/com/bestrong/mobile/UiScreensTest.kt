@@ -55,12 +55,20 @@ class UiScreensTest {
         settle()
     }
 
+    /** Sin rutinas, «+ Nueva rutina» está en la tarjeta vacía de Inicio (más abajo). */
+    private fun newRoutine() {
+        compose.mainClock.autoAdvance = true
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("+ Nueva rutina"))
+        compose.onNodeWithText("+ Nueva rutina").performClick()
+        compose.mainClock.autoAdvance = false
+        settle()
+    }
+
     @Test
     fun routine_editor() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Nueva").performClick()
-        settle()
+        newRoutine()
         compose.onNode(hasSetTextAction() and hasText("Nombre", substring = true)).performTextReplacement("Pecho y tríceps")
         pickBench()
         shot("routine_editor")
@@ -125,8 +133,7 @@ class UiScreensTest {
     fun routine_editor_dark() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Nueva").performClick()
-        settle()
+        newRoutine()
         pickBench()
         shot("routine_editor_dark")
     }

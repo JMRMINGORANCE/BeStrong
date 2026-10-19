@@ -407,7 +407,6 @@
     <string name="new_measurement">Nova mesura</string>
     <string name="new_records">🏆 Nous rècords</string>
     <string name="next">Següent</string>
-    <string name="next_up">Següent</string>
     <string name="no_data_body">Completa sèries d’aquest exercici per veure el teu progrés.</string>
     <string name="no_data_title">Encara no hi ha dades</string>
     <string name="no_data_yet">Encara no hi ha dades</string>
@@ -1235,7 +1234,7 @@
     <string name="builder_goal">Quin és el teu objectiu?</string>
     <string name="builder_days">Quants dies per setmana?</string>
     <string name="builder_equipment">Amb quin material?</string>
-    <string name="builder_minutes">Quant temps per sessió?</string>
+    <string name="builder_minutes">Quant temps per sessió? (min)</string>
     <string name="builder_gym">Gimnàs</string>
     <string name="builder_dumbbells">Manuelles</string>
     <string name="builder_bodyweight">Sense material</string>
@@ -1273,4 +1272,9 @@
         <item quantity="other">🔥 %1$d setmanes</item>
     </plurals>
     <string name="day_planned">planificat</string>
+    <string name="rating_scale">1 = poc · 5 = molt</string>
+    <string name="plates_below_bar">Menys que la barra (%1$s)</string>
+    <string name="current_set_label">Ara toca</string>
+    <string name="profile_empty_title">Aquí veuràs el teu progrés</string>
+    <string name="profile_empty_body">Gràfiques, rècords i mapa muscular apareixen tan bon punt acabis el primer entrenament.</string>
 </resources>

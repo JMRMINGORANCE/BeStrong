@@ -18,8 +18,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
-import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -98,10 +98,13 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                editingId = null
-                adding = true
-            }) { Icon(Icons.Default.Add, stringResource(R.string.add_measurement)) }
+            // Sin medidas ya está el botón grande de la tarjeta de bienvenida
+            if (list.isNotEmpty()) {
+                FloatingActionButton(onClick = {
+                    editingId = null
+                    adding = true
+                }) { Icon(Icons.Default.Add, stringResource(R.string.add_measurement)) }
+            }
         },
     ) { padding ->
         LazyColumn(Modifier.padding(padding).fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -113,7 +116,7 @@ fun MeasurementsScreen(vm: ProfileViewModel, onBack: () -> Unit) {
                         editingId = null
                         adding = true
                     }) {
-                        Icon(Icons.Default.MonitorWeight, null, Modifier.size(40.dp))
+                        Icon(Icons.Default.Straighten, null, Modifier.size(40.dp))
                         Text(stringResource(R.string.measurements_empty_title), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
                         Text(stringResource(R.string.measurements_empty_body), style = MaterialTheme.typography.bodyMedium)
                         Text("+ " + stringResource(R.string.add_measurement), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 4.dp))

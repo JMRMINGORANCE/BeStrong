@@ -407,7 +407,6 @@
     <string name="new_measurement">Nueva medida</string>
     <string name="new_records">🏆 Nuevos récords</string>
     <string name="next">Siguiente</string>
-    <string name="next_up">Siguiente</string>
     <string name="no_data_body">Completa series de este ejercicio para ver tu progreso.</string>
     <string name="no_data_title">Aún no hay datos</string>
     <string name="no_data_yet">Sin datos todavía</string>
@@ -1235,7 +1234,7 @@
     <string name="builder_goal">¿Cuál es tu objetivo?</string>
     <string name="builder_days">¿Cuántos días por semana?</string>
     <string name="builder_equipment">¿Con qué material?</string>
-    <string name="builder_minutes">¿Cuánto tiempo por sesión?</string>
+    <string name="builder_minutes">¿Cuánto tiempo por sesión? (min)</string>
     <string name="builder_gym">Gimnasio</string>
     <string name="builder_dumbbells">Mancuernas</string>
     <string name="builder_bodyweight">Sin material</string>
@@ -1273,4 +1272,9 @@
         <item quantity="other">🔥 %1$d semanas</item>
     </plurals>
     <string name="day_planned">planificado</string>
+    <string name="rating_scale">1 = poco · 5 = mucho</string>
+    <string name="plates_below_bar">Menos que la barra (%1$s)</string>
+    <string name="current_set_label">Ahora toca</string>
+    <string name="profile_empty_title">Aquí verás tu progreso</string>
+    <string name="profile_empty_body">Gráficas, récords y mapa muscular aparecen en cuanto termines tu primer entreno.</string>
 </resources>

@@ -97,7 +97,8 @@ private fun brandDark(accent: Accent): ColorScheme {
         onPrimaryContainer = if (orange) Color(0xFFFFDBCA) else lerp(accent.seed, Color.White, 0.82f),
         secondary = P.Amber,
         onSecondary = Color(0xFF2B1A00),
-        secondaryContainer = Color(0xFF3A2A12),
+        // Más intenso: es el fondo de los chips elegidos y tiene que verse sobre las tarjetas oscuras
+        secondaryContainer = Color(0xFF5C3F12),
         onSecondaryContainer = Color(0xFFFFDDB0),
         tertiary = P.Success,
         onTertiary = Color(0xFF00391A),
@@ -130,7 +131,8 @@ private fun brandLight(accent: Accent): ColorScheme {
         onPrimaryContainer = if (orange) P.OnOrangeContainerLight else lerp(accent.seed, Color.Black, 0.75f),
         secondary = P.AmberDark,
         onSecondary = Color.White,
-        secondaryContainer = Color(0xFFFFE6C2),
+        // Más intenso: es el fondo de los chips elegidos y tiene que verse sobre las tarjetas beis
+        secondaryContainer = Color(0xFFFFD596),
         onSecondaryContainer = Color(0xFF2B1A00),
         tertiary = P.SuccessDark,
         tertiaryContainer = P.SuccessContainerLight,

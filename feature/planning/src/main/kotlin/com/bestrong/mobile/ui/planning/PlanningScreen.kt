@@ -288,7 +288,7 @@ private fun GeneratorCard(vm: PlanningViewModel) {
         }
         Text(stringResource(R.string.gen_minutes), style = MaterialTheme.typography.labelMedium)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            listOf(30, 45, 60, 90).forEach { m -> FilterChip(selected = minutes == m, onClick = { minutes = m }, label = { Text("$m") }) }
+            listOf(30, 45, 60, 75, 90).forEach { m -> FilterChip(selected = minutes == m, onClick = { minutes = m }, label = { Text("$m") }) }
         }
         Button(onClick = { preview = vm.generate(days, equipment, goal, minutes) }) { Text(stringResource(R.string.gen_generate)) }
         preview.forEach { r ->

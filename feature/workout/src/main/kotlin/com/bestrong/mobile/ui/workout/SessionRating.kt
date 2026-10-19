@@ -24,16 +24,19 @@ import com.bestrong.mobile.shared.R
 @Composable
 fun SessionRatingPicker(onRate: (SessionRating) -> Unit) {
     var rating by remember { mutableStateOf(SessionRating()) }
+    // Nada marcado hasta que se toca (si no, parece que ya se respondió); los valores por defecto siguen ahí
+    var picked by remember { mutableStateOf(setOf<Int>()) }
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Text(stringResource(R.string.rating_title), style = MaterialTheme.typography.titleSmall)
-        RatingRow(stringResource(R.string.rating_energy), rating.energy) { rating = rating.copy(energy = it); onRate(rating) }
-        RatingRow(stringResource(R.string.rating_pain), rating.pain) { rating = rating.copy(pain = it); onRate(rating) }
-        RatingRow(stringResource(R.string.rating_motivation), rating.motivation) { rating = rating.copy(motivation = it); onRate(rating) }
+        Text(stringResource(R.string.rating_scale), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        RatingRow(stringResource(R.string.rating_energy), rating.energy.takeIf { 0 in picked }) { rating = rating.copy(energy = it); picked = picked + 0; onRate(rating) }
+        RatingRow(stringResource(R.string.rating_pain), rating.pain.takeIf { 1 in picked }) { rating = rating.copy(pain = it); picked = picked + 1; onRate(rating) }
+        RatingRow(stringResource(R.string.rating_motivation), rating.motivation.takeIf { 2 in picked }) { rating = rating.copy(motivation = it); picked = picked + 2; onRate(rating) }
     }
 }
 
 @Composable
-private fun RatingRow(label: String, value: Int, onChange: (Int) -> Unit) {
+private fun RatingRow(label: String, value: Int?, onChange: (Int) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(label, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
         (1..5).forEach { n ->

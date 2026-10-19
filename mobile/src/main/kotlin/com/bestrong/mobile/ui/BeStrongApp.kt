@@ -208,6 +208,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             else -> scheme.primary
         }
         com.bestrong.mobile.ui.theme.ScreenBackdrop(tabTint) {
+            // Con letra muy grande no caben las cuatro etiquetas: solo la de la pestaña elegida
+            val navLabels = androidx.compose.ui.platform.LocalDensity.current.fontScale <= 1.5f
             NavigationSuiteScaffold(
                 layoutType = layoutType,
                 navigationSuiteColors = androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults.colors(
@@ -222,6 +224,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             onClick = { nav.navigateTopLevel(dest.route) },
                             icon = { Icon(dest.icon, contentDescription = stringResource(dest.label)) },
                             label = { Text(stringResource(dest.label), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            alwaysShowLabel = navLabels,
                         )
                     }
                 },
@@ -258,6 +261,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         ProfileScreen(
                             vm = hiltViewModel<ProfileViewModel>(),
                             onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) },
+                            onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
                             onOpenExercise = { nav.navigate(Routes.exercise(it)) },
                         )
                     }

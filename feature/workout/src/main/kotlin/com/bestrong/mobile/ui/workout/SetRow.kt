@@ -489,7 +489,15 @@ private fun NumberField(
             .semantics { contentDescription = description },
         decorationBox = { inner ->
             Box(contentAlignment = Alignment.Center) {
-                if (text.isEmpty()) Text("0", color = MaterialTheme.colorScheme.outline, textAlign = TextAlign.Center)
+                // Mismo estilo que el número escrito (si no, el campo vacío sale más alto) y un gris legible
+                if (text.isEmpty()) {
+                    Text(
+                        "0",
+                        style = TextStyle(fontSize = MaterialTheme.typography.bodyLarge.fontSize),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center,
+                    )
+                }
                 inner()
             }
         },

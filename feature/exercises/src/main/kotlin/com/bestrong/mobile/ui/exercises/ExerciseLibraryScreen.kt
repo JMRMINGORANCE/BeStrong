@@ -324,12 +324,13 @@ private fun ExerciseCard(
                     IconToggleButton(
                         checked = favorite,
                         onCheckedChange = { onToggleFavorite() },
-                        modifier = Modifier.size(36.dp).clip(CircleShape).background(scheme.surfaceContainerLowest.copy(alpha = 0.85f)),
+                        // 44 dp para tocarlo bien y un fondo claro (sobre la imagen blanca no se ve un círculo negro)
+                        modifier = Modifier.size(44.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)),
                     ) {
                         Icon(
                             if (favorite) Icons.Default.Star else Icons.Default.StarBorder,
                             stringResource(if (favorite) R.string.favorite_remove else R.string.favorite_add, ex.displayName()),
-                            tint = if (favorite) scheme.secondary else scheme.onSurfaceVariant,
+                            tint = if (favorite) scheme.secondary else androidx.compose.ui.graphics.Color.DarkGray,
                             modifier = Modifier.size(20.dp),
                         )
                     }
@@ -337,7 +338,7 @@ private fun ExerciseCard(
             }
         }
         Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(ex.displayName(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, minLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(ex.displayName(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text(meta, style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             lastLine?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = scheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis) }
         }

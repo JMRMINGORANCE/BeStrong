@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -517,7 +518,8 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
             val prev = previous(we.exercise.id).getOrNull(we.sets.indexOf(set))
             com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                 Column(Modifier.padding(12.dp)) {
-                    Text(stringResource(R.string.next_up), style = MaterialTheme.typography.labelMedium)
+                    // Es la serie que toca ahora (la primera sin hacer), no la de después
+                    Text(stringResource(R.string.current_set_label), style = MaterialTheme.typography.labelMedium)
                     Text(we.exercise.displayName(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(describeSet(set, we.exercise, unit), style = MaterialTheme.typography.headlineMedium)
                     prev?.let { Text(stringResource(R.string.previous_value, describeSet(it, we.exercise, unit)), color = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -702,15 +704,20 @@ private fun ExerciseCard(
                 val gym = vm.settings.collectAsStateWithLifecycle().value.gymFor(we.exercise.id)
                 if (next > 0) {
                     val load = remember(next, gym, unit) { gym.plateLoad(next, unit) }
+                    // Por debajo de la barra no hay «solo la barra» que valga: se avisa en otro color
+                    val belowBar = next < gym.loadedBarKg - 0.01
                     Text(
-                        if (load.perSide.isEmpty()) {
+                        if (belowBar) {
+                            stringResource(R.string.plates_below_bar, unit.format(gym.loadedBarKg, withUnit = true))
+                        } else if (load.perSide.isEmpty()) {
                             stringResource(R.string.plates_inline_bar)
                         } else {
                             stringResource(R.string.plates_inline, load.perSide.joinToString(" + ") { formatWeight(it) }) + if (load.remainder > 0.01) " ≈" else ""
                         },
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 12.dp).clickable { showPlates = true },
+                        color = if (belowBar) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                        // Alineado con el nombre del ejercicio (a la derecha de su imagen)
+                        modifier = Modifier.padding(start = 78.dp, end = 12.dp).clickable { showPlates = true },
                     )
                 }
             }
@@ -1059,14 +1066,17 @@ fun WorkoutSummaryDialog(
     val unit = LocalWeightUnit.current
     AlertDialog(
         onDismissRequest = onDone,
-        icon = { Icon(Icons.Default.EmojiEvents, null) },
-        title = { Text(stringResource(R.string.workout_completed)) },
+        icon = { Icon(Icons.Default.EmojiEvents, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary) },
+        title = { Text(stringResource(R.string.workout_completed), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black) },
         text = {
             // Con récords, comparaciones y próxima vez puede no caber: se desplaza
             Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f))
-                    StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
+                // Los datos con el color normal del texto (el diálogo los atenuaría)
+                androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f))
+                        StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
+                    }
                 }
                 // «1 serie · 1 ejercicio»: con plurales
                 Text(
