@@ -369,15 +369,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Conflictos de sincronización con el reloj (misma serie con valores distintos). */
     val syncConflicts = repo.syncConflicts
 
-    /** Fin del descanso que arrancó el último «marcar las que faltan» (para pararlo si se deshace). */
-    private var pendingRestUndo: Long? = null
-
     /** Deshace el borrado de ese aviso: se recupera lo borrado sin perder lo que haya cambiado después. */
     fun undo(event: WorkoutEvent.Undoable) {
-        if (event.kind == UndoKind.COMPLETE) {
-            pendingRestUndo?.let { end -> if (restTimer.rest.value?.endsAtEpochMs == end) restTimer.skip() }
-            pendingRestUndo = null
-        }
         viewModelScope.launch {
             update(event.partner) { w -> if (w.id == event.workoutId) event.restore(w) else w }
             event.alsoUndo?.invoke()
@@ -479,11 +472,17 @@ class ActiveWorkoutViewModel @Inject constructor(
                 }
             }
             _events.tryEmit(
-                WorkoutEvent.Undoable(UndoKind.COMPLETE, partner, before.id, followUp = goal) { w ->
+                // Cada aviso guarda su propio descanso: dos «marcar las que faltan» seguidos no se pisan
+                WorkoutEvent.Undoable(
+                    UndoKind.COMPLETE,
+                    partner,
+                    before.id,
+                    followUp = goal,
+                    alsoUndo = startedEnd?.let { end -> { if (restTimer.rest.value?.endsAtEpochMs == end) restTimer.skip() } },
+                ) { w ->
                     WorkoutEditor.updateExercise(w, weId) { we -> we.copy(sets = we.sets.map { s -> if (marked[s.id] == s) old.getValue(s.id) else s }) }
                 },
             )
-            pendingRestUndo = startedEnd
         }
     }
     fun setType(weId: String, setId: String, type: SetType) = edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(type = type) } }

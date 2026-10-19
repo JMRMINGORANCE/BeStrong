@@ -206,9 +206,11 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
     val initialName = remember { name }
     val initialDays = remember { days.toList() }
     var confirmLeave by rememberSaveable { mutableStateOf(false) }
+    // El id viene de la navegación (no de la lista cargada, vacía tras matar el proceso): guardar no duplica el programa
+    val newProgramId = rememberSaveable { "custom:${newId()}" }
     val canSave = name.isNotBlank() && days.any { it.items.isNotEmpty() }
     val save = {
-        vm.saveProgram(buildProgram(existing?.id ?: "custom:${newId()}", name.trim(), days.filter { it.items.isNotEmpty() }))
+        vm.saveProgram(buildProgram(programId ?: newProgramId, name.trim(), days.filter { it.items.isNotEmpty() }))
         onClose()
     }
     val leave = { if (name != initialName || days.toList() != initialDays) confirmLeave = true else onClose() }
