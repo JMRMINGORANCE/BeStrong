@@ -579,9 +579,17 @@ private fun ExerciseList(
     modifier: Modifier = Modifier,
 ) {
     val groups = w.exercises.mapNotNull { it.supersetId }.distinct()
+    // Los ejercicios terminados se pliegan (menos el último hecho: su RPE y «añadir serie» siguen a mano)
+    var reopened by rememberSaveable { mutableStateOf(setOf<String>()) }
+    val lastDoneId = w.exercises.maxByOrNull { we -> we.sets.maxOfOrNull { it.completedAtEpochMs ?: 0L } ?: 0L }?.id
     LazyColumn(modifier.fillMaxWidth(), state = listState, contentPadding = PaddingValues(bottom = 24.dp)) {
         itemsIndexed(w.exercises, key = { _, we -> we.id }) { index, we ->
             val groupIndex = we.supersetId?.let { groups.indexOf(it) }
+            val folded = we.supersetId == null && we.sets.isNotEmpty() && we.sets.all { it.completed } && we.id != lastDoneId && we.id !in reopened
+            if (folded) {
+                DoneExerciseRow(we) { reopened = reopened + we.id }
+                return@itemsIndexed
+            }
             ExerciseCard(
                 we = we,
                 index = index,
@@ -1220,3 +1228,26 @@ private fun PendingExercises(w: Workout, onJump: (Int) -> Unit) {
 }
 
 private const val MAX_PENDING_SHOWN = 5
+
+/** Ejercicio terminado, plegado en una línea: imagen, nombre, series hechas y la mejor; tocar lo despliega. */
+@Composable
+private fun DoneExerciseRow(we: WorkoutExercise, onOpen: () -> Unit) {
+    val unit = LocalWeightUnit.current
+    val best = we.completedSets.maxByOrNull { it.estimatedOneRepMax }
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .clickable(onClickLabel = stringResource(R.string.exercise_show_sets), onClick = onOpen)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        com.bestrong.mobile.ui.components.ExerciseThumb(we.exercise, 40.dp, enlargeOnTap = false)
+        Column(Modifier.weight(1f)) {
+            Text(we.exercise.displayName(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            best?.let { Text(describeSet(it, we.exercise, unit), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1) }
+        }
+        com.bestrong.mobile.ui.components.MetaPill("✓ ${we.sets.size}/${we.sets.size}")
+    }
+}

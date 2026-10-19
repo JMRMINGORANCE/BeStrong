@@ -57,6 +57,7 @@
     <string name="action_sync">Sync</string>
     <string name="action_undo">Undo</string>
     <string name="add_exercises">Add exercises</string>
+    <string name="exercise_show_sets">Show sets</string>
     <string name="add_measurement">Add measurement</string>
     <string name="add_n">Add %1$d</string>
     <string name="add_set">+ Add set</string>

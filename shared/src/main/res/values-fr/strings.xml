@@ -57,6 +57,7 @@
     <string name="action_sync">Synchroniser</string>
     <string name="action_undo">Annuler</string>
     <string name="add_exercises">Ajouter des exercices</string>
+    <string name="exercise_show_sets">Voir les séries</string>
     <string name="add_measurement">Ajouter une mesure</string>
     <string name="add_n">Ajouter %1$d</string>
     <string name="add_set">+ Ajouter une série</string>

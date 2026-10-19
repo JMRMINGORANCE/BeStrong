@@ -57,6 +57,7 @@
     <string name="action_sync">Sincronitzar</string>
     <string name="action_undo">Desfer</string>
     <string name="add_exercises">Afegir exercicis</string>
+    <string name="exercise_show_sets">Mostra les sèries</string>
     <string name="add_measurement">Afegir mesura</string>
     <string name="add_n">Afegir %1$d</string>
     <string name="add_set">+ Afegir sèrie</string>

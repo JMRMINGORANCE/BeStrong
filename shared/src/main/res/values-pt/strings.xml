@@ -57,6 +57,7 @@
     <string name="action_sync">Sincronizar</string>
     <string name="action_undo">Anular</string>
     <string name="add_exercises">Adicionar exercícios</string>
+    <string name="exercise_show_sets">Ver séries</string>
     <string name="add_measurement">Adicionar medida</string>
     <string name="add_n">Adicionar %1$d</string>
     <string name="add_set">+ Adicionar série</string>
