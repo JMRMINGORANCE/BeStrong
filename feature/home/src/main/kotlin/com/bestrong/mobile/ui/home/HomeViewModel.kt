@@ -64,6 +64,9 @@ class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
+    /** Descanso en marcha (se ve en la tarjeta del entreno en curso sin tener que abrirlo). */
+    val rest: StateFlow<com.bestrong.mobile.ui.components.RestState?> = actions.rest
+
     /** Preparación del día (sueño y pulso en reposo de Health Connect + última valoración). */
     private val _readiness = MutableStateFlow<ReadinessReport?>(null)
     val readiness: StateFlow<ReadinessReport?> = _readiness

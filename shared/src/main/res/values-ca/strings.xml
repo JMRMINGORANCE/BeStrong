@@ -459,6 +459,7 @@
     <string name="peak_title">Preparació per a una data</string>
     <string name="peak_week">Falten %1$d setm. · %2$s: %3$d × %4$d al %5$d %%</string>
     <string name="personal_records">Rècords personals</string>
+    <string name="chart_change_since">%1$s des del %2$s</string>
     <string name="pip_next">Següent: %1$s</string>
     <string name="plan_generated_saved">%1$d rutines desades</string>
     <string name="plan_program_saved">Programa «%1$s» desat</string>

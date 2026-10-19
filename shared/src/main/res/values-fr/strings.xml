@@ -459,6 +459,7 @@
     <string name="peak_title">Préparation pour une date</string>
     <string name="peak_week">Dans %1$d sem. · %2$s : %3$d × %4$d à %5$d %%</string>
     <string name="personal_records">Records personnels</string>
+    <string name="chart_change_since">%1$s depuis le %2$s</string>
     <string name="pip_next">Suivant : %1$s</string>
     <string name="plan_generated_saved">%1$d routines enregistrées</string>
     <string name="plan_program_saved">Programme « %1$s » enregistré</string>

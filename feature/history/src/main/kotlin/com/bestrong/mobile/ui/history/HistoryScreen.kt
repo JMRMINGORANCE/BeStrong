@@ -92,6 +92,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain: () -> Unit = {}) {
     val history by vm.history.collectAsStateWithLifecycle()
+    val recordCounts by vm.recordCounts.collectAsStateWithLifecycle()
     val days by vm.trainingDays.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
     val filtered by vm.filtered.collectAsStateWithLifecycle()
@@ -204,10 +205,12 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
                             }
                             item { FilteredSummary(vm, filtered) }
                             items(filtered, key = { it.id }) { w ->
+                                val records = recordCounts.getOrDefault(w.id, 0)
                                 // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
                                 val dragText = workoutText(w)
                                 WorkoutCard(
                                     w,
+                                    records,
                                     Modifier.clip(MaterialTheme.shapes.large).combinedClickable(
                                         onLongClick = { DragShare.start(view, w.name, dragText) },
                                         onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } },
@@ -242,7 +245,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
 
 /** Un entreno de la lista: la fecha en un sello a la izquierda, el nombre, sus datos en píldoras y sus ejercicios. */
 @Composable
-private fun WorkoutCard(w: Workout, modifier: Modifier = Modifier) {
+private fun WorkoutCard(w: Workout, records: Int, modifier: Modifier = Modifier) {
     val unit = LocalWeightUnit.current
     val date = java.time.Instant.ofEpochMilli(w.startedAtEpochMs).atZone(java.time.ZoneId.systemDefault())
     com.bestrong.mobile.ui.components.Panel(modifier) {
@@ -271,6 +274,8 @@ private fun WorkoutCard(w: Workout, modifier: Modifier = Modifier) {
             com.bestrong.mobile.ui.components.MetaPill("⏱ " + formatDuration(w.durationSeconds()))
             if (w.totalVolume > 0) com.bestrong.mobile.ui.components.MetaPill(unit.formatVolume(w.totalVolume))
             com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.history_sets_done, w.completedSetCount, w.completedSetCount))
+            // Día de récords a la vista sin abrir el entreno
+            if (records > 0) com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.n_records, records, records))
         }
         // Las imágenes de sus ejercicios y, debajo, cuáles fueron
         com.bestrong.mobile.ui.components.ExerciseThumbStrip(w.exercises.map { it.exercise }, 40.dp)

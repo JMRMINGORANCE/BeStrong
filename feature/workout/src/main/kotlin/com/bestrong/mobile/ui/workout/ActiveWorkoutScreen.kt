@@ -69,6 +69,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -124,6 +125,7 @@ import com.bestrong.mobile.ui.help.TipCard
 import com.bestrong.mobile.ui.rememberFoldPosture
 import com.bestrong.mobile.ui.theme.statusColors
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 /**
  * Entrenamiento en curso.
@@ -155,6 +157,7 @@ fun ActiveWorkoutScreen(
     var renaming by remember { mutableStateOf(false) }
     var editingNotes by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
 
     KeepScreenOn(settings.keepScreenOn)
     LaunchedEffect(Unit) { vm.focusExercise.collect { listState.animateScrollToItem(it) } }
@@ -344,13 +347,22 @@ fun ActiveWorkoutScreen(
             onDismissRequest = { confirmFinish = false },
             title = { Text(stringResource(R.string.workout_finish_q)) },
             text = {
-                Text(
-                    when {
-                        w.completedSetCount == 0 -> stringResource(R.string.workout_finish_empty)
-                        pending > 0 -> pluralStringResource(R.plurals.workout_finish_pending, pending, pending)
-                        else -> stringResource(R.string.workout_finish_ok)
-                    },
-                )
+                Column {
+                    Text(
+                        when {
+                            w.completedSetCount == 0 -> stringResource(R.string.workout_finish_empty)
+                            pending > 0 -> pluralStringResource(R.plurals.workout_finish_pending, pending, pending)
+                            else -> stringResource(R.string.workout_finish_ok)
+                        },
+                    )
+                    // Cuáles son: lo normal es una serie hecha sin marcar; tocar lleva a ella
+                    if (pending > 0 && w.completedSetCount > 0) {
+                        PendingExercises(w) { i ->
+                            confirmFinish = false
+                            scope.launch { listState.animateScrollToItem(i) }
+                        }
+                    }
+                }
             },
             confirmButton = { Button(onClick = { confirmFinish = false; vm.finish(); if (w.completedSetCount == 0) onFinished() }) { Text(stringResource(R.string.workout_finish)) } },
             dismissButton = { TextButton(onClick = { confirmFinish = false }) { Text(stringResource(R.string.action_keep_going)) } },
@@ -674,7 +686,8 @@ private fun ExerciseCard(
                             },
                     )
                     Text(
-                        stringResource(R.string.exercise_subtitle_rest, we.exercise.primaryMuscle.label(), we.exercise.equipment.label(), formatDuration(we.restSeconds.toLong())),
+                        stringResource(R.string.exercise_subtitle_rest, we.exercise.primaryMuscle.label(), we.exercise.equipment.label(), formatDuration(we.restSeconds.toLong())) +
+                            lastDoneSuffix(previous),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -1183,3 +1196,27 @@ private fun nextSetLabel(w: com.bestrong.core.model.Workout): String? {
     val ex = next?.let { (i, _) -> w.exercises.getOrNull(i)?.exercise }
     return if (next == null || ex == null) null else ex.displayName() + " · " + describeSet(next.second, ex, unit)
 }
+
+/** « · hace 12 d»: cuánto hace de la última vez (tras un parón se empieza más ligero); vacío si fue hoy o no consta. */
+@Composable
+private fun lastDoneSuffix(previous: List<WorkoutSet>): String {
+    val days = remember(previous) {
+        previous.firstNotNullOfOrNull { it.completedAtEpochMs }?.let { ms ->
+            val zone = java.time.ZoneId.systemDefault()
+            java.time.temporal.ChronoUnit.DAYS.between(java.time.Instant.ofEpochMilli(ms).atZone(zone).toLocalDate(), java.time.LocalDate.now(zone))
+        }
+    }
+    return if (days != null && days > 0) " · " + stringResource(R.string.muscle_days_ago, days.toInt()) else ""
+}
+
+/** Ejercicios con series sin marcar («Press banca · 2/3»), para ir a ellos antes de terminar. */
+@Composable
+private fun PendingExercises(w: Workout, onJump: (Int) -> Unit) {
+    w.exercises.withIndex().filter { (_, we) -> we.sets.any { !it.completed } }.take(MAX_PENDING_SHOWN).forEach { (i, we) ->
+        TextButton(onClick = { onJump(i) }) {
+            Text("${we.exercise.displayName()} · ${we.sets.count { it.completed }}/${we.sets.size}", maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+private const val MAX_PENDING_SHOWN = 5

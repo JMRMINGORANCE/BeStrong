@@ -459,6 +459,7 @@
     <string name="peak_title">Peaking for a date</string>
     <string name="peak_week">%1$d wk out · %2$s: %3$d × %4$d at %5$d%%</string>
     <string name="personal_records">Personal records</string>
+    <string name="chart_change_since">%1$s since %2$s</string>
     <string name="pip_next">Next: %1$s</string>
     <string name="plan_generated_saved">%1$d routines saved</string>
     <string name="plan_program_saved">Program “%1$s” saved</string>

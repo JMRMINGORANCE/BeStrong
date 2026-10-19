@@ -152,7 +152,7 @@ fun HomeScreen(
         ) {
             // 1. Saludo; 2. lo que toca ahora; 3. accesos rápidos; 4. la semana; 5. rutinas; 6. el resto
             item(span = full) { Greeting { GymChip(vm) } }
-            active?.let { w -> item(span = full) { ActiveWorkoutHero(w, onOpenWorkout) } }
+            active?.let { w -> item(span = full) { ActiveWorkoutHero(w, vm.rest.collectAsStateWithLifecycle().value, onOpenWorkout) } }
             if (active == null) {
                 today?.let { s ->
                     item(span = full) { TodayCard(s, onStart = { vm.startProgramSession(s, onOpenWorkout) }, onStopProgram = vm::stopProgram) }
@@ -231,7 +231,7 @@ fun HomeScreen(
 
 /** El entreno abierto, lo primero de todo: tocarlo vuelve a él. */
 @Composable
-private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, onOpenWorkout: () -> Unit) {
+private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, rest: com.bestrong.mobile.ui.components.RestState?, onOpenWorkout: () -> Unit) {
     val now = rememberNow()
     com.bestrong.mobile.ui.components.HeroCard(onClick = onOpenWorkout) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -239,6 +239,11 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, onOpenWorkout:
                 Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
                 Text(w.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black)
                 Text(stringResource(R.string.home_in_progress_detail, formatDuration(w.durationSeconds(now)), w.completedSetCount, w.totalSetCount))
+                // Descanso en marcha: se ve sin abrir el entreno (cambiar de canción, mirar una rutina…)
+                rest?.let { r ->
+                    val left = ((r.endsAtEpochMs - now + 999) / 1000).coerceAtLeast(0)
+                    if (left > 0) Text("⏱ " + stringResource(R.string.rest_title, formatDuration(left)), fontWeight = FontWeight.Bold)
+                }
             }
             Box(
                 Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerLowest),

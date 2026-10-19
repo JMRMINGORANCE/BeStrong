@@ -177,6 +177,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         3 -> { v -> v.toInt().toString() }
                         else -> { v -> unit.format(v) }
                     }
+                    // «¿Voy a más?» de un vistazo: la diferencia entre el primer y el último punto
+                    ChartChange(points, if (metric < 2) { v -> unit.format(v, withUnit = true) } else formatter)
                     LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = formatter)
                 }
             }
@@ -462,4 +464,23 @@ private fun ExerciseAbout(exercise: com.bestrong.core.model.Exercise) {
             Text(it, style = MaterialTheme.typography.bodyMedium)
         }
     }
+}
+
+/** «+7,5 kg desde el 3 mar»: cuánto ha cambiado la métrica en lo que abarca la gráfica (en verde si sube). */
+@Composable
+private fun ChartChange(points: List<ChartPoint>, format: (Double) -> String) {
+    if (points.size < 2) return
+    val d = points.last().value - points.first().value
+    val sign = when {
+        d > 0 -> "+"
+        d < 0 -> "−"
+        else -> "="
+    }
+    val text = stringResource(R.string.chart_change_since, if (d == 0.0) sign else sign + format(kotlin.math.abs(d)), points.first().label)
+    Text(
+        text,
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.Bold,
+        color = if (d > 0) com.bestrong.mobile.ui.theme.statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }

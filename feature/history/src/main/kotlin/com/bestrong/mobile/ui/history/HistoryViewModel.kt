@@ -39,6 +39,12 @@ class HistoryViewModel @Inject constructor(
 ) : ViewModel() {
     val history: StateFlow<List<Workout>> = repo.history
 
+    /** Récords que batió cada entreno (el 🏆 de la lista), en una sola pasada cronológica. */
+    val recordCounts: StateFlow<Map<String, Int>> = repo.history
+        .map { h -> WorkoutStats.newRecordsInEach(h) { true }.mapValues { it.value.size } }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
     /** Modo pareja: mostrar también los entrenos de la otra persona. */
     val showPartner = MutableStateFlow(false)
 

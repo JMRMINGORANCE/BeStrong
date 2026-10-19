@@ -33,6 +33,9 @@ class WorkoutActions @Inject constructor(
     private val planning: PlanningStore,
     private val energy: com.bestrong.mobile.health.EnergyCalculator,
 ) {
+    /** Descanso en marcha (para mostrarlo fuera del entreno, p. ej. en Inicio). */
+    val rest get() = restTimer.rest
+
     /**
      * Pulso y calorías finales del reloj sobre lo guardado, sin pisar la valoración que se pone a la vez. Si el
      * entreno aún no está guardado (el móvil lo está terminando), se dejan pendientes para [applyPendingWatchHealth].
