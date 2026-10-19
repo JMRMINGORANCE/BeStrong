@@ -635,6 +635,7 @@
     <string name="set_type_failure">Muskelversagen</string>
     <string name="set_type_negative">Negative</string>
     <string name="set_type_normal">Normal</string>
+    <string name="set_type_change">Satztyp ändern</string>
     <string name="set_type_partial">Teilwdh.</string>
     <string name="set_type_warmup">Aufwärmen</string>
     <string name="set_weight_in">Gewicht in %1$s</string>
@@ -848,6 +849,8 @@
     <string name="pinned_note_hint">Wird bei jeder Ausführung dieser Übung angezeigt (Sitzhöhe, Griff, Gerät…).</string>
     <string name="update_routine">„%1$s“ aktualisieren</string>
     <string name="log_past_title">Vergangenes Training eintragen</string>
+    <string name="calendar_day_trained">%1$s, trainiert</string>
+    <string name="calendar_day_filter">Trainings dieses Tages zeigen</string>
     <string name="log_past_routine">Routine</string>
     <string name="log_past_date">Datum: %1$s</string>
     <string name="log_past_time">Uhrzeit (HH:MM)</string>
@@ -860,6 +863,7 @@
     <string name="weight_increment_default">Standard (%1$s)</string>
     <string name="routine_discard_q">Änderungen speichern?</string>
     <string name="routine_discard_body">Du hast die Routine geändert und nicht gespeichert.</string>
+    <string name="prog_discard_body">Du hast das Programm geändert und nicht gespeichert.</string>
     <string name="routine_delete_q">„%1$s“ löschen?</string>
     <string name="routine_delete_body">Bereits damit absolvierte Trainings bleiben im Verlauf.</string>
     <string name="edit_exercise">Übung bearbeiten</string>

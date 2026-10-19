@@ -635,6 +635,7 @@
     <string name="set_type_failure">Ao fallo</string>
     <string name="set_type_negative">Negativas</string>
     <string name="set_type_normal">Normal</string>
+    <string name="set_type_change">Cambiar tipo de serie</string>
     <string name="set_type_partial">Parciais</string>
     <string name="set_type_warmup">Quecemento</string>
     <string name="set_weight_in">Peso en %1$s</string>
@@ -848,6 +849,8 @@
     <string name="pinned_note_hint">Amósase cada vez que fagas este exercicio (altura do asento, agarre, máquina…).</string>
     <string name="update_routine">Actualizar «%1$s»</string>
     <string name="log_past_title">Rexistrar adestramento pasado</string>
+    <string name="calendar_day_trained">%1$s, adestrado</string>
+    <string name="calendar_day_filter">Ver os adestramentos dese día</string>
     <string name="log_past_routine">Rutina</string>
     <string name="log_past_date">Data: %1$s</string>
     <string name="log_past_time">Hora (HH:MM)</string>
@@ -860,6 +863,7 @@
     <string name="weight_increment_default">Predeterminado (%1$s)</string>
     <string name="routine_discard_q">Gardar os cambios?</string>
     <string name="routine_discard_body">Cambiaches a rutina e non a gardaches.</string>
+    <string name="prog_discard_body">Cambiaches o programa e non o gardaches.</string>
     <string name="routine_delete_q">Borrar «%1$s»?</string>
     <string name="routine_delete_body">Os adestramentos que xa fixeches con ela quedan no historial.</string>
     <string name="edit_exercise">Editar exercicio</string>

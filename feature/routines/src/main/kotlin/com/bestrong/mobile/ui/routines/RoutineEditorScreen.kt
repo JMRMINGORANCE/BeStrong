@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,6 +44,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -418,7 +421,7 @@ private fun RoutineExerciseCard(
                         stringResource(R.string.rest_value, formatDuration(re.restSeconds.toLong())),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.clickable { onEditRest(re.id) },
+                        modifier = Modifier.minimumInteractiveComponentSize().clickable(onClickLabel = stringResource(R.string.rest)) { onEditRest(re.id) },
                     )
                 }
                 IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.action_move_up)) }
@@ -466,7 +469,8 @@ private fun RoutineSetRow(vm: RoutineEditorViewModel, re: com.bestrong.core.mode
         // Tocar el número cambia el tipo de serie (C calentamiento, D drop, F al fallo)
         Text(
             set.type.short.ifEmpty { "${i + 1}" },
-            Modifier.widthIn(min = 24.dp).clickable { vm.cycleSetType(re.id, i) }.padding(vertical = 8.dp),
+            Modifier.minimumInteractiveComponentSize().clickable(onClickLabel = stringResource(R.string.set_type_change), role = Role.Button) { vm.cycleSetType(re.id, i) }
+                .wrapContentSize(),
             fontWeight = FontWeight.Bold,
             color = if (set.type == SetType.NORMAL) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.tertiary,
         )

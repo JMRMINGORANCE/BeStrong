@@ -26,6 +26,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -76,35 +80,56 @@ fun CalendarMonth(
             Row(Modifier.fillMaxWidth()) {
                 for (c in 0 until 7) {
                     val day = r * 7 + c - firstDow + 1
-                    Box(Modifier.weight(1f).aspectRatio(1f).padding(2.dp), contentAlignment = Alignment.Center) {
-                        if (day in 1..month.lengthOfMonth()) {
-                            val date = month.atDay(day)
-                            val trained = date in trainingDays
-                            val isSelected = date == selected
-                            Box(
-                                Modifier.fillMaxWidth(0.8f).aspectRatio(1f).clip(CircleShape)
-                                    .background(if (trained) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest)
-                                    .then(if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.tertiary, CircleShape) else Modifier)
-                                    .then(
-                                        when {
-                                            trained -> Modifier.clickable { onSelect(if (isSelected) null else date) }
-                                            onEmptyDay != null && !date.isAfter(today) -> Modifier.clickable { onEmptyDay(date) }
-                                            else -> Modifier
-                                        },
-                                    ),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(
-                                    "$day",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = if (date == today) FontWeight.Black else FontWeight.Normal,
-                                    color = if (trained) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
+                    if (day in 1..month.lengthOfMonth()) {
+                        val date = month.atDay(day)
+                        val trained = date in trainingDays
+                        val onClick: (() -> Unit)? = when {
+                            trained -> ({ onSelect(if (date == selected) null else date) })
+                            onEmptyDay != null && !date.isAfter(today) -> ({ onEmptyDay(date) })
+                            else -> null
                         }
+                        DayCell(date, trained, date == selected, date == today, locale, Modifier.weight(1f), onClick)
+                    } else {
+                        Box(Modifier.weight(1f).aspectRatio(1f))
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Un día del mes. Toda la celda es la zona táctil (el círculo solo mide ~33 dp) y TalkBack dice la fecha y si
+ * se entrenó; [onClick] null = día sin acción (futuro o sin poder apuntar).
+ */
+@Composable
+private fun DayCell(date: LocalDate, trained: Boolean, isSelected: Boolean, isToday: Boolean, locale: Locale, modifier: Modifier, onClick: (() -> Unit)?) {
+    val longDate = date.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.LONG).withLocale(locale))
+    val description = if (trained) stringResource(R.string.calendar_day_trained, longDate) else longDate
+    val label = stringResource(if (trained) R.string.calendar_day_filter else R.string.log_past_title)
+    Box(
+        modifier.aspectRatio(1f)
+            .then(if (onClick != null) Modifier.clickable(onClickLabel = label, onClick = onClick) else Modifier)
+            .semantics(mergeDescendants = true) {
+                contentDescription = description
+                selected = isSelected
+            }
+            .padding(2.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier.fillMaxWidth(0.8f).aspectRatio(1f).clip(CircleShape)
+                .background(if (trained) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest)
+                .then(if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.tertiary, CircleShape) else Modifier)
+                .clearAndSetSemantics {},
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                "${date.dayOfMonth}",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (isToday) FontWeight.Black else FontWeight.Normal,
+                color = if (trained) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+            )
         }
     }
 }

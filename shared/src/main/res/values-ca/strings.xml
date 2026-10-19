@@ -635,6 +635,7 @@
     <string name="set_type_failure">A la fallada</string>
     <string name="set_type_negative">Negatives</string>
     <string name="set_type_normal">Normal</string>
+    <string name="set_type_change">Canviar tipus de sèrie</string>
     <string name="set_type_partial">Parcials</string>
     <string name="set_type_warmup">Escalfament</string>
     <string name="set_weight_in">Pes en %1$s</string>
@@ -848,6 +849,8 @@
     <string name="pinned_note_hint">Es mostra cada cop que facis aquest exercici (alçada del seient, agafada, màquina…).</string>
     <string name="update_routine">Actualitzar «%1$s»</string>
     <string name="log_past_title">Registrar entrenament passat</string>
+    <string name="calendar_day_trained">%1$s, entrenat</string>
+    <string name="calendar_day_filter">Veure els entrenaments d\'aquell dia</string>
     <string name="log_past_routine">Rutina</string>
     <string name="log_past_date">Data: %1$s</string>
     <string name="log_past_time">Hora (HH:MM)</string>
@@ -860,6 +863,7 @@
     <string name="weight_increment_default">Predeterminat (%1$s)</string>
     <string name="routine_discard_q">Desar els canvis?</string>
     <string name="routine_discard_body">Has canviat la rutina i no l\'has desada.</string>
+    <string name="prog_discard_body">Has canviat el programa i no l\'has desat.</string>
     <string name="routine_delete_q">Esborrar «%1$s»?</string>
     <string name="routine_delete_body">Els entrenaments que ja vas fer amb ella es queden a l\'historial.</string>
     <string name="edit_exercise">Editar exercici</string>

@@ -635,6 +635,7 @@
     <string name="set_type_failure">Failure</string>
     <string name="set_type_negative">Negatives</string>
     <string name="set_type_normal">Normal</string>
+    <string name="set_type_change">Change set type</string>
     <string name="set_type_partial">Partials</string>
     <string name="set_type_warmup">Warm-up</string>
     <string name="set_weight_in">Weight in %1$s</string>
@@ -848,6 +849,8 @@
     <string name="pinned_note_hint">Shown every time you do this exercise (seat height, grip, machine…).</string>
     <string name="update_routine">Update “%1$s”</string>
     <string name="log_past_title">Log past workout</string>
+    <string name="calendar_day_trained">%1$s, trained</string>
+    <string name="calendar_day_filter">Show that day\'s workouts</string>
     <string name="log_past_routine">Routine</string>
     <string name="log_past_date">Date: %1$s</string>
     <string name="log_past_time">Time (HH:MM)</string>
@@ -860,6 +863,7 @@
     <string name="weight_increment_default">Default (%1$s)</string>
     <string name="routine_discard_q">Save changes?</string>
     <string name="routine_discard_body">You changed the routine and haven\'t saved it.</string>
+    <string name="prog_discard_body">You changed the program and haven\'t saved it.</string>
     <string name="routine_delete_q">Delete “%1$s”?</string>
     <string name="routine_delete_body">Workouts you already did with it stay in your history.</string>
     <string name="edit_exercise">Edit exercise</string>

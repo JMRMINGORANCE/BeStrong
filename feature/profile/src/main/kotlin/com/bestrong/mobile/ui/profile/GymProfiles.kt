@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.bestrong.core.model.Equipment
 import com.bestrong.core.training.GymProfile
+import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
@@ -40,6 +41,9 @@ import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.label
 
 private val STANDARD_PLATES = listOf(25.0, 20.0, 15.0, 10.0, 5.0, 2.5, 1.25, 0.5)
+
+/** Discos de un gimnasio en libras (45, 35, 25…), guardados en kg. */
+private val STANDARD_PLATES_LB = listOf(45.0, 35.0, 25.0, 10.0, 5.0, 2.5).map(WeightUnit.LB::toKg)
 
 /** Selección del gimnasio activo y acceso a su edición. */
 @Composable
@@ -73,13 +77,25 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
     val unit = LocalWeightUnit.current
     var name by remember { mutableStateOf(gym.name) }
     var equipment by remember { mutableStateOf(gym.equipment) }
-    var bar by remember { mutableStateOf(unit.format(gym.barKg)) }
-    var collars by remember { mutableStateOf(unit.format(gym.collarKg)) }
+    // Textos de partida: si no se tocan se guarda el valor exacto (el texto va redondeado y, en lb, convertido)
+    val initial = remember {
+        listOf(
+            unit.format(gym.barKg),
+            unit.format(gym.collarKg),
+            unit.format(gym.dumbbellsKg.minOrNull() ?: 2.0),
+            unit.format(gym.dumbbellsKg.maxOrNull() ?: 30.0),
+            unit.format(gym.dumbbellsKg.sorted().zipWithNext { a, b -> b - a }.minOrNull() ?: 2.0),
+        )
+    }
+    var bar by remember { mutableStateOf(initial[0]) }
+    var collars by remember { mutableStateOf(initial[1]) }
     var plates by remember { mutableStateOf(gym.platesKg.toSet()) }
     var anyDumbbell by remember { mutableStateOf(gym.dumbbellsKg.isEmpty()) }
-    var dbFrom by remember { mutableStateOf(unit.format(gym.dumbbellsKg.minOrNull() ?: 2.0)) }
-    var dbTo by remember { mutableStateOf(unit.format(gym.dumbbellsKg.maxOrNull() ?: 30.0)) }
-    var dbStep by remember { mutableStateOf(unit.format(gym.dumbbellsKg.sorted().zipWithNext { a, b -> b - a }.minOrNull() ?: 2.0)) }
+    var dbFrom by remember { mutableStateOf(initial[2]) }
+    var dbTo by remember { mutableStateOf(initial[3]) }
+    var dbStep by remember { mutableStateOf(initial[4]) }
+    // Los de la unidad del usuario y los que ya tuviera el gimnasio
+    val plateChoices = remember(unit) { ((if (unit == WeightUnit.LB) STANDARD_PLATES_LB else STANDARD_PLATES) + gym.platesKg).distinct().sortedDescending() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.gym_edit)) },
@@ -108,7 +124,7 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                 )
                 Text(stringResource(R.string.gym_plates), style = MaterialTheme.typography.labelLarge)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    STANDARD_PLATES.forEach { p ->
+                    plateChoices.forEach { p ->
                         FilterChip(selected = p in plates, onClick = { plates = if (p in plates) plates - p else plates + p }, label = { Text(unit.format(p)) })
                     }
                 }
@@ -128,8 +144,11 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
         },
         confirmButton = {
             TextButton(onClick = {
+                val dumbbellsUntouched = listOf(dbFrom, dbTo, dbStep) == initial.subList(2, 5) && gym.dumbbellsKg.isNotEmpty()
                 val dumbbells = if (anyDumbbell) {
                     emptyList()
+                } else if (dumbbellsUntouched) {
+                    gym.dumbbellsKg
                 } else {
                     val from = unit.parseToKg(dbFrom) ?: 2.0
                     val to = unit.parseToKg(dbTo) ?: 30.0
@@ -140,8 +159,14 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                     gym.copy(
                         name = name.trim().ifBlank { gym.name },
                         equipment = equipment,
-                        barKg = unit.parseToKg(bar) ?: gym.barKg,
-                        collarKg = if (collars.isBlank()) 0.0 else unit.parseToKg(collars)?.coerceIn(0.0, MAX_COLLARS_KG) ?: gym.collarKg,
+                        barKg = if (bar == initial[0]) gym.barKg else unit.parseToKg(bar) ?: gym.barKg,
+                        collarKg = if (collars == initial[1]) {
+                            gym.collarKg
+                        } else if (collars.isBlank()) {
+                            0.0
+                        } else {
+                            unit.parseToKg(collars)?.coerceIn(0.0, MAX_COLLARS_KG) ?: gym.collarKg
+                        },
                         platesKg = plates.sortedDescending().ifEmpty { gym.platesKg },
                         dumbbellsKg = dumbbells,
                     ),

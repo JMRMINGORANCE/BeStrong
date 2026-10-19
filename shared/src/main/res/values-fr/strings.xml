@@ -635,6 +635,7 @@
     <string name="set_type_failure">Échec</string>
     <string name="set_type_negative">Negatives</string>
     <string name="set_type_normal">Normal</string>
+    <string name="set_type_change">Changer le type de série</string>
     <string name="set_type_partial">Partielles</string>
     <string name="set_type_warmup">Échauffement</string>
     <string name="set_weight_in">Poids en %1$s</string>
@@ -848,6 +849,8 @@
     <string name="pinned_note_hint">Affichée à chaque fois que tu fais cet exercice (hauteur du siège, prise, machine…).</string>
     <string name="update_routine">Mettre à jour « %1$s »</string>
     <string name="log_past_title">Ajouter une séance passée</string>
+    <string name="calendar_day_trained">%1$s, entraîné</string>
+    <string name="calendar_day_filter">Voir les séances de ce jour</string>
     <string name="log_past_routine">Routine</string>
     <string name="log_past_date">Date : %1$s</string>
     <string name="log_past_time">Heure (HH:MM)</string>
@@ -860,6 +863,7 @@
     <string name="weight_increment_default">Par défaut (%1$s)</string>
     <string name="routine_discard_q">Enregistrer les modifications ?</string>
     <string name="routine_discard_body">Tu as modifié la routine sans l\'enregistrer.</string>
+    <string name="prog_discard_body">Vous avez modifié le programme sans l\'enregistrer.</string>
     <string name="routine_delete_q">Supprimer « %1$s » ?</string>
     <string name="routine_delete_body">Les séances déjà faites avec elle restent dans l\'historique.</string>
     <string name="edit_exercise">Modifier l\'exercice</string>

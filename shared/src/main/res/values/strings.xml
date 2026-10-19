@@ -635,6 +635,7 @@
     <string name="set_type_failure">Al fallo</string>
     <string name="set_type_negative">Negativas</string>
     <string name="set_type_normal">Normal</string>
+    <string name="set_type_change">Cambiar tipo de serie</string>
     <string name="set_type_partial">Parciales</string>
     <string name="set_type_warmup">Calentamiento</string>
     <string name="set_weight_in">Peso en %1$s</string>
@@ -848,6 +849,8 @@
     <string name="pinned_note_hint">Se muestra cada vez que hagas este ejercicio (altura del asiento, agarre, máquina…).</string>
     <string name="update_routine">Actualizar «%1$s»</string>
     <string name="log_past_title">Registrar entreno pasado</string>
+    <string name="calendar_day_trained">%1$s, entrenado</string>
+    <string name="calendar_day_filter">Ver los entrenos de ese día</string>
     <string name="log_past_routine">Rutina</string>
     <string name="log_past_date">Fecha: %1$s</string>
     <string name="log_past_time">Hora (HH:MM)</string>
@@ -860,6 +863,7 @@
     <string name="weight_increment_default">Predeterminado (%1$s)</string>
     <string name="routine_discard_q">¿Guardar los cambios?</string>
     <string name="routine_discard_body">Has cambiado la rutina y no la has guardado.</string>
+    <string name="prog_discard_body">Has cambiado el programa y no lo has guardado.</string>
     <string name="routine_delete_q">¿Borrar «%1$s»?</string>
     <string name="routine_delete_body">Los entrenos que ya hiciste con ella se quedan en el historial.</string>
     <string name="edit_exercise">Editar ejercicio</string>

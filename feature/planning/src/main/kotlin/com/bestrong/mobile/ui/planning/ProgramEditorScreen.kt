@@ -1,5 +1,6 @@
 package com.bestrong.mobile.ui.planning
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -201,6 +202,26 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
     val days = rememberSaveable(saver = DraftsSaver) { mutableStateListOf<DayDraft>().apply { addAll(existing?.let(::draftsOf) ?: listOf(DayDraft(dayLabel))) } }
     var picking by rememberSaveable { mutableStateOf<Int?>(null) }
     val defaultDayName = stringResource(R.string.prog_day_n, days.size + 1)
+    // Atrás con cambios sin guardar: se pregunta antes de perderlos (como en el editor de rutinas)
+    val initialName = remember { name }
+    val initialDays = remember { days.toList() }
+    var confirmLeave by rememberSaveable { mutableStateOf(false) }
+    val canSave = name.isNotBlank() && days.any { it.items.isNotEmpty() }
+    val save = {
+        vm.saveProgram(buildProgram(existing?.id ?: "custom:${newId()}", name.trim(), days.filter { it.items.isNotEmpty() }))
+        onClose()
+    }
+    val leave = { if (name != initialName || days.toList() != initialDays) confirmLeave = true else onClose() }
+    BackHandler(onBack = leave)
+    if (confirmLeave) {
+        AlertDialog(
+            onDismissRequest = { confirmLeave = false },
+            title = { Text(stringResource(R.string.routine_discard_q)) },
+            text = { Text(stringResource(R.string.prog_discard_body)) },
+            confirmButton = { Button(enabled = canSave, onClick = { confirmLeave = false; save() }) { Text(stringResource(R.string.action_save)) } },
+            dismissButton = { TextButton(onClick = { confirmLeave = false; onClose() }) { Text(stringResource(R.string.action_discard)) } },
+        )
+    }
 
     picking?.takeIf { it in days.indices }?.let { dayIndex ->
         ExercisePickDialog(hidden = vm.hiddenExercises, onPick = { id ->
@@ -213,15 +234,9 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.prog_create)) },
-                navigationIcon = { IconButton(onClick = onClose) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
+                navigationIcon = { IconButton(onClick = leave) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
                 actions = {
-                    TextButton(
-                        enabled = name.isNotBlank() && days.any { it.items.isNotEmpty() },
-                        onClick = {
-                            vm.saveProgram(buildProgram(existing?.id ?: "custom:${newId()}", name.trim(), days.filter { it.items.isNotEmpty() }))
-                            onClose()
-                        },
-                    ) { Text(stringResource(R.string.prog_save)) }
+                    TextButton(enabled = canSave, onClick = save) { Text(stringResource(R.string.prog_save)) }
                 },
             )
         },
