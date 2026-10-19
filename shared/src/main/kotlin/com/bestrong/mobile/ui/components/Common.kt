@@ -24,7 +24,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -173,20 +176,24 @@ fun MetaPill(text: String, modifier: Modifier = Modifier, icon: ImageVector? = n
 
 /** Degradado de marca (acento → ámbar) para lo que tiene que destacar. */
 @Composable
-fun brandGradient(): Brush = Brush.linearGradient(
-    listOf(MaterialTheme.colorScheme.primary, lerp(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary, 0.7f)),
-)
+fun brandGradient(): Brush {
+    val primary = MaterialTheme.colorScheme.primary
+    // En el tema claro el naranja puro deja el texto blanco pequeño por debajo de 4,5:1: se oscurece un poco
+    val light = MaterialTheme.colorScheme.surface.luminance() > 0.5f
+    val start = if (light) lerp(primary, androidx.compose.ui.graphics.Color.Black, 0.15f) else primary
+    return Brush.linearGradient(listOf(start, lerp(primary, MaterialTheme.colorScheme.secondary, 0.7f)))
+}
 
 /**
  * Tarjeta destacada: fondo con degradado de marca y texto oscuro encima. Para lo que importa ahora mismo (el entreno
  * en curso, «Hoy toca»).
  */
 @Composable
-fun HeroCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, content: @Composable ColumnScope.() -> Unit) {
+fun HeroCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, onClickLabel: String? = null, content: @Composable ColumnScope.() -> Unit) {
     val shape = MaterialTheme.shapes.large
     val base = modifier.fillMaxWidth().clip(shape).background(brandGradient())
     Column(
-        (if (onClick != null) base.clickable(onClick = onClick) else base).padding(20.dp),
+        (if (onClick != null) base.clickable(onClickLabel = onClickLabel, role = androidx.compose.ui.semantics.Role.Button, onClick = onClick) else base).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides MaterialTheme.colorScheme.onPrimary) {
@@ -197,9 +204,11 @@ fun HeroCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, conte
 
 /** Dato grande con su etiqueta: número muy visible sobre un fondo con un toque del acento. */
 @Composable
-fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
+fun StatTile(label: String, value: String, modifier: Modifier = Modifier, spokenValue: String = value) {
     Box(
-        modifier.clip(MaterialTheme.shapes.medium)
+        // Una sola parada para TalkBack y en orden natural: «Duración: 45:12»
+        modifier.clearAndSetSemantics { contentDescription = "$label: $spokenValue" }
+            .clip(MaterialTheme.shapes.medium)
             .background(
                 Brush.verticalGradient(
                     listOf(

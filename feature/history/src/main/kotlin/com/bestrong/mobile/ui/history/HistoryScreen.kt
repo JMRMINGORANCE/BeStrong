@@ -252,15 +252,16 @@ private fun WorkoutCard(w: Workout, records: Int, modifier: Modifier = Modifier)
         Row(verticalAlignment = Alignment.CenterVertically) {
             // Sello con el día y el mes
             Column(
-                Modifier.size(54.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                // Contenedor del acento con su color de texto (el naranja sobre naranja claro no llegaba a 3:1)
+                Modifier.size(54.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.primaryContainer),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text("${date.dayOfMonth}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
+                Text("${date.dayOfMonth}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 Text(
                     date.month.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.getDefault()).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
             }
             Column(Modifier.weight(1f).padding(start = 14.dp)) {

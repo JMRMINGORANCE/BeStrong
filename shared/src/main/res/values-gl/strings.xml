@@ -578,6 +578,8 @@
     <string name="rest_overrun">Descanso rematado hai %1$s</string>
     <string name="rest_overrun_action">Toca para seguir</string>
     <string name="rest_plus_15">+15 s</string>
+    <string name="a11y_rest_minus_15">Quitar 15 segundos de descanso</string>
+    <string name="a11y_rest_plus_15">Engadir 15 segundos de descanso</string>
     <string name="rest_skip">Omitir</string>
     <string name="rest_time">Tempo de descanso</string>
     <string name="rest_title">Descanso %1$s</string>
@@ -1295,6 +1297,7 @@
         <item quantity="other">🔥 %1$d semanas</item>
     </plurals>
     <string name="day_planned">planificado</string>
+    <string name="day_today">hoxe</string>
     <string name="rating_scale">1 = pouco · 5 = moito</string>
     <string name="plates_below_bar">Menos que a barra (%1$s)</string>
     <string name="current_set_label">Agora toca</string>

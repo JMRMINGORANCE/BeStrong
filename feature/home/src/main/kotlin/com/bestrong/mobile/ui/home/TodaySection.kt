@@ -634,6 +634,7 @@ private fun DayCircle(d: DayOfWeek, week: WeekProgress, locale: java.util.Locale
             else -> R.string.day_not_trained
         },
     )
+    val todayLabel = stringResource(R.string.day_today)
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -646,11 +647,12 @@ private fun DayCircle(d: DayOfWeek, week: WeekProgress, locale: java.util.Locale
                 when {
                     d == week.today -> Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                     // Planificado y aún sin hacer: un aro más suave
-                    planned -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f), CircleShape)
+                    planned -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.8f), CircleShape)
                     else -> Modifier
                 },
             )
-            .semantics { contentDescription = "$name: $state" },
+            // «Hoy» también en voz alta: a la vista solo lo distingue el grosor del aro
+            .semantics { contentDescription = "$name: $state" + if (d == week.today) ", $todayLabel" else "" },
     ) {
         Text(
             d.getDisplayName(TextStyle.NARROW, locale),

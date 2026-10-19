@@ -578,6 +578,8 @@
     <string name="rest_overrun">Rest ended %1$s ago</string>
     <string name="rest_overrun_action">Tap to continue</string>
     <string name="rest_plus_15">+15 s</string>
+    <string name="a11y_rest_minus_15">Remove 15 seconds of rest</string>
+    <string name="a11y_rest_plus_15">Add 15 seconds of rest</string>
     <string name="rest_skip">Skip</string>
     <string name="rest_time">Rest time</string>
     <string name="rest_title">Rest %1$s</string>
@@ -1295,6 +1297,7 @@
         <item quantity="other">🔥 %1$d weeks</item>
     </plurals>
     <string name="day_planned">planned</string>
+    <string name="day_today">today</string>
     <string name="rating_scale">1 = low · 5 = high</string>
     <string name="plates_below_bar">Less than the bar (%1$s)</string>
     <string name="current_set_label">Up now</string>

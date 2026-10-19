@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -17,12 +18,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +75,7 @@ fun RestTimerBar(
             .background(brandGradient()),
     ) {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            RestMilestones(remaining, rest.totalSeconds)
             Text(
                 stringResource(R.string.rest_title, formatDuration(remaining)),
                 style = when {
@@ -92,10 +99,32 @@ fun RestTimerBar(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 )
-                FilledTonalButton(onClick = { onAdjust(-15) }, colors = dark) { Text(stringResource(R.string.rest_minus_15), fontWeight = FontWeight.Bold) }
-                FilledTonalButton(onClick = { onAdjust(15) }, colors = dark) { Text(stringResource(R.string.rest_plus_15), fontWeight = FontWeight.Bold) }
+                val minus = stringResource(R.string.a11y_rest_minus_15)
+                val plus = stringResource(R.string.a11y_rest_plus_15)
+                FilledTonalButton(onClick = { onAdjust(-15) }, colors = dark, modifier = Modifier.semantics { contentDescription = minus }) { Text(stringResource(R.string.rest_minus_15), fontWeight = FontWeight.Bold) }
+                FilledTonalButton(onClick = { onAdjust(15) }, colors = dark, modifier = Modifier.semantics { contentDescription = plus }) { Text(stringResource(R.string.rest_plus_15), fontWeight = FontWeight.Bold) }
                 TextButton(onClick = onSkip) { Text(stringResource(R.string.rest_skip), color = onBrand, fontWeight = FontWeight.Bold) }
             }
         }
     }
 }
+
+/**
+ * Lo que dice TalkBack del descanso: solo al empezar y a los 30 y 10 s (un aviso cada segundo no deja usar
+ * nada más). Un nodo invisible, educado (no interrumpe), cuyo texto solo cambia en esos momentos.
+ */
+@Composable
+private fun RestMilestones(remaining: Long, totalSeconds: Int) {
+    var spoken by remember { mutableStateOf("") }
+    val text = stringResource(R.string.rest_title, formatDuration(remaining))
+    if (remaining == totalSeconds.toLong() || remaining == MILESTONE_30 || remaining == MILESTONE_10) spoken = text
+    Box(
+        Modifier.size(1.dp).semantics {
+            liveRegion = LiveRegionMode.Polite
+            contentDescription = spoken
+        },
+    )
+}
+
+private const val MILESTONE_30 = 30L
+private const val MILESTONE_10 = 10L

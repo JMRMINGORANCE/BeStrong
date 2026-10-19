@@ -233,7 +233,7 @@ fun HomeScreen(
 @Composable
 private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, rest: com.bestrong.mobile.ui.components.RestState?, onOpenWorkout: () -> Unit) {
     val now = rememberNow()
-    com.bestrong.mobile.ui.components.HeroCard(onClick = onOpenWorkout) {
+    com.bestrong.mobile.ui.components.HeroCard(onClick = onOpenWorkout, onClickLabel = stringResource(R.string.action_continue)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.home_in_progress), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)

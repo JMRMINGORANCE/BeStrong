@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -225,7 +227,8 @@ private fun KitPicker(kit: Kit, onPick: (Kit) -> Unit) {
         Triple(Kit.BODYWEIGHT, Icons.Default.Home, R.string.builder_bodyweight),
     )
     val scheme = MaterialTheme.colorScheme
-    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    // selectableGroup: TalkBack dice «1 de 3»
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         options.forEach { (k, icon, label) ->
             val on = k == kit
             Column(
@@ -253,7 +256,7 @@ private fun KitPicker(kit: Kit, onPick: (Kit) -> Unit) {
 @Composable
 private fun Segmented(labels: List<String>, selected: Int, onSelect: (Int) -> Unit) {
     val scheme = MaterialTheme.colorScheme
-    Row(Modifier.fillMaxWidth().clip(CircleShape).background(scheme.surfaceContainer).padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+    Row(Modifier.fillMaxWidth().clip(CircleShape).background(scheme.surfaceContainer).padding(4.dp).selectableGroup(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         labels.forEachIndexed { i, label ->
             val on = i == selected
             Box(
@@ -332,7 +335,8 @@ private fun WeekdayPicker(selected: List<Int>, onToggle: (Int) -> Unit) {
             Box(
                 Modifier.size(46.dp).clip(CircleShape)
                     .background(if (on) brandGradient() else SolidColor(scheme.surfaceContainer))
-                    .selectable(selected = on, role = Role.Checkbox) { onToggle(d.value) }
+                    // Casilla (marcado / sin marcar), no «seleccionado»: se pueden elegir varios días
+                    .toggleable(value = on, role = Role.Checkbox) { onToggle(d.value) }
                     .semantics { contentDescription = d.getDisplayName(java.time.format.TextStyle.FULL, locale) },
                 contentAlignment = Alignment.Center,
             ) {

@@ -578,6 +578,8 @@
     <string name="rest_overrun">Pause endete vor %1$s</string>
     <string name="rest_overrun_action">Tippen zum Fortfahren</string>
     <string name="rest_plus_15">+15 s</string>
+    <string name="a11y_rest_minus_15">15 Sekunden Pause weniger</string>
+    <string name="a11y_rest_plus_15">15 Sekunden Pause mehr</string>
     <string name="rest_skip">Überspringen</string>
     <string name="rest_time">Pausenzeit</string>
     <string name="rest_title">Pause %1$s</string>
@@ -1295,6 +1297,7 @@
         <item quantity="other">🔥 %1$d Wochen</item>
     </plurals>
     <string name="day_planned">geplant</string>
+    <string name="day_today">heute</string>
     <string name="rating_scale">1 = wenig · 5 = viel</string>
     <string name="plates_below_bar">Weniger als die Stange (%1$s)</string>
     <string name="current_set_label">Jetzt dran</string>

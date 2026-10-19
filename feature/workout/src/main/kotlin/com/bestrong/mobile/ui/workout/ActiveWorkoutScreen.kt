@@ -477,7 +477,7 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds(now)), Modifier.weight(1f))
             StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f))
-            StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}/${w.totalSetCount}", Modifier.weight(1f))
+            StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}/${w.totalSetCount}", Modifier.weight(1f), spokenValue = stringResource(R.string.achievements_count, w.completedSetCount, w.totalSetCount))
             metrics?.heartRate?.let { StatTile(stringResource(R.string.stat_watch_hr), "$it", Modifier.weight(0.8f)) }
         }
         // Barra de progreso del entreno (series hechas sobre el total), animada
