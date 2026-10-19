@@ -69,7 +69,7 @@
     <string name="appearance">Appearance and accessibility</string>
     <string name="auto_backup">Weekly backup</string>
     <string name="auto_backup_last">Last backup: %1$s</string>
-    <string name="auto_backup_off">Pick a folder (e.g. Google Drive) to save CSV + JSON every week.</string>
+    <string name="auto_backup_off">Pick a folder (e.g. Google Drive) to save CSV + JSON every week. They are not encrypted: for a password-protected copy use “Password-protected backup”.</string>
     <string name="auto_backup_on">On. First backup in progress.</string>
     <string name="backup_started">Backing up…</string>
     <string name="balance_leg_warning">Imbalanced: legs are far behind (or ahead of) upper body.</string>

@@ -69,7 +69,7 @@
     <string name="appearance">Apparence et accessibilité</string>
     <string name="auto_backup">Sauvegarde hebdomadaire</string>
     <string name="auto_backup_last">Dernière sauvegarde : %1$s</string>
-    <string name="auto_backup_off">Choisis un dossier (ex. Google Drive) pour y enregistrer CSV + JSON chaque semaine.</string>
+    <string name="auto_backup_off">Choisis un dossier (ex. Google Drive) pour y enregistrer CSV + JSON chaque semaine. Elles ne sont pas chiffrées : pour une copie protégée par mot de passe, utilise « Sauvegarde protégée par mot de passe ».</string>
     <string name="auto_backup_on">Activée. Première sauvegarde en cours.</string>
     <string name="backup_started">Sauvegarde en cours…</string>
     <string name="balance_leg_warning">Déséquilibré : les jambes sont très en retard (ou en avance) sur le haut du corps.</string>

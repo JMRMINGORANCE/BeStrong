@@ -94,7 +94,7 @@ class WatchSyncService : WearableListenerService() {
                             val records = WorkoutStats.newRecordsIn(workout, repository.historyOnce())
                             Notifier.records(this@WatchSyncService, workout, records, settings.settings.value.unit)
                         }
-                        Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.name}")
+                        Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.id}")
                         runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
                         // Un reenvío del mismo entreno no se vuelve a exportar
                         if (isNew) appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }

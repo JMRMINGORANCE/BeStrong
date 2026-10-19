@@ -69,7 +69,7 @@
     <string name="appearance">Aparencia e accesibilidade</string>
     <string name="auto_backup">Copia de seguranza semanal</string>
     <string name="auto_backup_last">Última copia: %1$s</string>
-    <string name="auto_backup_off">Escolle un cartafol (p. ex. Google Drive) para gardar CSV + JSON cada semana.</string>
+    <string name="auto_backup_off">Escolle un cartafol (p. ex. Google Drive) para gardar CSV + JSON cada semana. Van sen cifrar: para unha copia con contrasinal usa «Copia cifrada con contrasinal».</string>
     <string name="auto_backup_on">Activada. Primeira copia en curso.</string>
     <string name="backup_started">Copia de seguranza en curso…</string>
     <string name="balance_leg_warning">Descompensado: a perna está moi por detrás (ou por diante) do torso.</string>

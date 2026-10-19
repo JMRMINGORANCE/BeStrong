@@ -69,7 +69,7 @@
     <string name="appearance">Darstellung und Barrierefreiheit</string>
     <string name="auto_backup">Wöchentliches Backup</string>
     <string name="auto_backup_last">Letztes Backup: %1$s</string>
-    <string name="auto_backup_off">Wähle einen Ordner (z. B. Google Drive), um wöchentlich CSV + JSON zu speichern.</string>
+    <string name="auto_backup_off">Wähle einen Ordner (z. B. Google Drive), um wöchentlich CSV + JSON zu speichern. Sie sind unverschlüsselt: für eine Kopie mit Passwort nutze „Passwortgeschütztes Backup“.</string>
     <string name="auto_backup_on">Aktiv. Erstes Backup läuft.</string>
     <string name="backup_started">Backup läuft …</string>
     <string name="balance_leg_warning">Unausgewogen: Beine liegen weit hinter (oder vor) dem Oberkörper.</string>

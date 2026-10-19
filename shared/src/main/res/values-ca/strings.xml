@@ -69,7 +69,7 @@
     <string name="appearance">Aparença i accessibilitat</string>
     <string name="auto_backup">Còpia de seguretat setmanal</string>
     <string name="auto_backup_last">Última còpia: %1$s</string>
-    <string name="auto_backup_off">Tria una carpeta (p. ex. Google Drive) per desar CSV + JSON cada setmana.</string>
+    <string name="auto_backup_off">Tria una carpeta (p. ex. Google Drive) per desar CSV + JSON cada setmana. No van xifrades: per a una còpia amb contrasenya fes servir «Còpia xifrada amb contrasenya».</string>
     <string name="auto_backup_on">Activada. Primera còpia en curs.</string>
     <string name="backup_started">Còpia de seguretat en curs…</string>
     <string name="balance_leg_warning">Descompensat: la cama està molt per darrere (o per davant) del tors.</string>

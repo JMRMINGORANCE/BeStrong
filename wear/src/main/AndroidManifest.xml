@@ -27,7 +27,7 @@
     <application
         android:name=".BeStrongWearApp"
         android:localeConfig="@xml/locales_config"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault">

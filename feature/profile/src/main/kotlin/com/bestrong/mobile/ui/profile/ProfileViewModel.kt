@@ -271,7 +271,8 @@ class ProfileViewModel @Inject constructor(
      */
     fun importMeasurementsCsv(uri: Uri, onDone: (Triple<Int, Int, Int>?) -> Unit) = viewModelScope.launch {
         val read = runCatching {
-            val text = withContext(Dispatchers.IO) { context.contentResolver.openInputStream(uri)?.use { it.readBytes().decodeToString() } ?: error("no stream") }
+            // Con el mismo límite que las demás importaciones (un archivo enorme no tumba la app)
+            val text = withContext(Dispatchers.IO) { readLimited(uri) }
             withContext(Dispatchers.Default) { com.bestrong.core.io.MeasurementCsv.read(text) }
         }.getOrNull()
         if (read == null || read.rows.isEmpty()) {
