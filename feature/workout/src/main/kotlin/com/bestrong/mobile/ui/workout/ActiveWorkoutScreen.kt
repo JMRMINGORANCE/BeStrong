@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -179,6 +181,11 @@ fun ActiveWorkoutScreen(
             onSaveRoutine = { vm.saveSummaryAsRoutine(); vm.dismissSummary(); onFinished() },
             onUpdateRoutine = { vm.updateRoutineFromSummary(); vm.dismissSummary(); onFinished() },
             onDone = { vm.dismissSummary(); onFinished() },
+            onShareText = {
+                val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain")
+                    .putExtra(android.content.Intent.EXTRA_TEXT, vm.shareText(s.workout))
+                context.startActivity(android.content.Intent.createChooser(send, null))
+            },
         )
         return
     }
@@ -308,7 +315,8 @@ fun ActiveWorkoutScreen(
             }
         },
     ) { padding ->
-        val content = Modifier.padding(padding).fillMaxSize()
+        // Con el teclado abierto la lista se encoge y deja a la vista la serie que se escribe (la app va de borde a borde)
+        val content = Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize()
         val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline, vm::setDeadline, vm::fitToDeadline)
         when {
             posture == FoldPosture.TABLETOP -> Column(content) {
@@ -1127,6 +1135,7 @@ fun WorkoutSummaryDialog(
     onShare: () -> Unit = {},
     onRate: (SessionRating) -> Unit = {},
     onUpdateRoutine: () -> Unit = {},
+    onShareText: () -> Unit = {},
 ) {
     val w = summary.workout
     val unit = LocalWeightUnit.current
@@ -1212,6 +1221,8 @@ fun WorkoutSummaryDialog(
                     Icon(Icons.Default.Share, null)
                     Text(stringResource(R.string.share_workout), Modifier.padding(start = 8.dp))
                 }
+                // Series y RPE en texto, para mandárselo al entrenador o al grupo (sin ir al historial)
+                TextButton(onClick = onShareText, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.share_as_text)) }
             }
         },
         confirmButton = { Button(onClick = onDone) { Text(stringResource(R.string.action_done)) } },

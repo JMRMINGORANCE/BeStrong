@@ -82,6 +82,7 @@ fun WorkoutScreen(
     val unit = LocalWeightUnit.current
     val focus = remember { FocusRequester() }
     var accumulated by remember { mutableFloatStateOf(0f) }
+    val view = androidx.compose.ui.platform.LocalView.current
     val now = rememberVisibleNow(1_000)
     // Sin entreno (notificación o tile antiguos) el foco no llega a engancharse: no debe cerrar la app
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
@@ -108,6 +109,8 @@ fun WorkoutScreen(
                     if (steps != 0) {
                         accumulated -= steps * ROTARY_STEP_PX
                         repeat(kotlin.math.abs(steps)) { session.rotaryStep(if (steps > 0) 1 else -1) }
+                        // Un toque por paso: se ajusta sin mirar
+                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
                     }
                     true
                 }

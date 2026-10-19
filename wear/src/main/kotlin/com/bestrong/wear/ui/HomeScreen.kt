@@ -38,6 +38,8 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
     val zone = ZoneId.systemDefault()
     val thisWeek = WorkoutStats.weeklySummary(history, 1, LocalDate.now(zone), zone).first().workouts
     val streak = WorkoutStats.weeklyStreak(history, LocalDate.now(zone), zone)
+    // La de hoy (como el tile «Hoy toca»), arriba del todo: sin girar la corona para buscarla
+    val today = androidx.compose.runtime.remember(routines, history) { container.store.todayRoutine() }
 
     ScreenScaffold(scrollState = listState) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
@@ -60,9 +62,21 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
                 }
             }
             if (active == null) {
+                today?.let { r ->
+                    item {
+                        Button(
+                            onClick = { container.session.startRoutine(r); onStart() },
+                            label = { Text(r.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            secondaryLabel = { Text(stringResource(R.string.tile_today)) },
+                            icon = { Text("▶", Modifier.clearAndSetSemantics { }) },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
                 item {
                     Button(
                         onClick = { container.session.startEmpty(); onStart() },
+                        colors = if (today != null) ButtonDefaults.filledTonalButtonColors() else ButtonDefaults.buttonColors(),
                         label = { Text(stringResource(R.string.empty_workout)) },
                         icon = { Text("＋", Modifier.clearAndSetSemantics { }) },
                         modifier = Modifier.fillMaxWidth(),

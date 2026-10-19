@@ -33,6 +33,17 @@ class WorkoutActions @Inject constructor(
     private val planning: PlanningStore,
     private val energy: com.bestrong.mobile.health.EnergyCalculator,
 ) {
+    /** El entreno en texto (series y RPE), para mandarlo al entrenador o a un grupo. */
+    fun shareText(workout: Workout, exerciseName: (com.bestrong.core.model.Exercise) -> String): String = settings.settings.value.let { prefs ->
+        com.bestrong.core.io.CoachReport.text(
+            listOf(workout.copy(finishedAtEpochMs = workout.finishedAtEpochMs ?: workout.startedAtEpochMs)),
+            fromEpochMs = 0,
+            unit = prefs.unit,
+            exerciseName = exerciseName,
+            dumbbellTotal = prefs.dumbbellTotal,
+        )
+    }
+
     /** Descanso en marcha (para mostrarlo fuera del entreno, p. ej. en Inicio). */
     val rest get() = restTimer.rest
 

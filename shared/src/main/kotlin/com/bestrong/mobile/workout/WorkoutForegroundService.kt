@@ -20,6 +20,7 @@ import com.bestrong.mobile.WorkoutActions
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.RestState
+import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatClock
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -151,8 +152,13 @@ class WorkoutForegroundService : LifecycleService() {
             .setRequestPromotedOngoing(true)
         workoutProgress(w)?.let(b::setStyle)
         if (rest != null) {
+            // Qué viene después (lo que hay que cargar en la barra), visible en la pantalla de bloqueo
+            val next = WorkoutEditor.nextPendingSet(w)?.let { (i, set) ->
+                val ex = w.exercises[i].exercise
+                getString(R.string.rest_next, ex.displayName(this) + " · " + com.bestrong.mobile.ui.workout.describeSet(set, ex, settings.settings.value.unit))
+            }
             b.setContentTitle(getString(R.string.notif_rest_title, w.name))
-                .setContentText(getString(R.string.notif_rest_text))
+                .setContentText(next ?: getString(R.string.notif_rest_text))
                 .setWhen(rest.endsAtEpochMs)
                 .setChronometerCountDown(true)
                 .addAction(0, getString(R.string.rest_plus_15), action(ACTION_PLUS_15, 1))

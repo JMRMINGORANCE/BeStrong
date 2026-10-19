@@ -746,6 +746,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     fun adjustRest(deltaSeconds: Int) = restTimer.adjust(deltaSeconds)
+
+    /** El entreno en texto (series, RPE), como «Compartir como texto» del historial. */
+    fun shareText(workout: Workout): String = actions.shareText(workout) { it.displayName(appContext) }
     fun skipRest() = restTimer.skip()
 
     fun finish() {

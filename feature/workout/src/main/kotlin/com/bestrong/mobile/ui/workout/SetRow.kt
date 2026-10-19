@@ -329,7 +329,7 @@ fun SetRow(
                                 NumberField(set.reps.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_left), Modifier.weight(1f)) {
                                     if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
                                 }
-                                NumberField(set.repsRight?.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_right), Modifier.weight(1f)) {
+                                NumberField(set.repsRight?.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_reps_right), Modifier.weight(1f), last = true) {
                                     onRepsRight(it.toIntOrNull() ?: 0)
                                 }
                             }
@@ -340,19 +340,20 @@ fun SetRow(
                                 Modifier.weight(1f),
                                 syncKey = repsSync,
                                 onFocus = { f -> focusedField = if (f) StepField.REPS else focusedField.takeIf { it != StepField.REPS } },
+                                last = true,
                             ) {
                                 if (it.isEmpty()) onReps(0) else it.toIntOrNull()?.let(onReps)
                             }
                         }
                     }
-                    TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_seconds), Modifier.weight(2f)) {
+                    TrackingType.DURATION -> NumberField(set.durationSec.takeIf { it > 0 }?.toString() ?: "", stringResource(R.string.set_seconds), Modifier.weight(2f), last = true) {
                         if (it.isEmpty()) onDuration(0) else it.toIntOrNull()?.let(onDuration)
                     }
                     TrackingType.DISTANCE -> {
                         NumberField(unit.format(set.weightKg).takeIf { set.weightKg > 0 } ?: "", stringResource(R.string.set_weight_in, unit.label), Modifier.weight(1f), decimal = true) {
                             if (it.isEmpty()) onWeightKg(0.0) else unit.parseToKg(it)?.let(onWeightKg)
                         }
-                        NumberField(set.distanceM.takeIf { it > 0 }?.toInt()?.toString() ?: "", stringResource(R.string.set_meters), Modifier.weight(1f)) {
+                        NumberField(set.distanceM.takeIf { it > 0 }?.toInt()?.toString() ?: "", stringResource(R.string.set_meters), Modifier.weight(1f), last = true) {
                             onDistance(it.toDoubleOrNull() ?: 0.0)
                         }
                     }
@@ -364,7 +365,7 @@ fun SetRow(
                                 onDuration((it.toIntOrNull() ?: 0) * 60)
                             }
                         }
-                        NumberField(set.distanceM.takeIf { it > 0 }?.let { "%.2f".format(it / 1000) } ?: "", stringResource(R.string.set_km), Modifier.weight(1f), decimal = true) {
+                        NumberField(set.distanceM.takeIf { it > 0 }?.let { "%.2f".format(it / 1000) } ?: "", stringResource(R.string.set_km), Modifier.weight(1f), decimal = true, last = true) {
                             onDistance(it.replace(',', '.').toDoubleOrNull()?.times(1000) ?: 0.0)
                         }
                     }
@@ -447,8 +448,11 @@ private fun NumberField(
     signed: Boolean = false,
     syncKey: Int = 0,
     onFocus: (Boolean) -> Unit = {},
+    /** Último campo de la fila: «Hecho» cierra el teclado (si no, «Siguiente» lo dejaba tapando la pantalla). */
+    last: Boolean = false,
     onChange: (String) -> Unit,
 ) {
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     var text by remember { mutableStateOf(value) }
     var focused by remember { mutableStateOf(false) }
     // Tras pulsar ± el valor llega de vuelta aunque el campo tenga el foco
@@ -479,8 +483,9 @@ private fun NumberField(
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         keyboardOptions = KeyboardOptions(
             keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number,
-            imeAction = ImeAction.Next,
+            imeAction = if (last) ImeAction.Done else ImeAction.Next,
         ),
+        keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { focusManager.clearFocus() }),
         modifier = modifier
             .padding(horizontal = 4.dp)
             .clip(RoundedCornerShape(8.dp))

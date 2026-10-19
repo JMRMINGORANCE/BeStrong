@@ -59,6 +59,7 @@ fun RestScreen(session: WorkoutSession) {
     val progress = (remaining.toFloat() / r.totalSeconds).coerceIn(0f, 1f)
     val next = workout?.let { w -> WorkoutEditor.nextPendingSet(w)?.let { (i, s) -> w.exercises[i] to s } }
 
+    val view = androidx.compose.ui.platform.LocalView.current
     val focus = remember { FocusRequester() }
     var rotary by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
@@ -80,6 +81,7 @@ fun RestScreen(session: WorkoutSession) {
                     val steps = (rotary / ROTARY_STEP_PX).toInt()
                     if (steps != 0) {
                         rotary -= steps * ROTARY_STEP_PX
+                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
                         session.adjustRest(steps * REST_STEP_S)
                     }
                     true
