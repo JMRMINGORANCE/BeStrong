@@ -76,52 +76,57 @@ class WatchSyncService : WearableListenerService() {
         // El servicio se destruye al volver de onDataChanged: procesamos de forma síncrona.
         runBlocking {
             events.forEach { event ->
-                val item = event.dataItem
-                val path = item.uri.path.orEmpty()
-                when {
-                    path.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
-                        val received = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
-                            ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return@forEach
-                        val stored = repository.storedWorkout(received.id)
-                        // Series hechas en el móvil que el reloj no llegó a recibir: se fusionan con su terminado
-                        val withLocal = repository.localCopyOf(received.id)
-                            ?.let { WorkoutMerge.merge(it, received).copy(finishedAtEpochMs = received.finishedAtEpochMs) } ?: received
-                        val workout = completeFromWatch(withLocal, stored)
-                        val isNew = stored == null
-                        repository.saveWorkout(workout)
-                        repository.clearRemoteActive(workout.id)
-                        if (isNew) {
-                            val records = WorkoutStats.newRecordsIn(workout, repository.historyOnce())
-                            Notifier.records(this@WatchSyncService, workout, records, settings.settings.value.unit)
-                        }
-                        Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.id}")
-                        runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
-                        // Un reenvío del mismo entreno no se vuelve a exportar
-                        if (isNew) appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }
-                    }
-                    // Entreno terminado en el móvil: el reloj manda el pulso y las calorías finales
-                    path.startsWith(SyncContract.PATH_WORKOUT_HEALTH_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
-                        val health = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
-                            ?.let { runCatching { SyncContract.decodeHealth(it) }.getOrNull() }
-                        health?.let { actions.mergeWatchHealth(it) }
-                        runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
-                    }
-                    // Rutina creada en el reloj: se guarda y se borra el DataItem
-                    path.startsWith(SyncContract.PATH_WATCH_ROUTINE_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
-                        DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
-                            ?.let { runCatching { SyncContract.decodeRoutines(it) }.getOrNull() }
-                            ?.forEach { routine -> repository.saveRoutine(routine) }
-                        runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
-                    }
-                    path == SyncContract.PATH_ACTIVE_WORKOUT && isFromOtherNode(item.uri.host) -> {
-                        if (event.type == DataEvent.TYPE_DELETED) {
-                            repository.clearRemoteActive(null)
-                        } else {
-                            DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
-                                ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }
-                                ?.let { repository.applyRemoteActive(it) }
-                        }
-                    }
+                // Uno que falle no se lleva por delante el resto del lote
+                runCatching { handle(event) }.onFailure { Log.w(TAG, "Evento del reloj no procesado", it) }
+            }
+        }
+    }
+
+    private suspend fun handle(event: DataEvent) {
+        val item = event.dataItem
+        val path = item.uri.path.orEmpty()
+        when {
+            path.startsWith(SyncContract.PATH_FINISHED_WORKOUT_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
+                val received = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                    ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() } ?: return
+                val stored = repository.storedWorkout(received.id)
+                // Series hechas en el móvil que el reloj no llegó a recibir: se fusionan con su terminado
+                val withLocal = repository.localCopyOf(received.id)
+                    ?.let { WorkoutMerge.merge(it, received).copy(finishedAtEpochMs = received.finishedAtEpochMs) } ?: received
+                val workout = completeFromWatch(withLocal, stored)
+                val isNew = stored == null
+                repository.saveWorkout(workout)
+                repository.clearRemoteActive(workout.id)
+                if (isNew) {
+                    val records = WorkoutStats.newRecordsIn(workout, repository.historyOnce())
+                    Notifier.records(this@WatchSyncService, workout, records, settings.settings.value.unit)
+                }
+                Log.i(TAG, "Entrenamiento del reloj guardado: ${workout.id}")
+                runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
+                // Un reenvío del mismo entreno no se vuelve a exportar
+                if (isNew) appScope.launch { actions.exportToHealthConnectIfEnabled(workout) }
+            }
+            // Entreno terminado en el móvil: el reloj manda el pulso y las calorías finales
+            path.startsWith(SyncContract.PATH_WORKOUT_HEALTH_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
+                val health = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                    ?.let { runCatching { SyncContract.decodeHealth(it) }.getOrNull() }
+                health?.let { actions.mergeWatchHealth(it) }
+                runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
+            }
+            // Rutina creada en el reloj: se guarda y se borra el DataItem
+            path.startsWith(SyncContract.PATH_WATCH_ROUTINE_PREFIX) && event.type == DataEvent.TYPE_CHANGED -> {
+                DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                    ?.let { runCatching { SyncContract.decodeRoutines(it) }.getOrNull() }
+                    ?.forEach { routine -> repository.saveRoutine(routine) }
+                runCatching { Wearable.getDataClient(this@WatchSyncService).deleteDataItems(item.uri).await() }
+            }
+            path == SyncContract.PATH_ACTIVE_WORKOUT && isFromOtherNode(item.uri.host) -> {
+                if (event.type == DataEvent.TYPE_DELETED) {
+                    repository.clearRemoteActive(null)
+                } else {
+                    DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                        ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }
+                        ?.let { repository.applyRemoteActive(it) }
                 }
             }
         }

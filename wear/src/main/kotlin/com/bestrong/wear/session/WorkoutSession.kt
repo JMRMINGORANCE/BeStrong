@@ -300,7 +300,7 @@ class WorkoutSession @Inject constructor(
     fun applyRemote(incoming: Workout) {
         val local = _workout.value
         // Recién terminado o descartado aquí: el eco atrasado del móvil no lo resucita
-        if (local?.id != incoming.id && incoming.id == store.lastEndedWorkoutId) return
+        if (local?.id != incoming.id && store.wasEnded(incoming.id)) return
         // Se lee antes de apuntar el que llega: ¿tuvo el móvil alguna vez el entreno local?
         val phoneKnew = store.phoneKnownWorkoutId
         if (phoneKnew != incoming.id) store.phoneKnownWorkoutId = incoming.id
@@ -348,6 +348,8 @@ class WorkoutSession @Inject constructor(
         stopTempo()
         stopRest()
         repCounter.stop()
+        // También cuenta como cerrado: una copia atrasada (al reabrir la app) no lo resucita
+        store.markEnded(w.id)
         _workout.value = null
         store.activeWorkout = null
         // Con una carrera en marcha el ejercicio de Health Services es de los dos: no se corta

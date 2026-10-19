@@ -24,7 +24,7 @@
     <ID>CyclomaticComplexMethod:TimerScreens.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:VoiceSetParser.kt$VoiceSetParser$fun parse(text: String): SpokenSet</ID>
     <ID>CyclomaticComplexMethod:VoiceSetParser.kt$VoiceSetParser$private fun tokenize(text: String): List&lt;Tok&gt;</ID>
-    <ID>CyclomaticComplexMethod:WatchSyncService.kt$WatchSyncService$override fun onDataChanged(events: DataEventBuffer)</ID>
+    <ID>CyclomaticComplexMethod:WatchSyncService.kt$WatchSyncService$private suspend fun handle(event: DataEvent)</ID>
     <ID>CyclomaticComplexMethod:WearApp.kt$@Composable fun WearApp(container: WearContainer, startRequest: StateFlow&lt;String?&gt;, ambient: StateFlow&lt;Boolean&gt;, onStartRequestHandled: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:WorkoutCsv.kt$WorkoutCsv$fun import( text: String, known: List&lt;Exercise&gt;, zone: ZoneId = ZoneId.systemDefault(), strongUnit: WeightUnit = WeightUnit.KG, ): ImportResult</ID>
     <ID>CyclomaticComplexMethod:WorkoutCsv.kt$WorkoutCsv.ExerciseResolver$fun resolve(name: String, id: String = ""): Exercise</ID>

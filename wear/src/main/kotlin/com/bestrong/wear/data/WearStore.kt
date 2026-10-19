@@ -71,6 +71,19 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         _routines.value = routines
     }
 
+    /** Rutinas creadas aquí que el móvil aún no ha devuelto: una lista suya sin ellas no las borra. */
+    private fun pendingRoutineIds(): Set<String> = prefs.getStringSet(KEY_PENDING_ROUTINES, emptySet()).orEmpty()
+
+    /** Lista de rutinas del móvil: manda, salvo las creadas aquí que todavía no conoce. */
+    fun setPhoneRoutines(routines: List<Routine>) {
+        val phoneIds = routines.map { it.id }.toSet()
+        val pending = pendingRoutineIds()
+        val keep = _routines.value.filter { it.id in pending && it.id !in phoneIds }
+        val stillPending = pending.filterNot { it in phoneIds }.toSet()
+        if (stillPending != pending) prefs.edit { putStringSet(KEY_PENDING_ROUTINES, stillPending) }
+        setRoutines(routines + keep)
+    }
+
     fun setPhoneHistory(history: List<Workout>) {
         prefs.edit { putString(KEY_PHONE_HISTORY, SyncContract.encodeWorkouts(history).decodeToString()) }
         _phoneHistory.value = history
@@ -132,7 +145,23 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
     /** Último entreno terminado o descartado en el reloj: un mensaje atrasado del móvil no lo vuelve a abrir. */
     var lastEndedWorkoutId: String?
         get() = prefs.getString(KEY_LAST_ENDED, null)
-        set(value) = prefs.edit { putString(KEY_LAST_ENDED, value) }
+        set(value) {
+            prefs.edit { putString(KEY_LAST_ENDED, value) }
+            value?.let(::markEnded)
+        }
+
+    /**
+     * Los últimos entrenos terminados o cerrados aquí (no solo el último): un eco atrasado del móvil de uno
+     * de ellos no lo reabre aunque después se hiciera otro.
+     */
+    private fun endedIds(): List<String> = prefs.getString(KEY_ENDED_IDS, null)?.split(',')?.filter { it.isNotBlank() }.orEmpty()
+
+    fun markEnded(id: String) = prefs.edit { putString(KEY_ENDED_IDS, (listOf(id) + endedIds().filterNot { it == id }).take(MAX_ENDED).joinToString(",")) }
+
+    fun wasEnded(id: String): Boolean = id in endedIds() || _history.value.any { it.id == id }
+
+    /** Terminados en el reloj que el móvil aún no tiene en su historial (para reenviarlos si se perdió el aviso). */
+    val pendingForPhone: List<Workout> get() = _localHistory.value
 
     /** Umbral calibrado del contador de repeticiones (m/s²). */
     var repThreshold: Float
@@ -148,7 +177,10 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
     }
 
     /** Rutina creada en el reloj: se guarda aquí y se envía al móvil. */
-    fun addRoutine(routine: Routine) = setRoutines(_routines.value.filterNot { it.id == routine.id } + routine)
+    fun addRoutine(routine: Routine) {
+        prefs.edit { putStringSet(KEY_PENDING_ROUTINES, pendingRoutineIds() + routine.id) }
+        setRoutines(_routines.value.filterNot { it.id == routine.id } + routine)
+    }
 
     /**
      * Calorías de los tramos de Health Services ya cerrados en el entreno en curso (pesas → cinta →
@@ -217,6 +249,9 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         const val KEY_SEGMENTS_KCAL = "segments_kcal"
         const val KEY_REP_THRESHOLD = "rep_threshold"
         const val KEY_LAST_ENDED = "last_ended_workout"
+        const val KEY_ENDED_IDS = "ended_workout_ids"
+        const val KEY_PENDING_ROUTINES = "pending_watch_routines"
+        const val MAX_ENDED = 20
         const val KEY_PHONE_KNOWN = "phone_known_workout"
         const val KEY_REST = "active_rest"
         const val KEY_CARDIO = "active_cardio"

@@ -82,6 +82,17 @@ class PhoneSync @Inject constructor(@ApplicationContext private val context: Con
 
     suspend fun localNodeId(): String? = runCatching { nodeClient.localNode.await().id }.getOrNull()
 
+    /**
+     * Reenvía los entrenos terminados aquí que el móvil sigue sin tener (si se perdió el aviso, el DataItem se
+     * quedaba sin procesar para siempre). El móvil los fusiona por id: un reenvío no duplica ni reexporta.
+     */
+    suspend fun resendPendingWorkouts() {
+        val now = System.currentTimeMillis()
+        store.pendingForPhone
+            .filter { w -> w.finishedAtEpochMs?.let { now - it in RESEND_AFTER_MS..RESEND_WINDOW_MS } == true }
+            .forEach { sendFinishedWorkout(it) }
+    }
+
     /** Lee el último estado publicado por el móvil (al abrir la app). */
     suspend fun pullFromPhone(onActive: (Workout) -> Unit) {
         val items = runCatching { dataClient.dataItems.await() }.getOrNull() ?: return
@@ -103,11 +114,13 @@ class PhoneSync @Inject constructor(@ApplicationContext private val context: Con
 
     companion object {
         private const val TAG = "PhoneSync"
+        private const val RESEND_AFTER_MS = 10 * 60_000L
+        private const val RESEND_WINDOW_MS = 14 * 24 * 60 * 60_000L
 
         fun applyDataItem(store: WearStore, path: String, payload: ByteArray?) {
             payload ?: return
             when (path) {
-                SyncContract.PATH_ROUTINES -> runCatching { SyncContract.decodeRoutines(payload) }.onSuccess(store::setRoutines)
+                SyncContract.PATH_ROUTINES -> runCatching { SyncContract.decodeRoutines(payload) }.onSuccess(store::setPhoneRoutines)
                 SyncContract.PATH_RECENT_HISTORY -> runCatching { SyncContract.decodeWorkouts(payload) }.onSuccess(store::setPhoneHistory)
                 SyncContract.PATH_SETTINGS -> runCatching { SyncContract.decodeSettings(payload) }.onSuccess(store::setSettings)
             }

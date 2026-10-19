@@ -47,7 +47,10 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { startMeasuringIfActive() }
             .launch(arrayOf(ExerciseService.HEART_RATE_PERMISSION, Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.POST_NOTIFICATIONS))
 
-        lifecycleScope.launch { container.phoneSync.pullFromPhone(onActive = container.session::applyRemote) }
+        lifecycleScope.launch {
+            container.phoneSync.pullFromPhone(onActive = container.session::applyRemote)
+            container.phoneSync.resendPendingWorkouts()
+        }
         if (savedInstanceState == null) handleIntent(intent)
 
         setContent {
