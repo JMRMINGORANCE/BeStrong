@@ -21,8 +21,9 @@ data class TrainingProgram(
     val daysPerWeek: Int,
     val routines: List<RoutineTemplate>,
 ) {
-    fun name(language: String) = if (language == "en") nameEn else nameEs
-    fun description(language: String) = if (language == "en") descriptionEn else descriptionEs
+    // En el idioma de la app (con traducción a los que no son español ni inglés)
+    fun name(language: String) = com.bestrong.core.i18n.ContentText.pick(nameEs, nameEn, language)
+    fun description(language: String) = com.bestrong.core.i18n.ContentText.pick(descriptionEs, descriptionEn, language)
 
     /** Crea las rutinas (sin pesos: se rellenan con la última sesión o la progresión). */
     fun toRoutines(language: String): List<Routine> = routines.map { t ->
@@ -40,7 +41,7 @@ data class TrainingProgram(
             exercises[a] = exercises[a].copy(supersetId = group)
             exercises[b] = exercises[b].copy(supersetId = group)
         }
-        Routine(name = "${name(language)} · ${if (language == "en") t.nameEn else t.nameEs}", exercises = exercises)
+        Routine(name = "${name(language)} · ${com.bestrong.core.i18n.ContentText.pick(t.nameEs, t.nameEn, language)}", exercises = exercises)
     }
 }
 

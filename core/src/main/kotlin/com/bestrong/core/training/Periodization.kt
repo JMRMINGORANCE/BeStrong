@@ -79,8 +79,12 @@ data class PeriodizedProgram(
     val custom: Boolean = false,
 ) {
     val daysPerWeek: Int get() = days.size
-    fun name(lang: String) = if (lang == "en") nameEn else nameEs
-    fun description(lang: String) = if (lang == "en") descriptionEn else descriptionEs
+
+    // Los del usuario tal cual (su «Fuerza» no se traduce); los de la app, en su idioma
+    fun name(lang: String) = if (custom) nameEs else com.bestrong.core.i18n.ContentText.pick(nameEs, nameEn, lang)
+    fun description(lang: String) = if (custom) descriptionEs else com.bestrong.core.i18n.ContentText.pick(descriptionEs, descriptionEn, lang)
+
+    fun dayName(day: ProgramDay, lang: String) = if (custom) day.nameEs else com.bestrong.core.i18n.ContentText.pick(day.nameEs, day.nameEn, lang)
 }
 
 /** Programa activo del usuario: qué programa, desde cuándo y con qué training max. */
@@ -149,7 +153,7 @@ object Periodization {
         val weekLabel = if (program.weeksPerCycle > 1) " · ${texts.weekPrefix}${week + 1}" else ""
         val routine = Routine(
             id = routineId(program.id, dayIndex),
-            name = "${program.name(lang)} · ${if (lang == "en") day.nameEn else day.nameEs}$weekLabel",
+            name = "${program.name(lang)} · ${program.dayName(day, lang)}$weekLabel",
             exercises = exercises,
         )
         return ProgramSession(program, dayIndex, week + 1, cycle + 1, n, routine)

@@ -291,7 +291,7 @@ object RoutineGenerator {
             // El remate cuenta dentro del tiempo de la sesión
             val room = if (finisherEx != null) maxExercises - 1 else maxExercises
             val picks = picksFor(type, variant, usable, finisherEx, room)
-            val label = dayLabels[type] ?: dayNames.getValue(type).let { (es, en) -> if (lang == "en") en else es }
+            val label = dayLabels[type] ?: dayNames.getValue(type).let { (es, en) -> com.bestrong.core.i18n.ContentText.pick(es, en, lang) }
             val letter = if (days.count { it == type } > 1) " " + ('A' + variant) else ""
             // Superseries solo entre accesorios; el remate va suelto al final
             val exercises = pairAccessories(picks.mapIndexed { i, ex -> routineExercise(ex, if (i < 2) main else acc) }, goal)

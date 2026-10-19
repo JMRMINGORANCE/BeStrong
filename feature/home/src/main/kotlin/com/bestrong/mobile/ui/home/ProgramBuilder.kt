@@ -74,7 +74,6 @@ import com.bestrong.mobile.ui.components.Panel
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.brandGradient
 import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.ui.components.uiLanguage
 
 /** Cada objetivo con su icono, nombre y explicación corta. */
 private data class GoalOption(val goal: Goal, val icon: ImageVector, val title: Int, val body: Int)
@@ -116,7 +115,7 @@ fun ProgramBuilderScreen(
     var weekdaysText by rememberSaveable { mutableStateOf(com.bestrong.core.training.ProgramGenerator.defaultWeekdays(days).joinToString(",")) }
     val weekdays = weekdaysText.split(',').mapNotNull { it.toIntOrNull() }
     val program = remember(goal, days, kit, minutes, level) { vm.buildProgram(days, goal, kit, minutes, level) }
-    val lang = uiLanguage()
+    val lang = com.bestrong.mobile.ui.components.appLanguage()
     BackHandler(onBack = onDismiss)
     Scaffold(
         topBar = {

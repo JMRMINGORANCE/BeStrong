@@ -78,6 +78,15 @@ fun uiLanguage(): String = contentLanguage(LocalConfiguration.current.locales[0]
 
 fun Context.uiLanguage(): String = contentLanguage(resources.configuration.locales[0].language)
 
+/**
+ * El idioma real de la app (ca, gl, pt, fr, de…), no solo español/inglés: para los textos de contenido que sí
+ * están traducidos a todos (programas, sus días y descripciones).
+ */
+@Composable @ReadOnlyComposable
+fun appLanguage(): String = LocalConfiguration.current.locales[0].language
+
+fun Context.appLanguage(): String = resources.configuration.locales[0].language
+
 /** Textos que los programas escriben en cada sesión, en el idioma de la app. */
 fun Context.programTexts(): com.bestrong.core.training.ProgramTexts =
     com.bestrong.core.training.ProgramTexts(getString(com.bestrong.mobile.shared.R.string.program_amrap_note), getString(com.bestrong.mobile.shared.R.string.program_week_prefix))

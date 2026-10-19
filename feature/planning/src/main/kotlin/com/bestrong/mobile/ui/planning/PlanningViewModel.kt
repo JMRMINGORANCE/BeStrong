@@ -26,6 +26,7 @@ import com.bestrong.mobile.data.PlanningState
 import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.appLanguage
 import com.bestrong.mobile.ui.components.uiLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -105,7 +106,19 @@ class PlanningViewModel @Inject constructor(
 
     fun generate(days: Int, equipment: Set<Equipment>, goal: Goal, minutes: Int): List<Routine> =
         // Se filtra antes de emparejar superseries: así ninguna se queda con un solo ejercicio
-        RoutineGenerator.generate(days, equipment, goal, minutes, context.uiLanguage(), allowed = { com.bestrong.core.training.Injuries.isSafe(it, store.state.value.injuries) })
+        RoutineGenerator.generate(
+            days, equipment, goal, minutes, context.appLanguage(),
+            allowed = { com.bestrong.core.training.Injuries.isSafe(it, store.state.value.injuries) },
+            // Nombres de los días como en el creador de programas (traducidos a todos los idiomas)
+            dayLabels = mapOf(
+                "full" to context.getString(R.string.day_full),
+                "upper" to context.getString(R.string.day_upper),
+                "lower" to context.getString(R.string.day_lower),
+                "push" to context.getString(R.string.day_push),
+                "pull" to context.getString(R.string.day_pull),
+                "legs" to context.getString(R.string.day_legs),
+            ),
+        )
 
     fun saveGenerated(routines: List<Routine>) = viewModelScope.launch {
         repo.addRoutines(routines)

@@ -66,7 +66,6 @@ import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.label
-import com.bestrong.mobile.ui.components.uiLanguage
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 
@@ -240,7 +239,7 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     fun tmOf(id: String) = unit.parseToKg(values[id].orEmpty())?.takeIf { it > 0 }
     val lifts = program.mainLifts.filter { ExerciseLibrary.byId(it) != null }
     val valid = lifts.all { tmOf(it) != null }
-    val lang = uiLanguage()
+    val lang = com.bestrong.mobile.ui.components.appLanguage()
     BackHandler(onBack = onDismiss)
     Scaffold(
         topBar = {

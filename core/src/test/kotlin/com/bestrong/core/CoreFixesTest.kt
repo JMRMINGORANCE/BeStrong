@@ -98,6 +98,19 @@ class CoreFixesTest {
         assertEquals("Arm circles", com.bestrong.core.training.GuidedStep("Círculos de brazos", "Arm circles", 30).name("en"))
     }
 
+    @Test fun programTextsTranslatedToEveryAppLanguage() {
+        val pairs = com.bestrong.core.library.Programs.all.flatMap { p ->
+            listOf(p.nameEs to p.nameEn, p.descriptionEs to p.descriptionEn) + p.routines.map { it.nameEs to it.nameEn }
+        } + com.bestrong.core.training.PeriodizedPrograms.all.flatMap { p ->
+            listOf(p.nameEs to p.nameEn, p.descriptionEs to p.descriptionEn) + p.days.map { it.nameEs to it.nameEn }
+        }
+        // Los iguales en español e inglés (A, B, PHUL, 5/3/1…) no necesitan traducción
+        val missing = pairs.filter { (es, en) -> es != en }.distinct().flatMap { (es, _) ->
+            listOf("ca", "gl", "pt", "fr", "de").filterNot { com.bestrong.core.i18n.ContentText.has(es, it) }.map { "$es → $it" }
+        }
+        assertEquals(emptyList<String>(), missing)
+    }
+
     @Test fun measurementCsvStripsBom() {
         val m = MeasurementCsv.read("2024-01-01,80.5,,,,,\n2024-01-08,80.0,,,,,\n", ZoneOffset.UTC)
         assertEquals(2, m.rows.size)

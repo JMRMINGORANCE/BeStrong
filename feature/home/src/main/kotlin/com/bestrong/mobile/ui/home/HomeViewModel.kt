@@ -28,9 +28,9 @@ import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.health.HealthConnectReader
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.sync.WatchSync
+import com.bestrong.mobile.ui.components.appLanguage
 import com.bestrong.mobile.ui.components.defaultWorkoutName
 import com.bestrong.mobile.ui.components.programTexts
-import com.bestrong.mobile.ui.components.uiLanguage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.DayOfWeek
@@ -96,7 +96,7 @@ class HomeViewModel @Inject constructor(
 
     /** Sesión que toca hoy del programa activo (con las cargas ya calculadas). */
     val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state) { active, history, plan ->
-        val session = active?.let { Periodization.nextSession(it, history, context.uiLanguage(), plan.customPrograms, context.programTexts()) }
+        val session = active?.let { Periodization.nextSession(it, history, context.appLanguage(), plan.customPrograms, context.programTexts()) }
         // Semana de descarga del mesociclo: la sesión se aligera sola
         if (session != null && plan.mesocycle?.isDeloadWeek(LocalDate.now()) == true) session.copy(routine = Fatigue.deload(session.routine, context.getString(R.string.deload_label))) else session
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -249,7 +249,7 @@ class HomeViewModel @Inject constructor(
 
     fun activateProgram(program: PeriodizedProgram, trainingMaxKg: Map<String, Double>) = viewModelScope.launch {
         repo.setActiveProgram(ActiveProgram(program.id, System.currentTimeMillis(), trainingMaxKg, weeklyGoal = program.daysPerWeek))
-        message(context.getString(R.string.msg_program_started, program.name(context.uiLanguage())))
+        message(context.getString(R.string.msg_program_started, program.name(context.appLanguage())))
     }
 
     fun stopProgram() = viewModelScope.launch { repo.setActiveProgram(null) }
@@ -460,7 +460,7 @@ class HomeViewModel @Inject constructor(
             goal,
             kit.equipment,
             minutes,
-            context.uiLanguage(),
+            context.appLanguage(),
             allowed = { com.bestrong.core.training.Injuries.isSafe(it, injuries) },
             texts = texts,
             level = level,
@@ -487,9 +487,9 @@ class HomeViewModel @Inject constructor(
 
     /** Crea las rutinas del programa elegido en el idioma de la app. */
     fun addProgram(program: TrainingProgram) = viewModelScope.launch {
-        val routines = program.toRoutines(context.uiLanguage())
+        val routines = program.toRoutines(context.appLanguage())
         repo.addRoutines(routines)
-        message(context.getString(R.string.msg_program_added, program.name(context.uiLanguage()), routines.size))
+        message(context.getString(R.string.msg_program_added, program.name(context.appLanguage()), routines.size))
     }
 
     /** Última rutina borrada, para poder deshacerlo desde el aviso. */
