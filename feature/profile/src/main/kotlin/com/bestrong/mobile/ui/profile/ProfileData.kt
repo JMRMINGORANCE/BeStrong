@@ -32,6 +32,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -232,7 +233,7 @@ private fun TrashItem(vm: ProfileViewModel) {
                                 // De quién es (si es de la pareja) y cuándo se borró: sale de la papelera a los 30 días
                                 Text(listOfNotNull(t.workout.name, t.workout.athlete).joinToString(" · ") + " · " + formatDate(t.workout.startedAtEpochMs))
                                 Text(
-                                    stringResource(R.string.trash_deleted_left, formatDate(t.deletedAtEpochMs), t.daysLeft(System.currentTimeMillis())),
+                                    t.daysLeft(System.currentTimeMillis()).let { left -> pluralStringResource(R.plurals.trash_deleted_left, left, formatDate(t.deletedAtEpochMs), left) },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )

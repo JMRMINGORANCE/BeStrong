@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -129,7 +130,7 @@ fun WeekSummaryCard(stats: AdvancedStats) {
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
-            if (w.records.isNotEmpty()) Text(stringResource(R.string.week_records, w.records.size), style = MaterialTheme.typography.bodySmall)
+            if (w.records.isNotEmpty()) Text(pluralStringResource(R.plurals.week_records, w.records.size, w.records.size), style = MaterialTheme.typography.bodySmall)
         }
     }
 }

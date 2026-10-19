@@ -429,14 +429,20 @@
     <string name="notif_channel_reminders">Rappels d’entraînement</string>
     <string name="notif_complete_set">Valider la série</string>
     <string name="notif_progress">%1$d/%2$d séries terminées</string>
-    <string name="notif_records_title">🏆 %1$d nouveaux records !</string>
+    <plurals name="notif_records_title">
+        <item quantity="one">🏆 %1$d nouveau record !</item>
+        <item quantity="other">🏆 %1$d nouveaux records !</item>
+    </plurals>
     <string name="notif_reminder_routine">Prochaine routine : %1$s</string>
     <string name="notif_reminder_text">Ouvre BeStrong et lance ton entraînement.</string>
     <string name="notif_reminder_title">C’est jour d’entraînement 💪</string>
     <string name="notif_rest_text">Série suivante à la fin du compte à rebours</string>
     <string name="notif_rest_title">Repos · %1$s</string>
     <string name="notif_weekly_change">%1$s de volume par rapport à la semaine dernière</string>
-    <string name="notif_weekly_records">🏆 %1$d nouveaux records</string>
+    <plurals name="notif_weekly_records">
+        <item quantity="one">🏆 %1$d nouveau record</item>
+        <item quantity="other">🏆 %1$d nouveaux records</item>
+    </plurals>
     <string name="notif_weekly_text">%1$d entraînements · %2$s · %3$d séries</string>
     <string name="notif_weekly_title">Ta semaine sur BeStrong</string>
     <string name="one_hand_complete">%1$s · série %2$d</string>
@@ -473,7 +479,7 @@
     <string name="plates_remainder">Il manque %1$s %2$s : impossible à charger exactement avec des disques standard.</string>
     <string name="plates_target">Poids cible (%1$s)</string>
     <string name="plates_title">Calculateur de disques</string>
-    <string name="plates_total">Total: %1$s %2$s</string>
+    <string name="plates_total">Total : %1$s %2$s</string>
     <string name="previous_value">Précédent : %1$s</string>
     <string name="primary_muscle">Principal : %1$s</string>
     <string name="privacy">Confidentialité</string>
@@ -551,11 +557,11 @@
     <string name="readiness_title">Forme du jour</string>
     <string name="record_1rm">Meilleur 1RM estimé</string>
     <string name="record_heaviest">Charge la plus lourde</string>
-    <string name="record_line">%1$s: %2$s %3$s</string>
+    <string name="record_line">%1$s : %2$s %3$s</string>
     <string name="record_most_reps">Plus de répétitions</string>
     <string name="record_set_volume">Meilleur volume par série</string>
     <string name="record_timeline">Chronologie des records</string>
-    <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
+    <string name="record_timeline_line">%1$s · %2$s : %3$s</string>
     <string name="relative_strength">Force relative : %1$s</string>
     <string name="relative_strength_hint">1RM estimé divisé par ton poids corporel</string>
     <string name="reminders">Rappels</string>
@@ -696,10 +702,10 @@
     <string name="summary_hr">♥ moy. %1$d bpm · max %2$s</string>
     <string name="summary_imbalance">⚠ %1$s : un côté a fait %2$d %% de répétitions en moins</string>
     <string name="summary_kcal"> · %1$d kcal</string>
-    <string name="summary_next_line">%1$s %2$s: %3$s × %4$d</string>
+    <string name="summary_next_line">%1$s %2$s : %3$s × %4$d</string>
     <string name="summary_next_time">La prochaine fois</string>
     <string name="summary_vs_last">Par rapport à la dernière fois</string>
-    <string name="summary_vs_line">%1$s: %2$s</string>
+    <string name="summary_vs_line">%1$s : %2$s</string>
     <string name="superset_label">Superset %1$s</string>
     <string name="superset_remove">Retirer du superset</string>
     <string name="superset_with_next">Superset avec le suivant</string>
@@ -787,7 +793,10 @@
     <string name="watch_sync">Synchroniser avec la Galaxy Watch</string>
     <string name="watch_sync_body">Envoie maintenant routines et historique à la montre</string>
     <string name="week_adherence">Régularité des dernières semaines : %1$d %%</string>
-    <string name="week_records">%1$d records cette semaine</string>
+    <plurals name="week_records">
+        <item quantity="one">%1$d record cette semaine</item>
+        <item quantity="other">%1$d records cette semaine</item>
+    </plurals>
     <string name="week_sessions">%1$d séances sur %2$d</string>
     <string name="week_summary">Résumé de la semaine</string>
     <string name="week_summary_line">%1$d entraînements · %2$s · %3$d séries (%4$s effectives)</string>
@@ -804,7 +813,10 @@
     <string name="widget_description">Série de jours, entraînements de la semaine et accès rapide à tes routines</string>
     <string name="widget_start">Lancer %1$s</string>
     <string name="widget_streak">🔥 %1$d sem.</string>
-    <string name="widget_week">%1$d entraînements cette semaine</string>
+    <plurals name="widget_week">
+        <item quantity="one">%1$d entraînement cette semaine</item>
+        <item quantity="other">%1$d entraînements cette semaine</item>
+    </plurals>
     <string name="workout_afternoon">Entraînement de l’après-midi</string>
     <string name="workout_completed">Entraînement terminé !</string>
     <string name="workout_discard">Abandonner l’entraînement</string>
@@ -925,7 +937,10 @@
     <string name="muscle_trend">Séries par muscle (8 semaines)</string>
     <string name="muscle_trend_hint">Séries efficaces par semaine (secondaires pour moitié). Recommandé : %1$d–%2$d.</string>
     <string name="stat_average_workout">Séance moyenne : %1$s · %2$d séries · %3$s</string>
-    <string name="weekly_goal_reached">🎯 Objectif hebdomadaire atteint ! (%1$d jours)</string>
+    <plurals name="weekly_goal_reached">
+        <item quantity="one">🎯 Objectif hebdomadaire atteint ! (%1$d jour)</item>
+        <item quantity="other">🎯 Objectif hebdomadaire atteint ! (%1$d jours)</item>
+    </plurals>
     <string name="tool_share_week">Partager la semaine (texte pour ton coach)</string>
     <string name="share_week_title">Mes séances des 7 derniers jours (BeStrong)</string>
     <string name="share_week_empty">Aucune séance ces 7 derniers jours</string>
@@ -1168,7 +1183,10 @@
     <string name="trash_empty_confirm">Sûr ? Vider</string>
     <string name="cardio_streak">%1$d semaines d\'affilée à atteindre l\'objectif</string>
     <string name="cardio_goal_custom">Autre : saisis un nombre et touche km ou min</string>
-    <string name="trash_deleted_left">Supprimé le %1$s · reste %2$d j</string>
+    <plurals name="trash_deleted_left">
+        <item quantity="one">Supprimé le %1$s · reste %2$d j</item>
+        <item quantity="other">Supprimé le %1$s · reste %2$d j</item>
+    </plurals>
     <string name="trash_restore_all">Tout restaurer</string>
     <string name="trash_restored_n">Séances restaurées : %1$d</string>
     <string name="history_filtered_summary">Séances : %1$d · %2$s</string>

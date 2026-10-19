@@ -1168,7 +1168,7 @@ fun WorkoutSummaryDialog(
                     )
                 }
                 summary.weeklyGoalReached?.let { goal ->
-                    Text(stringResource(R.string.weekly_goal_reached, goal), fontWeight = FontWeight.Bold, color = statusColors.good)
+                    Text(pluralStringResource(R.plurals.weekly_goal_reached, goal, goal), fontWeight = FontWeight.Bold, color = statusColors.good)
                 }
                 // Los récords arriba, antes de la valoración: es lo primero que se quiere ver
                 if (summary.records.isNotEmpty()) {

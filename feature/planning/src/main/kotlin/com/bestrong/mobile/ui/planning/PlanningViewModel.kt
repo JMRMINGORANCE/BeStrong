@@ -152,7 +152,7 @@ class PlanningViewModel @Inject constructor(
         runCatching {
             val text = Ics.generate(events, usualTime, ZoneId.systemDefault())
             val dir = java.io.File(context.cacheDir, "share").apply { mkdirs() }
-            val file = java.io.File(dir, "bestrong-semana.ics").apply { writeText(text) }
+            val file = java.io.File(dir, "bestrong-week.ics").apply { writeText(text) }
             val uri = androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.files", file)
             val view = android.content.Intent(android.content.Intent.ACTION_VIEW).setDataAndType(uri, "text/calendar")
                 .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)

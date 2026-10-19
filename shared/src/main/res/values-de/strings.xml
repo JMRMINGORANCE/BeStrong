@@ -429,14 +429,20 @@
     <string name="notif_channel_reminders">Trainingserinnerungen</string>
     <string name="notif_complete_set">Satz abschließen</string>
     <string name="notif_progress">%1$d/%2$d Sätze abgeschlossen</string>
-    <string name="notif_records_title">🏆 %1$d neue Rekorde!</string>
+    <plurals name="notif_records_title">
+        <item quantity="one">🏆 %1$d neuer Rekord!</item>
+        <item quantity="other">🏆 %1$d neue Rekorde!</item>
+    </plurals>
     <string name="notif_reminder_routine">Nächste Routine: %1$s</string>
     <string name="notif_reminder_text">Öffne BeStrong und starte dein Training.</string>
     <string name="notif_reminder_title">Zeit fürs Training 💪</string>
     <string name="notif_rest_text">Nächster Satz, wenn der Countdown endet</string>
     <string name="notif_rest_title">Pause · %1$s</string>
     <string name="notif_weekly_change">%1$s Volumen ggü. Vorwoche</string>
-    <string name="notif_weekly_records">🏆 %1$d neue Rekorde</string>
+    <plurals name="notif_weekly_records">
+        <item quantity="one">🏆 %1$d neuer Rekord</item>
+        <item quantity="other">🏆 %1$d neue Rekorde</item>
+    </plurals>
     <string name="notif_weekly_text">%1$d Trainings · %2$s · %3$d Sätze</string>
     <string name="notif_weekly_title">Deine Woche in BeStrong</string>
     <string name="one_hand_complete">%1$s · Satz %2$d</string>
@@ -787,7 +793,10 @@
     <string name="watch_sync">Mit Galaxy Watch synchronisieren</string>
     <string name="watch_sync_body">Routinen und Verlauf jetzt an die Uhr senden</string>
     <string name="week_adherence">Konstanz der letzten Wochen: %1$d%%</string>
-    <string name="week_records">%1$d Rekorde diese Woche</string>
+    <plurals name="week_records">
+        <item quantity="one">%1$d Rekord diese Woche</item>
+        <item quantity="other">%1$d Rekorde diese Woche</item>
+    </plurals>
     <string name="week_sessions">%1$d von %2$d Einheiten</string>
     <string name="week_summary">Wochenübersicht</string>
     <string name="week_summary_line">%1$d Trainings · %2$s · %3$d Sätze (%4$s effektiv)</string>
@@ -804,7 +813,10 @@
     <string name="widget_description">Serie, Trainings pro Woche und Schnellzugriff auf deine Routinen</string>
     <string name="widget_start">%1$s starten</string>
     <string name="widget_streak">🔥 %1$d Wo.</string>
-    <string name="widget_week">%1$d Trainings diese Woche</string>
+    <plurals name="widget_week">
+        <item quantity="one">%1$d Training diese Woche</item>
+        <item quantity="other">%1$d Trainings diese Woche</item>
+    </plurals>
     <string name="workout_afternoon">Nachmittagstraining</string>
     <string name="workout_completed">Training abgeschlossen!</string>
     <string name="workout_discard">Training verwerfen</string>
@@ -925,7 +937,10 @@
     <string name="muscle_trend">Sätze pro Muskel (8 Wochen)</string>
     <string name="muscle_trend_hint">Effektive Sätze pro Woche (Nebenmuskeln halb). Empfohlen: %1$d–%2$d.</string>
     <string name="stat_average_workout">Durchschnittliches Training: %1$s · %2$d Sätze · %3$s</string>
-    <string name="weekly_goal_reached">🎯 Wochenziel erreicht! (%1$d Tage)</string>
+    <plurals name="weekly_goal_reached">
+        <item quantity="one">🎯 Wochenziel erreicht! (%1$d Tag)</item>
+        <item quantity="other">🎯 Wochenziel erreicht! (%1$d Tage)</item>
+    </plurals>
     <string name="tool_share_week">Woche teilen (Text für deinen Coach)</string>
     <string name="share_week_title">Meine Trainings der letzten 7 Tage (BeStrong)</string>
     <string name="share_week_empty">Keine Trainings in den letzten 7 Tagen</string>
@@ -1168,7 +1183,10 @@
     <string name="trash_empty_confirm">Sicher? Leeren</string>
     <string name="cardio_streak">%1$d Wochen in Folge Ziel erreicht</string>
     <string name="cardio_goal_custom">Andere: Zahl eingeben und km oder min tippen</string>
-    <string name="trash_deleted_left">Gelöscht am %1$s · noch %2$d Tage</string>
+    <plurals name="trash_deleted_left">
+        <item quantity="one">Gelöscht am %1$s · noch %2$d Tag</item>
+        <item quantity="other">Gelöscht am %1$s · noch %2$d Tage</item>
+    </plurals>
     <string name="trash_restore_all">Alle wiederherstellen</string>
     <string name="trash_restored_n">Wiederhergestellte Trainings: %1$d</string>
     <string name="history_filtered_summary">Trainings: %1$d · %2$s</string>

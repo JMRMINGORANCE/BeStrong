@@ -429,14 +429,20 @@
     <string name="notif_channel_reminders">Workout reminders</string>
     <string name="notif_complete_set">Complete set</string>
     <string name="notif_progress">%1$d/%2$d sets completed</string>
-    <string name="notif_records_title">🏆 %1$d new records!</string>
+    <plurals name="notif_records_title">
+        <item quantity="one">🏆 %1$d new record!</item>
+        <item quantity="other">🏆 %1$d new records!</item>
+    </plurals>
     <string name="notif_reminder_routine">Next routine: %1$s</string>
     <string name="notif_reminder_text">Open BeStrong and start your workout.</string>
     <string name="notif_reminder_title">Time to train today 💪</string>
     <string name="notif_rest_text">Next set when the countdown ends</string>
     <string name="notif_rest_title">Rest · %1$s</string>
     <string name="notif_weekly_change">%1$s volume vs last week</string>
-    <string name="notif_weekly_records">🏆 %1$d new records</string>
+    <plurals name="notif_weekly_records">
+        <item quantity="one">🏆 %1$d new record</item>
+        <item quantity="other">🏆 %1$d new records</item>
+    </plurals>
     <string name="notif_weekly_text">%1$d workouts · %2$s · %3$d sets</string>
     <string name="notif_weekly_title">Your week in BeStrong</string>
     <string name="one_hand_complete">%1$s · set %2$d</string>
@@ -787,7 +793,10 @@
     <string name="watch_sync">Sync with Galaxy Watch</string>
     <string name="watch_sync_body">Send routines and history to the watch now</string>
     <string name="week_adherence">Consistency over recent weeks: %1$d%%</string>
-    <string name="week_records">%1$d records this week</string>
+    <plurals name="week_records">
+        <item quantity="one">%1$d record this week</item>
+        <item quantity="other">%1$d records this week</item>
+    </plurals>
     <string name="week_sessions">%1$d of %2$d sessions</string>
     <string name="week_summary">Weekly summary</string>
     <string name="week_summary_line">%1$d workouts · %2$s · %3$d sets (%4$s effective)</string>
@@ -804,7 +813,10 @@
     <string name="widget_description">Streak, weekly workouts and quick access to your routines</string>
     <string name="widget_start">Start %1$s</string>
     <string name="widget_streak">🔥 %1$d wk</string>
-    <string name="widget_week">%1$d workouts this week</string>
+    <plurals name="widget_week">
+        <item quantity="one">%1$d workout this week</item>
+        <item quantity="other">%1$d workouts this week</item>
+    </plurals>
     <string name="workout_afternoon">Afternoon workout</string>
     <string name="workout_completed">Workout complete!</string>
     <string name="workout_discard">Discard workout</string>
@@ -925,7 +937,10 @@
     <string name="muscle_trend">Sets per muscle (8 weeks)</string>
     <string name="muscle_trend_hint">Effective sets per week (secondary muscles count half). Recommended: %1$d–%2$d.</string>
     <string name="stat_average_workout">Average workout: %1$s · %2$d sets · %3$s</string>
-    <string name="weekly_goal_reached">🎯 Weekly goal reached! (%1$d days)</string>
+    <plurals name="weekly_goal_reached">
+        <item quantity="one">🎯 Weekly goal reached! (%1$d day)</item>
+        <item quantity="other">🎯 Weekly goal reached! (%1$d days)</item>
+    </plurals>
     <string name="tool_share_week">Share the week (text for your coach)</string>
     <string name="share_week_title">My workouts from the last 7 days (BeStrong)</string>
     <string name="share_week_empty">No workouts in the last 7 days</string>
@@ -1168,7 +1183,10 @@
     <string name="trash_empty_confirm">Sure? Empty</string>
     <string name="cardio_streak">%1$d weeks in a row meeting the goal</string>
     <string name="cardio_goal_custom">Other: type a number and tap km or min</string>
-    <string name="trash_deleted_left">Deleted on %1$s · %2$d days left</string>
+    <plurals name="trash_deleted_left">
+        <item quantity="one">Deleted on %1$s · %2$d day left</item>
+        <item quantity="other">Deleted on %1$s · %2$d days left</item>
+    </plurals>
     <string name="trash_restore_all">Restore all</string>
     <string name="trash_restored_n">Workouts restored: %1$d</string>
     <string name="history_filtered_summary">Workouts: %1$d · %2$s</string>

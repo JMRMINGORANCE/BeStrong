@@ -429,14 +429,20 @@
     <string name="notif_channel_reminders">Lembretes de treino</string>
     <string name="notif_complete_set">Concluir série</string>
     <string name="notif_progress">%1$d/%2$d séries concluídas</string>
-    <string name="notif_records_title">🏆 %1$d novos recordes!</string>
+    <plurals name="notif_records_title">
+        <item quantity="one">🏆 %1$d novo recorde!</item>
+        <item quantity="other">🏆 %1$d novos recordes!</item>
+    </plurals>
     <string name="notif_reminder_routine">Próxima rotina: %1$s</string>
     <string name="notif_reminder_text">Abre o BeStrong e começa o teu treino.</string>
     <string name="notif_reminder_title">Hoje é dia de treinar 💪</string>
     <string name="notif_rest_text">Próxima série quando terminar a contagem</string>
     <string name="notif_rest_title">Descanso · %1$s</string>
     <string name="notif_weekly_change">%1$s de volume face à semana passada</string>
-    <string name="notif_weekly_records">🏆 %1$d novos recordes</string>
+    <plurals name="notif_weekly_records">
+        <item quantity="one">🏆 %1$d novo recorde</item>
+        <item quantity="other">🏆 %1$d novos recordes</item>
+    </plurals>
     <string name="notif_weekly_text">%1$d treinos · %2$s · %3$d séries</string>
     <string name="notif_weekly_title">A tua semana no BeStrong</string>
     <string name="one_hand_complete">%1$s · série %2$d</string>
@@ -787,7 +793,10 @@
     <string name="watch_sync">Sincronizar com o Galaxy Watch</string>
     <string name="watch_sync_body">Enviar agora rotinas e histórico para o relógio</string>
     <string name="week_adherence">Regularidade nas últimas semanas: %1$d%%</string>
-    <string name="week_records">%1$d recordes esta semana</string>
+    <plurals name="week_records">
+        <item quantity="one">%1$d recorde esta semana</item>
+        <item quantity="other">%1$d recordes esta semana</item>
+    </plurals>
     <string name="week_sessions">%1$d de %2$d sessões</string>
     <string name="week_summary">Resumo semanal</string>
     <string name="week_summary_line">%1$d treinos · %2$s · %3$d séries (%4$s efetivas)</string>
@@ -804,7 +813,10 @@
     <string name="widget_description">Sequência, treinos semanais e acesso rápido às tuas rotinas</string>
     <string name="widget_start">Começar %1$s</string>
     <string name="widget_streak">🔥 %1$d sem.</string>
-    <string name="widget_week">%1$d treinos esta semana</string>
+    <plurals name="widget_week">
+        <item quantity="one">%1$d treino esta semana</item>
+        <item quantity="other">%1$d treinos esta semana</item>
+    </plurals>
     <string name="workout_afternoon">Treino da tarde</string>
     <string name="workout_completed">Treino concluído!</string>
     <string name="workout_discard">Descartar treino</string>
@@ -925,7 +937,10 @@
     <string name="muscle_trend">Séries por músculo (8 semanas)</string>
     <string name="muscle_trend_hint">Séries efetivas por semana (secundários a metade). Recomendado: %1$d–%2$d.</string>
     <string name="stat_average_workout">Treino médio: %1$s · %2$d séries · %3$s</string>
-    <string name="weekly_goal_reached">🎯 Objetivo semanal cumprido! (%1$d dias)</string>
+    <plurals name="weekly_goal_reached">
+        <item quantity="one">🎯 Objetivo semanal cumprido! (%1$d dia)</item>
+        <item quantity="other">🎯 Objetivo semanal cumprido! (%1$d dias)</item>
+    </plurals>
     <string name="tool_share_week">Partilhar a semana (texto para o teu treinador)</string>
     <string name="share_week_title">Os meus treinos dos últimos 7 dias (BeStrong)</string>
     <string name="share_week_empty">Não há treinos nos últimos 7 dias</string>
@@ -1168,7 +1183,10 @@
     <string name="trash_empty_confirm">Tem certeza? Esvaziar</string>
     <string name="cardio_streak">%1$d semanas seguidas cumprindo a meta</string>
     <string name="cardio_goal_custom">Outro: digite o número e toque em km ou min</string>
-    <string name="trash_deleted_left">Apagado em %1$s · faltam %2$d dias</string>
+    <plurals name="trash_deleted_left">
+        <item quantity="one">Apagado em %1$s · falta %2$d dia</item>
+        <item quantity="other">Apagado em %1$s · faltam %2$d dias</item>
+    </plurals>
     <string name="trash_restore_all">Recuperar todos</string>
     <string name="trash_restored_n">Treinos recuperados: %1$d</string>
     <string name="history_filtered_summary">Treinos: %1$d · %2$s</string>

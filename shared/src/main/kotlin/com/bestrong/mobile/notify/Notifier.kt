@@ -69,7 +69,7 @@ object Notifier {
         lines.take(6).forEach(style::addLine)
         val n = NotificationCompat.Builder(context, CHANNEL_RECORDS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
-            .setContentTitle(context.getString(R.string.notif_records_title, records.size))
+            .setContentTitle(context.resources.getQuantityString(R.plurals.notif_records_title, records.size, records.size))
             .setContentText(lines.first())
             .setStyle(style.setSummaryText(workout.name))
             .setCategory(NotificationCompat.CATEGORY_STATUS)
@@ -254,7 +254,7 @@ object Notifier {
         val text = context.getString(R.string.notif_weekly_text, week.workouts, unit.formatVolume(week.volume), week.sets)
         val lines = listOfNotNull(
             text,
-            week.records.takeIf { it.isNotEmpty() }?.let { context.getString(R.string.notif_weekly_records, it.size) },
+            week.records.takeIf { it.isNotEmpty() }?.let { context.resources.getQuantityString(R.plurals.notif_weekly_records, it.size, it.size) },
             // Con cardio: kilómetros y tiempo de la semana
             week.takeIf { it.cardioDistanceM > 0 || it.cardioSec > 0 }?.let {
                 context.getString(R.string.notif_weekly_cardio, com.bestrong.mobile.ui.workout.cardioText(it.cardioSec.toInt(), it.cardioDistanceM, withPace = false))

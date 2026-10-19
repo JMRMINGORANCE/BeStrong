@@ -117,7 +117,7 @@ class BeStrongWidget : GlanceAppWidget() {
                 Text(context.getString(R.string.widget_streak, streak), style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 13.sp))
             }
             Text(
-                context.getString(R.string.widget_week, week),
+                context.resources.getQuantityString(R.plurals.widget_week, week, week),
                 style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp),
             )
             cardio?.let { Text(it, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp), maxLines = 1) }

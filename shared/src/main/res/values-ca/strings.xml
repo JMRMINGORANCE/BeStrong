@@ -429,14 +429,20 @@
     <string name="notif_channel_reminders">Recordatoris d’entrenament</string>
     <string name="notif_complete_set">Completar sèrie</string>
     <string name="notif_progress">%1$d/%2$d sèries completades</string>
-    <string name="notif_records_title">🏆 %1$d rècords nous!</string>
+    <plurals name="notif_records_title">
+        <item quantity="one">🏆 %1$d rècord nou!</item>
+        <item quantity="other">🏆 %1$d rècords nous!</item>
+    </plurals>
     <string name="notif_reminder_routine">Següent rutina: %1$s</string>
     <string name="notif_reminder_text">Obre BeStrong i comença el teu entrenament.</string>
     <string name="notif_reminder_title">Avui toca entrenar 💪</string>
     <string name="notif_rest_text">Següent sèrie en acabar el compte enrere</string>
     <string name="notif_rest_title">Descans · %1$s</string>
     <string name="notif_weekly_change">%1$s de volum respecte a la setmana passada</string>
-    <string name="notif_weekly_records">🏆 %1$d rècords nous</string>
+    <plurals name="notif_weekly_records">
+        <item quantity="one">🏆 %1$d rècord nou</item>
+        <item quantity="other">🏆 %1$d rècords nous</item>
+    </plurals>
     <string name="notif_weekly_text">%1$d entrenaments · %2$s · %3$d sèries</string>
     <string name="notif_weekly_title">La teva setmana a BeStrong</string>
     <string name="one_hand_complete">%1$s · sèrie %2$d</string>
@@ -787,7 +793,10 @@
     <string name="watch_sync">Sincronitzar amb Galaxy Watch</string>
     <string name="watch_sync_body">Envia rutines i historial al rellotge ara</string>
     <string name="week_adherence">Constància de les últimes setmanes: %1$d %%</string>
-    <string name="week_records">%1$d rècords aquesta setmana</string>
+    <plurals name="week_records">
+        <item quantity="one">%1$d rècord aquesta setmana</item>
+        <item quantity="other">%1$d rècords aquesta setmana</item>
+    </plurals>
     <string name="week_sessions">%1$d de %2$d sessions</string>
     <string name="week_summary">Resum de la setmana</string>
     <string name="week_summary_line">%1$d entrenaments · %2$s · %3$d sèries (%4$s efectives)</string>
@@ -804,7 +813,10 @@
     <string name="widget_description">Semaines d’affilée, entraînements de la semaine et accès rapide à tes routines</string>
     <string name="widget_start">Començar %1$s</string>
     <string name="widget_streak">🔥 %1$d setm.</string>
-    <string name="widget_week">%1$d entrenaments aquesta setmana</string>
+    <plurals name="widget_week">
+        <item quantity="one">%1$d entrenament aquesta setmana</item>
+        <item quantity="other">%1$d entrenaments aquesta setmana</item>
+    </plurals>
     <string name="workout_afternoon">Entrenament de tarda</string>
     <string name="workout_completed">Entrenament completat!</string>
     <string name="workout_discard">Descartar entrenament</string>
@@ -925,7 +937,10 @@
     <string name="muscle_trend">Sèries per múscul (8 setmanes)</string>
     <string name="muscle_trend_hint">Sèries efectives per setmana (secundaris a la meitat). Recomanat: %1$d–%2$d.</string>
     <string name="stat_average_workout">Entrenament mitjà: %1$s · %2$d sèries · %3$s</string>
-    <string name="weekly_goal_reached">🎯 Objectiu setmanal assolit! (%1$d dies)</string>
+    <plurals name="weekly_goal_reached">
+        <item quantity="one">🎯 Objectiu setmanal assolit! (%1$d dia)</item>
+        <item quantity="other">🎯 Objectiu setmanal assolit! (%1$d dies)</item>
+    </plurals>
     <string name="tool_share_week">Compartir la setmana (text per al teu entrenador)</string>
     <string name="share_week_title">Els meus entrenaments dels últims 7 dies (BeStrong)</string>
     <string name="share_week_empty">No hi ha entrenaments en els últims 7 dies</string>
@@ -1168,7 +1183,10 @@
     <string name="trash_empty_confirm">Segur? Buidar</string>
     <string name="cardio_streak">%1$d setmanes seguides complint l\'objectiu</string>
     <string name="cardio_goal_custom">Un altre: escriu el número i toca km o min</string>
-    <string name="trash_deleted_left">Esborrat el %1$s · queden %2$d dies</string>
+    <plurals name="trash_deleted_left">
+        <item quantity="one">Esborrat el %1$s · queda %2$d dia</item>
+        <item quantity="other">Esborrat el %1$s · queden %2$d dies</item>
+    </plurals>
     <string name="trash_restore_all">Recuperar-los tots</string>
     <string name="trash_restored_n">Entrenaments recuperats: %1$d</string>
     <string name="history_filtered_summary">Entrenaments: %1$d · %2$s</string>

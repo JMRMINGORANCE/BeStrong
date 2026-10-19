@@ -87,7 +87,7 @@ object RoutineShare {
         }
         doc.finishPage(page)
         val dir = File(context.cacheDir, "share").apply { mkdirs() }
-        val file = File(dir, "bestrong-rutina.pdf")
+        val file = File(dir, "bestrong-routine.pdf")
         FileOutputStream(file).use { doc.writeTo(it) }
         doc.close()
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", file)
