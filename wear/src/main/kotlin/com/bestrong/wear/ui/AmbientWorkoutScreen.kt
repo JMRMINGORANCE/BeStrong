@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,13 +41,19 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
     val w = workout ?: return
     val we = w.exercises.getOrNull(index)
     val set = we?.sets?.firstOrNull { !it.completed }
-    Box(Modifier.fillMaxSize().background(Color.Black).padding(24.dp), contentAlignment = Alignment.Center) {
+    val tracking = we?.exercise?.tracking ?: com.bestrong.core.model.TrackingType.WEIGHT_REPS
+    Box(Modifier.fillMaxSize().background(Color.Black).padding(24.dp).burnInShift(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(w.name, color = Color.Gray, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             we?.let { Text(it.exercise.displayName(), color = Color.White, fontSize = 16.sp, maxLines = 2, textAlign = TextAlign.Center) }
             set?.let {
                 Text(
-                    "${unit.format(it.weightKg)} ${unit.label} × ${it.reps}",
+                    // Como en la pantalla normal: segundos, minutos o metros según el ejercicio (no «0 kg × 0»)
+                    if (tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) {
+                        "${unit.format(it.weightKg)} ${unit.label} × ${it.reps}"
+                    } else {
+                        setText(it, tracking, unit)
+                    },
                     color = Color.White,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Light,
@@ -73,11 +80,35 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
 fun AmbientCardioScreen(cardio: com.bestrong.wear.session.CardioSession) {
     val state by cardio.state.collectAsStateWithLifecycle()
     val s = state ?: return
-    Box(Modifier.fillMaxSize().background(Color.Black).padding(24.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.fillMaxSize().background(Color.Black).padding(24.dp).burnInShift(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(cardioLabel(s.type), color = Color.Gray, fontSize = 13.sp)
             Text("%.2f km".format(s.distanceM / 1000), color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Light)
             Text("♥ ${s.heartRate ?: "--"}", color = Color.Gray, fontSize = 13.sp)
         }
     }
+}
+
+/**
+ * Protección contra quemado de pantallas OLED: si el reloj la pide, el contenido se desplaza unos píxeles en
+ * cada actualización del modo siempre activo (≈ 1 vez por minuto) para no dejar marcado el texto fijo.
+ */
+object AmbientBurnIn {
+    val tick = kotlinx.coroutines.flow.MutableStateFlow(0)
+
+    @Volatile var required = false
+
+    fun onUpdate() {
+        if (required) tick.value = (tick.value + 1) % SHIFT_POSITIONS
+    }
+}
+
+private const val SHIFT_POSITIONS = 9
+private const val SHIFT_DP = 4
+
+@Composable
+private fun Modifier.burnInShift(): Modifier {
+    val t by AmbientBurnIn.tick.collectAsStateWithLifecycle()
+    if (!AmbientBurnIn.required) return this
+    return offset(((t % 3) - 1).times(SHIFT_DP).dp, ((t / 3) - 1).times(SHIFT_DP).dp)
 }

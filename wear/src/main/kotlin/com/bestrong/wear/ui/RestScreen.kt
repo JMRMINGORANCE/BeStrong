@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -22,6 +22,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,7 +41,6 @@ import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.util.formatDuration
 import com.bestrong.wear.R
 import com.bestrong.wear.session.WorkoutSession
-import kotlinx.coroutines.delay
 
 /** Descanso a pantalla completa con anillo de progreso por el borde de la esfera. */
 @Composable
@@ -50,8 +50,7 @@ fun RestScreen(session: WorkoutSession) {
     val workout by session.workout.collectAsStateWithLifecycle()
     val recovered by session.recovered.collectAsStateWithLifecycle()
     val record by session.record.collectAsStateWithLifecycle()
-    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(200) } }
+    val now = rememberVisibleNow(200)
 
     val unit = LocalWeightUnit.current
     val r = rest ?: return
@@ -61,6 +60,7 @@ fun RestScreen(session: WorkoutSession) {
     val next = workout?.let { w -> WorkoutEditor.nextPendingSet(w)?.let { (i, s) -> w.exercises[i] to s } }
 
     val focus = remember { FocusRequester() }
+    var rotary by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     ScreenScaffold(timeText = {}) {
         Box(
@@ -73,6 +73,16 @@ fun RestScreen(session: WorkoutSession) {
                     } else {
                         false
                     }
+                }
+                // Corona o bisel: ±15 s por paso, como los botones
+                .onRotaryScrollEvent { e ->
+                    rotary += e.verticalScrollPixels
+                    val steps = (rotary / ROTARY_STEP_PX).toInt()
+                    if (steps != 0) {
+                        rotary -= steps * ROTARY_STEP_PX
+                        session.adjustRest(steps * REST_STEP_S)
+                    }
+                    true
                 }
                 .focusRequester(focus)
                 .focusable(),
@@ -89,7 +99,8 @@ fun RestScreen(session: WorkoutSession) {
                 Text(formatDuration(remaining), fontSize = 40.sp, fontWeight = FontWeight.Bold)
                 val zone = session.heartRateZone(metrics.heartRate)
                 Text("♥ ${metrics.heartRate ?: "--"}" + if (zone > 0) " · Z$zone" else "", color = HeartRed, style = MaterialTheme.typography.labelSmall)
-                if (recovered) Text(stringResource(R.string.recovered), color = Done, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
+                // Una sola línea de aviso (el récord manda): con las dos, los botones se iban contra el anillo
+                if (recovered && !record) Text(stringResource(R.string.recovered), color = Done, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
                 if (record) Text(stringResource(R.string.new_record_live), color = Done, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
                 next?.let { (we, s) ->
                     Text(
@@ -110,3 +121,6 @@ fun RestScreen(session: WorkoutSession) {
         }
     }
 }
+
+private const val ROTARY_STEP_PX = 60f
+private const val REST_STEP_S = 15

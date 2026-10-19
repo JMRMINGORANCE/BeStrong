@@ -149,6 +149,12 @@ private fun CrownChart(points: List<Pair<Long, Double>>, color: Color) {
         Canvas(
             Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 24.dp)
                 .onRotaryScrollEvent { e ->
+                    // En un extremo de la gráfica la corona vuelve a mover la lista (si no, quedaba atrapada aquí)
+                    val atEnd = (e.verticalScrollPixels > 0 && selected == points.lastIndex) || (e.verticalScrollPixels < 0 && selected == 0)
+                    if (atEnd) {
+                        accumulated = 0f
+                        return@onRotaryScrollEvent false
+                    }
                     accumulated += e.verticalScrollPixels
                     val steps = (accumulated / 40f).toInt()
                     if (steps != 0) {

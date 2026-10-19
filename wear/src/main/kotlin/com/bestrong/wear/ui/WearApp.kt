@@ -41,11 +41,16 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
     // Abierto desde el móvil: empezar rutina o entrenamiento vacío
     LaunchedEffect(request) {
         val r = request ?: return@LaunchedEffect
+        onStartRequestHandled()
+        // Con una carrera en marcha no se abre un entreno a la vez (se pisarían el pulso y el servicio)
+        if (container.cardio.isActive) {
+            nav.navigate(WearRoutes.CARDIO) { launchSingleTop = true }
+            return@LaunchedEffect
+        }
         if (session.workout.value == null) {
             val routine = container.store.routines.value.firstOrNull { it.id == r }
             if (routine != null) session.startRoutine(routine) else session.startEmpty()
         }
-        onStartRequestHandled()
         nav.navigate(WearRoutes.WORKOUT) { launchSingleTop = true }
     }
     // El descanso termina solo: volvemos a la pantalla de series

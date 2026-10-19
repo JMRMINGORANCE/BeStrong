@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,7 +36,6 @@ import com.bestrong.core.util.formatDuration
 import com.bestrong.wear.R
 import com.bestrong.wear.session.CardioSession
 import com.bestrong.wear.session.CardioType
-import kotlinx.coroutines.delay
 
 /** Cardio libre con GPS: elegir tipo, ver distancia/ritmo/pulso y guardar. */
 @Composable
@@ -92,8 +89,7 @@ fun CardioScreen(cardio: CardioSession, onDone: () -> Unit) {
             }
         }
         else -> {
-            var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-            LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(1_000) } }
+            val now = rememberVisibleNow(1_000)
             ScreenScaffold {
                 Box(Modifier.fillMaxSize().padding(bottom = 48.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {

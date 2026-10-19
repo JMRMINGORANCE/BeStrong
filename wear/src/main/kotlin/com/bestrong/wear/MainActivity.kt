@@ -29,12 +29,13 @@ class MainActivity : ComponentActivity() {
 
     private val ambientCallback = object : AmbientLifecycleObserver.AmbientLifecycleCallback {
         override fun onEnterAmbient(ambientDetails: AmbientLifecycleObserver.AmbientDetails) {
+            com.bestrong.wear.ui.AmbientBurnIn.required = ambientDetails.burnInProtectionRequired
             ambient.value = true
         }
         override fun onExitAmbient() {
             ambient.value = false
         }
-        override fun onUpdateAmbient() = Unit
+        override fun onUpdateAmbient() = com.bestrong.wear.ui.AmbientBurnIn.onUpdate()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

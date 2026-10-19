@@ -116,7 +116,8 @@ class CardioSession @Inject constructor(
         _state.value = null
         restoredHr = null
         store.activeCardio = null
-        ExerciseService.stop(context)
+        // Si hay un entreno de pesas abierto sigue necesitando el servicio (pulso, primer plano)
+        if (store.activeWorkout == null) ExerciseService.stop(context)
         val now = System.currentTimeMillis()
         val exercise = ExerciseLibrary.byId(s.type.exerciseId) ?: return
         val durationSec = ((now - s.startedAtEpochMs) / 1000).toInt()
@@ -146,7 +147,8 @@ class CardioSession @Inject constructor(
         _state.value = null
         restoredHr = null
         store.activeCardio = null
-        ExerciseService.stop(context)
+        // Si hay un entreno de pesas abierto sigue necesitando el servicio (pulso, primer plano)
+        if (store.activeWorkout == null) ExerciseService.stop(context)
     }
 
     fun dismissFinished() {

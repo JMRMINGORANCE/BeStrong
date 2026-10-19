@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.repeatOnLifecycle
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.Exercise
@@ -81,4 +82,23 @@ fun setText(set: com.bestrong.core.model.WorkoutSet, tracking: com.bestrong.core
     com.bestrong.core.model.TrackingType.CARDIO -> "${set.durationSec / 60} min" + if (set.distanceM > 0) " · ${"%.1f".format(set.distanceM / 1000)} km" else ""
     com.bestrong.core.model.TrackingType.DISTANCE -> (if (set.weightKg != 0.0) "${unit.format(set.weightKg)}×" else "") + "${set.distanceM.toInt()} m"
     else -> if (set.weightKg == 0.0) "${set.reps} reps" else "${unit.format(set.weightKg)}×${set.reps}"
+}
+
+/**
+ * La hora actual cada [intervalMs] solo mientras la pantalla está visible: con la pantalla apagada (y el
+ * descanso manteniendo la CPU despierta) no tiene sentido redibujar un reloj que nadie ve.
+ */
+@androidx.compose.runtime.Composable
+fun rememberVisibleNow(intervalMs: Long): Long {
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    val now = androidx.compose.runtime.remember { androidx.compose.runtime.mutableLongStateOf(System.currentTimeMillis()) }
+    androidx.compose.runtime.LaunchedEffect(lifecycle, intervalMs) {
+        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            while (true) {
+                now.longValue = System.currentTimeMillis()
+                kotlinx.coroutines.delay(intervalMs)
+            }
+        }
+    }
+    return now.longValue
 }

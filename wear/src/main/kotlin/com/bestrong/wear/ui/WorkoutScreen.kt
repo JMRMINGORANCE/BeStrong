@@ -12,11 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -82,8 +82,7 @@ fun WorkoutScreen(
     val unit = LocalWeightUnit.current
     val focus = remember { FocusRequester() }
     var accumulated by remember { mutableFloatStateOf(0f) }
-    var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    LaunchedEffect(Unit) { while (true) { now = System.currentTimeMillis(); delay(1_000) } }
+    val now = rememberVisibleNow(1_000)
     // Sin entreno (notificación o tile antiguos) el foco no llega a engancharse: no debe cerrar la app
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
 
@@ -227,27 +226,31 @@ fun WorkoutScreen(
                         )
                     }
                 }
-                // Reps que batirían tu récord con este peso (solo series que cuentan)
-                if (we.exercise.tracking == TrackingType.WEIGHT_REPS && set.countsForRecords) {
-                    // Solo cambia con las series hechas (no a cada giro de la corona)
-                    val doneSignature = w.exercises.sumOf { e -> e.completedSets.sumOf { it.estimatedOneRepMax } }
-                    val best = remember(we.exercise.id, doneSignature, records) { session.bestOneRepMax(we.exercise.id) }
-                    best?.let { com.bestrong.core.stats.OneRepMax.repsToBeat(it, set.weightKg) }?.let { reps ->
-                        Text(pluralStringResource(R.plurals.record_hint, reps, reps), style = MaterialTheme.typography.labelSmall, color = Done)
+                // Avisos en un bloque que cede sitio: con muchos, se recortan por abajo (los menos importantes) y el
+                // menú ⋯ (Terminar, Deshacer…) nunca se queda sin hueco
+                Column(Modifier.weight(1f, fill = false), horizontalAlignment = Alignment.CenterHorizontally) {
+                    previous?.let {
+                        Text(
+                            stringResource(R.string.previous_any, setText(it, we.exercise.tracking, unit)),
+                            // «La última vez» bien visible: es lo que hay que batir; tocarla la copia en esta serie
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.clickable(onClickLabel = stringResource(R.string.copy_previous)) { session.copyPrevious(it) },
+                        )
                     }
-                }
-                // Las reps que planea la rutina para esta serie, si difieren de lo que pone
-                set?.targetReps?.takeIf { it != set.reps && we.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { planned ->
-                    Text(stringResource(R.string.planned_reps, planned), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                previous?.let {
-                    Text(
-                        stringResource(R.string.previous_any, setText(it, we.exercise.tracking, unit)),
-                        // «La última vez» bien visible: es lo que hay que batir; tocarla la copia en esta serie
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.clickable(onClickLabel = stringResource(R.string.copy_previous)) { session.copyPrevious(it) },
-                    )
+                    // Reps que batirían tu récord con este peso (solo series que cuentan)
+                    if (we.exercise.tracking == TrackingType.WEIGHT_REPS && set.countsForRecords) {
+                        // Solo cambia con las series hechas (no a cada giro de la corona)
+                        val doneSignature = w.exercises.sumOf { e -> e.completedSets.sumOf { it.estimatedOneRepMax } }
+                        val best = remember(we.exercise.id, doneSignature, records) { session.bestOneRepMax(we.exercise.id) }
+                        best?.let { com.bestrong.core.stats.OneRepMax.repsToBeat(it, set.weightKg) }?.let { reps ->
+                            Text(pluralStringResource(R.plurals.record_hint, reps, reps), style = MaterialTheme.typography.labelSmall, color = Done)
+                        }
+                    }
+                    // Las reps que planea la rutina para esta serie, si difieren de lo que pone
+                    set?.targetReps?.takeIf { it != set.reps && we.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { planned ->
+                        Text(stringResource(R.string.planned_reps, planned), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -284,7 +287,8 @@ fun WorkoutScreen(
 private fun BigValue(value: String, unit: String, selected: Boolean, onClick: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable(onClick = onClick).padding(horizontal = 4.dp),
+        // Zona táctil de 48 dp: es lo que elige qué ajusta la corona
+        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).clickable(onClick = onClick).padding(horizontal = 4.dp),
     ) {
         Text(
             value,

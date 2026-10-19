@@ -278,7 +278,8 @@ class WorkoutSession @Inject constructor(
         stopTempo()
         repCounter.stop()
         set(null)
-        ExerciseService.stop(context)
+        // Con una carrera en marcha el ejercicio de Health Services es de los dos: no se corta
+        if (store.activeCardio == null) ExerciseService.stop(context)
     }
 
     private fun sendReplaced(local: Workout) {
@@ -349,7 +350,8 @@ class WorkoutSession @Inject constructor(
         repCounter.stop()
         _workout.value = null
         store.activeWorkout = null
-        ExerciseService.stop(context)
+        // Con una carrera en marcha el ejercicio de Health Services es de los dos: no se corta
+        if (store.activeCardio == null) ExerciseService.stop(context)
     }
 
     private fun isInForeground(): Boolean {
