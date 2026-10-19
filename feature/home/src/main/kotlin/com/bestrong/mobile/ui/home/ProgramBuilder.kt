@@ -105,10 +105,13 @@ fun ProgramBuilderScreen(
     // Empieza con lo que se dijo en la bienvenida: objetivo, días y dónde se entrena
     val settings by vm.settings.collectAsStateWithLifecycle()
     var goal by rememberSaveable { mutableStateOf(settings.trainingGoal) }
-    var days by rememberSaveable { mutableIntStateOf(settings.weeklyGoal.coerceIn(2, 6)) }
+    var days by rememberSaveable { mutableIntStateOf(settings.weeklyGoal.coerceIn(1, 6)) }
     var kit by rememberSaveable { mutableStateOf(defaultKit(settings.activeGym.equipment)) }
     var minutes by rememberSaveable { mutableIntStateOf(60) }
-    var level by rememberSaveable { mutableStateOf(com.bestrong.core.training.Level.INTERMEDIATE) }
+    // Sin entrenos todavía (recién llegado), de partida el nivel principiante
+    var level by rememberSaveable {
+        mutableStateOf(if (vm.history.value.none { it.isFinished }) com.bestrong.core.training.Level.BEGINNER else com.bestrong.core.training.Level.INTERMEDIATE)
+    }
     // Qué días de la semana (1 = lunes), como texto para guardarlo al girar: «1,3,5»
     var weekdaysText by rememberSaveable { mutableStateOf(com.bestrong.core.training.ProgramGenerator.defaultWeekdays(days).joinToString(",")) }
     val weekdays = weekdaysText.split(',').mapNotNull { it.toIntOrNull() }
@@ -157,7 +160,7 @@ fun ProgramBuilderScreen(
             item {
                 WeekdayPicker(weekdays) { d ->
                     val next = if (d in weekdays) weekdays - d else (weekdays + d).sorted()
-                    if (next.size in 2..6) {
+                    if (next.size in 1..6) {
                         weekdaysText = next.joinToString(",")
                         days = next.size
                     }

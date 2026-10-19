@@ -1311,4 +1311,6 @@
     <string name="workout_empty_body">Cerca\'l pel nom o pel múscul. Després escriu el pes i les repeticions i marca cada sèrie com a feta: el descans comença sol.</string>
     <string name="stat_week_vs_avg">Aquesta setmana: %1$s · mitjana: %2$s</string>
     <string name="picker_already_added">Ja afegit</string>
+    <string name="gym_default_gym">Gimnàs</string>
+    <string name="gym_default_home">Casa</string>
 </resources>

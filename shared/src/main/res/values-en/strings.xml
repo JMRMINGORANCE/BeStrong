@@ -1311,4 +1311,6 @@
     <string name="workout_empty_body">Search by name or muscle. Then enter weight and reps and mark each set as done: the rest timer starts on its own.</string>
     <string name="stat_week_vs_avg">This week: %1$s · avg: %2$s</string>
     <string name="picker_already_added">Already added</string>
+    <string name="gym_default_gym">Gym</string>
+    <string name="gym_default_home">Home</string>
 </resources>

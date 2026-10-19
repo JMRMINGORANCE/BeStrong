@@ -26,6 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -64,9 +65,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         if (savedInstanceState == null) handleIntent(intent)
-        // La notificación del entreno (descanso en la pantalla de bloqueo) necesita este permiso
+        // La notificación del entreno (descanso en la pantalla de bloqueo) necesita este permiso: se pide al empezar
+        // el primer entreno, cuando se entiende para qué es (no al abrir la app, encima de la bienvenida)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            lifecycleScope.launch {
+                repository.activeWorkout.first { it != null }
+                val granted = androidx.core.content.ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.POST_NOTIFICATIONS) ==
+                    android.content.pm.PackageManager.PERMISSION_GRANTED
+                if (!granted) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
         // Con un entreno en marcha, al salir de la app el descanso sigue en una ventana flotante (PiP)
         lifecycleScope.launch {

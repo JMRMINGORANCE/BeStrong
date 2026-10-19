@@ -130,11 +130,29 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
     // Tutorial la primera vez; novedades una vez tras cada actualización
     if (!isRobolectric) {
         if (!settings.tutorialDone) {
+            // Los gimnasios de serie se crean con nombre en español: se traducen al terminar la bienvenida
+            val gymName = stringResource(R.string.gym_default_gym)
+            val homeName = stringResource(R.string.gym_default_home)
             TutorialDialog(
                 onDone = { appVm.update { it.copy(tutorialDone = true, lastSeenVersion = BuildConfig.VERSION_CODE) } },
-                unit = settings.unit,
+                // En EE. UU. (y Liberia, Myanmar) se entrena en libras: la opción marcada de partida
+                unit = if (java.util.Locale.getDefault().country in POUND_COUNTRIES) com.bestrong.core.util.WeightUnit.LB else settings.unit,
                 weeklyGoal = settings.weeklyGoal,
-                onSetup = { unit, goal, home, training -> appVm.update { it.copy(unit = unit, weeklyGoal = goal, trainingGoal = training, pendingBuilder = true).trainingAt(home) } },
+                onSetup = { unit, goal, home, training ->
+                    appVm.update { s ->
+                        s.copy(unit = unit, weeklyGoal = goal, trainingGoal = training, pendingBuilder = true).trainingAt(home).let { t ->
+                            t.copy(
+                                gyms = t.gyms.map { g ->
+                                    when (g.name) {
+                                        "Gimnasio" -> g.copy(name = gymName)
+                                        "Casa" -> g.copy(name = homeName)
+                                        else -> g
+                                    }
+                                },
+                            )
+                        }
+                    }
+                },
                 atHome = com.bestrong.core.model.Equipment.BARBELL !in settings.activeGym.equipment,
                 trainingGoal = settings.trainingGoal,
             )
@@ -377,3 +395,5 @@ private fun NavHostController.navigateTopLevel(route: String) = navigate(route) 
     launchSingleTop = true
     restoreState = true
 }
+
+private val POUND_COUNTRIES = setOf("US", "LR", "MM")

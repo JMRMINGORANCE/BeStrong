@@ -1311,4 +1311,6 @@
     <string name="workout_empty_body">Búscao polo nome ou polo músculo. Despois escribe o peso e as repeticións e marca cada serie como feita: o descanso comeza só.</string>
     <string name="stat_week_vs_avg">Esta semana: %1$s · media: %2$s</string>
     <string name="picker_already_added">Xa engadido</string>
+    <string name="gym_default_gym">Ximnasio</string>
+    <string name="gym_default_home">Casa</string>
 </resources>

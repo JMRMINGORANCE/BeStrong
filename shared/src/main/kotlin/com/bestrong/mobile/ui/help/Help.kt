@@ -376,7 +376,8 @@ private fun SetupScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        TutorialIllustration(TutorialPage(R.string.setup_title, R.string.setup_title, Icons.Default.Tune, listOf(Icons.Default.Straighten, Icons.Default.CalendarMonth, Icons.Default.Home)), MaterialTheme.colorScheme.primary, Modifier.size(180.dp))
+        // Ilustración pequeña: con la grande, en muchos móviles las opciones de abajo quedaban tapadas por el botón
+        TutorialIllustration(TutorialPage(R.string.setup_title, R.string.setup_title, Icons.Default.Tune, listOf(Icons.Default.Straighten, Icons.Default.CalendarMonth, Icons.Default.Home)), MaterialTheme.colorScheme.primary, Modifier.size(SETUP_ART))
         Spacer(Modifier.height(16.dp))
         Text(stringResource(R.string.setup_title), style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center)
         Spacer(Modifier.height(16.dp))
@@ -385,6 +386,8 @@ private fun SetupScreen(
                 TrainingGoalChoice(training, onTraining)
                 SetupPage(unit, goal, onUnit, onGoal)
                 PlaceChoice(home, onHome)
+                // La pista al final: antes quedaba entre medias y empujaba «¿Dónde entrenas?» por debajo del botón
+                Text(stringResource(R.string.setup_import_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -413,7 +416,6 @@ private fun SetupPage(
         androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             for (d in 1..7) FilterChip(selected = d == goal, onClick = { onGoal(d) }, label = { Text("$d") })
         }
-        Text(stringResource(R.string.setup_import_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -492,3 +494,5 @@ fun TipCard(id: String, @StringRes text: Int, modifier: Modifier = Modifier) {
         }
     }
 }
+
+private val SETUP_ART = 96.dp

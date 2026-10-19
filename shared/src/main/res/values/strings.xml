@@ -1311,4 +1311,6 @@
     <string name="workout_empty_body">Búscalo por nombre o por músculo. Luego escribe peso y reps y marca cada serie como hecha: el descanso empieza solo.</string>
     <string name="stat_week_vs_avg">Esta semana: %1$s · media: %2$s</string>
     <string name="picker_already_added">Ya añadido</string>
+    <string name="gym_default_gym">Gimnasio</string>
+    <string name="gym_default_home">Casa</string>
 </resources>
