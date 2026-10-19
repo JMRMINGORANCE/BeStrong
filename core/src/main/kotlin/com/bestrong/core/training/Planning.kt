@@ -94,8 +94,23 @@ object Fatigue {
 // --- Preparación para una fecha (pico) --------------------------------------------------------
 
 data class PeakWeek(val weeksOut: Int, val focusEs: String, val focusEn: String, val sets: Int, val reps: Int, val percent: Double) {
-    fun focus(lang: String) = if (lang == "en") focusEn else focusEs
+    /** En el idioma de la app ([lang]: código ISO); si no hay traducción, español o inglés. */
+    fun focus(lang: String): String =
+        PEAK_FOCUS[focusEs]?.getOrNull(PEAK_LANGS.indexOf(lang)) ?: if (lang in setOf("es", "ca", "gl", "eu")) focusEs else focusEn
 }
+
+private val PEAK_LANGS = listOf("ca", "gl", "pt", "fr", "de")
+
+/** Fases del plan de pico en el resto de idiomas de la app (por su nombre en español). */
+private val PEAK_FOCUS: Map<String, List<String>> = mapOf(
+    "Volumen" to listOf("Volum", "Volume", "Volume", "Volume", "Volumen"),
+    "Fuerza" to listOf("Força", "Forza", "Força", "Force", "Kraft"),
+    "Fuerza pesada" to listOf("Força pesada", "Forza pesada", "Força pesada", "Force lourde", "Schwere Kraft"),
+    "Intensidad" to listOf("Intensitat", "Intensidade", "Intensidade", "Intensité", "Intensität"),
+    "Pico: sencillos" to listOf("Pic: singles", "Pico: sinxelos", "Pico: singles", "Pic : singles", "Peak: Singles"),
+    "Abridores" to listOf("Obertures", "Abridores", "Aberturas", "Ouvertures", "Eröffnungsversuche"),
+    "Descarga y competición" to listOf("Descàrrega i competició", "Descarga e competición", "Descarga e competição", "Affûtage et compétition", "Tapering und Wettkampf"),
+)
 
 object Peaking {
     /**

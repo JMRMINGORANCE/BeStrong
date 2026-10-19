@@ -362,7 +362,8 @@ private fun PeakCard(vm: PlanningViewModel, ui: PlanningUi) {
             if (meet != null) TextButton(onClick = { vm.setMeetDate(null) }) { Text(stringResource(R.string.peak_clear)) }
         }
         if (ui.peak.isEmpty()) Text(stringResource(R.string.peak_none), style = MaterialTheme.typography.bodySmall)
-        val lang = com.bestrong.mobile.ui.components.uiLanguage()
+        // El idioma real: las fases están traducidas a todos los de la app
+        val lang = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
         ui.peak.forEach { w ->
             Text(stringResource(R.string.peak_week, w.weeksOut, w.focus(lang), w.sets, w.reps, (w.percent * 100).roundToInt()), fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.bodySmall)
             val loads = ui.oneRepMaxes.entries.joinToString("  ") { (id, rm) -> vm.exerciseName(id) + " " + unit.format(Peaking.weight(w, rm)) }
