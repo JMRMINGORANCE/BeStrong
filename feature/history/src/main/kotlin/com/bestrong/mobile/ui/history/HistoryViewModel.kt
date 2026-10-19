@@ -98,6 +98,14 @@ class HistoryViewModel @Inject constructor(
     }
         .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Texto de búsqueda ya normalizado por entreno (se rehace solo si el entreno cambia). */
+    private val searchCache = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, String>>()
+
+    private fun searchTextOf(w: Workout): String {
+        searchCache[w.id]?.takeIf { it.first == w.updatedAtEpochMs }?.let { return it.second }
+        return WorkoutStats.searchText(w) { it.displayName(context) }.also { searchCache[w.id] = w.updatedAtEpochMs to it }
+    }
+
     val filtered: StateFlow<List<Workout>> = combine(
         repo.history,
         repo.partnerHistory,
@@ -117,7 +125,8 @@ class HistoryViewModel @Inject constructor(
         val all = if (routineId == null) byGym else byGym.filter { it.routineId == routineId }
         val zone = ZoneId.systemDefault()
         val ofDay = if (day == null) all else all.filter { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == day }
-        WorkoutStats.search(ofDay, q) { it.displayName(context) }
+        val plainQ = WorkoutStats.plainText(q.trim())
+        if (plainQ.isEmpty()) ofDay else ofDay.filter { searchTextOf(it).contains(plainQ) }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Entrenos por día del año actual (mapa de calor). */
@@ -359,10 +368,13 @@ class HistoryViewModel @Inject constructor(
             val fromProgram = workout.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
             // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
             // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya
-            val again = Routine.repeatOf(workout, keepAllSets = template != null || fromProgram) { we ->
-                if (fromProgram) we.notes else template?.exercises?.firstOrNull { it.exercise.id == we.exercise.id }?.notes.orEmpty()
+            // Rellenar recorre el historial varias veces por ejercicio: fuera del hilo principal
+            val again = withContext(Dispatchers.Default) {
+                Routine.repeatOf(workout, keepAllSets = template != null || fromProgram) { we ->
+                    if (fromProgram) we.notes else template?.exercises?.firstOrNull { it.exercise.id == we.exercise.id }?.notes.orEmpty()
+                }
+                    .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             }
-                .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             // Una sesión de programa repetida no cuenta como el siguiente día del programa
             repo.setActive(again.copy(routineId = workout.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))
         }

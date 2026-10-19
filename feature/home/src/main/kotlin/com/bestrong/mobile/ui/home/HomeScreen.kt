@@ -107,6 +107,7 @@ fun HomeScreen(
     }
     val active by vm.active.collectAsStateWithLifecycle()
     val history by vm.history.collectAsStateWithLifecycle()
+    val lastByRoutine by vm.lastByRoutine.collectAsStateWithLifecycle()
     val gymNames by vm.gymNames.collectAsStateWithLifecycle()
     val today by vm.today.collectAsStateWithLifecycle()
     val suggested by vm.suggestedRoutine.collectAsStateWithLifecycle()
@@ -199,7 +200,7 @@ fun HomeScreen(
                 foldersFor(routineQuery, collapsed),
                 onToggleFolder = { f -> collapsed = toggledFolder(routineQuery, collapsed, f) },
             ) { routine ->
-                val last = history.firstOrNull { it.routineId == routine.id }
+                val last = lastByRoutine[routine.id]
                 RoutineCard(
                     routine = routine,
                     plannedDays = plannedDays[routine.id].orEmpty(),

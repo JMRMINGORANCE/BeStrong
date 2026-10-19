@@ -222,6 +222,22 @@ object WorkoutStats {
             .filter { it.year == year }
             .groupingBy { it }.eachCount()
 
+    /** Texto sin acentos ni mayúsculas, como lo compara [search]. */
+    fun plainText(s: String): String = java.text.Normalizer.normalize(s.lowercase(), java.text.Normalizer.Form.NFD).replace(MARKS, "")
+
+    /**
+     * Todo lo buscable de un entreno ya normalizado (una línea por campo): se calcula una vez por entreno y
+     * cada tecla solo hace un contains, en vez de normalizar todo el historial.
+     */
+    fun searchText(w: Workout, nameOf: (com.bestrong.core.model.Exercise) -> String = { it.name }): String =
+        plainText(
+            (
+                listOf(w.name, w.notes, w.gymName.orEmpty(), w.athlete.orEmpty()) +
+                    w.exercises.flatMap { we -> listOf(nameOf(we.exercise), we.notes) + we.sets.map { it.note } }
+                )
+                .filter { it.isNotEmpty() }.joinToString("\n"),
+        )
+
     /** Búsqueda en el historial por nombre de entreno, ejercicio o nota. */
     fun search(history: List<Workout>, query: String, nameOf: (com.bestrong.core.model.Exercise) -> String = { it.name }): List<Workout> {
         // Sin acentos ni mayúsculas: «biceps» encuentra «Curl de bíceps»

@@ -63,7 +63,8 @@ class MuscleWidget : GlanceAppWidget() {
     private suspend fun rows(entry: WidgetEntryPoint): Pair<List<Pair<MuscleGroup, Double>>, Double> {
         val repo = entry.repository()
         val target = entry.settings().settings.value.weeklySetsTarget.toDouble()
-        val history = repo.historyOnce()
+        // En memoria si ya cargó (releerlo entero en cada cambio es caro)
+        val history = repo.history.value.ifEmpty { repo.historyOnce() }
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val week = WorkoutStats.weeklySetsPerMuscle(history, today, zone)

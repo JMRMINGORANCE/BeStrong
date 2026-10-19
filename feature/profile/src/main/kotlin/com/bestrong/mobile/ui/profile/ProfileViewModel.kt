@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -159,7 +160,8 @@ class ProfileViewModel @Inject constructor(
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
-    val advanced: StateFlow<AdvancedStats> = combine(repo.history, repo.measurements, settingsStore.settings) { history, measures, s ->
+    // Solo el sexo de los ajustes: cambiar el tema o las unidades no rehace estos cálculos (son caros con mucho historial)
+    val advanced: StateFlow<AdvancedStats> = combine(repo.history, repo.measurements, settingsStore.settings.map { it.sex }.distinctUntilChanged()) { history, measures, sex ->
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val now = System.currentTimeMillis()
@@ -167,7 +169,7 @@ class ProfileViewModel @Inject constructor(
         val weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(zone).toInstant().toEpochMilli()
         AdvancedStats(
             bodyWeightKg = bw,
-            standings = bw?.let { Strength.standings(history, it, s.sex) }.orEmpty(),
+            standings = bw?.let { Strength.standings(history, it, sex) }.orEmpty(),
             balance = Strength.balance(history, now),
             week = Strength.weekSummary(history, today, zone),
             weekEffectiveSets = history.filter { it.isFinished && it.startedAtEpochMs >= weekStart }.sumOf { Strength.effectiveSets(it) },

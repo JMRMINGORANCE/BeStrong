@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -276,6 +277,12 @@ class HomeViewModel @Inject constructor(
     val active: StateFlow<Workout?> = repo.activeWorkout
     val history: StateFlow<List<Workout>> = repo.history
 
+    /** El último entreno de cada rutina (una pasada por el historial, no una por tarjeta). */
+    val lastByRoutine: StateFlow<Map<String, Workout>> = repo.history
+        .map { h -> buildMap { h.forEach { w -> w.routineId?.let { if (it !in this) put(it, w) } } } }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
     // Con buzón: un aviso que llega con Inicio fuera de pantalla (enlace, widget) se muestra al volver, pero
     // solo si es reciente (uno de hace horas, como «ya hay un entreno en curso», confundiría)
     private val _messages = kotlinx.coroutines.channels.Channel<Pair<String, Long>>(kotlinx.coroutines.channels.Channel.BUFFERED)
@@ -299,10 +306,13 @@ class HomeViewModel @Inject constructor(
             val fromProgram = last.routineId?.startsWith(Periodization.ROUTINE_PREFIX) == true
             // Notas: las fijas de la rutina; en un programa (rutina generada) se conservan las de la sesión
             // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya
-            val again = Routine.repeatOf(last, keepAllSets = template != null || fromProgram) { we ->
-                if (fromProgram) we.notes else template?.exercises?.firstOrNull { it.exercise.id == we.exercise.id }?.notes.orEmpty()
+            // Rellenar recorre el historial varias veces por ejercicio: fuera del hilo principal (si no, el toque se traba)
+            val again = withContext(Dispatchers.Default) {
+                Routine.repeatOf(last, keepAllSets = template != null || fromProgram) { we ->
+                    if (fromProgram) we.notes else template?.exercises?.firstOrNull { it.exercise.id == we.exercise.id }?.notes.orEmpty()
+                }
+                    .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             }
-                .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             // Una sesión de programa repetida no cuenta como el siguiente día del programa
             repo.setActive(again.copy(routineId = last.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))
         }
@@ -317,7 +327,7 @@ class HomeViewModel @Inject constructor(
         }
         // Su gimnasio pasa a ser el activo antes de rellenar: los pesos salen con su material
         actions.useRoutineGym(routine)
-        repo.setActive(routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup()))
+        repo.setActive(withContext(Dispatchers.Default) { routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup()) })
         onStarted()
     }
 
