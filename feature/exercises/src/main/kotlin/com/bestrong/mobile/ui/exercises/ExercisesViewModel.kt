@@ -240,7 +240,8 @@ class ExercisesViewModel @Inject constructor(
             includeVariants = includeVariants,
             strengthCurve = Strength.strengthCurve(exerciseId, history),
             exercise = ex,
-            records = WorkoutStats.personalRecords(history)[exerciseId].orEmpty(),
+            // Solo los entrenos con este ejercicio: sus récords no dependen del resto (todo el historial costaba ~30 ms)
+            records = WorkoutStats.personalRecords(history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } })[exerciseId].orEmpty(),
             progress = WorkoutStats.exerciseProgress(exerciseId, history),
             // Solo el propio ejercicio (no las variantes), como en el entreno
             recentOneRepMax = com.bestrong.core.stats.RpeLoad.recentOneRepMax(exerciseId, fullHistory, System.currentTimeMillis()),
