@@ -108,9 +108,11 @@ fun WorkoutScreen(
                     val steps = (accumulated / ROTARY_STEP_PX).toInt()
                     if (steps != 0) {
                         accumulated -= steps * ROTARY_STEP_PX
-                        repeat(kotlin.math.abs(steps)) { session.rotaryStep(if (steps > 0) 1 else -1) }
                         // Un toque por paso: se ajusta sin mirar
-                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+                        repeat(kotlin.math.abs(steps)) {
+                            session.rotaryStep(if (steps > 0) 1 else -1)
+                            view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+                        }
                     }
                     true
                 }

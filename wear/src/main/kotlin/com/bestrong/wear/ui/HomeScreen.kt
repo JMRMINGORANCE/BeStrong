@@ -66,7 +66,7 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
                     item {
                         Button(
                             onClick = { container.session.startRoutine(r); onStart() },
-                            label = { Text(r.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            label = { Text(r.displayName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             secondaryLabel = { Text(stringResource(R.string.tile_today)) },
                             icon = { Text("▶", Modifier.clearAndSetSemantics { }) },
                             modifier = Modifier.fillMaxWidth(),

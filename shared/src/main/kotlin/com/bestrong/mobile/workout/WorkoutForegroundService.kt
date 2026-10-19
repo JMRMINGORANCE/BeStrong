@@ -155,7 +155,10 @@ class WorkoutForegroundService : LifecycleService() {
             // Qué viene después (lo que hay que cargar en la barra), visible en la pantalla de bloqueo
             val next = WorkoutEditor.nextPendingSet(w)?.let { (i, set) ->
                 val ex = w.exercises[i].exercise
-                getString(R.string.rest_next, ex.displayName(this) + " · " + com.bestrong.mobile.ui.workout.describeSet(set, ex, settings.settings.value.unit))
+                val prefs = settings.settings.value
+                // Con «suma de las dos mancuernas», el total del par (como en la fila de la serie)
+                val factor = if (prefs.dumbbellTotal && ex.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
+                getString(R.string.rest_next, ex.displayName(this) + " · " + com.bestrong.mobile.ui.workout.describeSet(set, ex, prefs.unit, factor))
             }
             b.setContentTitle(getString(R.string.notif_rest_title, w.name))
                 .setContentText(next ?: getString(R.string.notif_rest_text))
