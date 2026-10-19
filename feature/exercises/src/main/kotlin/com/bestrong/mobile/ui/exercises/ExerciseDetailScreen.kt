@@ -61,6 +61,7 @@ import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.reasonText
+import com.bestrong.mobile.ui.components.spokenAs
 import com.bestrong.mobile.ui.workout.describeSet
 import com.bestrong.mobile.ui.workout.setRemark
 
@@ -456,7 +457,7 @@ private fun ExerciseAbout(exercise: com.bestrong.core.model.Exercise) {
             fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
         )
         exercise.secondaryMuscles.forEach { com.bestrong.mobile.ui.components.MetaPill(it.label()) }
-        com.bestrong.mobile.ui.components.MetaPill("🏋️ " + exercise.equipment.label())
+        com.bestrong.mobile.ui.components.MetaPill("🏋️ " + exercise.equipment.label(), Modifier.spokenAs(exercise.equipment.label()))
     }
     howTo?.let {
         com.bestrong.mobile.ui.components.Panel(Modifier.padding(top = 8.dp)) {

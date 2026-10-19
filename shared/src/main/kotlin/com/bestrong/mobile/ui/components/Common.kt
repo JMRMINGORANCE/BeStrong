@@ -309,3 +309,9 @@ fun SearchPill(
         modifier = modifier.fillMaxWidth(),
     )
 }
+
+/**
+ * Lo que dice TalkBack en vez del texto visible: sin los emojis decorativos («⏱», «🏋️», «📌»), que si no se
+ * leen en voz alta («cronómetro», «chincheta») antes de lo que importa.
+ */
+fun Modifier.spokenAs(text: String): Modifier = semantics { contentDescription = text }

@@ -66,6 +66,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
@@ -82,6 +83,7 @@ import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatTime
 import com.bestrong.mobile.ui.components.rememberNow
+import com.bestrong.mobile.ui.components.spokenAs
 import com.bestrong.mobile.ui.help.TipCard
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -242,7 +244,7 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, rest: com.best
                 // Descanso en marcha: se ve sin abrir el entreno (cambiar de canción, mirar una rutina…)
                 rest?.let { r ->
                     val left = ((r.endsAtEpochMs - now + 999) / 1000).coerceAtLeast(0)
-                    if (left > 0) Text("⏱ " + stringResource(R.string.rest_title, formatDuration(left)), fontWeight = FontWeight.Bold)
+                    if (left > 0) stringResource(R.string.rest_title, formatDuration(left)).let { t -> Text("⏱ $t", Modifier.spokenAs(t), fontWeight = FontWeight.Bold) }
                 }
             }
             Box(
@@ -376,7 +378,7 @@ private fun RoutineCard(
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, count, count))
                     if (minutes > 0) com.bestrong.mobile.ui.components.MetaPill(stringResource(R.string.routine_estimated, minutes))
-                    gymName?.let { com.bestrong.mobile.ui.components.MetaPill("🏋️ $it") }
+                    gymName?.let { com.bestrong.mobile.ui.components.MetaPill("🏋️ $it", Modifier.spokenAs(it)) }
                     if (plannedDays.isNotEmpty()) {
                         val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
                         com.bestrong.mobile.ui.components.MetaPill("📅 " + plannedDays.joinToString(" · ") { it.getDisplayName(java.time.format.TextStyle.SHORT, locale) })
@@ -467,7 +469,7 @@ private fun FolderHeader(name: String, count: Int, folded: Boolean, icon: String
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
-            Text(icon)
+            Text(icon, Modifier.clearAndSetSemantics {})
         }
         Text(name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f).padding(start = 12.dp))
         com.bestrong.mobile.ui.components.MetaPill("$count")

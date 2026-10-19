@@ -84,6 +84,7 @@ import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.components.spokenAs
 import com.bestrong.mobile.ui.workout.describeSet
 import com.bestrong.mobile.ui.workout.setRemark
 import kotlinx.coroutines.launch
@@ -275,7 +276,7 @@ private fun WorkoutCard(w: Workout, records: Int, modifier: Modifier = Modifier)
         }
         @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
         androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            com.bestrong.mobile.ui.components.MetaPill("⏱ " + formatDuration(w.durationSeconds()))
+            com.bestrong.mobile.ui.components.MetaPill("⏱ " + formatDuration(w.durationSeconds()), Modifier.spokenAs(formatDuration(w.durationSeconds())))
             if (w.totalVolume > 0) com.bestrong.mobile.ui.components.MetaPill(unit.formatVolume(w.totalVolume))
             com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.history_sets_done, w.completedSetCount, w.completedSetCount))
             // Día de récords a la vista sin abrir el entreno
@@ -575,7 +576,7 @@ private fun GymFilterRow(vm: HistoryViewModel) {
     if (shown.size < 2 && selected == null) return
     androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         shown.forEach { g ->
-            FilterChip(selected = selected == g, onClick = { vm.gymFilter.value = if (selected == g) null else g }, label = { Text("🏋️ $g") })
+            FilterChip(selected = selected == g, onClick = { vm.gymFilter.value = if (selected == g) null else g }, label = { Text("🏋️ $g", Modifier.spokenAs(g)) })
         }
     }
 }

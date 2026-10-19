@@ -124,6 +124,7 @@ import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.rememberNow
+import com.bestrong.mobile.ui.components.spokenAs
 import com.bestrong.mobile.ui.components.uiLanguage
 import com.bestrong.mobile.ui.help.TipCard
 import com.bestrong.mobile.ui.rememberFoldPosture
@@ -797,7 +798,7 @@ private fun ExerciseCard(
                     "📌 $pinnedNote",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.padding(horizontal = 12.dp).minimumInteractiveComponentSize().clickable { editPinned = true },
+                    modifier = Modifier.padding(horizontal = 12.dp).minimumInteractiveComponentSize().clickable { editPinned = true }.spokenAs(pinnedNote),
                 )
             }
             if (we.notes.isNotBlank()) {
@@ -1253,6 +1254,6 @@ private fun DoneExerciseRow(we: WorkoutExercise, onOpen: () -> Unit) {
             Text(we.exercise.displayName(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
             best?.let { Text(describeSet(it, we.exercise, unit), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1) }
         }
-        com.bestrong.mobile.ui.components.MetaPill("✓ ${we.sets.size}/${we.sets.size}")
+        com.bestrong.mobile.ui.components.MetaPill("✓ ${we.sets.size}/${we.sets.size}", Modifier.spokenAs(stringResource(R.string.achievements_count, we.sets.size, we.sets.size)))
     }
 }
