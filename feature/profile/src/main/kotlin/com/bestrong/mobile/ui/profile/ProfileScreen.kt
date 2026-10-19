@@ -228,6 +228,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                             Column(Modifier.padding(16.dp)) {
                                 SectionHeader(stringResource(R.string.weekly_volume, unit.label))
+                                WeekVsAverage(stats.weeks, { it.volume }) { unit.formatVolume(it) }
                                 val f = DateTimeFormatter.ofPattern("d/M")
                                 BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), unit.fromKg(it.volume)) })
                             }
@@ -237,6 +238,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                             Column(Modifier.padding(16.dp)) {
                                 SectionHeader(stringResource(R.string.workouts_per_week))
+                                WeekVsAverage(stats.weeks, { it.workouts.toDouble() }) { formatWeight(it) }
                                 val f = DateTimeFormatter.ofPattern("d/M")
                                 BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), it.workouts.toDouble()) })
                             }
@@ -626,4 +628,17 @@ private fun ProfileTabs(selected: Int, onSelect: (Int) -> Unit) {
             }
         }
     }
+}
+
+/** «Esta semana: 3 · media: 2,5»: las barras no tienen escala, y esto responde a «¿voy por detrás?». */
+@Composable
+private fun WeekVsAverage(weeks: List<com.bestrong.core.stats.WeekBucket>, value: (com.bestrong.core.stats.WeekBucket) -> Double, format: (Double) -> String) {
+    val now = weeks.lastOrNull() ?: return
+    // Semanas ya cerradas y con entreno (las vacías bajarían la media de quien empezó hace poco)
+    val past = weeks.dropLast(1).filter { value(it) > 0 }
+    if (past.isEmpty()) return
+    com.bestrong.mobile.ui.components.MetaPill(
+        stringResource(R.string.stat_week_vs_avg, format(value(now)), format(past.sumOf(value) / past.size)),
+        Modifier.padding(vertical = 6.dp),
+    )
 }

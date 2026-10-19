@@ -89,6 +89,7 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
         routineName = routine.name,
         restFor = restFor,
         currentRest = routine.exercises.firstOrNull { it.id == restFor }?.restSeconds,
+        exerciseCount = routine.exercises.size,
         confirmLeave = confirmLeave,
         confirmDelete = confirmDelete,
         onClose = onClose,
@@ -211,6 +212,7 @@ private fun EditorDialogs(
     routineName: String,
     restFor: String?,
     currentRest: Int?,
+    exerciseCount: Int,
     confirmLeave: Boolean,
     confirmDelete: Boolean,
     onClose: () -> Unit,
@@ -242,9 +244,20 @@ private fun EditorDialogs(
             onDismissRequest = { onDismissRest() },
             title = { Text(stringResource(R.string.rest_time)) },
             text = {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    REST_OPTIONS.forEach { s ->
-                        FilterChip(selected = s == current, onClick = { vm.setRest(id, s); onDismissRest() }, label = { Text(formatDuration(s.toLong())) })
+                var toAll by remember(id) { mutableStateOf(false) }
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        REST_OPTIONS.forEach { s ->
+                            FilterChip(
+                                selected = s == current,
+                                onClick = { if (toAll) vm.setRestForAll(s) else vm.setRest(id, s); onDismissRest() },
+                                label = { Text(formatDuration(s.toLong())) },
+                            )
+                        }
+                    }
+                    // Con varios ejercicios, poner el mismo a todos de una vez
+                    if (exerciseCount > 1) {
+                        FilterChip(selected = toAll, onClick = { toAll = !toAll }, label = { Text(stringResource(R.string.routine_rest_apply_all)) })
                     }
                 }
             },

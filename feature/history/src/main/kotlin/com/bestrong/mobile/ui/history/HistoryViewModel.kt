@@ -81,6 +81,16 @@ class HistoryViewModel @Inject constructor(
     /** Gimnasio elegido (null = todos). */
     val gymFilter = MutableStateFlow<String?>(null)
 
+    /** Solo los entrenos de una rutina («todos mis días de pierna» sin que la búsqueda saque otros). */
+    val routineFilter = MutableStateFlow<String?>(null)
+
+    /** Las rutinas más hechas (id, nombre actual), para el filtro de un toque; la fila sale con dos o más. */
+    val routineChips: StateFlow<List<Pair<String, String>>> = combine(repo.history, repo.routines) { h, rs ->
+        val byId = rs.associateBy { it.id }
+        h.mapNotNull { it.routineId }.groupingBy { it }.eachCount().entries.sortedByDescending { it.value }
+            .mapNotNull { (id, _) -> byId[id]?.let { id to it.name } }.take(MAX_ROUTINE_CHIPS)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /** Gimnasios que aparecen en el historial (el filtro solo sale con dos o más). */
     val gymNames: StateFlow<List<String>> = viewed.map { list ->
         // Los gimnasios de los entrenos que se ven (con la pareja, también los suyos)
@@ -91,10 +101,11 @@ class HistoryViewModel @Inject constructor(
     val filtered: StateFlow<List<Workout>> = combine(
         repo.history,
         repo.partnerHistory,
-        combine(query.debounce { if (it.isEmpty()) 0L else 150L }, gymFilter, onlyPartner) { q, g, op -> Triple(q, g, op) },
+        combine(query.debounce { if (it.isEmpty()) 0L else 150L }, combine(gymFilter, routineFilter) { g, r -> g to r }, onlyPartner) { q, g, op -> Triple(q, g, op) },
         showPartner,
         selectedDay,
-    ) { h, p, (q, gym, op), sp, day ->
+    ) { h, p, (q, filters, op), sp, day ->
+        val (gym, routineId) = filters
         // Buscando su nombre salen sus entrenos aunque no se estén enseñando los de la pareja
         val partnerSearched = q.isNotBlank() && p.any { it.athlete?.contains(q.trim(), ignoreCase = true) == true }
         val mine = when {
@@ -102,7 +113,8 @@ class HistoryViewModel @Inject constructor(
             sp || partnerSearched -> (h + p).sortedByDescending { it.startedAtEpochMs }
             else -> h
         }
-        val all = if (gym == null) mine else mine.filter { it.gymName == gym }
+        val byGym = if (gym == null) mine else mine.filter { it.gymName == gym }
+        val all = if (routineId == null) byGym else byGym.filter { it.routineId == routineId }
         val zone = ZoneId.systemDefault()
         val ofDay = if (day == null) all else all.filter { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == day }
         WorkoutStats.search(ofDay, q) { it.displayName(context) }
@@ -220,6 +232,7 @@ class HistoryViewModel @Inject constructor(
     fun clearFilters() {
         query.value = ""
         gymFilter.value = null
+        routineFilter.value = null
         selectedDay.value = null
         onlyPartner.value = false
     }
@@ -356,3 +369,5 @@ class HistoryViewModel @Inject constructor(
         onStarted()
     }
 }
+
+private const val MAX_ROUTINE_CHIPS = 5

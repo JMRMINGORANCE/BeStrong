@@ -1306,4 +1306,8 @@
     <string name="profile_empty_body">Charts, records and the muscle map appear as soon as you finish your first workout.</string>
     <string name="builder_which_days">Which days will you train?</string>
     <string name="workout_outline">Workout exercises</string>
+    <string name="routine_rest_apply_all">Apply to all exercises</string>
+    <string name="workout_empty_title">Add your first exercise</string>
+    <string name="workout_empty_body">Search by name or muscle. Then enter weight and reps and mark each set as done: the rest timer starts on its own.</string>
+    <string name="stat_week_vs_avg">This week: %1$s · avg: %2$s</string>
 </resources>

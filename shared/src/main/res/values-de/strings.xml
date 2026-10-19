@@ -1306,4 +1306,8 @@
     <string name="profile_empty_body">Diagramme, Rekorde und die Muskelkarte erscheinen nach deinem ersten Training.</string>
     <string name="builder_which_days">An welchen Tagen trainierst du?</string>
     <string name="workout_outline">Übungen im Training</string>
+    <string name="routine_rest_apply_all">Für alle Übungen übernehmen</string>
+    <string name="workout_empty_title">Füge deine erste Übung hinzu</string>
+    <string name="workout_empty_body">Suche nach Name oder Muskel. Trage dann Gewicht und Wiederholungen ein und hake jeden Satz ab: Die Pause startet automatisch.</string>
+    <string name="stat_week_vs_avg">Diese Woche: %1$s · Schnitt: %2$s</string>
 </resources>

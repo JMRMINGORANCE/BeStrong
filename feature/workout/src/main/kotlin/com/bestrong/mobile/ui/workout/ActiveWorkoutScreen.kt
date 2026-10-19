@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
@@ -588,6 +590,19 @@ private fun ExerciseList(
     var reopened by rememberSaveable { mutableStateOf(setOf<String>()) }
     val lastDoneId = w.exercises.maxByOrNull { we -> we.sets.maxOfOrNull { it.completedAtEpochMs ?: 0L } ?: 0L }?.id
     LazyColumn(modifier.fillMaxWidth(), state = listState, contentPadding = PaddingValues(bottom = 24.dp)) {
+        // Entreno vacío: en vez de un botón pequeño, cómo se registra un entreno (sobre todo la primera vez)
+        if (w.exercises.isEmpty()) {
+            item {
+                com.bestrong.mobile.ui.components.EmptyState(
+                    Icons.Default.FitnessCenter,
+                    stringResource(R.string.workout_empty_title),
+                    stringResource(R.string.workout_empty_body),
+                    Modifier.fillMaxWidth().heightIn(min = 420.dp),
+                    action = stringResource(R.string.add_exercises) to onAddExercises,
+                )
+            }
+            return@LazyColumn
+        }
         itemsIndexed(w.exercises, key = { _, we -> we.id }) { index, we ->
             val groupIndex = we.supersetId?.let { groups.indexOf(it) }
             val folded = we.supersetId == null && we.sets.isNotEmpty() && we.sets.all { it.completed } && we.id != lastDoneId && we.id !in reopened

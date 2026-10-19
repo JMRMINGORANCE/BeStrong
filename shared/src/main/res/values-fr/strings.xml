@@ -1306,4 +1306,8 @@
     <string name="profile_empty_body">Graphiques, records et carte musculaire apparaissent dès ta première séance terminée.</string>
     <string name="builder_which_days">Quels jours t\'entraînes-tu ?</string>
     <string name="workout_outline">Exercices de la séance</string>
+    <string name="routine_rest_apply_all">Appliquer à tous les exercices</string>
+    <string name="workout_empty_title">Ajoute ton premier exercice</string>
+    <string name="workout_empty_body">Cherche-le par nom ou par muscle. Saisis ensuite le poids et les répétitions et valide chaque série : le repos démarre tout seul.</string>
+    <string name="stat_week_vs_avg">Cette semaine : %1$s · moyenne : %2$s</string>
 </resources>

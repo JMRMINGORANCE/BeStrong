@@ -1306,4 +1306,8 @@
     <string name="profile_empty_body">Gràfiques, rècords i mapa muscular apareixen tan bon punt acabis el primer entrenament.</string>
     <string name="builder_which_days">Quins dies entrenes?</string>
     <string name="workout_outline">Exercicis de l\'entrenament</string>
+    <string name="routine_rest_apply_all">Aplica a tots els exercicis</string>
+    <string name="workout_empty_title">Afegeix el teu primer exercici</string>
+    <string name="workout_empty_body">Cerca\'l pel nom o pel múscul. Després escriu el pes i les repeticions i marca cada sèrie com a feta: el descans comença sol.</string>
+    <string name="stat_week_vs_avg">Aquesta setmana: %1$s · mitjana: %2$s</string>
 </resources>

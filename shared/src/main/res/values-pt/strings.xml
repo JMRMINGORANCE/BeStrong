@@ -1306,4 +1306,8 @@
     <string name="profile_empty_body">Gráficos, recordes e mapa muscular aparecem assim que terminares o primeiro treino.</string>
     <string name="builder_which_days">Em que dias treinas?</string>
     <string name="workout_outline">Exercícios do treino</string>
+    <string name="routine_rest_apply_all">Aplicar a todos os exercícios</string>
+    <string name="workout_empty_title">Adiciona o teu primeiro exercício</string>
+    <string name="workout_empty_body">Pesquisa-o por nome ou músculo. Depois escreve o peso e as repetições e marca cada série como feita: o descanso começa sozinho.</string>
+    <string name="stat_week_vs_avg">Esta semana: %1$s · média: %2$s</string>
 </resources>

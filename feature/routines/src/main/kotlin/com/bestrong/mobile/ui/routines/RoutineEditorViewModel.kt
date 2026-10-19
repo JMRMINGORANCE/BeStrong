@@ -203,6 +203,9 @@ class RoutineEditorViewModel @Inject constructor(
     fun updateSet(id: String, index: Int, block: (RoutineSet) -> RoutineSet) =
         updateExercise(id) { re -> re.copy(sets = re.sets.mapIndexed { i, s -> if (i == index) block(s) else s }) }
     fun setRest(id: String, seconds: Int) = updateExercise(id) { it.copy(restSeconds = seconds) }
+
+    /** El mismo descanso en todos los ejercicios (una rutina nueva sale con el de serie en todos). */
+    fun setRestForAll(seconds: Int) = _routine.update { r -> r.copy(exercises = r.exercises.map { it.copy(restSeconds = seconds) }) }
     fun setExerciseNotes(id: String, notes: String) = updateExercise(id) { it.copy(notes = notes) }
 
     private val _tempoVersion = MutableStateFlow(0)

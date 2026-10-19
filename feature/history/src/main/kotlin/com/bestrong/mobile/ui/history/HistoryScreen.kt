@@ -191,6 +191,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
                             item { com.bestrong.mobile.ui.components.SectionHeader(stringResource(R.string.history_workouts), large = true) }
                             item { com.bestrong.mobile.ui.components.SearchPill(query, { vm.query.value = it }, stringResource(R.string.history_search)) }
                             item { GymFilterRow(vm) }
+                            item { RoutineFilterRow(vm) }
                             if (partnerWorkouts.isNotEmpty()) {
                                 item { AthleteFilterRow(vm, partnerWorkouts.first().athlete.orEmpty()) }
                             }
@@ -577,6 +578,19 @@ private fun GymFilterRow(vm: HistoryViewModel) {
     androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         shown.forEach { g ->
             FilterChip(selected = selected == g, onClick = { vm.gymFilter.value = if (selected == g) null else g }, label = { Text("🏋️ $g", Modifier.spokenAs(g)) })
+        }
+    }
+}
+
+/** Filtro de un toque por rutina (las más hechas); con un filtro puesto sale siempre, para poder quitarlo. */
+@Composable
+private fun RoutineFilterRow(vm: HistoryViewModel) {
+    val chips by vm.routineChips.collectAsStateWithLifecycle()
+    val selected by vm.routineFilter.collectAsStateWithLifecycle()
+    if (chips.size < 2 && selected == null) return
+    androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        chips.forEach { (id, name) ->
+            FilterChip(selected = selected == id, onClick = { vm.routineFilter.value = if (selected == id) null else id }, label = { Text(name) })
         }
     }
 }

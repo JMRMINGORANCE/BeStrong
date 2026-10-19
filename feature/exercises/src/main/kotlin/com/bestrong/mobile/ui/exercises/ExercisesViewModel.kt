@@ -200,9 +200,11 @@ class ExercisesViewModel @Inject constructor(
                 found.sortedByDescending { counts[it.id] ?: 0 }
             }
             f.query.isBlank() && f.muscle == null && f.equipment == null -> {
+                // Favoritos primero (los de siempre a mano también al elegir) y luego los últimos usados
+                val favFirst = found.filter { it.id in favs }
                 val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)
-                val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id } }
-                recent + (found - recent.toSet())
+                val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id && it.id !in favs } }
+                favFirst + recent + (found - favFirst.toSet() - recent.toSet())
             }
             else -> found
         }
