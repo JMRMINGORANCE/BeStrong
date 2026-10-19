@@ -343,7 +343,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         activeProgram = activeProgramOnce(),
     )
 
-    private suspend fun activeProgramOnce(): ActiveProgram? =
+    suspend fun activeProgramOnce(): ActiveProgram? =
         dao.valueOnce(KEY_PROGRAM)?.let { runCatching { json.decodeFromString(ActiveProgram.serializer(), it) }.getOrNull() }
 
     /** Restaura una copia sin borrar nada: añade lo que no exista (por id). Devuelve cuántos elementos se añadieron. */

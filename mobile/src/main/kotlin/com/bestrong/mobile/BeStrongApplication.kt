@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -163,12 +164,16 @@ class AppSync @Inject constructor(
     @OptIn(FlowPreview::class)
     fun start() {
         scope.launch {
+            // No antes de cargar: con mucho historial la lista en memoria puede seguir vacía pasado el segundo de
+            // espera y el reloj recibiría «sin rutinas» (vacía de verdad solo si la base de datos también lo está)
+            repository.routines.first { it.isNotEmpty() || repository.routinesOnce().isEmpty() }
             // La sesión de hoy del programa activo va la primera, con sus cargas calculadas
             combine(repository.routines, repository.activeProgram, repository.history) { routines, program, history ->
                 watchPush.routinesForWatch(routines, program, history)
             }.debounce(1_000).distinctUntilChanged().collect { watchSync.pushRoutines(it) }
         }
         scope.launch {
+            repository.history.first { it.isNotEmpty() || repository.historyOnce().isEmpty() }
             repository.history.debounce(2_000).collect { watchSync.pushHistory(it) }
         }
         // El widget muestra la semana y la rutina que toca: se redibuja si cambia el historial, las rutinas,

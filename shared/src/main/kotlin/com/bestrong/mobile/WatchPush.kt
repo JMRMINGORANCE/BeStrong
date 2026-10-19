@@ -29,7 +29,9 @@ class WatchPush @Inject constructor(
 
     /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
     suspend fun pushToWatchNow() {
-        watchSync.pushRoutines(routinesForWatch(repository.routines.value, repository.activeProgram.value, repository.history.value))
-        watchSync.pushHistory(repository.history.value)
+        // De la base de datos: recién arrancada la app, las listas en memoria aún están vacías y el reloj se quedaría sin nada
+        val history = repository.historyOnce()
+        watchSync.pushRoutines(routinesForWatch(repository.routinesOnce(), repository.activeProgramOnce(), history))
+        watchSync.pushHistory(history)
     }
 }
