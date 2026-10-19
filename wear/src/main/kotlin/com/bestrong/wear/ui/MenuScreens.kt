@@ -9,6 +9,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -298,7 +299,7 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                 }
             }
             if (s.records.isNotEmpty()) {
-                item { ListHeader { Text(stringResource(R.string.n_records, s.records.size)) } }
+                item { ListHeader { Text(pluralStringResource(R.plurals.n_records, s.records.size, s.records.size)) } }
                 items(s.records) { pr ->
                     Text(
                         "${pr.exerciseName}: ${pr.type.formatValue(pr.value, unit)}",

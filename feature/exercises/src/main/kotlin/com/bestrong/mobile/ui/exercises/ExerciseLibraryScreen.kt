@@ -68,6 +68,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -257,10 +258,10 @@ fun ExerciseSearchList(
                     ex.primaryMuscle.label(),
                     ex.equipment.label(),
                     if (ex.isCustom) stringResource(R.string.custom) else null,
-                    times?.let { stringResource(R.string.n_times, it) },
+                    times?.let { pluralStringResource(R.plurals.n_times, it, it) },
                 ).joinToString(" · ")
                 // Última vez y su mejor serie, para elegir sin abrir la ficha
-                val lastLine = last[ex.id]?.let { (date, set) -> stringResource(R.string.exercise_last_time, formatShortDate(date), describeSet(set, ex, unit)) }
+                val lastLine = last[ex.id]?.let { (date, set) -> stringResource(R.string.exercise_last_time, formatShortDate(date), describeSet(set, ex, unit, vm.weightFactor(ex))) }
                 ExerciseCard(
                     ex = ex,
                     meta = meta,

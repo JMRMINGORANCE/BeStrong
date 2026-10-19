@@ -111,7 +111,7 @@ object WorkoutShareCard {
         // Récords
         if (records.isNotEmpty() && y < H - 220f) {
             y += 24f
-            c.drawText("🏆 " + context.getString(R.string.n_records, records.size), PAD, y, text(44f, accent, bold = true))
+            c.drawText(context.resources.getQuantityString(R.plurals.n_records, records.size, records.size), PAD, y, text(44f, accent, bold = true))
             y += 60f
             records.take(3).forEach { pr ->
                 if (y > H - 120f) return@forEach

@@ -94,7 +94,10 @@
         <item quantity="one">%1$d ejercicio</item>
         <item quantity="other">%1$d ejercicios</item>
     </plurals>
-    <string name="n_records">🏆 %1$d récords</string>
+    <plurals name="n_records">
+        <item quantity="one">🏆 %1$d récord</item>
+        <item quantity="other">🏆 %1$d récords</item>
+    </plurals>
     <string name="notif_channel">Entrenamiento</string>
     <string name="notif_text">Entrenamiento en curso</string>
     <string name="quick_weights">Pesos recientes</string>

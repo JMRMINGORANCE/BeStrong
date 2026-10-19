@@ -58,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -394,7 +395,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                     com.bestrong.mobile.ui.components.HeroCard {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.EmojiEvents, null, Modifier.size(28.dp))
-                            Text(stringResource(R.string.n_records, records.size), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
+                            Text(pluralStringResource(R.plurals.n_records, records.size, records.size), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
                         }
                         records.forEach { Text(stringResource(R.string.record_line, it.exerciseName, it.type.label(), it.type.formatValue(it.value, unit)), style = MaterialTheme.typography.bodyMedium) }
                     }

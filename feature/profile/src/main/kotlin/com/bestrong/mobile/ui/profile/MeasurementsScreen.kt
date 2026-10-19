@@ -609,7 +609,7 @@ private fun WaistToHeightLine(ratio: Double) {
  */
 @Composable
 private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>, goalCm: Double?) {
-    var editing by remember { mutableStateOf(false) }
+    var editing by rememberSaveable { mutableStateOf(false) }
     val waistCm = points.last().second
     Row(verticalAlignment = Alignment.CenterVertically) {
         // La misma estimación que el peso objetivo, con la tendencia de las medidas de cintura
@@ -624,7 +624,7 @@ private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>
         TextButton(onClick = { editing = true }) { Text(stringResource(R.string.goal_set)) }
     }
     if (editing) {
-        var input by remember { mutableStateOf(goalCm?.let(::formatWeight) ?: "") }
+        var input by rememberSaveable { mutableStateOf(goalCm?.let(::formatWeight) ?: "") }
         val parsed = input.replace(',', '.').toDoubleOrNull()?.takeIf { it in MIN_WAIST_GOAL_CM..MAX_WAIST_GOAL_CM }
         AlertDialog(
             onDismissRequest = { editing = false },
@@ -644,11 +644,17 @@ private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>
                     editing = false
                 }) { Text(stringResource(R.string.action_save)) }
             },
+            // Cancelar siempre a mano; «Quitar» solo si hay uno que quitar
             dismissButton = {
-                TextButton(onClick = {
-                    vm.updateSettings { it.copy(waistGoalCm = null) }
-                    editing = false
-                }) { Text(stringResource(R.string.goal_remove)) }
+                Row {
+                    if (goalCm != null) {
+                        TextButton(onClick = {
+                            vm.updateSettings { it.copy(waistGoalCm = null) }
+                            editing = false
+                        }) { Text(stringResource(R.string.goal_remove), color = MaterialTheme.colorScheme.error) }
+                    }
+                    TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_cancel)) }
+                }
             },
         )
     }

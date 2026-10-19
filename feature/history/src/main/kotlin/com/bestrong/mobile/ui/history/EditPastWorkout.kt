@@ -32,7 +32,8 @@ fun EditPastSetDialog(
     weightFactor: Int = 1,
 ) {
     val unit = LocalWeightUnit.current
-    var weight by remember { mutableStateOf(if (set.weightKg == 0.0) "" else unit.format(set.weightKg * weightFactor)) }
+    val initialWeight = remember { if (set.weightKg == 0.0) "" else unit.format(set.weightKg * weightFactor) }
+    var weight by remember { mutableStateOf(initialWeight) }
     var reps by remember { mutableStateOf(set.reps.toString()) }
     var seconds by remember { mutableStateOf(set.durationSec.toString()) }
     var meters by remember { mutableStateOf(set.distanceM.toInt().toString()) }
@@ -97,6 +98,8 @@ fun EditPastSetDialog(
         confirmButton = {
             TextButton(onClick = {
                 val kg = when {
+                    // Sin tocar el peso se guarda el exacto (el texto va redondeado a un decimal y, en lb, convertido)
+                    weight == initialWeight -> set.weightKg
                     !hasWeight || weight.isBlank() -> 0.0
                     weight.startsWith("-") -> -(unit.parseToKg(weight.drop(1)) ?: 0.0) / weightFactor
                     else -> unit.parseToKg(weight)?.div(weightFactor) ?: set.weightKg

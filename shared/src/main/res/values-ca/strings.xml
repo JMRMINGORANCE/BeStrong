@@ -137,6 +137,7 @@
     <string name="delete_all_history">Tot l’historial</string>
     <string name="delete_data">Esborrar dades</string>
     <string name="delete_data_body">Tria què vols esborrar. No es pot desfer.</string>
+    <string name="cannot_undo">No es pot desfer.</string>
     <string name="delete_done">%1$d elements esborrats</string>
     <string name="delete_exercise">Eliminar exercici</string>
     <string name="delete_measurements">Totes les mesures</string>
@@ -393,11 +394,17 @@
     <string name="muscles_worked">Músculs treballats</string>
     <string name="music_app">App de música del botó</string>
     <string name="music_app_auto">Automàtica</string>
-    <string name="n_records">🏆 %1$d rècords</string>
+    <plurals name="n_records">
+        <item quantity="one">🏆 %1$d rècord</item>
+        <item quantity="other">🏆 %1$d rècords</item>
+    </plurals>
     <string name="n_reps">%1$d reps</string>
     <string name="n_sets">%1$s sèries</string>
     <string name="n_sets_value">%1$s sèries</string>
-    <string name="n_times">%1$d vegades</string>
+    <plurals name="n_times">
+        <item quantity="one">%1$d vegada</item>
+        <item quantity="other">%1$d vegades</item>
+    </plurals>
     <string name="name">Nom</string>
     <string name="nav_exercises">Exercicis</string>
     <string name="nav_history">Historial</string>

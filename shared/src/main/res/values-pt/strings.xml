@@ -137,6 +137,7 @@
     <string name="delete_all_history">Todo o histórico</string>
     <string name="delete_data">Eliminar dados</string>
     <string name="delete_data_body">Escolhe o que eliminar. Esta ação não pode ser anulada.</string>
+    <string name="cannot_undo">Não é possível anular.</string>
     <string name="delete_done">%1$d elementos eliminados</string>
     <string name="delete_exercise">Eliminar exercício</string>
     <string name="delete_measurements">Todas as medidas</string>
@@ -393,11 +394,17 @@
     <string name="muscles_worked">Músculos trabalhados</string>
     <string name="music_app">App de música do botão</string>
     <string name="music_app_auto">Automática</string>
-    <string name="n_records">🏆 %1$d recordes</string>
+    <plurals name="n_records">
+        <item quantity="one">🏆 %1$d recorde</item>
+        <item quantity="other">🏆 %1$d recordes</item>
+    </plurals>
     <string name="n_reps">%1$d reps</string>
     <string name="n_sets">%1$s séries</string>
     <string name="n_sets_value">%1$s séries</string>
-    <string name="n_times">%1$d vezes</string>
+    <plurals name="n_times">
+        <item quantity="one">%1$d vez</item>
+        <item quantity="other">%1$d vezes</item>
+    </plurals>
     <string name="name">Nome</string>
     <string name="nav_exercises">Exercícios</string>
     <string name="nav_history">Histórico</string>

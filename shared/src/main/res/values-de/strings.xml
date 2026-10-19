@@ -137,6 +137,7 @@
     <string name="delete_all_history">Gesamter Verlauf</string>
     <string name="delete_data">Daten löschen</string>
     <string name="delete_data_body">Wähle, was gelöscht werden soll. Das lässt sich nicht rückgängig machen.</string>
+    <string name="cannot_undo">Das kann nicht rückgängig gemacht werden.</string>
     <string name="delete_done">%1$d Einträge gelöscht</string>
     <string name="delete_exercise">Übung löschen</string>
     <string name="delete_measurements">Alle Maße</string>
@@ -393,11 +394,17 @@
     <string name="muscles_worked">Trainierte Muskeln</string>
     <string name="music_app">Musik-App für den Button</string>
     <string name="music_app_auto">Automatisch</string>
-    <string name="n_records">🏆 %1$d Rekorde</string>
+    <plurals name="n_records">
+        <item quantity="one">🏆 %1$d Rekord</item>
+        <item quantity="other">🏆 %1$d Rekorde</item>
+    </plurals>
     <string name="n_reps">%1$d Wdh.</string>
     <string name="n_sets">%1$s Sätze</string>
     <string name="n_sets_value">%1$s Sätze</string>
-    <string name="n_times">%1$d-mal</string>
+    <plurals name="n_times">
+        <item quantity="one">%1$d-mal</item>
+        <item quantity="other">%1$d-mal</item>
+    </plurals>
     <string name="name">Name</string>
     <string name="nav_exercises">Übungen</string>
     <string name="nav_history">Verlauf</string>

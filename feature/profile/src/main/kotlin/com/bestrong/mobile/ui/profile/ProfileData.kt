@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +49,8 @@ fun DataToolsSection(vm: ProfileViewModel) {
     var password by remember { mutableStateOf("") }
     var repeated by remember { mutableStateOf("") }
     var deleting by remember { mutableStateOf(false) }
+    // Segundo paso antes de borrar de verdad: un toque en la lista no basta
+    var confirmDelete by rememberSaveable { mutableStateOf<DeleteKind?>(null) }
     val xlsxLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) { uri ->
         uri?.let(vm::exportXlsx)
     }
@@ -121,17 +124,25 @@ fun DataToolsSection(vm: ProfileViewModel) {
             text = {
                 Column {
                     Text(stringResource(R.string.delete_data_body), style = MaterialTheme.typography.bodySmall)
-                    listOf(
-                        DeleteKind.OLD_HISTORY to R.string.delete_old_history,
-                        DeleteKind.MEASUREMENTS to R.string.delete_measurements,
-                        DeleteKind.PHOTOS to R.string.delete_photos,
-                        DeleteKind.ALL_HISTORY to R.string.delete_all_history,
-                    ).forEach { (k, l) ->
-                        TextButton(onClick = { vm.deleteData(k); deleting = false }) { Text(stringResource(l), color = MaterialTheme.colorScheme.error) }
+                    DeleteKind.entries.map { it to it.label }.forEach { (k, l) ->
+                        TextButton(onClick = { confirmDelete = k; deleting = false }) { Text(stringResource(l), color = MaterialTheme.colorScheme.error) }
                     }
                 }
             },
             confirmButton = { TextButton(onClick = { deleting = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
+    confirmDelete?.let { kind ->
+        AlertDialog(
+            onDismissRequest = { confirmDelete = null },
+            title = { Text(stringResource(kind.label)) },
+            text = { Text(stringResource(R.string.cannot_undo)) },
+            confirmButton = {
+                TextButton(onClick = { vm.deleteData(kind); confirmDelete = null }) {
+                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }
@@ -247,3 +258,11 @@ private fun TrashItem(vm: ProfileViewModel) {
         )
     }
 }
+
+private val DeleteKind.label: Int
+    get() = when (this) {
+        DeleteKind.OLD_HISTORY -> R.string.delete_old_history
+        DeleteKind.MEASUREMENTS -> R.string.delete_measurements
+        DeleteKind.PHOTOS -> R.string.delete_photos
+        DeleteKind.ALL_HISTORY -> R.string.delete_all_history
+    }

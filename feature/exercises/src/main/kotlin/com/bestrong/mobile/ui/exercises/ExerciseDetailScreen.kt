@@ -210,7 +210,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             SectionHeader(stringResource(R.string.next_target))
                             Text(
-                                stringResource(R.string.next_target_line, t.sets.count { it.type != SetType.WARMUP }, describeSet(work, s.exercise, unit)),
+                                stringResource(R.string.next_target_line, t.sets.count { it.type != SetType.WARMUP }, describeSet(work, s.exercise, unit, vm.weightFactor(s.exercise))),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -256,7 +256,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         // Notas de ese día para el ejercicio («hombro cargado», «agarre más abierto»…)
                         s.sessionNotes[w.id]?.let { Text("✎ $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary) }
                         w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
-                            Text("${i + 1}. ${describeSet(set, s.exercise, unit)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax)) else "")
+                            Text("${i + 1}. ${describeSet(set, s.exercise, unit, vm.weightFactor(s.exercise))}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax)) else "")
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
                     }
@@ -337,7 +337,7 @@ private fun RpeLoadCard(vm: ExercisesViewModel, exercise: com.bestrong.core.mode
     com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.rpe_table_title))
-            Text(stringResource(R.string.rpe_table_hint, unit.format(e1rm, withUnit = true)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.rpe_table_hint, unit.format(e1rm * factor, withUnit = true)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.reps_short), Modifier.weight(1f), fontWeight = FontWeight.Bold)
                 RPE_TABLE_RPES.forEach { Text("@" + it.toString().removeSuffix(".0"), Modifier.weight(1f), fontWeight = FontWeight.Bold) }

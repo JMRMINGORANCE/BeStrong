@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -304,13 +305,28 @@ private fun GeneratorCard(vm: PlanningViewModel) {
 
 @Composable
 private fun ProgramsCard(vm: PlanningViewModel, ui: PlanningUi, onEdit: (String?) -> Unit) {
+    // Un programa hecho a mano no se borra de un toque
+    var deleting by rememberSaveable { mutableStateOf<String?>(null) }
+    ui.state.customPrograms.firstOrNull { it.id == deleting }?.let { p ->
+        AlertDialog(
+            onDismissRequest = { deleting = null },
+            title = { Text(p.nameEs) },
+            text = { Text(stringResource(R.string.cannot_undo)) },
+            confirmButton = {
+                TextButton(onClick = { vm.deleteProgram(p.id); deleting = null }) {
+                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
     PlanCard(stringResource(R.string.prog_title)) {
         if (ui.state.customPrograms.isEmpty()) Text(stringResource(R.string.prog_empty), style = MaterialTheme.typography.bodySmall)
         ui.state.customPrograms.forEach { p ->
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(p.nameEs, Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
                 TextButton(onClick = { onEdit(p.id) }) { Text(stringResource(R.string.prog_edit)) }
-                IconButton(onClick = { vm.deleteProgram(p.id) }) { Icon(Icons.Default.Delete, stringResource(R.string.action_delete)) }
+                IconButton(onClick = { deleting = p.id }) { Icon(Icons.Default.Delete, stringResource(R.string.action_delete)) }
             }
         }
         Button(onClick = { onEdit(null) }) { Text(stringResource(R.string.prog_create)) }

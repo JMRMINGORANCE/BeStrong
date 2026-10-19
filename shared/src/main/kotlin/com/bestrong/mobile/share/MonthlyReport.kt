@@ -122,7 +122,7 @@ object MonthlyReport {
         // Récords
         if (s.records.isNotEmpty() && y < H - 160f) {
             y += 20f
-            c.drawText("🏆 " + context.getString(R.string.n_records, s.records.size), PAD, y, text(40f, accent, bold = true))
+            c.drawText(context.resources.getQuantityString(R.plurals.n_records, s.records.size, s.records.size), PAD, y, text(40f, accent, bold = true))
             y += 54f
             s.records.sortedByDescending { it.value }.take(3).forEach { pr ->
                 if (y > H - PAD) return@forEach
