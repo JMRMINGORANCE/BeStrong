@@ -27,3 +27,12 @@ spotless {
         ktlint(ktlintVersion)
     }
 }
+
+// Compose: los modelos del núcleo son inmutables (ver compose_stability.conf)
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.plugin.compose") {
+        extensions.configure<org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension> {
+            stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose_stability.conf"))
+        }
+    }
+}

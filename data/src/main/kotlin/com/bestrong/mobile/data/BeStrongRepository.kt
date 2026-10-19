@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -105,7 +106,10 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     val activeWorkout: StateFlow<Workout?> = dao.value(KEY_ACTIVE)
+        // La tabla clave-valor avisa de cualquier escritura: solo se decodifica si cambia esta clave
+        .distinctUntilChanged()
         .map { s -> s?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
+        .flowOn(Dispatchers.Default)
         .stateIn(scope, SharingStarted.Eagerly, null)
 
     /** Entreno en curso leído de la base de datos (en arranque en frío [activeWorkout] aún vale null). */
@@ -113,6 +117,8 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** Programa con progresión que sigue el usuario (null = ninguno). */
     val activeProgram: StateFlow<ActiveProgram?> = dao.value(KEY_PROGRAM)
+        // La tabla clave-valor avisa de cualquier escritura: solo se decodifica si cambia esta clave
+        .distinctUntilChanged()
         .map { s -> s?.let { runCatching { json.decodeFromString(ActiveProgram.serializer(), it) }.getOrNull() } }
         .stateIn(scope, SharingStarted.Eagerly, null)
 
@@ -197,7 +203,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         if (workout == null) {
             dao.deleteValue(KEY_ACTIVE)
         } else {
-            dao.putValue(KeyValueEntity(KEY_ACTIVE, Persistence.encodeWorkout(workout)))
+            dao.putValue(KeyValueEntity(KEY_ACTIVE, withContext(Dispatchers.Default) { Persistence.encodeWorkout(workout) }))
         }
     }
 
@@ -207,7 +213,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
      */
     suspend fun updateActive(block: (Workout) -> Workout): Pair<Workout, Workout>? = activeMutex.withLock {
         val current = currentActive() ?: return@withLock null
-        val updated = block(current).copy(updatedAtEpochMs = System.currentTimeMillis())
+        val updated = withContext(Dispatchers.Default) { block(current).copy(updatedAtEpochMs = System.currentTimeMillis()) }
         write(updated)
         current to updated
     }
@@ -221,12 +227,15 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     }
 
     private suspend fun currentActive(): Workout? =
-        dao.valueOnce(KEY_ACTIVE)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
+        dao.valueOnce(KEY_ACTIVE)?.let { withContext(Dispatchers.Default) { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
 
     // --- Modo pareja: segundo entreno activo en el mismo móvil -------------------------------
 
     val partnerWorkout: StateFlow<Workout?> = dao.value(KEY_PARTNER)
+        // La tabla clave-valor avisa de cualquier escritura: solo se decodifica si cambia esta clave
+        .distinctUntilChanged()
         .map { s -> s?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
+        .flowOn(Dispatchers.Default)
         .stateIn(scope, SharingStarted.Eagerly, null)
 
     suspend fun setPartnerActive(workout: Workout?) = activeMutex.withLock {
@@ -236,7 +245,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     suspend fun updatePartnerActive(block: (Workout) -> Workout): Pair<Workout, Workout>? = activeMutex.withLock {
         val current = currentPartner() ?: return@withLock null
         val updated = block(current).copy(updatedAtEpochMs = System.currentTimeMillis())
-        dao.putValue(KeyValueEntity(KEY_PARTNER, Persistence.encodeWorkout(updated)))
+        dao.putValue(KeyValueEntity(KEY_PARTNER, withContext(Dispatchers.Default) { Persistence.encodeWorkout(updated) }))
         current to updated
     }
 
@@ -246,7 +255,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     }
 
     private suspend fun currentPartner(): Workout? =
-        dao.valueOnce(KEY_PARTNER)?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() }
+        dao.valueOnce(KEY_PARTNER)?.let { withContext(Dispatchers.Default) { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
 
     private val _syncConflicts = MutableSharedFlow<List<WorkoutMerge.SetConflict>>(extraBufferCapacity = 4)
 
@@ -449,6 +458,8 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** Entrenos borrados en los últimos 30 días, el último primero (para recuperarlos desde Perfil). */
     val trash: StateFlow<List<TrashedWorkout>> = dao.value(KEY_TRASH)
+        // La tabla clave-valor avisa de cualquier escritura: solo se decodifica si cambia esta clave
+        .distinctUntilChanged()
         .map { raw -> TrashedWorkout.fresh(decodeTrash(raw), System.currentTimeMillis()) }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 

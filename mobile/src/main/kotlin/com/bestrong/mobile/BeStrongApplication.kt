@@ -136,7 +136,8 @@ class AppSync @Inject constructor(
             emit(bestsOf(repository.historyOnce()))
             // La lista en memoria empieza vacía hasta que carga: se salta solo ese arranque
             emitAll(repository.history.dropWhile { it.isEmpty() }.map(::bestsOf))
-        }.flowOn(Dispatchers.Default)
+            // La primera lista de la base de datos suele ser la misma que ya se leyó: no se reenvía
+        }.distinctUntilChanged().flowOn(Dispatchers.Default)
         combine(settings.settings, repository.activeProgram, notes, bests, planning.state.map { it.weeklyCap }.distinctUntilChanged()) { s, program, pinned, (best1rm, heaviest), cap ->
             SharedSettings(
                 s.unit, s.progressionEnabled, s.restVibration,
