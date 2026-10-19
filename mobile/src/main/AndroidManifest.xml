@@ -160,6 +160,15 @@
         <receiver
             android:name=".backup.BackupNowReceiver"
             android:exported="false" />
+        <!-- Viaje con cambio de huso u hora cambiada a mano: los avisos se reprograman a la hora local -->
+        <receiver
+            android:name="com.bestrong.mobile.notify.TimeChangeReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+            </intent-filter>
+        </receiver>
         <!-- «Dentro de 1 h» del recordatorio de entrenar -->
         <receiver
             android:name=".notify.ReminderSnoozeReceiver"

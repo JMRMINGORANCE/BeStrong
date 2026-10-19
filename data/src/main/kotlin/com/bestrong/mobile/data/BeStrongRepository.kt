@@ -515,7 +515,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
 
     /** [keepPosition]: deshacer un borrado la devuelve a su sitio en vez de al final. */
     suspend fun saveRoutine(routine: Routine, keepPosition: Boolean = false) {
-        val position = if (keepPosition || routines.value.any { it.id == routine.id }) routine.position else (routines.value.maxOfOrNull { it.position } ?: -1) + 1
+        // De la base de datos: el servicio del reloj, recién arrancado, aún no tiene la lista en memoria
+        val existing = routinesOnce()
+        val position = if (keepPosition || existing.any { it.id == routine.id }) routine.position else (existing.maxOfOrNull { it.position } ?: -1) + 1
         val r = routine.copy(position = position)
         dao.upsertRoutine(RoutineEntity(r.id, r.position, Persistence.encodeRoutine(r)))
     }

@@ -97,6 +97,11 @@ fun HomeScreen(
     onOpenExercise: (String) -> Unit = {},
 ) {
     val routines by vm.routines.collectAsStateWithLifecycle()
+    // Al volver a Inicio (p. ej. a la mañana siguiente) proteína, agua y disposición son las de hoy
+    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
+        vm.refreshReadiness()
+        onPauseOrDispose { }
+    }
     val active by vm.active.collectAsStateWithLifecycle()
     val history by vm.history.collectAsStateWithLifecycle()
     val gymNames by vm.gymNames.collectAsStateWithLifecycle()
@@ -601,17 +606,21 @@ private fun Greeting(actions: @Composable androidx.compose.foundation.layout.Row
 /** ¿Se quedó un entreno abierto sin querer? Ofrecer terminarlo a la hora de la última serie. */
 @Composable
 private fun ForgottenWorkoutDialog(vm: HomeViewModel) {
-    var forgotten by remember { mutableStateOf(vm.forgottenWorkout()) }
+    // Del flujo, no de una lectura al abrir: en arranque en frío el entreno activo llega un poco después
+    val active by vm.active.collectAsStateWithLifecycle()
+    var handledId by rememberSaveable { mutableStateOf<String?>(null) }
+    val forgotten = active?.takeIf { it.id != handledId && vm.forgottenWorkout() != null }
     forgotten?.let { fw ->
+        val close = { handledId = fw.id }
         AlertDialog(
-            onDismissRequest = { forgotten = null },
+            onDismissRequest = close,
             title = { Text(stringResource(R.string.forgotten_title)) },
             text = { Text(stringResource(R.string.forgotten_body, fw.name, formatTime(fw.updatedAtEpochMs))) },
-            confirmButton = { Button(onClick = { vm.finishForgotten(); forgotten = null }) { Text(stringResource(R.string.forgotten_finish)) } },
+            confirmButton = { Button(onClick = { vm.finishForgotten(); close() }) { Text(stringResource(R.string.forgotten_finish)) } },
             dismissButton = {
                 Row {
-                    TextButton(onClick = { vm.discardActive(); forgotten = null }) { Text(stringResource(R.string.action_discard)) }
-                    TextButton(onClick = { forgotten = null }) { Text(stringResource(R.string.forgotten_continue)) }
+                    TextButton(onClick = { vm.discardActive(); close() }) { Text(stringResource(R.string.action_discard)) }
+                    TextButton(onClick = { close() }) { Text(stringResource(R.string.forgotten_continue)) }
                 }
             },
         )

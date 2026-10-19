@@ -32,7 +32,9 @@ class WeeklySummaryWorker(context: Context, params: WorkerParameters) : Coroutin
             val week = if (today == now) thisWeek else Strength.weekSummary(history, today, zone)
             // Si la carga ha subido de golpe, el resumen lo avisa (riesgo de lesión)
             val loadRatio = TrainingLoad.weekly(history, today, zone).takeIf { it.tooHigh }?.acuteChronicRatio
-            if (week.workouts > 0) Notifier.weeklySummary(applicationContext, week, settings.unit, loadRatio)
+            // Un resumen que llega a mitad de la semana siguiente ya no resume nada útil
+            val stale = ExactWork.isStale(inputData, MAX_LATE_MS, sameDay = false)
+            if (week.workouts > 0 && !stale) Notifier.weeklySummary(applicationContext, week, settings.unit, loadRatio)
         } finally {
             runCatching { schedule(applicationContext, force = true) }.onFailure { Log.w("WeeklySummary", "No se pudo reprogramar", it) }
         }
@@ -40,6 +42,7 @@ class WeeklySummaryWorker(context: Context, params: WorkerParameters) : Coroutin
     }
 
     companion object {
+        private const val MAX_LATE_MS = 30 * 60 * 60 * 1000L
         private const val NAME = "weekly-summary"
 
         /** Próximo domingo a las 19:00 (OneTimeWork que se reprograma al acabar, ver [ExactWork]). */

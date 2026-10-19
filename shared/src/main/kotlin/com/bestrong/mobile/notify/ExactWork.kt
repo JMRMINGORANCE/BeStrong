@@ -29,11 +29,27 @@ internal object ExactWork {
         val key = "$config@${ZoneId.systemDefault().id}"
         val keep = !force && prefs.getString(name, null) == key
         val delay = Duration.between(ZonedDateTime.now(next.zone), next).toMillis().coerceAtLeast(0)
-        val request = OneTimeWorkRequest.Builder(worker).setInitialDelay(delay, TimeUnit.MILLISECONDS).build()
+        val request = OneTimeWorkRequest.Builder(worker)
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .setInputData(androidx.work.workDataOf(KEY_PLANNED to next.toInstant().toEpochMilli()))
+            .build()
         // KEEP solo respeta el que siga pendiente; si no queda ninguno, encola este
         WorkManager.getInstance(context).enqueueUniqueWork(name, if (keep) ExistingWorkPolicy.KEEP else ExistingWorkPolicy.REPLACE, request)
         prefs.edit { putString(name, key) }
     }
+
+    /**
+     * Si el aviso llega demasiado tarde para tener sentido: con el móvil apagado o en Doze, WorkManager lo
+     * lanza al volver, y un «hoy toca entrenar» del lunes no puede salir el martes a las 7:30.
+     */
+    fun isStale(input: androidx.work.Data, maxLateMs: Long, sameDay: Boolean, zone: ZoneId = ZoneId.systemDefault()): Boolean {
+        val planned = input.getLong(KEY_PLANNED, 0L).takeIf { it > 0 } ?: return false
+        val now = System.currentTimeMillis()
+        val otherDay = sameDay && java.time.Instant.ofEpochMilli(planned).atZone(zone).toLocalDate() != java.time.LocalDate.now(zone)
+        return now - planned > maxLateMs || otherDay
+    }
+
+    private const val KEY_PLANNED = "planned_at"
 
     fun cancel(context: Context, name: String) {
         WorkManager.getInstance(context).cancelUniqueWork(name)

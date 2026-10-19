@@ -22,7 +22,8 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         val deps = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val settings = deps.settings().settings.value
         try {
-            remind(deps, settings.reminderDays)
+            // Muy tarde u otro día (móvil apagado): se salta este y se programa el siguiente
+            if (!ExactWork.isStale(inputData, MAX_LATE_MS, sameDay = true)) remind(deps, settings.reminderDays)
         } finally {
             // Siguiente aviso a la hora exacta (también si este falla)
             runCatching { schedule(applicationContext, settings.reminderDays, settings.reminderHour, settings.reminderMinute, force = true) }
@@ -47,6 +48,7 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
 
     companion object {
         private const val NAME = "workout-reminder"
+        private const val MAX_LATE_MS = 2 * 60 * 60 * 1000L
 
         /** Programa (o cancela si no hay días) el próximo aviso: el primer día marcado a la hora indicada. */
         fun schedule(context: Context, days: Set<Int>, hour: Int, minute: Int, force: Boolean = false) {
