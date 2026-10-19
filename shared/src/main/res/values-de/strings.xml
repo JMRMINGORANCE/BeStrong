@@ -99,7 +99,10 @@
     <string name="calc_reps">Wdh.</string>
     <string name="calc_total">Total (Kniebeuge + Bank + Kreuzheben)</string>
     <string name="calc_weight">Gewicht</string>
-    <string name="calendar_title">%1$s %2$d · %3$d Trainings</string>
+    <plurals name="calendar_title">
+        <item quantity="one">%1$s %2$d · %3$d Training</item>
+        <item quantity="other">%1$s %2$d · %3$d Trainings</item>
+    </plurals>
     <string name="calis_line">%1$s → nächste: %2$s</string>
     <string name="calis_rule">Steig auf, wenn du 12 Wdh. (oder 60 s) in jedem Satz schaffst.</string>
     <string name="calis_start">Starte mit: %1$s</string>
@@ -1208,6 +1211,10 @@
     <plurals name="plan_week_duplicated_n">
         <item quantity="one">Woche in die nächste kopiert</item>
         <item quantity="other">Woche in die nächsten %1$d kopiert</item>
+    </plurals>
+    <plurals name="plan_week_kept_n">
+        <item quantity="one">%1$d bereits geplante Woche blieb unverändert</item>
+        <item quantity="other">%1$d bereits geplante Wochen blieben unverändert</item>
     </plurals>
     <plurals name="plan_duplicate_weeks">
         <item quantity="one">Nächste Woche</item>

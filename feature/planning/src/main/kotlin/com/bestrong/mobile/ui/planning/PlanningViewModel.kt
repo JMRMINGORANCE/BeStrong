@@ -122,12 +122,21 @@ class PlanningViewModel @Inject constructor(
         s.copy(weekPlans = s.weekPlans + (weekStart.toEpochDay() to s.planFor(weekStart).move(from, to)))
     }
 
-    /** Copia la semana en la siguiente. */
-    /** La semana de [weekStart] copiada en las [weeks] siguientes (1 = la próxima; 4 = un mes de mesociclo). */
-    fun duplicateWeek(weekStart: LocalDate, weeks: Int = 1) = store.update { s ->
-        val plan = s.planFor(weekStart)
-        s.copy(weekPlans = s.weekPlans + (1..weeks.coerceIn(1, MAX_DUPLICATE_WEEKS)).associate { weekStart.plusWeeks(it.toLong()).toEpochDay() to plan })
-    }.also { _messages.tryEmit(context.resources.getQuantityString(R.plurals.plan_week_duplicated_n, weeks, weeks)) }
+    /**
+     * La semana de [weekStart] copiada en las [weeks] siguientes (1 = la próxima; 4 = un mes de mesociclo).
+     * Las que ya tenían su propio plan se dejan como están (copiar 8 semanas no pisa lo ya organizado).
+     */
+    fun duplicateWeek(weekStart: LocalDate, weeks: Int = 1) {
+        val n = weeks.coerceIn(1, MAX_DUPLICATE_WEEKS)
+        val targets = (1..n).map { weekStart.plusWeeks(it.toLong()).toEpochDay() }
+        val kept = targets.count { store.state.value.weekPlans[it]?.days?.isNotEmpty() == true }
+        store.update { s ->
+            val plan = s.planFor(weekStart)
+            s.copy(weekPlans = s.weekPlans + targets.filter { s.weekPlans[it]?.days.isNullOrEmpty() }.associateWith { plan })
+        }
+        val copied = context.resources.getQuantityString(R.plurals.plan_week_duplicated_n, n, n)
+        _messages.tryEmit(if (kept > 0) copied + ". " + context.resources.getQuantityString(R.plurals.plan_week_kept_n, kept, kept) else copied)
+    }
 
     fun estimateMinutes(routine: Routine): Int = RoutineTime.estimateMinutes(routine)
 

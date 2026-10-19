@@ -112,7 +112,10 @@
     <string name="routine_save">Save routine</string>
     <string name="routines">Routines</string>
     <string name="set_of">Set %1$d/%2$d%3$s</string>
-    <string name="sets_volume">%1$d sets · %2$s</string>
+    <plurals name="sets_volume">
+        <item quantity="one">%1$d set · %2$s</item>
+        <item quantity="other">%1$d sets · %2$s</item>
+    </plurals>
     <string name="stem_button">Quick button</string>
     <string name="stem_complete">Complete set</string>
     <string name="stem_next">Next exercise</string>

@@ -99,7 +99,10 @@
     <string name="calc_reps">Reps</string>
     <string name="calc_total">Total (agachamento + banco + peso morto)</string>
     <string name="calc_weight">Peso</string>
-    <string name="calendar_title">%1$s %2$d · %3$d adestramentos</string>
+    <plurals name="calendar_title">
+        <item quantity="one">%1$s %2$d · %3$d adestramento</item>
+        <item quantity="other">%1$s %2$d · %3$d adestramentos</item>
+    </plurals>
     <string name="calis_line">%1$s → seguinte: %2$s</string>
     <string name="calis_rule">Pasa ao seguinte nivel con 12 reps (ou 60 s) en todas as series.</string>
     <string name="calis_start">Comeza por: %1$s</string>
@@ -1208,6 +1211,10 @@
     <plurals name="plan_week_duplicated_n">
         <item quantity="one">Semana copiada na seguinte</item>
         <item quantity="other">Semana copiada nas %1$d seguintes</item>
+    </plurals>
+    <plurals name="plan_week_kept_n">
+        <item quantity="one">%1$d semana xa planificada quedou igual</item>
+        <item quantity="other">%1$d semanas xa planificadas quedaron igual</item>
     </plurals>
     <plurals name="plan_duplicate_weeks">
         <item quantity="one">Na semana seguinte</item>

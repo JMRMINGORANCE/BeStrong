@@ -112,7 +112,10 @@
     <string name="routine_save">Desar rutina</string>
     <string name="routines">Rutines</string>
     <string name="set_of">Sèrie %1$d/%2$d%3$s</string>
-    <string name="sets_volume">%1$d sèries · %2$s</string>
+    <plurals name="sets_volume">
+        <item quantity="one">%1$d sèrie · %2$s</item>
+        <item quantity="other">%1$d sèries · %2$s</item>
+    </plurals>
     <string name="stem_button">Botó ràpid</string>
     <string name="stem_complete">Completar sèrie</string>
     <string name="stem_next">Exercici següent</string>

@@ -72,7 +72,7 @@ fun MenuScreen(
             item { ListHeader { Text(w.name, maxLines = 1, overflow = TextOverflow.Ellipsis) } }
             item {
                 Text(
-                    stringResource(R.string.sets_volume, w.completedSetCount, unit.formatVolume(w.totalVolume)),
+                    pluralStringResource(R.plurals.sets_volume, w.completedSetCount, w.completedSetCount, unit.formatVolume(w.totalVolume)),
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,
                 )

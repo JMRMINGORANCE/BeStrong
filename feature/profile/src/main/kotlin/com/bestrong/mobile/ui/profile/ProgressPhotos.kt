@@ -143,7 +143,8 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
     toDelete?.let { p ->
         AlertDialog(
             onDismissRequest = { toDelete = null },
-            title = { Text(stringResource(R.string.progress_delete)) },
+            // Tocar una foto la abre para verla; borrar es la opción secundaria, no lo primero que se ofrece
+            title = { Text(formatShortDate(p.dateEpochMs)) },
             text = {
                 AsyncImage(
                     model = p.file,
@@ -152,8 +153,10 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
                     modifier = Modifier.fillMaxWidth().aspectRatio(0.75f),
                 )
             },
-            confirmButton = { TextButton(onClick = { vm.deletePhoto(p); toDelete = null }) { Text(stringResource(R.string.action_delete)) } },
-            dismissButton = { TextButton(onClick = { toDelete = null }) { Text(stringResource(R.string.action_cancel)) } },
+            confirmButton = { TextButton(onClick = { toDelete = null }) { Text(stringResource(R.string.action_close)) } },
+            dismissButton = {
+                TextButton(onClick = { vm.deletePhoto(p); toDelete = null }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
+            },
         )
     }
 }

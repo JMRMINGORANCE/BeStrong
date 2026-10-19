@@ -99,7 +99,10 @@
     <string name="calc_reps">Reps</string>
     <string name="calc_total">Total (esquat + banca + pes mort)</string>
     <string name="calc_weight">Pes</string>
-    <string name="calendar_title">%1$s %2$d · %3$d entrenaments</string>
+    <plurals name="calendar_title">
+        <item quantity="one">%1$s %2$d · %3$d entrenament</item>
+        <item quantity="other">%1$s %2$d · %3$d entrenaments</item>
+    </plurals>
     <string name="calis_line">%1$s → següent: %2$s</string>
     <string name="calis_rule">Passa al següent nivell amb 12 reps (o 60 s) a totes les sèries.</string>
     <string name="calis_start">Comença per: %1$s</string>
@@ -1208,6 +1211,10 @@
     <plurals name="plan_week_duplicated_n">
         <item quantity="one">Setmana copiada a la següent</item>
         <item quantity="other">Setmana copiada a les %1$d següents</item>
+    </plurals>
+    <plurals name="plan_week_kept_n">
+        <item quantity="one">%1$d setmana ja planificada s\'ha deixat igual</item>
+        <item quantity="other">%1$d setmanes ja planificades s\'han deixat igual</item>
     </plurals>
     <plurals name="plan_duplicate_weeks">
         <item quantity="one">A la setmana següent</item>

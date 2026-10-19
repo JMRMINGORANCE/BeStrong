@@ -99,7 +99,10 @@
     <string name="calc_reps">Reps</string>
     <string name="calc_total">Total (squat + développé couché + soulevé de terre)</string>
     <string name="calc_weight">Poids</string>
-    <string name="calendar_title">%1$s %2$d · %3$d entraînements</string>
+    <plurals name="calendar_title">
+        <item quantity="one">%1$s %2$d · %3$d entraînement</item>
+        <item quantity="other">%1$s %2$d · %3$d entraînements</item>
+    </plurals>
     <string name="calis_line">%1$s → suivant : %2$s</string>
     <string name="calis_rule">Passe au niveau suivant avec 12 répétitions (ou 60 s) sur toutes les séries.</string>
     <string name="calis_start">Commence par : %1$s</string>
@@ -1208,6 +1211,10 @@
     <plurals name="plan_week_duplicated_n">
         <item quantity="one">Semaine copiée dans %1$d semaine suivante</item>
         <item quantity="other">Semaine copiée dans les %1$d suivantes</item>
+    </plurals>
+    <plurals name="plan_week_kept_n">
+        <item quantity="one">%1$d semaine déjà planifiée a été conservée</item>
+        <item quantity="other">%1$d semaines déjà planifiées ont été conservées</item>
     </plurals>
     <plurals name="plan_duplicate_weeks">
         <item quantity="one">Dans %1$d semaine suivante</item>

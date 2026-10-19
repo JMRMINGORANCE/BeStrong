@@ -112,7 +112,10 @@
     <string name="routine_save">Routine speichern</string>
     <string name="routines">Routinen</string>
     <string name="set_of">Satz %1$d/%2$d%3$s</string>
-    <string name="sets_volume">%1$d Sätze · %2$s</string>
+    <plurals name="sets_volume">
+        <item quantity="one">%1$d Satz · %2$s</item>
+        <item quantity="other">%1$d Sätze · %2$s</item>
+    </plurals>
     <string name="stem_button">Schnelltaste</string>
     <string name="stem_complete">Satz abschließen</string>
     <string name="stem_next">Nächste Übung</string>

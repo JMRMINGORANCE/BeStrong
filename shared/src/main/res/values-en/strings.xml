@@ -99,7 +99,10 @@
     <string name="calc_reps">Reps</string>
     <string name="calc_total">Total (squat + bench + deadlift)</string>
     <string name="calc_weight">Weight</string>
-    <string name="calendar_title">%1$s %2$d · %3$d workouts</string>
+    <plurals name="calendar_title">
+        <item quantity="one">%1$s %2$d · %3$d workout</item>
+        <item quantity="other">%1$s %2$d · %3$d workouts</item>
+    </plurals>
     <string name="calis_line">%1$s → next: %2$s</string>
     <string name="calis_rule">Move up with 12 reps (or 60 s) on every set.</string>
     <string name="calis_start">Start with: %1$s</string>
@@ -1208,6 +1211,10 @@
     <plurals name="plan_week_duplicated_n">
         <item quantity="one">Week copied to the next one</item>
         <item quantity="other">Week copied to the next %1$d</item>
+    </plurals>
+    <plurals name="plan_week_kept_n">
+        <item quantity="one">%1$d week already planned was kept</item>
+        <item quantity="other">%1$d weeks already planned were kept</item>
     </plurals>
     <plurals name="plan_duplicate_weeks">
         <item quantity="one">Next week</item>

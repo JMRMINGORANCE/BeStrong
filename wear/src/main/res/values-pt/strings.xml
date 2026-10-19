@@ -112,7 +112,10 @@
     <string name="routine_save">Guardar rotina</string>
     <string name="routines">Rotinas</string>
     <string name="set_of">Série %1$d/%2$d%3$s</string>
-    <string name="sets_volume">%1$d séries · %2$s</string>
+    <plurals name="sets_volume">
+        <item quantity="one">%1$d série · %2$s</item>
+        <item quantity="other">%1$d séries · %2$s</item>
+    </plurals>
     <string name="stem_button">Botão rápido</string>
     <string name="stem_complete">Concluir série</string>
     <string name="stem_next">Exercício seguinte</string>
