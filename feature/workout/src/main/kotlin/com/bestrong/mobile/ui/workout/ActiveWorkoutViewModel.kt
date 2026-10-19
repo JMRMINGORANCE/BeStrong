@@ -686,6 +686,9 @@ class ActiveWorkoutViewModel @Inject constructor(
             if (index >= 0 && !done(before) && done(updated)) {
                 onSetCompleted(updated, index)
                 if (!partner) goalEvent(updated, weId, setId)?.let { _events.tryEmit(it) }
+            } else if (unticked(before, updated, setId) && wasLastCompleted(before, setId)) {
+                // Marcada por error y desmarcada: el descanso que lanzó ya no tiene sentido
+                restTimer.skip()
             }
         }
     }
@@ -724,16 +727,20 @@ class ActiveWorkoutViewModel @Inject constructor(
     private fun onSetCompleted(updated: Workout, index: Int) {
         val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index, settings.value.warmupRestSeconds)
         if (restSeconds > 0) restTimer.start(restSeconds) else restTimer.skip()
-        // Aviso por voz: cuánto descansar y qué viene
-        WorkoutEditor.nextPendingSet(updated)?.let { (i, s) ->
+        // Aviso por voz: cuánto descansar y qué viene (la serie del ejercicio al que se salta, no la primera de la lista)
+        val upcoming = next?.let { i -> updated.exercises.getOrNull(i)?.sets?.firstOrNull { !it.completed }?.let { i to it } }
+            ?: WorkoutEditor.nextPendingSet(updated)
+        upcoming?.let { (i, s) ->
             val we = updated.exercises[i]
+            val name = we.exercise.displayName(appContext)
+            val set = describeSet(s, we.exercise.tracking, settings.value.unit, withPace = false)
+            // En una superserie no hay descanso: no se dice «descansa 0:00»
             announcer.say(
-                appContext.getString(
-                    R.string.tts_next,
-                    formatDuration(restSeconds.toLong()),
-                    we.exercise.displayName(appContext),
-                    describeSet(s, we.exercise.tracking, settings.value.unit, withPace = false),
-                ),
+                if (restSeconds > 0) {
+                    appContext.getString(R.string.tts_next, formatDuration(restSeconds.toLong()), name, set)
+                } else {
+                    appContext.getString(R.string.tts_next_no_rest, name, set)
+                },
             )
         }
         if (next != null && next != index) _focusExercise.tryEmit(next)
@@ -876,4 +883,16 @@ class ActiveWorkoutViewModel @Inject constructor(
         const val KEY_DEADLINE = "deadline"
         const val KEY_DEADLINE_WORKOUT = "deadline_workout_id"
     }
+}
+
+/** Si [setId] fue la última serie hecha (la que lanzó el descanso en curso). */
+private fun wasLastCompleted(w: Workout, setId: String): Boolean {
+    val sets = w.exercises.flatMap { it.sets }.filter { it.completed }
+    val mine = sets.firstOrNull { it.id == setId }?.completedAtEpochMs ?: return false
+    return sets.none { it.id != setId && (it.completedAtEpochMs ?: 0) > mine }
+}
+
+private fun unticked(before: Workout, after: Workout, setId: String): Boolean {
+    fun done(w: Workout) = w.exercises.any { we -> we.sets.any { it.id == setId && it.completed } }
+    return done(before) && !done(after)
 }

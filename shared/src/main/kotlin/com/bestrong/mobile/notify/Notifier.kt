@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.PeriodSummary
 import com.bestrong.core.stats.PersonalRecord
+import com.bestrong.core.stats.formatValue
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.AppIntents
 import com.bestrong.mobile.shared.R
@@ -62,7 +63,7 @@ object Notifier {
         if (records.isEmpty() || !canPost(context)) return
         ensureChannels(context)
         val lines = records.map {
-            context.getString(R.string.record_line, it.exerciseName, context.getString(it.type.labelRes()), unit.format(it.value))
+            context.getString(R.string.record_line, it.exerciseName, context.getString(it.type.labelRes()), it.type.formatValue(it.value, unit))
         }
         val style = NotificationCompat.InboxStyle()
         lines.take(6).forEach(style::addLine)

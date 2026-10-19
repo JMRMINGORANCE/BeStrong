@@ -70,6 +70,7 @@ import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RestStats
 import com.bestrong.core.stats.RestSummary
+import com.bestrong.core.stats.formatValue
 import com.bestrong.core.util.formatDuration
 import com.bestrong.core.util.formatVolume
 import com.bestrong.mobile.share.DragShare
@@ -395,7 +396,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             Icon(Icons.Default.EmojiEvents, null, Modifier.size(28.dp))
                             Text(stringResource(R.string.n_records, records.size), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
                         }
-                        records.forEach { Text(stringResource(R.string.record_line, it.exerciseName, it.type.label(), unit.format(it.value)), style = MaterialTheme.typography.bodyMedium) }
+                        records.forEach { Text(stringResource(R.string.record_line, it.exerciseName, it.type.label(), it.type.formatValue(it.value, unit)), style = MaterialTheme.typography.bodyMedium) }
                     }
                 }
             }

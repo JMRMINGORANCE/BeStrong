@@ -18,6 +18,13 @@ enum class RecordType(val label: String) {
     MOST_REPS("Más repeticiones"),
 }
 
+/** Valor de un récord en la unidad del usuario: las reps no son un peso y el volumen va en kg·reps. */
+fun RecordType.formatValue(value: Double, unit: com.bestrong.core.util.WeightUnit): String = when (this) {
+    RecordType.MOST_REPS -> "${value.toInt()}×"
+    RecordType.BEST_SET_VOLUME -> unit.formatVolume(value)
+    else -> unit.format(value, withUnit = true)
+}
+
 data class PersonalRecord(
     val exerciseId: String,
     val exerciseName: String,

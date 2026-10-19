@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.FileProvider
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.stats.PeriodSummary
+import com.bestrong.core.stats.formatValue
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatDuration
 import com.bestrong.designsystem.BeStrongPalette
@@ -125,7 +126,7 @@ object MonthlyReport {
             y += 54f
             s.records.sortedByDescending { it.value }.take(3).forEach { pr ->
                 if (y > H - PAD) return@forEach
-                val line = context.getString(R.string.record_line, pr.exerciseName, context.getString(pr.type.labelRes()), unit.format(pr.value))
+                val line = context.getString(R.string.record_line, pr.exerciseName, context.getString(pr.type.labelRes()), pr.type.formatValue(pr.value, unit))
                 c.drawText(fit(line, text(34f, Color.LTGRAY), contentWidth), PAD, y, text(34f, Color.LTGRAY))
                 y += 48f
             }

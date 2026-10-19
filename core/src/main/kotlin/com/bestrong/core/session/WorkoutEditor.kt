@@ -475,8 +475,22 @@ object WorkoutEditor {
     fun unlinkSuperset(workout: Workout, workoutExerciseId: String): Workout {
         val group = workout.exercises.firstOrNull { it.id == workoutExerciseId }?.supersetId ?: return workout
         val cleared = workout.exercises.map { if (it.id == workoutExerciseId) it.copy(supersetId = null) else it }
-        val remaining = cleared.count { it.supersetId == group }
-        return workout.copy(exercises = if (remaining <= 1) cleared.map { if (it.supersetId == group) it.copy(supersetId = null) else it } else cleared)
+        // Si sale uno del medio (A-B-C sin B) quedan dos tramos: cada uno es su propia superserie
+        // y el que se queda solo deja de serlo
+        val runs = mutableListOf<MutableList<Int>>()
+        cleared.forEachIndexed { i, we ->
+            if (we.supersetId != group) return@forEachIndexed
+            if (runs.lastOrNull()?.last() == i - 1) runs.last().add(i) else runs.add(mutableListOf(i))
+        }
+        val newGroup = runs.withIndex().flatMap { (n, run) ->
+            val id = when {
+                run.size <= 1 -> null
+                n == 0 -> group
+                else -> com.bestrong.core.util.newId()
+            }
+            run.map { it to id }
+        }.toMap()
+        return workout.copy(exercises = cleared.mapIndexed { i, we -> if (i in newGroup) we.copy(supersetId = newGroup[i]) else we })
     }
 
     /** Índices de los ejercicios de la superserie de [index] (solo él mismo si no tiene). */

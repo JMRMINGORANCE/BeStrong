@@ -737,6 +737,7 @@
     <string name="track_weight_reps">Gewicht &amp; Wdh.</string>
     <string name="tts_go">Los geht’s mit dem Satz!</string>
     <string name="tts_next">Pause %1$s. Als Nächstes: %2$s, %3$s</string>
+    <string name="tts_next_no_rest">Als Nächstes: %1$s, %2$s</string>
     <string name="tut1_d">Erfasse deine Sätze in Sekunden, auf Handy oder Uhr. Alles bleibt auf deinem Gerät.</string>
     <string name="tut1_t">Willkommen bei BeStrong</string>
     <string name="tut2_d">Erstelle Routinen oder wähle ein Programm (5/3/1, GZCLP, PPL…). „Heute“ sagt dir, was du jeden Tag machen sollst.</string>
@@ -797,7 +798,10 @@
     <string name="workout_finish">Beenden</string>
     <string name="workout_finish_empty">Du hast keinen Satz abgeschlossen: Das Training wird verworfen.</string>
     <string name="workout_finish_ok">Es wird in deinem Verlauf gespeichert.</string>
-    <string name="workout_finish_pending">%1$d unvollständige Sätze werden nicht gespeichert.</string>
+    <plurals name="workout_finish_pending">
+        <item quantity="one">%1$d unvollständiger Satz wird nicht gespeichert.</item>
+        <item quantity="other">%1$d unvollständige Sätze werden nicht gespeichert.</item>
+    </plurals>
     <string name="workout_finish_q">Training beenden?</string>
     <string name="workout_midday">Mittagstraining</string>
     <string name="workout_minimize">Training minimieren</string>

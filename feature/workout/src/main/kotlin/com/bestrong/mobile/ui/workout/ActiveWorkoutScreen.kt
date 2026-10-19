@@ -102,6 +102,7 @@ import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.WorkoutStats
+import com.bestrong.core.stats.formatValue
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.training.SuggestionKind
@@ -341,7 +342,7 @@ fun ActiveWorkoutScreen(
                 Text(
                     when {
                         w.completedSetCount == 0 -> stringResource(R.string.workout_finish_empty)
-                        pending > 0 -> stringResource(R.string.workout_finish_pending, pending)
+                        pending > 0 -> pluralStringResource(R.plurals.workout_finish_pending, pending, pending)
                         else -> stringResource(R.string.workout_finish_ok)
                     },
                 )
@@ -735,7 +736,7 @@ private fun ExerciseCard(
                         style = MaterialTheme.typography.labelMedium,
                         color = if (belowBar) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                         // Alineado con el nombre del ejercicio (a la derecha de su imagen)
-                        modifier = Modifier.padding(start = 78.dp, end = 12.dp).clickable { showPlates = true },
+                        modifier = Modifier.padding(start = 78.dp, end = 12.dp).minimumInteractiveComponentSize().clickable { showPlates = true },
                     )
                 }
             }
@@ -766,7 +767,7 @@ private fun ExerciseCard(
                     "📌 $pinnedNote",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.padding(horizontal = 12.dp).clickable { editPinned = true },
+                    modifier = Modifier.padding(horizontal = 12.dp).minimumInteractiveComponentSize().clickable { editPinned = true },
                 )
             }
             if (we.notes.isNotBlank()) {
@@ -994,7 +995,7 @@ private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.mode
         color = MaterialTheme.colorScheme.secondary,
         // Tocar pone ese peso en las series pendientes
         modifier = Modifier.padding(horizontal = 12.dp)
-            .then(if (load != null && pending) Modifier.clickable(onClickLabel = stringResource(R.string.plates_use_weight)) { vm.applyRpeLoads(we.id) } else Modifier),
+            .then(if (load != null && pending) Modifier.minimumInteractiveComponentSize().clickable(onClickLabel = stringResource(R.string.plates_use_weight)) { vm.applyRpeLoads(we.id) } else Modifier),
     )
 }
 
@@ -1150,7 +1151,7 @@ fun WorkoutSummaryDialog(
                 if (summary.records.isNotEmpty()) {
                     Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
                     summary.records.forEach { pr ->
-                        Text(stringResource(R.string.record_line, pr.exerciseName, pr.type.label(), unit.format(pr.value)), style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.record_line, pr.exerciseName, pr.type.label(), pr.type.formatValue(pr.value, unit)), style = MaterialTheme.typography.bodySmall)
                     }
                 }
                 OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth()) {

@@ -253,6 +253,12 @@ fun SetRow(
                             onClick = { onAssisted(!set.assisted); menu = false },
                         )
                         DropdownMenuItem(text = { Text(stringResource(R.string.set_note)) }, onClick = { editingNote = true; menu = false })
+                        // Borrar también desde el menú: el deslizamiento no llega a TalkBack
+                        HorizontalDivider()
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.set_delete), color = MaterialTheme.colorScheme.error) },
+                            onClick = { onDelete(); menu = false },
+                        )
                     }
                 }
                 val columns = LocalSetColumns.current

@@ -18,6 +18,7 @@ import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.PersonalRecord
+import com.bestrong.core.stats.formatValue
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.core.util.formatDuration
 import com.bestrong.designsystem.BeStrongPalette
@@ -114,7 +115,7 @@ object WorkoutShareCard {
             y += 60f
             records.take(3).forEach { pr ->
                 if (y > H - 120f) return@forEach
-                val line = context.getString(R.string.record_line, pr.exerciseName, context.getString(pr.type.labelRes()), unit.format(pr.value))
+                val line = context.getString(R.string.record_line, pr.exerciseName, context.getString(pr.type.labelRes()), pr.type.formatValue(pr.value, unit))
                 c.drawText(fit(line, detailP, contentWidth), PAD, y, detailP)
                 y += 54f
             }

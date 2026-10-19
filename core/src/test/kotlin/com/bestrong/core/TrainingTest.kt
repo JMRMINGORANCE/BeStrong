@@ -106,6 +106,20 @@ class TrainingTest {
         assertTrue(w.exercises.all { it.supersetId == null })
     }
 
+    @Test fun unlinkMiddleOfSupersetSplitsIt() {
+        val curl = ExerciseLibrary.byId("barbell_curl")!!
+        var w = WorkoutEditor.addExercises(WorkoutEditor.empty(0), listOf(bench, squat, curl, bench))
+        val (a, b, c) = w.exercises
+        w = WorkoutEditor.linkWithNext(w, a.id)
+        w = WorkoutEditor.linkWithNext(w, b.id)
+        w = WorkoutEditor.linkWithNext(w, c.id)
+        // A-B-C-D sin B: A se queda sola y C-D siguen juntas
+        w = WorkoutEditor.unlinkSuperset(w, b.id)
+        assertEquals(listOf(0), WorkoutEditor.supersetGroup(w, 0))
+        assertEquals(listOf(2, 3), WorkoutEditor.supersetGroup(w, 2))
+        assertEquals(null, w.exercises[1].supersetId)
+    }
+
     @Test fun everyLibraryExerciseHasInstructions() {
         val missing = ExerciseLibrary.all.filter { ExerciseInfo.instructions(it.id) == null }.map { it.id }
         assertEquals(emptyList<String>(), missing)

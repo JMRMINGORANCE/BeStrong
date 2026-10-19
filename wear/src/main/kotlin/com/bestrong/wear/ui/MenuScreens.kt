@@ -31,6 +31,7 @@ import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.model.Workout
 import com.bestrong.core.session.WorkoutEditor
+import com.bestrong.core.stats.formatValue
 import com.bestrong.core.util.formatDuration
 import com.bestrong.wear.R
 import com.bestrong.wear.WearContainer
@@ -300,7 +301,7 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                 item { ListHeader { Text(stringResource(R.string.n_records, s.records.size)) } }
                 items(s.records) { pr ->
                     Text(
-                        "${pr.exerciseName}: ${unit.format(pr.value)}",
+                        "${pr.exerciseName}: ${pr.type.formatValue(pr.value, unit)}",
                         style = MaterialTheme.typography.labelSmall,
                         textAlign = TextAlign.Center,
                     )
