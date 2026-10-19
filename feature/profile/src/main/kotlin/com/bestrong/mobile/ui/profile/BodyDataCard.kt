@@ -54,7 +54,8 @@ fun BodyDataCard(settings: UserSettings, onUpdate: ((UserSettings) -> UserSettin
                         if (y != null || year.isEmpty()) onUpdate { it.copy(birthYear = y) }
                     },
                     isError = year.isNotEmpty() && validYear(year) == null,
-                    label = { Text(stringResource(R.string.birth_year)) },
+                    // Una sola línea: si no, este campo sale más alto que el de al lado
+                    label = { Text(stringResource(R.string.birth_year), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.weight(1f),
@@ -67,7 +68,7 @@ fun BodyDataCard(settings: UserSettings, onUpdate: ((UserSettings) -> UserSettin
                         if (h != null || height.isEmpty()) onUpdate { it.copy(heightCm = h) }
                     },
                     isError = height.isNotEmpty() && validHeight(height) == null,
-                    label = { Text(stringResource(R.string.height_cm)) },
+                    label = { Text(stringResource(R.string.height_cm), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.weight(1f),

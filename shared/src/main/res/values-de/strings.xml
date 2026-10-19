@@ -1232,7 +1232,6 @@
     <string name="builder_title">Erstelle dein Programm</string>
     <string name="builder_subtitle">Wähle Ziel und Tage: wir stellen es für dich zusammen</string>
     <string name="builder_goal">Was ist dein Ziel?</string>
-    <string name="builder_days">Wie viele Tage pro Woche?</string>
     <string name="builder_equipment">Welche Ausrüstung?</string>
     <string name="builder_minutes">Wie lange pro Einheit? (min)</string>
     <string name="builder_gym">Studio</string>
@@ -1277,4 +1276,6 @@
     <string name="current_set_label">Jetzt dran</string>
     <string name="profile_empty_title">Hier siehst du deinen Fortschritt</string>
     <string name="profile_empty_body">Diagramme, Rekorde und die Muskelkarte erscheinen nach deinem ersten Training.</string>
+    <string name="builder_which_days">An welchen Tagen trainierst du?</string>
+    <string name="workout_outline">Übungen im Training</string>
 </resources>

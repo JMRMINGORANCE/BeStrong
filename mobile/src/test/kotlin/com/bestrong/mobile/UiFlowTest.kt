@@ -246,8 +246,9 @@ class UiFlowTest {
         // Objetivo y días: el programa a medida cambia al momento
         compose.onNodeWithText("Perder grasa").performClick()
         compose.mainClock.autoAdvance = true
-        programsList().performScrollToNode(hasText("4"))
-        compose.onNodeWithText("4").performClick()
+        // Tres días por defecto (L X V): añadir el jueves deja el programa en 4
+        programsList().performScrollToNode(hasText("J"))
+        compose.onNodeWithText("J").performClick()
         compose.mainClock.autoAdvance = false
         settle()
         captureScreenRoboImage("build/outputs/roborazzi/builder_folded.png")

@@ -1232,7 +1232,6 @@
     <string name="builder_title">Crea el teu programa</string>
     <string name="builder_subtitle">Tria l\'objectiu i els dies: el muntem a la teva mida</string>
     <string name="builder_goal">Quin és el teu objectiu?</string>
-    <string name="builder_days">Quants dies per setmana?</string>
     <string name="builder_equipment">Amb quin material?</string>
     <string name="builder_minutes">Quant temps per sessió? (min)</string>
     <string name="builder_gym">Gimnàs</string>
@@ -1277,4 +1276,6 @@
     <string name="current_set_label">Ara toca</string>
     <string name="profile_empty_title">Aquí veuràs el teu progrés</string>
     <string name="profile_empty_body">Gràfiques, rècords i mapa muscular apareixen tan bon punt acabis el primer entrenament.</string>
+    <string name="builder_which_days">Quins dies entrenes?</string>
+    <string name="workout_outline">Exercicis de l\'entrenament</string>
 </resources>

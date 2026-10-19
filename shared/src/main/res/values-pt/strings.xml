@@ -1232,7 +1232,6 @@
     <string name="builder_title">Cria o teu programa</string>
     <string name="builder_subtitle">Escolhe o objetivo e os dias: montamos à tua medida</string>
     <string name="builder_goal">Qual é o teu objetivo?</string>
-    <string name="builder_days">Quantos dias por semana?</string>
     <string name="builder_equipment">Com que material?</string>
     <string name="builder_minutes">Quanto tempo por sessão? (min)</string>
     <string name="builder_gym">Ginásio</string>
@@ -1277,4 +1276,6 @@
     <string name="current_set_label">Agora</string>
     <string name="profile_empty_title">Aqui vais ver o teu progresso</string>
     <string name="profile_empty_body">Gráficos, recordes e mapa muscular aparecem assim que terminares o primeiro treino.</string>
+    <string name="builder_which_days">Em que dias treinas?</string>
+    <string name="workout_outline">Exercícios do treino</string>
 </resources>

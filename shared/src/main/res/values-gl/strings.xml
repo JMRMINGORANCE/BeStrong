@@ -1232,7 +1232,6 @@
     <string name="builder_title">Crea o teu programa</string>
     <string name="builder_subtitle">Escolle o obxectivo e os días: montámolo á túa medida</string>
     <string name="builder_goal">Cal é o teu obxectivo?</string>
-    <string name="builder_days">Cantos días por semana?</string>
     <string name="builder_equipment">Con que material?</string>
     <string name="builder_minutes">Canto tempo por sesión? (min)</string>
     <string name="builder_gym">Ximnasio</string>
@@ -1277,4 +1276,6 @@
     <string name="current_set_label">Agora toca</string>
     <string name="profile_empty_title">Aquí verás o teu progreso</string>
     <string name="profile_empty_body">Gráficas, récords e mapa muscular aparecen en canto remates o primeiro adestramento.</string>
+    <string name="builder_which_days">Que días adestras?</string>
+    <string name="workout_outline">Exercicios do adestramento</string>
 </resources>

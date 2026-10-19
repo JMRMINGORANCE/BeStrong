@@ -1232,7 +1232,6 @@
     <string name="builder_title">Crée ton programme</string>
     <string name="builder_subtitle">Choisis ton objectif et tes jours : on l\'adapte à toi</string>
     <string name="builder_goal">Quel est ton objectif ?</string>
-    <string name="builder_days">Combien de jours par semaine ?</string>
     <string name="builder_equipment">Quel matériel ?</string>
     <string name="builder_minutes">Combien de temps par séance ? (min)</string>
     <string name="builder_gym">Salle</string>
@@ -1277,4 +1276,6 @@
     <string name="current_set_label">Maintenant</string>
     <string name="profile_empty_title">Tes progrès apparaîtront ici</string>
     <string name="profile_empty_body">Graphiques, records et carte musculaire apparaissent dès ta première séance terminée.</string>
+    <string name="builder_which_days">Quels jours t\'entraînes-tu ?</string>
+    <string name="workout_outline">Exercices de la séance</string>
 </resources>

@@ -143,14 +143,12 @@ fun ProgramBuilderScreen(
             }
             item { SectionHeader(stringResource(R.string.builder_goal), large = true) }
             items(GOALS, key = { it.goal.name }) { g -> GoalCard(g, selected = goal == g.goal) { goal = g.goal } }
-            item { SectionHeader(stringResource(R.string.builder_days), large = true) }
+            // Qué días: el número sale de los días elegidos (sin pedirlo dos veces)
             item {
-                DaysPicker(days) {
-                    days = it
-                    weekdaysText = com.bestrong.core.training.ProgramGenerator.defaultWeekdays(it).joinToString(",")
+                SectionHeader(stringResource(R.string.builder_which_days), large = true) {
+                    MetaPill(pluralStringResource(R.plurals.days_count, days, days))
                 }
             }
-            // Y cuáles: tocar un día lo quita o lo pone (entre 2 y 6)
             item {
                 Text(stringResource(R.string.builder_weekdays_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -215,25 +213,6 @@ private fun GoalCard(option: GoalOption, selected: Boolean, onClick: () -> Unit)
             Text(stringResource(option.body), style = MaterialTheme.typography.bodySmall, color = if (selected) scheme.onPrimary else scheme.onSurfaceVariant)
         }
         if (selected) Icon(Icons.Default.Check, null, tint = scheme.onPrimary)
-    }
-}
-
-/** Días por semana (2–6) en círculos grandes. */
-@Composable
-private fun DaysPicker(days: Int, onPick: (Int) -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        for (d in 2..6) {
-            val on = d == days
-            Box(
-                Modifier.weight(1f).height(64.dp).clip(MaterialTheme.shapes.large)
-                    .background(if (on) brandGradient() else SolidColor(scheme.surfaceContainer))
-                    .selectable(selected = on, role = Role.RadioButton) { onPick(d) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("$d", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = if (on) scheme.onPrimary else scheme.onSurface)
-            }
-        }
     }
 }
 
@@ -351,7 +330,7 @@ private fun WeekdayPicker(selected: List<Int>, onToggle: (Int) -> Unit) {
         java.time.DayOfWeek.entries.forEach { d ->
             val on = d.value in selected
             Box(
-                Modifier.size(42.dp).clip(CircleShape)
+                Modifier.size(46.dp).clip(CircleShape)
                     .background(if (on) brandGradient() else SolidColor(scheme.surfaceContainer))
                     .selectable(selected = on, role = Role.Checkbox) { onToggle(d.value) }
                     .semantics { contentDescription = d.getDisplayName(java.time.format.TextStyle.FULL, locale) },

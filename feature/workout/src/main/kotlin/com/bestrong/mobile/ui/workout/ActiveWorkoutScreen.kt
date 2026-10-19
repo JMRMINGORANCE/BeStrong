@@ -512,6 +512,24 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
                 }
             }
         }
+        // Índice del entreno: cada ejercicio con sus series hechas (el panel izquierdo del Fold desplegado no se queda vacío)
+        if (w.exercises.size > 1) {
+            com.bestrong.mobile.ui.components.Panel(contentPadding = 12.dp) {
+                Text(stringResource(R.string.workout_outline), fontWeight = FontWeight.SemiBold)
+                w.exercises.forEach { we ->
+                    val done = we.sets.count { it.completed }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        com.bestrong.mobile.ui.components.ExerciseThumb(we.exercise, 36.dp, Modifier.padding(end = 10.dp), enlargeOnTap = false)
+                        Text(we.exercise.displayName(), Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text(
+                            "$done/${we.sets.size}",
+                            fontWeight = FontWeight.Bold,
+                            color = if (done == we.sets.size) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
         // Siguiente serie pendiente, visible de un vistazo
         w.exercises.firstOrNull { we -> we.sets.any { !it.completed } }?.let { we ->
             val set = we.sets.first { !it.completed }
