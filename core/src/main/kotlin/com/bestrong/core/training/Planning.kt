@@ -529,8 +529,40 @@ object IntervalTimer {
 
 /** Paso de una sesión guiada (calentamiento o estiramientos). */
 data class GuidedStep(val nameEs: String, val nameEn: String, val seconds: Int) {
-    fun name(lang: String) = if (lang == "en") nameEn else nameEs
+    /** En el idioma de la app ([lang]: código ISO, p. ej. «ca»); si no hay traducción, español o inglés. */
+    fun name(lang: String): String {
+        val i = GUIDED_LANGS.indexOf(lang)
+        return GUIDED_NAMES[nameEs]?.getOrNull(i) ?: if (lang in setOf("es", "ca", "gl", "eu")) nameEs else nameEn
+    }
 }
+
+/** Idiomas de [GUIDED_NAMES], en el orden de cada lista. */
+private val GUIDED_LANGS = listOf("ca", "gl", "pt", "fr", "de")
+
+/** Nombres de los pasos guiados en el resto de idiomas de la app, por su nombre en español. */
+private val GUIDED_NAMES: Map<String, List<String>> = mapOf(
+    "Saltos suaves o bici" to listOf("Salts suaus o bici", "Saltos suaves ou bici", "Saltos suaves ou bicicleta", "Sauts légers ou vélo", "Lockere Hampelmänner oder Rad"),
+    "Círculos de brazos" to listOf("Cercles de braços", "Círculos de brazos", "Círculos de braços", "Cercles de bras", "Armkreisen"),
+    "Rotaciones de hombro con banda" to listOf("Rotacions d'espatlla amb banda", "Rotacións de ombro con banda", "Rotações de ombro com elástico", "Rotations d'épaules avec élastique", "Schulterkreisen mit Band"),
+    "Flexiones lentas" to listOf("Flexions lentes", "Flexións lentas", "Flexões lentas", "Pompes lentes", "Langsame Liegestütze"),
+    "Remo escapular" to listOf("Rem escapular", "Remo escapular", "Remada escapular", "Rowing scapulaire", "Skapula-Rudern"),
+    "Balanceos de pierna" to listOf("Balancejos de cama", "Balanceos de perna", "Balanços de perna", "Balancements de jambe", "Beinschwingen"),
+    "Sentadilla profunda con pausa" to listOf("Esquat profund amb pausa", "Agachamento profundo con pausa", "Agachamento profundo com pausa", "Squat profond tenu", "Tiefe Kniebeuge halten"),
+    "Puente de glúteo" to listOf("Pont de glutis", "Ponte de glúteo", "Ponte de glúteo", "Pont fessier", "Glute Bridge"),
+    "Gusano con flexión" to listOf("Cuc amb flexió", "Verme con flexión", "Minhoca com flexão", "Inchworm avec pompe", "Inchworm mit Liegestütz"),
+    "Sentadilla sin peso" to listOf("Esquat sense pes", "Agachamento sen peso", "Agachamento sem peso", "Squat au poids du corps", "Kniebeugen ohne Gewicht"),
+    "Zancada con giro" to listOf("Gambada amb gir", "Zancada con xiro", "Afundo com rotação", "Fente avec rotation", "Ausfallschritt mit Drehung"),
+    "Pectoral en marco de puerta" to listOf("Pectoral al marc de la porta", "Pectoral no marco da porta", "Peitoral no batente da porta", "Étirement des pectoraux dans l'encadrement", "Brustdehnung im Türrahmen"),
+    "Dorsal colgado o en banco" to listOf("Dorsal penjat o al banc", "Dorsal colgado ou no banco", "Dorsal suspenso ou no banco", "Étirement du dos", "Latissimus-Dehnung"),
+    "Tríceps por encima de la cabeza" to listOf("Tríceps per sobre del cap", "Tríceps por riba da cabeza", "Tríceps por cima da cabeça", "Triceps au-dessus de la tête", "Trizepsdehnung über Kopf"),
+    "Hombro cruzado" to listOf("Espatlla creuada", "Ombro cruzado", "Ombro cruzado", "Épaule croisée", "Schulter quer"),
+    "Cuádriceps de pie" to listOf("Quàdriceps dempeus", "Cuádriceps de pé", "Quadríceps em pé", "Quadriceps debout", "Quadrizeps im Stehen"),
+    "Isquios sentado" to listOf("Isquiotibials assegut", "Isquiotibiais sentado", "Isquiotibiais sentado", "Ischios assis", "Beinbeuger im Sitzen"),
+    "Figura 4 (glúteo)" to listOf("Figura 4 (glutis)", "Figura 4 (glúteo)", "Figura 4 (glúteo)", "Figure 4 (fessiers)", "Figur 4 (Gesäß)"),
+    "Gemelo en pared" to listOf("Bessó a la paret", "Xemelgo na parede", "Panturrilha na parede", "Mollet contre le mur", "Wadendehnung an der Wand"),
+    "Postura del niño" to listOf("Postura del nen", "Postura do neno", "Postura da criança", "Posture de l'enfant", "Kindhaltung"),
+    "Cobra" to listOf("Cobra", "Cobra", "Cobra", "Cobra", "Kobra"),
+)
 
 enum class BodyFocus { UPPER, LOWER, FULL }
 

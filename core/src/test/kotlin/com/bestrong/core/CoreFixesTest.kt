@@ -87,6 +87,17 @@ class CoreFixesTest {
         assertEquals(listOf(listOf("x", "a,b")), Csv.parse("x,\"a,b\"\n"))
     }
 
+    @Test fun guidedStepsTranslatedToEveryAppLanguage() {
+        val steps = com.bestrong.core.training.BodyFocus.entries.flatMap {
+            com.bestrong.core.training.GuidedRoutines.warmup(it) + com.bestrong.core.training.GuidedRoutines.stretching(it)
+        }
+        for (lang in listOf("ca", "gl", "pt", "fr", "de")) {
+            steps.forEach { st -> assertTrue("${st.nameEs} sin traducir a $lang", st.name(lang) != st.nameEn || st.nameEn == st.nameEs || st.nameEs == "Cobra") }
+        }
+        assertEquals("Armkreisen", com.bestrong.core.training.GuidedStep("Círculos de brazos", "Arm circles", 30).name("de"))
+        assertEquals("Arm circles", com.bestrong.core.training.GuidedStep("Círculos de brazos", "Arm circles", 30).name("en"))
+    }
+
     @Test fun measurementCsvStripsBom() {
         val m = MeasurementCsv.read("2024-01-01,80.5,,,,,\n2024-01-08,80.0,,,,,\n", ZoneOffset.UTC)
         assertEquals(2, m.rows.size)

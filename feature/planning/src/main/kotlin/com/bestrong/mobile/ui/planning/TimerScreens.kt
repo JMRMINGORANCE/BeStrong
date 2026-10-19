@@ -175,7 +175,8 @@ fun GuidedSessionScreen(warmup: Boolean, focus: BodyFocus, onBack: () -> Unit) {
         view.keepScreenOn = true
         onDispose { view.keepScreenOn = false }
     }
-    val lang = com.bestrong.mobile.ui.components.uiLanguage()
+    // El idioma real (no solo español/inglés): los pasos guiados están traducidos a todos los de la app
+    val lang = androidx.compose.ui.platform.LocalConfiguration.current.locales[0].language
     val steps = remember(warmup, focus) { if (warmup) GuidedRoutines.warmup(focus) else GuidedRoutines.stretching(focus) }
     var index by rememberSaveable { mutableIntStateOf(0) }
     // Fin del paso en reloj monótono: la cuenta no se retrasa aunque el bucle se frene
