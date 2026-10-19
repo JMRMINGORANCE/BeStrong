@@ -1332,4 +1332,5 @@
     <string name="gym_default_gym">Gym</string>
     <string name="gym_default_home">Home</string>
     <string name="setup_sex">Sex (for calories and strength levels)</string>
+    <string name="deload_label">deload</string>
 </resources>

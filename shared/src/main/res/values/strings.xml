@@ -1332,4 +1332,5 @@
     <string name="gym_default_gym">Gimnasio</string>
     <string name="gym_default_home">Casa</string>
     <string name="setup_sex">Sexo (para calorías y niveles de fuerza)</string>
+    <string name="deload_label">descarga</string>
 </resources>

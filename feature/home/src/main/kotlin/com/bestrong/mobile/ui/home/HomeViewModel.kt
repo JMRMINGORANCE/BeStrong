@@ -98,7 +98,7 @@ class HomeViewModel @Inject constructor(
     val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state) { active, history, plan ->
         val session = active?.let { Periodization.nextSession(it, history, context.uiLanguage(), plan.customPrograms, context.programTexts()) }
         // Semana de descarga del mesociclo: la sesión se aligera sola
-        if (session != null && plan.mesocycle?.isDeloadWeek(LocalDate.now()) == true) session.copy(routine = Fatigue.deload(session.routine)) else session
+        if (session != null && plan.mesocycle?.isDeloadWeek(LocalDate.now()) == true) session.copy(routine = Fatigue.deload(session.routine, context.getString(R.string.deload_label))) else session
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Ajustes (gimnasio activo para el selector de arriba). */

@@ -1332,4 +1332,5 @@
     <string name="gym_default_gym">Salle</string>
     <string name="gym_default_home">Maison</string>
     <string name="setup_sex">Sexe (pour les calories et niveaux de force)</string>
+    <string name="deload_label">décharge</string>
 </resources>

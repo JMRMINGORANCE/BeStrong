@@ -75,12 +75,13 @@ object Fatigue {
         )
     }
 
-    private const val DELOAD_SUFFIX = " · deload"
-
-    /** Versión de descarga de una rutina: 60 % del peso y la mitad de series (mínimo 1). */
-    fun deload(routine: Routine): Routine = routine.copy(
+    /**
+     * Versión de descarga de una rutina: 60 % del peso y la mitad de series (mínimo 1). [label]: la palabra que se
+     * añade al nombre, en el idioma de la app («descarga», «Deload»…).
+     */
+    fun deload(routine: Routine, label: String = "deload"): Routine = routine.copy(
         // Descargar dos veces no repite el sufijo
-        name = if (routine.name.endsWith(DELOAD_SUFFIX)) routine.name else routine.name + DELOAD_SUFFIX,
+        name = " · $label".let { suffix -> if (routine.name.endsWith(suffix)) routine.name else routine.name + suffix },
         exercises = routine.exercises.map { re ->
             // Solo calentamientos: se descargan ellos (si no, el ejercicio se quedaría sin series)
             val work = re.sets.filter { it.type != SetType.WARMUP }.ifEmpty { re.sets }
