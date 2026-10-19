@@ -182,6 +182,9 @@ class ExercisesViewModel @Inject constructor(
     private val marks = combine(favorites, hidden) { f, h -> f to h }
 
     /** Ejercicios usados recientemente, primero (como Hevy). */
+    /** Lo pone el selector de ejercicios (cada pantalla tiene su ViewModel): ordena con los favoritos arriba. */
+    @Volatile var favoritesFirst = false
+
     val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, marks, planning.state) { all, f, history, (favs, hiddenIds), plan ->
         val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }
             .filter { !f.favoritesOnly || it.id in favs }
@@ -200,8 +203,9 @@ class ExercisesViewModel @Inject constructor(
                 found.sortedByDescending { counts[it.id] ?: 0 }
             }
             f.query.isBlank() && f.muscle == null && f.equipment == null -> {
-                // Favoritos primero (los de siempre a mano también al elegir) y luego los últimos usados
-                val favFirst = found.filter { it.id in favs }
+                // En el selector, favoritos primero (los de siempre a mano); en la biblioteca no, para que marcar
+                // la estrella no haga saltar la tarjeta
+                val favFirst = if (favoritesFirst) found.filter { it.id in favs } else emptyList()
                 val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)
                 val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id && it.id !in favs } }
                 favFirst + recent + (found - favFirst.toSet() - recent.toSet())

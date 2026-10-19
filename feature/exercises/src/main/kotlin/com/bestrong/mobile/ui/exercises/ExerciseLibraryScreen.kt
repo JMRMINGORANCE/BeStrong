@@ -139,6 +139,8 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (List<String>) -> Unit, existing: Set<String> = emptySet()) {
+    // Antes de que la lista empiece a recogerse (se compone después)
+    vm.favoritesFirst = true
     // Lo elegido sobrevive al giro y al abrir un plegable
     val picked = androidx.compose.runtime.saveable.rememberSaveable(
         saver = androidx.compose.runtime.saveable.listSaver<androidx.compose.runtime.snapshots.SnapshotStateList<String>, String>({ it.toList() }, { it.toMutableStateList() }),

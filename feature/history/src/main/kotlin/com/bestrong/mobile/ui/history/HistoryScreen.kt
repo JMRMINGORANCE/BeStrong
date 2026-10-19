@@ -585,8 +585,12 @@ private fun GymFilterRow(vm: HistoryViewModel) {
 /** Filtro de un toque por rutina (las más hechas); con un filtro puesto sale siempre, para poder quitarlo. */
 @Composable
 private fun RoutineFilterRow(vm: HistoryViewModel) {
-    val chips by vm.routineChips.collectAsStateWithLifecycle()
+    val top by vm.routineChips.collectAsStateWithLifecycle()
     val selected by vm.routineFilter.collectAsStateWithLifecycle()
+    val history by vm.history.collectAsStateWithLifecycle()
+    // La elegida siempre a la vista (aunque se borrara o saliera de las más hechas), para poder quitarla
+    val chips = selected?.takeIf { id -> top.none { it.first == id } }
+        ?.let { id -> top + (id to (history.firstOrNull { it.routineId == id }?.name ?: id)) } ?: top
     if (chips.size < 2 && selected == null) return
     androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
         chips.forEach { (id, name) ->

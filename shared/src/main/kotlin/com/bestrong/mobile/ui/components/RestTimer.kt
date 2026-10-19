@@ -115,9 +115,11 @@ fun RestTimerBar(
  */
 @Composable
 private fun RestMilestones(remaining: Long, totalSeconds: Int) {
+    // Nace vacío y cambia después: TalkBack anuncia los cambios de una región viva, no el texto con el que aparece
     var spoken by remember { mutableStateOf("") }
     val text = stringResource(R.string.rest_title, formatDuration(remaining))
-    if (remaining == totalSeconds.toLong() || remaining == MILESTONE_30 || remaining == MILESTONE_10) spoken = text
+    val milestone = remaining == totalSeconds.toLong() || remaining == MILESTONE_30 || remaining == MILESTONE_10
+    LaunchedEffect(milestone, remaining) { if (milestone) spoken = text }
     Box(
         Modifier.size(1.dp).semantics {
             liveRegion = LiveRegionMode.Polite

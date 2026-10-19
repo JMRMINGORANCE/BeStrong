@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -222,7 +223,7 @@ class HomeViewModel @Inject constructor(
         // Sin sello de gimnasio: pudo quedar abierto días y el activo de ahora no tiene por qué ser aquel
         val finished = WorkoutEditor.finishAtLastActivity(w)
         if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
-        _messages.trySend(context.getString(R.string.msg_forgotten_saved))
+        message(context.getString(R.string.msg_forgotten_saved))
     }
 
     fun discardActive() = viewModelScope.launch { repo.discardActive() }
@@ -247,7 +248,7 @@ class HomeViewModel @Inject constructor(
 
     fun activateProgram(program: PeriodizedProgram, trainingMaxKg: Map<String, Double>) = viewModelScope.launch {
         repo.setActiveProgram(ActiveProgram(program.id, System.currentTimeMillis(), trainingMaxKg, weeklyGoal = program.daysPerWeek))
-        _messages.trySend(context.getString(R.string.msg_program_started, program.name(context.uiLanguage())))
+        message(context.getString(R.string.msg_program_started, program.name(context.uiLanguage())))
     }
 
     fun stopProgram() = viewModelScope.launch { repo.setActiveProgram(null) }
@@ -263,7 +264,7 @@ class HomeViewModel @Inject constructor(
     /** Empieza la sesión del programa con las cargas prescritas (sin sustituirlas por la última vez). */
     fun startProgramSession(session: ProgramSession, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() != null) {
-            _messages.trySend(context.getString(R.string.msg_workout_already_active))
+            message(context.getString(R.string.msg_workout_already_active))
             onStarted()
             return@launch
         }
@@ -275,9 +276,14 @@ class HomeViewModel @Inject constructor(
     val active: StateFlow<Workout?> = repo.activeWorkout
     val history: StateFlow<List<Workout>> = repo.history
 
-    // Con buzón: un aviso que llega con Inicio fuera de pantalla (enlace, widget) se muestra al volver, no se pierde
-    private val _messages = kotlinx.coroutines.channels.Channel<String>(kotlinx.coroutines.channels.Channel.BUFFERED)
+    // Con buzón: un aviso que llega con Inicio fuera de pantalla (enlace, widget) se muestra al volver, pero
+    // solo si es reciente (uno de hace horas, como «ya hay un entreno en curso», confundiría)
+    private val _messages = kotlinx.coroutines.channels.Channel<Pair<String, Long>>(kotlinx.coroutines.channels.Channel.BUFFERED)
     val messages: kotlinx.coroutines.flow.Flow<String> = _messages.receiveAsFlow()
+        .filter { (_, at) -> System.currentTimeMillis() - at < MESSAGE_TTL_MS }
+        .map { it.first }
+
+    private fun message(text: String) = _messages.trySend(text to System.currentTimeMillis())
 
     fun startEmpty(onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() == null) repo.setActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
@@ -305,7 +311,7 @@ class HomeViewModel @Inject constructor(
 
     fun startRoutine(routine: Routine, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() != null) {
-            _messages.trySend(context.getString(R.string.msg_workout_already_active))
+            message(context.getString(R.string.msg_workout_already_active))
             onStarted()
             return@launch
         }
@@ -329,7 +335,7 @@ class HomeViewModel @Inject constructor(
         val routine = _pendingImport.value ?: return@launch
         _pendingImport.value = null
         repo.saveRoutine(routine)
-        _messages.trySend(context.getString(R.string.routine_imported, routine.name))
+        message(context.getString(R.string.routine_imported, routine.name))
     }
 
     fun dismissImport() {
@@ -340,7 +346,7 @@ class HomeViewModel @Inject constructor(
     fun startRoutineById(id: String, onStarted: () -> Unit) = viewModelScope.launch {
         val routine = repo.routine(id)
         if (routine == null) {
-            _messages.trySend(context.getString(R.string.msg_routine_missing))
+            message(context.getString(R.string.msg_routine_missing))
             return@launch
         }
         startRoutine(routine, onStarted)
@@ -349,7 +355,7 @@ class HomeViewModel @Inject constructor(
     fun startOnWatch(routine: Routine?) = viewModelScope.launch {
         watchPush.pushToWatchNow()
         val ok = watchSync.startOnWatch(routine?.id)
-        _messages.trySend(context.getString(if (ok) R.string.msg_opening_on_watch else R.string.msg_no_watch))
+        message(context.getString(if (ok) R.string.msg_opening_on_watch else R.string.msg_no_watch))
     }
 
     /**
@@ -466,14 +472,14 @@ class HomeViewModel @Inject constructor(
         planning.update { st -> st.copy(weekPlans = com.bestrong.core.training.ProgramGenerator.schedule(st.weekPlans, program.routines.map { it.id }, weekdays, monday, from = LocalDate.now())) }
         // El objetivo de la semana pasa a ser los días del programa, y se recuerda el objetivo elegido
         settingsStore.update { it.copy(weeklyGoal = program.routines.size.coerceIn(1, 7), trainingGoal = goal) }
-        _messages.trySend(context.getString(R.string.msg_program_added, folder, program.routines.size))
+        message(context.getString(R.string.msg_program_added, folder, program.routines.size))
     }
 
     /** Crea las rutinas del programa elegido en el idioma de la app. */
     fun addProgram(program: TrainingProgram) = viewModelScope.launch {
         val routines = program.toRoutines(context.uiLanguage())
         repo.addRoutines(routines)
-        _messages.trySend(context.getString(R.string.msg_program_added, program.name(context.uiLanguage()), routines.size))
+        message(context.getString(R.string.msg_program_added, program.name(context.uiLanguage()), routines.size))
     }
 
     /** Última rutina borrada, para poder deshacerlo desde el aviso. */
@@ -557,3 +563,5 @@ enum class Kit(val equipment: Set<com.bestrong.core.model.Equipment>) {
     DUMBBELLS(setOf(com.bestrong.core.model.Equipment.DUMBBELL, com.bestrong.core.model.Equipment.BODYWEIGHT, com.bestrong.core.model.Equipment.KETTLEBELL)),
     BODYWEIGHT(setOf(com.bestrong.core.model.Equipment.BODYWEIGHT)),
 }
+
+private const val MESSAGE_TTL_MS = 15_000L
