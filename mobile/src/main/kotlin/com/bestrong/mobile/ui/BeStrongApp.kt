@@ -90,6 +90,7 @@ private object Routes {
     const val EXERCISE = "exercise/{id}"
     const val MEASUREMENTS = "measurements"
     const val PICKED = "picked_exercises"
+    const val EXISTING = "picker_existing"
     const val PLANNING = "planning"
     const val PROGRAM_EDITOR = "program_editor?id={id}"
     const val TIMER = "timer/{plan}"
@@ -279,7 +280,11 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         }
                         ActiveWorkoutScreen(
                             vm = vm,
-                            onAddExercises = { nav.navigate(Routes.PICKER) },
+                            onAddExercises = {
+                                // El selector marca los que ya están (para no duplicar sin querer)
+                                backStackEntry.savedStateHandle[Routes.EXISTING] = ArrayList(vm.workout.value?.exercises?.map { it.exercise.id }.orEmpty())
+                                nav.navigate(Routes.PICKER)
+                            },
                             onBack = { nav.popBackStack() },
                             // Se quita antes la pantalla del entreno: si no, Entrenar la restauraba vacía («sin entreno»)
                             onFinished = {
@@ -293,6 +298,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                     composable(Routes.PICKER) {
                         ExercisePickerScreen(
                             vm = hiltViewModel<ExercisesViewModel>(),
+                            existing = remember { nav.previousBackStackEntry?.savedStateHandle?.get<ArrayList<String>>(Routes.EXISTING)?.toSet().orEmpty() },
                             onBack = { nav.popBackStack() },
                             onPicked = { ids ->
                                 // Solo desde el selector visible: un segundo toque durante la animación cerraba también el editor
@@ -313,7 +319,14 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                                 backStackEntry.savedStateHandle[Routes.PICKED] = null
                             }
                         }
-                        RoutineEditorScreen(vm, onAddExercises = { nav.navigate(Routes.PICKER) }, onClose = { nav.popBackStack() })
+                        RoutineEditorScreen(
+                            vm,
+                            onAddExercises = {
+                                backStackEntry.savedStateHandle[Routes.EXISTING] = ArrayList(vm.routine.value.exercises.map { it.exercise.id })
+                                nav.navigate(Routes.PICKER)
+                            },
+                            onClose = { nav.popBackStack() },
+                        )
                     }
                     composable(Routes.EXERCISE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { backStackEntry ->
                         val id = backStackEntry.arguments?.getString("id").orEmpty()

@@ -1310,4 +1310,5 @@
     <string name="workout_empty_title">Adiciona o teu primeiro exercício</string>
     <string name="workout_empty_body">Pesquisa-o por nome ou músculo. Depois escreve o peso e as repetições e marca cada série como feita: o descanso começa sozinho.</string>
     <string name="stat_week_vs_avg">Esta semana: %1$s · média: %2$s</string>
+    <string name="picker_already_added">Já adicionado</string>
 </resources>

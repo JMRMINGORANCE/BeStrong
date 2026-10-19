@@ -138,7 +138,7 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
 /** Selector a pantalla completa (añadir ejercicios a un entrenamiento o rutina). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (List<String>) -> Unit) {
+fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (List<String>) -> Unit, existing: Set<String> = emptySet()) {
     // Lo elegido sobrevive al giro y al abrir un plegable
     val picked = androidx.compose.runtime.saveable.rememberSaveable(
         saver = androidx.compose.runtime.saveable.listSaver<androidx.compose.runtime.snapshots.SnapshotStateList<String>, String>({ it.toList() }, { it.toMutableStateList() }),
@@ -170,6 +170,7 @@ fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (
             multiSelect = true,
             onClick = { if (it.id in picked) picked.remove(it.id) else picked.add(it.id) },
             modifier = Modifier.padding(padding),
+            existing = existing,
         )
     }
 }
@@ -204,6 +205,8 @@ fun ExerciseSearchList(
     multiSelect: Boolean,
     onClick: (Exercise) -> Unit,
     modifier: Modifier = Modifier,
+    /** Los que ya tiene la rutina o el entreno («Ya añadido»). */
+    existing: Set<String> = emptySet(),
 ) {
     val filter by vm.filter.collectAsStateWithLifecycle()
     val results by vm.results.collectAsStateWithLifecycle()
@@ -255,6 +258,7 @@ fun ExerciseSearchList(
                 val ex = results[i]
                 val times = usage[ex.id]
                 val meta = listOfNotNull(
+                    if (ex.id in existing) stringResource(R.string.picker_already_added) else null,
                     ex.primaryMuscle.label(),
                     ex.equipment.label(),
                     if (ex.isCustom) stringResource(R.string.custom) else null,

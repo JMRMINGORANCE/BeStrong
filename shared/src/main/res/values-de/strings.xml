@@ -1310,4 +1310,5 @@
     <string name="workout_empty_title">Füge deine erste Übung hinzu</string>
     <string name="workout_empty_body">Suche nach Name oder Muskel. Trage dann Gewicht und Wiederholungen ein und hake jeden Satz ab: Die Pause startet automatisch.</string>
     <string name="stat_week_vs_avg">Diese Woche: %1$s · Schnitt: %2$s</string>
+    <string name="picker_already_added">Schon hinzugefügt</string>
 </resources>
