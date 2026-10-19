@@ -338,7 +338,8 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         history = historyOnce(includePartner = true),
         routines = routinesOnce(),
         customExercises = customExercises.first(),
-        measurements = measurements.first(),
+        // De la base de datos: en la copia semanal (app cerrada) la lista en memoria aún está vacía
+        measurements = measurementsOnce(),
         activeProgram = activeProgramOnce(),
     )
 
@@ -353,7 +354,7 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         val routineIds = routinesOnce().map { it.id }.toSet()
         val newRoutines = data.routines.filter { it.id !in routineIds }
         addRoutines(newRoutines)
-        val measurementIds = measurements.value.map { it.id }.toSet()
+        val measurementIds = measurementsOnce().map { it.id }.toSet()
         val newMeasurements = data.measurements.filter { it.id !in measurementIds }
         newMeasurements.forEach { saveMeasurement(it) }
         // El programa de la copia solo si ahora no se sigue ninguno

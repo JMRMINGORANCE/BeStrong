@@ -76,8 +76,10 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
         }
         val sleep = if (HealthPermission.getReadPermission(SleepSessionRecord::class) in ok) {
             runCatching {
-                client.readRecords(ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(now.minus(Duration.ofHours(24)), now)))
-                    .records.sumOf { Duration.between(it.startTime, it.endTime).toMinutes() } / 60.0
+                val from = now.minus(Duration.ofHours(24))
+                val records = client.readRecords(ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(from, now))).records
+                // Dos apps que apuntan la misma noche no son 16 h: se recortan a las 24 h y se unen los solapes
+                mergedMinutes(records.map { maxOf(it.startTime, from) to minOf(it.endTime, now) }) / 60.0
             }.getOrNull()?.takeIf { it > 0 }
         } else {
             null
@@ -121,4 +123,25 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
             .forEach { tracker.add(it.beatsPerMinute.toInt(), it.time.toEpochMilli()) }
         return tracker.samples()
     }
+}
+
+/** Minutos cubiertos por los intervalos, contando una sola vez lo que se solapa. */
+fun mergedMinutes(intervals: List<Pair<java.time.Instant, java.time.Instant>>): Long {
+    var total = 0L
+    var curStart: java.time.Instant? = null
+    var curEnd: java.time.Instant? = null
+    intervals.filter { it.second.isAfter(it.first) }.sortedBy { it.first }.forEach { (s, e) ->
+        val end = curEnd
+        if (end == null || s.isAfter(end)) {
+            if (curStart != null && end != null) total += Duration.between(curStart, end).toMinutes()
+            curStart = s
+            curEnd = e
+        } else if (e.isAfter(end)) {
+            curEnd = e
+        }
+    }
+    val start = curStart
+    val end = curEnd
+    if (start != null && end != null) total += Duration.between(start, end).toMinutes()
+    return total
 }

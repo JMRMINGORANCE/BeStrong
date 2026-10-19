@@ -42,8 +42,10 @@ class WorkoutActions @Inject constructor(
      */
     suspend fun mergeWatchHealth(h: com.bestrong.core.sync.WorkoutHealthData) {
         var hadSamples = true
+        var oldKcal: Pair<Int?, Int?>? = null
         val merged = repository.updateWorkout(h.workoutId) { saved ->
             hadSamples = saved.heartRateSamples.isNotEmpty()
+            oldKcal = saved.calories to saved.activeCalories
             energy.complete(
                 saved.copy(
                     avgHeartRate = h.avgHeartRate ?: saved.avgHeartRate,
@@ -59,8 +61,12 @@ class WorkoutActions @Inject constructor(
             if (repository.storedWorkout(h.workoutId) != null) applyPendingWatchHealth(h.workoutId)
             return
         }
-        // La sesión ya se exportó al terminar: ahora solo se añade la gráfica de pulso
-        if (!hadSamples) exportHeartRateIfEnabled(merged)
+        // La sesión ya se exportó al terminar. Si cambian las calorías (llegan las del reloj), se vuelve a exportar
+        // entera (mismos ids, versión nueva: se actualiza, no se duplica); si no, solo la gráfica de pulso
+        when {
+            oldKcal != (merged.calories to merged.activeCalories) -> exportToHealthConnectIfEnabled(merged)
+            !hadSamples -> exportHeartRateIfEnabled(merged)
+        }
     }
 
     /** Tras guardar un entreno terminado en el móvil: lo del reloj que llegó antes, si es de ese entreno. */
