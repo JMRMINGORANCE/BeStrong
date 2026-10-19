@@ -68,6 +68,15 @@ class UiFlowTest {
         }
     }
 
+    /**
+     * Como [settle], pero hasta que aparezca [text] (o pasen [timeoutMs]): tras una escritura en Room el flujo
+     * puede tardar más que unas rondas fijas si la máquina va cargada.
+     */
+    private fun settleUntil(text: String, timeoutMs: Long = 10_000) {
+        val end = System.currentTimeMillis() + timeoutMs
+        while (compose.onAllNodesWithText(text).fetchSemanticsNodes().isEmpty() && System.currentTimeMillis() < end) settle(1)
+    }
+
     private fun shot(name: String) = compose.onRoot().captureRoboImage("build/outputs/roborazzi/$name.png")
 
     private fun startEmptyWorkoutWithBench() {
@@ -160,7 +169,7 @@ class UiFlowTest {
         programsList().performScrollToNode(hasText("Full Body 3 días"))
         compose.onNodeWithText("Full Body 3 días").performClick()
         compose.mainClock.autoAdvance = false
-        settle(25)
+        settleUntil("Full Body 3 días · A")
         // Aparece en «Te toca» y en la lista de rutinas
         assertTrue(compose.onAllNodesWithText("Full Body 3 días · A").fetchSemanticsNodes().isNotEmpty())
         shot("programs_added_folded")
@@ -280,7 +289,7 @@ class UiFlowTest {
         settle()
         shot("program_setup_folded")
         compose.onNodeWithText("Empezar programa").performClick()
-        settle(25)
+        settleUntil("40×5  45×5  50×5 kg")
         assertNotNull(compose.onNodeWithText("Hoy toca").fetchSemanticsNode())
         // Semana 1 del 5/3/1 con TM 60: 65/75/85 % → 40 / 45 / 50 kg
         assertNotNull(compose.onNodeWithText("40×5  45×5  50×5 kg").fetchSemanticsNode())
