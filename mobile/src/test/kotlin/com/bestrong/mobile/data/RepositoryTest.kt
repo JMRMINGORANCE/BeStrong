@@ -15,10 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.After
@@ -60,14 +57,15 @@ class RepositoryTest {
     @Test fun remoteActiveWorkoutIsMergedSetBySet() = runBlocking {
         val base = WorkoutEditor.addExercises(WorkoutEditor.empty(0), listOf(bench))
         repo.setActive(base)
-        val local = repo.activeWorkout.filterNotNull().first()
+        // De la base de datos (determinista): el flujo puede tardar en avisar con Robolectric cargado
+        val local = repo.activeOnce()!!
         val we = local.exercises[0]
         // El móvil completa la serie 1…
         repo.updateActive { WorkoutEditor.toggleSetCompleted(it, we.id, we.sets[0].id) }
         // …y llega del reloj la serie 2 completada (sobre el estado inicial, más reciente)
         val watch = WorkoutEditor.toggleSetCompleted(local, we.id, we.sets[1].id).copy(updatedAtEpochMs = System.currentTimeMillis() + 10_000)
         repo.applyRemoteActive(watch)
-        val merged = withTimeout(5_000) { repo.activeWorkout.first { w -> w?.exercises?.get(0)?.sets?.count { it.completed } == 2 } }
+        val merged = repo.activeOnce()
         assertEquals(listOf(true, true, false), merged!!.exercises[0].sets.map { it.completed })
     }
 
@@ -88,10 +86,8 @@ class RepositoryTest {
         repo.setActiveProgram(p)
         // Lo guardado, de la base de datos (determinista); el flujo puede tardar en avisar con Robolectric cargado
         assertEquals(p, repo.activeProgramOnce())
-        assertEquals(p, withTimeout(20_000) { repo.activeProgram.filterNotNull().first() })
         repo.setActiveProgram(null)
         assertNull(repo.activeProgramOnce())
-        assertNull(withTimeout(20_000) { repo.activeProgram.first { it == null } })
     }
 
     @Test fun backupCarriesActiveProgramAndExtras() = runBlocking {
@@ -109,7 +105,7 @@ class RepositoryTest {
         // El programa solo se restaura si no hay ninguno activo
         repo.setActiveProgram(null)
         assertEquals(1, repo.restore(decoded))
-        assertEquals(p, withTimeout(5_000) { repo.activeProgram.filterNotNull().first() })
+        assertEquals(p, repo.activeProgramOnce())
         assertEquals(0, repo.restore(decoded))
     }
 

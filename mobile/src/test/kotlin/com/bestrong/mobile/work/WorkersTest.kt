@@ -16,7 +16,6 @@ import com.bestrong.mobile.di.WorkerEntryPoint
 import com.bestrong.mobile.notify.ReminderWorker
 import com.bestrong.mobile.notify.WeeklySummaryWorker
 import dagger.hilt.android.EntryPointAccessors
-import java.time.LocalDate
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -40,14 +39,16 @@ class WorkersTest {
     private fun notifications() = shadowOf(app.getSystemService(NotificationManager::class.java)).allNotifications
 
     @Test fun reminderNotifiesOnChosenDayWhenNotTrained() = runBlocking {
-        settings.update { it.copy(reminderDays = setOf(LocalDate.now().dayOfWeek.value)) }
+        // Todos los días: «hoy» aunque el test cruce la medianoche
+        settings.update { it.copy(reminderDays = (1..7).toSet()) }
         val result = TestListenableWorkerBuilder<ReminderWorker>(app).build().doWork()
         assertEquals(ListenableWorker.Result.success(), result)
         assertTrue("Debe haber una notificación de recordatorio", notifications().isNotEmpty())
     }
 
     @Test fun reminderSilentOnOtherDays() = runBlocking {
-        settings.update { it.copy(reminderDays = setOf(LocalDate.now().plusDays(1).dayOfWeek.value)) }
+        // Ningún día: nunca es hoy (antes, «mañana» podía pasar a ser hoy a medianoche)
+        settings.update { it.copy(reminderDays = emptySet()) }
         TestListenableWorkerBuilder<ReminderWorker>(app).build().doWork()
         assertTrue(notifications().isEmpty())
     }
