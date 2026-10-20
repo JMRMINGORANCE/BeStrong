@@ -228,7 +228,7 @@ private fun ImportMeasurementsButton(vm: ProfileViewModel) {
             }
         }
     }
-    IconButton(onClick = { launcher.launch(arrayOf("text/*", "text/csv", "text/comma-separated-values")) }) {
+    IconButton(onClick = { launcher.launch(arrayOf("text/*", "text/csv", "text/comma-separated-values", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) }) {
         Icon(Icons.Default.FileUpload, stringResource(R.string.import_measurements))
     }
 }

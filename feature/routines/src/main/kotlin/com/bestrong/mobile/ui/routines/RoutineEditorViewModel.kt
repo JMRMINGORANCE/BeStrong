@@ -153,6 +153,10 @@ class RoutineEditorViewModel @Inject constructor(
 
     /** Gimnasios para elegir el de la rutina. */
     val gyms: List<com.bestrong.core.training.GymProfile> get() = settingsStore.settings.value.gyms
+
+    /** 2 si las mancuernas se apuntan como total del par (como en el entreno y el historial); si no, 1. */
+    fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =
+        if (settingsStore.settings.value.dumbbellTotal && exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
     fun setGym(id: String?) = _routine.update { it.copy(gymId = id) }
     fun setNotes(notes: String) = _routine.update { it.copy(notes = notes) }
     fun setEmoji(emoji: String?) = _routine.update { it.copy(emoji = emoji) }

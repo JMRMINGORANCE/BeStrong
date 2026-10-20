@@ -74,6 +74,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
     val flow = remember(exerciseId, includeVariants) { vm.detail(exerciseId, includeVariants) }
     val state by flow.collectAsStateWithLifecycle()
     val s = state ?: return
+    val f = vm.weightFactor(s.exercise)
     var metric by rememberSaveable { mutableIntStateOf(0) }
     var editing by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
@@ -170,7 +171,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     val points = s.progress.takeLast(30).map { p ->
                         ChartPoint(
                             formatShortDate(p.dateEpochMs),
-                            when (metric) { 0 -> p.bestOneRepMax; 1 -> p.heaviestWeight; 2 -> p.volume; else -> p.bestReps.toDouble() },
+                            // Con mancuernas como total del par, en las mismas cifras que el entreno
+                            when (metric) { 0 -> p.bestOneRepMax * f; 1 -> p.heaviestWeight * f; 2 -> p.volume * f; else -> p.bestReps.toDouble() },
                         )
                     }
                     // Peso en tu unidad, volumen con su unidad y las reps tal cual
@@ -197,8 +199,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                                 Text(
                                     when (type) {
                                         RecordType.MOST_REPS -> pr.value.toInt().let { n -> pluralStringResource(R.plurals.n_reps, n, n) }
-                                        RecordType.BEST_SET_VOLUME -> unit.formatVolume(pr.value)
-                                        else -> unit.format(pr.value, withUnit = true)
+                                        RecordType.BEST_SET_VOLUME -> unit.formatVolume(pr.value * f)
+                                        else -> unit.format(pr.value * f, withUnit = true)
                                     },
                                     fontWeight = FontWeight.Bold,
                                 )
@@ -233,7 +235,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                             Text(stringResource(R.string.strength_curve_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             val repsLabel = stringResource(R.string.reps_short)
                             BarChart(
-                                s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps", unit.fromKg(kg)) },
+                                s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps", unit.fromKg(kg * f)) },
                                 describe = { "${it.label} $repsLabel: ${unit.format(unit.toKg(it.value), withUnit = true)}" },
                             )
                             // Mejores marcas por repeticiones (1RM, 3RM, 5RM…), las que se suelen buscar
@@ -241,7 +243,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                             val repMaxes = REP_MAXES.mapNotNull { r -> s.strengthCurve.filterKeys { it >= r }.values.maxOrNull()?.let { r to it } }
                             if (repMaxes.isNotEmpty()) {
                                 Text(
-                                    repMaxes.map { (r, kg) -> stringResource(R.string.rep_max, r, unit.format(kg, withUnit = true)) }.joinToString("  ·  "),
+                                    repMaxes.map { (r, kg) -> stringResource(R.string.rep_max, r, unit.format(kg * f, withUnit = true)) }.joinToString("  ·  "),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     modifier = Modifier.padding(top = 8.dp),
@@ -260,7 +262,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         // Notas de ese día para el ejercicio («hombro cargado», «agarre más abierto»…)
                         s.sessionNotes[w.id]?.let { Text("✎ $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary) }
                         w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
-                            Text("${i + 1}. ${describeSet(set, s.exercise, unit, vm.weightFactor(s.exercise))}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax)) else "")
+                            Text("${i + 1}. ${describeSet(set, s.exercise, unit, f)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax * f)) else "")
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                         }
                     }

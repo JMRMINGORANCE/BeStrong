@@ -59,7 +59,8 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise, afterImage:
     val items = remember(exercise.id, version) { vm.mediaItems(exercise.id) }
     val image = remember(exercise.id) { vm.image(exercise.id) }
     var note by rememberSaveable(exercise.id) { mutableStateOf(vm.note(exercise.id)) }
-    var savedNote by remember(exercise.id) { mutableStateOf(note) }
+    // Lo guardado de verdad (no la nota restaurada al volver a la vista, que puede estar sin guardar)
+    var savedNote by remember(exercise.id) { mutableStateOf(vm.note(exercise.id)) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri -> uri?.let { vm.addMedia(exercise.id, it) } }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {

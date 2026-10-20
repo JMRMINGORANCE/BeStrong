@@ -56,7 +56,8 @@ fun DataToolsSection(vm: ProfileViewModel) {
         uri?.let(vm::exportXlsx)
     }
     val encLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { uri ->
-        if (uri != null) vm.exportEncrypted(uri, password.toCharArray())
+        // La contraseña la guarda el ViewModel: si la actividad se recrea con el selector abierto, no se pierde
+        vm.exportEncrypted(uri)
         password = ""
     }
 
@@ -100,6 +101,7 @@ fun DataToolsSection(vm: ProfileViewModel) {
                 TextButton(enabled = password.length >= MIN_PASSWORD && repeated == password, onClick = {
                     repeated = ""
                     askPassword = false
+                    vm.setExportPassword(password.toCharArray())
                     encLauncher.launch("bestrong-${java.time.LocalDate.now()}.bestrong")
                 }) { Text(stringResource(R.string.action_export)) }
             },

@@ -405,7 +405,29 @@ class ProfileViewModel @Inject constructor(
     }
 
     /** Copia completa cifrada con contraseña (AES-256-GCM). */
-    fun exportEncrypted(uri: Uri, password: CharArray) = viewModelScope.launch {
+    private var exportPassword: CharArray? = null
+
+    /** Contraseña elegida para la copia cifrada, a la espera de que se elija dónde guardarla. */
+    fun setExportPassword(password: CharArray) {
+        exportPassword?.fill(' ')
+        exportPassword = password
+    }
+
+    /** Guarda la copia cifrada con la contraseña pendiente; sin ella (p. ej. tras cerrarse la app) no se exporta en claro. */
+    fun exportEncrypted(uri: Uri?) {
+        val password = exportPassword
+        exportPassword = null
+        when {
+            uri == null -> password?.fill(' ')
+            password == null || password.size < MIN_EXPORT_PASSWORD -> {
+                password?.fill(' ')
+                _messages.tryEmit(context.getString(R.string.export_error, context.getString(R.string.password_hint)))
+            }
+            else -> writeEncrypted(uri, password)
+        }
+    }
+
+    private fun writeEncrypted(uri: Uri, password: CharArray) = viewModelScope.launch {
         val result = runCatching {
             val text = withContext(Dispatchers.Default) { EncryptedBackup.encrypt(Backup.encode(fullBackup.data()), password) }
             withContext(Dispatchers.IO) {
@@ -750,3 +772,6 @@ enum class ExportRange { ALL, YEAR, DAYS_90, DAYS_30 }
 enum class DeleteKind { OLD_HISTORY, MEASUREMENTS, PHOTOS, ALL_HISTORY }
 
 private const val MAX_IMPORT_BYTES = 64 * 1024 * 1024
+
+/** Igual que el mínimo que pide el diálogo de la copia cifrada. */
+private const val MIN_EXPORT_PASSWORD = 10

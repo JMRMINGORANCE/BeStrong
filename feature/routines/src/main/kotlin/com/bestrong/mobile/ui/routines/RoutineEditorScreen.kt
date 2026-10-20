@@ -494,8 +494,9 @@ private fun RoutineSetRow(vm: RoutineEditorViewModel, re: com.bestrong.core.mode
         } else if (re.exercise.tracking == TrackingType.DURATION) {
             SmallNumberField(stringResource(R.string.seconds_short), set.durationSec.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(durationSec = v.toIntOrNull() ?: 0) } }
         } else {
-            SmallNumberField(unit.label, unit.format(set.weightKg), Modifier.weight(1f), decimal = true) { v ->
-                vm.updateSet(re.id, i) { it.copy(weightKg = unit.parseToKg(v) ?: 0.0) }
+            val factor = vm.weightFactor(re.exercise)
+            SmallNumberField(unit.label, unit.format(set.weightKg * factor), Modifier.weight(1f), decimal = true) { v ->
+                vm.updateSet(re.id, i) { it.copy(weightKg = (unit.parseToKg(v) ?: 0.0) / factor) }
             }
             SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
         }

@@ -207,7 +207,7 @@ class ExercisesViewModel @Inject constructor(
                 // la estrella no haga saltar la tarjeta
                 val favFirst = if (favoritesFirst) found.filter { it.id in favs } else emptyList()
                 val recentIds = history.flatMap { w -> w.exercises.map { it.exercise.id } }.distinct().take(8)
-                val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id && it.id !in favs } }
+                val recent = recentIds.mapNotNull { id -> found.firstOrNull { it.id == id && it !in favFirst } }
                 favFirst + recent + (found - favFirst.toSet() - recent.toSet())
             }
             else -> found
@@ -232,7 +232,10 @@ class ExercisesViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings, repo.routines, planning.state) { all, fullHistory, settings, routines, _ ->
-        val ex = all.firstOrNull { it.id == exerciseId } ?: return@combine null
+        // Un ejercicio propio borrado (o llegado en una rutina compartida) sigue en el historial: se ve con lo guardado allí
+        val ex = all.firstOrNull { it.id == exerciseId }
+            ?: fullHistory.firstNotNullOfOrNull { w -> w.exercises.firstOrNull { it.exercise.id == exerciseId }?.exercise }
+            ?: return@combine null
         val family = ExerciseLibrary.familyOf(exerciseId)
         val history = if (includeVariants) WorkoutStats.mergeVariants(fullHistory, exerciseId, family) else fullHistory
         ExerciseDetailState(
