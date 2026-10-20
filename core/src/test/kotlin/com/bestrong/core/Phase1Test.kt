@@ -82,7 +82,10 @@ class Phase1Test {
         val bench = ex("bench_press")
         val alts = Alternatives.forExercise(bench, ExerciseLibrary.all)
         assertTrue(alts.isNotEmpty())
-        assertTrue(alts.all { it.primaryMuscle == bench.primaryMuscle })
+        // Mismo músculo principal, o variantes del mismo movimiento (press cerrado), y estas primero
+        val family = ExerciseLibrary.familyOf(bench.id)
+        assertTrue(alts.all { it.primaryMuscle == bench.primaryMuscle || it.id in family })
+        assertTrue(alts.first().id in family)
         val onlyDb = Alternatives.forExercise(bench, ExerciseLibrary.all, setOf(Equipment.DUMBBELL))
         assertTrue(onlyDb.all { it.equipment == Equipment.DUMBBELL })
         // 100 kg en barra → ~40 kg por mancuerna

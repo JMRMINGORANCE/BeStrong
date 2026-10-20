@@ -904,6 +904,7 @@
     <string name="gym_delete_body">Se borran su material, discos y mancuernas. Las rutinas que lo usaban pasan a usar el gimnasio activo.</string>
     <string name="routine_delete_body">Los entrenos que ya hiciste con ella se quedan en el historial.</string>
     <string name="edit_exercise">Editar ejercicio</string>
+    <string name="exercise_name_taken">Ya hay un ejercicio con ese nombre</string>
     <string name="track_distance">Distancia</string>
     <string name="secondary_muscles_label">Músculos secundarios</string>
     <string name="unilateral_exercise">Un lado cada vez (registrar cada lado)</string>

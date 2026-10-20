@@ -160,6 +160,14 @@ class ExercisesViewModel @Inject constructor(
         return com.bestrong.core.stats.RpeLoad.roundToLoadable(kg, s.unit, s.stepKgFor(exercise.id), s.gymFor(exercise.id), exercise.equipment)
     }
 
+    /** Ya hay otro ejercicio (propio o de la biblioteca, en español o inglés) que se llama [name]. */
+    fun nameTaken(name: String, exceptId: String?): Boolean {
+        val wanted = WorkoutStats.plainText(name)
+        return repo.exercises.value.any { e ->
+            e.id != exceptId && listOf(e.name, ExerciseLibrary.displayName(e, "en"), ExerciseLibrary.displayName(e, "es")).any { WorkoutStats.plainText(it) == wanted }
+        }
+    }
+
     fun weightFactor(exercise: Exercise): Int = if (settingsStore.settings.value.dumbbellTotal && exercise.equipment == Equipment.DUMBBELL) 2 else 1
 
     /** null quita el objetivo. */
@@ -236,7 +244,8 @@ class ExercisesViewModel @Inject constructor(
         val ex = all.firstOrNull { it.id == exerciseId }
             ?: fullHistory.firstNotNullOfOrNull { w -> w.exercises.firstOrNull { it.exercise.id == exerciseId }?.exercise }
             ?: return@combine null
-        val family = ExerciseLibrary.familyOf(exerciseId)
+        // Solo variantes que se registran igual: las dominadas (solo reps) no se mezclan con el jalón (peso)
+        val family = ExerciseLibrary.familyOf(exerciseId).filter { id -> id == exerciseId || all.firstOrNull { it.id == id }?.tracking == ex.tracking }
         val history = if (includeVariants) WorkoutStats.mergeVariants(fullHistory, exerciseId, family) else fullHistory
         ExerciseDetailState(
             variants = family.mapNotNull { id -> all.firstOrNull { it.id == id } },

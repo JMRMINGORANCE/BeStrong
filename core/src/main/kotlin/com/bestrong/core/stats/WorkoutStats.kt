@@ -431,13 +431,14 @@ object WorkoutStats {
     fun setsPerMuscle(history: List<Workout>, sinceEpochMs: Long): Map<MuscleGroup, Double> {
         val result = mutableMapOf<MuscleGroup, Double>()
         history.filter { it.isFinished && it.startedAtEpochMs >= sinceEpochMs }.forEach { w ->
-            w.exercises.forEach { we ->
+            // El cardio no son series de un músculo (ni «Cardio 3/10» en el widget, ni medio de espalda por remar)
+            w.exercises.filter { it.exercise.tracking != com.bestrong.core.model.TrackingType.CARDIO }.forEach { we ->
                 val n = we.completedSets.count { it.type != SetType.WARMUP }.toDouble()
                 if (n == 0.0) return@forEach
                 result.merge(we.exercise.primaryMuscle, n, Double::plus)
                 we.exercise.secondaryMuscles.forEach { result.merge(it, n * 0.5, Double::plus) }
             }
         }
-        return result.toList().sortedByDescending { it.second }.toMap()
+        return result.filterKeys { it != MuscleGroup.CARDIO }.toList().sortedByDescending { it.second }.toMap()
     }
 }

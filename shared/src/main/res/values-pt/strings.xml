@@ -904,6 +904,7 @@
     <string name="gym_delete_body">O equipamento, os discos e os halteres são apagados. As rotinas que o usavam passam a usar o ginásio ativo.</string>
     <string name="routine_delete_body">Os treinos que já fizeste com ela ficam no histórico.</string>
     <string name="edit_exercise">Editar exercício</string>
+    <string name="exercise_name_taken">Já existe um exercício com esse nome</string>
     <string name="track_distance">Distância</string>
     <string name="secondary_muscles_label">Músculos secundários</string>
     <string name="unilateral_exercise">Um lado de cada vez (registar cada lado)</string>

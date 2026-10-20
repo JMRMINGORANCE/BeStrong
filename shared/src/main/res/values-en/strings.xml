@@ -904,6 +904,7 @@
     <string name="gym_delete_body">Its equipment, plates and dumbbells are deleted. Routines that used it will use the active gym.</string>
     <string name="routine_delete_body">Workouts you already did with it stay in your history.</string>
     <string name="edit_exercise">Edit exercise</string>
+    <string name="exercise_name_taken">There is already an exercise with that name</string>
     <string name="track_distance">Distance</string>
     <string name="secondary_muscles_label">Secondary muscles</string>
     <string name="unilateral_exercise">One side at a time (log each side)</string>

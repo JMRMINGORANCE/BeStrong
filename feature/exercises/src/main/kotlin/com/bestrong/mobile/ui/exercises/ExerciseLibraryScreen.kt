@@ -306,6 +306,7 @@ fun ExerciseSearchList(
             initial = null,
             presetName = filter.query.trim(),
             onDismiss = { creating = false },
+            nameTaken = { vm.nameTaken(it, exceptId = null) },
             onSave = { draft ->
                 val ex = vm.createCustom(draft)
                 creating = false
@@ -434,7 +435,7 @@ private fun <T> EnumFilter(label: String, values: List<T>, selected: T?, name: @
 
 /** Crear (initial = null) o editar un ejercicio personalizado; devuelve un borrador sin id definitivo. */
 @Composable
-fun ExerciseFormDialog(initial: Exercise?, onDismiss: () -> Unit, presetName: String = "", onSave: (Exercise) -> Unit) {
+fun ExerciseFormDialog(initial: Exercise?, onDismiss: () -> Unit, presetName: String = "", nameTaken: (String) -> Boolean = { false }, onSave: (Exercise) -> Unit) {
     var name by rememberSaveable { mutableStateOf(initial?.name ?: presetName) }
     var muscle by rememberSaveable { mutableStateOf(initial?.primaryMuscle ?: MuscleGroup.CHEST) }
     var secondary by rememberSaveable { mutableStateOf(initial?.secondaryMuscles.orEmpty()) }
@@ -446,7 +447,16 @@ fun ExerciseFormDialog(initial: Exercise?, onDismiss: () -> Unit, presetName: St
         title = { Text(stringResource(if (initial == null) R.string.new_exercise else R.string.edit_exercise)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.name)) }, singleLine = true)
+                // Un nombre repetido daría dos ejercicios iguales con historiales separados (y la importación elegiría uno)
+                val taken = isNameTaken(name, nameTaken)
+                OutlinedTextField(
+                    name,
+                    { name = it },
+                    label = { Text(stringResource(R.string.name)) },
+                    singleLine = true,
+                    isError = taken,
+                    supportingText = takenHint(taken),
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, muscle, { it.label() }) { it?.let { m -> muscle = m } }
                     EnumFilter(stringResource(R.string.filter_equipment), Equipment.entries, equipment, { it.label() }) { it?.let { e -> equipment = e } }
@@ -481,7 +491,7 @@ fun ExerciseFormDialog(initial: Exercise?, onDismiss: () -> Unit, presetName: St
             }
         },
         confirmButton = {
-            Button(enabled = name.isNotBlank(), onClick = {
+            Button(enabled = canSaveName(name, nameTaken), onClick = {
                 val base = initial ?: Exercise(id = "", name = "", primaryMuscle = muscle, isCustom = true)
                 onSave(
                     base.copy(
@@ -516,4 +526,15 @@ private fun VoiceSearchButton(onResult: (String) -> Unit) {
         result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.let(onResult)
     }
     IconButton(onClick = { runCatching { launcher.launch(intent) } }) { Icon(Icons.Default.Mic, stringResource(R.string.voice_search)) }
+}
+
+private fun isNameTaken(name: String, nameTaken: (String) -> Boolean): Boolean = name.isNotBlank() && nameTaken(name.trim())
+
+private fun canSaveName(name: String, nameTaken: (String) -> Boolean): Boolean = name.isNotBlank() && !nameTaken(name.trim())
+
+/** Aviso bajo el nombre si ya existe (null = sin texto de apoyo). */
+private fun takenHint(taken: Boolean): (@Composable () -> Unit)? = if (taken) {
+    { Text(stringResource(R.string.exercise_name_taken)) }
+} else {
+    null
 }

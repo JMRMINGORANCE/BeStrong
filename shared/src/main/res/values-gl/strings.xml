@@ -904,6 +904,7 @@
     <string name="gym_delete_body">Bórranse o seu material, discos e mancuernas. As rutinas que o usaban pasan a usar o ximnasio activo.</string>
     <string name="routine_delete_body">Os adestramentos que xa fixeches con ela quedan no historial.</string>
     <string name="edit_exercise">Editar exercicio</string>
+    <string name="exercise_name_taken">Xa hai un exercicio con ese nome</string>
     <string name="track_distance">Distancia</string>
     <string name="secondary_muscles_label">Músculos secundarios</string>
     <string name="unilateral_exercise">Un lado cada vez (rexistrar cada lado)</string>

@@ -904,6 +904,7 @@
     <string name="gym_delete_body">Se n\'esborren el material, els discos i les manuelles. Les rutines que el feien servir passen a usar el gimnàs actiu.</string>
     <string name="routine_delete_body">Els entrenaments que ja vas fer amb ella es queden a l\'historial.</string>
     <string name="edit_exercise">Editar exercici</string>
+    <string name="exercise_name_taken">Ja hi ha un exercici amb aquest nom</string>
     <string name="track_distance">Distància</string>
     <string name="secondary_muscles_label">Músculs secundaris</string>
     <string name="unilateral_exercise">Un costat cada vegada (registrar cada costat)</string>

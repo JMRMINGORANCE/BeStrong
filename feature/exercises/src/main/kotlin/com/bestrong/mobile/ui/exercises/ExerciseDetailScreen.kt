@@ -79,7 +79,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
     var editing by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     if (editing) {
-        ExerciseFormDialog(initial = s.exercise, onDismiss = { editing = false }, onSave = { vm.updateCustom(it); editing = false })
+        ExerciseFormDialog(initial = s.exercise, onDismiss = { editing = false }, nameTaken = { vm.nameTaken(it, exceptId = s.exercise.id) }, onSave = { vm.updateCustom(it); editing = false })
     }
     if (confirmDelete) {
         val used = remember { vm.routinesUsing(s.exercise.id) }

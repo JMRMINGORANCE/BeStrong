@@ -904,6 +904,7 @@
     <string name="gym_delete_body">Son matériel, ses disques et ses haltères sont supprimés. Les routines qui l\'utilisaient passent au club actif.</string>
     <string name="routine_delete_body">Les séances déjà faites avec elle restent dans l\'historique.</string>
     <string name="edit_exercise">Modifier l\'exercice</string>
+    <string name="exercise_name_taken">Un exercice porte déjà ce nom</string>
     <string name="track_distance">Distance</string>
     <string name="secondary_muscles_label">Muscles secondaires</string>
     <string name="unilateral_exercise">Un côté à la fois (noter chaque côté)</string>

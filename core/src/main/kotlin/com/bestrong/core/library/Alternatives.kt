@@ -10,13 +10,17 @@ import com.bestrong.core.model.WorkoutSet
  */
 object Alternatives {
     /** Mismo músculo principal; primero los que comparten músculos secundarios, luego por material parecido. */
-    fun forExercise(exercise: Exercise, all: List<Exercise>, available: Set<Equipment>? = null): List<Exercise> =
-        all.filter { it.id != exercise.id && it.primaryMuscle == exercise.primaryMuscle && it.tracking == exercise.tracking }
+    fun forExercise(exercise: Exercise, all: List<Exercise>, available: Set<Equipment>? = null): List<Exercise> {
+        // Primero las variantes del mismo movimiento (peso muerto → rumano), aunque su músculo principal sea otro
+        val family = ExerciseLibrary.familyOf(exercise.id).toSet()
+        return all.filter { it.id != exercise.id && it.tracking == exercise.tracking && (it.id in family || it.primaryMuscle == exercise.primaryMuscle) }
             .filter { available == null || it.equipment in available }
             .sortedWith(
-                compareByDescending<Exercise> { it.secondaryMuscles.intersect(exercise.secondaryMuscles.toSet()).size }
+                compareBy<Exercise> { if (it.id in family) 0 else 1 }
+                    .thenByDescending { it.secondaryMuscles.intersect(exercise.secondaryMuscles.toSet()).size }
                     .thenBy { if (it.equipment == exercise.equipment) 0 else 1 },
             )
+    }
 
     /** Factor aproximado de carga entre materiales (barra = 1). Mancuernas: peso de cada una. */
     private fun factor(e: Equipment): Double = when (e) {
@@ -49,7 +53,9 @@ object Alternatives {
         }
         val ff = factor(from.equipment)
         val ft = factor(to.equipment)
-        if (ff == 0.0 || ft == 0.0) return sets.map { if (it.completed) it else it.copy(weightKg = 0.0, targetReps = null) }
+        // El peso solo se convierte entre variantes del mismo movimiento: 140 kg de peso muerto no son 140 kg de remo
+        val sameMovement = to.id in ExerciseLibrary.familyOf(from.id)
+        if (ff == 0.0 || ft == 0.0 || !sameMovement) return sets.map { if (it.completed) it else it.copy(weightKg = 0.0, targetReps = null) }
         return sets.map { s ->
             if (s.completed) s else s.copy(weightKg = (Math.round(s.weightKg * ft / ff / stepKg) * stepKg).coerceAtLeast(0.0), targetReps = null)
         }

@@ -904,6 +904,7 @@
     <string name="gym_delete_body">Geräte, Scheiben und Kurzhanteln werden gelöscht. Routinen, die es nutzten, verwenden das aktive Studio.</string>
     <string name="routine_delete_body">Bereits damit absolvierte Trainings bleiben im Verlauf.</string>
     <string name="edit_exercise">Übung bearbeiten</string>
+    <string name="exercise_name_taken">Es gibt bereits eine Übung mit diesem Namen</string>
     <string name="track_distance">Distanz</string>
     <string name="secondary_muscles_label">Sekundäre Muskeln</string>
     <string name="unilateral_exercise">Einseitig (jede Seite erfassen)</string>
