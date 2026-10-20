@@ -237,7 +237,7 @@ fun WorkoutScreen(
                 Column(Modifier.weight(1f, fill = false), horizontalAlignment = Alignment.CenterHorizontally) {
                     previous?.let {
                         Text(
-                            stringResource(R.string.previous_any, setText(it, we.exercise.tracking, unit)),
+                            stringResource(R.string.previous_any, setText(it, we.exercise.tracking, unit, stringResource(R.string.unit_reps))),
                             // «La última vez» bien visible: es lo que hay que batir; tocarla la copia en esta serie
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.secondary,

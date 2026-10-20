@@ -52,7 +52,7 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
                     if (tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) {
                         "${unit.format(it.weightKg)} ${unit.label} × ${it.reps}"
                     } else {
-                        setText(it, tracking, unit)
+                        setText(it, tracking, unit, stringResource(R.string.unit_reps))
                     },
                     color = Color.White,
                     fontSize = 26.sp,

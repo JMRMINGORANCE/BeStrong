@@ -77,11 +77,17 @@ fun cardioName(context: Context, type: CardioType): String = context.getString(
 )
 
 /** Una serie como se lee en la muñeca, según cómo se mide: «80×8», «45 s», «20 min», «40×30 m», «12 reps». */
-fun setText(set: com.bestrong.core.model.WorkoutSet, tracking: com.bestrong.core.model.TrackingType, unit: com.bestrong.core.util.WeightUnit): String = when (tracking) {
+fun setText(
+    set: com.bestrong.core.model.WorkoutSet,
+    tracking: com.bestrong.core.model.TrackingType,
+    unit: com.bestrong.core.util.WeightUnit,
+    // En el idioma del reloj («Wdh.», «rép.»…): R.string.unit_reps
+    repsLabel: String = "reps",
+): String = when (tracking) {
     com.bestrong.core.model.TrackingType.DURATION -> "${set.durationSec} s"
     com.bestrong.core.model.TrackingType.CARDIO -> "${set.durationSec / 60} min" + if (set.distanceM > 0) " · ${"%.1f".format(set.distanceM / 1000)} km" else ""
     com.bestrong.core.model.TrackingType.DISTANCE -> (if (set.weightKg != 0.0) "${unit.format(set.weightKg)}×" else "") + "${set.distanceM.toInt()} m"
-    else -> if (set.weightKg == 0.0) "${set.reps} reps" else "${unit.format(set.weightKg)}×${set.reps}"
+    else -> if (set.weightKg == 0.0) "${set.reps} $repsLabel" else "${unit.format(set.weightKg)}×${set.reps}"
 }
 
 /**
