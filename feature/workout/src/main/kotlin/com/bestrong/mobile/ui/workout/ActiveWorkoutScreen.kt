@@ -167,6 +167,7 @@ fun ActiveWorkoutScreen(
     var editingNotes by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val dumbbellTotal = vm.settings.collectAsStateWithLifecycle().value.dumbbellTotal
 
     KeepScreenOn(settings.keepScreenOn)
     LaunchedEffect(Unit) { vm.focusExercise.collect { listState.animateScrollToItem(it) } }
@@ -309,7 +310,7 @@ fun ActiveWorkoutScreen(
         snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             Column {
-                if (!expanded && posture != FoldPosture.TABLETOP) rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w)) }
+                if (!expanded && posture != FoldPosture.TABLETOP) rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal)) }
                 // Modo una mano: lo importante abajo, al alcance del pulgar
                 if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
             }
@@ -325,7 +326,7 @@ fun ActiveWorkoutScreen(
                 RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                 // Mitad superior: lo que se mira desde el banco
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true, next = nextSetLabel(w)) }
+                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true, next = nextSetLabel(w, dumbbellTotal)) }
                         ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp), eta)
                 }
                 HorizontalDivider()
@@ -337,7 +338,7 @@ fun ActiveWorkoutScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     if (w.isPaused) PausedBanner(vm::togglePause)
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w)) }
+                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w, dumbbellTotal)) }
                     if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                     if (settings.mediaControls) MediaControls(settings.musicApp)
@@ -1237,11 +1238,13 @@ fun WorkoutSummaryDialog(
 
 /** «Press banca · 80 kg × 8»: la siguiente serie por hacer, para la barra de descanso. */
 @Composable
-private fun nextSetLabel(w: com.bestrong.core.model.Workout): String? {
+private fun nextSetLabel(w: com.bestrong.core.model.Workout, dumbbellTotal: Boolean): String? {
     val unit = LocalWeightUnit.current
     val next = WorkoutEditor.nextPendingSet(w)
     val ex = next?.let { (i, _) -> w.exercises.getOrNull(i)?.exercise }
-    return if (next == null || ex == null) null else ex.displayName() + " · " + describeSet(next.second, ex, unit)
+    // Con «suma de las dos mancuernas», el peso del par (como en la fila de la serie)
+    val factor = if (dumbbellTotal && ex?.equipment == Equipment.DUMBBELL) 2 else 1
+    return if (next == null || ex == null) null else ex.displayName() + " · " + describeSet(next.second, ex, unit, factor)
 }
 
 /** « · hace 12 d»: cuánto hace de la última vez (tras un parón se empieza más ligero); vacío si fue hoy o no consta. */
