@@ -76,6 +76,21 @@ fun GymProfilesSection(settings: UserSettings, onSelect: (String) -> Unit, onEdi
 fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) -> Unit, onDelete: () -> Unit, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
     var name by remember { mutableStateOf(gym.name) }
+    // Borrar un gimnasio se lleva su material y lo quita de sus rutinas: se confirma antes
+    var confirmDelete by remember { mutableStateOf(false) }
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.routine_delete_q, gym.name)) },
+            text = { Text(stringResource(R.string.gym_delete_body)) },
+            confirmButton = {
+                TextButton(onClick = { confirmDelete = false; onDelete() }, colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = androidx.compose.material3.MaterialTheme.colorScheme.error)) {
+                    Text(stringResource(R.string.action_delete))
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
     var equipment by remember { mutableStateOf(gym.equipment) }
     // Textos de partida: si no se tocan se guarda el valor exacto (el texto va redondeado y, en lb, convertido)
     val initial = remember {
@@ -175,7 +190,7 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
         },
         dismissButton = {
             Row {
-                if (canDelete) TextButton(onClick = onDelete) { Text(stringResource(R.string.action_delete)) }
+                if (canDelete) TextButton(onClick = { confirmDelete = true }) { Text(stringResource(R.string.action_delete)) }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
             }
         },

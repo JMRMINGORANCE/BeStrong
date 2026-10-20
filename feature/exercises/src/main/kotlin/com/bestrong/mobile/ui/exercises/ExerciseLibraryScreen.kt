@@ -128,7 +128,13 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
                 if (id == null) {
                     EmptyState(Icons.Default.Search, stringResource(R.string.exercise_pick_title), stringResource(R.string.exercise_pick_body))
                 } else {
-                    ExerciseDetailScreen(vm, id, onBack = if (navigator.canNavigateBack()) ({ scope.launch { navigator.navigateBack() } }) else null)
+                    ExerciseDetailScreen(
+                        vm,
+                        id,
+                        onBack = if (navigator.canNavigateBack()) ({ scope.launch { navigator.navigateBack() } }) else null,
+                        // Con dos paneles no hay «atrás»: tras borrarlo, el panel vuelve a «Elige un ejercicio» (no en blanco)
+                        onDeleted = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, null) } },
+                    )
                 }
             }
         },
@@ -193,7 +199,7 @@ fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (
 @Composable
 private fun FilterChips(vm: ExercisesViewModel, filter: ExerciseFilter, onCreate: (() -> Unit)?) {
     Row(
-        Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+        Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         EnumFilter(stringResource(R.string.filter_muscle), MuscleGroup.entries, filter.muscle, { it.label() }) { vm.filter.value = filter.copy(muscle = it) }
@@ -245,7 +251,8 @@ fun ExerciseSearchList(
             filter.query,
             { q -> vm.filter.value = filter.copy(query = q) },
             stringResource(R.string.search_exercise),
-            Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            // Mismo margen que el título (y que Historial y Perfil): todo alineado a la izquierda
+            Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
             trailing = { VoiceSearchButton { q -> vm.filter.value = vm.filter.value.copy(query = q) } },
         )
         FilterChips(vm, filter, onCreate = if (title == null) ({ creating = true }) else null)
@@ -253,7 +260,7 @@ fun ExerciseSearchList(
         androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
             columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(minSize = 156.dp),
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 96.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {

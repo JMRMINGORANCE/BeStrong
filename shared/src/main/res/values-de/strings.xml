@@ -894,6 +894,7 @@
     <string name="routine_discard_body">Du hast die Routine geändert und nicht gespeichert.</string>
     <string name="prog_discard_body">Du hast das Programm geändert und nicht gespeichert.</string>
     <string name="routine_delete_q">„%1$s“ löschen?</string>
+    <string name="gym_delete_body">Geräte, Scheiben und Kurzhanteln werden gelöscht. Routinen, die es nutzten, verwenden das aktive Studio.</string>
     <string name="routine_delete_body">Bereits damit absolvierte Trainings bleiben im Verlauf.</string>
     <string name="edit_exercise">Übung bearbeiten</string>
     <string name="track_distance">Distanz</string>

@@ -894,6 +894,7 @@
     <string name="routine_discard_body">You changed the routine and haven\'t saved it.</string>
     <string name="prog_discard_body">You changed the program and haven\'t saved it.</string>
     <string name="routine_delete_q">Delete “%1$s”?</string>
+    <string name="gym_delete_body">Its equipment, plates and dumbbells are deleted. Routines that used it will use the active gym.</string>
     <string name="routine_delete_body">Workouts you already did with it stay in your history.</string>
     <string name="edit_exercise">Edit exercise</string>
     <string name="track_distance">Distance</string>

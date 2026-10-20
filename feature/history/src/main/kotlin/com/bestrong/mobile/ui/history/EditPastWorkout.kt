@@ -128,8 +128,11 @@ fun EditPastSetDialog(
             }) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = {
-            Column {
-                TextButton(onClick = onDelete) { Text(stringResource(R.string.action_delete)) }
+            // Borrar en rojo, para no confundirlo con Cancelar
+            androidx.compose.foundation.layout.Row {
+                TextButton(onClick = onDelete, colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = androidx.compose.material3.MaterialTheme.colorScheme.error)) {
+                    Text(stringResource(R.string.action_delete))
+                }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
             }
         },

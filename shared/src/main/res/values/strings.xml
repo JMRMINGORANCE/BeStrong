@@ -894,6 +894,7 @@
     <string name="routine_discard_body">Has cambiado la rutina y no la has guardado.</string>
     <string name="prog_discard_body">Has cambiado el programa y no lo has guardado.</string>
     <string name="routine_delete_q">¿Borrar «%1$s»?</string>
+    <string name="gym_delete_body">Se borran su material, discos y mancuernas. Las rutinas que lo usaban pasan a usar el gimnasio activo.</string>
     <string name="routine_delete_body">Los entrenos que ya hiciste con ella se quedan en el historial.</string>
     <string name="edit_exercise">Editar ejercicio</string>
     <string name="track_distance">Distancia</string>

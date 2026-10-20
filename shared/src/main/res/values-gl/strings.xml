@@ -894,6 +894,7 @@
     <string name="routine_discard_body">Cambiaches a rutina e non a gardaches.</string>
     <string name="prog_discard_body">Cambiaches o programa e non o gardaches.</string>
     <string name="routine_delete_q">Borrar «%1$s»?</string>
+    <string name="gym_delete_body">Bórranse o seu material, discos e mancuernas. As rutinas que o usaban pasan a usar o ximnasio activo.</string>
     <string name="routine_delete_body">Os adestramentos que xa fixeches con ela quedan no historial.</string>
     <string name="edit_exercise">Editar exercicio</string>
     <string name="track_distance">Distancia</string>

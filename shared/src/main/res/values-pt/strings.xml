@@ -894,6 +894,7 @@
     <string name="routine_discard_body">Alteraste a rotina e não a guardaste.</string>
     <string name="prog_discard_body">Alteraste o programa e não o guardaste.</string>
     <string name="routine_delete_q">Apagar «%1$s»?</string>
+    <string name="gym_delete_body">O equipamento, os discos e os halteres são apagados. As rotinas que o usavam passam a usar o ginásio ativo.</string>
     <string name="routine_delete_body">Os treinos que já fizeste com ela ficam no histórico.</string>
     <string name="edit_exercise">Editar exercício</string>
     <string name="track_distance">Distância</string>

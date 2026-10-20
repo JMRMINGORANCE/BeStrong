@@ -68,7 +68,7 @@ import com.bestrong.mobile.ui.workout.setRemark
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (() -> Unit)?) {
+fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (() -> Unit)?, onDeleted: () -> Unit = { onBack?.invoke() }) {
     val unit = LocalWeightUnit.current
     var includeVariants by rememberSaveable(exerciseId) { mutableStateOf(false) }
     val flow = remember(exerciseId, includeVariants) { vm.detail(exerciseId, includeVariants) }
@@ -87,7 +87,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             onDismissRequest = { confirmDelete = false },
             title = { Text(stringResource(R.string.delete_exercise_q, s.exercise.name)) },
             text = { Text(if (used > 0) stringResource(R.string.delete_exercise_used, used) else stringResource(R.string.delete_exercise_body)) },
-            confirmButton = { Button(onClick = { confirmDelete = false; vm.deleteCustom(s.exercise.id); onBack?.invoke() }) { Text(stringResource(R.string.action_delete)) } },
+            confirmButton = { Button(onClick = { confirmDelete = false; vm.deleteCustom(s.exercise.id); onDeleted() }) { Text(stringResource(R.string.action_delete)) } },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
@@ -179,7 +179,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     val formatter: (Double) -> String = when (metric) {
                         2 -> { v -> unit.formatVolume(v) }
                         3 -> { v -> v.toInt().toString() }
-                        else -> { v -> unit.format(v) }
+                        // Con su unidad: «Máx 100 kg», no «Máx 100»
+                        else -> { v -> unit.format(v, withUnit = true) }
                     }
                     // «¿Voy a más?» de un vistazo: la diferencia entre el primer y el último punto
                     ChartChange(points, if (metric < 2) { v -> unit.format(v, withUnit = true) } else formatter)
@@ -235,8 +236,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                             Text(stringResource(R.string.strength_curve_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             val repsLabel = stringResource(R.string.reps_short)
                             BarChart(
-                                s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps", unit.fromKg(kg * f)) },
-                                describe = { "${it.label} $repsLabel: ${unit.format(unit.toKg(it.value), withUnit = true)}" },
+                                s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps $repsLabel", unit.fromKg(kg * f)) },
+                                describe = { "${it.label}: ${unit.format(unit.toKg(it.value), withUnit = true)}" },
                             )
                             // Mejores marcas por repeticiones (1RM, 3RM, 5RM…), las que se suelen buscar
                             // N RM = lo más pesado movido al menos N veces (100 kg × 6 también vale como 5RM)
