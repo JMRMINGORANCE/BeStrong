@@ -221,6 +221,7 @@ class HomeViewModel @Inject constructor(
     fun finishForgotten() = viewModelScope.launch {
         // De una vez y bajo el cerrojo (lo marca terminado: un mensaje atrasado del reloj no lo resucita)
         val w = repo.takeActive() ?: return@launch
+        actions.closePartner(withGym = false)
         // Sin sello de gimnasio: pudo quedar abierto días y el activo de ahora no tiene por qué ser aquel
         // Como al terminarlo en el entreno: calorías, lo del reloj que llegara y Health Connect
         val finished = actions.withEnergy(WorkoutEditor.finishAtLastActivity(w))
@@ -232,7 +233,10 @@ class HomeViewModel @Inject constructor(
         message(context.getString(R.string.msg_forgotten_saved))
     }
 
-    fun discardActive() = viewModelScope.launch { repo.discardActive() }
+    fun discardActive() = viewModelScope.launch {
+        repo.discardActive()
+        actions.closePartner()
+    }
 
     /** Entreno recién descartado (para el aviso con «Deshacer»). */
     val discarded: StateFlow<com.bestrong.core.model.Workout?> = repo.discarded

@@ -379,6 +379,13 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     fun rewriteHistory(match: (Workout) -> Boolean, change: (Workout) -> Workout) = scope.launch {
         val now = System.currentTimeMillis()
         saveWorkouts(historyOnce(includePartner = true).filter(match).map { change(it).copy(updatedAtEpochMs = now) })
+        // También los de la papelera: si se recuperan, que vuelvan con el nombre nuevo
+        trashMutex.withLock {
+            val list = trashOnce()
+            if (list.any { match(it.workout) }) {
+                saveTrash(list.map { t -> if (match(t.workout)) t.copy(workout = change(t.workout).copy(updatedAtEpochMs = now)) else t })
+            }
+        }
     }
 
     /** Varios entrenos de una vez (una transacción): p. ej. al renombrar un gimnasio. */

@@ -40,6 +40,16 @@ class WorkoutActions @Inject constructor(
     suspend fun withEnergy(workout: Workout): Workout =
         energy.complete(workout, watchKcal = workout.calories?.takeIf { workout.caloriesSource == com.bestrong.core.model.CaloriesSource.WATCH })
 
+    /**
+     * Termina el entreno de la pareja, si hay uno abierto, guardando lo que hizo (aparte: no cuenta para tus
+     * récords). Al terminar o descartar el tuyo: sin esto quedaría huérfano, sin forma de volver a él.
+     */
+    suspend fun closePartner(withGym: Boolean = true) {
+        val current = repository.takePartnerActive() ?: return
+        val finished = WorkoutEditor.finish(current, System.currentTimeMillis()).let { if (withGym) withGym(it) else it }
+        if (finished.exercises.isNotEmpty()) repository.saveWorkout(finished)
+    }
+
     /** El entreno en texto (series y RPE), para mandarlo al entrenador o a un grupo. */
     fun shareText(workout: Workout, exerciseName: (com.bestrong.core.model.Exercise) -> String): String = settings.settings.value.let { prefs ->
         com.bestrong.core.io.CoachReport.text(

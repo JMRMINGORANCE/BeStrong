@@ -755,16 +755,16 @@ class ActiveWorkoutViewModel @Inject constructor(
         if (partnerMode.value) {
             // Entreno de la pareja: se guarda aparte (no cuenta para tus récords ni estadísticas)
             viewModelScope.launch {
-                val current = repo.takePartnerActive() ?: return@launch
-                val finished = actions.withGym(WorkoutEditor.finish(current, System.currentTimeMillis()))
+                actions.closePartner()
                 setPartnerMode(false)
-                if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
             }
             return
         }
         viewModelScope.launch {
             // Se lee y se quita bajo el cerrojo: no se pierde ninguna serie marcada en el último momento
             val current = repo.takeActive() ?: return@launch
+            // Si la pareja seguía con el suyo, se guarda también: tras terminar el tuyo no habría cómo volver a él
+            actions.closePartner()
             val metrics = metricsStore.metrics.value?.takeIf { it.workoutId == current.id }
             val ended = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
                 avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
@@ -797,6 +797,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         val rest = restTimer.rest.value
         restTimer.skip()
         repo.discardActive(rest?.endsAtEpochMs, rest?.totalSeconds ?: 0)
+        actions.closePartner()
     }
 
     fun saveSummaryAsRoutine() {
