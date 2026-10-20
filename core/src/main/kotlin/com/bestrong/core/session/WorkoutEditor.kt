@@ -111,9 +111,31 @@ object WorkoutEditor {
     }
 
     /** Sustituye un ejercicio por una alternativa conservando el descanso y adaptando los pesos. */
-    fun substitute(workout: Workout, workoutExerciseId: String, to: Exercise, previousOfNew: List<WorkoutSet>, stepKg: Double): Workout =
-        updateExercise(workout, workoutExerciseId) { we ->
-            we.copy(exercise = to, sets = com.bestrong.core.library.Alternatives.convertSets(we.exercise, to, we.sets, previousOfNew, stepKg), targetRpe = we.targetRpe.takeIf { to.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS })
+    fun substitute(workout: Workout, workoutExerciseId: String, to: Exercise, previousOfNew: List<WorkoutSet>, stepKg: Double): Workout {
+        val we = workout.exercises.firstOrNull { it.id == workoutExerciseId } ?: return workout
+        val done = we.sets.filter { it.completed }
+        val targetRpe = we.targetRpe.takeIf { to.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }
+        return if (done.isEmpty()) replaceAll(workout, we, to, previousOfNew, stepKg, targetRpe) else splitReplace(workout, we, done, to, previousOfNew, stepKg, targetRpe)
+    }
+
+    private fun splitReplace(workout: Workout, we: WorkoutExercise, done: List<WorkoutSet>, to: Exercise, previousOfNew: List<WorkoutSet>, stepKg: Double, targetRpe: Double?): Workout {
+        // Con series ya hechas, esas se quedan en el ejercicio original (eran de él: récords, «anterior»); lo que
+        // queda pasa a uno nuevo justo debajo. Las pendientes movidas se marcan borradas para que el reloj no las devuelva
+        val pending = we.sets.filterNot { it.completed }.ifEmpty { listOf(we.sets.last().asPending()) }
+        val replacement = WorkoutExercise(
+            exercise = to,
+            sets = com.bestrong.core.library.Alternatives.convertSets(we.exercise, to, pending, previousOfNew, stepKg).map { it.copy(id = com.bestrong.core.util.newId()) },
+            restSeconds = we.restSeconds,
+            targetRpe = targetRpe,
+        )
+        val exercises = workout.exercises.flatMap { if (it.id == we.id) listOf(it.copy(sets = done), replacement) else listOf(it) }
+        val tombstones = we.sets.filterNot { it.completed }.associate { it.id to emptySet<String>() }
+        return workout.copy(exercises = normalizedSupersets(exercises), deletedIds = workout.deletedIds + tombstones)
+    }
+
+    private fun replaceAll(workout: Workout, we: WorkoutExercise, to: Exercise, previousOfNew: List<WorkoutSet>, stepKg: Double, targetRpe: Double?): Workout =
+        updateExercise(workout, we.id) {
+            it.copy(exercise = to, sets = com.bestrong.core.library.Alternatives.convertSets(we.exercise, to, we.sets, previousOfNew, stepKg), targetRpe = targetRpe)
         }
 
     fun removeExercise(workout: Workout, workoutExerciseId: String): Workout =
@@ -165,7 +187,26 @@ object WorkoutEditor {
         if (from !in workout.exercises.indices || to !in workout.exercises.indices) return workout
         val list = workout.exercises.toMutableList()
         list.add(to, list.removeAt(from))
-        return workout.copy(exercises = list)
+        // Mover dentro o a través de una superserie no puede dejar un grupo partido (A, C, B con A y B juntas):
+        // cada tramo seguido es su propio grupo y uno de un solo ejercicio deja de ser superserie
+        return workout.copy(exercises = normalizedSupersets(list))
+    }
+
+    private fun normalizedSupersets(exercises: List<WorkoutExercise>): List<WorkoutExercise> {
+        val runs = mutableListOf<MutableList<Int>>()
+        exercises.forEachIndexed { i, we ->
+            if (we.supersetId != null && exercises.getOrNull(i - 1)?.supersetId == we.supersetId) runs.last().add(i) else runs.add(mutableListOf(i))
+        }
+        val seen = mutableSetOf<String>()
+        val ids = arrayOfNulls<String>(exercises.size)
+        runs.forEach { run ->
+            val id = exercises[run.first()].supersetId
+            if (id != null && run.size > 1) {
+                val groupId = if (seen.add(id)) id else com.bestrong.core.util.newId()
+                run.forEach { ids[it] = groupId }
+            }
+        }
+        return exercises.mapIndexed { i, we -> if (we.supersetId == ids[i]) we else we.copy(supersetId = ids[i]) }
     }
 
     fun replaceExercise(workout: Workout, workoutExerciseId: String, exercise: Exercise): Workout =

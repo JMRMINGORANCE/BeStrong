@@ -33,6 +33,13 @@ class WorkoutActions @Inject constructor(
     private val planning: PlanningStore,
     private val energy: com.bestrong.mobile.health.EnergyCalculator,
 ) {
+    /**
+     * Calorías de un entreno terminado (las del reloj si se midieron; si no, pulso o estimación), como al
+     * terminarlo en el entreno. Para terminar desde fuera (olvidado) o tras corregir duración o series.
+     */
+    suspend fun withEnergy(workout: Workout): Workout =
+        energy.complete(workout, watchKcal = workout.calories?.takeIf { workout.caloriesSource == com.bestrong.core.model.CaloriesSource.WATCH })
+
     /** El entreno en texto (series y RPE), para mandarlo al entrenador o a un grupo. */
     fun shareText(workout: Workout, exerciseName: (com.bestrong.core.model.Exercise) -> String): String = settings.settings.value.let { prefs ->
         com.bestrong.core.io.CoachReport.text(

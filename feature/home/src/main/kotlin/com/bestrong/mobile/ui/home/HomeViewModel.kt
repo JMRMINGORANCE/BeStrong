@@ -222,8 +222,13 @@ class HomeViewModel @Inject constructor(
         // De una vez y bajo el cerrojo (lo marca terminado: un mensaje atrasado del reloj no lo resucita)
         val w = repo.takeActive() ?: return@launch
         // Sin sello de gimnasio: pudo quedar abierto días y el activo de ahora no tiene por qué ser aquel
-        val finished = WorkoutEditor.finishAtLastActivity(w)
-        if (finished.exercises.isNotEmpty()) repo.saveWorkout(finished)
+        // Como al terminarlo en el entreno: calorías, lo del reloj que llegara y Health Connect
+        val finished = actions.withEnergy(WorkoutEditor.finishAtLastActivity(w))
+        if (finished.exercises.isNotEmpty()) {
+            repo.saveWorkout(finished)
+            actions.applyPendingWatchHealth(finished.id)
+            actions.exportToHealthConnectIfEnabled(finished)
+        }
         message(context.getString(R.string.msg_forgotten_saved))
     }
 

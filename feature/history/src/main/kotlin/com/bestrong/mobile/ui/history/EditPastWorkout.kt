@@ -37,8 +37,12 @@ fun EditPastSetDialog(
     var reps by remember { mutableStateOf(set.reps.toString()) }
     var seconds by remember { mutableStateOf(set.durationSec.toString()) }
     var meters by remember { mutableStateOf(set.distanceM.toInt().toString()) }
-    var minutes by remember { mutableStateOf((set.durationSec / 60).toString()) }
-    var km by remember { mutableStateOf(if (set.distanceM > 0) "%.2f".format(set.distanceM / 1000) else "") }
+    // Como el peso: si no se tocan se guardan exactos (25:47 no pasa a 25:00 ni 45 s a 0)
+    val initialMinutes = remember { (set.durationSec / 60).toString() }
+    val initialKm = remember { if (set.distanceM > 0) "%.2f".format(set.distanceM / 1000) else "" }
+    val initialMeters = remember { set.distanceM.toInt().toString() }
+    var minutes by remember { mutableStateOf(initialMinutes) }
+    var km by remember { mutableStateOf(initialKm) }
     val hasWeight = tracking != TrackingType.DURATION && tracking != TrackingType.CARDIO
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -108,8 +112,17 @@ fun EditPastSetDialog(
                     set.copy(
                         weightKg = kg,
                         reps = reps.toIntOrNull() ?: set.reps,
-                        durationSec = if (tracking == TrackingType.CARDIO) minutes.toIntOrNull()?.times(60) ?: set.durationSec else seconds.toIntOrNull() ?: set.durationSec,
-                        distanceM = if (tracking == TrackingType.CARDIO) km.replace(',', '.').toDoubleOrNull()?.times(1000) ?: 0.0 else meters.toDoubleOrNull() ?: set.distanceM,
+                        durationSec = when {
+                            tracking != TrackingType.CARDIO -> seconds.toIntOrNull() ?: set.durationSec
+                            minutes == initialMinutes -> set.durationSec
+                            else -> minutes.toIntOrNull()?.times(60) ?: set.durationSec
+                        },
+                        distanceM = when {
+                            tracking == TrackingType.CARDIO && km == initialKm -> set.distanceM
+                            tracking == TrackingType.CARDIO -> km.replace(',', '.').toDoubleOrNull()?.times(1000) ?: 0.0
+                            meters == initialMeters -> set.distanceM
+                            else -> meters.toDoubleOrNull() ?: set.distanceM
+                        },
                     ),
                 )
             }) { Text(stringResource(R.string.action_save)) }

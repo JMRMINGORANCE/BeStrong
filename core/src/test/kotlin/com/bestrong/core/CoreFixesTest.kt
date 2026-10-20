@@ -111,6 +111,28 @@ class CoreFixesTest {
         assertEquals(emptyList<String>(), missing)
     }
 
+    @Test fun movingExerciseNeverLeavesSplitSuperset() {
+        val squat = ExerciseLibrary.byId("squat")!!
+        val curl = ExerciseLibrary.byId("barbell_curl")!!
+        var w = com.bestrong.core.session.WorkoutEditor.addExercises(com.bestrong.core.session.WorkoutEditor.empty(0), listOf(bench, squat, curl))
+        w = com.bestrong.core.session.WorkoutEditor.linkWithNext(w, w.exercises[0].id)
+        // A+B en superserie, C suelto: subir C deja A, C, B → A y B ya no pueden seguir agrupadas
+        w = com.bestrong.core.session.WorkoutEditor.moveExercise(w, 2, 1)
+        assertTrue(w.exercises.all { it.supersetId == null })
+    }
+
+    @Test fun substituteKeepsCompletedSetsOnOriginal() {
+        val db = ExerciseLibrary.byId("db_bench_press")!!
+        var w = com.bestrong.core.session.WorkoutEditor.addExercises(com.bestrong.core.session.WorkoutEditor.empty(0), listOf(bench))
+        val we = w.exercises[0]
+        w = com.bestrong.core.session.WorkoutEditor.toggleSetCompleted(w, we.id, we.sets[0].id)
+        w = com.bestrong.core.session.WorkoutEditor.substitute(w, we.id, db, emptyList(), 2.0)
+        assertEquals(listOf("bench_press", "db_bench_press"), w.exercises.map { it.exercise.id })
+        assertTrue(w.exercises[0].sets.all { it.completed })
+        assertTrue(w.exercises[1].sets.none { it.completed })
+        assertEquals(we.sets.size - 1, w.exercises[1].sets.size)
+    }
+
     @Test fun measurementCsvStripsBom() {
         val m = MeasurementCsv.read("2024-01-01,80.5,,,,,\n2024-01-08,80.0,,,,,\n", ZoneOffset.UTC)
         assertEquals(2, m.rows.size)

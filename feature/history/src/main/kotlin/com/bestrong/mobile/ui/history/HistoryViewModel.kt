@@ -229,7 +229,16 @@ class HistoryViewModel @Inject constructor(
             }
         } else {
             // Sobre lo guardado (el pulso del reloj o la valoración pueden haber llegado después de abrirlo)
-            val saved = repo.updateWorkout(workout.id) { WorkoutEditor.cleanupFinished(block(it)).copy(updatedAtEpochMs = edited.updatedAtEpochMs) }
+            val updated = repo.updateWorkout(workout.id) { WorkoutEditor.cleanupFinished(block(it)).copy(updatedAtEpochMs = edited.updatedAtEpochMs) }
+            // Las calorías dependen de la duración y del cardio: corregidos, se recalculan (las del reloj se respetan)
+            val saved = updated?.let { u ->
+                val kcal = actions.withEnergy(u)
+                if (kcal.calories == u.calories && kcal.activeCalories == u.activeCalories) {
+                    u
+                } else {
+                    repo.updateWorkout(u.id) { it.copy(calories = kcal.calories, activeCalories = kcal.activeCalories, caloriesSource = kcal.caloriesSource) }
+                }
+            }
             // Corregido aquí, corregido en Health Connect: se quita lo de antes (un bloque de cardio borrado no
             // dejaría su distancia) y se exporta de nuevo
             if (saved != null && saved.athlete == null) {

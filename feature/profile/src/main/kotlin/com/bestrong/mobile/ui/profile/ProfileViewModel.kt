@@ -507,7 +507,7 @@ class ProfileViewModel @Inject constructor(
             DeleteKind.OLD_HISTORY -> {
                 val limit = System.currentTimeMillis() - 365L * 86_400_000L
                 deleteFromHealth(java.time.Instant.ofEpochMilli(limit))
-                repo.historyOnce().filter { it.startedAtEpochMs < limit }.map { it.id }.also { repo.deleteWorkouts(it) }.size
+                repo.historyOnce(includePartner = true).filter { it.startedAtEpochMs < limit }.map { it.id }.also { repo.deleteWorkouts(it) }.size
             }
             DeleteKind.ALL_HISTORY -> {
                 deleteFromHealth(null)
