@@ -68,10 +68,24 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
                 )
             }
             rest?.let { r ->
-                val end = DateTimeFormatter.ofPattern("HH:mm:ss").format(Instant.ofEpochMilli(r.endsAtEpochMs).atZone(ZoneId.systemDefault()))
-                Text(stringResource(R.string.rest_until, end), color = Color.Gray, fontSize = 13.sp)
+                // En el formato del reloj (12/24 h) y sin segundos: en AOD se redibuja una vez por minuto
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val pattern = android.text.format.DateFormat.getBestDateTimePattern(java.util.Locale.getDefault(), if (android.text.format.DateFormat.is24HourFormat(context)) "Hm" else "hm")
+                val end = DateTimeFormatter.ofPattern(pattern).format(Instant.ofEpochMilli(r.endsAtEpochMs).atZone(ZoneId.systemDefault()))
+                Text(stringResource(R.string.rest_until, end), color = Color.Gray, fontSize = 13.sp, maxLines = 1)
             }
         }
+    }
+}
+
+/**
+ * AOD fuera de un entreno (resumen, inicio, editor…): negro con el nombre en gris y desplazado, en vez de la interfaz a
+ * todo color (botones naranjas encendidos minutos en una pantalla OLED).
+ */
+@Composable
+fun AmbientIdleScreen() {
+    Box(Modifier.fillMaxSize().background(Color.Black).padding(24.dp).burnInShift(), contentAlignment = Alignment.Center) {
+        Text(stringResource(R.string.app_name), color = Color.Gray, fontSize = 16.sp)
     }
 }
 

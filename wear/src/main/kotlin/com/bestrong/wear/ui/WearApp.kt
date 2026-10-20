@@ -9,6 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.material3.AppScaffold
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
+import androidx.wear.compose.navigation.currentBackStackEntryAsState
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import com.bestrong.wear.WearContainer
 import kotlinx.coroutines.flow.StateFlow
@@ -51,14 +52,29 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
             val routine = container.store.routines.value.firstOrNull { it.id == r }
             if (routine != null) session.startRoutine(routine) else session.startEmpty()
         }
-        nav.navigate(WearRoutes.WORKOUT) { launchSingleTop = true }
+        // Sobre Inicio: si estaba en el descanso no queda debajo un descanso muerto (pantalla vacía al volver)
+        nav.navigate(WearRoutes.WORKOUT) {
+            popUpTo(WearRoutes.HOME)
+            launchSingleTop = true
+        }
     }
     // El descanso termina solo: volvemos a la pantalla de series
     LaunchedEffect(rest) {
         if (rest == null && nav.currentDestination?.route == WearRoutes.REST) nav.popBackStack()
     }
-    LaunchedEffect(summary) {
-        if (summary != null) nav.navigate(WearRoutes.SUMMARY) { popUpTo(WearRoutes.HOME) }
+    LaunchedEffect(summary, active?.id) {
+        val route = nav.currentDestination?.route
+        when {
+            summary != null -> nav.navigate(WearRoutes.SUMMARY) {
+                popUpTo(WearRoutes.HOME)
+                launchSingleTop = true
+            }
+            // Un entreno nuevo (del móvil o del tile) con el resumen a la vista: a sus series, no a un resumen vacío
+            route == WearRoutes.SUMMARY && active != null -> nav.navigate(WearRoutes.WORKOUT) { popUpTo(WearRoutes.HOME) }
+            // Terminado sin series hechas o cerrado desde el móvil con el menú, la info o la calibración abiertos:
+            // a Inicio (si no, se quedaba una pantalla negra)
+            active == null && route in SESSION_ROUTES -> nav.navigate(WearRoutes.HOME) { popUpTo(0) }
+        }
     }
 
     BeStrongWearTheme {
@@ -69,6 +85,12 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
             }
             if (isAmbient && cardioState != null) {
                 AmbientCardioScreen(container.cardio)
+                return@CompositionLocalProvider
+            }
+            // Solo en pantallas sin nada a medias (el editor de rutinas perdería lo añadido y el cardio su resumen)
+            val route = nav.currentBackStackEntryAsState().value?.destination?.route
+            if (isAmbient && route in setOf(WearRoutes.HOME, WearRoutes.SUMMARY)) {
+                AmbientIdleScreen()
                 return@CompositionLocalProvider
             }
             AppScaffold {
@@ -141,3 +163,6 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
         }
     }
 }
+
+/** Pantallas que solo tienen sentido con un entreno abierto. */
+private val SESSION_ROUTES = setOf(WearRoutes.WORKOUT, WearRoutes.REST, WearRoutes.MENU, WearRoutes.INFO, WearRoutes.PICKER, WearRoutes.CALIBRATE)
