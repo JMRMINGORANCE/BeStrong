@@ -97,6 +97,12 @@ fun Exercise.displayName(): String = ExerciseLibrary.displayName(this, uiLanguag
 
 fun Exercise.displayName(context: Context): String = ExerciseLibrary.displayName(this, context.uiLanguage())
 
+/** Nombre del ejercicio de un récord en el idioma de la app (el récord guarda el nombre en español). */
+@Composable
+fun com.bestrong.core.stats.PersonalRecord.exerciseLabel(): String = ExerciseLibrary.byId(exerciseId)?.displayName() ?: exerciseName
+
+fun com.bestrong.core.stats.PersonalRecord.exerciseLabel(context: Context): String = ExerciseLibrary.byId(exerciseId)?.displayName(context) ?: exerciseName
+
 /** Por qué se propone esto; con « · limitado por el tope semanal» si Planificación recortó la subida. */
 @Composable @ReadOnlyComposable
 fun ProgressionSuggestion.reasonText(): String = kindText() + if (cappedByWeek) stringResource(R.string.prog_capped_suffix) else ""

@@ -17,6 +17,7 @@ import com.bestrong.core.stats.formatValue
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.AppIntents
 import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.labelRes
 
 /** Notificaciones que no son la del entreno en curso: récords y recordatorios. */
@@ -63,7 +64,7 @@ object Notifier {
         if (records.isEmpty() || !canPost(context)) return
         ensureChannels(context)
         val lines = records.map {
-            context.getString(R.string.record_line, it.exerciseName, context.getString(it.type.labelRes()), it.type.formatValue(it.value, unit))
+            context.getString(R.string.record_line, it.exerciseLabel(context), context.getString(it.type.labelRes()), it.type.formatValue(it.value, unit))
         }
         val style = NotificationCompat.InboxStyle()
         lines.take(6).forEach(style::addLine)

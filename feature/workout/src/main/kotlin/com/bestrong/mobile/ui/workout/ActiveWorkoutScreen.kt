@@ -125,6 +125,7 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.RestTimerBar
 import com.bestrong.mobile.ui.components.StatTile
 import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.rememberNow
@@ -1198,7 +1199,7 @@ fun WorkoutSummaryDialog(
                 if (summary.records.isNotEmpty()) {
                     Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
                     summary.records.forEach { pr ->
-                        Text(stringResource(R.string.record_line, pr.exerciseName, pr.type.label(), pr.type.formatValue(pr.value, unit)), style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.record_line, pr.exerciseLabel(), pr.type.label(), pr.type.formatValue(pr.value, unit)), style = MaterialTheme.typography.bodySmall)
                     }
                 }
                 // Frente a la última vez que hiciste cada ejercicio

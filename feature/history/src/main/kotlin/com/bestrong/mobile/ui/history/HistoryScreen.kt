@@ -83,6 +83,7 @@ import com.bestrong.mobile.ui.components.EmptyState
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.StatTile
 import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
@@ -419,7 +420,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             Icon(Icons.Default.EmojiEvents, null, Modifier.size(28.dp))
                             Text(pluralStringResource(R.plurals.n_records, records.size, records.size), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
                         }
-                        records.forEach { Text(stringResource(R.string.record_line, it.exerciseName, it.type.label(), it.type.formatValue(it.value, unit)), style = MaterialTheme.typography.bodyMedium) }
+                        records.forEach { Text(stringResource(R.string.record_line, it.exerciseLabel(), it.type.label(), it.type.formatValue(it.value, unit)), style = MaterialTheme.typography.bodyMedium) }
                     }
                 }
             }

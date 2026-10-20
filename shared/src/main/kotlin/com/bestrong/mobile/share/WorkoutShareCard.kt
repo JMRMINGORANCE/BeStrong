@@ -24,6 +24,7 @@ import com.bestrong.core.util.formatDuration
 import com.bestrong.designsystem.BeStrongPalette
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.labelRes
 import java.io.File
@@ -115,7 +116,7 @@ object WorkoutShareCard {
             y += 60f
             records.take(3).forEach { pr ->
                 if (y > H - 120f) return@forEach
-                val line = context.getString(R.string.record_line, pr.exerciseName, context.getString(pr.type.labelRes()), pr.type.formatValue(pr.value, unit))
+                val line = context.getString(R.string.record_line, pr.exerciseLabel(context), context.getString(pr.type.labelRes()), pr.type.formatValue(pr.value, unit))
                 c.drawText(fit(line, detailP, contentWidth), PAD, y, detailP)
                 y += 54f
             }

@@ -76,6 +76,7 @@ import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.StatTile
+import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.help.HelpDialog
@@ -299,7 +300,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 if (stats.topOneRepMax.isEmpty()) Text(stringResource(R.string.complete_sets_for_records))
                                 stats.topOneRepMax.forEach { pr ->
                                     ListItem(
-                                        headlineContent = { Text(pr.exerciseName) },
+                                        headlineContent = { Text(pr.exerciseLabel()) },
                                         trailingContent = { Text(unit.format(pr.value, withUnit = true), fontWeight = FontWeight.Bold) },
                                         modifier = Modifier.clickable { onOpenExercise(pr.exerciseId) },
                                     )

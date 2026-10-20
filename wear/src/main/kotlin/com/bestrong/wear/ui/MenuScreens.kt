@@ -302,7 +302,7 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                 item { ListHeader { Text(pluralStringResource(R.plurals.n_records, s.records.size, s.records.size)) } }
                 items(s.records) { pr ->
                     Text(
-                        "${pr.exerciseName}: ${pr.type.formatValue(pr.value, unit)}",
+                        "${recordName(pr)}: ${pr.type.formatValue(pr.value, unit)}",
                         style = MaterialTheme.typography.labelSmall,
                         textAlign = TextAlign.Center,
                     )
@@ -351,3 +351,7 @@ private fun warnIfNotLighter(context: android.content.Context, added: Boolean, h
     // Sin peso apuntado todavía no hay de dónde bajar: se dice eso
     if (!added) android.widget.Toast.makeText(context, if (hasWeight) R.string.cannot_go_lighter else R.string.enter_weight_first, android.widget.Toast.LENGTH_SHORT).show()
 }
+
+/** Nombre del ejercicio del récord en el idioma del reloj (el récord lo guarda en español). */
+@Composable
+private fun recordName(pr: com.bestrong.core.stats.PersonalRecord): String = ExerciseLibrary.byId(pr.exerciseId)?.displayName() ?: pr.exerciseName
