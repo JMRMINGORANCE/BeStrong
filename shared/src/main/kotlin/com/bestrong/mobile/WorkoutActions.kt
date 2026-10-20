@@ -177,7 +177,8 @@ class WorkoutActions @Inject constructor(
     fun cappedByWeek(ex: com.bestrong.core.model.Exercise, sets: List<WorkoutSet>, history: List<Workout> = repository.history.value): Boolean {
         val cap = planning.state.value.weeklyCap ?: return false
         val lastWeekBest = WorkoutStats.bestWeightBetween(ex.id, history, System.currentTimeMillis() - 7 * 86_400_000L, Long.MAX_VALUE)
-        return sets.any { it.weightKg > ProgressionCap.limit(it.weightKg, lastWeekBest, cap) + 1e-6 }
+        val step = settings.settings.value.stepKgFor(ex.id)
+        return sets.any { it.weightKg > ProgressionCap.limit(it.weightKg, lastWeekBest, cap, step) + 1e-6 }
     }
 
     /**

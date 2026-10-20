@@ -278,7 +278,18 @@ class HomeViewModel @Inject constructor(
             onStarted()
             return@launch
         }
-        repo.setActive(session.routine.toWorkout(System.currentTimeMillis()))
+        // Las cargas del programa salen de porcentajes (en kg): se llevan a un peso montable con tus discos y tu
+        // unidad (en libras, 67,5 kg = 148,8 lb no se puede cargar)
+        val prefs = settingsStore.settings.value
+        val workout = session.routine.toWorkout(System.currentTimeMillis()).let { w ->
+            w.copy(
+                exercises = w.exercises.map { we ->
+                    val gym = prefs.gymFor(we.exercise.id)
+                    we.copy(sets = we.sets.map { set -> if (set.weightKg > 0) set.copy(weightKg = gym.nearestLoad(set.weightKg, we.exercise.equipment, prefs.unit)) else set })
+                },
+            )
+        }
+        repo.setActive(workout)
         onStarted()
     }
 

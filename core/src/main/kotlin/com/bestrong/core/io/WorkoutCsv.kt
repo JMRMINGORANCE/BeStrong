@@ -211,14 +211,17 @@ object WorkoutCsv {
                         val durationMin = parseStrongDuration(r.get("duration"))
                         Row(
                             key = r.get("date") + "|" + r.get("workout name"), name = r.get("workout name"),
-                            start = start, end = durationMin?.let { start + it * 60_000L },
+                            // El formato nuevo trae la duración del entreno en segundos («Duration (sec)»)
+                            start = start,
+                            end = durationMin?.let { start + it * 60_000L } ?: num(r.get("duration (sec)"))?.takeIf { it > 0 }?.let { start + (it * 1000).toLong() },
                             notes = r.get("workout notes"), exercise = ex, exNotes = r.get("notes"), superset = null,
                             set = WorkoutSet(
                                 // Strong antiguo: «Weight» en la unidad elegida; el nuevo: «Weight (kg)» o «Weight (lbs)»
                                 weightKg = num(r.get("weight"))?.let(strongUnit::toKg) ?: num(r.get("weight (kg)"))
                                     ?: num(r.get("weight (lbs)"))?.let { WeightUnit.LB.toKg(it) } ?: 0.0,
                                 reps = num(r.get("reps"))?.toInt() ?: 0,
-                                durationSec = (num(r.get("seconds")) ?: num(r.get("duration (sec)")))?.toInt() ?: 0,
+                                // «Duration (sec)» es la del entreno entero, no la de la serie
+                                durationSec = num(r.get("seconds"))?.toInt() ?: 0,
                                 distanceM = num(r.get("distance (meters)")) ?: num(r.get("distance"))?.let { d ->
                                     if (strongUnit == WeightUnit.LB) d * METERS_PER_MILE else d * 1000
                                 } ?: 0.0,

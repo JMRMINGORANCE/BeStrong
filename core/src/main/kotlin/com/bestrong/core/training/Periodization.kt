@@ -229,7 +229,10 @@ object Periodization {
             val start = thisMonday.minusWeeks(back.toLong())
             if (since != null && start.plusDays(6).isBefore(since)) return@mapNotNull null
             val count = dates.count { !it.isBefore(start) && it.isBefore(start.plusDays(7)) }
-            minOf(1.0, count.toDouble() / weeklyGoal)
+            // La semana en que se empezó cuenta con el objetivo de los días que quedaban (empezar el jueves no es fallar)
+            val daysIn = if (since != null && start.isBefore(since)) 7 - java.time.temporal.ChronoUnit.DAYS.between(start, since).toInt() else 7
+            val goal = kotlin.math.ceil(weeklyGoal * daysIn / 7.0).toInt().coerceAtLeast(1)
+            minOf(1.0, count.toDouble() / goal)
         }
         return if (ratios.isEmpty()) null else ratios.average()
     }

@@ -673,12 +673,13 @@ object Injuries {
 object ProgressionCap {
     /**
      * Limita la subida de peso semanal a [maxWeeklyIncrease] (5 % por defecto) sobre el mejor
-     * peso de la semana anterior; nunca baja de ese peso.
+     * peso de la semana anterior; nunca baja de ese peso. Siempre deja subir al menos un escalón [minStepKg]: con
+     * pesos ligeros (40 kg al 2,5 % = 41 → 40 al redondear) el tope, si no, bloquearía toda subida para siempre.
      */
-    fun limit(suggestedKg: Double, lastWeekBestKg: Double?, maxWeeklyIncrease: Double = 0.05): Double {
+    fun limit(suggestedKg: Double, lastWeekBestKg: Double?, maxWeeklyIncrease: Double = 0.05, minStepKg: Double = 0.0): Double {
         if (lastWeekBestKg == null || lastWeekBestKg <= 0) return suggestedKg
-        val cap = Periodization.round(lastWeekBestKg * (1 + maxWeeklyIncrease))
-        return suggestedKg.coerceAtMost(cap.coerceAtLeast(lastWeekBestKg))
+        val cap = maxOf(Periodization.round(lastWeekBestKg * (1 + maxWeeklyIncrease)), lastWeekBestKg + minStepKg)
+        return suggestedKg.coerceAtMost(cap)
     }
 
     /**
@@ -686,7 +687,7 @@ object ProgressionCap {
      * [stepKg] de la unidad, sin bajar del mejor de la semana anterior.
      */
     fun limitIn(unit: com.bestrong.core.util.WeightUnit, suggestedKg: Double, lastWeekBestKg: Double?, maxWeeklyIncrease: Double, stepKg: Double): Double {
-        val limited = limit(suggestedKg, lastWeekBestKg, maxWeeklyIncrease)
+        val limited = limit(suggestedKg, lastWeekBestKg, maxWeeklyIncrease, stepKg)
         val step = unit.fromKg(stepKg)
         // En kg, sin tope aplicado o sin escalón, el tope ya vale tal cual
         if (unit == com.bestrong.core.util.WeightUnit.KG || limited >= suggestedKg - 1e-9 || step <= 0) return limited

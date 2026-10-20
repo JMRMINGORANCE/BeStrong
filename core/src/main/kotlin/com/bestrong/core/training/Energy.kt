@@ -2,6 +2,7 @@ package com.bestrong.core.training
 
 import com.bestrong.core.model.CaloriesSource
 import com.bestrong.core.model.HeartRateSample
+import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.stats.Sex
 import kotlin.math.roundToInt
@@ -219,7 +220,7 @@ object Energy {
         val activeSeconds = workout.durationSeconds()
         val blocks = cardioBlocks(workout)
         return when {
-            blocks.isEmpty() -> compute(activeSeconds, workout.completedSetCount, profile, watchKcal, heartRate, bucketSec)
+            blocks.isEmpty() -> compute(activeSeconds, workout.exercises.sumOf { we -> we.completedSets.count { it.type != SetType.WARMUP } }, profile, watchKcal, heartRate, bucketSec)
             watchKcal != null && watchKcal > 0 -> EnergyResult(watchKcal, activeKcal(watchKcal, activeSeconds, profile), CaloriesSource.WATCH)
             else -> mixedEstimate(workout, blocks, profile, heartRate, bucketSec)
         }
@@ -259,7 +260,7 @@ object Energy {
         bucketSec: Int,
     ): Pair<Double, Boolean> {
         val strengthSec = (activeSeconds - blocks.sumOf { it.durationSec.toLong() }).coerceAtLeast(0)
-        val strengthSets = workout.exercises.filter { CardioEnergy.kindOf(it.exercise.id) == null }.sumOf { it.completedSets.size }
+        val strengthSets = workout.exercises.filter { CardioEnergy.kindOf(it.exercise.id) == null }.sumOf { we -> we.completedSets.count { it.type != SetType.WARMUP } }
         val outside = heartRate.filter { s -> blocks.none { b -> b.contains(s.offsetSec) } }
         val hrAvg = coveredAverageBpm(outside, bucketSec, strengthSec).takeIf { strengthSets > 0 }
         val met = when {

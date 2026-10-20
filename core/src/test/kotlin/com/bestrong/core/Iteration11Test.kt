@@ -564,8 +564,10 @@ class CollarTest {
         val lb = com.bestrong.core.util.WeightUnit.LB
         val best = lb.toKg(90.0)
         val capped = com.bestrong.core.training.ProgressionCap.limitIn(lb, lb.toKg(95.0), best, 0.025, lb.stepKg())
-        // El tope (≈ 92 lb) se baja al escalón de 5 lb, sin bajar de las 90 de la semana pasada
-        assertEquals(90.0, lb.fromKg(capped), 1e-6)
+        // El tope (≈ 92 lb) se queda en el escalón siguiente de 5 lb: siempre se puede subir al menos uno
+        assertEquals(95.0, lb.fromKg(capped), 1e-6)
+        // Pero no más de uno: 100 lb sigue recortado a 95
+        assertEquals(95.0, lb.fromKg(com.bestrong.core.training.ProgressionCap.limitIn(lb, lb.toKg(100.0), best, 0.025, lb.stepKg())), 1e-6)
     }
 
     @Test
