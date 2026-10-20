@@ -153,7 +153,7 @@ class WorkoutForegroundService : LifecycleService() {
         workoutProgress(w)?.let(b::setStyle)
         if (rest != null) {
             // Qué viene después (lo que hay que cargar en la barra), visible en la pantalla de bloqueo
-            val next = WorkoutEditor.nextPendingSet(w)?.let { (i, set) ->
+            val next = WorkoutEditor.upcomingSet(w)?.let { (i, set) ->
                 val ex = w.exercises[i].exercise
                 val prefs = settings.settings.value
                 // Con «suma de las dos mancuernas», el total del par (como en la fila de la serie)

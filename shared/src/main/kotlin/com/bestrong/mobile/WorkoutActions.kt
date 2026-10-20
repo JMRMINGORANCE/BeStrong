@@ -110,12 +110,13 @@ class WorkoutActions @Inject constructor(
     suspend fun completeNextSet(): Boolean {
         // La serie se elige dentro de updateActive, sobre el último estado guardado: dos toques
         // seguidos (o un cambio del reloj) completan series distintas y nunca desmarcan una hecha
-        // (nextPendingSet solo devuelve series sin completar)
+        // (upcomingSet solo devuelve series sin completar). La que toca de verdad: en superseries o con ejercicios
+        // hechos fuera de orden, no la primera pendiente de la lista
         val (before, updated) = repository.updateActive { w ->
-            val (index, set) = WorkoutEditor.nextPendingSet(w) ?: return@updateActive w
+            val (index, set) = WorkoutEditor.upcomingSet(w) ?: return@updateActive w
             WorkoutEditor.toggleSetCompleted(w, w.exercises[index].id, set.id)
         } ?: return false
-        val (index, _) = WorkoutEditor.nextPendingSet(before) ?: return false
+        val (index, _) = WorkoutEditor.upcomingSet(before) ?: return false
         val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index, settings.settings.value.warmupRestSeconds)
         if (rest > 0) restTimer.start(rest) else restTimer.skip()
         return true
@@ -195,6 +196,10 @@ class WorkoutActions @Inject constructor(
 
     /** Nombre del gimnasio activo para guardarlo en el entreno (solo con varios perfiles: con uno no aporta). */
     fun currentGymName(): String? = settings.settings.value.takeIf { it.gyms.size > 1 }?.activeGym?.name
+
+    /** 2 con «suma de las dos mancuernas» en un ejercicio con mancuernas (el peso del par, como en pantalla); si no, 1. */
+    fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =
+        if (settings.settings.value.dumbbellTotal && exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
 
     /** El entreno con el gimnasio donde se ha hecho, si aún no lo tiene (al terminarlo en el móvil o en el reloj). */
     fun withGym(workout: Workout): Workout = if (workout.gymName != null) workout else workout.copy(gymName = currentGymName())

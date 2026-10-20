@@ -732,7 +732,8 @@ class ActiveWorkoutViewModel @Inject constructor(
         upcoming?.let { (i, s) ->
             val we = updated.exercises[i]
             val name = we.exercise.displayName(appContext)
-            val set = describeSet(s, we.exercise.tracking, settings.value.unit, withPace = false)
+            // Como en pantalla: con «suma de las dos mancuernas», el peso del par
+            val set = describeSet(s, we.exercise.tracking, settings.value.unit, withPace = false, weightFactor = actions.weightFactor(we.exercise))
             // En una superserie no hay descanso: no se dice «descansa 0:00»
             announcer.say(
                 if (restSeconds > 0) {

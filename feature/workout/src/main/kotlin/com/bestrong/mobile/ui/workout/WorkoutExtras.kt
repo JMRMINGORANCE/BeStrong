@@ -63,7 +63,7 @@ import kotlinx.coroutines.delay
  */
 @Composable
 fun OneHandedBar(w: Workout, vm: ActiveWorkoutViewModel, onFinish: () -> Unit) {
-    val next = WorkoutEditor.nextPendingSet(w)
+    val next = WorkoutEditor.upcomingSet(w)
     // Color explícito: la superficie del tema es transparente (deja ver el fondo de la app)
     Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp) {
         Row(

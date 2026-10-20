@@ -1254,7 +1254,7 @@ fun WorkoutSummaryDialog(
 @Composable
 private fun nextSetLabel(w: com.bestrong.core.model.Workout, dumbbellTotal: Boolean): String? {
     val unit = LocalWeightUnit.current
-    val next = WorkoutEditor.nextPendingSet(w)
+    val next = WorkoutEditor.upcomingSet(w)
     val ex = next?.let { (i, _) -> w.exercises.getOrNull(i)?.exercise }
     // Con «suma de las dos mancuernas», el peso del par (como en la fila de la serie)
     val factor = if (dumbbellTotal && ex?.equipment == Equipment.DUMBBELL) 2 else 1

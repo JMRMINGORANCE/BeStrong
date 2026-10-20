@@ -596,6 +596,19 @@ object WorkoutEditor {
     }
 
     /** Siguiente serie pendiente: (índice de ejercicio, serie) o null si está todo hecho. */
+    /**
+     * La serie que toca ahora, siguiendo el orden del entreno (superseries y ejercicios hechos fuera de orden): la
+     * siguiente tras la última marcada según [afterSetCompleted]; sin nada marcado, la primera pendiente de la lista.
+     * La usan el botón de la notificación, las teclas de volumen, el modo una mano y el «siguiente» del descanso.
+     */
+    fun upcomingSet(workout: Workout): Pair<Int, WorkoutSet>? {
+        val lastDone = workout.exercises.withIndex()
+            .mapNotNull { (i, we) -> we.sets.filter { it.completed }.maxOfOrNull { it.completedAtEpochMs ?: 0L }?.let { i to it } }
+            .maxByOrNull { it.second }?.first
+        val next = lastDone?.let { afterSetCompleted(workout, it).first }
+        return next?.let { i -> workout.exercises.getOrNull(i)?.sets?.firstOrNull { !it.completed }?.let { i to it } } ?: nextPendingSet(workout)
+    }
+
     fun nextPendingSet(workout: Workout): Pair<Int, WorkoutSet>? {
         workout.exercises.forEachIndexed { i, we ->
             we.sets.firstOrNull { !it.completed }?.let { return i to it }

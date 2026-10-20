@@ -46,7 +46,7 @@ fun RestPip(repository: BeStrongRepository, restTimer: RestTimerController, unit
             }
             w?.let { wk ->
                 // Fuera del árbol de la app (sin su unidad): en tu unidad y con mancuernas como total, como la notificación
-                WorkoutEditor.nextPendingSet(wk)?.let { (i, s) ->
+                WorkoutEditor.upcomingSet(wk)?.let { (i, s) ->
                     val we = wk.exercises[i]
                     Text(
                         stringResource(R.string.pip_next, we.exercise.displayName() + " · " + describeSet(s, we.exercise, unit, if (dumbbellTotal && we.exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1)),
