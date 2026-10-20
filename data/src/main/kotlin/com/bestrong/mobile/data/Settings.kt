@@ -382,7 +382,11 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private fun android.content.SharedPreferences.Editor.putTyped(k: String, expected: Any?, v: kotlinx.serialization.json.JsonElement) {
         val p = v as? JsonPrimitive
         when {
-            expected is Set<*> && v is JsonArray -> putStringSet(k, v.mapNotNull { (it as? JsonPrimitive)?.content }.toSet())
+            // Favoritos, ocultos y consejos vistos se suman a los de ahora (restaurar no quita lo marcado después)
+            expected is Set<*> && v is JsonArray -> putStringSet(
+                k,
+                v.mapNotNull { (it as? JsonPrimitive)?.content }.toSet() + (if (k in UNION_SET_KEYS) expected.map { it.toString() } else emptyList()),
+            )
             p == null -> Unit
             p.isString -> if (expected is String) putString(k, p.content)
             expected is Boolean -> p.booleanOrNull?.let { putBoolean(k, it) }
@@ -407,3 +411,6 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
 
 /** Hora del recordatorio de pesarse (por la mañana, en ayunas). */
 const val WEIGH_IN_HOUR = 8
+
+/** Ajustes de conjunto que al restaurar se juntan con los actuales en vez de sustituirlos. */
+private val UNION_SET_KEYS = setOf("favorites", "hidden_exercises", "dismissed_tips")

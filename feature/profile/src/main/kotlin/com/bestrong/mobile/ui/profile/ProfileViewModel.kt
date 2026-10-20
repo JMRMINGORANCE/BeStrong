@@ -303,7 +303,7 @@ class ProfileViewModel @Inject constructor(
         var completed = 0
         rows.forEach { row ->
             val old = byDay[day(row.dateEpochMs)]
-            val merged = old?.let { fillMissing(it, row) } ?: row
+            val merged = old?.filledFrom(row) ?: row
             if (merged != old) {
                 // Como las demás: con la exportación activada, el peso y la grasa también a Health Connect
                 saveMeasurementNow(merged, force = false, known = listOfNotNull(old))
@@ -313,16 +313,6 @@ class ProfileViewModel @Inject constructor(
         }
         return added to completed
     }
-
-    /** [old] con lo que le falta tomado de [row] (lo que ya tenía no se toca). */
-    private fun fillMissing(old: BodyMeasurement, row: BodyMeasurement) = old.copy(
-        weightKg = old.weightKg ?: row.weightKg,
-        bodyFatPct = old.bodyFatPct ?: row.bodyFatPct,
-        waistCm = old.waistCm ?: row.waistCm,
-        chestCm = old.chestCm ?: row.chestCm,
-        armCm = old.armCm ?: row.armCm,
-        thighCm = old.thighCm ?: row.thighCm,
-    )
 
     /** Los pesos de la báscula borrados aquí vuelven a traerse en la próxima importación. */
     fun restoreIgnoredHealthWeights() = viewModelScope.launch {

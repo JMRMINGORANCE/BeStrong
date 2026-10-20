@@ -356,9 +356,22 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         val routineIds = routinesOnce().map { it.id }.toSet()
         val newRoutines = data.routines.filter { it.id !in routineIds }
         addRoutines(newRoutines)
-        val measurementIds = measurementsOnce().map { it.id }.toSet()
-        val newMeasurements = data.measurements.filter { it.id !in measurementIds }
-        newMeasurements.forEach { saveMeasurement(it) }
+        // Por día, como al importar: si ese día ya hay una medida (la báscula del móvil nuevo), se completa con lo que
+        // le falte en vez de dejar dos puntos el mismo día en la gráfica
+        val zone = java.time.ZoneId.systemDefault()
+        fun day(m: BodyMeasurement) = java.time.Instant.ofEpochMilli(m.dateEpochMs).atZone(zone).toLocalDate()
+        val local = measurementsOnce()
+        val measurementIds = local.map { it.id }.toSet()
+        val byDay = local.associateBy(::day).toMutableMap()
+        val newMeasurements = data.measurements.filter { it.id !in measurementIds }.filter { row ->
+            val old = byDay[day(row)]
+            val merged = old?.filledFrom(row) ?: row
+            if (merged != old) {
+                saveMeasurement(merged)
+                byDay[day(merged)] = merged
+            }
+            old == null
+        }
         // El programa de la copia solo si ahora no se sigue ninguno
         val program = data.activeProgram?.takeIf { activeProgramOnce() == null }
         program?.let { setActiveProgram(it) }

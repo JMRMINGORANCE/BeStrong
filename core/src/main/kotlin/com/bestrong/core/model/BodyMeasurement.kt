@@ -18,4 +18,14 @@ data class BodyMeasurement(
      * allí ya está el suyo y saldría dos veces.
      */
     val weightFromHealth: Boolean = false,
-)
+) {
+    /** Esta medida con lo que le falta tomado de [row] (lo que ya tenía no se toca): juntar dos del mismo día. */
+    fun filledFrom(row: BodyMeasurement): BodyMeasurement = copy(
+        weightKg = weightKg ?: row.weightKg,
+        bodyFatPct = bodyFatPct ?: row.bodyFatPct,
+        waistCm = waistCm ?: row.waistCm,
+        chestCm = chestCm ?: row.chestCm,
+        armCm = armCm ?: row.armCm,
+        thighCm = thighCm ?: row.thighCm,
+    )
+}
