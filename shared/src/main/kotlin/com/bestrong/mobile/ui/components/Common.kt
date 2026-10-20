@@ -220,7 +220,15 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier, spoken
             ),
     ) {
         Column(Modifier.padding(horizontal = 14.dp, vertical = 12.dp)) {
-            Text(value, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            // En tres columnas de un móvil estrecho «12.345 kg» no cabe: encoge antes de cortarse («12.3…»)
+            val valueStyle = MaterialTheme.typography.headlineSmall
+            androidx.compose.foundation.text.BasicText(
+                value,
+                style = valueStyle.copy(fontWeight = FontWeight.Black, color = androidx.compose.material3.LocalContentColor.current),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 12.sp, maxFontSize = valueStyle.fontSize),
+            )
             // Con letra grande la etiqueta encoge antes de cortarse («Duraci…»)
             AutoSizeLabel(label)
         }

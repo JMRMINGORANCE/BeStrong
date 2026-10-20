@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -105,7 +105,15 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
                 }
                 Row {
                     Text(re.exercise.displayName(), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(load, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                    // Con series distintas la carga es larga: no deja sin sitio al nombre (pasa a dos líneas)
+                    Text(
+                        load,
+                        Modifier.padding(start = 8.dp).weight(1f, fill = false),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                        maxLines = 2,
+                    )
                 }
                 if (re.notes.isNotBlank()) Text(re.notes, style = MaterialTheme.typography.labelSmall)
             }
@@ -145,7 +153,8 @@ fun SuggestedRoutineCard(routine: Routine, onStart: () -> Unit) {
 fun HeroButton(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
     Button(
         onClick = onClick,
-        modifier = modifier.height(52.dp),
+        // Mínimo, no fijo: con letra grande o «Lancer la routine» el texto pasa a dos líneas sin cortarse
+        modifier = modifier.heightIn(min = 52.dp),
         colors = androidx.compose.material3.ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             contentColor = MaterialTheme.colorScheme.onSurface,
@@ -448,8 +457,9 @@ fun IntakeCard(vm: HomeViewModel) {
             range?.let { LinearProgressIndicator(progress = { (intake.proteinG.toFloat() / it.first).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
             Text(stringResource(R.string.intake_water, intake.waterMl))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilledTonalButton(onClick = { vm.addIntake(proteinG = 20) }) { Text(stringResource(R.string.intake_add_protein)) }
-                FilledTonalButton(onClick = { vm.addIntake(waterMl = 250) }) { Text(stringResource(R.string.intake_add_water)) }
+                // Mitad y mitad: en francés («+20 g de protéines») el segundo no queda aplastado
+                FilledTonalButton(onClick = { vm.addIntake(proteinG = 20) }, Modifier.weight(1f)) { Text(stringResource(R.string.intake_add_protein), textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
+                FilledTonalButton(onClick = { vm.addIntake(waterMl = 250) }, Modifier.weight(1f)) { Text(stringResource(R.string.intake_add_water), textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
             }
             BodyWeightQuickEntry(bw) { vm.logBodyWeight(it) }
         }
@@ -536,7 +546,6 @@ private fun CustomCardioGoal(vm: HomeViewModel, current: HomeViewModel.CardioWee
     var text by remember { mutableStateOf(current.goalMin?.toString() ?: current.goalKm?.let { com.bestrong.core.util.formatGoalKm(it) }.orEmpty()) }
     var invalid by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(stringResource(R.string.cardio_goal_custom), style = MaterialTheme.typography.bodySmall)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             androidx.compose.material3.OutlinedTextField(
                 value = text,
@@ -546,6 +555,8 @@ private fun CustomCardioGoal(vm: HomeViewModel, current: HomeViewModel.CardioWee
                 },
                 isError = invalid,
                 singleLine = true,
+                // Como etiqueta del campo: TalkBack dice qué se escribe, no solo «cuadro de edición»
+                label = { Text(stringResource(R.string.cardio_goal_custom)) },
                 keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
                 modifier = Modifier.weight(1f),
             )

@@ -12,10 +12,15 @@ fun formatWeight(kg: Double): String {
     }
 }
 
-/** 12_345.0 → "12.345" */
-fun formatVolume(kg: Double): String {
+/**
+ * 12_345.0 → "12.345" (en idiomas con coma decimal) o "12 345" (espacio fino en el resto: en inglés «12.345»
+ * se leería como doce coma tres, y la coma chocaría con los decimales de los pesos).
+ */
+fun formatVolume(kg: Double, locale: java.util.Locale = java.util.Locale.getDefault()): String {
     val n = kg.roundToLong()
-    return n.toString().reversed().chunked(3).joinToString(".").reversed()
+    val separator = if (java.text.DecimalFormatSymbols.getInstance(locale).decimalSeparator == ',') "." else "\u202F"
+    val digits = kotlin.math.abs(n).toString().reversed().chunked(3).joinToString(separator).reversed()
+    return if (n < 0) "-$digits" else digits
 }
 
 /** Objetivo en km con los decimales que tenga, hasta dos: «20», «12,5», «12,04» (en el idioma del móvil). */

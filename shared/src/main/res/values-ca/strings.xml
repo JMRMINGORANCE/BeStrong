@@ -366,6 +366,9 @@
     <string name="metric_volume">Volum</string>
     <string name="month_next">Mes següent</string>
     <string name="month_previous">Mes anterior</string>
+    <string name="week_previous">Setmana anterior</string>
+    <string name="week_next">Setmana següent</string>
+    <string name="week_current">Tornar a aquesta setmana</string>
     <string name="more_options">Més opcions</string>
     <string name="msg_forgotten_saved">Entrenament desat amb l’hora de l’última sèrie</string>
     <string name="msg_no_watch">No s’ha trobat cap rellotge connectat</string>

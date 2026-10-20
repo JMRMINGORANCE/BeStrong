@@ -366,6 +366,9 @@
     <string name="metric_volume">Volumen</string>
     <string name="month_next">Nächster Monat</string>
     <string name="month_previous">Vorheriger Monat</string>
+    <string name="week_previous">Vorherige Woche</string>
+    <string name="week_next">Nächste Woche</string>
+    <string name="week_current">Zurück zu dieser Woche</string>
     <string name="more_options">Weitere Optionen</string>
     <string name="msg_forgotten_saved">Training mit der Zeit des letzten Satzes gespeichert</string>
     <string name="msg_no_watch">Keine verbundene Uhr gefunden</string>

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -200,11 +201,11 @@ fun WorkoutScreen(
                 }
 
                 when (we.exercise.tracking) {
-                    TrackingType.DURATION -> BigValue("${set.durationSec}", "s", selected = true) {}
+                    TrackingType.DURATION -> BigValue("${set.durationSec}", "s", selected = true, onClick = null)
                     TrackingType.CARDIO -> if (set.isRunning) {
                         CardioStopwatch(set.startedAtEpochMs ?: 0L)
                     } else {
-                        BigValue("${set.durationSec / 60}", "min", selected = true) {}
+                        BigValue("${set.durationSec / 60}", "min", selected = true, onClick = null)
                     }
                     else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         // Lo marcado es lo que mueve el bisel (sin peso a la vista, las reps o los metros)
@@ -289,11 +290,13 @@ fun WorkoutScreen(
 }
 
 @Composable
-private fun BigValue(value: String, unit: String, selected: Boolean, onClick: () -> Unit) {
+private fun BigValue(value: String, unit: String, selected: Boolean, onClick: (() -> Unit)?) {
+    // Zona táctil de 48 dp: es lo que elige qué ajusta la corona. Como opción seleccionable (TalkBack dice cuál
+    // está marcada); sin [onClick] (duración, cronómetro) no se anuncia como un botón que no hace nada
+    val choose = onClick?.let { Modifier.selectable(selected = selected, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = it) } ?: Modifier
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        // Zona táctil de 48 dp: es lo que elige qué ajusta la corona
-        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).clickable(onClick = onClick).padding(horizontal = 4.dp),
+        modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).then(choose).padding(horizontal = 4.dp),
     ) {
         Text(
             value,
@@ -325,5 +328,5 @@ private fun CardioStopwatch(startedAtEpochMs: Long) {
             kotlinx.coroutines.delay(1000)
         }
     }
-    BigValue(com.bestrong.core.util.formatDuration(elapsed), "", selected = true) {}
+    BigValue(com.bestrong.core.util.formatDuration(elapsed), "", selected = true, onClick = null)
 }

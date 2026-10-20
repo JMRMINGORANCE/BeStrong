@@ -366,6 +366,9 @@
     <string name="metric_volume">Volume</string>
     <string name="month_next">Mes seguinte</string>
     <string name="month_previous">Mes anterior</string>
+    <string name="week_previous">Semana anterior</string>
+    <string name="week_next">Semana seguinte</string>
+    <string name="week_current">Volver a esta semana</string>
     <string name="more_options">Máis opcións</string>
     <string name="msg_forgotten_saved">Adestramento gardado coa hora da última serie</string>
     <string name="msg_no_watch">Non se atopou ningún reloxo conectado</string>

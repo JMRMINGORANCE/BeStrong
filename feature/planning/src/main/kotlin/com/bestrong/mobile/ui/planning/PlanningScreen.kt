@@ -45,6 +45,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -149,13 +150,21 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
     var cellWidth by remember { mutableIntStateOf(1) }
     PlanCard(stringResource(R.string.cal_title)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { weekOffset-- }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.action_back)) }
+            IconButton(onClick = { weekOffset-- }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.week_previous)) }
             Text(
                 stringResource(R.string.cal_week_of, formatShortDate(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())),
-                Modifier.weight(1f),
+                // Lejos de hoy, tocar la fecha vuelve a esta semana
+                Modifier.weight(1f).then(
+                    if (weekOffset != 0) {
+                        Modifier.clickable(onClickLabel = stringResource(R.string.week_current)) { weekOffset = 0 }.minimumInteractiveComponentSize()
+                    } else {
+                        Modifier
+                    },
+                ),
                 textAlign = TextAlign.Center,
+                color = if (weekOffset != 0) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Unspecified,
             )
-            IconButton(onClick = { weekOffset++ }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.action_next)) }
+            IconButton(onClick = { weekOffset++ }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.week_next)) }
         }
         Text(stringResource(R.string.cal_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(Modifier.fillMaxWidth().onSizeChanged { cellWidth = (it.width / 7).coerceAtLeast(1) }, horizontalArrangement = Arrangement.spacedBy(4.dp)) {

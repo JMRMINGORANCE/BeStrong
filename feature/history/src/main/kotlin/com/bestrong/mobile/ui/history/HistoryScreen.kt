@@ -45,6 +45,7 @@ import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -609,7 +610,8 @@ private fun WorkoutGymLine(w: Workout, vm: HistoryViewModel) {
         "🏋️ " + (w.gymName ?: stringResource(R.string.history_gym_unknown)),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.clickable(onClickLabel = stringResource(R.string.history_gym_change)) { picking = true },
+        // Zona de toque de 48 dp: la línea sola mide unos 16
+        modifier = Modifier.clickable(onClickLabel = stringResource(R.string.history_gym_change)) { picking = true }.minimumInteractiveComponentSize(),
     )
     if (picking) {
         AlertDialog(

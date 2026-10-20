@@ -1,6 +1,7 @@
 package com.bestrong.wear.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -10,6 +11,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
@@ -36,14 +38,15 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
     val unit = LocalWeightUnit.current
     val listState = rememberScalingLazyListState()
     val zone = ZoneId.systemDefault()
-    val thisWeek = WorkoutStats.weeklySummary(history, 1, LocalDate.now(zone), zone).first().workouts
-    val streak = WorkoutStats.weeklyStreak(history, LocalDate.now(zone), zone)
+    // Solo cambian con el historial (no a cada recomposición al girar la corona)
+    val thisWeek = androidx.compose.runtime.remember(history) { WorkoutStats.weeklySummary(history, 1, LocalDate.now(zone), zone).first().workouts }
+    val streak = androidx.compose.runtime.remember(history) { WorkoutStats.weeklyStreak(history, LocalDate.now(zone), zone) }
     // La de hoy (como el tile «Hoy toca»), arriba del todo: sin girar la corona para buscarla
     val today = androidx.compose.runtime.remember(routines, history) { container.store.todayRoutine() }
 
     ScreenScaffold(scrollState = listState) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
-            item { ListHeader { Text("BeStrong", color = Brand, style = MaterialTheme.typography.titleLarge) } }
+            item { ListHeader { Text(stringResource(R.string.app_name), color = Brand, style = MaterialTheme.typography.titleLarge) } }
             item {
                 Text(
                     pluralStringResource(R.plurals.week_summary, thisWeek, thisWeek, streak),
@@ -126,13 +129,18 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
             history.firstOrNull()?.let { last ->
                 item { ListHeader { Text(stringResource(R.string.last)) } }
                 item {
-                    Button(
-                        onClick = {},
-                        enabled = false,
-                        label = { Text(last.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                        secondaryLabel = { Text("${formatDuration(last.durationSeconds())} · ${unit.formatVolume(last.totalVolume)}") },
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    // Solo información: texto normal (un botón desactivado se ve apagado y TalkBack dice «desactivado»)
+                    androidx.compose.foundation.layout.Column(
+                        Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                    ) {
+                        Text(last.name, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            "${formatDuration(last.durationSeconds())} · ${unit.formatVolume(last.totalVolume)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
         }

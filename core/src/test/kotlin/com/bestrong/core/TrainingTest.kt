@@ -36,7 +36,8 @@ class TrainingTest {
     @Test fun units() {
         assertEquals("225", WeightUnit.LB.format(WeightUnit.LB.toKg(225.0)))
         assertEquals("82,5 kg", WeightUnit.KG.format(82.5, withUnit = true))
-        assertEquals("12.345 kg", WeightUnit.KG.formatVolume(12_345.0))
+        assertEquals("12.345 kg", WeightUnit.KG.formatVolume(12_345.0, java.util.Locale("es")))
+        assertEquals("12\u202F345 kg", WeightUnit.KG.formatVolume(12_345.0, java.util.Locale.US))
         assertEquals("220 lb", WeightUnit.LB.formatVolume(WeightUnit.LB.toKg(220.0)))
         assertEquals(100.0, WeightUnit.KG.parseToKg("100")!!, 0.0)
     }
