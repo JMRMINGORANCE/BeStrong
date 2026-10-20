@@ -50,6 +50,9 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
     private suspend fun backUp(deps: WorkerEntryPoint, settingsStore: com.bestrong.mobile.data.SettingsStore, tree: Uri): Result {
         return runCatching {
             val data = deps.backup().data()
+            // Sin nada que guardar (móvil nuevo antes de restaurar): no se escribe una copia vacía, que sustituiría a la
+            // buena del mismo día o, con la rotación, acabaría borrando la última copia con datos
+            if (data.history.isEmpty() && data.routines.isEmpty() && data.measurements.isEmpty()) return@runCatching
             val date = LocalDate.now()
             // Prefijo propio: la rotación nunca toca las exportaciones manuales («bestrong-fecha.csv»)
             write(tree, "$PREFIX$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
