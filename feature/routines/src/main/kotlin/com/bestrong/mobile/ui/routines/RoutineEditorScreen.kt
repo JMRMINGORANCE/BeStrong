@@ -97,8 +97,19 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
         onDismissDelete = { confirmDelete = false },
         onDismissRest = { restFor = null },
     )
+    val snackbar = remember { androidx.compose.material3.SnackbarHostState() }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    androidx.compose.runtime.LaunchedEffect(vm) {
+        vm.removed.collect { message ->
+            // Uno nuevo sustituye al anterior (solo se puede deshacer el último)
+            snackbar.currentSnackbarData?.dismiss()
+            val result = snackbar.showSnackbar(context.getString(message), context.getString(R.string.action_undo), duration = androidx.compose.material3.SnackbarDuration.Short)
+            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) vm.undoRemove()
+        }
+    }
     // El teclado también cuenta como borde: así las series de abajo pueden subir por encima de él
     Scaffold(
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbar) },
         contentWindowInsets = androidx.compose.material3.ScaffoldDefaults.contentWindowInsets.union(WindowInsets.ime),
         topBar = {
             TopAppBar(

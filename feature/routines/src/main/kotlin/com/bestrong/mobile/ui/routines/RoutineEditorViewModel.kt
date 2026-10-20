@@ -187,7 +187,31 @@ class RoutineEditorViewModel @Inject constructor(
     private fun updateExercise(id: String, block: (RoutineExercise) -> RoutineExercise) =
         _routine.update { r -> r.copy(exercises = r.exercises.map { if (it.id == id) block(it) else it }) }
 
-    fun removeExercise(id: String) = _routine.update { r -> r.copy(exercises = r.exercises.filterNot { it.id == id }).normalizedSupersets() }
+    /** Rutina antes del último borrado y la de justo después (para «Deshacer» del aviso). */
+    private var undo: Pair<Routine, Routine>? = null
+
+    private val _removed = kotlinx.coroutines.flow.MutableSharedFlow<Int>(extraBufferCapacity = 1)
+
+    /** Aviso de borrado (texto) para ofrecer «Deshacer»: un toque de más en ✕ no se lleva series, notas ni tempo. */
+    val removed: kotlinx.coroutines.flow.SharedFlow<Int> = _removed
+
+    fun removeExercise(id: String) = removeWithUndo(R.string.undo_exercise_deleted) { r -> r.copy(exercises = r.exercises.filterNot { it.id == id }).normalizedSupersets() }
+
+    private fun removeWithUndo(message: Int, block: (Routine) -> Routine) {
+        val before = _routine.value
+        val after = block(before)
+        if (after == before) return
+        _routine.value = after
+        undo = before to after
+        _removed.tryEmit(message)
+    }
+
+    /** Deshace el último borrado si no se ha tocado nada desde entonces (si no, se perderían esos cambios). */
+    fun undoRemove() {
+        val (before, after) = undo ?: return
+        undo = null
+        if (_routine.value == after) _routine.value = before
+    }
 
     /** Copia del ejercicio justo debajo (p. ej. un bloque de series de descarga), fuera de superserie. */
     fun duplicateExercise(id: String) = _routine.update { r ->
@@ -203,7 +227,9 @@ class RoutineEditorViewModel @Inject constructor(
     fun moveExercise(from: Int, to: Int) = _routine.update { r -> r.moveKeepingSupersets(from, down = to > from).normalizedSupersets() }
 
     fun addSet(id: String) = updateExercise(id) { re -> re.copy(sets = re.sets + (re.sets.lastOrNull() ?: RoutineSet())) }
-    fun removeSet(id: String, index: Int) = updateExercise(id) { re -> re.copy(sets = re.sets.filterIndexed { i, _ -> i != index }) }
+    fun removeSet(id: String, index: Int) = removeWithUndo(R.string.undo_set_deleted) { r ->
+        r.copy(exercises = r.exercises.map { re -> if (re.id == id) re.copy(sets = re.sets.filterIndexed { i, _ -> i != index }) else re })
+    }
     fun updateSet(id: String, index: Int, block: (RoutineSet) -> RoutineSet) =
         updateExercise(id) { re -> re.copy(sets = re.sets.mapIndexed { i, s -> if (i == index) block(s) else s }) }
     fun setRest(id: String, seconds: Int) = updateExercise(id) { it.copy(restSeconds = seconds) }

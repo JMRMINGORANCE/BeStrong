@@ -615,21 +615,10 @@ private fun ExerciseList(
         itemsIndexed(w.exercises, key = { _, we -> we.id }) { index, we ->
             val groupIndex = we.supersetId?.let { groups.indexOf(it) }
             val folded = we.supersetId == null && we.sets.isNotEmpty() && we.sets.all { it.completed } && we.id != lastDoneId && we.id !in reopened
-            if (folded) {
-                DoneExerciseRow(we) { reopened = reopened + we.id }
-                return@itemsIndexed
+            // Al saltar, mover o plegar, la tarjeta se desliza a su sitio en vez de aparecer de golpe (no se pierde de vista)
+            androidx.compose.foundation.layout.Box(Modifier.animateItem()) {
+                if (folded) DoneExerciseRow(we) { reopened = reopened + we.id } else ExerciseItem(w, we, index, groupIndex, previous, suggestions, vm)
             }
-            ExerciseCard(
-                we = we,
-                index = index,
-                count = w.exercises.size,
-                previous = previous(we.exercise.id),
-                suggestion = suggestions[we.exercise.id],
-                supersetLabel = groupIndex?.let { stringResource(R.string.superset_label, ('A' + it).toString()) },
-                supersetColor = groupIndex?.let { supersetColors[it % supersetColors.size] },
-                nextInSuperset = w.exercises.getOrNull(index + 1)?.supersetId?.let { it == we.supersetId } == true,
-                vm = vm,
-            )
         }
         item {
             Button(onClick = onAddExercises, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -639,6 +628,29 @@ private fun ExerciseList(
         }
         item { TipCard("swipe_sets", R.string.tip_swipe, Modifier.fillMaxWidth().padding(horizontal = 16.dp)) }
     }
+}
+
+@Composable
+private fun ExerciseItem(
+    w: Workout,
+    we: WorkoutExercise,
+    index: Int,
+    groupIndex: Int?,
+    previous: (String) -> List<WorkoutSet>,
+    suggestions: Map<String, ProgressionSuggestion>,
+    vm: ActiveWorkoutViewModel,
+) {
+    ExerciseCard(
+        we = we,
+        index = index,
+        count = w.exercises.size,
+        previous = previous(we.exercise.id),
+        suggestion = suggestions[we.exercise.id],
+        supersetLabel = groupIndex?.let { stringResource(R.string.superset_label, ('A' + it).toString()) },
+        supersetColor = groupIndex?.let { supersetColors[it % supersetColors.size] },
+        nextInSuperset = w.exercises.getOrNull(index + 1)?.supersetId?.let { it == we.supersetId } == true,
+        vm = vm,
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
