@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -354,18 +355,27 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             title = { Text(w.name) },
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
+                // Corregir series es a lo que más se entra en un entreno pasado: a la vista, no en el menú
                 if (editing) {
                     IconButton(onClick = { editing = false }) { Icon(Icons.Default.Check, stringResource(R.string.history_edit_done)) }
+                } else {
+                    IconButton(onClick = { editing = true }) { Icon(Icons.Default.Edit, stringResource(R.string.history_edit)) }
                 }
                 Box {
                     IconButton(onClick = { WorkoutShareCard.share(context, w, records, unit) }) { Icon(Icons.Default.Share, stringResource(R.string.share_workout)) }
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text(stringResource(R.string.history_edit)) }, onClick = { menu = false; editing = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.history_edit_info)) }, onClick = { menu = false; editInfo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.repeat_workout)) }, onClick = { menu = false; vm.repeat(w, onWorkoutStarted) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.copy_to_day)) }, onClick = { menu = false; copying = true })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.save_as_routine)) }, onClick = { menu = false; vm.saveAsRoutine(w) })
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.save_as_routine)) },
+                            onClick = {
+                                menu = false
+                                vm.saveAsRoutine(w)
+                                android.widget.Toast.makeText(context, context.getString(R.string.saved_as_routine), android.widget.Toast.LENGTH_SHORT).show()
+                            },
+                        )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.share_as_text)) },
                             onClick = {

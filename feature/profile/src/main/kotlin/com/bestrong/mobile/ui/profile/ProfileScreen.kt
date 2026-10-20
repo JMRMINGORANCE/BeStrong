@@ -57,6 +57,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.PermissionController
@@ -344,6 +346,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 checked = settings.progressionEnabled,
                             ) { v -> vm.updateSettings { it.copy(progressionEnabled = v) } }
                             WarmupRestSetting(settings.warmupRestSeconds) { v -> vm.updateSettings { it.copy(warmupRestSeconds = v) } }
+                            SettingsSubheader(stringResource(R.string.settings_during))
                             SwitchItem(stringResource(R.string.rest_countdown), checked = settings.restCountdown) { v ->
                                 vm.updateSettings { it.copy(restCountdown = v) }
                             }
@@ -416,6 +419,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 onEdit = { editingGym = it },
                                 onAdd = { editingGym = GymProfile(name = "") },
                             )
+                            SettingsSubheader(stringResource(R.string.settings_health))
                             SwitchItem(
                                 title = stringResource(R.string.hc_export),
                                 body = when {
@@ -452,6 +456,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 supportingContent = { Text(reminderSummary(settings)) },
                                 modifier = Modifier.clickable { showReminders = true },
                             )
+                            SettingsSubheader(stringResource(R.string.settings_data))
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.auto_backup)) },
                                 supportingContent = {
@@ -494,6 +499,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 trailingContent = { TextButton(onClick = { importLauncher.launch(arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) }) { Text(stringResource(R.string.action_import)) } },
                             )
                             DataToolsSection(vm)
+                            SettingsSubheader(stringResource(R.string.settings_help))
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.help)) },
                                 supportingContent = { Text(stringResource(R.string.help_body)) },
@@ -642,5 +648,16 @@ private fun WeekVsAverage(weeks: List<com.bestrong.core.stats.WeekBucket>, value
     com.bestrong.mobile.ui.components.MetaPill(
         stringResource(R.string.stat_week_vs_avg, format(value(now)), format(past.sumOf(value) / past.size)),
         Modifier.padding(vertical = 6.dp),
+    )
+}
+
+/** Subapartado dentro del panel de Ajustes: la lista larga se escanea por bloques en vez de leerla entera. */
+@Composable
+private fun SettingsSubheader(text: String) {
+    Text(
+        text,
+        Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 4.dp).semantics { heading() },
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
     )
 }

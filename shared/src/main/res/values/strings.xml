@@ -476,6 +476,7 @@
     <string name="chart_change_since">%1$s desde el %2$s</string>
     <string name="pip_next">Siguiente: %1$s</string>
     <string name="plan_generated_saved">%1$d rutinas guardadas</string>
+    <string name="saved_as_routine">Guardado como rutina</string>
     <string name="plan_program_saved">Programa «%1$s» guardado</string>
     <string name="planning">Planificación</string>
     <string name="planning_open">Planificar</string>
@@ -663,6 +664,10 @@
     <string name="sets_per_muscle">Series por músculo (30 días)</string>
     <string name="sets_times_exercise">%1$d × %2$s</string>
     <string name="settings">Ajustes</string>
+    <string name="settings_during">Durante el entreno</string>
+    <string name="settings_health">Salud y recordatorios</string>
+    <string name="settings_data">Copias y datos</string>
+    <string name="settings_help">Ayuda e información</string>
     <string name="sex_female">Mujer</string>
     <string name="sex_male">Hombre</string>
     <plurals name="share_more_exercises">
