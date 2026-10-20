@@ -240,6 +240,9 @@ class ProfileViewModel @Inject constructor(
 
     fun saveMeasurement(m: BodyMeasurement) = viewModelScope.launch { saveMeasurementNow(m, force = false) }
 
+    /** Día (epochDay, hora local) de una medida: así se recuerdan los pesos de la báscula descartados. */
+    private fun localDay(m: BodyMeasurement): Long = java.time.Instant.ofEpochMilli(m.dateEpochMs).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay()
+
     /**
      * Guarda la medida; a Health Connect solo si cambian el peso o la grasa ([force]: siempre, al deshacer un
      * borrado).
@@ -248,7 +251,10 @@ class ProfileViewModel @Inject constructor(
         // [known]: las medidas ya leídas (importando muchas no se relee la tabla en cada una)
         val before = (known ?: repo.measurementsOnce()).firstOrNull { it.id == m.id }
         // Un peso de la báscula corregido a mano sigue sin exportarse: allí ya está el de la báscula (saldría doble)
-        val saved = m
+        // Si se quitó el peso de la báscula, no vuelve al importar otra vez (como al borrar la medida)
+        val clearedHealth = before?.weightFromHealth == true && m.weightKg == null
+        if (clearedHealth) repo.ignoreHealthWeightDay(localDay(m))
+        val saved = if (clearedHealth) m.copy(weightFromHealth = false) else m
         repo.saveMeasurement(saved)
         val healthChanged = force || before == null || before.weightKg != saved.weightKg || before.bodyFatPct != saved.bodyFatPct
         if (!healthChanged || !settingsStore.settings.value.healthConnectExport) return
@@ -344,9 +350,7 @@ class ProfileViewModel @Inject constructor(
             repo.deleteMeasurement(id)
             // Una de la báscula no vuelve al importar de nuevo
             // (por día: si se unió a otra medida del día, su hora no es la de la báscula)
-            if (m?.weightFromHealth == true) {
-                repo.ignoreHealthWeightDay(java.time.Instant.ofEpochMilli(m.dateEpochMs).atZone(ZoneId.systemDefault()).toLocalDate().toEpochDay())
-            }
+            if (m?.weightFromHealth == true) repo.ignoreHealthWeightDay(localDay(m))
             runCatching { healthConnect.deleteMeasurement(id) }
         }
     }
@@ -537,6 +541,8 @@ class ProfileViewModel @Inject constructor(
             }
             DeleteKind.MEASUREMENTS -> repo.measurements.value.onEach {
                 repo.deleteMeasurement(it.id)
+                // Los pesos de la báscula no vuelven en la siguiente importación
+                if (it.weightFromHealth) repo.ignoreHealthWeightDay(localDay(it))
                 runCatching { healthConnect.deleteMeasurement(it.id) }
             }.size
             DeleteKind.PHOTOS -> photoStore.photos.value.onEach { photoStore.delete(it) }.size

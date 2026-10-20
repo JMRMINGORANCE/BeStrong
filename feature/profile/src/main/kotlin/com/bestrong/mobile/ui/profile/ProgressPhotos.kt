@@ -58,10 +58,21 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
     // El desbloqueo dura mientras la pantalla está abierta (no se guarda al girar ni al volver)
     val locks = settings.lockProgressPhotos && BiometricLock.isAvailable(context)
     var unlocked by remember { mutableStateOf(!locks) }
-    val pickPhoto = rememberGuardedPicker(locks, unlocked, onLock = { unlocked = false }, onPicked = vm::addPhoto)
     var comparing by rememberSaveable { mutableStateOf(false) }
     val chosen = remember { mutableStateListOf<String>() }
     var toDelete by remember { mutableStateOf<ProgressPhoto?>(null) }
+    // Al volver a bloquear se cierran también la foto ampliada y la comparación (si no, quedaban a la vista
+    // sin pedir la huella, y sin la protección contra capturas)
+    val pickPhoto = rememberGuardedPicker(
+        locks,
+        unlocked,
+        onLock = {
+            unlocked = false
+            toDelete = null
+            chosen.clear()
+        },
+        onPicked = vm::addPhoto,
+    )
     val unlockTitle = stringResource(R.string.progress_unlock_title)
 
     com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
@@ -117,7 +128,7 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
             }
         }
     }
-    if (comparing && chosen.size == 2) {
+    if (unlocked && comparing && chosen.size == 2) {
         val pair = chosen.mapNotNull { id -> photos.firstOrNull { it.file.name == id } }.sortedBy { it.dateEpochMs }
         AlertDialog(
             onDismissRequest = { chosen.clear() },
@@ -140,7 +151,7 @@ fun ProgressPhotosSection(vm: ProfileViewModel) {
             confirmButton = { TextButton(onClick = { chosen.clear() }) { Text(stringResource(R.string.action_close)) } },
         )
     }
-    toDelete?.let { p ->
+    toDelete?.takeIf { unlocked }?.let { p ->
         AlertDialog(
             onDismissRequest = { toDelete = null },
             // Tocar una foto la abre para verla; borrar es la opción secundaria, no lo primero que se ofrece

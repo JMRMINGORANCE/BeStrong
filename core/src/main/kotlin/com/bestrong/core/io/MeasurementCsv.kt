@@ -90,7 +90,8 @@ object MeasurementCsv {
             // «Fat mass (kg)», «masa grasa», «Fat-free…»: no son el % de grasa (salvo que diga «%»: «Masse grasse (%)»)
             field == "fat" && !percent && listOf("mass", "masa", "massa", "kg", "free", "libre", "lb", "lbs").any(::has) -> Column("")
             field == "weight" && listOf("lb", "lbs", "pounds", "libras").any(::has) -> Column(field, LB_TO_KG)
-            field in CIRCUMFERENCES && listOf("in", "inch", "inches", "pulgadas", "zoll").any(::has) -> Column(field, INCH_TO_CM)
+            // «in» suelto también es la preposición («Bauchumfang in cm», «Waist in cm»): con «cm» no son pulgadas
+            field in CIRCUMFERENCES && !has("cm") && listOf("in", "inch", "inches", "pulgadas", "zoll").any(::has) -> Column(field, INCH_TO_CM)
             else -> Column(field)
         }
     }

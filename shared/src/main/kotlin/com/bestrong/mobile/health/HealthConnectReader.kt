@@ -87,7 +87,7 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
         val resting = if (HealthPermission.getReadPermission(RestingHeartRateRecord::class) in ok) {
             runCatching {
                 client.readRecords(ReadRecordsRequest(RestingHeartRateRecord::class, TimeRangeFilter.between(now.minus(Duration.ofDays(30)), now)))
-                    .records.sortedBy { it.time }.map { it.beatsPerMinute.toInt() }
+                    .records.sortedBy { it.time }.map { it.time to it.beatsPerMinute.toInt() }
             }.getOrDefault(emptyList())
         } else {
             emptyList()
@@ -104,8 +104,9 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
             heightCm = height,
             weights = weights,
             sleepHours = sleep,
-            restingHr = resting.lastOrNull(),
-            baselineRestingHr = resting.takeIf { it.size >= 3 }?.average()?.toInt(),
+            // El de hoy solo si es reciente (uno de hace dos semanas, enfermo, no dice cómo estás hoy); la media, del mes
+            restingHr = resting.lastOrNull()?.takeIf { (time, _) -> time > now.minus(Duration.ofHours(RECENT_RESTING_HOURS)) }?.second,
+            baselineRestingHr = resting.takeIf { it.size >= 3 }?.map { it.second }?.average()?.toInt(),
         )
     }
 
@@ -145,3 +146,6 @@ fun mergedMinutes(intervals: List<Pair<java.time.Instant, java.time.Instant>>): 
     if (start != null && end != null) total += Duration.between(start, end).toMinutes()
     return total
 }
+
+/** Pulso en reposo que todavía vale como «el de hoy». */
+private const val RECENT_RESTING_HOURS = 36L
