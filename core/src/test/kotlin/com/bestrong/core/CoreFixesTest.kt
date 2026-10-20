@@ -137,4 +137,10 @@ class CoreFixesTest {
         val m = MeasurementCsv.read("2024-01-01,80.5,,,,,\n2024-01-08,80.0,,,,,\n", ZoneOffset.UTC)
         assertEquals(2, m.rows.size)
     }
+
+    @Test fun spokenKilosWinOverPoundsUnit() {
+        val lb = com.bestrong.core.util.WeightUnit.LB
+        assertEquals(80.0, com.bestrong.core.training.VoiceSetParser.parse("80 kilos 8 reps").weightKg(lb)!!, 1e-9)
+        assertEquals(lb.toKg(80.0), com.bestrong.core.training.VoiceSetParser.parse("80 por 8").weightKg(lb)!!, 1e-9)
+    }
 }

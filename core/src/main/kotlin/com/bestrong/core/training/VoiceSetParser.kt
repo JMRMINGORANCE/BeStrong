@@ -3,7 +3,23 @@ package com.bestrong.core.training
 import java.text.Normalizer
 
 /** Serie dictada: peso (en la unidad dicha o la del usuario), reps y RPE si se mencionan. */
-data class SpokenSet(val weight: Double? = null, val reps: Int? = null, val rpe: Double? = null, val pounds: Boolean = false)
+data class SpokenSet(
+    val weight: Double? = null,
+    val reps: Int? = null,
+    val rpe: Double? = null,
+    val pounds: Boolean = false,
+    /** Se dijo «kilos» (o kg) expresamente: vale aunque la app esté en libras. */
+    val kilos: Boolean = false,
+) {
+    /** El peso en kg: la unidad dicha manda sobre la de la app («80 kilos» en libras son 80 kg). */
+    fun weightKg(unit: com.bestrong.core.util.WeightUnit): Double? = weight?.let { w ->
+        when {
+            pounds -> com.bestrong.core.util.WeightUnit.LB.toKg(w)
+            kilos -> w
+            else -> unit.toKg(w)
+        }
+    }
+}
 
 /**
  * Entiende frases como «80 kilos 8 repeticiones», «ochenta por ocho», «82 y medio por 5 RPE 8»,
@@ -42,6 +58,7 @@ object VoiceSetParser {
         var reps: Int? = null
         var rpe: Double? = null
         var pounds = false
+        var kilos = false
         val loose = mutableListOf<Double>()
         var i = 0
         while (i < tokens.size) {
@@ -54,7 +71,7 @@ object VoiceSetParser {
                 when {
                     next != null && next in weightWords -> {
                         weight = t.v
-                        if (next in poundWords) pounds = true
+                        if (next in poundWords) pounds = true else kilos = true
                         i += 2
                         continue
                     }
@@ -78,7 +95,7 @@ object VoiceSetParser {
             reps == null && weight != null && loose.isNotEmpty() -> reps = loose[0].toInt()
             weight == null && reps == null && loose.size == 1 -> reps = loose[0].toInt()
         }
-        return SpokenSet(weight, reps?.takeIf { it in 0..200 }, rpe, pounds)
+        return SpokenSet(weight, reps?.takeIf { it in 0..200 }, rpe, pounds, kilos)
     }
 
     private fun normalize(s: String): String =

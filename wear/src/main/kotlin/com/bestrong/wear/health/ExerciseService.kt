@@ -47,6 +47,7 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -77,6 +78,12 @@ class ExerciseService : LifecycleService() {
     /** Tipo del ejercicio abierto en Health Services (pesas o la máquina de cardio en marcha). */
     private var currentType: ExerciseType? = null
 
+    /**
+     * El ejercicio abierto es el de una carrera/caminata/bici suelta: si se empieza una rutina mientras tanto, sus
+     * calorías y su pulso son de la carrera (ya guardada aparte) y no cuentan para las pesas.
+     */
+    @Volatile private var cardioSegment = false
+
     private val callback = object : ExerciseUpdateCallback {
         override fun onExerciseUpdateReceived(update: ExerciseUpdate) {
             val m = update.latestMetrics
@@ -89,6 +96,7 @@ class ExerciseService : LifecycleService() {
                 m.getData(DataType.SPEED).lastOrNull()?.let { cardio.onSpeed(it.value) }
                 return
             }
+            if (cardioSegment) return
             m.getData(DataType.HEART_RATE_BPM).forEach { p ->
                 session.onHeartRate(p.value.roundToInt(), p.getTimeInstant(boot).toEpochMilli())
             }
@@ -210,6 +218,7 @@ class ExerciseService : LifecycleService() {
             // otro pondría las calorías y las estadísticas de pulso a cero
             if (type != null && !ownsExerciseInProgress()) startSegment(type)
             currentType = type
+            cardioSegment = false
         } catch (e: Exception) {
             Log.w(TAG, "No se pudo iniciar la sesión de Health Services", e)
         }
@@ -245,18 +254,22 @@ class ExerciseService : LifecycleService() {
     private suspend fun followCardio() {
         session.workout
             .map { w -> w?.let { WorkoutEditor.runningCardio(it) }?.first?.exercise?.id }
+            // También al acabar una carrera suelta con una rutina abierta (del móvil): vuelta a pesas
+            .combine(cardio.state.map { it != null }) { id, running -> id to running }
             .distinctUntilChanged()
             .collect { if (!cardio.isActive && session.workout.value != null) switchTo(wantedType()) }
     }
 
     private suspend fun switchTo(type: ExerciseType) {
         val target = runCatching { supportedOrNull(type) }.getOrNull() ?: ExerciseType.WEIGHTLIFTING
-        if (target == currentType || currentType == null) return
+        if ((target == currentType && !cardioSegment) || currentType == null) return
         runCatching {
             exerciseClient.endExercise()
             // Health Services tarda un momento en cerrar el ejercicio anterior
             withTimeoutOrNull(SWITCH_TIMEOUT_MS) { while (ownsExerciseInProgress()) delay(SWITCH_POLL_MS) }
-            session.onHealthSegmentChanged()
+            // Lo de una carrera suelta no es un tramo de este entreno
+            if (!cardioSegment) session.onHealthSegmentChanged()
+            cardioSegment = false
             startSegment(target)
             currentType = target
         }.onFailure { Log.w(TAG, "No se pudo cambiar de ejercicio en Health Services", it) }
@@ -288,6 +301,11 @@ class ExerciseService : LifecycleService() {
             val wanted = setOf(DataType.HEART_RATE_BPM, DataType.CALORIES_TOTAL, DataType.DISTANCE_TOTAL, DataType.SPEED)
             val gps = checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) == android.content.pm.PackageManager.PERMISSION_GRANTED
             exerciseClient.setUpdateCallback(callback)
+            cardioSegment = true
+            currentType = type
+            // Si Android reinició la app a mitad de la carrera, se sigue con ella: empezar otra pondría la
+            // distancia y las calorías a cero
+            if (ownsExerciseInProgress()) return
             exerciseClient.startExercise(
                 ExerciseConfig.builder(type)
                     .setDataTypes(wanted.filter { it in supported }.toSet())
@@ -324,6 +342,7 @@ class ExerciseService : LifecycleService() {
     private fun stopEverything(startId: Int, endExercise: Boolean = exerciseStarted) {
         exerciseStarted = false
         currentType = null
+        cardioSegment = false
         sessionJob?.cancel()
         sessionJob = null
         stopJob?.cancel()

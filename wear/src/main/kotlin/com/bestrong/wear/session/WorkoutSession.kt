@@ -307,10 +307,7 @@ class WorkoutSession @Inject constructor(
         val remote = if (local == null) incoming else WorkoutMerge.merge(local, incoming)
         if (remote == local) return
         val isNew = local == null || local.id != remote.id
-        // Dos entrenos distintos (empezados a la vez sin conexión) y gana el del móvil: lo hecho en el reloj no se
-        // pierde, se le manda terminado; pero solo si el móvil nunca lo tuvo (si lo tuvo, ya lo terminó o lo descartó)
-        val unknownToPhone = local != null && local.id != incoming.id && phoneKnew != local.id
-        if (isNew && unknownToPhone && local.exercises.any { we -> we.sets.any { it.completed } }) sendReplaced(local)
+        if (isNew && local != null) wrapUp(local, knownToPhone = phoneKnew == local.id)
         _workout.value = remote
         store.activeWorkout = remote
         // Se sigue en el mismo ejercicio aunque el móvil haya borrado o movido otros
@@ -335,10 +332,24 @@ class WorkoutSession @Inject constructor(
     /** El móvil terminó o descartó el entreno. */
     fun clearFromRemote() {
         val w = _workout.value ?: return
-        // Lo medido por el reloj (pulso completo y calorías) se manda al móvil, que ya guardó el entreno
+        wrapUp(w, knownToPhone = true)
+        // Sin marcarlo como terminado: el móvil puede deshacer el descarte y devolver el mismo entreno
+        _workout.value = null
+        store.activeWorkout = null
+        // Con una carrera en marcha el ejercicio de Health Services es de los dos: no se corta
+        if (store.activeCardio == null) ExerciseService.stop(context)
+    }
+
+    /**
+     * Cierra en el reloj un entreno que el móvil sustituye o ya cerró: sin envíos ni descansos pendientes (su descanso
+     * no sigue sonando en el siguiente). Si el móvil nunca lo tuvo (empezados a la vez sin conexión), lo hecho en el
+     * reloj no se pierde: se le manda terminado; si lo tuvo, ya lo guardó allí y se le manda el pulso y las calorías.
+     */
+    private fun wrapUp(w: Workout, knownToPhone: Boolean) {
+        if (!knownToPhone && w.exercises.any { we -> we.sets.any { it.completed } }) sendReplaced(w)
         val m = _metrics.value
         val samples = hr.samples()
-        if (samples.isNotEmpty() || m.calories != null) {
+        if (knownToPhone && (samples.isNotEmpty() || m.calories != null)) {
             val data = WorkoutHealthData(w.id, m.avgHeartRate, m.maxHeartRate, m.calories, samples)
             scope.launch { phoneSync.sendWorkoutHealth(data) }
         }
@@ -348,11 +359,6 @@ class WorkoutSession @Inject constructor(
         stopTempo()
         stopRest()
         repCounter.stop()
-        // Sin marcarlo como terminado: el móvil puede deshacer el descarte y devolver el mismo entreno
-        _workout.value = null
-        store.activeWorkout = null
-        // Con una carrera en marcha el ejercicio de Health Services es de los dos: no se corta
-        if (store.activeCardio == null) ExerciseService.stop(context)
     }
 
     private fun isInForeground(): Boolean {
@@ -781,8 +787,7 @@ class WorkoutSession @Inject constructor(
         if (spoken.weight == null && spoken.reps == null) return false
         val we = currentExercise() ?: return false
         val s = currentSet() ?: return false
-        val unit = store.settings.value.unit
-        val kg = spoken.weight?.let { w -> if (spoken.pounds) w * 0.45359237 else unit.toKg(w) }
+        val kg = spoken.weightKg(store.settings.value.unit)
         edit { w ->
             WorkoutEditor.updateSet(w, we.id, s.id) {
                 it.copy(
