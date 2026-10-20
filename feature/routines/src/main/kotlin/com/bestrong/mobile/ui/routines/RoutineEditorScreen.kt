@@ -190,7 +190,8 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
 @Composable
 private fun SmallNumberField(label: String, value: String, modifier: Modifier, decimal: Boolean = false, onChange: (String) -> Unit) {
     // Texto local: así "82," no se convierte en "82" mientras se escribe
-    var text by remember { mutableStateOf(value) }
+    // Un 0 se ve como pista, no como texto: así se escribe «8» y no «08» sin tener que borrar antes
+    var text by remember { mutableStateOf(value.takeUnless { it == "0" }.orEmpty()) }
     OutlinedTextField(
         value = text,
         onValueChange = { new ->
@@ -198,8 +199,10 @@ private fun SmallNumberField(label: String, value: String, modifier: Modifier, d
             onChange(text)
         },
         label = { Text(label) },
+        placeholder = { Text("0") },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number),
+        // «Siguiente» del teclado pasa de kg a reps (y a la serie de abajo) sin tocar la pantalla
+        keyboardOptions = KeyboardOptions(keyboardType = if (decimal) KeyboardType.Decimal else KeyboardType.Number, imeAction = androidx.compose.ui.text.input.ImeAction.Next),
         modifier = modifier,
     )
 }

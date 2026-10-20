@@ -155,11 +155,20 @@ fun SetRow(
             onDismiss = { timing = false },
         )
     }
+    val focus = androidx.compose.ui.platform.LocalFocusManager.current
+    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    // Marcar la serie: un toque físico de confirmación (manos sudadas, sin mirar) y fuera el teclado, que si no
+    // tapa la barra del descanso que acaba de empezar
+    val toggle = {
+        focus.clearFocus()
+        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+        onToggle()
+    }
     val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
         // Deslizar a la izquierda borra; a la derecha completa (o desmarca) la serie
         when (it) {
             SwipeToDismissBoxValue.EndToStart -> onDelete()
-            SwipeToDismissBoxValue.StartToEnd -> onToggle()
+            SwipeToDismissBoxValue.StartToEnd -> toggle()
             else -> Unit
         }
         false
@@ -193,9 +202,9 @@ fun SetRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 var menu by remember { mutableStateOf(false) }
-                var editingNote by remember { mutableStateOf(false) }
+                var editingNote by rememberSaveable(set.id) { mutableStateOf(false) }
                 if (editingNote) {
-                    var text by remember { mutableStateOf(set.note) }
+                    var text by rememberSaveable(set.id) { mutableStateOf(set.note) }
                     AlertDialog(
                         onDismissRequest = { editingNote = false },
                         title = { Text(stringResource(R.string.set_note)) },
@@ -379,7 +388,7 @@ fun SetRow(
                 }
                 FilledIconToggleButton(
                     checked = set.completed,
-                    onCheckedChange = { onToggle() },
+                    onCheckedChange = { toggle() },
                     modifier = Modifier.semantics { stateDescription = stateText },
                 ) {
                     Icon(Icons.Default.Check, stringResource(R.string.set_complete, label))

@@ -60,6 +60,7 @@
     <string name="exercise_show_sets">Ver series</string>
     <string name="add_measurement">Engadir medida</string>
     <string name="add_n">Engadir %1$d</string>
+    <string name="picker_leave_q">Engadir os exercicios escollidos?</string>
     <string name="add_set">+ Engadir serie</string>
     <string name="add_warmup">Engadir quecemento</string>
     <string name="all">Todos</string>

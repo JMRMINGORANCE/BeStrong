@@ -60,6 +60,7 @@
     <string name="exercise_show_sets">Show sets</string>
     <string name="add_measurement">Add measurement</string>
     <string name="add_n">Add %1$d</string>
+    <string name="picker_leave_q">Add the selected exercises?</string>
     <string name="add_set">+ Add set</string>
     <string name="add_warmup">Add warm-up sets</string>
     <string name="all">All</string>

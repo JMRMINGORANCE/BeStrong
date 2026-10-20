@@ -145,11 +145,23 @@ fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (
     val picked = androidx.compose.runtime.saveable.rememberSaveable(
         saver = androidx.compose.runtime.saveable.listSaver<androidx.compose.runtime.snapshots.SnapshotStateList<String>, String>({ it.toList() }, { it.toMutableStateList() }),
     ) { mutableStateListOf<String>() }
+    // Salir con ejercicios marcados no los tira sin avisar (Atrás por costumbre tras elegir cinco)
+    var confirmLeave by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
+    val leave = { if (picked.isEmpty()) onBack() else confirmLeave = true }
+    androidx.activity.compose.BackHandler(enabled = picked.isNotEmpty()) { confirmLeave = true }
+    if (confirmLeave) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirmLeave = false },
+            title = { Text(stringResource(R.string.picker_leave_q)) },
+            confirmButton = { androidx.compose.material3.Button(onClick = { confirmLeave = false; onPicked(picked.toList()) }) { Text(stringResource(R.string.add_n, picked.size)) } },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { confirmLeave = false; onBack() }) { Text(stringResource(R.string.action_discard)) } },
+        )
+    }
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.add_exercises)) },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
+                navigationIcon = { IconButton(onClick = leave) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
             )
         },
         floatingActionButton = {

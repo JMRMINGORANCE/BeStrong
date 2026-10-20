@@ -161,10 +161,10 @@ fun ActiveWorkoutScreen(
     val deadline by vm.deadline.collectAsStateWithLifecycle()
     val suggestions by vm.suggestions.collectAsStateWithLifecycle()
     val metrics by vm.watchMetrics.collectAsStateWithLifecycle()
-    var confirmFinish by remember { mutableStateOf(false) }
-    var confirmDiscard by remember { mutableStateOf(false) }
-    var renaming by remember { mutableStateOf(false) }
-    var editingNotes by remember { mutableStateOf(false) }
+    var confirmFinish by rememberSaveable { mutableStateOf(false) }
+    var confirmDiscard by rememberSaveable { mutableStateOf(false) }
+    var renaming by rememberSaveable { mutableStateOf(false) }
+    var editingNotes by rememberSaveable { mutableStateOf(false) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val dumbbellTotal = vm.settings.collectAsStateWithLifecycle().value.dumbbellTotal
@@ -394,7 +394,7 @@ fun ActiveWorkoutScreen(
         )
     }
     if (renaming) {
-        var name by remember { mutableStateOf(w.name) }
+        var name by rememberSaveable { mutableStateOf(w.name) }
         AlertDialog(
             onDismissRequest = { renaming = false },
             title = { Text(stringResource(R.string.workout_name)) },
@@ -404,7 +404,7 @@ fun ActiveWorkoutScreen(
         )
     }
     if (editingNotes) {
-        var notes by remember { mutableStateOf(w.notes) }
+        var notes by rememberSaveable { mutableStateOf(w.notes) }
         AlertDialog(
             onDismissRequest = { editingNotes = false },
             title = { Text(stringResource(R.string.workout_notes)) },
@@ -657,12 +657,12 @@ private fun ExerciseCard(
     val unit = LocalWeightUnit.current
     var menu by remember { mutableStateOf(false) }
     var editRest by remember { mutableStateOf(false) }
-    var editNotes by remember { mutableStateOf(false) }
-    var editPinned by remember { mutableStateOf(false) }
+    var editNotes by rememberSaveable { mutableStateOf(false) }
+    var editPinned by rememberSaveable { mutableStateOf(false) }
     var editIncrement by remember { mutableStateOf(false) }
     val stepKg = vm.settings.collectAsStateWithLifecycle().value.stepKgFor(we.exercise.id)
     val pinnedNote = vm.pinnedNotes.collectAsStateWithLifecycle().value[we.exercise.id].orEmpty()
-    var editTempo by remember { mutableStateOf(false) }
+    var editTempo by rememberSaveable { mutableStateOf(false) }
     var substituting by remember { mutableStateOf(false) }
     var showHistory by remember { mutableStateOf(false) }
     var editBar by remember { mutableStateOf(false) }
@@ -925,7 +925,7 @@ private fun ExerciseCard(
         )
     }
     if (editTempo) {
-        var tempo by remember { mutableStateOf(we.tempo.orEmpty()) }
+        var tempo by rememberSaveable { mutableStateOf(we.tempo.orEmpty()) }
         val valid = tempo.isBlank() || Tempo.parse(tempo) != null
         AlertDialog(
             onDismissRequest = { editTempo = false },
@@ -948,7 +948,7 @@ private fun ExerciseCard(
         )
     }
     if (editNotes) {
-        var notes by remember { mutableStateOf(we.notes) }
+        var notes by rememberSaveable { mutableStateOf(we.notes) }
         AlertDialog(
             onDismissRequest = { editNotes = false },
             title = { Text(stringResource(R.string.notes)) },
@@ -986,7 +986,7 @@ private fun ExerciseCard(
         )
     }
     if (editPinned) {
-        var note by remember { mutableStateOf(pinnedNote) }
+        var note by rememberSaveable { mutableStateOf(pinnedNote) }
         AlertDialog(
             onDismissRequest = { editPinned = false },
             title = { Text(stringResource(R.string.pinned_note)) },
@@ -1142,6 +1142,8 @@ fun WorkoutSummaryDialog(
     val unit = LocalWeightUnit.current
     AlertDialog(
         onDismissRequest = onDone,
+        // Un toque fuera sin querer no se lleva la valoración ni «Guardar como rutina» (Atrás y «Hecho» sí cierran)
+        properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = false),
         icon = { Icon(Icons.Default.EmojiEvents, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary) },
         title = { Text(stringResource(R.string.workout_completed), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black) },
         text = {

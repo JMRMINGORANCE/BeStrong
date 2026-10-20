@@ -60,6 +60,7 @@
     <string name="exercise_show_sets">Mostra les sèries</string>
     <string name="add_measurement">Afegir mesura</string>
     <string name="add_n">Afegir %1$d</string>
+    <string name="picker_leave_q">Afegir els exercicis triats?</string>
     <string name="add_set">+ Afegir sèrie</string>
     <string name="add_warmup">Afegir escalfament</string>
     <string name="all">Tots</string>

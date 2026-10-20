@@ -60,6 +60,7 @@
     <string name="exercise_show_sets">Voir les séries</string>
     <string name="add_measurement">Ajouter une mesure</string>
     <string name="add_n">Ajouter %1$d</string>
+    <string name="picker_leave_q">Ajouter les exercices choisis ?</string>
     <string name="add_set">+ Ajouter une série</string>
     <string name="add_warmup">Ajouter des séries d’échauffement</string>
     <string name="all">Tous</string>
