@@ -434,14 +434,19 @@ private fun RoutineCard(
 private fun ShareRoutineDialog(routine: Routine, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val link = remember(routine) { RoutineShare.link(routine) }
-    val qr = remember(link) { RoutineShare.qr(link).asImageBitmap() }
+    // Una rutina muy larga no cabe en un QR (fallaba al abrir): entonces solo el enlace
+    val qr = remember(link) { runCatching { RoutineShare.qr(link).asImageBitmap() }.getOrNull() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.share_routine_title, routine.name)) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Image(qr, contentDescription = stringResource(R.string.share_routine_link), modifier = Modifier.size(240.dp))
-                Text(stringResource(R.string.share_routine_hint), style = MaterialTheme.typography.bodySmall)
+                if (qr != null) {
+                    Image(qr, contentDescription = stringResource(R.string.share_routine_link), modifier = Modifier.size(240.dp))
+                    Text(stringResource(R.string.share_routine_hint), style = MaterialTheme.typography.bodySmall)
+                } else {
+                    Text(stringResource(R.string.share_qr_too_long), style = MaterialTheme.typography.bodyMedium)
+                }
             }
         },
         confirmButton = { TextButton(onClick = { RoutineShare.shareLink(context, routine); onDismiss() }) { Text(stringResource(R.string.share_routine_send)) } },

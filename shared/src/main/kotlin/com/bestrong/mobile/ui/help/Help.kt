@@ -209,7 +209,11 @@ fun TutorialDialog(
         onSex(chosenSex)
         onDone()
     }
-    Dialog(onDismissRequest = {}, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
+    // Atrás vuelve a la pantalla anterior (en la primera no hace nada: la bienvenida no se salta sin querer)
+    Dialog(
+        onDismissRequest = { if (pager.currentPage > 0) scope.launch { pager.animateScrollToPage(pager.currentPage - 1) } },
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
+    ) {
         val setup = pager.currentPage == TUTORIAL.size
         // Cada pantalla tiñe el fondo con su color (acento, ámbar, verde…)
         val tint = tutorialTint(pager.currentPage)

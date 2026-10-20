@@ -609,6 +609,8 @@
     <string name="routine_edit">Editar rutina</string>
     <string name="routine_emoji">Emoji de la rutina</string>
     <string name="routine_imported">Rutina «%1$s» importada</string>
+    <string name="routine_link_invalid">No se pudo leer la rutina del enlace (incompleto o de una versión más nueva de BeStrong).</string>
+    <string name="share_qr_too_long">Demasiado larga para un código QR: envía el enlace.</string>
     <string name="routine_import_confirm_title">¿Importar rutina?</string>
     <string name="routine_import_confirm_text">Se añadirá «%1$s» (%2$d ejercicios) a «Mis rutinas». Impórtala solo si confías en quien te la ha enviado.</string>
     <string name="routine_last_done">Última vez: %1$s</string>

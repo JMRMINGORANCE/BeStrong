@@ -609,6 +609,8 @@
     <string name="routine_edit">Edit routine</string>
     <string name="routine_emoji">Routine emoji</string>
     <string name="routine_imported">Routine “%1$s” imported</string>
+    <string name="routine_link_invalid">Couldn\'t read the routine in this link (incomplete or from a newer BeStrong).</string>
+    <string name="share_qr_too_long">Too long for a QR code: send the link instead.</string>
     <string name="routine_import_confirm_title">Import routine?</string>
     <string name="routine_import_confirm_text">“%1$s” (%2$d exercises) will be added to “My routines”. Only import it if you trust whoever sent it.</string>
     <string name="routine_last_done">Last done: %1$s</string>

@@ -366,13 +366,19 @@ class HomeViewModel @Inject constructor(
 
     /** Un enlace puede llegar de cualquier web o app: se pregunta antes de guardarla. */
     fun importRoutineLink(link: String) {
-        _pendingImport.value = RoutineLink.decode(link) ?: return
+        // Si no se puede leer (cortado o de una versión más nueva), se dice: antes la app se abría sin más
+        val routine = RoutineLink.decode(link)
+        if (routine == null) message(context.getString(R.string.routine_link_invalid)) else _pendingImport.value = routine
     }
 
     /** Confirmada: se añade a «Mis rutinas». */
     fun confirmImport() = viewModelScope.launch {
         val routine = _pendingImport.value ?: return@launch
         _pendingImport.value = null
+        // Sus ejercicios propios (o que esta versión no conoce) pasan a tu biblioteca: si no, no salen en el
+        // selector, no se pueden editar ni tienen sugerencia de progresión
+        routine.exercises.map { it.exercise }.distinctBy { it.id }.filter { repo.exercise(it.id) == null }
+            .forEach { repo.saveCustomExercise(it.copy(isCustom = true)) }
         repo.saveRoutine(routine)
         message(context.getString(R.string.routine_imported, routine.name))
     }
