@@ -222,6 +222,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 indicatorColor = scheme.primary,
                 selectedIconColor = scheme.onPrimary,
                 selectedTextColor = scheme.primary,
+                unselectedIconColor = scheme.onSurfaceVariant,
+                unselectedTextColor = scheme.onSurfaceVariant,
             ),
         )
         // Cada pestaña con su color de fondo, como las pantallas de la bienvenida

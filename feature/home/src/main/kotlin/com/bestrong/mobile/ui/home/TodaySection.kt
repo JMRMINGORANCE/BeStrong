@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -95,7 +96,8 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
                 }
             }
             com.bestrong.mobile.ui.components.ExerciseThumbStrip(session.routine.exercises.map { it.exercise }, 44.dp, modifier = Modifier.padding(vertical = 8.dp))
-            session.routine.exercises.forEach { re ->
+            // Los primeros con su carga (la tira de arriba ya los enseña todos): el botón de empezar sigue a la vista
+            session.routine.exercises.take(TODAY_SHOWN).forEach { re ->
                 val weights = re.sets.map { it.weightKg }.distinct()
                 val reps = re.sets.map { it.reps }.distinct()
                 val load = when {
@@ -116,6 +118,9 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
                     )
                 }
                 if (re.notes.isNotBlank()) Text(re.notes, style = MaterialTheme.typography.labelSmall)
+            }
+            (session.routine.exercises.size - TODAY_SHOWN).takeIf { it > 0 }?.let { n ->
+                Text(androidx.compose.ui.res.pluralStringResource(R.plurals.share_more_exercises, n, n), style = MaterialTheme.typography.labelMedium, modifier = Modifier.alpha(0.8f))
             }
             HeroButton(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
                 Icon(Icons.Default.PlayArrow, null)
@@ -672,3 +677,6 @@ private fun DayCircle(d: DayOfWeek, week: WeekProgress, locale: java.util.Locale
         )
     }
 }
+
+/** Ejercicios de la sesión de hoy que se listan con su carga en la tarjeta. */
+private const val TODAY_SHOWN = 4

@@ -111,6 +111,7 @@ fun HomeScreen(
     val lastByRoutine by vm.lastByRoutine.collectAsStateWithLifecycle()
     val gymNames by vm.gymNames.collectAsStateWithLifecycle()
     val today by vm.today.collectAsStateWithLifecycle()
+    val missed by vm.missedSession.collectAsStateWithLifecycle()
     val suggested by vm.suggestedRoutine.collectAsStateWithLifecycle()
     val week by vm.week.collectAsStateWithLifecycle()
     val plannedDays by vm.plannedDays.collectAsStateWithLifecycle()
@@ -166,6 +167,8 @@ fun HomeScreen(
                     item(span = full) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }) }
                 }
             }
+            // Una sesión planificada que se pasó, con «hacerla hoy»: arriba, no debajo de todas las rutinas
+            missedSessionItem(noWorkout = active == null, missed = missed, vm = vm, onOpenWorkout = onOpenWorkout)
             item(span = full) {
                 QuickActions(
                     // Si arriba ya hay una tarjeta destacada (entreno abierto, lo que toca), el entreno libre no compite con ella
@@ -221,7 +224,6 @@ fun HomeScreen(
             // En una sola columna: las tarjetas que no tienen nada que enseñar no dejan huecos en la rejilla
             item(span = full) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    MissedSessionCard(vm, onOpenWorkout)
                     YearAgoCard(vm, onOpenExercise)
                     CardioWeekCard(vm)
                     StaleRoutineCard(vm)
@@ -255,7 +257,8 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, rest: com.best
                 Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerLowest),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.Default.PlayArrow, stringResource(R.string.action_continue), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
+                // La tarjeta ya dice «Continuar» al tocarla: el icono no lo repite
+                Icon(Icons.Default.PlayArrow, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(32.dp))
             }
         }
         androidx.compose.material3.LinearProgressIndicator(
@@ -372,7 +375,8 @@ private fun RoutineCard(
     var sharing by remember { mutableStateOf(false) }
     val context = LocalContext.current
     if (sharing) ShareRoutineDialog(routine) { sharing = false }
-    com.bestrong.mobile.ui.components.Panel(onClick = onEdit) {
+    // TalkBack: «toca dos veces para editar» (no un «activar» sin más)
+    com.bestrong.mobile.ui.components.Panel(onClick = onEdit, onClickLabel = stringResource(R.string.action_edit)) {
         Row(verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(routine.displayName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -654,4 +658,8 @@ private fun OpenBuilderAfterWelcome(vm: HomeViewModel, open: () -> Unit) {
             vm.clearPendingBuilder()
         }
     }
+}
+
+private fun androidx.compose.foundation.lazy.grid.LazyGridScope.missedSessionItem(noWorkout: Boolean, missed: Any?, vm: HomeViewModel, onOpenWorkout: () -> Unit) {
+    if (noWorkout && missed != null) item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) { MissedSessionCard(vm, onOpenWorkout) }
 }

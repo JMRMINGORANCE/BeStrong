@@ -77,7 +77,9 @@ class HomeViewModel @Inject constructor(
         val snap = runCatching { healthReader.read() }.getOrNull()
         healthConnected.value = snap != null && (snap.sleepHours != null || snap.restingHr != null)
         val lastRating = repo.history.value.firstOrNull { it.rating != null }?.rating
-        _readiness.value = Readiness.score(snap?.sleepHours, snap?.restingHr, snap?.baselineRestingHr, lastRating)
+        // Sin ningún dato (ni sueño, ni pulso en reposo, ni valoración) no hay nota: antes salía un «70 · Normal» inventado
+        val anyData = snap?.sleepHours != null || snap?.restingHr != null || lastRating != null
+        _readiness.value = if (anyData) Readiness.score(snap?.sleepHours, snap?.restingHr, snap?.baselineRestingHr, lastRating) else null
         intakeStore.refresh()
     }
 
