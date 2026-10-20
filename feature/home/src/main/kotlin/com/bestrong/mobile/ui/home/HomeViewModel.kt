@@ -10,7 +10,6 @@ import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.training.ActiveProgram
-import com.bestrong.core.training.Fatigue
 import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.PeriodizedProgram
 import com.bestrong.core.training.PeriodizedPrograms
@@ -43,6 +42,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -94,18 +94,6 @@ class HomeViewModel @Inject constructor(
     val bodyWeightKg: StateFlow<Double?> = repo.measurements.map { m -> m.sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
-    /** Sesión que toca hoy del programa activo (con las cargas ya calculadas). */
-    val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state) { active, history, plan ->
-        val session = active?.let { Periodization.nextSession(it, history, context.appLanguage(), plan.customPrograms, context.programTexts()) }
-        // Semana de descarga del mesociclo: la sesión se aligera sola
-        if (session != null && plan.mesocycle?.isDeloadWeek(LocalDate.now()) == true) session.copy(routine = Fatigue.deload(session.routine, context.getString(R.string.deload_label))) else session
-    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
-    /** Ajustes (gimnasio activo para el selector de arriba). */
-    val settings: StateFlow<com.bestrong.mobile.data.UserSettings> = settingsStore.settings
-
-    fun setActiveGym(id: String) = settingsStore.update { it.copy(activeGymId = id) }
-
     /** Cada hora: lo que depende de la fecha (la semana del cardio) cambia al pasar de domingo a lunes sin otro aviso. */
     private val hourTick = kotlinx.coroutines.flow.flow {
         while (true) {
@@ -113,6 +101,25 @@ class HomeViewModel @Inject constructor(
             kotlinx.coroutines.delay(HOUR_MS)
         }
     }
+
+    /**
+     * Cambia al pasar la medianoche (mirado cada hora): con Inicio a la vista toda la noche (un plegable en su soporte),
+     * la sesión, la sugerencia y la semana no se quedan en las de ayer.
+     */
+    private val dayTick = hourTick.map { LocalDate.now() }.distinctUntilChanged()
+
+    /** Sesión que toca hoy del programa activo (con las cargas ya calculadas). */
+    val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state, dayTick) { active, history, plan, _ ->
+        // Semana de descarga del mesociclo: la sesión se aligera sola
+        active?.let {
+            Periodization.sessionWithDeload(it, history, context.appLanguage(), plan.customPrograms, context.programTexts(), plan.mesocycle, context.getString(R.string.deload_label))
+        }
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Ajustes (gimnasio activo para el selector de arriba). */
+    val settings: StateFlow<com.bestrong.mobile.data.UserSettings> = settingsStore.settings
+
+    fun setActiveGym(id: String) = settingsStore.update { it.copy(activeGymId = id) }
 
     /** Cardio de esta semana (metros, segundos) y el objetivo de km, para la tarjeta de Inicio. */
     data class CardioWeek(val meters: Double, val seconds: Long, val goalKm: Double?, val goalMin: Int? = null, val streak: Int = 0) {
@@ -166,7 +173,7 @@ class HomeViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), settingsStore.settings.value.gyms.associate { it.id to it.name })
 
     /** Si no hay programa: la rutina que lleva más tiempo sin hacerse. */
-    val suggestedRoutine: StateFlow<Routine?> = combine(repo.routines, repo.history, planning.state) { routines, history, plan ->
+    val suggestedRoutine: StateFlow<Routine?> = combine(repo.routines, repo.history, planning.state, dayTick) { routines, history, plan, _ ->
         val last = history.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
         val usable = routines.filter { it.exercises.isNotEmpty() && !it.archived }
         // La planificada para hoy (si aún no se ha hecho hoy); si no, la que lleva más tiempo sin hacerse
@@ -177,13 +184,15 @@ class HomeViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     /** Rutina → días de esta semana en que está planificada (para enseñarlo en su tarjeta). */
-    val plannedDays: StateFlow<Map<String, List<DayOfWeek>>> = planning.state.map { plan ->
+    val plannedDays: StateFlow<Map<String, List<DayOfWeek>>> = combine(planning.state, repo.routines, dayTick) { plan, routines, _ ->
         val monday = LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-        plan.planFor(monday).days.entries.groupBy({ it.value }, { DayOfWeek.of(it.key) }).mapValues { (_, d) -> d.sorted() }
+        // Solo rutinas que siguen existiendo (una borrada o archivada no deja días «planificados» fantasma)
+        val alive = routines.filterNot { it.archived }.map { it.id }.toSet()
+        plan.planFor(monday).days.entries.filter { it.value in alive }.groupBy({ it.value }, { DayOfWeek.of(it.key) }).mapValues { (_, d) -> d.sorted() }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** Semana actual: días entrenados frente al objetivo y adherencia de las 8 semanas anteriores. */
-    val week: StateFlow<WeekProgress> = combine(repo.history, repo.activeProgram, settingsStore.settings, planning.state) { history, active, s, plan ->
+    val week: StateFlow<WeekProgress> = combine(repo.history, repo.activeProgram, settingsStore.settings, planning.state, dayTick) { history, active, s, plan, _ ->
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val goal = active?.weeklyGoal ?: s.weeklyGoal
@@ -499,7 +508,11 @@ class HomeViewModel @Inject constructor(
         val folder = generateSequence(2) { it + 1 }.map { "${program.name} $it" }.let { more -> if (program.name !in folders) program.name else more.first { it !in folders } }
         repo.addRoutines(program.routines.map { it.copy(folder = folder) })
         val monday = LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-        planning.update { st -> st.copy(weekPlans = com.bestrong.core.training.ProgramGenerator.schedule(st.weekPlans, program.routines.map { it.id }, weekdays, monday, from = LocalDate.now())) }
+        // Los días que ocupaban rutinas ya borradas o archivadas quedan libres para el programa nuevo
+        val alive = repo.routinesOnce().filterNot { it.archived }.map { it.id }.toSet()
+        planning.update { st ->
+            st.copy(weekPlans = com.bestrong.core.training.ProgramGenerator.schedule(st.weekPlans, program.routines.map { it.id }, weekdays, monday, from = LocalDate.now(), exists = { it in alive }))
+        }
         // El objetivo de la semana pasa a ser los días del programa, y se recuerda el objetivo elegido
         settingsStore.update { it.copy(weeklyGoal = program.routines.size.coerceIn(1, 7), trainingGoal = goal) }
         message(context.getString(R.string.msg_program_added, folder, program.routines.size))

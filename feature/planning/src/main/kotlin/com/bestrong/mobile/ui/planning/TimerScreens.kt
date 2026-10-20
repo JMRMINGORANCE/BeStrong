@@ -125,7 +125,19 @@ fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(IntervalRoute.encode(plan).substringBefore(':').uppercase()) },
+                // El nombre en tu idioma (antes «CIRCUIT» en todos)
+                title = {
+                    Text(
+                        when (plan) {
+                            is IntervalPlan.Hiit -> stringResource(R.string.timer_hiit, plan.workSec, plan.restSec, plan.rounds)
+                            is IntervalPlan.Emom -> stringResource(R.string.timer_emom, plan.minutes)
+                            is IntervalPlan.Amrap -> stringResource(R.string.timer_amrap, plan.minutes)
+                            is IntervalPlan.Circuit -> stringResource(R.string.timer_circuit)
+                        },
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                },
                 navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
             )
         },

@@ -432,7 +432,7 @@ private fun TimersCard(onTimer: (IntervalPlan) -> Unit) {
         OutlinedTextField(stations, { stations = it }, label = { Text(stringResource(R.string.timer_circuit_stations)) }, modifier = Modifier.fillMaxWidth())
         Button(onClick = {
             val list = stations.split(',').map { it.trim() }.filter { it.isNotEmpty() }
-            if (list.isNotEmpty()) onTimer(IntervalPlan.Circuit(list, work, rest, rounds.coerceAtMost(10)))
+            if (list.isNotEmpty()) onTimer(IntervalPlan.Circuit(list, work, rest, rounds))
         }) { Text(stringResource(R.string.timer_circuit)) }
     }
 }

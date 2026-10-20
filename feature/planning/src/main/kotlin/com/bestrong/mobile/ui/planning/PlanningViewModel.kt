@@ -193,7 +193,11 @@ class PlanningViewModel @Inject constructor(
         _messages.tryEmit(context.getString(R.string.plan_program_saved, p.nameEs))
     }
 
-    fun deleteProgram(id: String) = store.deleteProgram(id)
+    /** Borra un programa propio; si era el activo, se deja de seguir (si no, quedaba activo sin sesiones ni forma de pararlo). */
+    fun deleteProgram(id: String) {
+        store.deleteProgram(id)
+        viewModelScope.launch { if (repo.activeProgramOnce()?.programId == id) repo.setActiveProgram(null) }
+    }
 
     fun exerciseName(id: String): String = ExerciseLibrary.byId(id)?.let { com.bestrong.core.library.ExerciseLibrary.displayName(it, context.uiLanguage()) } ?: id
 

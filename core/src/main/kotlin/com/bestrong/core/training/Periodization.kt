@@ -134,10 +134,14 @@ object Periodization {
         lang: String,
         custom: List<PeriodizedProgram> = emptyList(),
         texts: ProgramTexts = ProgramTexts.forLang(lang),
+        ignoreForLoads: (Workout) -> Boolean = { false },
     ): ProgramSession? {
         val program = PeriodizedPrograms.byId(active.programId) ?: custom.firstOrNull { it.id == active.programId } ?: return null
-        val done = sessionsDone(active, history)
-        val n = done.size
+        val all = sessionsDone(active, history)
+        val n = all.size
+        // Las sesiones aligeradas (semana de descarga) cuentan para avanzar, pero no como intento de la progresión
+        // lineal: 3×3 al 60 % no es un fallo de 5×3 ni el peso desde el que seguir
+        val done = all.filterNot(ignoreForLoads)
         val dayIndex = n % program.days.size
         val sessionsPerCycle = program.days.size * program.weeksPerCycle
         val cycle = n / sessionsPerCycle
@@ -207,6 +211,25 @@ object Periodization {
             attempts.size >= 2 && attempts[attempts.size - 2].let { (w, ok) -> !ok && w == weight } -> round(weight * 0.9)
             else -> weight
         }
+    }
+
+    /**
+     * [nextSession] con la semana de descarga del [mesocycle] aplicada: hoy en descarga, la sesión se aligera; las de
+     * semanas de descarga pasadas no cuentan para las cargas.
+     */
+    fun sessionWithDeload(
+        active: ActiveProgram,
+        history: List<Workout>,
+        lang: String,
+        custom: List<PeriodizedProgram>,
+        texts: ProgramTexts,
+        mesocycle: Mesocycle?,
+        deloadLabel: String,
+        zone: ZoneId = ZoneId.systemDefault(),
+    ): ProgramSession? {
+        val inDeload = { w: Workout -> mesocycle?.isDeloadWeek(Instant.ofEpochMilli(w.startedAtEpochMs).atZone(zone).toLocalDate()) == true }
+        val session = nextSession(active, history, lang, custom, texts, inDeload) ?: return null
+        return if (mesocycle?.isDeloadWeek(LocalDate.now(zone)) == true) session.copy(routine = Fatigue.deload(session.routine, deloadLabel)) else session
     }
 
     /** Días entrenados de la semana de [day] (lunes a domingo). */
