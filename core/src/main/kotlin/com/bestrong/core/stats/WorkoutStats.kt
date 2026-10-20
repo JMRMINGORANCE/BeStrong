@@ -262,8 +262,10 @@ object WorkoutStats {
     fun newRecordsIn(workout: Workout, history: List<Workout>): List<PersonalRecord> {
         val before = personalRecords(history.filter { it.id != workout.id && it.startedAtEpochMs < workout.startedAtEpochMs })
         val records = mutableListOf<PersonalRecord>()
-        workout.exercises.forEach { we ->
-            val sets = we.completedSets.filter { it.countsForRecords }
+        // Un ejercicio repetido en dos bloques del entreno cuenta una vez (con lo mejor de los dos), no un récord por bloque
+        workout.exercises.groupBy { it.exercise.id }.values.forEach { blocks ->
+            val we = blocks.first()
+            val sets = blocks.flatMap { it.completedSets }.filter { it.countsForRecords }
             if (sets.isEmpty()) return@forEach
             val previous = before[we.exercise.id] ?: return@forEach // la primera vez no cuenta como récord
             RecordType.entries.forEach { type ->
@@ -286,7 +288,7 @@ object WorkoutStats {
         val result = HashMap<String, List<PersonalRecord>>()
         // Entrenos a la misma hora (importados solo con fecha) no cuentan como «anteriores» entre sí
         history.filter { it.isFinished }.groupBy { it.startedAtEpochMs }.toSortedMap().values.forEach { group ->
-            val bestsByWorkout = group.map { w -> w to w.exercises.flatMap { we -> bestsOf(we) } }
+            val bestsByWorkout = group.map { w -> w to w.exercises.groupBy { it.exercise.id }.values.flatMap { blocks -> bestsOf(blocks) } }
             bestsByWorkout.filter { (w, _) -> include(w) }.forEach { (w, bests) ->
                 // La primera vez que se hace un ejercicio no cuenta como récord
                 result[w.id] = bests.filter { (we, type, value) -> best[we.exercise.id]?.let { value > (it[type] ?: 0.0) } == true }
@@ -298,9 +300,10 @@ object WorkoutStats {
         return result
     }
 
-    /** Mejor valor (> 0) de cada tipo de récord en ese ejercicio del entreno. */
-    private fun bestsOf(we: WorkoutExercise): List<Triple<WorkoutExercise, RecordType, Double>> {
-        val sets = we.completedSets.filter { it.countsForRecords }
+    /** Mejor valor (> 0) de cada tipo de récord en ese ejercicio del entreno (todos sus bloques juntos). */
+    private fun bestsOf(blocks: List<WorkoutExercise>): List<Triple<WorkoutExercise, RecordType, Double>> {
+        val we = blocks.first()
+        val sets = blocks.flatMap { it.completedSets }.filter { it.countsForRecords }
         if (sets.isEmpty()) return emptyList()
         return RecordType.entries.map { type -> Triple(we, type, sets.maxOf { recordValue(type, it) }) }.filter { it.third > 0 }
     }
@@ -317,9 +320,10 @@ object WorkoutStats {
                     ExerciseProgressPoint(
                         dateEpochMs = w.startedAtEpochMs,
                         bestOneRepMax = sets.maxOf { it.estimatedOneRepMax },
-                        heaviestWeight = sets.maxOf { it.weightKg },
+                        // Como los récords: sin negativas, parciales ni asistidas (120 kg en negativa no es tu peso máximo)
+                        heaviestWeight = sets.filter { it.countsForRecords }.maxOfOrNull { it.weightKg } ?: 0.0,
                         volume = sets.sumOf { it.volume },
-                        bestReps = sets.maxOf { it.reps },
+                        bestReps = sets.filter { it.countsForRecords }.maxOfOrNull { it.recordReps } ?: 0,
                         distanceM = sets.sumOf { it.distanceM },
                         durationSec = sets.sumOf { it.durationSec },
                     )

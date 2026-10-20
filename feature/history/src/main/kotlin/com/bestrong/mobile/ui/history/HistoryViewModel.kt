@@ -40,8 +40,11 @@ class HistoryViewModel @Inject constructor(
     val history: StateFlow<List<Workout>> = repo.history
 
     /** Récords que batió cada entreno (el 🏆 de la lista), en una sola pasada cronológica. */
-    val recordCounts: StateFlow<Map<String, Int>> = repo.history
-        .map { h -> WorkoutStats.newRecordsInEach(h) { true }.mapValues { it.value.size } }
+    // Cada uno contra su propio historial: los entrenos de la pareja también llevan su 🏆 (como en su detalle)
+    val recordCounts: StateFlow<Map<String, Int>> = combine(repo.history, repo.partnerHistory) { h, p ->
+        (WorkoutStats.newRecordsInEach(h) { true } + p.groupBy { it.athlete }.values.flatMap { WorkoutStats.newRecordsInEach(it) { true }.entries }.associate { it.toPair() })
+            .mapValues { it.value.size }
+    }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
@@ -123,7 +126,8 @@ class HistoryViewModel @Inject constructor(
     ) { h, p, (q, filters, op), sp, day ->
         val (gym, routineId) = filters
         // Buscando su nombre salen sus entrenos aunque no se estén enseñando los de la pareja
-        val partnerSearched = q.isNotBlank() && p.any { it.athlete?.contains(q.trim(), ignoreCase = true) == true }
+        // (sin tildes, como el resto de la búsqueda: «ines» encuentra a «Inés»)
+        val partnerSearched = q.isNotBlank() && p.any { WorkoutStats.plainText(it.athlete.orEmpty()).contains(WorkoutStats.plainText(q.trim())) }
         val mine = when {
             op && p.isNotEmpty() -> p.sortedByDescending { it.startedAtEpochMs }
             sp || partnerSearched -> (h + p).sortedByDescending { it.startedAtEpochMs }

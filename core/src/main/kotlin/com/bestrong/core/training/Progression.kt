@@ -185,7 +185,7 @@ object Progression {
         val window = points.takeLast(sessions)
         // Una sesión claramente más ligera en la ventana es una descarga (o un reinicio): aún no se puede juzgar,
         // y así la descarga no se pide una y otra vez. Sin carga (1RM 0) no hay forma de medir el estancamiento.
-        val deloaded = window.any { it.heaviestWeight < heaviest * DELOAD_SIGN }
+        val deloaded = window.any { it.heaviestWeight > 0 && it.heaviestWeight < heaviest * DELOAD_SIGN }
         return !deloaded && before > 0.0 && window.all { it.bestOneRepMax <= before }
     }
 

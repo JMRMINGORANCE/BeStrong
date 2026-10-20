@@ -182,4 +182,17 @@ class CoreFixesTest {
         val resumed = com.bestrong.core.session.WorkoutEditor.resume(w, 1_500_000)
         assertEquals(900_000L, resumed.exercises[0].sets[0].startedAtEpochMs)
     }
+
+    @Test fun exerciseInTwoBlocksCountsRecordsOnce() {
+        val bench = com.bestrong.core.library.ExerciseLibrary.all.first()
+        fun w(start: Long, vararg kg: Double) = com.bestrong.core.model.Workout(
+            name = "w", startedAtEpochMs = start, finishedAtEpochMs = start + 1,
+            exercises = kg.map { com.bestrong.core.model.WorkoutExercise(exercise = bench, sets = listOf(com.bestrong.core.model.WorkoutSet(weightKg = it, reps = 5, completed = true))) },
+        )
+        val old = w(0, 90.0)
+        val today = w(10, 100.0, 105.0)
+        val types = com.bestrong.core.stats.WorkoutStats.newRecordsIn(today, listOf(old)).map { it.type }
+        assertEquals(types.distinct().size, types.size)
+        assertEquals(types.size, com.bestrong.core.stats.WorkoutStats.newRecordsInEach(listOf(old, today)) { it.id == today.id }[today.id]!!.size)
+    }
 }
