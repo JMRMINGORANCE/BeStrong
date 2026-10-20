@@ -165,7 +165,9 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
 
     // Peticiones desde la notificación del entreno o el widget
     LaunchedEffect(request) {
-        val openWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } }
+        // Si el entreno ya está en la pila (p. ej. debajo del selector de ejercicios), se vuelve a él en vez de
+        // apilar otro: si no, Atrás llevaba al selector viejo y al terminar quedaba un entreno vacío en Entrenar
+        val openWorkout = { if (!nav.popBackStack(Routes.WORKOUT, inclusive = false)) nav.navigate(Routes.WORKOUT) { launchSingleTop = true } }
         when (val r = request) {
             LaunchRequest.OpenWorkout -> openWorkout()
             LaunchRequest.StartEmpty -> home.startEmpty(openWorkout)
@@ -257,9 +259,9 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
                             // Un doble toque no abre dos editores (el de debajo pisaría lo guardado en el de arriba)
                             onEditRoutine = { if (entry?.destination?.route == TopLevel.TRAIN.route) nav.navigate(Routes.routine(it)) { launchSingleTop = true } },
-                            onOpenPlanning = { nav.navigate(Routes.PLANNING) },
+                            onOpenPlanning = { nav.navigate(Routes.PLANNING) { launchSingleTop = true } },
                             onOpenMuscle = { muscle -> nav.openMuscle(muscle.name) },
-                            onOpenExercise = { nav.navigate(Routes.exercise(it)) },
+                            onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
                         )
                     }
                     composable(TopLevel.HISTORY.route) {
@@ -282,9 +284,9 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                     composable(TopLevel.PROFILE.route) {
                         ProfileScreen(
                             vm = hiltViewModel<ProfileViewModel>(),
-                            onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) },
+                            onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) { launchSingleTop = true } },
                             onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
-                            onOpenExercise = { nav.navigate(Routes.exercise(it)) },
+                            onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
                         )
                     }
                     composable(Routes.WORKOUT) { backStackEntry ->

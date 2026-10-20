@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.withResumed
 import com.bestrong.core.io.RoutineLink
 import com.bestrong.mobile.data.BeStrongRepository
@@ -79,6 +80,15 @@ class MainActivity : ComponentActivity() {
                 if (!granted) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
+        // Con la app delante y un entreno abierto, el servicio (notificación, descanso en la pantalla de bloqueo) en
+        // marcha: si el entreno llegó del reloj con la app en segundo plano, Android no dejó arrancarlo entonces
+        lifecycleScope.launch {
+            repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+                repository.activeWorkout.map { it != null }.distinctUntilChanged().collect { active ->
+                    if (active) com.bestrong.mobile.workout.WorkoutForegroundService.start(this@MainActivity)
+                }
+            }
+        }
         // Con un entreno en marcha, al salir de la app el descanso sigue en una ventana flotante (PiP)
         lifecycleScope.launch {
             repository.activeWorkout.map { it != null }.distinctUntilChanged().collect { active -> updatePipParams(active) }
@@ -91,7 +101,7 @@ class MainActivity : ComponentActivity() {
                 // y lo escrito (si no, se volvía a Entrenar desde cero y se perdían los cambios del editor)
                 val holder = androidx.compose.runtime.saveable.rememberSaveableStateHolder()
                 if (pip) {
-                    RestPip(repository, restTimer)
+                    RestPip(repository, restTimer, userSettings.unit, userSettings.dumbbellTotal)
                 } else {
                     holder.SaveableStateProvider("app") {
                         BeStrongApp(launchRequest = launchRequest, onLaunchHandled = { launchRequest.value = null })

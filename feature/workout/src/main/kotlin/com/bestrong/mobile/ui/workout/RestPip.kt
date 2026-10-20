@@ -29,7 +29,7 @@ import com.bestrong.mobile.workout.RestTimerController
 
 /** Ventana flotante (picture-in-picture): cuenta atrás del descanso y siguiente serie. */
 @Composable
-fun RestPip(repository: BeStrongRepository, restTimer: RestTimerController) {
+fun RestPip(repository: BeStrongRepository, restTimer: RestTimerController, unit: com.bestrong.core.util.WeightUnit, dumbbellTotal: Boolean) {
     val workout by repository.activeWorkout.collectAsStateWithLifecycle()
     val rest by restTimer.rest.collectAsStateWithLifecycle()
     val now = rememberNow(500)
@@ -45,10 +45,11 @@ fun RestPip(repository: BeStrongRepository, restTimer: RestTimerController) {
                 Text(formatDuration(w.durationSeconds(now)), fontSize = 28.sp, fontWeight = FontWeight.Bold)
             }
             w?.let { wk ->
+                // Fuera del árbol de la app (sin su unidad): en tu unidad y con mancuernas como total, como la notificación
                 WorkoutEditor.nextPendingSet(wk)?.let { (i, s) ->
                     val we = wk.exercises[i]
                     Text(
-                        stringResource(R.string.pip_next, we.exercise.displayName() + " · " + describeSet(s, we.exercise, com.bestrong.mobile.ui.components.LocalWeightUnit.current)),
+                        stringResource(R.string.pip_next, we.exercise.displayName() + " · " + describeSet(s, we.exercise, unit, if (dumbbellTotal && we.exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1)),
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
