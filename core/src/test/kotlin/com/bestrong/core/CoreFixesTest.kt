@@ -143,4 +143,43 @@ class CoreFixesTest {
         assertEquals(80.0, com.bestrong.core.training.VoiceSetParser.parse("80 kilos 8 reps").weightKg(lb)!!, 1e-9)
         assertEquals(lb.toKg(80.0), com.bestrong.core.training.VoiceSetParser.parse("80 por 8").weightKg(lb)!!, 1e-9)
     }
+
+    @Test fun uncheckedThenDeletedSetDoesNotComeBackFromOldCopy() {
+        val bench = com.bestrong.core.library.ExerciseLibrary.all.first()
+        val set = com.bestrong.core.model.WorkoutSet(reps = 5, completed = true, completedAtEpochMs = 10)
+        val we = com.bestrong.core.model.WorkoutExercise(exercise = bench, sets = listOf(set))
+        val old = com.bestrong.core.model.Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(we), updatedAtEpochMs = 10)
+        val unchecked = com.bestrong.core.session.WorkoutEditor.toggleSetCompleted(old, we.id, set.id, nowEpochMs = 20)
+        val deleted = com.bestrong.core.session.WorkoutEditor.removeSet(unchecked, we.id, set.id).copy(updatedAtEpochMs = 30)
+        val merged = com.bestrong.core.sync.WorkoutMerge.merge(old, deleted)
+        assertEquals(0, merged.exercises.sumOf { it.sets.size })
+    }
+
+    @Test fun mergeKeepsPauseFromOtherDeviceAndOneStopwatch() {
+        val bench = com.bestrong.core.library.ExerciseLibrary.all.first()
+        val x = com.bestrong.core.model.WorkoutSet(startedAtEpochMs = 100)
+        val y = com.bestrong.core.model.WorkoutSet(startedAtEpochMs = 200)
+        val we = com.bestrong.core.model.WorkoutExercise(exercise = bench, sets = listOf(x, y))
+        val phone = com.bestrong.core.model.Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(we.copy(sets = listOf(x.copy(startedAtEpochMs = null), y))), pausedTotalMs = 60_000, updatedAtEpochMs = 200)
+        val watch = phone.copy(exercises = listOf(we.copy(sets = listOf(x, y.copy(startedAtEpochMs = null)))), pausedTotalMs = 0, updatedAtEpochMs = 300)
+        val merged = com.bestrong.core.sync.WorkoutMerge.merge(phone, watch)
+        assertEquals(60_000, merged.pausedTotalMs)
+        assertEquals(1, merged.exercises.sumOf { e -> e.sets.count { it.isRunning } })
+    }
+
+    @Test fun supersetStartedWithSecondMemberGoesToFirstWithoutRest() {
+        val lib = com.bestrong.core.library.ExerciseLibrary.all
+        val a = com.bestrong.core.model.WorkoutExercise(exercise = lib[0], supersetId = "g", restSeconds = 90, sets = List(2) { com.bestrong.core.model.WorkoutSet(reps = 5) })
+        val b = com.bestrong.core.model.WorkoutExercise(exercise = lib[1], supersetId = "g", restSeconds = 90, sets = listOf(com.bestrong.core.model.WorkoutSet(reps = 5, completed = true), com.bestrong.core.model.WorkoutSet(reps = 5)))
+        val w = com.bestrong.core.model.Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(a, b))
+        assertEquals(0 to 0, com.bestrong.core.session.WorkoutEditor.afterSetCompleted(w, 1))
+    }
+
+    @Test fun pausedCardioStopwatchDoesNotCountThePause() {
+        val bench = com.bestrong.core.library.ExerciseLibrary.all.first()
+        val set = com.bestrong.core.model.WorkoutSet(startedAtEpochMs = 0)
+        val w = com.bestrong.core.model.Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(com.bestrong.core.model.WorkoutExercise(exercise = bench, sets = listOf(set))), pausedAtEpochMs = 600_000)
+        val resumed = com.bestrong.core.session.WorkoutEditor.resume(w, 1_500_000)
+        assertEquals(900_000L, resumed.exercises[0].sets[0].startedAtEpochMs)
+    }
 }

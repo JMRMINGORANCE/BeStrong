@@ -34,14 +34,24 @@ object WorkoutMerge {
             }
         }
         return newer.copy(
-            exercises = merged.filterNot { gone(it, deleted) }.map { we -> we.copy(sets = we.sets.filterNot { gone(it, deleted) }) },
+            exercises = singleStopwatch(merged.filterNot { gone(it, deleted) }.map { we -> we.copy(sets = we.sets.filterNot { gone(it, deleted) }) }),
             deletedIds = deleted,
+            // El tiempo en pausa solo crece: una pausa hecha en el otro dispositivo no se pierde
+            pausedTotalMs = maxOf(a.pausedTotalMs, b.pausedTotalMs),
             updatedAtEpochMs = maxOf(a.updatedAtEpochMs, b.updatedAtEpochMs),
             avgHeartRate = newer.avgHeartRate ?: older.avgHeartRate,
             maxHeartRate = newer.maxHeartRate ?: older.maxHeartRate,
             calories = newer.calories ?: older.calories,
             heartRateSamples = newer.heartRateSamples.ifEmpty { older.heartRateSamples },
         )
+    }
+
+    /** Solo un cronómetro de cardio a la vez: si la fusión deja dos en marcha, sigue el último arrancado. */
+    private fun singleStopwatch(exercises: List<WorkoutExercise>): List<WorkoutExercise> {
+        val running = exercises.flatMap { we -> we.sets.filter { it.isRunning } }
+        if (running.size < 2) return exercises
+        val keep = running.maxBy { it.startedAtEpochMs ?: 0L }.id
+        return exercises.map { we -> we.copy(sets = we.sets.map { if (it.isRunning && it.id != keep) it.copy(startedAtEpochMs = null) else it }) }
     }
 
     /** Borrado a propósito y sin series hechas que quien lo borró no conocía. */
@@ -76,7 +86,9 @@ object WorkoutMerge {
             e.sets.mapIndexedNotNull { i, ns ->
                 val os = olderSets[ns.id] ?: return@mapIndexedNotNull null
                 val differs = os.weightKg != ns.weightKg || os.reps != ns.reps || os.durationSec != ns.durationSec
-                if (ns.completed && os.completed && differs) SetConflict(e.exercise.name, i, ns, os) else null
+                // Lo que de verdad queda (no siempre el más reciente: puede ganar una marca posterior a un desmarcado)
+                val kept = mergeSet(os, ns)
+                if (ns.completed && os.completed && differs) SetConflict(e.exercise.name, i, kept, if (kept === ns) os else ns) else null
             }
         }
     }

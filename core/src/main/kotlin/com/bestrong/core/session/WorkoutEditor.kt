@@ -97,7 +97,14 @@ object WorkoutEditor {
 
     fun resume(workout: Workout, nowEpochMs: Long): Workout {
         val since = workout.pausedAtEpochMs ?: return workout
-        return workout.copy(pausedAtEpochMs = null, pausedTotalMs = workout.pausedTotalMs + (nowEpochMs - since).coerceAtLeast(0))
+        val paused = (nowEpochMs - since).coerceAtLeast(0)
+        // Un cronómetro de cardio en marcha no cuenta la pausa (se corre su inicio lo que duró)
+        val exercises = if (runningCardio(workout) == null) {
+            workout.exercises
+        } else {
+            workout.exercises.map { we -> we.copy(sets = we.sets.map { s -> s.startedAtEpochMs?.takeIf { s.isRunning }?.let { s.copy(startedAtEpochMs = it + paused) } ?: s }) }
+        }
+        return workout.copy(pausedAtEpochMs = null, pausedTotalMs = workout.pausedTotalMs + paused, exercises = exercises)
     }
 
     /** Lleva más de [limitMs] sin ningún cambio (se dejó abierto sin querer). */
@@ -142,7 +149,11 @@ object WorkoutEditor {
         dropLoneSupersets(
             workout.copy(
                 exercises = workout.exercises.filterNot { it.id == workoutExerciseId },
-                deletedIds = workout.deletedIds + (workoutExerciseId to workout.exercises.firstOrNull { it.id == workoutExerciseId }?.sets.orEmpty().filter { it.completed }.map { it.id }.toSet()),
+                // Conocidas: las hechas y las que se hicieron y desmarcaron (una copia vieja, aún marcada, no lo resucita)
+                deletedIds = workout.deletedIds + (
+                    workoutExerciseId to workout.exercises.firstOrNull { it.id == workoutExerciseId }?.sets.orEmpty()
+                        .filter { it.completed || it.uncompletedAtEpochMs != null }.map { it.id }.toSet()
+                    ),
             ),
         )
 
@@ -168,13 +179,16 @@ object WorkoutEditor {
         val unlinked = before.exercises.filter { it.supersetId != null && afterById[it.id]?.let { a -> a.supersetId == null } == true }
             .associate { it.id to it.supersetId!! }
         return { w ->
+            // Lo recuperado vuelve con ids nuevos: el reloj pudo recibir ya el borrado, y con el id de antes su
+            // marca de borrado lo volvería a quitar al fusionar
             var exercises = w.exercises.map { we ->
                 val sets = removedSets.filter { it.first == we.id && we.sets.none { s -> s.id == it.third.id } }
-                    .fold(we.sets) { acc, (_, index, set) -> acc.toMutableList().apply { add(index.coerceAtMost(size), set) } }
+                    .fold(we.sets) { acc, (_, index, set) -> acc.toMutableList().apply { add(index.coerceAtMost(size), set.copy(id = com.bestrong.core.util.newId())) } }
                 we.copy(sets = sets, supersetId = we.supersetId ?: unlinked[we.id])
             }
             removedExercises.filter { r -> exercises.none { it.id == r.value.id } }.forEach { (index, we) ->
-                exercises = exercises.toMutableList().apply { add(index.coerceAtMost(size), we) }
+                val fresh = we.copy(id = com.bestrong.core.util.newId(), sets = we.sets.map { it.copy(id = com.bestrong.core.util.newId()) })
+                exercises = exercises.toMutableList().apply { add(index.coerceAtMost(size), fresh) }
             }
             // Lo recuperado deja de estar borrado (si no, la fusión con el reloj lo volvería a quitar)
             // (también las series de un ejercicio recuperado entero, que pudieron quedar marcadas antes al recortar)
@@ -377,8 +391,10 @@ object WorkoutEditor {
     fun removeSet(workout: Workout, workoutExerciseId: String, setId: String): Workout =
         updateExercise(workout, workoutExerciseId) { we -> we.copy(sets = we.sets.filterNot { it.id == setId }) }
             .let { w ->
-                val wasDone = workout.exercises.firstOrNull { it.id == workoutExerciseId }?.sets?.firstOrNull { it.id == setId }?.completed == true
-                w.copy(deletedIds = w.deletedIds + (setId to if (wasDone) setOf(setId) else emptySet()))
+                // Hecha alguna vez (también si se desmarcó antes de borrarla): una copia vieja aún marcada no la resucita
+                val set = workout.exercises.firstOrNull { it.id == workoutExerciseId }?.sets?.firstOrNull { it.id == setId }
+                val known = set != null && (set.completed || set.uncompletedAtEpochMs != null)
+                w.copy(deletedIds = w.deletedIds + (setId to if (known) setOf(setId) else emptySet()))
             }
 
     fun updateSet(workout: Workout, workoutExerciseId: String, setId: String, block: (WorkoutSet) -> WorkoutSet): Workout =
@@ -556,7 +572,8 @@ object WorkoutEditor {
             val pos = group.indexOf(index)
             val doneHere = current.sets.count { it.completed }
             // Siguiente del grupo que aún no ha hecho la serie de esta ronda
-            val nextInRound = (group.drop(pos + 1)).firstOrNull { i ->
+            // En círculo: empezar la ronda por el segundo del grupo lleva al primero sin descanso
+            val nextInRound = (group.drop(pos + 1) + group.take(pos)).firstOrNull { i ->
                 val ex = workout.exercises[i]
                 ex.sets.count { it.completed } < doneHere && ex.sets.any { !it.completed }
             }
@@ -626,10 +643,13 @@ object WorkoutEditor {
     }
 
     fun finish(workout: Workout, nowEpochMs: Long): Workout {
-        // Un cronómetro de cardio en marcha cuenta como hecho hasta ahora (si no, se perdería el bloque)
-        val stopped = runningCardio(workout)?.let { (we, set) -> finishCardio(workout, we.id, set.id, nowEpochMs) } ?: workout
-        return resume(stopped, nowEpochMs).copy(
+        // Primero se cierra la pausa (el cronómetro no la cuenta); un cardio en marcha cuenta como hecho hasta ahora
+        val resumed = resume(workout, nowEpochMs)
+        val stopped = runningCardio(resumed)?.let { (we, set) -> finishCardio(resumed, we.id, set.id, nowEpochMs) } ?: resumed
+        return stopped.copy(
             finishedAtEpochMs = nowEpochMs,
+            // Lo último que pasó: al fusionarse con una copia de otro dispositivo, gana el terminado
+            updatedAtEpochMs = maxOf(workout.updatedAtEpochMs, nowEpochMs),
             exercises = stopped.exercises
                 .map { it.copy(sets = it.completedSets) }
                 .filter { it.sets.isNotEmpty() },

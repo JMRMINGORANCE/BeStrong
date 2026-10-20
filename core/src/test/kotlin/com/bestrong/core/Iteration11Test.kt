@@ -127,8 +127,14 @@ class Iteration13Test {
         val extra = WorkoutSet(reps = 1)
         val later = after.copy(exercises = listOf(after.exercises[0].copy(sets = after.exercises[0].sets + extra)))
         val restored = undo(later)
-        assertEquals(listOf(a.id, b.id), restored.exercises.map { it.id })
-        assertEquals(listOf(a.sets[0].id, a.sets[1].id, a.sets[2].id, extra.id), restored.exercises[0].sets.map { it.id })
+        // Lo recuperado vuelve en su sitio (con ids nuevos: la marca de borrado que ya tenga el reloj no lo quita)
+        assertEquals(a.id, restored.exercises[0].id)
+        assertEquals(curl, restored.exercises[1].exercise)
+        assertEquals(2, restored.exercises[1].sets.size)
+        val ids = restored.exercises[0].sets.map { it.id }
+        assertEquals(4, ids.size)
+        assertEquals(listOf(a.sets[0].id, a.sets[1].id), ids.take(2))
+        assertEquals(extra.id, ids[3])
     }
 
     @Test fun trimKeepsNextSetOfStartedExerciseAndClearsLoneSuperset() {
