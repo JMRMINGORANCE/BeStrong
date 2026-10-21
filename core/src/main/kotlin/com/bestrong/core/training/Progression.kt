@@ -92,7 +92,7 @@ object Progression {
         // Con rango, el 1RM estimado baja a propósito al subir peso y volver al mínimo: el estancamiento se mide
         // por reps con el mismo peso; sin rango, por el 1RM
         val stalled = loaded && if (useRange) isStalledInRange(exercise.id, history, stallSessions, repRange) else isStalled(exercise.id, history, stallSessions)
-        return when {
+        val suggestion = when {
             stalled -> {
                 // Al menos un escalón por debajo: con pesos ligeros el 90 % redondeado volvía al mismo peso
                 val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg).coerceAtMost(it.weightKg - incrementKg).coerceAtLeast(0.0), completed = false, rpe = null) }
@@ -101,6 +101,12 @@ object Progression {
             isUnloaded(exercise.tracking, last) -> unloaded(exercise.tracking, last)
             useRange -> byRange(last, repRange!!, incrementKg, easy)
             else -> fixedReps(last, incrementKg, easy)
+        }
+        // La última vez faltaron series: se repite el peso en vez de subirlo (2 de 4 bien hechas no son las 4)
+        return if (suggestion.kind == SuggestionKind.INCREASE_WEIGHT && previous?.skippedWorkSets == true) {
+            ProgressionSuggestion(SuggestionKind.REPEAT, last.map { it.copy(completed = false, rpe = null) }, "Faltaron series: repite el peso y complétalas")
+        } else {
+            suggestion
         }
     }
 

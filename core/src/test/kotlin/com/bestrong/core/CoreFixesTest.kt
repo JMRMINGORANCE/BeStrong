@@ -204,4 +204,15 @@ class CoreFixesTest {
         assertEquals(com.bestrong.core.training.SuggestionKind.ADD_REPS, s.kind)
         assertEquals(8, s.sets.first().reps)
     }
+
+    @Test fun skippedWorkSetsDoNotRaiseWeight() {
+        val bench = com.bestrong.core.library.ExerciseLibrary.byId("bench_press")!!
+        val sets = List(2) { com.bestrong.core.model.WorkoutSet(weightKg = 100.0, reps = 5, completed = true) } + List(2) { com.bestrong.core.model.WorkoutSet(weightKg = 100.0, reps = 5) }
+        val w = com.bestrong.core.model.Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(com.bestrong.core.model.WorkoutExercise(exercise = bench, sets = sets)))
+        val finished = com.bestrong.core.session.WorkoutEditor.finish(w, 10)
+        assertEquals(4, finished.exercises.single().plannedSets)
+        val s = com.bestrong.core.training.Progression.suggest(bench, listOf(finished))!!
+        assertEquals(com.bestrong.core.training.SuggestionKind.REPEAT, s.kind)
+        assertEquals(0, com.bestrong.core.training.NextTime.suggest(finished.exercises.single(), 2.5)!!.direction)
+    }
 }

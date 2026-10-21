@@ -108,8 +108,16 @@ data class WorkoutExercise(
     val tempo: String? = null,
     /** RPE objetivo que trae la rutina (null = sin objetivo). */
     val targetRpe: Double? = null,
+    /**
+     * Series efectivas planeadas, guardado al terminar solo si se hicieron menos (las no hechas se quitan): con
+     * series saltadas no se propone subir el peso. Null = se hicieron todas.
+     */
+    val plannedSets: Int? = null,
 ) {
     val completedSets: List<WorkoutSet> get() = sets.filter { it.completed }
+
+    /** Terminado con menos series efectivas de las planeadas. */
+    val skippedWorkSets: Boolean get() = (plannedSets ?: 0) > completedSets.count { it.type != SetType.WARMUP }
 
     companion object {
         const val DEFAULT_REST_SECONDS = 120

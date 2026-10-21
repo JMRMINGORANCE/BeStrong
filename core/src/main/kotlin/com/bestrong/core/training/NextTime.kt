@@ -34,7 +34,8 @@ object NextTime {
         val target = targetOf(topSets)
         val maxRpe = topSets.mapNotNull { it.rpe }.maxOrNull()
         val evidence = evidenceFor(work, topSets)
-        val allReps = topSets.all { it.reps >= target } && evidence
+        // Con series saltadas no se sube, aunque las hechas salieran bien
+        val allReps = topSets.all { it.reps >= target } && evidence && !we.skippedWorkSets
         val name = we.exercise.name
         val high = Autoregulation.high(we.targetRpe)
         return when {

@@ -683,7 +683,11 @@ object WorkoutEditor {
             // Lo último que pasó: al fusionarse con una copia de otro dispositivo, gana el terminado
             updatedAtEpochMs = maxOf(workout.updatedAtEpochMs, nowEpochMs),
             exercises = stopped.exercises
-                .map { it.copy(sets = it.completedSets) }
+                .map { we ->
+                    val planned = we.sets.count { it.type != SetType.WARMUP }
+                    val done = we.completedSets.count { it.type != SetType.WARMUP }
+                    we.copy(sets = we.completedSets, plannedSets = planned.takeIf { it > done } ?: we.plannedSets)
+                }
                 .filter { it.sets.isNotEmpty() },
         )
     }
