@@ -204,6 +204,8 @@ class WorkoutForegroundService : LifecycleService() {
         private const val ACTION_COMPLETE = "com.bestrong.SET_COMPLETE"
 
         fun start(context: Context) {
+            // Ya se está entrenando: el «hoy toca» no sigue en la barra (su «Empezar» abriría otro entreno)
+            com.bestrong.mobile.notify.Notifier.cancelReminder(context)
             runCatching { context.startForegroundService(Intent(context, WorkoutForegroundService::class.java)) }
                 .onFailure { Log.w(TAG, "No se pudo arrancar el servicio (¿app en segundo plano?)", it) }
         }

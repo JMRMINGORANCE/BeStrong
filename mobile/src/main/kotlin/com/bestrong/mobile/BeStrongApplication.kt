@@ -194,8 +194,6 @@ class AppSync @Inject constructor(
                 watchSync.pushActive(w)
                 if (w != null) {
                     WorkoutForegroundService.start(context)
-                    // Ya se está entrenando: el «hoy toca» no sigue en la barra (su «Empezar» abriría otro entreno)
-                    com.bestrong.mobile.notify.Notifier.cancelReminder(context)
                 } else {
                     restTimer.skip()
                     watchMetrics.metrics.value = null
