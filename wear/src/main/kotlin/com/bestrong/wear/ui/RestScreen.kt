@@ -57,7 +57,7 @@ fun RestScreen(session: WorkoutSession) {
     // Redondeado hacia arriba: 1:00 al empezar y 0:01 el último segundo (no 0:00 antes de acabar)
     val remaining = ((r.endsAtEpochMs - now + 999) / 1000).coerceAtLeast(0)
     val progress = (remaining.toFloat() / r.totalSeconds).coerceIn(0f, 1f)
-    val next = workout?.let { w -> WorkoutEditor.nextPendingSet(w)?.let { (i, s) -> w.exercises[i] to s } }
+    val next = workout?.let { w -> WorkoutEditor.upcomingSet(w)?.let { (i, s) -> w.exercises[i] to s } }
 
     val view = androidx.compose.ui.platform.LocalView.current
     val focus = remember { FocusRequester() }

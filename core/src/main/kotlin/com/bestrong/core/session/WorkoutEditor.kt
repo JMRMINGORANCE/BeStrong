@@ -628,6 +628,12 @@ object WorkoutEditor {
         return previous.filter { (it.type == SetType.WARMUP) == warm }.getOrNull(sameKind)
     }
 
+    /** La última serie normal hecha de un ejercicio de peso y reps en todo el entreno (para ponerle el RPE). */
+    fun lastCompletedNormal(workout: Workout): Pair<WorkoutExercise, WorkoutSet>? =
+        workout.exercises.filter { it.exercise.tracking == TrackingType.WEIGHT_REPS }
+            .flatMap { e -> e.sets.filter { it.completed && it.type == SetType.NORMAL }.map { e to it } }
+            .maxByOrNull { it.second.completedAtEpochMs ?: 0L }
+
     fun nextPendingSet(workout: Workout): Pair<Int, WorkoutSet>? {
         workout.exercises.forEachIndexed { i, we ->
             we.sets.firstOrNull { !it.completed }?.let { return i to it }

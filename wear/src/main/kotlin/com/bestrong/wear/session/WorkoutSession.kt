@@ -178,7 +178,7 @@ class WorkoutSession @Inject constructor(
             }
         }
         if (_rest.value == null) store.activeRest = null
-        _exerciseIndex.value = _workout.value?.let { w -> WorkoutEditor.nextPendingSet(w)?.first } ?: 0
+        _exerciseIndex.value = _workout.value?.let { w -> WorkoutEditor.upcomingSet(w)?.first } ?: 0
     }
 
     /** Cambio local: guarda, marca la hora y lo publica al móvil (agrupando cambios rápidos). */
@@ -464,15 +464,15 @@ class WorkoutSession @Inject constructor(
         val step = store.settings.value.stepKgFor(we.exercise.id)
         // El peso solo si se ve en pantalla: en dominadas a 0 kg se marca (y se cambia) las reps
         val target = effectiveTarget(we, s)
+        // Peso y reps pasan también a las series pendientes que tenían lo mismo (como en el móvil): no hay que volver
+        // a girar la corona en cada serie
         edit { w ->
-            WorkoutEditor.updateSet(w, we.id, s.id) { set ->
-                when {
-                    we.exercise.tracking == TrackingType.DURATION -> set.copy(durationSec = (set.durationSec + 5 * direction).coerceAtLeast(0))
-                    we.exercise.tracking == TrackingType.CARDIO -> set.copy(durationSec = (set.durationSec + 60 * direction).coerceAtLeast(0))
-                    target == RotaryTarget.WEIGHT -> set.copy(weightKg = nextWeight(set.weightKg, step * direction))
-                    we.exercise.tracking == TrackingType.DISTANCE -> set.copy(distanceM = (set.distanceM + DISTANCE_STEP_M * direction).coerceAtLeast(0.0))
-                    else -> set.copy(reps = (set.reps + direction).coerceAtLeast(0))
-                }
+            when {
+                we.exercise.tracking == TrackingType.DURATION -> WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(durationSec = (it.durationSec + 5 * direction).coerceAtLeast(0)) }
+                we.exercise.tracking == TrackingType.CARDIO -> WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(durationSec = (it.durationSec + 60 * direction).coerceAtLeast(0)) }
+                target == RotaryTarget.WEIGHT -> WorkoutEditor.updateSetPropagating(w, we.id, s.id, weightKg = nextWeight(s.weightKg, step * direction))
+                we.exercise.tracking == TrackingType.DISTANCE -> WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(distanceM = (it.distanceM + DISTANCE_STEP_M * direction).coerceAtLeast(0.0)) }
+                else -> WorkoutEditor.updateSetPropagating(w, we.id, s.id, reps = (s.reps + direction).coerceAtLeast(0)).also { repCounter.reset() }
             }
         }
     }
@@ -495,6 +495,8 @@ class WorkoutSession @Inject constructor(
     fun adjustReps(delta: Int) {
         val we = currentExercise() ?: return
         val s = currentSet() ?: return
+        // Reps corregidas a mano: no las pisa el contador de repeticiones al marcar
+        repCounter.reset()
         edit { w -> WorkoutEditor.updateSet(w, we.id, s.id) { it.copy(reps = (it.reps + delta).coerceAtLeast(0)) } }
     }
 
@@ -588,6 +590,8 @@ class WorkoutSession @Inject constructor(
             startRest(restSeconds)
             true
         } else {
+            // Sin descanso (superserie, drop): un descanso anterior que siguiera corriendo no vibra a mitad de serie
+            stopRest()
             false
         }
     }
@@ -817,8 +821,8 @@ class WorkoutSession @Inject constructor(
      * RPE (corrige el que se estima por la velocidad o lo pone si no se contó). Se sincroniza con el móvil.
      */
     fun cycleLastSetRpe() {
-        val we = currentExercise() ?: return
-        val last = we.sets.lastOrNull { it.completed && it.type == SetType.NORMAL } ?: return
+        // La última hecha de todo el entreno: tras la última serie de un ejercicio el actual ya es el siguiente
+        val (we, last) = _workout.value?.let(WorkoutEditor::lastCompletedNormal) ?: return
         val choices = listOf(6.0, 7.0, 8.0, 9.0, 10.0)
         val next = when (val r = last.rpe) {
             null -> choices.first()

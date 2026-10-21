@@ -320,18 +320,18 @@ private fun ScalingLazyListScope.setCorrections(w: Workout, index: Int, session:
             Button(onClick = { if (session.removePendingSet()) onBack() }, label = { Text(stringResource(R.string.remove_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
         }
     }
-    // RPE de la última serie normal del ejercicio: cada toque pasa al siguiente (6…10 y «—»)
-    w.exercises.getOrNull(index)?.takeIf { it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS }
-        ?.sets?.lastOrNull { it.completed && it.type == com.bestrong.core.model.SetType.NORMAL }?.let { last ->
-            item {
-                Button(
-                    onClick = { session.cycleLastSetRpe() },
-                    label = { Text(stringResource(R.string.last_set_rpe, last.rpe?.toString()?.removeSuffix(".0") ?: "—")) },
-                    colors = ButtonDefaults.filledTonalButtonColors(),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+    // RPE de la última serie normal hecha (de todo el entreno: tras la última de un ejercicio el actual ya es el
+    // siguiente): cada toque pasa al siguiente (6…10 y «—»)
+    com.bestrong.core.session.WorkoutEditor.lastCompletedNormal(w)?.second?.let { last ->
+        item {
+            Button(
+                onClick = { session.cycleLastSetRpe() },
+                label = { Text(stringResource(R.string.last_set_rpe, last.rpe?.toString()?.removeSuffix(".0") ?: "—")) },
+                colors = ButtonDefaults.filledTonalButtonColors(),
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
+    }
     if (w.completedSetCount > 0) {
         item {
             Button(onClick = { if (session.undoLastSet()) onBack() }, label = { Text(stringResource(R.string.undo_last_set)) }, colors = ButtonDefaults.filledTonalButtonColors(), modifier = Modifier.fillMaxWidth())
