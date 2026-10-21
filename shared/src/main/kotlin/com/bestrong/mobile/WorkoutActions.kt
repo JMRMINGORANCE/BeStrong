@@ -121,10 +121,10 @@ class WorkoutActions @Inject constructor(
         // [visible]: la del que está en pantalla (teclas de volumen con el entreno de la pareja a la vista)
         val partner = visible && partnerOnScreen.value && repository.partnerWorkout.value != null
         val (before, updated) = (if (partner) repository.updatePartnerActive(next) else repository.updateActive(next)) ?: return false
-        val (index, _) = WorkoutEditor.upcomingSet(before) ?: return false
-        val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index, settings.settings.value.warmupRestSeconds)
-        if (rest > 0) restTimer.start(rest) else restTimer.skip()
-        return true
+        return WorkoutEditor.upcomingSet(before)?.let { (index, _) ->
+            val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index, settings.settings.value.warmupRestSeconds)
+            if (rest > 0) restTimer.start(rest) else restTimer.skip()
+        } != null
     }
 
     /**
