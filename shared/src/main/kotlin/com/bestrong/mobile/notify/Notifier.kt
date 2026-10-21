@@ -252,7 +252,9 @@ object Notifier {
     fun weeklySummary(context: Context, week: PeriodSummary, unit: WeightUnit, highLoadRatio: Double? = null) {
         if (!canPost(context)) return
         ensureChannels(context)
-        val text = context.getString(R.string.notif_weekly_text, week.workouts, unit.formatVolume(week.volume), week.sets)
+        // Con plural («1 entreno»); una semana solo de cardio no enseña «0 kg · 0 series»
+        val text = context.resources.getQuantityString(R.plurals.notif_weekly_text, week.workouts, week.workouts, unit.formatVolume(week.volume), week.sets)
+            .takeIf { week.volume > 0 || week.sets > 0 }
         val lines = listOfNotNull(
             text,
             week.records.takeIf { it.isNotEmpty() }?.let { context.resources.getQuantityString(R.plurals.notif_weekly_records, it.size, it.size) },
@@ -266,7 +268,7 @@ object Notifier {
         val n = NotificationCompat.Builder(context, CHANNEL_REMINDERS)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
             .setContentTitle(context.getString(R.string.notif_weekly_title))
-            .setContentText(text)
+            .setContentText(text ?: lines.firstOrNull())
             .setStyle(NotificationCompat.BigTextStyle().bigText(lines.joinToString("\n")))
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(true)

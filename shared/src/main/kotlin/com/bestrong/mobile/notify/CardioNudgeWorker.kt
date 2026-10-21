@@ -34,7 +34,9 @@ class CardioNudgeWorker(context: Context, params: WorkerParameters) : CoroutineW
             val goal = s.weeklyCardioMin?.toDouble() ?: s.weeklyCardioKm ?: 0.0
             // Solo si va por detrás del ritmo de la semana (con margen): el jueves, menos de la mitad hecha; el lunes,
             // menos de un octavo
-            if (pace != null && goal - pace.left < goal * today.dayOfWeek.value / NUDGE_DAYS) Notifier.cardioNudge(applicationContext, text(pace))
+            // Retrasado al día siguiente (móvil apagado el domingo): ya es otra semana, no se avisa
+            val late = ExactWork.isStale(inputData, LATE_MS, sameDay = true)
+            if (!late && pace != null && goal - pace.left < goal * today.dayOfWeek.value / NUDGE_DAYS) Notifier.cardioNudge(applicationContext, text(pace))
         } finally {
             runCatching { schedule(applicationContext, deps.settings().settings.value.cardioNudgeDay, force = true) }.onFailure { Log.w("CardioNudge", "No se pudo reprogramar", it) }
         }
@@ -48,6 +50,7 @@ class CardioNudgeWorker(context: Context, params: WorkerParameters) : CoroutineW
     }
 
     companion object {
+        private const val LATE_MS = 4 * 60 * 60 * 1000L
         private const val NAME = "cardio-nudge"
         private const val NUDGE_DAYS = 8.0
 

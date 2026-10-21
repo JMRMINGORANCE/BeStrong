@@ -17,7 +17,8 @@ class MeasureWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         val deps = EntryPointAccessors.fromApplication(applicationContext, WorkerEntryPoint::class.java)
         val enabled = deps.settings().settings.value.measureReminder
         try {
-            if (enabled) Notifier.measure(applicationContext)
+            // Solo el día 1 (si se retrasó hasta el 10 porque el móvil estaba apagado, ya no)
+            if (enabled && !ExactWork.isStale(inputData, LATE_MS, sameDay = true)) Notifier.measure(applicationContext)
         } finally {
             runCatching { schedule(applicationContext, enabled, force = true) }.onFailure { Log.w("MeasureWorker", "No se pudo reprogramar", it) }
         }
@@ -25,6 +26,7 @@ class MeasureWorker(context: Context, params: WorkerParameters) : CoroutineWorke
     }
 
     companion object {
+        private const val LATE_MS = 12 * 60 * 60 * 1000L
         private const val NAME = "measure-reminder"
 
         fun schedule(context: Context, enabled: Boolean, force: Boolean = false) {

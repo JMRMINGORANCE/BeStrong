@@ -450,7 +450,10 @@
         <item quantity="one">🏆 %1$d nouveau record</item>
         <item quantity="other">🏆 %1$d nouveaux records</item>
     </plurals>
-    <string name="notif_weekly_text">%1$d entraînements · %2$s · %3$d séries</string>
+    <plurals name="notif_weekly_text">
+        <item quantity="one">%1$d entraînement · %2$s · %3$d séries</item>
+        <item quantity="other">%1$d entraînements · %2$s · %3$d séries</item>
+    </plurals>
     <string name="notif_weekly_title">Ta semaine sur BeStrong</string>
     <string name="one_hand_complete">%1$s · série %2$d</string>
     <string name="one_handed">Mode une main</string>
