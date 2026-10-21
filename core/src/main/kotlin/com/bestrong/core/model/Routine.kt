@@ -69,7 +69,8 @@ data class Routine(
                     // Calentamientos con calentamientos y efectivas (normal, drop, fallo…) con efectivas
                     val warm = rs.type == SetType.WARMUP
                     val sameKindIndex = re.sets.take(i).count { (it.type == SetType.WARMUP) == warm }
-                    val prev = previous.filter { (it.type == SetType.WARMUP) == warm }.getOrNull(sameKindIndex)
+                    // Una serie que la última vez se saltó toma la última hecha de su tipo (no el peso viejo de la rutina)
+                    val prev = previous.filter { (it.type == SetType.WARMUP) == warm }.let { it.getOrNull(sameKindIndex) ?: it.lastOrNull() }
                     WorkoutSet(
                         weightKg = prev?.weightKg?.takeIf { it > 0 } ?: rs.weightKg,
                         reps = prev?.reps?.takeIf { it > 0 } ?: rs.reps,

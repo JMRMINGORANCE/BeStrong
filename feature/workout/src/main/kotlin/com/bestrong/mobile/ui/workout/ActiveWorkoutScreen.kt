@@ -329,7 +329,7 @@ fun ActiveWorkoutScreen(
                 // Mitad superior: lo que se mira desde el banco
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true, next = nextSetLabel(w, dumbbellTotal)) }
-                        ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp), eta)
+                        ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp), eta, dumbbellTotal)
                 }
                 HorizontalDivider()
                 listContent(Modifier.weight(1f))
@@ -344,7 +344,7 @@ fun ActiveWorkoutScreen(
                     if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                     if (settings.mediaControls) MediaControls(settings.musicApp)
-                    SummaryPanel(w, previous, liveMetrics, eta = eta)
+                    SummaryPanel(w, previous, liveMetrics, eta = eta, dumbbellTotal = dumbbellTotal)
                 }
                 listContent(Modifier.weight(0.62f))
             }
@@ -523,7 +523,7 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
 }
 
 @Composable
-private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, metrics: LiveMetrics?, modifier: Modifier = Modifier, eta: EtaInputs = EtaInputs()) {
+private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, metrics: LiveMetrics?, modifier: Modifier = Modifier, eta: EtaInputs = EtaInputs(), dumbbellTotal: Boolean = false) {
     val unit = LocalWeightUnit.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         StatsRow(w, metrics, eta = eta)
@@ -567,16 +567,18 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
             }
         }
         // Siguiente serie pendiente, visible de un vistazo
-        w.exercises.firstOrNull { we -> we.sets.any { !it.completed } }?.let { we ->
-            val set = we.sets.first { !it.completed }
-            val prev = previous(we.exercise.id).getOrNull(we.sets.indexOf(set))
+        // La que toca de verdad (superseries, fuera de orden), con su «anterior» del mismo tipo y el peso del par
+        WorkoutEditor.upcomingSet(w)?.let { (i, set) ->
+            val we = w.exercises[i]
+            val prev = WorkoutEditor.previousMatch(we.sets, we.sets.indexOf(set), previous(we.exercise.id))
+            val factor = pairFactor(we.exercise.id, dumbbellTotal)
             com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                 Column(Modifier.padding(12.dp)) {
                     // Es la serie que toca ahora (la primera sin hacer), no la de después
                     Text(stringResource(R.string.current_set_label), style = MaterialTheme.typography.labelMedium)
                     Text(we.exercise.displayName(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Text(describeSet(set, we.exercise, unit), style = MaterialTheme.typography.headlineMedium)
-                    prev?.let { Text(stringResource(R.string.previous_value, describeSet(it, we.exercise, unit)), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    Text(describeSet(set, we.exercise, unit, factor), style = MaterialTheme.typography.headlineMedium)
+                    prev?.let { Text(stringResource(R.string.previous_value, describeSet(it, we.exercise, unit, factor)), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
             }
         }

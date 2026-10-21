@@ -55,7 +55,8 @@ class WorkoutEditorTest {
     @Test fun routineToWorkoutPrefillsFromHistory() {
         val routine = Routine(name = "Push", exercises = listOf(RoutineExercise(exercise = bench, sets = List(2) { RoutineSet(50.0, 10) })))
         val w = routine.toWorkout(0, previousSets = { listOf(done(70.0, 6)) })
-        assertEquals(listOf(70.0, 50.0), w.exercises.single().sets.map { it.weightKg })
+        // La segunda no se hizo la última vez: toma la última hecha (70), no el peso viejo de la rutina (50)
+        assertEquals(listOf(70.0, 70.0), w.exercises.single().sets.map { it.weightKg })
         assertEquals(routine.id, w.routineId)
         val back = Routine.fromWorkout(w)
         assertEquals(2, back.exercises.single().sets.size)
