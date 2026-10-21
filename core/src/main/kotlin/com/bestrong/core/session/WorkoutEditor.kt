@@ -190,10 +190,9 @@ object WorkoutEditor {
                 val fresh = we.copy(id = com.bestrong.core.util.newId(), sets = we.sets.map { it.copy(id = com.bestrong.core.util.newId()) })
                 exercises = exercises.toMutableList().apply { add(index.coerceAtMost(size), fresh) }
             }
-            // Lo recuperado deja de estar borrado (si no, la fusión con el reloj lo volvería a quitar)
-            // (también las series de un ejercicio recuperado entero, que pudieron quedar marcadas antes al recortar)
-            val restored = removedExercises.flatMap { listOf(it.value.id) + it.value.sets.map { s -> s.id } } + removedSets.map { it.third.id }
-            w.copy(exercises = exercises, deletedIds = w.deletedIds - restored.toSet())
+            // Las marcas de borrado se quedan: lo recuperado lleva ids nuevos, y así una copia vieja del reloj (que aún tenga
+            // lo borrado con los ids de antes) no lo duplica al fusionar
+            w.copy(exercises = exercises)
         }
     }
 
@@ -607,6 +606,17 @@ object WorkoutEditor {
             .maxByOrNull { it.second }?.first
         val next = lastDone?.let { afterSetCompleted(workout, it).first }
         return next?.let { i -> workout.exercises.getOrNull(i)?.sets?.firstOrNull { !it.completed }?.let { i to it } } ?: nextPendingSet(workout)
+    }
+
+    /**
+     * La serie de [previous] (la última vez) que corresponde a la [index] de [sets]: calentamientos con calentamientos y
+     * efectivas con efectivas (si no, con un calentamiento de menos hoy, la primera efectiva se compara con uno).
+     */
+    fun previousMatch(sets: List<WorkoutSet>, index: Int, previous: List<WorkoutSet>): WorkoutSet? {
+        val set = sets.getOrNull(index) ?: return null
+        val warm = set.type == SetType.WARMUP
+        val sameKind = sets.take(index).count { (it.type == SetType.WARMUP) == warm }
+        return previous.filter { (it.type == SetType.WARMUP) == warm }.getOrNull(sameKind)
     }
 
     fun nextPendingSet(workout: Workout): Pair<Int, WorkoutSet>? {

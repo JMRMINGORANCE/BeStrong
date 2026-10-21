@@ -880,7 +880,7 @@ private fun ExerciseCard(
                     SetRow(
                         index = displayIndex,
                         set = set,
-                        previous = previous.getOrNull(i),
+                        previous = WorkoutEditor.previousMatch(we.sets, i, previous),
                         tracking = we.exercise.tracking,
                         pace = com.bestrong.core.util.PaceStyle.of(we.exercise.id),
                         onWeightKg = { vm.updateSet(we.id, set.id, weightKg = it) },

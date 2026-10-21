@@ -178,7 +178,11 @@ object Progression {
         val points = WorkoutStats.exerciseProgress(exerciseId, history)
         if (points.size < sessions + 1) return false
         val earlier = points.dropLast(sessions)
-        val before = earlier.maxOf { it.bestOneRepMax }
+        // El mejor desde la última descarga: volviendo a subir tras una (o tras un parón) no se compara con lo de antes
+        val lastDeload = earlier.indices.lastOrNull { i ->
+            i > 0 && earlier[i].heaviestWeight > 0 && earlier[i].heaviestWeight < earlier[i - 1].heaviestWeight * DELOAD_SIGN
+        } ?: 0
+        val before = earlier.drop(lastDeload).maxOf { it.bestOneRepMax }
         // La sesión justo antes de la ventana (no el máximo de siempre: un bloque pesado de hace meses no puede
         // hacer que todo lo de ahora parezca descarga)
         val heaviest = earlier.last().heaviestWeight

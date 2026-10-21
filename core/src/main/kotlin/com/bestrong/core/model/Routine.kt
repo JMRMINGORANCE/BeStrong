@@ -122,7 +122,8 @@ data class Routine(
                 supersetId = we.supersetId,
                 tempo = we.tempo,
                 targetRpe = we.targetRpe,
-                sets = we.sets.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) },
+                // Las reps objetivo (si las había), no las que salieron: 10/8/7 en un 3×10 no rebaja el plan
+                sets = we.sets.map { RoutineSet(it.weightKg, it.targetReps ?: it.reps, it.durationSec, it.type) },
             )
         }
     }

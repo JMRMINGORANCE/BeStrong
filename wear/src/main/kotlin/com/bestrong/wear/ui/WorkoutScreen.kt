@@ -96,7 +96,7 @@ fun WorkoutScreen(
     val we = w.exercises.getOrNull(index)
     val set = we?.sets?.firstOrNull { !it.completed }
     val setNumber = we?.sets?.indexOf(set)?.plus(1) ?: 0
-    val previous = we?.let { session.previousFor(it.exercise.id).getOrNull(setNumber - 1) }
+    val previous = we?.let { com.bestrong.core.session.WorkoutEditor.previousMatch(it.sets, setNumber - 1, session.previousFor(it.exercise.id)) }
 
     val completeDescription = stringResource(R.string.complete_set)
     ScreenScaffold {

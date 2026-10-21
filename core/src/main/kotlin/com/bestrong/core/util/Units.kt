@@ -15,8 +15,11 @@ enum class WeightUnit(val label: String, val kgPerUnit: Double, val defaultIncre
 
     /** Formatea un peso guardado en kg en esta unidad, sin decimales innecesarios. */
     fun format(kg: Double, withUnit: Boolean = false): String {
-        val v = (fromKg(kg) * 10).roundToLong() / 10.0
-        val text = if (v % 1.0 == 0.0) v.toLong().toString() else v.toString().replace('.', ',')
+        // En kg hasta dos decimales: los incrementos de 1,25 kg se ven tal cual (61,25 y no «61,3»); en libras uno
+        // (un peso guardado en kg no sale como «134,48 lb»)
+        val scale = if (this == KG) 100.0 else 10.0
+        val v = (fromKg(kg) * scale).roundToLong() / scale
+        val text = if (v % 1.0 == 0.0) v.toLong().toString() else v.toString().trimEnd('0').replace('.', ',')
         return if (withUnit) "$text $label" else text
     }
 

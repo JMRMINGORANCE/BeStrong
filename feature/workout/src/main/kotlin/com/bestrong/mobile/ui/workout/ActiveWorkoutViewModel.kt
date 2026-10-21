@@ -423,9 +423,11 @@ class ActiveWorkoutViewModel @Inject constructor(
             val removed = sets.getOrNull(index) ?: return@launch
             _events.tryEmit(
                 WorkoutEvent.Undoable(UndoKind.SET, partner, before.id) { w ->
+                    // Con id nuevo y sin quitar la marca de borrado: el reloj ya la tiene, y con el id de antes la fusión la
+                    // volvería a quitar
                     WorkoutEditor.updateExercise(w, weId) { we ->
-                        if (we.sets.any { it.id == setId }) we else we.copy(sets = we.sets.toMutableList().apply { add(index.coerceAtMost(size), removed) })
-                    }.let { it.copy(deletedIds = it.deletedIds - setId) } // si no, la fusión con el reloj la volvería a quitar
+                        if (we.sets.any { it.id == setId }) we else we.copy(sets = we.sets.toMutableList().apply { add(index.coerceAtMost(size), removed.copy(id = com.bestrong.core.util.newId())) })
+                    }
                 },
             )
         }
@@ -658,12 +660,11 @@ class ActiveWorkoutViewModel @Inject constructor(
         WorkoutEditor.updateExercise(w, weId) { we ->
             var i = 0
             we.copy(
+                // Cada serie efectiva con la suya de la sugerencia (también las ya hechas cuentan para el orden)
                 sets = we.sets.map { s ->
-                    if (s.completed || s.type == SetType.WARMUP) {
-                        s
-                    } else {
-                        suggestion.sets.getOrNull(i++)?.let { sug -> s.copy(weightKg = sug.weightKg, reps = sug.reps, durationSec = sug.durationSec) } ?: s
-                    }
+                    if (s.type == SetType.WARMUP) return@map s
+                    val sug = suggestion.sets.getOrNull(i++)
+                    if (s.completed || sug == null) s else s.copy(weightKg = sug.weightKg, reps = sug.reps, durationSec = sug.durationSec)
                 },
             )
         }
