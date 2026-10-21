@@ -195,4 +195,13 @@ class CoreFixesTest {
         assertEquals(types.distinct().size, types.size)
         assertEquals(types.size, com.bestrong.core.stats.WorkoutStats.newRecordsInEach(listOf(old, today)) { it.id == today.id }[today.id]!!.size)
     }
+
+    @Test fun missedPlannedRepsDoNotRaiseWeight() {
+        val bench = com.bestrong.core.library.ExerciseLibrary.byId("bench_press")!!
+        val sets = List(3) { com.bestrong.core.model.WorkoutSet(weightKg = 80.0, reps = 6, targetReps = 8, completed = true) }
+        val w = com.bestrong.core.model.Workout(name = "w", startedAtEpochMs = 0, finishedAtEpochMs = 1, exercises = listOf(com.bestrong.core.model.WorkoutExercise(exercise = bench, sets = sets)))
+        val s = com.bestrong.core.training.Progression.suggest(bench, listOf(w))!!
+        assertEquals(com.bestrong.core.training.SuggestionKind.ADD_REPS, s.kind)
+        assertEquals(8, s.sets.first().reps)
+    }
 }

@@ -81,7 +81,9 @@ object Progression {
         val previous = WorkoutStats.previousExercise(exercise.id, history)
         val last = previous?.completedSets.orEmpty().filter { it.type != SetType.WARMUP }
         // El cardio no progresa por peso ni repeticiones
-        if (last.isEmpty() || exercise.tracking == TrackingType.CARDIO) return null
+        // (ni una distancia sin lastre: remar 2000 m no es «sube 2,5 kg»)
+        val noLoadDistance = exercise.tracking == TrackingType.DISTANCE && last.all { it.weightKg == 0.0 }
+        if (last.isEmpty() || exercise.tracking == TrackingType.CARDIO || noLoadDistance) return null
 
         // Sin carga (peso corporal o tiempo) el 1RM estimado es 0 y no sirve para detectar estancamiento
         val loaded = exercise.tracking != TrackingType.DURATION && last.any { it.weightKg > 0.0 }
@@ -92,7 +94,8 @@ object Progression {
         val stalled = loaded && if (useRange) isStalledInRange(exercise.id, history, stallSessions, repRange) else isStalled(exercise.id, history, stallSessions)
         return when {
             stalled -> {
-                val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg), completed = false, rpe = null) }
+                // Al menos un escalón por debajo: con pesos ligeros el 90 % redondeado volvía al mismo peso
+                val sets = last.map { it.copy(weightKg = roundTo(it.weightKg * 0.9, incrementKg).coerceAtMost(it.weightKg - incrementKg).coerceAtLeast(0.0), completed = false, rpe = null) }
                 ProgressionSuggestion(SuggestionKind.DELOAD, sets, "Llevas $stallSessions sesiones sin progresar: descarga al 90 %", stallSessions = stallSessions)
             }
             isUnloaded(exercise.tracking, last) -> unloaded(exercise.tracking, last)
@@ -117,15 +120,20 @@ object Progression {
     private fun fixedReps(last: List<WorkoutSet>, incrementKg: Double, easy: Boolean): ProgressionSuggestion {
         // Drop sets y similares no cuentan: menos reps a menos peso es lo esperado, no un fallo
         val work = last.filter { it.type == SetType.NORMAL || it.type == SetType.FAILURE || it.type == SetType.CLUSTER }.ifEmpty { last }
-        val targetReps = work.first().reps
-        val hitAll = work.all { it.reps >= targetReps }
+        // Las series al peso más alto marcan el objetivo (pirámides y aproximaciones no), con las reps planeadas si
+        // las había (un 3×8 hecho a 6/6/6 no es «todas cumplidas»); una serie asistida no cuenta como hecha
+        val top = work.maxOf { it.weightKg }
+        val atTop = work.filter { it.weightKg == top }
+        val targetReps = atTop.first().let { it.targetReps ?: it.reps }
+        val hitAll = atTop.all { it.reps >= targetReps && !it.assisted }
+        fun reps(s: WorkoutSet) = if (s.weightKg == top && s in work) targetReps else s.reps
         return when {
             hitAll && easy -> {
-                val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = targetReps, completed = false, rpe = null) }
+                val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = reps(it), completed = false, rpe = null) }
                 ProgressionSuggestion(SuggestionKind.INCREASE_WEIGHT, sets, "Completaste todas las series: sube el peso")
             }
             !hitAll -> {
-                val sets = last.map { it.copy(reps = targetReps, completed = false, rpe = null) }
+                val sets = last.map { it.copy(reps = reps(it), completed = false, rpe = null) }
                 ProgressionSuggestion(SuggestionKind.ADD_REPS, sets, "Mismo peso: intenta $targetReps reps en todas las series", targetReps = targetReps)
             }
             else -> ProgressionSuggestion(SuggestionKind.REPEAT, last.map { it.copy(completed = false, rpe = null) }, "RPE alto: repite y consolida")
@@ -140,7 +148,7 @@ object Progression {
         // Igual que el estancamiento: las series efectivas al peso más alto (un drop set no cuenta)
         val working = last.filter { it.type == SetType.NORMAL || it.type == SetType.FAILURE }.ifEmpty { last }
         val top = working.maxOf { it.weightKg }
-        val atTop = working.filter { it.weightKg == top }.all { it.reps >= range.last }
+        val atTop = working.filter { it.weightKg == top }.all { it.reps >= range.last && !it.assisted }
         return when {
             atTop && easy -> {
                 val sets = last.map { it.copy(weightKg = it.weightKg + incrementKg, reps = range.first, completed = false, rpe = null) }
