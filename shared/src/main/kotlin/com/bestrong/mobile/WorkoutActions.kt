@@ -103,19 +103,24 @@ class WorkoutActions @Inject constructor(
         runCatching { com.bestrong.core.sync.SyncContract.decodeHealth(raw.encodeToByteArray()) }.getOrNull()?.let { mergeWatchHealth(it) }
     }
 
+    /** Se está viendo el entreno de la pareja (lo marca la pantalla del entreno; lo leen las teclas de volumen). */
+    val partnerOnScreen = MutableStateFlow(false)
+
     /**
      * Completa la siguiente serie pendiente y arranca su descanso (botón de la notificación,
      * botones de volumen). Devuelve false si no queda ninguna.
      */
-    suspend fun completeNextSet(): Boolean {
+    suspend fun completeNextSet(visible: Boolean = false): Boolean {
         // La serie se elige dentro de updateActive, sobre el último estado guardado: dos toques
         // seguidos (o un cambio del reloj) completan series distintas y nunca desmarcan una hecha
         // (upcomingSet solo devuelve series sin completar). La que toca de verdad: en superseries o con ejercicios
         // hechos fuera de orden, no la primera pendiente de la lista
-        val (before, updated) = repository.updateActive { w ->
-            val (index, set) = WorkoutEditor.upcomingSet(w) ?: return@updateActive w
-            WorkoutEditor.toggleSetCompleted(w, w.exercises[index].id, set.id)
-        } ?: return false
+        val next: (Workout) -> Workout = { w ->
+            WorkoutEditor.upcomingSet(w)?.let { (index, set) -> WorkoutEditor.toggleSetCompleted(w, w.exercises[index].id, set.id) } ?: w
+        }
+        // [visible]: la del que está en pantalla (teclas de volumen con el entreno de la pareja a la vista)
+        val partner = visible && partnerOnScreen.value && repository.partnerWorkout.value != null
+        val (before, updated) = (if (partner) repository.updatePartnerActive(next) else repository.updateActive(next)) ?: return false
         val (index, _) = WorkoutEditor.upcomingSet(before) ?: return false
         val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index, settings.settings.value.warmupRestSeconds)
         if (rest > 0) restTimer.start(rest) else restTimer.skip()

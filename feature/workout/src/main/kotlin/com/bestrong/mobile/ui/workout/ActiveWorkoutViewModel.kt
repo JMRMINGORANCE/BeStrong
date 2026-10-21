@@ -92,6 +92,12 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     private fun setPartnerMode(on: Boolean) {
         savedState[KEY_PARTNER_MODE] = on
+        actions.partnerOnScreen.value = on
+    }
+
+    override fun onCleared() {
+        // Sin la pantalla del entreno, lo que se ve ya no es lo de la pareja
+        actions.partnerOnScreen.value = false
     }
 
     val workout: StateFlow<Workout?> = combine(repo.activeWorkout, repo.partnerWorkout, partnerMode) { me, partner, isPartner ->
@@ -863,6 +869,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     init {
+        actions.partnerOnScreen.value = partnerMode.value
         viewModelScope.launch { workout.collect(::onWorkoutForRpe) }
         // Resumen sin cerrar cuando el sistema mató el proceso: se reconstruye desde el historial
         savedState.get<String>(KEY_SUMMARY_ID)?.let { id ->
