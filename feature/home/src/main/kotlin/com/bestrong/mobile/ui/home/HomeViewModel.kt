@@ -208,7 +208,9 @@ class HomeViewModel @Inject constructor(
             today = today.dayOfWeek,
             streak = com.bestrong.core.stats.WorkoutStats.weeklyStreak(history.filter { it.isFinished }, today, zone),
             // Días con una rutina planificada (Planificar o el programa a medida)
-            plannedDays = plan.planFor(today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))).days.keys.map { DayOfWeek.of(it) }.toSet(),
+            // (solo rutinas que siguen existiendo: una borrada no deja el día marcado)
+            plannedDays = plan.planFor(today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))).days
+                .filterValues { id -> repo.routines.value.any { it.id == id } }.keys.map { DayOfWeek.of(it) }.toSet(),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 
@@ -439,7 +441,8 @@ class HomeViewModel @Inject constructor(
             .groupBy({ it.routineId!! }, { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() })
         val week = plan.planFor(weekStart)
         val tomorrow = today.plusDays(1)
-        val canMove = tomorrow.dayOfWeek != java.time.DayOfWeek.MONDAY && week.routineFor(tomorrow.dayOfWeek) == null
+        // Mañana libre también si lo que tenía era una rutina ya borrada (el calendario lo enseña como descanso)
+        val canMove = tomorrow.dayOfWeek != java.time.DayOfWeek.MONDAY && week.routineFor(tomorrow.dayOfWeek)?.let { id -> routines.any { it.id == id } } != true
         week.missedSessions(weekStart, today, trained) { id, since -> doneOn[id].orEmpty().any { !it.isBefore(since) } }
             .firstNotNullOfOrNull { (day, id) -> routines.firstOrNull { it.id == id && !it.archived }?.let { MissedSession(day, it, canMove) } }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
@@ -452,7 +455,8 @@ class HomeViewModel @Inject constructor(
         if (tomorrow.dayOfWeek == java.time.DayOfWeek.MONDAY) return
         planning.update { s ->
             val plan = s.planFor(weekStart)
-            if (plan.routineFor(tomorrow.dayOfWeek) != null) s else s.copy(weekPlans = s.weekPlans + (weekStart.toEpochDay() to plan.move(day, tomorrow.dayOfWeek)))
+            val taken = plan.routineFor(tomorrow.dayOfWeek)?.let { id -> repo.routines.value.any { it.id == id } } == true
+            if (taken) s else s.copy(weekPlans = s.weekPlans + (weekStart.toEpochDay() to plan.move(day, tomorrow.dayOfWeek)))
         }
     }
 

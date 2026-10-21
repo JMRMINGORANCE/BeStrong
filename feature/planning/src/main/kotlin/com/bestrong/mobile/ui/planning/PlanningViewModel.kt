@@ -142,12 +142,15 @@ class PlanningViewModel @Inject constructor(
     fun duplicateWeek(weekStart: LocalDate, weeks: Int = 1) {
         val n = weeks.coerceIn(1, MAX_DUPLICATE_WEEKS)
         val targets = (1..n).map { weekStart.plusWeeks(it.toLong()).toEpochDay() }
-        val kept = targets.count { store.state.value.weekPlans[it]?.days?.isNotEmpty() == true }
+        // Solo rutinas que siguen existiendo: una semana con rutinas borradas (todo «Descanso») está libre
+        val alive = repo.routines.value.map { it.id }.toSet()
+        fun planned(day: Long) = store.state.value.weekPlans[day]?.days?.values?.any { it in alive } == true
+        val kept = targets.count(::planned)
         store.update { s ->
-            val plan = s.planFor(weekStart)
-            s.copy(weekPlans = s.weekPlans + targets.filter { s.weekPlans[it]?.days.isNullOrEmpty() }.associateWith { plan })
+            val plan = s.planFor(weekStart).let { p -> p.copy(days = p.days.filterValues { it in alive }) }
+            s.copy(weekPlans = s.weekPlans + targets.filterNot(::planned).associateWith { plan })
         }
-        val copied = context.resources.getQuantityString(R.plurals.plan_week_duplicated_n, n, n)
+        val copied = context.resources.getQuantityString(R.plurals.plan_week_duplicated_n, n - kept, n - kept)
         _messages.tryEmit(if (kept > 0) copied + ". " + context.resources.getQuantityString(R.plurals.plan_week_kept_n, kept, kept) else copied)
     }
 
