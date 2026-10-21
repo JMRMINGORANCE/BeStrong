@@ -569,20 +569,7 @@ object WorkoutEditor {
         val group = supersetGroup(workout, index)
         val current = workout.exercises.getOrNull(index) ?: return null to 0
         if (group.size > 1) {
-            val pos = group.indexOf(index)
-            // Tras un calentamiento se sigue con este ejercicio (descanso corto): las rondas son de series efectivas
-            val justDone = current.sets.filter { it.completed }.maxByOrNull { it.completedAtEpochMs ?: 0L }
-            if (justDone?.type == SetType.WARMUP && current.sets.any { !it.completed }) return index to current.restSeconds.coerceAtMost(warmupRestSeconds)
-            val doneHere = current.sets.count { it.completed && it.type != SetType.WARMUP }
-            // Siguiente del grupo que aún no ha hecho la serie de esta ronda
-            // En círculo: empezar la ronda por el segundo del grupo lleva al primero sin descanso
-            val nextInRound = (group.drop(pos + 1) + group.take(pos)).firstOrNull { i ->
-                val ex = workout.exercises[i]
-                ex.sets.count { it.completed && it.type != SetType.WARMUP } < doneHere && ex.sets.any { !it.completed }
-            }
-            if (nextInRound != null) return nextInRound to 0
-            val firstPending = group.firstOrNull { i -> workout.exercises[i].sets.any { !it.completed } }
-            if (firstPending != null) return firstPending to workout.exercises[group.last()].restSeconds
+            supersetNext(workout, group, index, warmupRestSeconds)?.let { return it }
         } else if (current.sets.any { !it.completed }) {
             // Tras una serie de aproximación basta un descanso corto (no los 3 min de la serie efectiva)
             val justDone = current.sets.filter { it.completed }.maxByOrNull { it.completedAtEpochMs ?: 0L }
@@ -596,6 +583,24 @@ object WorkoutEditor {
         }
         val next = nextPendingSet(workout)?.first
         return next to if (next == null) 0 else current.restSeconds
+    }
+
+    /** [afterSetCompleted] dentro de una superserie: (siguiente, descanso), o null si el grupo ya está hecho. */
+    private fun supersetNext(workout: Workout, group: List<Int>, index: Int, warmupRestSeconds: Int): Pair<Int, Int>? {
+        val current = workout.exercises[index]
+        val pos = group.indexOf(index)
+        // Tras un calentamiento se sigue con este ejercicio (descanso corto): las rondas son de series efectivas
+        val justDone = current.sets.filter { it.completed }.maxByOrNull { it.completedAtEpochMs ?: 0L }
+        if (justDone?.type == SetType.WARMUP && current.sets.any { !it.completed }) return index to current.restSeconds.coerceAtMost(warmupRestSeconds)
+        val doneHere = current.sets.count { it.completed && it.type != SetType.WARMUP }
+        // Siguiente del grupo que aún no ha hecho la serie de esta ronda
+        // En círculo: empezar la ronda por el segundo del grupo lleva al primero sin descanso
+        val nextInRound = (group.drop(pos + 1) + group.take(pos)).firstOrNull { i ->
+            val ex = workout.exercises[i]
+            ex.sets.count { it.completed && it.type != SetType.WARMUP } < doneHere && ex.sets.any { !it.completed }
+        }
+        return nextInRound?.let { it to 0 }
+            ?: group.firstOrNull { i -> workout.exercises[i].sets.any { !it.completed } }?.let { it to workout.exercises[group.last()].restSeconds }
     }
 
     /** Siguiente serie pendiente: (índice de ejercicio, serie) o null si está todo hecho. */
