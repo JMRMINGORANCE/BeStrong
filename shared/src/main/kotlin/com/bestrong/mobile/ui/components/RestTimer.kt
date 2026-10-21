@@ -49,7 +49,8 @@ fun rememberNow(intervalMs: Long = 1_000): Long {
     return now
 }
 
-data class RestState(val endsAtEpochMs: Long, val totalSeconds: Int)
+/** [workoutId]: de qué entreno es (tuyo o de la pareja); null = sin saber (descansos de versiones anteriores). */
+data class RestState(val endsAtEpochMs: Long, val totalSeconds: Int, val workoutId: String? = null)
 
 @Composable
 fun RestTimerBar(

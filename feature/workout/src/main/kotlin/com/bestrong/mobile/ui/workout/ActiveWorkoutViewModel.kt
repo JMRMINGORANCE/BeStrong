@@ -558,7 +558,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun togglePause() {
         val now = System.currentTimeMillis()
         val paused = workout.value?.isPaused == true
-        if (!paused) restTimer.skip()
+        if (!paused) restTimer.skipFor(workout.value?.id)
         edit { if (it.isPaused) WorkoutEditor.resume(it, now) else WorkoutEditor.pause(it, now) }
     }
 
@@ -687,8 +687,8 @@ class ActiveWorkoutViewModel @Inject constructor(
                 onSetCompleted(updated, index)
                 if (!partner) goalEvent(updated, weId, setId)?.let { _events.tryEmit(it) }
             } else if (unticked(before, updated, setId) && wasLastCompleted(before, setId)) {
-                // Marcada por error y desmarcada: el descanso que lanzó ya no tiene sentido
-                restTimer.skip()
+                // Marcada por error y desmarcada: el descanso que lanzó ya no tiene sentido (solo el de este entreno)
+                restTimer.skipFor(updated.id)
             }
         }
     }
@@ -726,7 +726,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Descanso, aviso por voz y desplazamiento al siguiente ejercicio tras completar una serie. */
     private fun onSetCompleted(updated: Workout, index: Int) {
         val (next, restSeconds) = WorkoutEditor.afterSetCompleted(updated, index, settings.value.warmupRestSeconds)
-        if (restSeconds > 0) restTimer.start(restSeconds) else restTimer.skip()
+        if (restSeconds > 0) restTimer.start(restSeconds, updated.id) else restTimer.skipFor(updated.id)
         // Aviso por voz: cuánto descansar y qué viene (la serie del ejercicio al que se salta, no la primera de la lista)
         val upcoming = next?.let { i -> updated.exercises.getOrNull(i)?.sets?.firstOrNull { !it.completed }?.let { i to it } }
             ?: WorkoutEditor.nextPendingSet(updated)

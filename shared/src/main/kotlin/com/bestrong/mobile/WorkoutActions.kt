@@ -123,7 +123,7 @@ class WorkoutActions @Inject constructor(
         val (before, updated) = (if (partner) repository.updatePartnerActive(next) else repository.updateActive(next)) ?: return false
         return WorkoutEditor.upcomingSet(before)?.let { (index, _) ->
             val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index, settings.settings.value.warmupRestSeconds)
-            if (rest > 0) restTimer.start(rest) else restTimer.skip()
+            if (rest > 0) restTimer.start(rest, updated.id) else restTimer.skipFor(updated.id)
         } != null
     }
 

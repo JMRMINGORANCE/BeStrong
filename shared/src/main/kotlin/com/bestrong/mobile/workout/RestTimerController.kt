@@ -72,17 +72,17 @@ class RestTimerController @Inject constructor(
     private fun restore(): RestState? {
         val ends = prefs.getLong("ends", 0)
         val total = prefs.getInt("total", 0)
-        return if (ends > System.currentTimeMillis() && total > 0) RestState(ends, total) else null
+        return if (ends > System.currentTimeMillis() && total > 0) RestState(ends, total, prefs.getString("workout", null)) else null
     }
 
     private fun persist(r: RestState?) {
-        prefs.edit().apply { if (r == null) clear() else putLong("ends", r.endsAtEpochMs).putInt("total", r.totalSeconds) }.apply()
+        prefs.edit().apply { if (r == null) clear() else putLong("ends", r.endsAtEpochMs).putInt("total", r.totalSeconds).putString("workout", r.workoutId) }.apply()
     }
 
-    fun start(seconds: Int) {
+    fun start(seconds: Int, workoutId: String? = null) {
         if (seconds <= 0) return skip()
         _restEndedAt.value = null
-        _rest.value = RestState(System.currentTimeMillis() + seconds * 1000L, seconds)
+        _rest.value = RestState(System.currentTimeMillis() + seconds * 1000L, seconds, workoutId)
         persist(_rest.value)
         schedule()
     }
@@ -98,12 +98,21 @@ class RestTimerController @Inject constructor(
 
     fun adjust(deltaSeconds: Int) {
         val r = _rest.value ?: return
-        _rest.value = RestState(
-            (r.endsAtEpochMs + deltaSeconds * 1000L).coerceAtLeast(System.currentTimeMillis()),
-            (r.totalSeconds + deltaSeconds).coerceAtLeast(1),
+        _rest.value = r.copy(
+            endsAtEpochMs = (r.endsAtEpochMs + deltaSeconds * 1000L).coerceAtLeast(System.currentTimeMillis()),
+            totalSeconds = (r.totalSeconds + deltaSeconds).coerceAtLeast(1),
         )
         persist(_rest.value)
         schedule()
+    }
+
+    /**
+     * Quita el descanso solo si es del entreno [workoutId] (o de origen desconocido): pausar o desmarcar en el de la
+     * pareja no corta el tuyo, ni al revés.
+     */
+    fun skipFor(workoutId: String?) {
+        val owner = _rest.value?.workoutId
+        if (owner == null || owner == workoutId) skip()
     }
 
     fun skip() {
