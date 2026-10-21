@@ -38,9 +38,12 @@ class MergeTombstoneTest {
         val merged = WorkoutMerge.merge(done, removed)
         assertEquals(listOf("s2"), merged.exercises[0].sets.map { it.id })
         assertEquals(listOf("s2"), WorkoutMerge.merge(removed, done.copy(updatedAtEpochMs = 3_000)).exercises[0].sets.map { it.id })
-        // Deshacer el borrado la recupera
+        // Deshacer el borrado la recupera (con id nuevo): una sola serie hecha, sin duplicarla con la copia vieja
         val restored = WorkoutEditor.undoRemoval(done, removed)(removed).copy(updatedAtEpochMs = 4_000)
-        assertTrue(WorkoutMerge.merge(done, restored).exercises[0].sets.any { it.id == "s1" })
+        val sets = WorkoutMerge.merge(done, restored).exercises[0].sets
+        assertEquals(2, sets.size)
+        assertEquals(1, sets.count { it.completed })
+        assertTrue(sets.none { it.id == "s1" })
     }
 
     @Test fun deletedExerciseDoesNotComeBack() {
