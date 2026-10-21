@@ -40,7 +40,8 @@ object Autoregulation {
     }
 
     fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double): RpeAdjustment? {
-        val done = exercise.sets.firstOrNull { it.id == completedSetId } ?: return null
+        // Solo con la serie ya hecha: un RPE puesto antes de marcarla no ajusta esa misma serie
+        val done = exercise.sets.firstOrNull { it.id == completedSetId && it.completed } ?: return null
         val rpe = done.rpe ?: return null
         // Normales y cluster; tras una al fallo solo se sube (si se quedó lejos del fallo); un drop no cuenta
         if (done.type !in ADJUSTABLE || done.weightKg <= 0) return null

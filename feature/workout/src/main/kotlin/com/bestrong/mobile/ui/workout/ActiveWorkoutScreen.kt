@@ -188,6 +188,7 @@ fun ActiveWorkoutScreen(
                     .putExtra(android.content.Intent.EXTRA_TEXT, vm.shareText(s.workout))
                 context.startActivity(android.content.Intent.createChooser(send, null))
             },
+            dumbbellTotal = dumbbellTotal,
         )
         return
     }
@@ -1150,6 +1151,7 @@ fun WorkoutSummaryDialog(
     onRate: (SessionRating) -> Unit = {},
     onUpdateRoutine: () -> Unit = {},
     onShareText: () -> Unit = {},
+    dumbbellTotal: Boolean = false,
 ) {
     val w = summary.workout
     val unit = LocalWeightUnit.current
@@ -1222,7 +1224,7 @@ fun WorkoutSummaryDialog(
                             else -> "="
                         }
                         Text(
-                            stringResource(R.string.summary_next_line, arrow, ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName, unit.format(n.weightKg, withUnit = true), n.reps),
+                            stringResource(R.string.summary_next_line, arrow, ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName, unit.format(n.weightKg * pairFactor(n.exerciseId, dumbbellTotal), withUnit = true), n.reps),
                             style = MaterialTheme.typography.bodySmall,
                             color = if (n.direction > 0) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -1308,3 +1310,7 @@ private fun DoneExerciseRow(we: WorkoutExercise, onOpen: () -> Unit) {
         com.bestrong.mobile.ui.components.MetaPill("✓ ${we.sets.size}/${we.sets.size}", Modifier.spokenAs(stringResource(R.string.achievements_count, we.sets.size, we.sets.size)))
     }
 }
+
+/** 2 con «suma de las dos mancuernas» en un ejercicio con mancuernas (como en las filas); si no, 1. */
+private fun pairFactor(exerciseId: String, dumbbellTotal: Boolean): Int =
+    if (dumbbellTotal && ExerciseLibrary.byId(exerciseId)?.equipment == Equipment.DUMBBELL) 2 else 1

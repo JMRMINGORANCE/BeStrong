@@ -365,13 +365,14 @@ object WorkoutEditor {
 
     /** Añade una serie copiando la última (peso y reps). */
     fun addSet(workout: Workout, workoutExerciseId: String): Workout = updateExercise(workout, workoutExerciseId) { we ->
-        val last = we.sets.lastOrNull()
+        // Tras un drop set, otra serie normal con lo de la última efectiva (no otro drop al peso ya bajado)
+        val last = we.sets.lastOrNull()?.takeIf { it.type != SetType.DROP } ?: we.sets.lastOrNull { it.type != SetType.DROP } ?: we.sets.lastOrNull()
         we.copy(
             sets = we.sets + WorkoutSet(
                 weightKg = last?.weightKg ?: 0.0,
                 reps = last?.reps ?: 10,
                 durationSec = last?.durationSec ?: 0,
-                type = if (last?.type == SetType.WARMUP) SetType.NORMAL else last?.type ?: SetType.NORMAL,
+                type = if (last?.type == SetType.WARMUP || last?.type == SetType.DROP) SetType.NORMAL else last?.type ?: SetType.NORMAL,
                 // También la distancia y el lado derecho (cardio por distancia y unilaterales)
                 distanceM = last?.distanceM ?: 0.0,
                 repsRight = last?.repsRight,
@@ -569,12 +570,15 @@ object WorkoutEditor {
         val current = workout.exercises.getOrNull(index) ?: return null to 0
         if (group.size > 1) {
             val pos = group.indexOf(index)
-            val doneHere = current.sets.count { it.completed }
+            // Tras un calentamiento se sigue con este ejercicio (descanso corto): las rondas son de series efectivas
+            val justDone = current.sets.filter { it.completed }.maxByOrNull { it.completedAtEpochMs ?: 0L }
+            if (justDone?.type == SetType.WARMUP && current.sets.any { !it.completed }) return index to current.restSeconds.coerceAtMost(warmupRestSeconds)
+            val doneHere = current.sets.count { it.completed && it.type != SetType.WARMUP }
             // Siguiente del grupo que aún no ha hecho la serie de esta ronda
             // En círculo: empezar la ronda por el segundo del grupo lleva al primero sin descanso
             val nextInRound = (group.drop(pos + 1) + group.take(pos)).firstOrNull { i ->
                 val ex = workout.exercises[i]
-                ex.sets.count { it.completed } < doneHere && ex.sets.any { !it.completed }
+                ex.sets.count { it.completed && it.type != SetType.WARMUP } < doneHere && ex.sets.any { !it.completed }
             }
             if (nextInRound != null) return nextInRound to 0
             val firstPending = group.firstOrNull { i -> workout.exercises[i].sets.any { !it.completed } }

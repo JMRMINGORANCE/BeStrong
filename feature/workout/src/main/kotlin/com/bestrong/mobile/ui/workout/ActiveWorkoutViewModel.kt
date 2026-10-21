@@ -545,11 +545,11 @@ class ActiveWorkoutViewModel @Inject constructor(
         val updated = WorkoutEditor.updateSet(current, weId, setId) { s -> s.copy(rpe = rpe) }
         edit { WorkoutEditor.updateSet(it, weId, setId) { s -> s.copy(rpe = rpe) } }
         // Autorregulación: con RPE muy alto o muy bajo, proponer ajustar las series que quedan
-        val we = updated.exercises.firstOrNull { it.id == weId } ?: return
-        Autoregulation.suggest(we, setId, settings.value.stepKgFor(we.exercise.id))?.let {
-            _events.tryEmit(WorkoutEvent.RpeSuggestion(weId, we.exercise, it))
-        }
+        rpeSuggestion(updated.exercises.firstOrNull { it.id == weId } ?: return, setId)
     }
+
+    private fun rpeSuggestion(we: com.bestrong.core.model.WorkoutExercise, setId: String) =
+        Autoregulation.suggest(we, setId, settings.value.stepKgFor(we.exercise.id))?.let { _events.tryEmit(WorkoutEvent.RpeSuggestion(we.id, we.exercise, it)) }
 
     fun applyRpeAdjustment(weId: String, adjustment: RpeAdjustment) = edit { w ->
         WorkoutEditor.updateExercise(w, weId) { Autoregulation.apply(it, adjustment) }
@@ -686,6 +686,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             fun done(w: Workout) = w.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId }?.completed == true
             if (index >= 0 && !done(before) && done(updated)) {
                 onSetCompleted(updated, index)
+                // RPE puesto antes de marcarla: la propuesta de ajuste llega al marcarla
+                rpeSuggestion(updated.exercises[index], setId)
                 if (!partner) goalEvent(updated, weId, setId)?.let { _events.tryEmit(it) }
             } else if (unticked(before, updated, setId) && wasLastCompleted(before, setId)) {
                 // Marcada por error y desmarcada: el descanso que lanzó ya no tiene sentido (solo el de este entreno)
