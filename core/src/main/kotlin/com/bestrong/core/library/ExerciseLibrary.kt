@@ -50,7 +50,8 @@ object ExerciseLibrary {
      */
     val families: Map<String, List<String>> = mapOf(
         "bench" to listOf("bench_press", "incline_bench_press", "decline_bench_press", "db_bench_press", "db_incline_press", "close_grip_bench", "machine_chest_press"),
-        "squat" to listOf("squat", "front_squat", "smith_squat", "goblet_squat", "hack_squat", "leg_press"),
+        // Sin la prensa: 250 kg × 10 en prensa no es tu 1RM de sentadilla
+        "squat" to listOf("squat", "front_squat", "smith_squat", "goblet_squat", "hack_squat"),
         "deadlift" to listOf("deadlift", "romanian_deadlift"),
         "row" to listOf("barbell_row", "db_row", "pendlay_row", "t_bar_row", "seated_cable_row"),
         "overhead" to listOf("overhead_press", "db_shoulder_press", "arnold_press"),
@@ -218,7 +219,8 @@ object ExerciseLibrary {
         "Lateral Raise" to "lateral_raise", "Lateral Raise (Dumbbell)" to "lateral_raise", "Lateral Raise (Cable)" to "cable_lateral_raise",
         "Front Raise (Dumbbell)" to "front_raise", "Rear Delt Reverse Fly (Dumbbell)" to "rear_delt_fly", "Reverse Fly (Dumbbell)" to "rear_delt_fly",
         "Face Pull" to "face_pull", "Face Pull (Cable)" to "face_pull", "Upright Row (Barbell)" to "upright_row",
-        "Shrug (Dumbbell)" to "shrug", "Shrug (Barbell)" to "shrug",
+        // «Shrug (Barbell)» no: el de la biblioteca es con mancuernas (se importaría como el peso de cada una)
+        "Shrug (Dumbbell)" to "shrug",
         "Bicep Curl (Barbell)" to "barbell_curl", "Curl (Barbell)" to "barbell_curl", "Bicep Curl (Dumbbell)" to "db_curl", "Curl (Dumbbell)" to "db_curl",
         "Hammer Curl (Dumbbell)" to "hammer_curl", "Preacher Curl (Barbell)" to "preacher_curl", "Bicep Curl (Cable)" to "cable_curl",
         "Incline Curl (Dumbbell)" to "incline_db_curl", "Bench Press - Close Grip (Barbell)" to "close_grip_bench", "Close Grip Bench Press" to "close_grip_bench",
