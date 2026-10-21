@@ -77,7 +77,8 @@ fun WorkoutScreen(
     // Marcas del móvil: si llegan nuevas, la pista «N reps = récord» se recalcula
     val records by session.recordsVersion.collectAsStateWithLifecycle(initialValue = Unit to Unit)
     val countedReps by session.repCounter.reps.collectAsStateWithLifecycle()
-    val pinnedNotes = session.settings.collectAsStateWithLifecycle().value.pinnedNotes
+    val sharedSettings = session.settings.collectAsStateWithLifecycle().value
+    val pinnedNotes = sharedSettings.pinnedNotes
     val velocity by session.velocityInfo.collectAsStateWithLifecycle()
     val voice = rememberVoiceInput(stringResource(R.string.voice_prompt)) { session.applySpoken(it) }
     val unit = LocalWeightUnit.current
@@ -94,6 +95,7 @@ fun WorkoutScreen(
         return
     }
     val we = w.exercises.getOrNull(index)
+    val factor = we?.let { sharedSettings.weightFactor(it.exercise) } ?: 1
     val set = we?.sets?.firstOrNull { !it.completed }
     val setNumber = we?.sets?.indexOf(set)?.plus(1) ?: 0
     val previous = we?.let { com.bestrong.core.session.WorkoutEditor.previousMatch(it.sets, setNumber - 1, session.previousFor(it.exercise.id)) }
@@ -211,7 +213,7 @@ fun WorkoutScreen(
                         // Lo marcado es lo que mueve el bisel (sin peso a la vista, las reps o los metros)
                         val effective = session.effectiveTarget(we, set)
                         if (com.bestrong.wear.session.showsWeight(we, set)) {
-                            BigValue(unit.format(set.weightKg), unit.label, selected = effective == RotaryTarget.WEIGHT) {
+                            BigValue(unit.format(set.weightKg * factor), unit.label, selected = effective == RotaryTarget.WEIGHT) {
                                 session.setRotaryTarget(RotaryTarget.WEIGHT)
                             }
                             Text("×", style = MaterialTheme.typography.titleLarge)
@@ -237,7 +239,7 @@ fun WorkoutScreen(
                 Column(Modifier.weight(1f, fill = false), horizontalAlignment = Alignment.CenterHorizontally) {
                     previous?.let {
                         Text(
-                            stringResource(R.string.previous_any, setText(it, we.exercise.tracking, unit, stringResource(R.string.unit_reps))),
+                            stringResource(R.string.previous_any, setText(it, we.exercise.tracking, unit, stringResource(R.string.unit_reps), factor)),
                             // «La última vez» bien visible: es lo que hay que batir; tocarla la copia en esta serie
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.secondary,

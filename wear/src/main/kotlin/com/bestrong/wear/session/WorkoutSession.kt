@@ -791,7 +791,7 @@ class WorkoutSession @Inject constructor(
         if (spoken.weight == null && spoken.reps == null) return false
         val we = currentExercise() ?: return false
         val s = currentSet() ?: return false
-        val kg = spoken.weightKg(store.settings.value.unit)
+        val kg = spoken.weightKg(store.settings.value.unit)?.div(store.settings.value.weightFactor(we.exercise)) // dicho como total del par
         edit { w ->
             WorkoutEditor.updateSet(w, we.id, s.id) {
                 it.copy(

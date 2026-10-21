@@ -168,7 +168,13 @@ data class SharedSettings(
     val weeklyCardioMin: Int? = null,
     /** Subida máxima semanal de Planificación (0,05 = 5 %); null = sin tope. */
     val weeklyCap: Double? = null,
+    /** Mancuernas apuntadas como total del par (elegido en el móvil): el reloj muestra y entiende el mismo peso. */
+    val dumbbellTotal: Boolean = false,
 ) {
+    /** 2 con [dumbbellTotal] en un ejercicio con mancuernas; si no, 1 (el peso se guarda siempre por mancuerna). */
+    fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =
+        if (dumbbellTotal && exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
+
     /** El gimnasio activo con la barra propia del ejercicio, si la tiene (como en el móvil). */
     fun gymFor(exerciseId: String): com.bestrong.core.training.GymProfile? =
         activeGym?.let { g -> exerciseBarKg[exerciseId]?.let { g.copy(barKg = it) } ?: g }

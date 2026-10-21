@@ -38,10 +38,12 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
     val metrics by session.metrics.collectAsStateWithLifecycle()
     val lowPower by session.lowPower.collectAsStateWithLifecycle()
     val unit = LocalWeightUnit.current
+    val settings by session.settings.collectAsStateWithLifecycle()
     val w = workout ?: return
     val we = w.exercises.getOrNull(index)
     val set = we?.sets?.firstOrNull { !it.completed }
     val tracking = we?.exercise?.tracking ?: com.bestrong.core.model.TrackingType.WEIGHT_REPS
+    val factor = we?.let { settings.weightFactor(it.exercise) } ?: 1
     Box(Modifier.fillMaxSize().background(Color.Black).padding(24.dp).burnInShift(), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(w.name, color = Color.Gray, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -50,9 +52,9 @@ fun AmbientWorkoutScreen(session: WorkoutSession) {
                 Text(
                     // Como en la pantalla normal: segundos, minutos o metros según el ejercicio (no «0 kg × 0»)
                     if (tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) {
-                        "${unit.format(it.weightKg)} ${unit.label} × ${it.reps}"
+                        "${unit.format(it.weightKg * factor)} ${unit.label} × ${it.reps}"
                     } else {
-                        setText(it, tracking, unit, stringResource(R.string.unit_reps))
+                        setText(it, tracking, unit, stringResource(R.string.unit_reps), factor)
                     },
                     color = Color.White,
                     fontSize = 26.sp,

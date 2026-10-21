@@ -151,6 +151,7 @@ class AppSync @Inject constructor(
                 multiGym = s.gyms.size > 1,
                 weeklyCardioKm = s.weeklyCardioKm,
                 weeklyCardioMin = s.weeklyCardioMin,
+                dumbbellTotal = s.dumbbellTotal,
                 weeklyCap = cap,
                 pinnedNotes = pinned,
                 warmupRestSeconds = s.warmupRestSeconds,

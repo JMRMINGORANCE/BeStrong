@@ -83,11 +83,13 @@ fun setText(
     unit: com.bestrong.core.util.WeightUnit,
     // En el idioma del reloj («Wdh.», «rép.»…): R.string.unit_reps
     repsLabel: String = "reps",
+    // 2 con mancuernas apuntadas como total del par (como en el móvil)
+    factor: Int = 1,
 ): String = when (tracking) {
     com.bestrong.core.model.TrackingType.DURATION -> "${set.durationSec} s"
     com.bestrong.core.model.TrackingType.CARDIO -> "${set.durationSec / 60} min" + if (set.distanceM > 0) " · ${"%.1f".format(set.distanceM / 1000)} km" else ""
-    com.bestrong.core.model.TrackingType.DISTANCE -> (if (set.weightKg != 0.0) "${unit.format(set.weightKg)}×" else "") + "${set.distanceM.toInt()} m"
-    else -> if (set.weightKg == 0.0) "${set.reps} $repsLabel" else "${unit.format(set.weightKg)}×${set.reps}"
+    com.bestrong.core.model.TrackingType.DISTANCE -> (if (set.weightKg != 0.0) "${unit.format(set.weightKg * factor)}×" else "") + "${set.distanceM.toInt()} m"
+    else -> if (set.weightKg == 0.0) "${set.reps} $repsLabel" else "${unit.format(set.weightKg * factor)}×${set.reps}"
 }
 
 /**
