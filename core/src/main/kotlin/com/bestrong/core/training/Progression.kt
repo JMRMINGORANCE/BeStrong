@@ -102,13 +102,16 @@ object Progression {
             useRange -> byRange(last, repRange!!, incrementKg, easy)
             else -> fixedReps(last, incrementKg, easy)
         }
-        // La última vez faltaron series: se repite el peso en vez de subirlo (2 de 4 bien hechas no son las 4)
-        return if (suggestion.kind == SuggestionKind.INCREASE_WEIGHT && previous?.skippedWorkSets == true) {
+        return repeatIfSkipped(suggestion, previous?.skippedWorkSets == true, last)
+    }
+
+    /** La última vez faltaron series: se repite el peso en vez de subirlo (2 de 4 bien hechas no son las 4). */
+    private fun repeatIfSkipped(suggestion: ProgressionSuggestion, skipped: Boolean, last: List<WorkoutSet>): ProgressionSuggestion =
+        if (skipped && suggestion.kind == SuggestionKind.INCREASE_WEIGHT) {
             ProgressionSuggestion(SuggestionKind.REPEAT, last.map { it.copy(completed = false, rpe = null) }, "Faltaron series: repite el peso y complétalas")
         } else {
             suggestion
         }
-    }
 
     /** Por tiempo, o de repeticiones sin lastre: progresa sin tocar el peso. */
     private fun isUnloaded(tracking: TrackingType, last: List<WorkoutSet>) =

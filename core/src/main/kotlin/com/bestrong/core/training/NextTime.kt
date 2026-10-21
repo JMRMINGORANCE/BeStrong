@@ -34,8 +34,7 @@ object NextTime {
         val target = targetOf(topSets)
         val maxRpe = topSets.mapNotNull { it.rpe }.maxOrNull()
         val evidence = evidenceFor(work, topSets)
-        // Con series saltadas no se sube, aunque las hechas salieran bien
-        val allReps = topSets.all { it.reps >= target } && evidence && !we.skippedWorkSets
+        val allReps = allRepsDone(topSets, target, evidence, we.skippedWorkSets)
         val name = we.exercise.name
         val high = Autoregulation.high(we.targetRpe)
         return when {
@@ -44,6 +43,10 @@ object NextTime {
             else -> NextTimeSuggestion(we.exercise.id, name, top, target, 0, needsRpe = !evidence)
         }
     }
+
+    /** Todas las pesadas con sus reps y con datos para saberlo; con series saltadas no, aunque las hechas salieran bien. */
+    private fun allRepsDone(topSets: List<com.bestrong.core.model.WorkoutSet>, target: Int, evidence: Boolean, skipped: Boolean): Boolean =
+        !skipped && evidence && topSets.all { it.reps >= target }
 
     private fun evidenceFor(work: List<com.bestrong.core.model.WorkoutSet>, topSets: List<com.bestrong.core.model.WorkoutSet>): Boolean =
         hasEvidence(topSets) || topThenBackOffs(work, topSets)
