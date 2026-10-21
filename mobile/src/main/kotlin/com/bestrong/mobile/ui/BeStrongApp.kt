@@ -199,6 +199,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
 
     CompositionLocalProvider(
         LocalWeightUnit provides settings.unit,
+        com.bestrong.mobile.ui.components.LocalDumbbellTotal provides settings.dumbbellTotal,
         LocalBodyUnit provides (settings.bodyUnit ?: settings.unit),
         LocalSetColumns provides SetColumns(settings.showPreviousColumn, settings.showComparison),
         LocalAppInfo provides AppInfo(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.REPO_URL, BuildConfig.DONATION_URL),

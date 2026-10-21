@@ -187,7 +187,7 @@ fun RecordTimelineCard(stats: AdvancedStats) {
             SectionHeader(stringResource(R.string.record_timeline))
             stats.timeline.forEach { r ->
                 Text(
-                    stringResource(R.string.record_timeline_line, formatShortDate(r.dateEpochMs), liftName(r.exerciseId), unit.format(r.value, withUnit = true)),
+                    stringResource(R.string.record_timeline_line, formatShortDate(r.dateEpochMs), liftName(r.exerciseId), unit.format(r.value * com.bestrong.mobile.ui.components.pairFactor(r.exerciseId), withUnit = true)),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }

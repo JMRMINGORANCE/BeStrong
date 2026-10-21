@@ -171,7 +171,7 @@ class ProfileViewModel @Inject constructor(
             bodyWeightKg = bw,
             standings = bw?.let { Strength.standings(history, it, sex) }.orEmpty(),
             balance = Strength.balance(history, now),
-            week = Strength.weekSummary(history, today, zone),
+            week = Strength.weekSummary(history, today, zone, System.currentTimeMillis()),
             weekEffectiveSets = history.filter { it.isFinished && it.startedAtEpochMs >= weekStart }.sumOf { Strength.effectiveSets(it) },
             achievements = Strength.achievements(history, today, zone, bw),
             timeline = Strength.recordTimeline(history, setOf(RecordType.BEST_ONE_REP_MAX)).takeLast(12).reversed(),

@@ -40,7 +40,8 @@ fun YearInReviewCard(y: YearSummary) {
         add(pluralStringResource(R.plurals.year_records_n, y.period.records.size, y.period.records.size) + " · " + pluralStringResource(R.plurals.year_streak, y.longestWeeklyStreak, y.longestWeeklyStreak))
         y.topMuscle?.let { add(stringResource(R.string.year_top_muscle, it.label())) }
         y.biggestGains.forEach { (ex, from, to) ->
-            add(stringResource(R.string.year_gain, ex.displayName(), unit.format(from), unit.format(to, withUnit = true)))
+            val f = com.bestrong.mobile.ui.components.pairFactor(ex.id)
+            add(stringResource(R.string.year_gain, ex.displayName(), unit.format(from * f), unit.format(to * f, withUnit = true)))
         }
     }
     val title = stringResource(R.string.year_title, y.year)

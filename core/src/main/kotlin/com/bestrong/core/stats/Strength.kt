@@ -227,10 +227,10 @@ object Strength {
     }
 
     /** Resumen de un periodo [from, to) frente al periodo anterior de la misma duración. */
-    fun summary(history: List<Workout>, from: Long, to: Long, all: List<Workout> = history, prevFrom: Long = from - (to - from)): PeriodSummary {
+    fun summary(history: List<Workout>, from: Long, to: Long, all: List<Workout> = history, prevFrom: Long = from - (to - from), prevTo: Long = from): PeriodSummary {
         val done = history.filter { it.isFinished }
         val inPeriod = done.filter { it.startedAtEpochMs in from until to }
-        val before = done.filter { it.startedAtEpochMs in prevFrom until from }
+        val before = done.filter { it.startedAtEpochMs in prevFrom until prevTo }
         val volume = inPeriod.sumOf { it.totalVolume }
         val prevVolume = before.sumOf { it.totalVolume }
         val ids = inPeriod.mapTo(HashSet()) { it.id }
@@ -263,12 +263,15 @@ object Strength {
         }
     }
 
-    fun weekSummary(history: List<Workout>, day: LocalDate, zone: ZoneId): PeriodSummary {
+    fun weekSummary(history: List<Workout>, day: LocalDate, zone: ZoneId, nowEpochMs: Long? = null): PeriodSummary {
         val monday = day.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         // Fin de semana por calendario: con cambio de hora la semana no dura 7 × 24 h
         val start = monday.atStartOfDay(zone).toInstant().toEpochMilli()
         val end = monday.plusWeeks(1).atStartOfDay(zone).toInstant().toEpochMilli()
-        return summary(history, start, end)
+        val prevFrom = monday.minusWeeks(1).atStartOfDay(zone).toInstant().toEpochMilli()
+        // Semana en curso ([nowEpochMs]): frente al mismo tramo de la pasada (el lunes no sale «−100 %» de volumen)
+        val prevTo = nowEpochMs?.takeIf { it in start until end }?.let { prevFrom + (it - start) } ?: start
+        return summary(history, start, end, prevFrom = prevFrom, prevTo = prevTo)
     }
 
     /** Resumen de [year] (null si no entrenaste ese año). */

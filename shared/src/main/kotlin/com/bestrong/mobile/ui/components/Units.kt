@@ -6,6 +6,14 @@ import com.bestrong.core.util.WeightUnit
 /** Unidad de peso elegida en Ajustes; toda la UI la lee de aquí. */
 val LocalWeightUnit = staticCompositionLocalOf { WeightUnit.KG }
 
+/** Mancuernas apuntadas como total del par (Ajustes): lo leen las pantallas sin acceso a los ajustes. */
+val LocalDumbbellTotal = staticCompositionLocalOf { false }
+
+/** 2 con [LocalDumbbellTotal] en un ejercicio de la biblioteca con mancuernas; si no, 1 (se guarda por mancuerna). */
+@androidx.compose.runtime.Composable
+fun pairFactor(exerciseId: String): Int =
+    if (LocalDumbbellTotal.current && com.bestrong.core.library.ExerciseLibrary.byId(exerciseId)?.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
+
 /** Unidad del peso corporal y las medidas (unidades mixtas: p. ej. cargas en lb y cuerpo en kg). */
 val LocalBodyUnit = staticCompositionLocalOf { WeightUnit.KG }
 
