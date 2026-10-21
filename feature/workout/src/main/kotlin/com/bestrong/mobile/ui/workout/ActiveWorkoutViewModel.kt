@@ -95,7 +95,6 @@ class ActiveWorkoutViewModel @Inject constructor(
         savedState[KEY_PARTNER_MODE] = on.also { actions.partnerOnScreen.value = it }
     }
 
-
     val workout: StateFlow<Workout?> = combine(repo.activeWorkout, repo.partnerWorkout, partnerMode) { me, partner, isPartner ->
         if (isPartner) partner else me
     }.stateIn(viewModelScope, SharingStarted.Eagerly, repo.activeWorkout.value)
