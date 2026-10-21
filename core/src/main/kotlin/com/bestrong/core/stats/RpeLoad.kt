@@ -25,8 +25,9 @@ object RpeLoad {
      */
     fun oneRepMaxOf(set: com.bestrong.core.model.WorkoutSet): Double {
         val rpe = set.rpe?.takeIf { it in MIN_RELIABLE_RPE..MAX_RPE }
-        val usable = set.countsForRecords && set.reps > 0 && set.weightKg > 0
-        return if (rpe != null && usable) set.weightKg / fraction(set.reps, rpe) else set.estimatedOneRepMax
+        // Unilateral: el lado más flojo, como el 1RM de siempre
+        val usable = set.countsForRecords && set.recordReps > 0 && set.weightKg > 0
+        return if (rpe != null && usable) set.weightKg / fraction(set.recordReps, rpe) else set.estimatedOneRepMax
     }
 
     /** Fracción del 1RM para [reps] a [rpe] (1 rep a RPE 10 = 100 %). */

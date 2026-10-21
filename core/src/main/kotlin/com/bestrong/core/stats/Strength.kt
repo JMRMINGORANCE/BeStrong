@@ -179,7 +179,7 @@ object Strength {
         val done = history.filter { it.isFinished }
         val count = done.size.toDouble()
         val volumeT = done.sumOf { it.totalVolume } / 1000.0
-        val sets = done.sumOf { it.completedSetCount }.toDouble()
+        val sets = done.sumOf { it.workSetCount }.toDouble()
         val streak = WorkoutStats.weeklyStreak(done, today, zone).toDouble()
         val best = bestOneRepMax(done)
         val list = mutableListOf(
@@ -242,7 +242,7 @@ object Strength {
         return PeriodSummary(
             workouts = inPeriod.size,
             volume = volume,
-            sets = inPeriod.sumOf { it.completedSetCount },
+            sets = inPeriod.sumOf { it.workSetCount },
             durationSec = inPeriod.sumOf { it.durationSeconds() },
             records = records,
             volumeChange = if (prevVolume > 0) (volume - prevVolume) / prevVolume else null,

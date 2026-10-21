@@ -174,6 +174,10 @@ data class Workout(
     val completedSetCount: Int
         get() = exercises.sumOf { it.completedSets.size }
 
+    /** Series efectivas hechas (sin calentamientos): lo que se enseña como «series» en estadísticas y logros. */
+    val workSetCount: Int
+        get() = exercises.sumOf { e -> e.completedSets.count { it.type != SetType.WARMUP } }
+
     val totalSetCount: Int
         get() = exercises.sumOf { it.sets.size }
 

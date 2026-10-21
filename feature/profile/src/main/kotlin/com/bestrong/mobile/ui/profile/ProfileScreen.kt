@@ -299,9 +299,11 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 SectionHeader(stringResource(R.string.best_1rm))
                                 if (stats.topOneRepMax.isEmpty()) Text(stringResource(R.string.complete_sets_for_records))
                                 stats.topOneRepMax.forEach { pr ->
+                                    // Con mancuernas como total del par, el mismo número que en el detalle del ejercicio
+                                    val pair = if (settings.dumbbellTotal && com.bestrong.core.library.ExerciseLibrary.byId(pr.exerciseId)?.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
                                     ListItem(
                                         headlineContent = { Text(pr.exerciseLabel()) },
-                                        trailingContent = { Text(unit.format(pr.value, withUnit = true), fontWeight = FontWeight.Bold) },
+                                        trailingContent = { Text(unit.format(pr.value * pair, withUnit = true), fontWeight = FontWeight.Bold) },
                                         modifier = Modifier.clickable { onOpenExercise(pr.exerciseId) },
                                     )
                                 }

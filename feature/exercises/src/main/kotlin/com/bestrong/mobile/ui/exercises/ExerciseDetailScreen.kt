@@ -168,7 +168,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             }
             if (!timed) {
                 item {
-                    val points = s.progress.takeLast(30).map { p ->
+                    // Sin series que cuenten (asistidas, negativas) no hay 1RM, peso ni reps de ese día: no se pinta un 0
+                    val points = s.progress.filter { p -> metric == 2 || p.bestReps > 0 }.takeLast(30).map { p ->
                         ChartPoint(
                             formatShortDate(p.dateEpochMs),
                             // Con mancuernas como total del par, en las mismas cifras que el entreno

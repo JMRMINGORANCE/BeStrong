@@ -144,7 +144,7 @@ class ProfileViewModel @Inject constructor(
             totalWorkouts = history.size,
             totalVolume = history.sumOf { it.totalVolume },
             totalDurationSec = history.sumOf { it.durationSeconds() },
-            totalSets = history.sumOf { it.completedSetCount },
+            totalSets = history.sumOf { it.workSetCount },
             weeklyStreak = WorkoutStats.weeklyStreak(history, today, zone),
             weeks = WorkoutStats.weeklySummary(history, 12, today, zone),
             muscles30d = WorkoutStats.setsPerMuscle(history, System.currentTimeMillis() - 30L * 24 * 3600 * 1000),
