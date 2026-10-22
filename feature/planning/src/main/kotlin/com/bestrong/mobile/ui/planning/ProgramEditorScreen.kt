@@ -203,8 +203,9 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
     var picking by rememberSaveable { mutableStateOf<Int?>(null) }
     val defaultDayName = stringResource(R.string.prog_day_n, days.size + 1)
     // Atrás con cambios sin guardar: se pregunta antes de perderlos (como en el editor de rutinas)
-    val initialName = remember { name }
-    val initialDays = remember { days.toList() }
+    // Del programa guardado (no del borrador restaurado): tras recrearse la pantalla los cambios siguen contando
+    val initialName = remember(existing) { existing?.nameEs ?: "" }
+    val initialDays = remember(existing) { existing?.let(::draftsOf) ?: listOf(DayDraft(dayLabel)) }
     var confirmLeave by rememberSaveable { mutableStateOf(false) }
     // El id viene de la navegación (no de la lista cargada, vacía tras matar el proceso): guardar no duplica el programa
     val newProgramId = rememberSaveable { "custom:${newId()}" }

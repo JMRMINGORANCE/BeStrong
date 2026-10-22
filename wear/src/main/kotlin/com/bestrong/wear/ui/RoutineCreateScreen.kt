@@ -40,6 +40,8 @@ fun RoutineCreateScreen(container: WearContainer, onSaved: () -> Unit) {
     var picking by remember { mutableStateOf(false) }
     val voice = rememberVoiceInput(stringResource(R.string.routine_rename_voice)) { name = it.trim().replaceFirstChar { c -> c.uppercase() } }
     if (picking) {
+        // Atrás (botón) cierra solo el selector: no se pierde la rutina a medias
+        androidx.activity.compose.BackHandler { picking = false }
         ExercisePickerScreen(container) { ex ->
             exercises += ex
             picking = false

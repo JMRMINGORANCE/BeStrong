@@ -120,7 +120,7 @@ object WorkoutStats {
         RecordType.HEAVIEST_WEIGHT -> set.weightKg
         RecordType.BEST_ONE_REP_MAX -> set.estimatedOneRepMax
         RecordType.BEST_SET_VOLUME -> set.volume
-        RecordType.MOST_REPS -> set.recordReps.toDouble()
+        RecordType.MOST_REPS -> if (set.type == SetType.CLUSTER) 0.0 else set.recordReps.toDouble()
     }
 
     /**
@@ -418,13 +418,14 @@ object WorkoutStats {
     /** Series efectivas por músculo que tiene una rutina (como [setsPerMuscle], sin calentamientos). */
     fun routineSetsPerMuscle(routine: com.bestrong.core.model.Routine): Map<MuscleGroup, Double> {
         val result = mutableMapOf<MuscleGroup, Double>()
-        routine.exercises.forEach { re ->
+        // Sin cardio, como [setsPerMuscle]
+        routine.exercises.filter { it.exercise.tracking != com.bestrong.core.model.TrackingType.CARDIO }.forEach { re ->
             val n = re.sets.count { it.type != SetType.WARMUP }.toDouble()
             if (n == 0.0) return@forEach
             result.merge(re.exercise.primaryMuscle, n, Double::plus)
             re.exercise.secondaryMuscles.forEach { result.merge(it, n * 0.5, Double::plus) }
         }
-        return result.toList().sortedByDescending { it.second }.toMap()
+        return result.filterKeys { it != MuscleGroup.CARDIO }.toList().sortedByDescending { it.second }.toMap()
     }
 
     /** Series efectivas por grupo muscular (el principal cuenta 1, los secundarios 0,5). */

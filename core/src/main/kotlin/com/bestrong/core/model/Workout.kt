@@ -82,7 +82,8 @@ data class WorkoutSet(
     /** 1RM estimado (Epley). Las series de calentamiento no cuentan; en unilaterales, con el lado más flojo. */
     val estimatedOneRepMax: Double
         get() = when {
-            !countsForRecords || recordReps <= 0 || weightKg <= 0 -> 0.0
+            // Cluster / rest-pause: sus reps suman varias mini-series (8+3+2 no son 13 seguidas)
+            !countsForRecords || type == SetType.CLUSTER || recordReps <= 0 || weightKg <= 0 -> 0.0
             recordReps == 1 -> weightKg
             else -> weightKg * (1 + recordReps / 30.0)
         }

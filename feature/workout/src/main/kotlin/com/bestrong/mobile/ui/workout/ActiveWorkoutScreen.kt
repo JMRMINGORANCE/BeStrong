@@ -571,7 +571,7 @@ private fun SummaryPanel(w: Workout, previous: (String) -> List<WorkoutSet>, met
         WorkoutEditor.upcomingSet(w)?.let { (i, set) ->
             val we = w.exercises[i]
             val prev = WorkoutEditor.previousMatch(we.sets, we.sets.indexOf(set), previous(we.exercise.id))
-            val factor = pairFactor(we.exercise.id, dumbbellTotal)
+            val factor = pairFactor(we.exercise, dumbbellTotal)
             com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                 Column(Modifier.padding(12.dp)) {
                     // Es la serie que toca ahora (la primera sin hacer), no la de después
@@ -1226,7 +1226,7 @@ fun WorkoutSummaryDialog(
                             else -> "="
                         }
                         Text(
-                            stringResource(R.string.summary_next_line, arrow, ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName, unit.format(n.weightKg * pairFactor(n.exerciseId, dumbbellTotal), withUnit = true), n.reps),
+                            stringResource(R.string.summary_next_line, arrow, ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName, unit.format(n.weightKg * pairFactor(w.exercises.firstOrNull { it.exercise.id == n.exerciseId }?.exercise, dumbbellTotal), withUnit = true), n.reps),
                             style = MaterialTheme.typography.bodySmall,
                             color = if (n.direction > 0) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -1314,5 +1314,5 @@ private fun DoneExerciseRow(we: WorkoutExercise, onOpen: () -> Unit) {
 }
 
 /** 2 con «suma de las dos mancuernas» en un ejercicio con mancuernas (como en las filas); si no, 1. */
-private fun pairFactor(exerciseId: String, dumbbellTotal: Boolean): Int =
-    if (dumbbellTotal && ExerciseLibrary.byId(exerciseId)?.equipment == Equipment.DUMBBELL) 2 else 1
+private fun pairFactor(exercise: com.bestrong.core.model.Exercise?, dumbbellTotal: Boolean): Int =
+    if (dumbbellTotal && exercise?.equipment == Equipment.DUMBBELL) 2 else 1

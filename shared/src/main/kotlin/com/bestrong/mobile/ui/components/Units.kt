@@ -14,6 +14,11 @@ val LocalDumbbellTotal = staticCompositionLocalOf { false }
 fun pairFactor(exerciseId: String): Int =
     if (LocalDumbbellTotal.current && com.bestrong.core.library.ExerciseLibrary.byId(exerciseId)?.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
 
+/** Como [pairFactor] con el ejercicio a mano (también los propios, que no están en la biblioteca). */
+@androidx.compose.runtime.Composable
+fun pairFactor(exercise: com.bestrong.core.model.Exercise): Int =
+    if (LocalDumbbellTotal.current && exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
+
 /** Unidad del peso corporal y las medidas (unidades mixtas: p. ej. cargas en lb y cuerpo en kg). */
 val LocalBodyUnit = staticCompositionLocalOf { WeightUnit.KG }
 
