@@ -48,16 +48,17 @@ object Alternatives {
                 // Sin calentamientos (o sin efectivas) la otra vez: se usa lo que haya del ejercicio nuevo
                 val p = pool.getOrNull(i) ?: pool.lastOrNull() ?: previousOfNew.last()
                 // Las reps planeadas eran del ejercicio de antes: ya no sirven para comparar
-                if (s.completed) s else s.copy(weightKg = p.weightKg, reps = p.reps, durationSec = p.durationSec, targetReps = null)
+                if (s.completed) s else s.copy(weightKg = p.weightKg, reps = p.reps, repsRight = p.repsRight.takeIf { to.unilateral }, durationSec = p.durationSec, targetReps = null)
             }
         }
         val ff = factor(from.equipment)
         val ft = factor(to.equipment)
         // El peso solo se convierte entre variantes del mismo movimiento: 140 kg de peso muerto no son 140 kg de remo
         val sameMovement = to.id in ExerciseLibrary.familyOf(from.id)
-        if (ff == 0.0 || ft == 0.0 || !sameMovement) return sets.map { if (it.completed) it else it.copy(weightKg = 0.0, targetReps = null) }
+        if (ff == 0.0 || ft == 0.0 || !sameMovement) return sets.map { if (it.completed) it else it.copy(weightKg = 0.0, repsRight = it.repsRight.takeIf { to.unilateral }, targetReps = null) }
         return sets.map { s ->
-            if (s.completed) s else s.copy(weightKg = (Math.round(s.weightKg * ft / ff / stepKg) * stepKg).coerceAtLeast(0.0), targetReps = null)
+            // Un ejercicio a dos lados no tiene «derecha»: si no, sus reps contarían en el volumen y saldría un desequilibrio
+            if (s.completed) s else s.copy(weightKg = (Math.round(s.weightKg * ft / ff / stepKg) * stepKg).coerceAtLeast(0.0), repsRight = s.repsRight.takeIf { to.unilateral }, targetReps = null)
         }
     }
 }

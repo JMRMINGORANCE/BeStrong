@@ -303,7 +303,7 @@ fun SetRow(
                         if (delta != null) {
                             val beats = SetComparison.beats(set, previous) == true
                             val text = buildList {
-                                if (delta.weightKg != 0.0) add((if (delta.weightKg > 0) "+" else "−") + unit.format(kotlin.math.abs(delta.weightKg), withUnit = true))
+                                if (delta.weightKg != 0.0) add((if (delta.weightKg > 0) "+" else "−") + unit.format(kotlin.math.abs(delta.weightKg) * weightFactor, withUnit = true))
                                 if (delta.reps != 0) add((if (delta.reps > 0) "+" else "−") + kotlin.math.abs(delta.reps))
                                 if (delta.durationSec != 0) add((if (delta.durationSec > 0) "+" else "−") + kotlin.math.abs(delta.durationSec) + " s")
                             }.joinToString(" · ")

@@ -1217,7 +1217,9 @@ fun WorkoutSummaryDialog(
                 if (summary.records.isNotEmpty()) {
                     Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
                     summary.records.forEach { pr ->
-                        Text(stringResource(R.string.record_line, pr.exerciseLabel(), pr.type.label(), pr.type.formatValue(pr.value, unit)), style = MaterialTheme.typography.bodySmall)
+                        // Con «suma de las dos mancuernas», el peso y el 1RM del par (como en las series y el historial)
+                        val f = if (pr.type == com.bestrong.core.stats.RecordType.HEAVIEST_WEIGHT || pr.type == com.bestrong.core.stats.RecordType.BEST_ONE_REP_MAX) com.bestrong.mobile.ui.components.pairFactor(pr.exerciseId) else 1
+                        Text(stringResource(R.string.record_line, pr.exerciseLabel(), pr.type.label(), pr.type.formatValue(pr.value * f, unit)), style = MaterialTheme.typography.bodySmall)
                     }
                 }
                 // Frente a la última vez que hiciste cada ejercicio
@@ -1321,7 +1323,7 @@ private fun DoneExerciseRow(we: WorkoutExercise, onOpen: () -> Unit) {
         com.bestrong.mobile.ui.components.ExerciseThumb(we.exercise, 40.dp, enlargeOnTap = false)
         Column(Modifier.weight(1f)) {
             Text(we.exercise.displayName(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            best?.let { Text(describeSet(it, we.exercise, unit), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1) }
+            best?.let { Text(describeSet(it, we.exercise, unit, com.bestrong.mobile.ui.components.pairFactor(we.exercise)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1) }
         }
         com.bestrong.mobile.ui.components.MetaPill("✓ ${we.sets.size}/${we.sets.size}", Modifier.spokenAs(stringResource(R.string.achievements_count, we.sets.size, we.sets.size)))
     }

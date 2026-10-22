@@ -296,4 +296,15 @@ class CoreFixesTest {
         // Sin series nuevas no se toca el descanso
         assertEquals(null, com.bestrong.core.session.RestSync.remainingAfterRemote(after, after, 40_000, 60))
     }
+
+    @Test
+    fun bilateralSubstituteDropsRightReps() {
+        val from = ExerciseLibrary.byId("db_row")!!
+        val to = ExerciseLibrary.byId("barbell_row")!!
+        val sets = listOf(WorkoutSet(weightKg = 30.0, reps = 10, repsRight = 10))
+        val converted = com.bestrong.core.library.Alternatives.convertSets(from, to, sets, emptyList(), 2.5)
+        assertEquals(null, converted[0].repsRight)
+        // Derecha vacía (0) no es un desequilibrio del 100 %
+        assertEquals(null, WorkoutSet(weightKg = 20.0, reps = 10, repsRight = 0, completed = true).sideImbalance)
+    }
 }

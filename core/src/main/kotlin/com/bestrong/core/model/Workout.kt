@@ -73,7 +73,8 @@ data class WorkoutSet(
     /** Diferencia entre lados (0 = igual); null si no es unilateral o no hay datos. */
     val sideImbalance: Double?
         get() {
-            val right = repsRight ?: return null
+            // Derecha a 0 = sin apuntar (el campo vacío), como en recordReps: no es un 100 % de desequilibrio
+            val right = repsRight?.takeIf { it > 0 } ?: return null
             val max = maxOf(reps, right)
             return if (max <= 0) null else kotlin.math.abs(reps - right).toDouble() / max
         }
