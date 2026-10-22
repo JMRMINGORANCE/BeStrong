@@ -90,19 +90,7 @@ object WorkoutShareCard {
         val nameP = text(if (roomy) 48f else 40f, bold = true)
         val detailP = text(if (roomy) 42f else 36f, Color.LTGRAY)
         done.take(MAX_EXERCISES).forEach { e ->
-            val sets = e.sets.filter { it.completed && it.type != SetType.WARMUP }.ifEmpty { e.sets.filter { it.completed } }
-            val best = sets.maxByOrNull { it.estimatedOneRepMax.takeIf { v -> v > 0 } ?: (it.reps + it.durationSec).toDouble() }
-            val detail = when {
-                best == null -> ""
-                e.exercise.tracking == TrackingType.DURATION -> "${sets.size} × ${best.durationSec} s"
-                e.exercise.tracking == TrackingType.CARDIO -> com.bestrong.mobile.ui.workout.cardioText(
-                    sets.sumOf { it.durationSec }, sets.sumOf { it.distanceM }, pace = com.bestrong.core.util.PaceStyle.of(e.exercise.id),
-                    // El ritmo, solo con las series que tienen km (un calentamiento sin distancia no lo baja)
-                    paceSec = sets.filter { it.distanceM > 0 }.sumOf { it.durationSec },
-                )
-                best.weightKg > 0 -> "${sets.size} × ${unit.format(best.weightKg, withUnit = true)} × ${best.reps}"
-                else -> "${sets.size} × ${best.reps}"
-            }
+            val detail = exerciseDetail(e, unit)
             val dw = detailP.measureText(detail)
             c.drawText(fit(e.exercise.displayName(context), nameP, contentWidth - dw - 32f), PAD, y, nameP)
             c.drawText(detail, W - PAD - dw, y, detailP)
@@ -147,5 +135,26 @@ object WorkoutShareCard {
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         send.clipData = ClipData.newRawUri(null, uri)
         context.startActivity(Intent.createChooser(send, context.getString(R.string.share_workout)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+}
+
+/** «3 × 80 kg × 8», «3 × 30 s», «25 min · 5 km», «3 × 40 kg · 40 m»: lo hecho en un ejercicio, para la tarjeta. */
+private fun exerciseDetail(e: com.bestrong.core.model.WorkoutExercise, unit: com.bestrong.core.util.WeightUnit): String {
+    val sets = e.sets.filter { it.completed && it.type != SetType.WARMUP }.ifEmpty { e.sets.filter { it.completed } }
+    val best = sets.maxByOrNull { it.estimatedOneRepMax.takeIf { v -> v > 0 } ?: (it.reps + it.durationSec).toDouble() }
+    return when {
+        best == null -> ""
+        e.exercise.tracking == TrackingType.DURATION -> "${sets.size} × ${best.durationSec} s"
+        e.exercise.tracking == TrackingType.CARDIO -> com.bestrong.mobile.ui.workout.cardioText(
+            sets.sumOf { it.durationSec }, sets.sumOf { it.distanceM }, pace = com.bestrong.core.util.PaceStyle.of(e.exercise.id),
+            // El ritmo, solo con las series que tienen km (un calentamiento sin distancia no lo baja)
+            paceSec = sets.filter { it.distanceM > 0 }.sumOf { it.durationSec },
+        )
+        // Distancia: peso y metros de la mejor (no «× 0»)
+        e.exercise.tracking == TrackingType.DISTANCE -> sets.maxWith(compareBy({ it.weightKg }, { it.distanceM })).let { b ->
+            "${sets.size} × " + (if (b.weightKg > 0) "${unit.format(b.weightKg, withUnit = true)} · " else "") + "${b.distanceM.toInt()} m"
+        }
+        best.weightKg > 0 -> "${sets.size} × ${unit.format(best.weightKg, withUnit = true)} × ${best.reps}"
+        else -> "${sets.size} × ${best.reps}"
     }
 }

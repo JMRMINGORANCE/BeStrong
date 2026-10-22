@@ -91,6 +91,8 @@ data class Routine(
                         weightKg = prev?.weightKg?.takeIf { it > 0 } ?: rs.weightKg,
                         reps = if (distance) 0 else prev?.reps?.takeIf { it > 0 } ?: rs.reps,
                         durationSec = prev?.durationSec?.takeIf { it > 0 } ?: rs.durationSec,
+                        // Los metros de la última vez (paseo del granjero, trineo): si no, salían a 0
+                        distanceM = prev?.distanceM ?: 0.0,
                         type = rs.type,
                         targetReps = rs.reps.takeIf { it > 0 && rs.durationSec == 0 && !distance },
                     )

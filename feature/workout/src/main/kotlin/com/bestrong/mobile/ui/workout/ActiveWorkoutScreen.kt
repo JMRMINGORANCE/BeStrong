@@ -252,7 +252,9 @@ fun ActiveWorkoutScreen(
                     val template = if (e.adjustment.direction < 0) rpeDown else rpeUp
                     // Con «suma de las dos mancuernas», el total del par (como las filas)
                     val pair = if (vm.settings.value.dumbbellTotal && e.exercise.equipment == Equipment.DUMBBELL) 2 else 1
-                    val msg = template.format(e.exercise.displayName(appContext), unitForShare.format(e.adjustment.newWeightKg * pair, withUnit = true))
+                    // Cuánto se mueven las que quedan (cada una lo mismo: una pirámide sigue siéndolo)
+                    val delta = kotlin.math.abs(e.adjustment.newWeightKg - e.adjustment.fromWeightKg) * pair
+                    val msg = template.format(e.exercise.displayName(appContext), unitForShare.format(delta, withUnit = true))
                     if (snackbar.showSnackbar(msg, applyLabel, duration = SnackbarDuration.Long) == SnackbarResult.ActionPerformed) {
                         vm.applyRpeAdjustment(e.weId, e.adjustment)
                     }

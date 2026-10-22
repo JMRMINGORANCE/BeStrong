@@ -949,7 +949,8 @@ private const val WAKE_LOCK_MARGIN_MS = 15_000L
 enum class StemAction { COMPLETE_SET, SKIP_REST, NEXT_EXERCISE }
 
 /** Ejercicios en los que el acelerómetro cuenta repeticiones (no los de tiempo ni el cardio). */
-private val REP_TRACKING = setOf(TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY, TrackingType.DISTANCE)
+// Sin distancia: en el paseo del granjero contaría zancadas como reps (volumen y récords fantasma)
+private val REP_TRACKING = setOf(TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY)
 
 /** Dónde queda el ejercicio que se estaba viendo tras una edición del móvil (o el siguiente pendiente). */
 private fun keptExerciseIndex(local: Workout?, remote: Workout, index: Int): Int {

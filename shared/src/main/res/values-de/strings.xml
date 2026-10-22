@@ -625,8 +625,8 @@
     <string name="routine_untitled">Unbenannte Routine</string>
     <string name="rpe">RPE</string>
     <string name="rpe_remove">RPE löschen</string>
-    <string name="rpe_suggest_down">Sehr hoher RPE bei %1$s: restliche Sätze auf %2$s senken?</string>
-    <string name="rpe_suggest_up">Niedriger RPE bei %1$s: restliche Sätze auf %2$s erhöhen?</string>
+    <string name="rpe_suggest_down">Sehr hoher RPE bei %1$s: restliche Sätze um %2$s senken?</string>
+    <string name="rpe_suggest_up">Niedriger RPE bei %1$s: restliche Sätze um %2$s erhöhen?</string>
     <string name="rpe_value">RPE %1$s</string>
     <string name="save_as_routine">Als Routine speichern</string>
     <string name="scheme_531">5/3/1 (4 Wochen)</string>

@@ -101,5 +101,7 @@ object RoutineShare {
 private fun targetText(tracking: TrackingType, set: com.bestrong.core.model.RoutineSet?): String = when (tracking) {
     TrackingType.DURATION -> "${set?.durationSec ?: 0} s"
     TrackingType.CARDIO -> com.bestrong.mobile.ui.workout.cardioText(set?.durationSec ?: 0, 0.0)
+    // Distancia: su peso (sin reps; los metros no se planifican en la rutina)
+    TrackingType.DISTANCE -> set?.weightKg?.takeIf { it > 0 }?.let { "${com.bestrong.core.util.formatWeight(it)} kg" } ?: "—"
     else -> "${set?.reps ?: 0}"
 }

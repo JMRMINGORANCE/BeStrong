@@ -523,7 +523,10 @@ private fun RoutineSetRow(vm: RoutineEditorViewModel, re: com.bestrong.core.mode
             SmallNumberField(unit.label, unit.format(set.weightKg * factor), Modifier.weight(1f), decimal = true) { v ->
                 vm.updateSet(re.id, i) { it.copy(weightKg = (unit.parseToKg(v) ?: 0.0) / factor) }
             }
-            SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
+            // De distancia, solo el peso (las reps no se usan; los metros salen de la última vez)
+            if (re.exercise.tracking != TrackingType.DISTANCE) {
+                SmallNumberField(stringResource(R.string.reps_short), set.reps.toString(), Modifier.weight(1f)) { v -> vm.updateSet(re.id, i) { it.copy(reps = v.toIntOrNull() ?: 0) } }
+            }
         }
         IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
     }

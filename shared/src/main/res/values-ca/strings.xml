@@ -625,8 +625,8 @@
     <string name="routine_untitled">Rutina sense nom</string>
     <string name="rpe">RPE</string>
     <string name="rpe_remove">Treure RPE</string>
-    <string name="rpe_suggest_down">RPE molt alt a %1$s: vols baixar les sèries que queden a %2$s?</string>
-    <string name="rpe_suggest_up">RPE baix a %1$s: vols pujar les sèries que queden a %2$s?</string>
+    <string name="rpe_suggest_down">RPE molt alt a %1$s: vols baixar %2$s les sèries que queden?</string>
+    <string name="rpe_suggest_up">RPE baix a %1$s: vols pujar %2$s les sèries que queden?</string>
     <string name="rpe_value">RPE %1$s</string>
     <string name="save_as_routine">Desar com a rutina</string>
     <string name="scheme_531">5/3/1 (4 setmanes)</string>

@@ -625,8 +625,8 @@
     <string name="routine_untitled">Rutina sen nome</string>
     <string name="rpe">RPE</string>
     <string name="rpe_remove">Quitar RPE</string>
-    <string name="rpe_suggest_down">RPE moi alto en %1$s: baixar as series que quedan a %2$s?</string>
-    <string name="rpe_suggest_up">RPE baixo en %1$s: subir as series que quedan a %2$s?</string>
+    <string name="rpe_suggest_down">RPE moi alto en %1$s: baixar %2$s as series que quedan?</string>
+    <string name="rpe_suggest_up">RPE baixo en %1$s: subir %2$s as series que quedan?</string>
     <string name="rpe_value">RPE %1$s</string>
     <string name="save_as_routine">Gardar como rutina</string>
     <string name="scheme_531">5/3/1 (4 semanas)</string>
