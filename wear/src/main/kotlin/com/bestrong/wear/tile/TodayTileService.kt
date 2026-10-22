@@ -94,7 +94,9 @@ class TodayTileService : TileService() {
     private fun firstTarget(routine: Routine): String? {
         val first = routine.exercises.firstOrNull()
         val set = first?.sets?.firstOrNull { it.type != com.bestrong.core.model.SetType.WARMUP && it.weightKg > 0 }
-        return set?.let { "${exerciseName(first.exercise)} · ${container.store.settings.value.unit.format(it.weightKg)} × ${it.reps}" }
+        // Con «suma de las dos mancuernas», el total del par (como en el entreno)
+        val s = container.store.settings.value
+        return set?.let { "${exerciseName(first.exercise)} · ${s.unit.format(it.weightKg * s.weightFactor(first.exercise))} × ${it.reps}" }
     }
 
     /** Nombre en el idioma del reloj (como en la app: español para es/ca/gl/eu, si no inglés). */

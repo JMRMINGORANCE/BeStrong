@@ -584,6 +584,8 @@ fun CardioWeekCard(vm: HomeViewModel) {
     val week by vm.cardioWeek.collectAsStateWithLifecycle()
     if (!week.worthShowing) return
     var editing by remember { mutableStateOf(false) }
+    // Con objetivo llega el aviso de cardio: sin permiso de notificaciones no llegaría nunca
+    val askNotifications = com.bestrong.mobile.ui.components.rememberNotificationPermission()
     com.bestrong.mobile.ui.components.Panel(onClick = { editing = true }, contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             CardioWeekProgress(week)
@@ -598,14 +600,17 @@ fun CardioWeekCard(vm: HomeViewModel) {
                     androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         androidx.compose.material3.FilterChip(selected = week.goalKm == null && week.goalMin == null, onClick = { vm.setWeeklyCardioGoal(null, null); editing = false }, label = { Text("—") })
                         CARDIO_GOALS_KM.forEach { g ->
-                            androidx.compose.material3.FilterChip(selected = week.goalKm == g, onClick = { vm.setWeeklyCardioGoal(g, null); editing = false }, label = { Text("${g.toInt()} km") })
+                            androidx.compose.material3.FilterChip(selected = week.goalKm == g, onClick = { vm.setWeeklyCardioGoal(g, null); editing = false; askNotifications() }, label = { Text("${g.toInt()} km") })
                         }
                         // En minutos, para el cardio sin distancia (elíptica, bici estática, HIIT)
                         CARDIO_GOALS_MIN.forEach { g ->
-                            androidx.compose.material3.FilterChip(selected = week.goalMin == g, onClick = { vm.setWeeklyCardioGoal(null, g); editing = false }, label = { Text("$g min") })
+                            androidx.compose.material3.FilterChip(selected = week.goalMin == g, onClick = { vm.setWeeklyCardioGoal(null, g); editing = false; askNotifications() }, label = { Text("$g min") })
                         }
                     }
-                    CustomCardioGoal(vm, week) { editing = false }
+                    CustomCardioGoal(vm, week) {
+                        editing = false
+                        askNotifications()
+                    }
                     CardioNudgeSwitch(vm)
                 }
             },
@@ -621,7 +626,14 @@ private fun CardioNudgeSwitch(vm: HomeViewModel) {
     val day by vm.cardioNudgeDay.collectAsStateWithLifecycle()
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(stringResource(R.string.cardio_nudge_setting), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-        androidx.compose.material3.Switch(checked = on, onCheckedChange = vm::setCardioNudge)
+        val askNotifications = com.bestrong.mobile.ui.components.rememberNotificationPermission()
+        androidx.compose.material3.Switch(
+            checked = on,
+            onCheckedChange = {
+                vm.setCardioNudge(it)
+                if (it) askNotifications()
+            },
+        )
     }
     // Qué día (por la tarde) llega el aviso
     if (on) {

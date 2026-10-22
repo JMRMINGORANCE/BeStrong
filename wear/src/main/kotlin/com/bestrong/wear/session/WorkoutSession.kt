@@ -844,12 +844,12 @@ class WorkoutSession @Inject constructor(
 
     // --- Rutinas creadas en el reloj ---------------------------------------------------------
 
-    /** Guarda una rutina hecha en el reloj (3 series por ejercicio) y la envía al móvil. */
+    /** Guarda una rutina hecha en el reloj (las series de partida de cada tipo, como en el móvil) y la envía al móvil. */
     fun createRoutine(name: String, exercises: List<Exercise>): Routine {
         val routine = Routine(
             name = name,
             exercises = exercises.map { ex ->
-                RoutineExercise(exercise = ex, restSeconds = com.bestrong.core.training.RestPolicy.defaultFor(ex))
+                RoutineExercise(exercise = ex, sets = com.bestrong.core.model.RoutineSet.defaultsFor(ex.tracking), restSeconds = com.bestrong.core.training.RestPolicy.defaultFor(ex))
             },
         )
         store.addRoutine(routine)

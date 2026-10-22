@@ -77,7 +77,12 @@ fun RoutineCreateScreen(container: WearContainer, onSaved: () -> Unit) {
                 Button(
                     onClick = { exercises.removeAt(i) },
                     label = { Text(ex.displayName(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                    secondaryLabel = { Text("3 × 10 · ✕") },
+                    // Lo que se va a guardar: 3 × 10, 3 × 30 s o un bloque de cardio
+                    secondaryLabel = {
+                        val sets = com.bestrong.core.model.RoutineSet.defaultsFor(ex.tracking)
+                        val first = sets.first()
+                        Text("${sets.size} × " + (if (first.durationSec > 0) com.bestrong.core.util.formatDuration(first.durationSec.toLong()) else "${first.reps}") + " · ✕")
+                    },
                     colors = ButtonDefaults.filledTonalButtonColors(),
                     modifier = Modifier.fillMaxWidth(),
                 )

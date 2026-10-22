@@ -50,6 +50,11 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
         }
         if (session.workout.value == null) {
             val routine = container.store.routines.value.firstOrNull { it.id == r }
+            // Una rutina que el reloj ya no tiene (borrada o aún sin llegar): a Inicio, no un entreno vacío sin nombre
+            if (routine == null && r.isNotEmpty()) {
+                nav.navigate(WearRoutes.HOME) { popUpTo(0) }
+                return@LaunchedEffect
+            }
             if (routine != null) session.startRoutine(routine) else session.startEmpty()
         }
         // Sobre Inicio: si estaba en el descanso no queda debajo un descanso muerto (pantalla vacía al volver)
