@@ -81,7 +81,7 @@ object WorkoutEditor {
                 val left = set.startedAtEpochMs?.let { (set.durationSec - ((nowEpochMs - it) / 1000).toInt()).coerceAtLeast(0) } ?: set.durationSec
                 // Como en afterSetCompleted: fuera de superserie no se descansa antes de un drop set
                 // y tras un calentamiento basta el descanso corto
-                val nextIsDrop = group.size == 1 && we.sets.drop(k + 1).firstOrNull { !it.completed }?.type == SetType.DROP
+                val nextIsDrop = we.sets.drop(k + 1).firstOrNull { !it.completed }?.type == SetType.DROP
                 val rest = if (set.type == SetType.WARMUP && group.size == 1) we.restSeconds.coerceAtMost(warmupRestSeconds) else we.restSeconds
                 maxOf(if (set.isRunning) 0 else secondsPerSet, left) to if (closesRound && !nextIsDrop) rest else 0
             }
@@ -600,19 +600,33 @@ object WorkoutEditor {
         return next to if (next == null) 0 else current.restSeconds
     }
 
+    /** Series que cuentan como rondas de una superserie (ni calentamientos ni drop sets). */
+    private fun roundSets(we: WorkoutExercise) = we.sets.count { it.completed && it.type != SetType.WARMUP && it.type != SetType.DROP }
+
+    /** Descanso para seguir en el mismo ejercicio: tras un calentamiento (corto) o antes de un drop set (ninguno). */
+    private fun stayOn(current: WorkoutExercise, justDone: WorkoutSet?, warmupRestSeconds: Int): Int? {
+        val pendingHere = current.sets.firstOrNull { !it.completed }
+        return when {
+            justDone?.type == SetType.WARMUP && pendingHere != null -> current.restSeconds.coerceAtMost(warmupRestSeconds)
+            pendingHere?.type == SetType.DROP -> 0
+            else -> null
+        }
+    }
+
     /** [afterSetCompleted] dentro de una superserie: (siguiente, descanso), o null si el grupo ya está hecho. */
     private fun supersetNext(workout: Workout, group: List<Int>, index: Int, warmupRestSeconds: Int): Pair<Int, Int>? {
         val current = workout.exercises[index]
         val pos = group.indexOf(index)
         // Tras un calentamiento se sigue con este ejercicio (descanso corto): las rondas son de series efectivas
         val justDone = current.sets.filter { it.completed }.maxByOrNull { it.completedAtEpochMs ?: 0L }
-        if (justDone?.type == SetType.WARMUP && current.sets.any { !it.completed }) return index to current.restSeconds.coerceAtMost(warmupRestSeconds)
-        val doneHere = current.sets.count { it.completed && it.type != SetType.WARMUP }
+        // y un drop set va justo detrás, sin descanso (como fuera de superserie) y no cuenta como ronda
+        stayOn(current, justDone, warmupRestSeconds)?.let { return index to it }
+        val doneHere = roundSets(current)
         // Siguiente del grupo que aún no ha hecho la serie de esta ronda
         // En círculo: empezar la ronda por el segundo del grupo lleva al primero sin descanso
         val nextInRound = (group.drop(pos + 1) + group.take(pos)).firstOrNull { i ->
             val ex = workout.exercises[i]
-            ex.sets.count { it.completed && it.type != SetType.WARMUP } < doneHere && ex.sets.any { !it.completed }
+            roundSets(ex) < doneHere && ex.sets.any { !it.completed }
         }
         return nextInRound?.let { it to 0 }
             ?: group.firstOrNull { i -> workout.exercises[i].sets.any { !it.completed } }?.let { it to workout.exercises[group.last()].restSeconds }

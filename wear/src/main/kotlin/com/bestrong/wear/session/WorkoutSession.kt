@@ -316,9 +316,9 @@ class WorkoutSession @Inject constructor(
         store.activeWorkout = remote
         // Se sigue en el mismo ejercicio aunque el móvil haya borrado o movido otros
         if (!isNew) _exerciseIndex.value = keptExerciseIndex(local, remote, _exerciseIndex.value)
-        // Serie marcada en el móvil: el descanso del reloj pasa a ser el suyo
+        // Serie marcada en el móvil: el descanso del reloj pasa a ser el suyo y se va a lo que toca (en superserie, el otro)
         com.bestrong.core.session.RestSync.remainingAfterRemote(local, remote, System.currentTimeMillis(), store.settings.value.warmupRestSeconds)
-            ?.let { if (it > 0) startRest(it) else stopRest() }
+            ?.let { if (it > 0) startRest(it) else stopRest(); WorkoutEditor.upcomingSet(remote)?.let { (i, _) -> _exerciseIndex.value = i } }
         if (isNew) startedFromPhone(remote)
     }
 
@@ -330,7 +330,7 @@ class WorkoutSession @Inject constructor(
         hr = HeartRateTracker(remote.startedAtEpochMs)
         platformHr = null
         resetHealthSegments()
-        _exerciseIndex.value = WorkoutEditor.nextPendingSet(remote)?.first ?: 0
+        _exerciseIndex.value = WorkoutEditor.upcomingSet(remote)?.first ?: 0
         // Empezado en el móvil: el reloj mide el pulso automáticamente (con la app en segundo
         // plano no se puede arrancar el servicio; lo hará MainActivity al abrirla)
         if (isInForeground()) ExerciseService.start(context)
@@ -401,7 +401,7 @@ class WorkoutSession @Inject constructor(
         val set = we?.sets?.lastOrNull { !it.completed } ?: return false
         edit { WorkoutEditor.removeSet(it, we.id, set.id) }
         // Si este ejercicio ya no tiene series pendientes, se pasa al siguiente que las tenga
-        if (currentSet() == null) _workout.value?.let { w -> WorkoutEditor.nextPendingSet(w)?.let { _exerciseIndex.value = it.first } }
+        if (currentSet() == null) _workout.value?.let { w -> WorkoutEditor.upcomingSet(w)?.let { _exerciseIndex.value = it.first } }
         return true
     }
 
@@ -958,7 +958,8 @@ private fun keptExerciseIndex(local: Workout?, remote: Workout, index: Int): Int
     val at = remote.exercises.indexOfFirst { it.id == currentId }
     return when {
         at >= 0 -> at
-        else -> WorkoutEditor.nextPendingSet(remote)?.first ?: index.coerceIn(0, (remote.exercises.size - 1).coerceAtLeast(0))
+        // Siguiendo el orden de la superserie (no el primero de la lista con series pendientes)
+        else -> WorkoutEditor.upcomingSet(remote)?.first ?: index.coerceIn(0, (remote.exercises.size - 1).coerceAtLeast(0))
     }
 }
 
