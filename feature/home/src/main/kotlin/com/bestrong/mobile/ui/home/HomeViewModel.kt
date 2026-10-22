@@ -111,10 +111,20 @@ class HomeViewModel @Inject constructor(
     private val dayTick = hourTick.map { LocalDate.now() }.distinctUntilChanged()
 
     /** Sesión que toca hoy del programa activo (con las cargas ya calculadas). */
-    val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state, dayTick) { active, history, plan, _ ->
+    val today: StateFlow<ProgramSession?> = combine(repo.activeProgram, repo.history, planning.state, dayTick, settingsStore.settings) { active, history, plan, _, s ->
         // Semana de descarga del mesociclo: la sesión se aligera sola
         active?.let {
             Periodization.sessionWithDeload(it, history, context.appLanguage(), plan.customPrograms, context.programTexts(), plan.mesocycle, context.getString(R.string.deload_label))
+        }?.let { session ->
+            // Con lo que se puede montar en tu gimnasio (como al empezar): 67,5 kg en libras no es 148,8 sino 150
+            session.copy(
+                routine = session.routine.copy(
+                    exercises = session.routine.exercises.map { re ->
+                        val gym = s.gymFor(re.exercise.id)
+                        re.copy(sets = re.sets.map { if (it.weightKg > 0) it.copy(weightKg = gym.nearestLoad(it.weightKg, re.exercise.equipment, s.unit)) else it })
+                    },
+                ),
+            )
         }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
@@ -215,7 +225,7 @@ class HomeViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 
     /** Músculos que esta semana van por detrás de lo habitual (de jueves en adelante). */
-    val laggingMuscles: StateFlow<List<Pair<com.bestrong.core.model.MuscleGroup, Double>>> = combine(repo.history, settingsStore.settings) { history, s ->
+    val laggingMuscles: StateFlow<List<Pair<com.bestrong.core.model.MuscleGroup, Double>>> = combine(repo.history, settingsStore.settings, dayTick) { history, s, _ ->
         val zone = ZoneId.systemDefault()
         com.bestrong.core.stats.WorkoutStats.laggingMuscles(history, LocalDate.now(zone), zone, minSets = s.weeklySetsTarget.toDouble())
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -434,7 +444,7 @@ class HomeViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** «Hace un año»: los ejercicios que hacías entonces y ahora, el que más ha mejorado primero (máx. 3). */
-    val yearAgo: StateFlow<List<com.bestrong.core.stats.YearAgoComparison>> = repo.history.map { history ->
+    val yearAgo: StateFlow<List<com.bestrong.core.stats.YearAgoComparison>> = combine(repo.history, dayTick) { history, _ ->
         val zone = ZoneId.systemDefault()
         com.bestrong.core.stats.YearAgo.compare(history, LocalDate.now(zone), zone).take(3)
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -443,7 +453,7 @@ class HomeViewModel @Inject constructor(
     data class MissedSession(val day: java.time.DayOfWeek, val routine: Routine, val canMoveToTomorrow: Boolean)
 
     /** La última sesión planificada de esta semana que se pasó sin entrenar ni hacerse después, si la hay. */
-    val missedSession: StateFlow<MissedSession?> = combine(planning.state, repo.history, repo.routines) { plan, history, routines ->
+    val missedSession: StateFlow<MissedSession?> = combine(planning.state, repo.history, repo.routines, dayTick) { plan, history, routines, _ ->
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))

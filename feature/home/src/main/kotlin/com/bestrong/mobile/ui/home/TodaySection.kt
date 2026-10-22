@@ -98,12 +98,14 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
             com.bestrong.mobile.ui.components.ExerciseThumbStrip(session.routine.exercises.map { it.exercise }, 44.dp, modifier = Modifier.padding(vertical = 8.dp))
             // Los primeros con su carga (la tira de arriba ya los enseña todos): el botón de empezar sigue a la vista
             session.routine.exercises.take(TODAY_SHOWN).forEach { re ->
+                // Con «suma de las dos mancuernas», el total del par (lo mismo que saldrá al empezar)
+                val f = com.bestrong.mobile.ui.components.pairFactor(re.exercise)
                 val weights = re.sets.map { it.weightKg }.distinct()
                 val reps = re.sets.map { it.reps }.distinct()
                 val load = when {
                     weights.all { it == 0.0 } -> "${re.sets.size} × ${reps.joinToString("/")}"
-                    weights.size == 1 && reps.size == 1 -> "${re.sets.size} × ${reps[0]} · ${unit.format(weights[0], withUnit = true)}"
-                    else -> re.sets.joinToString("  ") { "${unit.format(it.weightKg)}×${it.reps}" } + " ${unit.label}"
+                    weights.size == 1 && reps.size == 1 -> "${re.sets.size} × ${reps[0]} · ${unit.format(weights[0] * f, withUnit = true)}"
+                    else -> re.sets.joinToString("  ") { "${unit.format(it.weightKg * f)}×${it.reps}" } + " ${unit.label}"
                 }
                 Row {
                     Text(re.exercise.displayName(), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -311,12 +313,13 @@ fun YearAgoCard(vm: HomeViewModel, onOpenExercise: (String) -> Unit = {}) {
             Text(stringResource(R.string.year_ago_title), fontWeight = FontWeight.Bold)
             items.forEach { c ->
                 val pct = kotlin.math.round(c.change * 100).toInt()
+                val f = com.bestrong.mobile.ui.components.pairFactor(c.exercise)
                 Text(
                     stringResource(
                         R.string.year_ago_line,
                         c.exercise.displayName(),
-                        unit.format(c.thenWeightKg) + "×" + c.thenReps,
-                        unit.format(c.nowWeightKg) + "×" + c.nowReps + " " + unit.label,
+                        unit.format(c.thenWeightKg * f) + "×" + c.thenReps,
+                        unit.format(c.nowWeightKg * f) + "×" + c.nowReps + " " + unit.label,
                         (if (pct >= 0) "+" else "") + pct,
                     ),
                     style = MaterialTheme.typography.bodyMedium,
