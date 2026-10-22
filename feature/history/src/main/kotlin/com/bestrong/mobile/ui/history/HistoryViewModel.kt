@@ -310,8 +310,12 @@ class HistoryViewModel @Inject constructor(
         // Pesos de la última sesión anterior a esa fecha de quien lo hizo (no la sugerencia de progresión de hoy)
         val own = if (athlete != null) repo.partnerHistory.value.filter { it.athlete == athlete } else repo.historyOnce()
         val before = own.filter { it.isFinished && it.startedAtEpochMs < startMs }
-        val w = routine.toWorkout(startMs, { id -> WorkoutStats.previousSets(id, before) })
-        val done = w.copy(
+        // Cada bloque del mismo ejercicio con lo suyo (la descarga de 3×10 no hereda los 100 kg del 3×5)
+        val w = routine.toWorkout(startMs, { id -> WorkoutStats.previousSets(id, before) }, previousBlock = { id, n -> WorkoutStats.previousBlock(id, n, before) })
+        // Con su gimnasio (el de la rutina o el activo) y sus calorías, como un entreno terminado en directo
+        val routineGym = settingsStore.settings.value.gyms.firstOrNull { it.id == routine.gymId }?.name
+        val logged = w.copy(
+            gymName = routineGym,
             athlete = athlete,
             // Como los de la pareja empezados en directo: «Ana · Pierna»
             name = athlete?.let { "$it · ${w.name}" } ?: w.name,
@@ -319,6 +323,7 @@ class HistoryViewModel @Inject constructor(
             updatedAtEpochMs = System.currentTimeMillis(),
             exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { it.copy(completed = true, completedAtEpochMs = endMs) }) },
         )
+        val done = actions.withEnergy(actions.withGym(logged))
         repo.saveWorkout(done)
         // Como al copiarlo o editarlo: también a Health Connect
         if (done.athlete == null) actions.exportToHealthConnectIfEnabled(done)
@@ -327,8 +332,10 @@ class HistoryViewModel @Inject constructor(
 
     /** Copia un entreno pasado, tal cual, a otro día (el que se hizo igual y no se apuntó). */
     fun copyToDay(workout: Workout, startMs: Long, endMs: Long, exerciseIds: Set<String>) = viewModelScope.launch {
-        val copy = WorkoutEditor.copyToDay(workout, startMs, endMs, System.currentTimeMillis(), exerciseIds)
-        if (copy.exercises.isEmpty()) return@launch
+        val raw = WorkoutEditor.copyToDay(workout, startMs, endMs, System.currentTimeMillis(), exerciseIds)
+        if (raw.exercises.isEmpty()) return@launch
+        // Calorías calculadas para la copia (la copia empieza sin las de aquel día)
+        val copy = actions.withEnergy(raw)
         repo.saveWorkout(copy)
         _copied.value = copy.id
         if (copy.athlete == null) actions.exportToHealthConnectIfEnabled(copy)

@@ -672,18 +672,21 @@ object WorkoutEditor {
             // El tiempo elegido ya es el activo: sin las pausas de aquel día
             pausedAtEpochMs = null,
             pausedTotalMs = 0,
-            exercises = workout.exercises.filter { onlyExercises == null || it.id in onlyExercises }.map { we ->
-                we.copy(
-                    id = com.bestrong.core.util.newId(),
-                    sets = we.sets.map { s ->
-                        s.copy(
-                            id = com.bestrong.core.util.newId(),
-                            completedAtEpochMs = s.completedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) },
-                            startedAtEpochMs = s.startedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) },
-                        )
-                    },
-                )
-            },
+            // Sin uno de los dos de una superserie, el otro queda suelto (no una «superserie» de uno)
+            exercises = normalizedSupersets(
+                workout.exercises.filter { onlyExercises == null || it.id in onlyExercises }.map { we ->
+                    we.copy(
+                        id = com.bestrong.core.util.newId(),
+                        sets = we.sets.map { s ->
+                            s.copy(
+                                id = com.bestrong.core.util.newId(),
+                                completedAtEpochMs = s.completedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) },
+                                startedAtEpochMs = s.startedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) },
+                            )
+                        },
+                    )
+                },
+            ),
             avgHeartRate = null,
             maxHeartRate = null,
             calories = null,
