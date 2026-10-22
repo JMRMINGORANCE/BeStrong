@@ -195,7 +195,11 @@ fun SetRow(
                 }
             },
         ) {
-            val bg = if (set.completed) MaterialTheme.colorScheme.tertiaryContainer else com.bestrong.mobile.ui.theme.LocalScreenColor.current
+            // Al marcar, el fondo se rellena suave (es la acción más repetida de la app)
+            val bg by androidx.compose.animation.animateColorAsState(
+                if (set.completed) MaterialTheme.colorScheme.tertiaryContainer else com.bestrong.mobile.ui.theme.LocalScreenColor.current,
+                label = "setBg",
+            )
             val label = if (set.type == SetType.NORMAL) "${index + 1}" else set.type.short
             Row(
                 Modifier.fillMaxWidth().background(bg).padding(horizontal = 4.dp, vertical = 2.dp).heightIn(min = 48.dp),
@@ -291,6 +295,7 @@ fun SetRow(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                         )
                         // Comparación en vivo con la misma serie de la vez anterior (+2,5 kg · +1)
                         val hasValues = set.weightKg > 0 || set.reps > 0 || set.durationSec > 0

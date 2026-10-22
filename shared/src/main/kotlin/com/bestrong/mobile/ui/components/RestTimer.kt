@@ -95,16 +95,25 @@ fun RestTimerBar(
                 trackColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.3f),
                 drawStopIndicator = {},
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // A todo el ancho y a partes iguales: «Überspringen» o letra grande no se salen en un móvil estrecho
+            val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+            fun tick() = haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val dark = androidx.compose.material3.ButtonDefaults.filledTonalButtonColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 )
                 val minus = stringResource(R.string.a11y_rest_minus_15)
                 val plus = stringResource(R.string.a11y_rest_plus_15)
-                FilledTonalButton(onClick = { onAdjust(-15) }, colors = dark, modifier = Modifier.semantics { contentDescription = minus }) { Text(stringResource(R.string.rest_minus_15), fontWeight = FontWeight.Bold) }
-                FilledTonalButton(onClick = { onAdjust(15) }, colors = dark, modifier = Modifier.semantics { contentDescription = plus }) { Text(stringResource(R.string.rest_plus_15), fontWeight = FontWeight.Bold) }
-                TextButton(onClick = onSkip) { Text(stringResource(R.string.rest_skip), color = onBrand, fontWeight = FontWeight.Bold) }
+                FilledTonalButton(onClick = { tick(); onAdjust(-15) }, colors = dark, modifier = Modifier.weight(1f).semantics { contentDescription = minus }) {
+                    Text(stringResource(R.string.rest_minus_15), fontWeight = FontWeight.Bold, maxLines = 1)
+                }
+                FilledTonalButton(onClick = { tick(); onAdjust(15) }, colors = dark, modifier = Modifier.weight(1f).semantics { contentDescription = plus }) {
+                    Text(stringResource(R.string.rest_plus_15), fontWeight = FontWeight.Bold, maxLines = 1)
+                }
+                TextButton(onClick = { tick(); onSkip() }, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.rest_skip), color = onBrand, fontWeight = FontWeight.Bold, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                }
             }
         }
     }

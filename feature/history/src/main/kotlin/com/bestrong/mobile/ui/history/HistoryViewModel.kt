@@ -139,7 +139,8 @@ class HistoryViewModel @Inject constructor(
         val ofDay = if (day == null) all else all.filter { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == day }
         val plainQ = WorkoutStats.plainText(q.trim())
         if (plainQ.isEmpty()) ofDay else ofDay.filter { searchTextOf(it).contains(plainQ) }
-    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        // Empieza con el historial ya cargado (sin filtros es lo mismo): al abrir no parpadea «ningún entreno coincide»
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), repo.history.value)
 
     /** Entrenos por día del año actual (mapa de calor). */
     val heatmap: StateFlow<Map<LocalDate, Int>> = viewed

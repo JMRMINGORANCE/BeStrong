@@ -715,7 +715,8 @@ private fun ExerciseCard(
             Row(Modifier.padding(start = 12.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 com.bestrong.mobile.ui.components.ExerciseThumb(we.exercise, 54.dp, Modifier.padding(end = 12.dp))
                 Column(Modifier.weight(1f)) {
-                    supersetLabel?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = supersetColor ?: Color.Unspecified, fontWeight = FontWeight.Bold) }
+                    // El color solo en la barra lateral: el ámbar o el turquesa como texto no se leen sobre fondo claro
+                    supersetLabel?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold) }
                     Text(
                         we.exercise.displayName(),
                         style = MaterialTheme.typography.titleMedium,
