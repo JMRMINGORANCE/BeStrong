@@ -20,7 +20,6 @@ import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Autoregulation
-import com.bestrong.core.training.NextTime
 import com.bestrong.core.training.NextTimeSuggestion
 import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.Progression
@@ -849,7 +848,8 @@ class ActiveWorkoutViewModel @Inject constructor(
         WorkoutStats.newRecordsIn(finished, history),
         WorkoutStats.compareWithPrevious(finished, history),
         WorkoutStats.imbalances(finished),
-        NextTime.forWorkout(finished) { settings.value.stepKgFor(it) },
+        // Lo mismo que se rellenará al empezar la próxima vez (no una regla aparte que a veces lo contradecía)
+        actions.nextTimeAfter(finished, history),
         weeklyGoalReached = weeklyGoalReachedBy(finished, history),
     )
 

@@ -165,6 +165,34 @@ class WorkoutActions @Inject constructor(
     }
 
     /**
+     * «La próxima vez» del resumen al terminar: con la sobrecarga progresiva activada, lo mismo que se rellenará al
+     * empezar (rango de reps, sesiones fallidas, mancuernas del gimnasio, tope semanal); si no, la regla sencilla.
+     */
+    fun nextTimeAfter(finished: Workout, history: List<Workout>): List<com.bestrong.core.training.NextTimeSuggestion> {
+        val s = settings.settings.value
+        if (!s.progressionEnabled) return com.bestrong.core.training.NextTime.forWorkout(finished) { s.stepKgFor(it) }
+        val all = if (history.any { it.id == finished.id }) history else listOf(finished) + history
+        val gymName = s.activeGym.name.takeIf { s.gyms.size > 1 }
+        return finished.exercises.distinctBy { it.exercise.id }.mapNotNull { we ->
+            val done = we.completedSets.filter { it.type != com.bestrong.core.model.SetType.WARMUP && it.countsForRecords && it.weightKg > 0 }
+            if (we.exercise.tracking != com.bestrong.core.model.TrackingType.WEIGHT_REPS || done.isEmpty()) return@mapNotNull null
+            val base = WorkoutStats.atGym(all, gymName, we.exercise.id)
+            val sug = Progression.suggest(we.exercise, base, s.stepKgFor(we.exercise.id), repRange = s.repRangeFor(we.exercise.id)) ?: return@mapNotNull null
+            val sets = loadable(we.exercise, sug.sets, sug.kind, WorkoutStats.previousSets(we.exercise.id, base), all)
+            val top = sets.maxOfOrNull { it.weightKg } ?: return@mapNotNull null
+            val before = done.maxOf { it.weightKg }
+            val direction = if (top > before + 1e-6) {
+                1
+            } else if (top < before - 1e-6) {
+                -1
+            } else {
+                0
+            }
+            com.bestrong.core.training.NextTimeSuggestion(we.exercise.id, we.exercise.name, top, sets.first { it.weightKg == top }.reps, direction)
+        }
+    }
+
+    /**
      * Ajusta unas series propuestas a lo que se puede montar en el gimnasio activo: tope de subida semanal
      * (Planificación), barra/discos/mancuernas (con la barra del ejercicio) y, si tocaba subir y el redondeo
      * deja el mismo peso, el siguiente que se pueda montar (si no, la subida se perdería). La asistencia
