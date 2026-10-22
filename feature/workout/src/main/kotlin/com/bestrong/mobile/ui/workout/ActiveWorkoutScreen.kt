@@ -324,7 +324,8 @@ fun ActiveWorkoutScreen(
                     enter = androidx.compose.animation.slideInVertically { it } + androidx.compose.animation.fadeIn(),
                     exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
                 ) {
-                    shownRest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal)) }
+                    // La siguiente serie solo si el descanso es de quien se ve (el de la pareja no lleva la tuya)
+                    shownRest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal).takeIf { _ -> it.workoutId == null || it.workoutId == w.id }) }
                 }
                 // Modo una mano: lo importante abajo, al alcance del pulgar
                 if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
@@ -341,7 +342,7 @@ fun ActiveWorkoutScreen(
                 RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                 // Mitad superior: lo que se mira desde el banco
                 Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true, next = nextSetLabel(w, dumbbellTotal)) }
+                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true, next = nextSetLabel(w, dumbbellTotal).takeIf { _ -> it.workoutId == null || it.workoutId == w.id }) }
                         ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp), eta, dumbbellTotal)
                 }
                 HorizontalDivider()
@@ -353,7 +354,7 @@ fun ActiveWorkoutScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     if (w.isPaused) PausedBanner(vm::togglePause)
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w, dumbbellTotal)) }
+                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w, dumbbellTotal).takeIf { _ -> it.workoutId == null || it.workoutId == w.id }) }
                     if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                     if (settings.mediaControls) MediaControls(settings.musicApp)

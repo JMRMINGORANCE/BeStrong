@@ -95,7 +95,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     val workout: StateFlow<Workout?> = combine(repo.activeWorkout, repo.partnerWorkout, partnerMode) { me, partner, isPartner ->
-        if (isPartner) partner else me
+        // Sin entreno de la pareja (se cerró desde Inicio, el reloj o al terminar el tuyo): el tuyo, no «sin entreno»
+        if (isPartner && partner != null) partner else me
     }.stateIn(viewModelScope, SharingStarted.Eagerly, repo.activeWorkout.value)
 
     /** Cambia entre tu entreno y el de tu pareja; la primera vez copia tus ejercicios con las series sin hacer. */
@@ -675,7 +676,8 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Cronómetro de cardio: en el reloj, además, cambia la sesión de pesas a la de esa máquina. */
     fun startCardio(weId: String, setId: String) {
-        restTimer.skip()
+        // Solo el descanso de quien arranca el cronómetro (el de la pareja, o el tuyo, sigue)
+        restTimer.skipFor(workout.value?.id)
         edit { WorkoutEditor.startCardio(it, weId, setId) }
     }
 
