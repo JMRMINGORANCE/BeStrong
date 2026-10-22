@@ -209,10 +209,11 @@ data class SharedSettings(
         val raise = suggestion.kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
         val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
         return suggestion.sets.mapIndexed { i, set ->
-            val target = capped(set.weightKg)
+            val prev = before.getOrNull(i)?.weightKg
+            // El tope frena la subida, nunca deja por debajo de lo que ya se hizo
+            val target = capped(set.weightKg).coerceAtLeast(minOf(set.weightKg, prev ?: 0.0))
             // En libras también, con los discos de libras (los mismos que enseña la calculadora)
             val rounded = if (target > 0) gym.nearestLoad(target, exercise.equipment, unit) else target
-            val prev = before.getOrNull(i)?.weightKg
             val lost = raise && prev != null && prev > 0 && rounded <= prev + 1e-6
             // La subida que no se pierde al redondear, si el tope semanal la permite
             val above = if (lost) gym.loadAbove(prev!!, exercise.equipment, unit).takeIf { it <= capped(it) + 1e-6 } else null

@@ -156,8 +156,11 @@ class WorkoutActions @Inject constructor(
             val base = WorkoutStats.atGym(history, gymName, id)
             val suggestion = if (s.progressionEnabled && ex != null) Progression.suggest(ex, base, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id)) else null
             val previous = WorkoutStats.previousSets(id, base)
+            // Con sugerencia, los calentamientos de la última vez delante (la sugerencia solo trae las efectivas y, sin
+            // ellos, la rutina ponía los de la plantilla, a menudo a 0 kg)
+            val warmups = if (suggestion != null) previous.filter { it.type == com.bestrong.core.model.SetType.WARMUP } else emptyList()
             val sets = suggestion?.sets ?: previous
-            if (ex == null) sets else loadable(ex, sets, suggestion?.kind, previous, history)
+            if (ex == null) warmups + sets else warmups + loadable(ex, sets, suggestion?.kind, previous, history)
         }
     }
 
@@ -183,9 +186,10 @@ class WorkoutActions @Inject constructor(
         val raise = kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
         val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
         return sets.mapIndexed { i, set ->
-            val target = capped(set.weightKg)
-            val rounded = if (target > 0) gym.nearestLoad(target, ex.equipment, s.unit) else target
             val prev = before.getOrNull(i)?.weightKg
+            // El tope frena la subida, nunca deja por debajo de lo que ya se hizo (70 kg el lunes no pasa a 62,5 el jueves)
+            val target = capped(set.weightKg).coerceAtLeast(minOf(set.weightKg, prev ?: 0.0))
+            val rounded = if (target > 0) gym.nearestLoad(target, ex.equipment, s.unit) else target
             // Subida perdida al redondear: el siguiente peso montable, si el tope semanal lo permite
             val lost = prev != null && prev > 0 && rounded <= prev + 1e-6
             val above = if (raise && lost) gym.loadAbove(prev!!, ex.equipment, s.unit) else null
