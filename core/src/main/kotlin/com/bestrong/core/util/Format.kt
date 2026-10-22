@@ -2,13 +2,20 @@ package com.bestrong.core.util
 
 import kotlin.math.roundToLong
 
-/** 80.0 → "80", 82.5 → "82,5" */
+/**
+ * Separador decimal del idioma: coma en español y casi toda Europa, punto en inglés. Los pesos salían siempre con
+ * coma («82,5 kg» en inglés, junto a «12.5 km»). Al leer lo escrito se aceptan los dos.
+ */
+fun decimalSeparator(locale: java.util.Locale = java.util.Locale.getDefault()): Char =
+    java.text.DecimalFormatSymbols.getInstance(locale).decimalSeparator
+
+/** 80.0 → "80", 82.5 → "82,5" (o «82.5» en inglés) */
 fun formatWeight(kg: Double): String {
     val rounded = (kg * 100).roundToLong() / 100.0
     return if (rounded % 1.0 == 0.0) {
         rounded.toLong().toString()
     } else {
-        rounded.toString().trimEnd('0').replace('.', ',')
+        rounded.toString().trimEnd('0').replace('.', decimalSeparator())
     }
 }
 

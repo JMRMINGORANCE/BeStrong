@@ -378,7 +378,7 @@ class CoachReportTest {
         val w = finishedWorkout("w", LocalDate.of(2026, 3, 2), bench to listOf(done(80.0, 8).copy(rpe = 8.0), done(82.5, 6).copy(note = "lento"))).copy(notes = "Buen día")
         val text = com.bestrong.core.io.CoachReport.text(listOf(w), 0, com.bestrong.core.util.WeightUnit.KG, UTC, java.util.Locale.ROOT)
         assertTrue(text.contains("80×8 @8"))
-        assertTrue(text.contains("80×8 @8 / 82,5×6 (lento)"))
+        assertTrue(text.contains("80×8 @8 / 82${com.bestrong.core.util.decimalSeparator()}5×6 (lento)"))
         assertTrue(text.contains("✎ Buen día"))
         assertTrue(text.contains("min · kg)"))
     }
@@ -386,6 +386,6 @@ class CoachReportTest {
     @Test fun decimalRpeUsesCommaLikeWeights() {
         val w = finishedWorkout("w", LocalDate.of(2026, 3, 2), bench to listOf(done(80.0, 8).copy(rpe = 8.5)))
         val text = com.bestrong.core.io.CoachReport.text(listOf(w), 0, com.bestrong.core.util.WeightUnit.KG, UTC, java.util.Locale.ROOT)
-        assertTrue(text.contains("80×8 @8,5"))
+        assertTrue(text.contains("80×8 @8${com.bestrong.core.util.decimalSeparator()}5"))
     }
 }

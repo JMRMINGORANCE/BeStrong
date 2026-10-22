@@ -19,7 +19,7 @@ enum class WeightUnit(val label: String, val kgPerUnit: Double, val defaultIncre
         // (un peso guardado en kg no sale como «134,48 lb»)
         val scale = if (this == KG) 100.0 else 10.0
         val v = (fromKg(kg) * scale).roundToLong() / scale
-        val text = if (v % 1.0 == 0.0) v.toLong().toString() else v.toString().trimEnd('0').replace('.', ',')
+        val text = if (v % 1.0 == 0.0) v.toLong().toString() else v.toString().trimEnd('0').replace('.', decimalSeparator())
         return if (withUnit) "$text $label" else text
     }
 
@@ -42,6 +42,6 @@ enum class WeightUnit(val label: String, val kgPerUnit: Double, val defaultIncre
     /** Formatea un incremento con hasta dos decimales («1,25 kg»), que [format] redondearía. */
     fun formatStep(kg: Double): String {
         val v = (fromKg(kg) * 100).roundToLong() / 100.0
-        return (if (v % 1.0 == 0.0) v.toLong().toString() else v.toString().replace('.', ',')) + " " + label
+        return (if (v % 1.0 == 0.0) v.toLong().toString() else v.toString().replace('.', decimalSeparator())) + " " + label
     }
 }

@@ -65,9 +65,9 @@ object CoachReport {
     /** RPE y nota de la serie: « @8,5 (lento)». */
     private fun extras(s: WorkoutSet): String = (s.rpe?.let { " @" + decimal(it) }.orEmpty()) + (if (s.note.isNotBlank()) " (${s.note})" else "")
 
-    /** Un decimal como mucho y con coma, igual que los pesos. */
+    /** Un decimal como mucho, con el separador del idioma (igual que los pesos). */
     private fun decimal(v: Double): String {
         val r = Math.round(v * 10) / 10.0
-        return if (r % 1.0 == 0.0) r.toLong().toString() else r.toString().replace('.', ',')
+        return if (r % 1.0 == 0.0) r.toLong().toString() else r.toString().replace('.', com.bestrong.core.util.decimalSeparator())
     }
 }
