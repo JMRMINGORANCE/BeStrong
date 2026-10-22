@@ -210,7 +210,17 @@ object WorkoutCsv {
                         val order = r.get("set order")
                         // Strong 6 mete filas del temporizador de descanso entre las series: no son series
                         if (order.equals("rest timer", ignoreCase = true)) return@mapNotNull null
-                        val durationMin = parseStrongDuration(r.get("duration"))
+                        // Strong antiguo: «Workout Duration» y la unidad de cada fila («lbs», «mi»), aunque la app use otra
+                        val durationMin = parseStrongDuration(r.get("duration").ifBlank { r.get("workout duration") })
+                        val rowUnit = r.get("weight unit").lowercase().let { u ->
+                            if (u.startsWith("lb")) {
+                                WeightUnit.LB
+                            } else if (u.startsWith("kg")) {
+                                WeightUnit.KG
+                            } else {
+                                strongUnit
+                            }
+                        }
                         Row(
                             key = r.get("date") + "|" + r.get("workout name"), name = r.get("workout name"),
                             // El formato nuevo trae la duración del entreno en segundos («Duration (sec)»)
@@ -219,13 +229,13 @@ object WorkoutCsv {
                             notes = r.get("workout notes"), exercise = ex, exNotes = r.get("notes"), superset = null,
                             set = WorkoutSet(
                                 // Strong antiguo: «Weight» en la unidad elegida; el nuevo: «Weight (kg)» o «Weight (lbs)»
-                                weightKg = num(r.get("weight"))?.let(strongUnit::toKg) ?: num(r.get("weight (kg)"))
+                                weightKg = num(r.get("weight"))?.let(rowUnit::toKg) ?: num(r.get("weight (kg)"))
                                     ?: num(r.get("weight (lbs)"))?.let { WeightUnit.LB.toKg(it) } ?: 0.0,
                                 reps = num(r.get("reps"))?.toInt() ?: 0,
                                 // «Duration (sec)» es la del entreno entero, no la de la serie
                                 durationSec = num(r.get("seconds"))?.toInt() ?: 0,
                                 distanceM = num(r.get("distance (meters)")) ?: num(r.get("distance"))?.let { d ->
-                                    if (strongUnit == WeightUnit.LB) d * METERS_PER_MILE else d * 1000
+                                    r.get("distance unit").ifBlank { null }?.let { d * metresPer(it) } ?: if (strongUnit == WeightUnit.LB) d * METERS_PER_MILE else d * 1000
                                 } ?: 0.0,
                                 type = when (order.uppercase()) { "W" -> SetType.WARMUP; "D" -> SetType.DROP; "F" -> SetType.FAILURE; else -> SetType.NORMAL },
                                 rpe = num(r.get("rpe")),
@@ -368,7 +378,9 @@ object WorkoutCsv {
             byName[n]?.let { return it }
             // Hevy/Strong: "Bench Press (Barbell)" → alias
             val base = n.substringBefore(" (").trim()
-            (aliases[n] ?: aliases[base])?.let { aliasId -> ExerciseLibrary.byId(aliasId)?.let { return it } }
+            // El nombre sin «(…)» solo si el material entre paréntesis es el del ejercicio: «Overhead Press (Dumbbell)» no es
+            // el press militar con barra (si no, las mancuernas iban a los récords de la barra)
+            (aliases[n] ?: aliases[base]?.takeIf { sameEquipment(n, it) })?.let { aliasId -> ExerciseLibrary.byId(aliasId)?.let { return it } }
             created.firstOrNull { it.name.normalized() == n }?.let { return it }
             val equipment = when {
                 "barbell" in n -> Equipment.BARBELL
@@ -399,3 +411,23 @@ object WorkoutCsv {
 
 /** Metros en una milla. */
 private const val METERS_PER_MILE = 1609.344
+
+/** Material escrito entre paréntesis en Hevy/Strong («Bench Press (Smith Machine)»); null si no dice ninguno. */
+private fun equipmentIn(name: String): Equipment? {
+    val paren = name.substringAfter(" (", "").substringBefore(")")
+    return when {
+        paren.isEmpty() -> null
+        "smith" in paren -> Equipment.SMITH
+        "barbell" in paren -> Equipment.BARBELL
+        "dumbbell" in paren -> Equipment.DUMBBELL
+        "cable" in paren -> Equipment.CABLE
+        "machine" in paren -> Equipment.MACHINE
+        "kettlebell" in paren -> Equipment.KETTLEBELL
+        "band" in paren -> Equipment.BAND
+        else -> null
+    }
+}
+
+/** El ejercicio [aliasId] encaja con el material que dice [name] (o [name] no dice ninguno). */
+private fun sameEquipment(name: String, aliasId: String): Boolean =
+    equipmentIn(name)?.let { it == ExerciseLibrary.byId(aliasId)?.equipment } ?: true

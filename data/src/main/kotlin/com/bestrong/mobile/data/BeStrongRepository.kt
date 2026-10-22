@@ -333,10 +333,11 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     suspend fun importWorkouts(workouts: List<Workout>, newExercises: List<Exercise>): Int {
         val existing = historyOnce(includePartner = true)
         val ids = existing.map { it.id }.toSet()
-        val keys = existing.map { it.startedAtEpochMs to it.name }.toSet()
         // Lo que está en la papelera se borró a propósito: restaurar una copia anterior no lo devuelve al historial
-        // (se recupera desde la papelera si se quiere)
-        val trashed = trashOnce().map { it.workout.id }.toSet()
+        // (se recupera desde la papelera si se quiere); tampoco reimportar el mismo archivo de otra app (otro id)
+        val inTrash = trashOnce().map { it.workout }
+        val trashed = inTrash.map { it.id }.toSet()
+        val keys = (existing + inTrash).map { it.startedAtEpochMs to it.name }.toSet()
         val fresh = workouts.filter { it.id !in ids && it.id !in trashed && (it.startedAtEpochMs to it.name) !in keys }
         // Todo de una vez (una transacción): rápido con miles de entrenos y sin importaciones a medias
         val (exerciseRows, workoutRows) = withContext(Dispatchers.Default) {
