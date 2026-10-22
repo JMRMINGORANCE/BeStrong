@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -238,7 +241,7 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
 
     // El teclado también cuenta como borde: el campo enfocado sube por encima de él (si no, se escribía a ciegas)
     Scaffold(
-        contentWindowInsets = androidx.compose.material3.ScaffoldDefaults.contentWindowInsets.union(androidx.compose.foundation.layout.WindowInsets.ime),
+        contentWindowInsets = androidx.compose.material3.ScaffoldDefaults.contentWindowInsets.union(WindowInsets.ime),
         topBar = {
             TopAppBar(
                 title = { Text(name.ifBlank { stringResource(R.string.prog_create) }, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
