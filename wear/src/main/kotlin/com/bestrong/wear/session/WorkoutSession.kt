@@ -210,8 +210,7 @@ class WorkoutSession @Inject constructor(
             val ex = exerciseFor(exerciseId)
             if (ex != null) {
                 Progression.suggest(ex, base, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { sug ->
-                    val weekAgo = System.currentTimeMillis() - 7 * 86_400_000L
-                    val lastWeekBest = WorkoutStats.bestWeightBetween(exerciseId, store.history.value, weekAgo, Long.MAX_VALUE)
+                    val lastWeekBest = com.bestrong.core.training.ProgressionCap.lastWeekBest(exerciseId, store.history.value, System.currentTimeMillis())
                     return s.loadable(ex, sug, previous, lastWeekBest)
                 }
             }

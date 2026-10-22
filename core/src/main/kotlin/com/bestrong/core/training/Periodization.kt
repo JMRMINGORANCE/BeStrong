@@ -227,7 +227,10 @@ object Periodization {
         deloadLabel: String,
         zone: ZoneId = ZoneId.systemDefault(),
     ): ProgramSession? {
-        val inDeload = { w: Workout -> mesocycle?.isDeloadWeek(Instant.ofEpochMilli(w.startedAtEpochMs).atZone(zone).toLocalDate()) == true }
+        // Una sesión hecha aligerada lo sigue siendo aunque el mesociclo se pare o empiece otro (lleva la marca en el nombre)
+        val inDeload = { w: Workout ->
+            w.name.endsWith(" · $deloadLabel") || mesocycle?.isDeloadWeek(Instant.ofEpochMilli(w.startedAtEpochMs).atZone(zone).toLocalDate()) == true
+        }
         val session = nextSession(active, history, lang, custom, texts, inDeload) ?: return null
         return if (mesocycle?.isDeloadWeek(LocalDate.now(zone)) == true) session.copy(routine = Fatigue.deload(session.routine, deloadLabel)) else session
     }

@@ -674,6 +674,18 @@ object Injuries {
 
 object ProgressionCap {
     /**
+     * Mejor peso de [exerciseId] en la semana natural anterior (lunes a domingo): la referencia del tope. Con una
+     * ventana de 7 días hacia atrás, dos sesiones en la semana se sumaban (+5 % y otro +5 %) y una sesión semanal a
+     * una hora algo más tarde quedaba fuera y se quitaba el tope.
+     */
+    fun lastWeekBest(exerciseId: String, history: List<com.bestrong.core.model.Workout>, nowEpochMs: Long, zone: java.time.ZoneId = java.time.ZoneId.systemDefault()): Double? {
+        val monday = java.time.Instant.ofEpochMilli(nowEpochMs).atZone(zone).toLocalDate()
+            .with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+        fun ms(d: java.time.LocalDate) = d.atStartOfDay(zone).toInstant().toEpochMilli()
+        return com.bestrong.core.stats.WorkoutStats.bestWeightBetween(exerciseId, history, ms(monday.minusWeeks(1)), ms(monday))
+    }
+
+    /**
      * Limita la subida de peso semanal a [maxWeeklyIncrease] (5 % por defecto) sobre el mejor
      * peso de la semana anterior; nunca baja de ese peso. Siempre deja subir al menos un escalón [minStepKg]: con
      * pesos ligeros (40 kg al 2,5 % = 41 → 40 al redondear) el tope, si no, bloquearía toda subida para siempre.

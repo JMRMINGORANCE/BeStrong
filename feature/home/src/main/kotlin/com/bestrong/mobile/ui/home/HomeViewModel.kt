@@ -454,7 +454,8 @@ class HomeViewModel @Inject constructor(
         val tomorrow = today.plusDays(1)
         // Mañana libre también si lo que tenía era una rutina ya borrada (el calendario lo enseña como descanso)
         val canMove = tomorrow.dayOfWeek != java.time.DayOfWeek.MONDAY && week.routineFor(tomorrow.dayOfWeek)?.let { id -> routines.any { it.id == id } } != true
-        week.missedSessions(weekStart, today, trained) { id, since -> doneOn[id].orEmpty().any { !it.isBefore(since) } }
+        // Hecha en cualquier día de esta semana (también antes de su día): no se salta lo que se adelantó
+        week.missedSessions(weekStart, today, trained) { id, _ -> doneOn[id].orEmpty().any { !it.isBefore(weekStart) } }
             .firstNotNullOfOrNull { (day, id) -> routines.firstOrNull { it.id == id && !it.archived }?.let { MissedSession(day, it, canMove) } }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

@@ -176,7 +176,7 @@ class WorkoutActions @Inject constructor(
     ): List<WorkoutSet> {
         val s = settings.settings.value
         val cap = planning.state.value.weeklyCap
-        val lastWeekBest = cap?.let { WorkoutStats.bestWeightBetween(ex.id, history, System.currentTimeMillis() - 7 * 86_400_000L, Long.MAX_VALUE) }
+        val lastWeekBest = cap?.let { ProgressionCap.lastWeekBest(ex.id, history, System.currentTimeMillis()) }
         fun capped(kg: Double) = if (cap == null) kg else ProgressionCap.limitIn(s.unit, kg, lastWeekBest, cap, s.stepKgFor(ex.id))
         // En libras se redondea con los discos de libras (como la calculadora de discos)
         val gym = s.gymFor(ex.id)
@@ -196,7 +196,7 @@ class WorkoutActions @Inject constructor(
     /** Si el tope semanal de Planificación recorta alguna de estas series (para decirlo junto a la sugerencia). */
     fun cappedByWeek(ex: com.bestrong.core.model.Exercise, sets: List<WorkoutSet>, history: List<Workout> = repository.history.value): Boolean {
         val cap = planning.state.value.weeklyCap ?: return false
-        val lastWeekBest = WorkoutStats.bestWeightBetween(ex.id, history, System.currentTimeMillis() - 7 * 86_400_000L, Long.MAX_VALUE)
+        val lastWeekBest = ProgressionCap.lastWeekBest(ex.id, history, System.currentTimeMillis())
         val step = settings.settings.value.stepKgFor(ex.id)
         return sets.any { it.weightKg > ProgressionCap.limit(it.weightKg, lastWeekBest, cap, step) + 1e-6 }
     }
