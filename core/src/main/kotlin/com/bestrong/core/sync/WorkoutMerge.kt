@@ -93,6 +93,9 @@ object WorkoutMerge {
         }
     }
 
+    private fun latestEdit(older: WorkoutSet, newer: WorkoutSet): WorkoutSet =
+        if ((older.editedAtEpochMs ?: 0L) > (newer.editedAtEpochMs ?: 0L)) older else newer
+
     private fun mergeSet(older: WorkoutSet, newer: WorkoutSet): WorkoutSet {
         // Desmarcada después de completarse (en cualquier lado): gana el desmarcado
         val uncompletedAt = listOfNotNull(older.uncompletedAtEpochMs, newer.uncompletedAtEpochMs).maxOrNull()
@@ -104,10 +107,7 @@ object WorkoutMerge {
                 .copy(uncompletedAtEpochMs = uncompletedAt)
             // Sin hacer: gana la última edición de esta serie (girar la corona en el reloj no se pierde porque el
             // móvil cambiara otra cosa después). Un cronómetro de cardio arrancado en un lado no lo para el otro
-            else -> {
-                val edited = if ((older.editedAtEpochMs ?: 0L) > (newer.editedAtEpochMs ?: 0L)) older else newer
-                edited.copy(startedAtEpochMs = newer.startedAtEpochMs ?: older.startedAtEpochMs)
-            }
+            else -> latestEdit(older, newer).copy(startedAtEpochMs = newer.startedAtEpochMs ?: older.startedAtEpochMs)
         }
     }
 }

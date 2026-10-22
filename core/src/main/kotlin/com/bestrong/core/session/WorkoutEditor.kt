@@ -404,9 +404,11 @@ object WorkoutEditor {
     fun updateSet(workout: Workout, workoutExerciseId: String, setId: String, block: (WorkoutSet) -> WorkoutSet): Workout =
         updateExercise(workout, workoutExerciseId) { we -> we.copy(sets = we.sets.map { if (it.id == setId) block(it).stampEdit(it) else it }) }
 
+    private fun WorkoutSet.logged() = listOf(weightKg, reps, repsRight, durationSec, distanceM)
+
     /** Marca la hora si cambió lo apuntado (para que la fusión móvil-reloj no pierda esta edición). */
     private fun WorkoutSet.stampEdit(before: WorkoutSet): WorkoutSet =
-        if (weightKg != before.weightKg || reps != before.reps || repsRight != before.repsRight || durationSec != before.durationSec || distanceM != before.distanceM) {
+        if (logged() != before.logged()) {
             copy(editedAtEpochMs = System.currentTimeMillis())
         } else {
             this
