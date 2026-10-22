@@ -460,10 +460,12 @@ class ProfileViewModel @Inject constructor(
         val local = repo.historyOnce(includePartner = true)
         val ids = local.map { it.id }.toSet()
         val keys = local.map { it.startedAtEpochMs to it.name }.toSet()
+        // Los de la papelera no se restauran (se recuperan desde ella): no cuentan como nuevos
+        val trashed = repo.trashedIds()
         val latestLocal = local.maxOfOrNull { it.startedAtEpochMs }
         val latestBackup = data.history.maxOfOrNull { it.startedAtEpochMs }
         restoreInfo.value = RestoreInfo(
-            newWorkouts = data.history.count { it.id !in ids && (it.startedAtEpochMs to it.name) !in keys },
+            newWorkouts = data.history.count { it.id !in ids && it.id !in trashed && (it.startedAtEpochMs to it.name) !in keys },
             olderThanLocal = latestLocal != null && latestBackup != null && latestBackup < latestLocal,
         )
         restoreWithSettings.value = true

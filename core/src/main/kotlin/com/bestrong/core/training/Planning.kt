@@ -414,7 +414,8 @@ object ProgramGenerator {
         texts: Texts? = null,
         level: Level = Level.INTERMEDIATE,
     ): GeneratedProgram {
-        val days = daysPerWeek.coerceIn(1, 6)
+        // Con 7 días salen 6 rutinas que se repiten a lo largo de la semana
+        val days = daysPerWeek.coerceIn(1, 7)
         val routines = RoutineGenerator.generate(days, equipment, goal, minutesPerSession, lang, allowed, texts?.dayLabels.orEmpty(), level)
         val (es, en) = goalNames.getValue(goal)
         val name = texts?.name ?: if (lang == "en") "$en · $days days" else "$es · $days días"

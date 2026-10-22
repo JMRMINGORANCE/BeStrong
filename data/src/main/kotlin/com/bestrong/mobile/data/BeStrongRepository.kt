@@ -492,6 +492,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     private suspend fun saveTrash(list: List<TrashedWorkout>) =
         dao.putValue(KeyValueEntity(KEY_TRASH, json.encodeToString(trashSerializer, list)))
 
+    /** Ids de los entrenos en la papelera (al restaurar no se vuelven a añadir). */
+    suspend fun trashedIds(): Set<String> = trashOnce().map { it.workout.id }.toSet()
+
     private suspend fun trashOnce(): List<TrashedWorkout> = TrashedWorkout.fresh(decodeTrash(dao.valueOnce(KEY_TRASH)), System.currentTimeMillis())
 
     /** Borra un entreno dejándolo 30 días en la papelera. */

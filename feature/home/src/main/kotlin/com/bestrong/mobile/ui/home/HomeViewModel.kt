@@ -386,6 +386,12 @@ class HomeViewModel @Inject constructor(
     fun confirmImport() = viewModelScope.launch {
         val routine = _pendingImport.value ?: return@launch
         _pendingImport.value = null
+        // El mismo enlace o QR otra vez (mismo nombre, ejercicios y series) no duplica la rutina
+        fun key(r: Routine) = r.name to r.exercises.map { it.exercise.id to it.sets }
+        if (repo.routinesOnce().any { !it.archived && key(it) == key(routine) }) {
+            message(context.getString(R.string.routine_already_imported, routine.name))
+            return@launch
+        }
         // Sus ejercicios propios (o que esta versión no conoce) pasan a tu biblioteca: si no, no salen en el
         // selector, no se pueden editar ni tienen sugerencia de progresión
         routine.exercises.map { it.exercise }.distinctBy { it.id }.filter { repo.exercise(it.id) == null }
@@ -533,7 +539,7 @@ class HomeViewModel @Inject constructor(
             st.copy(weekPlans = com.bestrong.core.training.ProgramGenerator.schedule(st.weekPlans, program.routines.map { it.id }, weekdays, monday, from = LocalDate.now(), exists = { it in alive }))
         }
         // El objetivo de la semana pasa a ser los días del programa, y se recuerda el objetivo elegido
-        settingsStore.update { it.copy(weeklyGoal = program.routines.size.coerceIn(1, 7), trainingGoal = goal) }
+        settingsStore.update { it.copy(weeklyGoal = (weekdays.size.takeIf { n -> n > 0 } ?: program.routines.size).coerceIn(1, 7), trainingGoal = goal) }
         message(context.getString(R.string.msg_program_added, folder, program.routines.size))
     }
 

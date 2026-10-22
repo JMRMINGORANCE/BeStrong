@@ -368,6 +368,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     fun restoreBackup(json: JsonObject) {
         // Se escriben antes todos los ajustes actuales: así cada clave conocida tiene su tipo en prefs
         update { it }
+        val localGyms = _settings.value.gyms
         // Los textos opcionales vacíos no quedan guardados (putString null los borra): también son texto
         val current = NULLABLE_STRING_KEYS.associateWith { "" } + prefs.all
         prefs.edit {
@@ -376,6 +377,9 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             if (CARDIO_GOAL_KEYS.any { it in json }) CARDIO_GOAL_KEYS.filterNot { it in json }.forEach { remove(it) }
         }
         _settings.value = runCatching { read() }.getOrDefault(_settings.value)
+        // Los gimnasios creados después de la copia se quedan (restaurar no borra nada de lo que ya hay)
+        val extra = localGyms.filter { g -> _settings.value.gyms.none { it.id == g.id || it.name == g.name } }
+        if (extra.isNotEmpty()) update { it.copy(gyms = it.gyms + extra) }
     }
 
     /** Escribe [v] solo si es del mismo tipo que el valor actual [expected]; si no, se ignora. */

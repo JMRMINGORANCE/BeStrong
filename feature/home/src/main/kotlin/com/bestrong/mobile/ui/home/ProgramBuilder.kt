@@ -104,7 +104,7 @@ fun ProgramBuilderScreen(
     // Empieza con lo que se dijo en la bienvenida: objetivo, días y dónde se entrena
     val settings by vm.settings.collectAsStateWithLifecycle()
     var goal by rememberSaveable { mutableStateOf(settings.trainingGoal) }
-    var days by rememberSaveable { mutableIntStateOf(settings.weeklyGoal.coerceIn(1, 6)) }
+    var days by rememberSaveable { mutableIntStateOf(settings.weeklyGoal.coerceIn(1, 7)) }
     var kit by rememberSaveable { mutableStateOf(defaultKit(settings.activeGym.equipment)) }
     var minutes by rememberSaveable { mutableIntStateOf(60) }
     // Sin entrenos todavía (recién llegado), de partida el nivel principiante
@@ -159,7 +159,7 @@ fun ProgramBuilderScreen(
             item {
                 WeekdayPicker(weekdays) { d ->
                     val next = if (d in weekdays) weekdays - d else (weekdays + d).sorted()
-                    if (next.size in 1..6) {
+                    if (next.size in 1..7) {
                         weekdaysText = next.joinToString(",")
                         days = next.size
                     }
