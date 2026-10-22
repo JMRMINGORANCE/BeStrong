@@ -26,7 +26,9 @@ class WeeklySummaryWorker(context: Context, params: WorkerParameters) : Coroutin
             val history = deps.repository().historyOnce()
             // Programado el domingo a las 19:00: si el sistema lo retrasa (lunes o martes, aunque ya hayas entrenado),
             // se resume la semana que acabó ese domingo
-            val today = LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY))
+            val now = LocalDate.now(zone)
+            val late = now.dayOfWeek == java.time.DayOfWeek.MONDAY || now.dayOfWeek == java.time.DayOfWeek.TUESDAY
+            val today = if (late) now.with(java.time.temporal.TemporalAdjusters.previous(java.time.DayOfWeek.SUNDAY)) else now
             val week = Strength.weekSummary(history, today, zone)
             // Si la carga ha subido de golpe, el resumen lo avisa (riesgo de lesión)
             val loadRatio = TrainingLoad.weekly(history, today, zone).takeIf { it.tooHigh }?.acuteChronicRatio
