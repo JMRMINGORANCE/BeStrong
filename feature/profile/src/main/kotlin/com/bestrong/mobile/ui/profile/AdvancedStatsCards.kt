@@ -122,7 +122,14 @@ fun WeekSummaryCard(stats: AdvancedStats) {
     com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             SectionHeader(stringResource(R.string.week_summary))
-            Text(stringResource(R.string.week_summary_line, w.workouts, unit.formatVolume(w.volume), w.sets, formatWeight(stats.weekEffectiveSets)))
+            // Cada cifra con su plural («1 entreno», «1 serie»): con una sola frase salía «1 entrenos · … · 1 series»
+            Text(
+                listOf(
+                    pluralStringResource(R.plurals.n_workouts_count, w.workouts, w.workouts),
+                    unit.formatVolume(w.volume),
+                    pluralStringResource(R.plurals.n_sets_count, w.sets, w.sets) + " " + stringResource(R.string.week_effective_suffix, formatWeight(stats.weekEffectiveSets)),
+                ).joinToString(" · "),
+            )
             w.volumeChange?.let { c ->
                 Text(
                     stringResource(R.string.week_vs_last, (if (c >= 0) "+" else "−") + "${(abs(c) * 100).toInt()} %"),

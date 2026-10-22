@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -143,9 +144,9 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                         FilterChip(selected = p in plates, onClick = { plates = if (p in plates) plates - p else plates + p }, label = { Text(unit.format(p)) })
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.toggleable(value = anyDumbbell, role = androidx.compose.ui.semantics.Role.Switch) { anyDumbbell = it }, verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.gym_any_dumbbell), Modifier.weight(1f))
-                    Switch(anyDumbbell, { anyDumbbell = it })
+                    Switch(anyDumbbell, null)
                 }
                 if (!anyDumbbell) {
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

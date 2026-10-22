@@ -485,9 +485,9 @@ fun ExerciseFormDialog(initial: Exercise?, onDismiss: () -> Unit, presetName: St
                         )
                     }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.toggleable(value = unilateral, role = androidx.compose.ui.semantics.Role.Switch) { unilateral = it }, verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.unilateral_exercise), Modifier.weight(1f))
-                    Switch(checked = unilateral, onCheckedChange = { unilateral = it })
+                    Switch(checked = unilateral, onCheckedChange = null)
                 }
             }
         },

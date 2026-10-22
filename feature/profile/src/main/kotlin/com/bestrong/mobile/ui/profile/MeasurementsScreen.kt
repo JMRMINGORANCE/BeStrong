@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -434,15 +435,16 @@ private fun WeighInReminder(vm: ProfileViewModel) {
             }
         }
         // Y una vez al mes, las medidas con cinta
-        Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+        // Toda la fila es el interruptor: TalkBack lo lee con su nombre (y tocar el texto también lo cambia)
+        Row(
+            Modifier.fillMaxWidth().padding(top = 8.dp).toggleable(value = settings.measureReminder, role = androidx.compose.ui.semantics.Role.Switch) { on ->
+                if (on) askNotifications()
+                vm.updateSettings { it.copy(measureReminder = on) }
+            },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(stringResource(R.string.measure_reminder), style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
-            androidx.compose.material3.Switch(
-                checked = settings.measureReminder,
-                onCheckedChange = { on ->
-                    if (on) askNotifications()
-                    vm.updateSettings { it.copy(measureReminder = on) }
-                },
-            )
+            androidx.compose.material3.Switch(checked = settings.measureReminder, onCheckedChange = null)
         }
     }
 }

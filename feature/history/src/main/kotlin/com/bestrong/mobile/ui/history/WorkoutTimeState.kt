@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -189,8 +190,12 @@ fun CopyToDayDialog(durationMin: Long, exercises: List<Pair<String, String>>, on
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 WorkoutTimeFields(time)
                 exercises.forEach { (id, name) ->
-                    androidx.compose.foundation.layout.Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                        androidx.compose.material3.Checkbox(checked = id in chosen, onCheckedChange = { on -> chosen = if (on) chosen + id else chosen - id })
+                    // Toda la fila es la casilla: TalkBack dice de qué ejercicio es
+                    androidx.compose.foundation.layout.Row(
+                        Modifier.fillMaxWidth().toggleable(value = id in chosen, role = androidx.compose.ui.semantics.Role.Checkbox) { on -> chosen = if (on) chosen + id else chosen - id },
+                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    ) {
+                        androidx.compose.material3.Checkbox(checked = id in chosen, onCheckedChange = null)
                         Text(name)
                     }
                 }

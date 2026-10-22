@@ -253,7 +253,10 @@ object Notifier {
         if (!canPost(context)) return
         ensureChannels(context)
         // Con plural («1 entreno»); una semana solo de cardio no enseña «0 kg · 0 series»
-        val text = context.resources.getQuantityString(R.plurals.notif_weekly_text, week.workouts, week.workouts, unit.formatVolume(week.volume), week.sets)
+        // Cada cifra con su plural: «1 entreno · 60 kg · 1 serie» (no «1 series»)
+        val res = context.resources
+        val text = listOf(res.getQuantityString(R.plurals.n_workouts_count, week.workouts, week.workouts), unit.formatVolume(week.volume), res.getQuantityString(R.plurals.n_sets_count, week.sets, week.sets))
+            .joinToString(" · ")
             .takeIf { week.volume > 0 || week.sets > 0 }
         val lines = listOfNotNull(
             text,

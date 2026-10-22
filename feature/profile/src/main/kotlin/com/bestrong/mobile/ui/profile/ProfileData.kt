@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -194,8 +195,8 @@ private fun RestorePreviewDialog(vm: ProfileViewModel) {
                 if (info.olderThanLocal && summary.hasSettings && withSettings) Text(stringResource(R.string.restore_preview_older), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 Text(stringResource(R.string.restore_preview_merge), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (summary.hasSettings) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(checked = withSettings, onCheckedChange = { vm.restoreWithSettings.value = it })
+                    Row(Modifier.toggleable(value = withSettings, role = androidx.compose.ui.semantics.Role.Checkbox) { vm.restoreWithSettings.value = it }, verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(checked = withSettings, onCheckedChange = null)
                         Text(stringResource(R.string.restore_preview_settings), Modifier.weight(1f))
                     }
                 }

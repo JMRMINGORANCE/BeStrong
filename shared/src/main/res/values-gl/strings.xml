@@ -451,10 +451,6 @@
         <item quantity="one">🏆 %1$d récord novo</item>
         <item quantity="other">🏆 %1$d récords novos</item>
     </plurals>
-    <plurals name="notif_weekly_text">
-        <item quantity="one">%1$d adestramento · %2$s · %3$d series</item>
-        <item quantity="other">%1$d adestramentos · %2$s · %3$d series</item>
-    </plurals>
     <string name="notif_weekly_title">A túa semana en BeStrong</string>
     <string name="one_hand_complete">%1$s · serie %2$d</string>
     <string name="one_handed">Modo unha man</string>
@@ -822,7 +818,15 @@
     </plurals>
     <string name="week_sessions">%1$d de %2$d sesións</string>
     <string name="week_summary">Resumo da semana</string>
-    <string name="week_summary_line">%1$d adestramentos · %2$s · %3$d series (%4$s efectivas)</string>
+    <plurals name="n_workouts_count">
+        <item quantity="one">%1$d adestramento</item>
+        <item quantity="other">%1$d adestramentos</item>
+    </plurals>
+    <plurals name="n_sets_count">
+        <item quantity="one">%1$d serie</item>
+        <item quantity="other">%1$d series</item>
+    </plurals>
+    <string name="week_effective_suffix">(%1$s efectivas)</string>
     <string name="week_vs_last">%1$s de volume fronte á semana pasada</string>
     <string name="weekly_volume">Volume semanal (%1$s)</string>
     <string name="weight_unit">Unidade de peso</string>

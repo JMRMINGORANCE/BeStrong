@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -624,16 +625,17 @@ fun CardioWeekCard(vm: HomeViewModel) {
 private fun CardioNudgeSwitch(vm: HomeViewModel) {
     val on by vm.cardioNudge.collectAsStateWithLifecycle()
     val day by vm.cardioNudgeDay.collectAsStateWithLifecycle()
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    val askNotifications = com.bestrong.mobile.ui.components.rememberNotificationPermission()
+    // Toda la fila es el interruptor: TalkBack lo lee con su nombre
+    Row(
+        Modifier.toggleable(value = on, role = androidx.compose.ui.semantics.Role.Switch) {
+            vm.setCardioNudge(it)
+            if (it) askNotifications()
+        },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Text(stringResource(R.string.cardio_nudge_setting), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-        val askNotifications = com.bestrong.mobile.ui.components.rememberNotificationPermission()
-        androidx.compose.material3.Switch(
-            checked = on,
-            onCheckedChange = {
-                vm.setCardioNudge(it)
-                if (it) askNotifications()
-            },
-        )
+        androidx.compose.material3.Switch(checked = on, onCheckedChange = null)
     }
     // Qué día (por la tarde) llega el aviso
     if (on) {
