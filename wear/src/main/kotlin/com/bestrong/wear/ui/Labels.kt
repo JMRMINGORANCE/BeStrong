@@ -110,3 +110,22 @@ fun rememberVisibleNow(intervalMs: Long): Long {
     }
     return now.longValue
 }
+
+/**
+ * Segundos que faltan hasta [endsAtEpochMs] (redondeado hacia arriba): se despierta justo cuando cambia el número,
+ * una vez por segundo, en vez de redibujar el descanso 5 veces por segundo.
+ */
+@androidx.compose.runtime.Composable
+fun rememberSecondsLeft(endsAtEpochMs: Long): Long {
+    fun left() = ((endsAtEpochMs - System.currentTimeMillis() + 999) / 1000).coerceAtLeast(0)
+    val secs = androidx.compose.runtime.remember(endsAtEpochMs) { androidx.compose.runtime.mutableLongStateOf(left()) }
+    androidx.compose.runtime.LaunchedEffect(endsAtEpochMs) {
+        while (true) {
+            val ms = endsAtEpochMs - System.currentTimeMillis()
+            secs.longValue = left()
+            if (ms <= 0) break
+            kotlinx.coroutines.delay((ms - 1) % 1000 + 1)
+        }
+    }
+    return secs.longValue
+}

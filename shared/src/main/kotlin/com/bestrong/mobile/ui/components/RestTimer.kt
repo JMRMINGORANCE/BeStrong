@@ -36,6 +36,25 @@ import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.shared.R
 import kotlinx.coroutines.delay
 
+/**
+ * Segundos que faltan hasta [endsAtEpochMs] (redondeado hacia arriba: 1:30 al empezar, 0:01 el último segundo). Se
+ * despierta justo cuando cambia el número, una vez por segundo, en vez de redibujar la pantalla 4-5 veces por segundo.
+ */
+@Composable
+fun rememberSecondsLeft(endsAtEpochMs: Long): Long {
+    fun left() = ((endsAtEpochMs - System.currentTimeMillis() + 999) / 1000).coerceAtLeast(0)
+    var secs by remember(endsAtEpochMs) { mutableLongStateOf(left()) }
+    LaunchedEffect(endsAtEpochMs) {
+        while (true) {
+            val ms = endsAtEpochMs - System.currentTimeMillis()
+            secs = left()
+            if (ms <= 0) break
+            delay((ms - 1) % 1000 + 1)
+        }
+    }
+    return secs
+}
+
 /** Reloj que avanza cada segundo mientras está en composición. */
 @Composable
 fun rememberNow(intervalMs: Long = 1_000): Long {
@@ -64,9 +83,8 @@ fun RestTimerBar(
     /** Lo que viene después («Press banca · 80 kg × 8»), como en el reloj. */
     next: String? = null,
 ) {
-    val now = rememberNow(250)
     // Redondeado hacia arriba (como en el reloj): 1:30 al empezar y 0:01 el último segundo
-    val remaining = ((rest.endsAtEpochMs - now + 999) / 1000).coerceAtLeast(0)
+    val remaining = rememberSecondsLeft(rest.endsAtEpochMs)
     val progress = if (rest.totalSeconds > 0) remaining.toFloat() / rest.totalSeconds else 0f
     val onBrand = MaterialTheme.colorScheme.onPrimary
     // Sobre el degradado de marca, con las esquinas de arriba redondeadas: se ve de lejos que toca descansar

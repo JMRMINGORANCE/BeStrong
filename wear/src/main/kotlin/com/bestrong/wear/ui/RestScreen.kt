@@ -50,12 +50,12 @@ fun RestScreen(session: WorkoutSession) {
     val workout by session.workout.collectAsStateWithLifecycle()
     val recovered by session.recovered.collectAsStateWithLifecycle()
     val record by session.record.collectAsStateWithLifecycle()
-    val now = rememberVisibleNow(200)
 
     val unit = LocalWeightUnit.current
     val r = rest ?: return
     // Redondeado hacia arriba: 1:00 al empezar y 0:01 el último segundo (no 0:00 antes de acabar)
-    val remaining = ((r.endsAtEpochMs - now + 999) / 1000).coerceAtLeast(0)
+    // Una vez por segundo, justo cuando cambia el número (antes se redibujaba entera 5 veces por segundo)
+    val remaining = rememberSecondsLeft(r.endsAtEpochMs)
     val progress = (remaining.toFloat() / r.totalSeconds).coerceIn(0f, 1f)
     val next = workout?.let { w -> WorkoutEditor.upcomingSet(w)?.let { (i, s) -> w.exercises[i] to s } }
 

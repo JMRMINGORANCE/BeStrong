@@ -85,7 +85,6 @@ fun WorkoutScreen(
     val focus = remember { FocusRequester() }
     var accumulated by remember { mutableFloatStateOf(0f) }
     val view = androidx.compose.ui.platform.LocalView.current
-    val now = rememberVisibleNow(1_000)
     // Sin entreno (notificación o tile antiguos) el foco no llega a engancharse: no debe cerrar la app
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
 
@@ -137,7 +136,7 @@ fun WorkoutScreen(
                 verticalArrangement = Arrangement.Center,
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Text(formatDuration(w.durationSeconds(now)), style = MaterialTheme.typography.labelSmall)
+                    ElapsedText(w)
                     Text("♥ ${metrics.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.labelSmall)
                     session.heartRateZone(metrics.heartRate).takeIf { it > 0 }?.let { z ->
                         Text(stringResource(R.string.hr_zone, z), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
@@ -331,4 +330,11 @@ private fun CardioStopwatch(startedAtEpochMs: Long, pausedAt: Long?) {
         }
     }
     BigValue(com.bestrong.core.util.formatDuration(elapsed), "", selected = true, onClick = null)
+}
+
+/** Tiempo del entreno: el reloj de cada segundo solo redibuja esta etiqueta, no toda la pantalla del entreno. */
+@Composable
+private fun ElapsedText(w: com.bestrong.core.model.Workout) {
+    val now = rememberVisibleNow(1_000)
+    Text(formatDuration(w.durationSeconds(now)), style = MaterialTheme.typography.labelSmall)
 }

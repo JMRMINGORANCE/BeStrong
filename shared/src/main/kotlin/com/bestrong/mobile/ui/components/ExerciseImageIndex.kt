@@ -90,7 +90,8 @@ object ExerciseImageIndex {
 @Composable
 fun ExerciseThumb(exercise: Exercise, size: Dp = 52.dp, modifier: Modifier = Modifier, enlargeOnTap: Boolean = true) {
     val context = LocalContext.current
-    val model = remember(exercise.id) { ExerciseImageIndex.url(context, exercise.id) }
+    // La imagen grande solo hace falta si se puede ampliar: en listas sin ampliar no se busca (lee disco)
+    val model = remember(exercise.id, enlargeOnTap) { if (enlargeOnTap) ExerciseImageIndex.url(context, exercise.id) else null }
     val thumb = remember(exercise.id) { ExerciseImageIndex.thumb(context, exercise.id) }
     var big by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(size * 0.28f)
