@@ -16,7 +16,8 @@ object ExerciseGoals {
         !set.countsForRecords -> 0.0
         tracking == TrackingType.WEIGHT_REPS -> set.estimatedOneRepMax
         // Como el récord de reps: por lado (el peor si es unilateral) y sin asistencia (peso negativo)
-        tracking == TrackingType.REPS_ONLY -> if (set.weightKg < 0) 0.0 else (set.repsRight?.let { minOf(set.reps, it) } ?: set.reps).toDouble()
+        // (una derecha vacía, 0, cuenta como sin apuntar)
+        tracking == TrackingType.REPS_ONLY -> if (set.weightKg < 0) 0.0 else set.recordReps.toDouble()
         tracking == TrackingType.DURATION -> set.durationSec.toDouble()
         else -> 0.0
     }

@@ -246,7 +246,12 @@ class ExercisesViewModel @Inject constructor(
             ?: fullHistory.firstNotNullOfOrNull { w -> w.exercises.firstOrNull { it.exercise.id == exerciseId }?.exercise }
             ?: return@combine null
         // Solo variantes que se registran igual: las dominadas (solo reps) no se mezclan con el jalón (peso)
-        val family = ExerciseLibrary.familyOf(exerciseId).filter { id -> id == exerciseId || all.firstOrNull { it.id == id }?.tracking == ex.tracking }
+        // y, con «suma de las dos mancuernas», sin mezclar mancuernas con barra (cada una se ve con su factor)
+        val dumbbell = ex.equipment == com.bestrong.core.model.Equipment.DUMBBELL
+        val family = ExerciseLibrary.familyOf(exerciseId).filter { id ->
+            val v = all.firstOrNull { it.id == id }
+            id == exerciseId || (v?.tracking == ex.tracking && (!settings.dumbbellTotal || (v.equipment == com.bestrong.core.model.Equipment.DUMBBELL) == dumbbell))
+        }
         val history = if (includeVariants) WorkoutStats.mergeVariants(fullHistory, exerciseId, family) else fullHistory
         ExerciseDetailState(
             variants = family.mapNotNull { id -> all.firstOrNull { it.id == id } },
@@ -260,8 +265,12 @@ class ExercisesViewModel @Inject constructor(
             recentOneRepMax = com.bestrong.core.stats.RpeLoad.recentOneRepMax(exerciseId, fullHistory, System.currentTimeMillis()),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
             // Como en el entreno: ajustada al gimnasio y al tope semanal (con su aviso)
-            nextTarget = Progression.suggest(ex, fullHistory, settings.stepKgFor(ex.id), repRange = settings.repRangeFor(ex.id))
-                ?.let { sug -> sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, history = fullHistory), cappedByWeek = actions.cappedByWeek(ex, sug.sets, fullHistory)) },
+            // (con varios gimnasios, con lo hecho en el activo, igual que el relleno al empezar)
+            nextTarget = WorkoutStats.atGym(fullHistory, settings.activeGym.name.takeIf { settings.gyms.size > 1 }, ex.id).let { base ->
+                Progression.suggest(ex, base, settings.stepKgFor(ex.id), repRange = settings.repRangeFor(ex.id))?.let { sug ->
+                    sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, WorkoutStats.previousSets(ex.id, base), fullHistory), cappedByWeek = actions.cappedByWeek(ex, sug.sets, fullHistory))
+                }
+            },
             sessionNotes = sessionNotes(exerciseId, history, routines),
             rpeTrend = Strength.rpeTrend(history, setOf(exerciseId)),
             goalPoints = com.bestrong.core.stats.ExerciseGoals.points(history, exerciseId, ex.tracking),

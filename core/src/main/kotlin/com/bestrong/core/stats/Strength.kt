@@ -386,8 +386,9 @@ object Strength {
         val best = sortedMapOf<Int, Double>()
         history.filter { it.isFinished }.forEach { w ->
             w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.completedSets }
-                .filter { it.countsForRecords && it.type != SetType.WARMUP && it.reps in 1..maxReps && it.weightKg > 0 }
-                .forEach { s -> if (s.weightKg > (best[s.reps] ?: 0.0)) best[s.reps] = s.weightKg }
+                // Como los récords: el lado más flojo si es unilateral, y sin clusters (sus reps suman mini-series)
+                .filter { it.countsForRecords && it.type != SetType.WARMUP && it.type != SetType.CLUSTER && it.recordReps in 1..maxReps && it.weightKg > 0 }
+                .forEach { s -> if (s.weightKg > (best[s.recordReps] ?: 0.0)) best[s.recordReps] = s.weightKg }
         }
         return best
     }
