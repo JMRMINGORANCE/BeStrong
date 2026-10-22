@@ -274,4 +274,15 @@ class CoreFixesTest {
         assertEquals(List(3) { 30 }, edited.sets.map { it.durationSec })
         assertEquals(null, edited.targetRpe)
     }
+
+    @Test
+    fun mergeKeepsLatestEditOfPendingSet() {
+        val base = Workout(id = "w", name = "W", startedAtEpochMs = 0, updatedAtEpochMs = 1, exercises = listOf(WorkoutExercise(id = "e", exercise = bench, sets = listOf(WorkoutSet(id = "a", weightKg = 80.0, reps = 5), WorkoutSet(id = "b", weightKg = 80.0, reps = 5)))))
+        // El reloj cambia la serie a; después el móvil cambia la b (su entreno es el más reciente)
+        val watch = com.bestrong.core.session.WorkoutEditor.updateSet(base, "e", "a") { it.copy(weightKg = 82.5) }.copy(updatedAtEpochMs = 10)
+        val phone = base.copy(updatedAtEpochMs = 20, exercises = listOf(base.exercises[0].copy(sets = listOf(base.exercises[0].sets[0], base.exercises[0].sets[1].copy(reps = 6)))))
+        val merged = com.bestrong.core.sync.WorkoutMerge.merge(watch, phone)
+        assertEquals(82.5, merged.exercises[0].sets[0].weightKg, 0.0)
+        assertEquals(6, merged.exercises[0].sets[1].reps)
+    }
 }

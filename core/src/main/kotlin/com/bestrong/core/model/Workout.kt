@@ -51,6 +51,8 @@ data class WorkoutSet(
      * quitar la marca.
      */
     val uncompletedAtEpochMs: Long? = null,
+    /** Última vez que se cambió su peso, reps, tiempo o distancia: al fusionar, gana la edición más reciente de la serie. */
+    val editedAtEpochMs: Long? = null,
 ) {
     /** Cronómetro de cardio en marcha. */
     val isRunning: Boolean get() = startedAtEpochMs != null && !completed

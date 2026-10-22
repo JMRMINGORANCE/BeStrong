@@ -71,7 +71,7 @@ fun ExerciseInfoScreen(session: WorkoutSession) {
                 val text = if (previous.isEmpty()) {
                     stringResource(R.string.info_first_time)
                 } else {
-                    stringResource(R.string.info_last_time, previous.joinToString("  ") { "${unit.format(it.weightKg)}×${it.reps}" })
+                    stringResource(R.string.info_last_time, previous.joinToString("  ") { "${unit.format(it.weightKg * settings.weightFactor(we.exercise))}×${it.reps}" })
                 }
                 Text(text, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
             }
@@ -95,7 +95,8 @@ fun ExerciseInfoScreen(session: WorkoutSession) {
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         recent.forEach { kg ->
-                            val label = unit.format(kg)
+                            // Con «suma de las dos mancuernas», el total del par (como el valor de la serie)
+                            val label = unit.format(kg * settings.weightFactor(we.exercise))
                             TextButton(
                                 onClick = { session.setCurrentWeight(kg) },
                                 colors = if (kg == set.weightKg) TextButtonDefaults.filledTextButtonColors() else TextButtonDefaults.filledTonalTextButtonColors(),

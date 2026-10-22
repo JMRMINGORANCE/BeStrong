@@ -402,7 +402,15 @@ object WorkoutEditor {
             }
 
     fun updateSet(workout: Workout, workoutExerciseId: String, setId: String, block: (WorkoutSet) -> WorkoutSet): Workout =
-        updateExercise(workout, workoutExerciseId) { we -> we.copy(sets = we.sets.map { if (it.id == setId) block(it) else it }) }
+        updateExercise(workout, workoutExerciseId) { we -> we.copy(sets = we.sets.map { if (it.id == setId) block(it).stampEdit(it) else it }) }
+
+    /** Marca la hora si cambió lo apuntado (para que la fusión móvil-reloj no pierda esta edición). */
+    private fun WorkoutSet.stampEdit(before: WorkoutSet): WorkoutSet =
+        if (weightKg != before.weightKg || reps != before.reps || repsRight != before.repsRight || durationSec != before.durationSec || distanceM != before.distanceM) {
+            copy(editedAtEpochMs = System.currentTimeMillis())
+        } else {
+            this
+        }
 
     /**
      * Cambia peso y/o reps de una serie y lo propaga a las series siguientes pendientes del mismo tipo
@@ -416,11 +424,11 @@ object WorkoutEditor {
             we.copy(
                 sets = we.sets.mapIndexed { j, s ->
                     when {
-                        j == i -> s.copy(weightKg = weightKg ?: s.weightKg, reps = reps ?: s.reps)
+                        j == i -> s.copy(weightKg = weightKg ?: s.weightKg, reps = reps ?: s.reps).stampEdit(s)
                         j > i && !s.completed && s.type == old.type -> s.copy(
                             weightKg = if (weightKg != null && s.weightKg == old.weightKg) weightKg else s.weightKg,
                             reps = if (reps != null && s.reps == old.reps) reps else s.reps,
-                        )
+                        ).stampEdit(s)
                         else -> s
                     }
                 },

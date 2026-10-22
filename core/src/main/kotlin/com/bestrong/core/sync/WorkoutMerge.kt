@@ -102,8 +102,12 @@ object WorkoutMerge {
             stillDone(older) -> older
             newer.completed || older.completed -> (if (!newer.completed) newer else newer.copy(completed = false, completedAtEpochMs = null, startedAtEpochMs = null))
                 .copy(uncompletedAtEpochMs = uncompletedAt)
-            // Un cronómetro de cardio arrancado en un lado no lo para una edición del otro que no lo sabía
-            else -> newer.copy(startedAtEpochMs = newer.startedAtEpochMs ?: older.startedAtEpochMs)
+            // Sin hacer: gana la última edición de esta serie (girar la corona en el reloj no se pierde porque el
+            // móvil cambiara otra cosa después). Un cronómetro de cardio arrancado en un lado no lo para el otro
+            else -> {
+                val edited = if ((older.editedAtEpochMs ?: 0L) > (newer.editedAtEpochMs ?: 0L)) older else newer
+                edited.copy(startedAtEpochMs = newer.startedAtEpochMs ?: older.startedAtEpochMs)
+            }
         }
     }
 }
