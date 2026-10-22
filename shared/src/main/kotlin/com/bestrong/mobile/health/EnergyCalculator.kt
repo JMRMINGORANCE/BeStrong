@@ -6,7 +6,6 @@ import com.bestrong.core.training.BodyProfile
 import com.bestrong.core.training.Energy
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
-import java.time.Year
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,17 +19,22 @@ class EnergyCalculator @Inject constructor(
     private val settings: SettingsStore,
     private val reader: HealthConnectReader,
 ) {
-    /** Tus datos: peso (medidas o Health Connect), altura, edad, sexo y pulso en reposo. */
-    suspend fun profile(): BodyProfile {
+    /**
+     * Tus datos en [atEpochMs]: peso (medidas o Health Connect) de ese día o el anterior más cercano, altura, edad,
+     * sexo y pulso en reposo. Corregir un entreno antiguo no le cambia las calorías por el peso de hoy.
+     */
+    suspend fun profile(atEpochMs: Long = System.currentTimeMillis()): BodyProfile {
         val s = settings.settings.value
         val snapshot = runCatching { reader.read() }.getOrNull()
         // De la base de datos: al arrancar la app en frío (entreno llegado del reloj) la lista en memoria aún está vacía
-        val weight = repository.measurementsOnce().sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg }
+        val measured = repository.measurementsOnce().sortedByDescending { it.dateEpochMs }
+        val weight = (measured.filter { it.dateEpochMs <= atEpochMs }.firstNotNullOfOrNull { it.weightKg } ?: measured.lastOrNull { it.weightKg != null }?.weightKg)
+            ?: snapshot?.weights?.filter { it.first <= atEpochMs }?.maxByOrNull { it.first }?.second
             ?: snapshot?.weights?.maxByOrNull { it.first }?.second
         return BodyProfile(
             weightKg = weight,
             heightCm = s.heightCm?.toDouble() ?: snapshot?.heightCm,
-            age = s.birthYear?.let { Year.now().value - it }?.takeIf { it in 10..100 },
+            age = s.birthYear?.let { java.time.Instant.ofEpochMilli(atEpochMs).atZone(java.time.ZoneId.systemDefault()).year - it }?.takeIf { it in 10..100 },
             sex = s.sex,
             restingHr = snapshot?.restingHr,
         )
@@ -49,7 +53,7 @@ class EnergyCalculator @Inject constructor(
         val heartRate = workout.heartRateSamples.ifEmpty { external }
         val result = Energy.forWorkout(
             workout = workout,
-            profile = profile(),
+            profile = profile(workout.startedAtEpochMs),
             watchKcal = watchKcal,
             heartRate = heartRate,
         )

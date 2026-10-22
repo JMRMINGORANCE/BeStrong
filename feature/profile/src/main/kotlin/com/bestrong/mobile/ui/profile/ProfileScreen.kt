@@ -299,7 +299,9 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 if (stats.topOneRepMax.isEmpty()) Text(stringResource(R.string.complete_sets_for_records))
                                 stats.topOneRepMax.forEach { pr ->
                                     // Con mancuernas como total del par, el mismo número que en el detalle del ejercicio
-                                    val pair = if (settings.dumbbellTotal && com.bestrong.core.library.ExerciseLibrary.byId(pr.exerciseId)?.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
+                                    // (también los propios, que no están en la biblioteca)
+                                    val equipment = (vm.exerciseOf(pr.exerciseId) ?: com.bestrong.core.library.ExerciseLibrary.byId(pr.exerciseId))?.equipment
+                                    val pair = if (settings.dumbbellTotal && equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
                                     ListItem(
                                         headlineContent = { Text(pr.exerciseLabel()) },
                                         trailingContent = { Text(unit.format(pr.value * pair, withUnit = true), fontWeight = FontWeight.Bold) },
@@ -315,7 +317,10 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         ListItem(
                             headlineContent = { Text(stringResource(R.string.measurements)) },
                             supportingContent = {
-                                Text(measurements.firstOrNull()?.weightKg?.let { stringResource(R.string.last_weight, unit.format(it, withUnit = true)) } ?: stringResource(R.string.log_measurements))
+                                // En la unidad del cuerpo (con unidades mixtas, la de las cargas puede ser otra) y el último peso apuntado,
+                                // aunque la medida más reciente sea solo de cintura
+                                val bodyUnit = com.bestrong.mobile.ui.components.LocalBodyUnit.current
+                                Text(measurements.firstNotNullOfOrNull { it.weightKg }?.let { stringResource(R.string.last_weight, bodyUnit.format(it, withUnit = true)) } ?: stringResource(R.string.log_measurements))
                             },
                             trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
                         )

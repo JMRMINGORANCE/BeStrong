@@ -94,14 +94,24 @@ private fun goalFormatter(tracking: TrackingType, factor: Int): (Double) -> Stri
 private fun GoalEditor(vm: ExercisesViewModel, s: ExerciseDetailState, goal: Double?, factor: Int, onClose: () -> Unit) {
     val unit = LocalWeightUnit.current
     val byWeight = s.exercise.tracking == TrackingType.WEIGHT_REPS
+    val initial = goal?.let { if (byWeight) unit.format(it * factor) else it.toInt().toString() }.orEmpty()
     GoalDialog(
-        initial = goal?.let { if (byWeight) unit.format(it * factor) else it.toInt().toString() }.orEmpty(),
+        initial = initial,
         label = when (s.exercise.tracking) {
             TrackingType.WEIGHT_REPS -> stringResource(R.string.goal_field, unit.label)
             TrackingType.DURATION -> stringResource(R.string.goal_field_seconds)
             else -> stringResource(R.string.goal_field_reps)
         },
-        parse = { t -> if (byWeight) unit.parseToKg(t)?.let { it / factor } else t.toIntOrNull()?.toDouble() },
+        // Sin tocar el texto se guarda el objetivo exacto: 100 kg visto en libras (220,5) no pasa a 100,017
+        parse = { t ->
+            if (goal != null && t == initial) {
+                goal
+            } else if (byWeight) {
+                unit.parseToKg(t)?.let { it / factor }
+            } else {
+                t.toIntOrNull()?.toDouble()
+            }
+        },
         decimal = byWeight,
         hasGoal = goal != null,
         onSave = { v -> vm.setGoal(s.exercise.id, v); onClose() },

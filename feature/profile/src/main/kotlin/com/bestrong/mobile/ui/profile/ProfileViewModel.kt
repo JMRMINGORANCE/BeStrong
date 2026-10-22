@@ -766,6 +766,9 @@ class ProfileViewModel @Inject constructor(
     fun syncWatchNow() = viewModelScope.launch {
         watchPush.pushToWatchNow()
     }
+
+    /** El ejercicio (también los propios), para su equipo en el 1RM de Perfil. */
+    fun exerciseOf(id: String): com.bestrong.core.model.Exercise? = repo.exercise(id)
 }
 
 enum class ExportRange { ALL, YEAR, DAYS_90, DAYS_30 }
