@@ -360,6 +360,7 @@
     <string name="meso_deload_week">Deload week: sessions are lightened automatically</string>
     <string name="meso_start">%1$d + 1 mesocycle</string>
     <string name="meso_stop">Remove mesocycle</string>
+    <string name="meso_stop_confirm">Remove mesocycle? Tap again</string>
     <string name="meso_week">Week %1$d of %2$d</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Max weight</string>

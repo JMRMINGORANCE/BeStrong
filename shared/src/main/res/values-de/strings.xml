@@ -360,6 +360,7 @@
     <string name="meso_deload_week">Deload-Woche: Einheiten werden automatisch erleichtert</string>
     <string name="meso_start">Mesozyklus %1$d + 1</string>
     <string name="meso_stop">Mesozyklus entfernen</string>
+    <string name="meso_stop_confirm">Mesozyklus entfernen? Nochmal tippen</string>
     <string name="meso_week">Woche %1$d von %2$d</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Max. Gewicht</string>

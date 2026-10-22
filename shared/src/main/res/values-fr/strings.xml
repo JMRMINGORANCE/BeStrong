@@ -360,6 +360,7 @@
     <string name="meso_deload_week">Semaine de décharge : les séances sont allégées automatiquement</string>
     <string name="meso_start">Mésocycle de %1$d + 1</string>
     <string name="meso_stop">Retirer le mésocycle</string>
+    <string name="meso_stop_confirm">Retirer le mésocycle ? Touche à nouveau</string>
     <string name="meso_week">Semaine %1$d sur %2$d</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Poids max.</string>

@@ -351,8 +351,8 @@ private fun ExerciseCard(
                     IconToggleButton(
                         checked = favorite,
                         onCheckedChange = { onToggleFavorite() },
-                        // 44 dp para tocarlo bien y un fondo claro (sobre la imagen blanca no se ve un círculo negro)
-                        modifier = Modifier.size(44.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)),
+                        // 48 dp (el mínimo para tocarlo bien) y un fondo claro (sobre la imagen blanca no se ve un círculo negro)
+                        modifier = Modifier.size(48.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)),
                     ) {
                         Icon(
                             if (favorite) Icons.Default.Star else Icons.Default.StarBorder,

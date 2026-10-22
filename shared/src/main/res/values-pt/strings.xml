@@ -360,6 +360,7 @@
     <string name="meso_deload_week">Semana de descarga: as sessões são aliviadas automaticamente</string>
     <string name="meso_start">Mesociclo de %1$d + 1</string>
     <string name="meso_stop">Remover mesociclo</string>
+    <string name="meso_stop_confirm">Remover o mesociclo? Toca outra vez</string>
     <string name="meso_week">Semana %1$d de %2$d</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Peso máx.</string>

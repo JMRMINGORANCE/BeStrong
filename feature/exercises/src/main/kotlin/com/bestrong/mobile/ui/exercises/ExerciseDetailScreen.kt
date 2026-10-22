@@ -94,7 +94,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
 
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text(s.exercise.displayName()) },
+            title = { Text(s.exercise.displayName(), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
                 if (s.recentSessions.isNotEmpty()) ExportExerciseButton(vm, s.exercise)
