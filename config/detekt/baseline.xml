@@ -37,6 +37,7 @@
     <ID>LongMethod:WorkoutCsv.kt$WorkoutCsv$fun import( text: String, known: List&lt;Exercise&gt;, zone: ZoneId = ZoneId.systemDefault(), strongUnit: WeightUnit = WeightUnit.KG, ): ImportResult</ID>
     <ID>LongMethod:WorkoutShareCard.kt$WorkoutShareCard$fun render(context: Context, w: Workout, records: List&lt;PersonalRecord&gt;, unit: WeightUnit): Bitmap</ID>
     <ID>LongParameterList:ActiveWorkoutViewModel.kt$ActiveWorkoutViewModel$( private val repo: BeStrongRepository, private val settingsStore: SettingsStore, private val restTimer: RestTimerController, private val metricsStore: WatchMetricsStore, private val energy: EnergyCalculator, private val actions: WorkoutActions, private val announcer: Announcer, @ApplicationContext private val appContext: Context, private val savedState: SavedStateHandle, private val media: ExerciseMediaStore, )</ID>
+    <ID>LongParameterList:HomeViewModel.kt$HomeViewModel$( private val repo: BeStrongRepository, private val actions: WorkoutActions, private val watchSync: WatchSync, private val settingsStore: SettingsStore, private val watchPush: WatchPush, private val planning: PlanningStore, private val healthReader: HealthConnectReader, private val intakeStore: IntakeStore, @ApplicationContext private val context: Context, private val savedState: androidx.lifecycle.SavedStateHandle, )</ID>
     <ID>LoopWithTooManyJumpStatements:VoiceSetParser.kt$VoiceSetParser$while</ID>
     <ID>MatchingDeclarationName:Charts.kt$ChartPoint</ID>
     <ID>MatchingDeclarationName:TimerScreens.kt$IntervalRoute</ID>

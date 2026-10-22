@@ -133,7 +133,8 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
                         id,
                         onBack = if (navigator.canNavigateBack()) ({ scope.launch { navigator.navigateBack() } }) else null,
                         // Con dos paneles no hay «atrás»: tras borrarlo, el panel vuelve a «Elige un ejercicio» (no en blanco)
-                        onDeleted = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, null) } },
+                        // En un panel se vuelve a la lista (antes quedaba «elige un ejercicio» y, atrás, el borrado en blanco); en dos, se vacía el detalle
+                        onDeleted = { scope.launch { if (navigator.canNavigateBack()) navigator.navigateBack() else navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, null) } },
                     )
                 }
             }

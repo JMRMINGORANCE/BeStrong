@@ -63,6 +63,7 @@ class HomeViewModel @Inject constructor(
     private val healthReader: HealthConnectReader,
     private val intakeStore: IntakeStore,
     @ApplicationContext private val context: Context,
+    private val savedState: androidx.lifecycle.SavedStateHandle,
 ) : ViewModel() {
 
     /** Descanso en marcha (se ve en la tarjeta del entreno en curso sin tener que abrirlo). */
@@ -382,20 +383,22 @@ class HomeViewModel @Inject constructor(
     }
 
     /** Rutina recibida por enlace o QR, pendiente de que el usuario confirme la importación. */
-    private val _pendingImport = MutableStateFlow<Routine?>(null)
-    val pendingImport: StateFlow<Routine?> = _pendingImport
+    // Se guarda el enlace (no la rutina): si Android cierra la app con el diálogo abierto, al volver sigue ahí
+    val pendingImport: StateFlow<Routine?> = savedState.getStateFlow<String?>(KEY_PENDING_LINK, null)
+        .map { link -> link?.let(RoutineLink::decode) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /** Un enlace puede llegar de cualquier web o app: se pregunta antes de guardarla. */
     fun importRoutineLink(link: String) {
         // Si no se puede leer (cortado o de una versión más nueva), se dice: antes la app se abría sin más
         val routine = RoutineLink.decode(link)
-        if (routine == null) message(context.getString(R.string.routine_link_invalid)) else _pendingImport.value = routine
+        if (routine == null) message(context.getString(R.string.routine_link_invalid)) else savedState[KEY_PENDING_LINK] = link
     }
 
     /** Confirmada: se añade a «Mis rutinas». */
     fun confirmImport() = viewModelScope.launch {
-        val routine = _pendingImport.value ?: return@launch
-        _pendingImport.value = null
+        val routine = pendingImport.value ?: return@launch
+        savedState[KEY_PENDING_LINK] = null
         // El mismo enlace o QR otra vez (mismo nombre, ejercicios y series) no duplica la rutina
         fun key(r: Routine) = r.name to r.exercises.map { it.exercise.id to it.sets }
         if (repo.routinesOnce().any { !it.archived && key(it) == key(routine) }) {
@@ -411,7 +414,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun dismissImport() {
-        _pendingImport.value = null
+        savedState[KEY_PENDING_LINK] = null
     }
 
     /** Desde el widget: empezar una rutina por id. */
@@ -644,3 +647,5 @@ enum class Kit(val equipment: Set<com.bestrong.core.model.Equipment>) {
 }
 
 private const val MESSAGE_TTL_MS = 15_000L
+
+private const val KEY_PENDING_LINK = "pending_routine_link"

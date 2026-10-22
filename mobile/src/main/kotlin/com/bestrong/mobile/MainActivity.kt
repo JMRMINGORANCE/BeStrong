@@ -95,6 +95,20 @@ class MainActivity : ComponentActivity() {
         }
         setContent {
             val userSettings by settings.settings.collectAsStateWithLifecycle()
+            // Los iconos de la barra de estado siguen al tema de la app, no al del sistema (con tema oscuro elegido en la
+            // app y el sistema en claro, la hora y la batería salían oscuras sobre fondo oscuro)
+            val dark = when (userSettings.appearance.mode) {
+                com.bestrong.mobile.data.ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+                com.bestrong.mobile.data.ThemeMode.LIGHT -> false
+                com.bestrong.mobile.data.ThemeMode.DARK -> true
+            }
+            androidx.compose.runtime.DisposableEffect(dark) {
+                enableEdgeToEdge(
+                    statusBarStyle = androidx.activity.SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { dark },
+                    navigationBarStyle = androidx.activity.SystemBarStyle.auto(NAV_SCRIM_LIGHT, NAV_SCRIM_DARK) { dark },
+                )
+                onDispose {}
+            }
             BeStrongTheme(userSettings.appearance) {
                 val pip by inPip.collectAsStateWithLifecycle()
                 // Al pasar a PiP la app sale de la composición: con esto, al volver se recupera la pila de pantallas
@@ -186,3 +200,7 @@ class MainActivity : ComponentActivity() {
         const val EXTRA_ROUTINE_ID = AppIntents.EXTRA_ROUTINE_ID
     }
 }
+
+/** Velo de la barra de navegación de 3 botones (los mismos que usa enableEdgeToEdge por defecto). */
+private val NAV_SCRIM_LIGHT = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
+private val NAV_SCRIM_DARK = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)

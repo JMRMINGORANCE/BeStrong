@@ -236,7 +236,9 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
         }, onDismiss = { picking = null })
     }
 
+    // El teclado también cuenta como borde: el campo enfocado sube por encima de él (si no, se escribía a ciegas)
     Scaffold(
+        contentWindowInsets = androidx.compose.material3.ScaffoldDefaults.contentWindowInsets.union(androidx.compose.foundation.layout.WindowInsets.ime),
         topBar = {
             TopAppBar(
                 title = { Text(name.ifBlank { stringResource(R.string.prog_create) }, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
