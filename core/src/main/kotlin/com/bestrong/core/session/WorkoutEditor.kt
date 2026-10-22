@@ -95,6 +95,9 @@ object WorkoutEditor {
     fun pause(workout: Workout, nowEpochMs: Long): Workout =
         if (workout.isPaused) workout else workout.copy(pausedAtEpochMs = nowEpochMs)
 
+    /** Hasta dónde cuenta un cronómetro de cardio: en pausa se queda donde se paró. */
+    private fun stopwatchEnd(workout: Workout, nowEpochMs: Long): Long = workout.pausedAtEpochMs?.coerceAtMost(nowEpochMs) ?: nowEpochMs
+
     fun resume(workout: Workout, nowEpochMs: Long): Workout {
         val since = workout.pausedAtEpochMs ?: return workout
         val paused = (nowEpochMs - since).coerceAtLeast(0)
@@ -102,7 +105,7 @@ object WorkoutEditor {
         val exercises = if (runningCardio(workout) == null) {
             workout.exercises
         } else {
-            workout.exercises.map { we -> we.copy(sets = we.sets.map { s -> s.startedAtEpochMs?.takeIf { s.isRunning }?.let { s.copy(startedAtEpochMs = it + paused) } ?: s }) }
+            workout.exercises.map { we -> we.copy(sets = we.sets.map { s -> s.startedAtEpochMs?.takeIf { s.isRunning }?.let { s.copy(startedAtEpochMs = it + (nowEpochMs - maxOf(since, it)).coerceAtLeast(0)) } ?: s }) }
         }
         return workout.copy(pausedAtEpochMs = null, pausedTotalMs = workout.pausedTotalMs + paused, exercises = exercises)
     }
@@ -301,7 +304,7 @@ object WorkoutEditor {
                     when {
                         s.completed -> s
                         s.isRunning && started != null ->
-                            s.copy(durationSec = ((nowEpochMs - started) / 1000).toInt().coerceAtLeast(1), completed = true, completedAtEpochMs = nowEpochMs)
+                            s.copy(durationSec = ((stopwatchEnd(workout, nowEpochMs) - started) / 1000).toInt().coerceAtLeast(1), completed = true, completedAtEpochMs = nowEpochMs)
                         s.hasTarget -> s.copy(completed = true, completedAtEpochMs = nowEpochMs)
                         else -> s
                     }
@@ -442,7 +445,7 @@ object WorkoutEditor {
             val started = it.startedAtEpochMs
             if (it.isRunning && started != null) {
                 // Marcar un cardio en marcha lo termina con el tiempo del cronómetro
-                it.copy(durationSec = ((nowEpochMs - started) / 1000).toInt().coerceAtLeast(1), completed = true, completedAtEpochMs = nowEpochMs)
+                it.copy(durationSec = ((stopwatchEnd(workout, nowEpochMs) - started) / 1000).toInt().coerceAtLeast(1), completed = true, completedAtEpochMs = nowEpochMs)
             } else {
                 it.copy(
                     completed = !it.completed,

@@ -95,7 +95,11 @@ object WorkoutShareCard {
             val detail = when {
                 best == null -> ""
                 e.exercise.tracking == TrackingType.DURATION -> "${sets.size} × ${best.durationSec} s"
-                e.exercise.tracking == TrackingType.CARDIO -> com.bestrong.mobile.ui.workout.cardioText(sets.sumOf { it.durationSec }, sets.sumOf { it.distanceM }, pace = com.bestrong.core.util.PaceStyle.of(e.exercise.id))
+                e.exercise.tracking == TrackingType.CARDIO -> com.bestrong.mobile.ui.workout.cardioText(
+                    sets.sumOf { it.durationSec }, sets.sumOf { it.distanceM }, pace = com.bestrong.core.util.PaceStyle.of(e.exercise.id),
+                    // El ritmo, solo con las series que tienen km (un calentamiento sin distancia no lo baja)
+                    paceSec = sets.filter { it.distanceM > 0 }.sumOf { it.durationSec },
+                )
                 best.weightKg > 0 -> "${sets.size} × ${unit.format(best.weightKg, withUnit = true)} × ${best.reps}"
                 else -> "${sets.size} × ${best.reps}"
             }

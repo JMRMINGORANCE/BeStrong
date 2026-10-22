@@ -51,7 +51,7 @@ class CardioComplicationService : SuspendingComplicationDataSourceService() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
         val icon = MonochromaticImage.Builder(Icon.createWithResource(this, R.drawable.ic_dumbbell)).build()
-        val value = if (unit == "km" && done < 100) "%.1f".format(done) else "%.0f".format(done)
+        val value = if (unit == "km" && done < 100) com.bestrong.core.util.formatKmLike(done.toDouble(), goal?.toDouble()) else "%.0f".format(done)
         val text = PlainComplicationText.Builder(value).build()
         val description = PlainComplicationText.Builder(getString(R.string.cardio_complication_desc, value, unit)).build()
         return when (type) {

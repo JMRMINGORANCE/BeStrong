@@ -535,12 +535,16 @@ private fun NumberField(
     )
 }
 
-/** Tiempo del cronómetro de cardio en marcha, actualizado cada segundo. */
+/** Cuándo se pausó el entreno que se está viendo (null si no está en pausa). */
+val LocalPausedAt = androidx.compose.runtime.compositionLocalOf<Long?> { null }
+
+/** Tiempo del cronómetro de cardio en marcha, actualizado cada segundo (parado mientras el entreno está en pausa). */
 @Composable
 private fun CardioElapsed(startedAtEpochMs: Long, modifier: Modifier) {
-    val elapsed by produceState(0L, startedAtEpochMs) {
+    val pausedAt = LocalPausedAt.current
+    val elapsed by produceState(0L, startedAtEpochMs, pausedAt) {
         while (true) {
-            value = ((System.currentTimeMillis() - startedAtEpochMs) / 1000).coerceAtLeast(0)
+            value = (((pausedAt ?: System.currentTimeMillis()) - startedAtEpochMs) / 1000).coerceAtLeast(0)
             kotlinx.coroutines.delay(1000)
         }
     }

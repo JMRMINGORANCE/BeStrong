@@ -268,219 +268,222 @@ fun ActiveWorkoutScreen(
     var touchLocked by rememberSaveable { mutableStateOf(false) }
     if (touchLocked) TouchLockOverlay { touchLocked = false }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.workout_minimize)) } },
-                title = {
-                    // El nombre, en grande y del color del texto (tocarlo lo cambia)
-                    TextButton(
-                        onClick = { renaming = true },
-                        contentPadding = PaddingValues(0.dp),
-                        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+    // En pausa, el cronómetro del cardio se queda parado donde se paró
+    androidx.compose.runtime.CompositionLocalProvider(LocalPausedAt provides w.pausedAtEpochMs) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.workout_minimize)) } },
+                    title = {
+                        // El nombre, en grande y del color del texto (tocarlo lo cambia)
+                        TextButton(
+                            onClick = { renaming = true },
+                            contentPadding = PaddingValues(0.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        ) {
+                            Text(w.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        }
+                    },
+                    actions = {
+                        var menu by remember { mutableStateOf(false) }
+                        val openGyms = gymSwitch(vm)
+                        IconButton(onClick = vm::togglePause) {
+                            if (w.isPaused) {
+                                Icon(Icons.Default.PlayArrow, stringResource(R.string.workout_resume))
+                            } else {
+                                Icon(Icons.Default.Pause, stringResource(R.string.workout_pause))
+                            }
+                        }
+                        // Botón compacto: con el relleno por defecto el nombre del entreno se cortaba
+                        if (!oneHanded) {
+                            Button(onClick = { confirmFinish = true }, contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)) {
+                                Text(stringResource(R.string.workout_finish), maxLines = 1)
+                            }
+                        }
+                        IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more_options)) }
+                        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                            DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.workout_notes)) }, onClick = { menu = false; editingNotes = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.touch_lock)) }, onClick = { menu = false; touchLocked = true })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.gym_switch_title)) }, onClick = { menu = false; openGyms() })
+                            DropdownMenuItem(text = { Text(stringResource(R.string.workout_discard)) }, onClick = { menu = false; confirmDiscard = true })
+                        }
+                    },
+                )
+            },
+            snackbarHost = { SnackbarHost(snackbar) },
+            bottomBar = {
+                Column {
+                    // Entra y sale deslizándose (la lista no salta al marcar una serie o saltar el descanso)
+                    var shownRest by remember { mutableStateOf(rest) }
+                    if (rest != null) shownRest = rest
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = rest != null && !expanded && posture != FoldPosture.TABLETOP,
+                        enter = androidx.compose.animation.slideInVertically { it } + androidx.compose.animation.fadeIn(),
+                        exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
                     ) {
-                        Text(w.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        shownRest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal)) }
                     }
-                },
-                actions = {
-                    var menu by remember { mutableStateOf(false) }
-                    val openGyms = gymSwitch(vm)
-                    IconButton(onClick = vm::togglePause) {
-                        if (w.isPaused) {
-                            Icon(Icons.Default.PlayArrow, stringResource(R.string.workout_resume))
-                        } else {
-                            Icon(Icons.Default.Pause, stringResource(R.string.workout_pause))
-                        }
-                    }
-                    // Botón compacto: con el relleno por defecto el nombre del entreno se cortaba
-                    if (!oneHanded) {
-                        Button(onClick = { confirmFinish = true }, contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)) {
-                            Text(stringResource(R.string.workout_finish), maxLines = 1)
-                        }
-                    }
-                    IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more_options)) }
-                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.workout_notes)) }, onClick = { menu = false; editingNotes = true })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.touch_lock)) }, onClick = { menu = false; touchLocked = true })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.gym_switch_title)) }, onClick = { menu = false; openGyms() })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.workout_discard)) }, onClick = { menu = false; confirmDiscard = true })
-                    }
-                },
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbar) },
-        bottomBar = {
-            Column {
-                // Entra y sale deslizándose (la lista no salta al marcar una serie o saltar el descanso)
-                var shownRest by remember { mutableStateOf(rest) }
-                if (rest != null) shownRest = rest
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = rest != null && !expanded && posture != FoldPosture.TABLETOP,
-                    enter = androidx.compose.animation.slideInVertically { it } + androidx.compose.animation.fadeIn(),
-                    exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
-                ) {
-                    shownRest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal)) }
+                    // Modo una mano: lo importante abajo, al alcance del pulgar
+                    if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
                 }
-                // Modo una mano: lo importante abajo, al alcance del pulgar
-                if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
-            }
-        },
-    ) { padding ->
-        // Con el teclado abierto la lista se encoge y deja a la vista la serie que se escribe (la app va de borde a borde)
-        val content = Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize()
-        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline, vm::setDeadline, vm::fitToDeadline)
-        when {
-            posture == FoldPosture.TABLETOP -> Column(content) {
-                // En pausa también se avisa en modo mesa y desplegado (antes solo plegado)
-                if (w.isPaused) PausedBanner(vm::togglePause)
-                RestOverrunBanner(restEndedAt, vm::dismissOverrun)
-                // Mitad superior: lo que se mira desde el banco
-                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true, next = nextSetLabel(w, dumbbellTotal)) }
-                        ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp), eta, dumbbellTotal)
-                }
-                HorizontalDivider()
-                listContent(Modifier.weight(1f))
-            }
-            expanded -> Row(content) {
-                Column(
-                    Modifier.weight(0.38f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
+            },
+        ) { padding ->
+            // Con el teclado abierto la lista se encoge y deja a la vista la serie que se escribe (la app va de borde a borde)
+            val content = Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize()
+            val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline, vm::setDeadline, vm::fitToDeadline)
+            when {
+                posture == FoldPosture.TABLETOP -> Column(content) {
+                    // En pausa también se avisa en modo mesa y desplegado (antes solo plegado)
                     if (w.isPaused) PausedBanner(vm::togglePause)
-                    rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w, dumbbellTotal)) }
+                    RestOverrunBanner(restEndedAt, vm::dismissOverrun)
+                    // Mitad superior: lo que se mira desde el banco
+                    Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, giant = true, next = nextSetLabel(w, dumbbellTotal)) }
+                            ?: SummaryPanel(w, previous, liveMetrics, Modifier.padding(16.dp), eta, dumbbellTotal)
+                    }
+                    HorizontalDivider()
+                    listContent(Modifier.weight(1f))
+                }
+                expanded -> Row(content) {
+                    Column(
+                        Modifier.weight(0.38f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        if (w.isPaused) PausedBanner(vm::togglePause)
+                        rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w, dumbbellTotal)) }
+                        if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
+                        RestOverrunBanner(restEndedAt, vm::dismissOverrun)
+                        if (settings.mediaControls) MediaControls(settings.musicApp)
+                        SummaryPanel(w, previous, liveMetrics, eta = eta, dumbbellTotal = dumbbellTotal)
+                    }
+                    listContent(Modifier.weight(0.62f))
+                }
+                else -> Column(content) {
                     if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
+                    if (w.isPaused) PausedBanner(vm::togglePause)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                     if (settings.mediaControls) MediaControls(settings.musicApp)
-                    SummaryPanel(w, previous, liveMetrics, eta = eta, dumbbellTotal = dumbbellTotal)
+                    StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), eta)
+                    listContent(Modifier.weight(1f))
                 }
-                listContent(Modifier.weight(0.62f))
             }
-            else -> Column(content) {
-                if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
-                if (w.isPaused) PausedBanner(vm::togglePause)
-                RestOverrunBanner(restEndedAt, vm::dismissOverrun)
-                if (settings.mediaControls) MediaControls(settings.musicApp)
-                StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), eta)
-                listContent(Modifier.weight(1f))
-            }
+        }
+
+        if (confirmFinish) {
+            val pending = w.totalSetCount - w.completedSetCount
+            AlertDialog(
+                onDismissRequest = { confirmFinish = false },
+                title = { Text(stringResource(R.string.workout_finish_q)) },
+                text = {
+                    Column {
+                        Text(
+                            when {
+                                w.completedSetCount == 0 -> stringResource(R.string.workout_finish_empty)
+                                pending > 0 -> pluralStringResource(R.plurals.workout_finish_pending, pending, pending)
+                                else -> stringResource(R.string.workout_finish_ok)
+                            },
+                        )
+                        // Cuáles son: lo normal es una serie hecha sin marcar; tocar lleva a ella
+                        if (pending > 0 && w.completedSetCount > 0) {
+                            PendingExercises(w) { i ->
+                                confirmFinish = false
+                                scope.launch { listState.animateScrollToItem(i) }
+                            }
+                        }
+                    }
+                },
+                confirmButton = { Button(onClick = { confirmFinish = false; vm.finish(); if (w.completedSetCount == 0) onFinished() }) { Text(stringResource(R.string.workout_finish)) } },
+                dismissButton = { TextButton(onClick = { confirmFinish = false }) { Text(stringResource(R.string.action_keep_going)) } },
+            )
+        }
+        if (confirmDiscard) {
+            AlertDialog(
+                onDismissRequest = { confirmDiscard = false },
+                title = { Text(stringResource(R.string.workout_discard_q)) },
+                text = { Text(stringResource(R.string.workout_discard_body)) },
+                confirmButton = { Button(onClick = { confirmDiscard = false; vm.discard(); onDiscarded() }) { Text(stringResource(R.string.action_discard)) } },
+                dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.action_cancel)) } },
+            )
+        }
+        if (renaming) {
+            var name by rememberSaveable { mutableStateOf(w.name) }
+            AlertDialog(
+                onDismissRequest = { renaming = false },
+                title = { Text(stringResource(R.string.workout_name)) },
+                text = { OutlinedTextField(name, { name = it }, singleLine = true) },
+                confirmButton = { Button(onClick = { vm.rename(name); renaming = false }) { Text(stringResource(R.string.action_save)) } },
+                dismissButton = { TextButton(onClick = { renaming = false }) { Text(stringResource(R.string.action_cancel)) } },
+            )
+        }
+        if (editingNotes) {
+            var notes by rememberSaveable { mutableStateOf(w.notes) }
+            AlertDialog(
+                onDismissRequest = { editingNotes = false },
+                title = { Text(stringResource(R.string.workout_notes)) },
+                text = { OutlinedTextField(notes, { notes = it }, minLines = 3, placeholder = { Text(stringResource(R.string.workout_notes_hint)) }) },
+                confirmButton = { Button(onClick = { vm.setWorkoutNotes(notes); editingNotes = false }) { Text(stringResource(R.string.action_save)) } },
+                dismissButton = { TextButton(onClick = { editingNotes = false }) { Text(stringResource(R.string.action_cancel)) } },
+            )
         }
     }
 
-    if (confirmFinish) {
-        val pending = w.totalSetCount - w.completedSetCount
-        AlertDialog(
-            onDismissRequest = { confirmFinish = false },
-            title = { Text(stringResource(R.string.workout_finish_q)) },
-            text = {
-                Column {
-                    Text(
-                        when {
-                            w.completedSetCount == 0 -> stringResource(R.string.workout_finish_empty)
-                            pending > 0 -> pluralStringResource(R.plurals.workout_finish_pending, pending, pending)
-                            else -> stringResource(R.string.workout_finish_ok)
-                        },
-                    )
-                    // Cuáles son: lo normal es una serie hecha sin marcar; tocar lleva a ella
-                    if (pending > 0 && w.completedSetCount > 0) {
-                        PendingExercises(w) { i ->
-                            confirmFinish = false
-                            scope.launch { listState.animateScrollToItem(i) }
-                        }
-                    }
-                }
-            },
-            confirmButton = { Button(onClick = { confirmFinish = false; vm.finish(); if (w.completedSetCount == 0) onFinished() }) { Text(stringResource(R.string.workout_finish)) } },
-            dismissButton = { TextButton(onClick = { confirmFinish = false }) { Text(stringResource(R.string.action_keep_going)) } },
-        )
+    @Composable
+    private fun KeepScreenOn(enabled: Boolean) {
+        val activity = LocalActivity.current ?: return
+        DisposableEffect(enabled) {
+            if (enabled) activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            onDispose { activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+        }
     }
-    if (confirmDiscard) {
-        AlertDialog(
-            onDismissRequest = { confirmDiscard = false },
-            title = { Text(stringResource(R.string.workout_discard_q)) },
-            text = { Text(stringResource(R.string.workout_discard_body)) },
-            confirmButton = { Button(onClick = { confirmDiscard = false; vm.discard(); onDiscarded() }) { Text(stringResource(R.string.action_discard)) } },
-            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.action_cancel)) } },
-        )
-    }
-    if (renaming) {
-        var name by rememberSaveable { mutableStateOf(w.name) }
-        AlertDialog(
-            onDismissRequest = { renaming = false },
-            title = { Text(stringResource(R.string.workout_name)) },
-            text = { OutlinedTextField(name, { name = it }, singleLine = true) },
-            confirmButton = { Button(onClick = { vm.rename(name); renaming = false }) { Text(stringResource(R.string.action_save)) } },
-            dismissButton = { TextButton(onClick = { renaming = false }) { Text(stringResource(R.string.action_cancel)) } },
-        )
-    }
-    if (editingNotes) {
-        var notes by rememberSaveable { mutableStateOf(w.notes) }
-        AlertDialog(
-            onDismissRequest = { editingNotes = false },
-            title = { Text(stringResource(R.string.workout_notes)) },
-            text = { OutlinedTextField(notes, { notes = it }, minLines = 3, placeholder = { Text(stringResource(R.string.workout_notes_hint)) }) },
-            confirmButton = { Button(onClick = { vm.setWorkoutNotes(notes); editingNotes = false }) { Text(stringResource(R.string.action_save)) } },
-            dismissButton = { TextButton(onClick = { editingNotes = false }) { Text(stringResource(R.string.action_cancel)) } },
-        )
-    }
-}
-
-@Composable
-private fun KeepScreenOn(enabled: Boolean) {
-    val activity = LocalActivity.current ?: return
-    DisposableEffect(enabled) {
-        if (enabled) activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        onDispose { activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
-    }
-}
 
 /** «⚠ «Casa» no tiene Mancuernas · Sustituir»: el gimnasio activo no tiene el material del ejercicio. */
-@Composable
-private fun MissingEquipmentLine(vm: ActiveWorkoutViewModel, we: WorkoutExercise, onSubstitute: () -> Unit) {
-    val gym = vm.settings.collectAsStateWithLifecycle().value.activeGym
-    val equipment = we.exercise.equipment
-    // Sin material o ya hecho: no hace falta avisar
-    // Correr, bici, comba… («otro»/cardio) no dependen del material del gimnasio
-    val needsNothing = equipment == Equipment.BODYWEIGHT || equipment == Equipment.OTHER || we.exercise.tracking == TrackingType.CARDIO
-    if (needsNothing || equipment in gym.equipment || we.sets.all { it.completed }) return
-    Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            stringResource(R.string.gym_missing_equipment, gym.name, equipment.label()),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.weight(1f),
-        )
-        TextButton(onClick = onSubstitute) { Text(stringResource(R.string.substitute_title)) }
+    @Composable
+    private fun MissingEquipmentLine(vm: ActiveWorkoutViewModel, we: WorkoutExercise, onSubstitute: () -> Unit) {
+        val gym = vm.settings.collectAsStateWithLifecycle().value.activeGym
+        val equipment = we.exercise.equipment
+        // Sin material o ya hecho: no hace falta avisar
+        // Correr, bici, comba… («otro»/cardio) no dependen del material del gimnasio
+        val needsNothing = equipment == Equipment.BODYWEIGHT || equipment == Equipment.OTHER || we.exercise.tracking == TrackingType.CARDIO
+        if (needsNothing || equipment in gym.equipment || we.sets.all { it.completed }) return
+        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.gym_missing_equipment, gym.name, equipment.label()),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onSubstitute) { Text(stringResource(R.string.substitute_title)) }
+        }
     }
-}
 
 /**
- * «Rango 8–12 · 10/12 → al llegar a 12 en todas, +2,5 kg»: el rango de la doble progresión con lo que
- * llevas en la siguiente serie. Tocarlo abre el selector de rango.
- */
-@Composable
-private fun RepRangeLine(vm: ActiveWorkoutViewModel, we: WorkoutExercise) {
-    val settings by vm.settings.collectAsStateWithLifecycle()
-    val range = settings.repRangeFor(we.exercise.id)?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS } ?: return
-    val unit = LocalWeightUnit.current
-    var editing by remember { mutableStateOf(false) }
-    if (editing) RepRangeDialog(vm, we.exercise.id) { editing = false }
-    val current = we.sets.firstOrNull { !it.completed && it.type != SetType.WARMUP }?.reps
-    val factor = if (we.exercise.equipment == Equipment.DUMBBELL && settings.dumbbellTotal) 2 else 1
-    Text(
-        stringResource(
-            R.string.rep_range_line,
-            range.first, range.last,
-            current?.let { "$it/${range.last}" } ?: "✓",
-            // Salto exacto (1,25 no «1,3») y, con «suma de las dos mancuernas», como en las filas
-            unit.formatStep(settings.stepKgFor(we.exercise.id) * factor),
-        ),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize()
-            .clickable(onClickLabel = stringResource(R.string.rep_range)) { editing = true }.padding(horizontal = 12.dp),
-    )
+     * «Rango 8–12 · 10/12 → al llegar a 12 en todas, +2,5 kg»: el rango de la doble progresión con lo que
+     * llevas en la siguiente serie. Tocarlo abre el selector de rango.
+     */
+    @Composable
+    private fun RepRangeLine(vm: ActiveWorkoutViewModel, we: WorkoutExercise) {
+        val settings by vm.settings.collectAsStateWithLifecycle()
+        val range = settings.repRangeFor(we.exercise.id)?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS } ?: return
+        val unit = LocalWeightUnit.current
+        var editing by remember { mutableStateOf(false) }
+        if (editing) RepRangeDialog(vm, we.exercise.id) { editing = false }
+        val current = we.sets.firstOrNull { !it.completed && it.type != SetType.WARMUP }?.reps
+        val factor = if (we.exercise.equipment == Equipment.DUMBBELL && settings.dumbbellTotal) 2 else 1
+        Text(
+            stringResource(
+                R.string.rep_range_line,
+                range.first, range.last,
+                current?.let { "$it/${range.last}" } ?: "✓",
+                // Salto exacto (1,25 no «1,3») y, con «suma de las dos mancuernas», como en las filas
+                unit.formatStep(settings.stepKgFor(we.exercise.id) * factor),
+            ),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize()
+                .clickable(onClickLabel = stringResource(R.string.rep_range)) { editing = true }.padding(horizontal = 12.dp),
+        )
+    }
 }
 
 /** «🏆 6 reps con 100 kg = récord»: lo que hace falta en esta serie para superar tu mejor 1RM estimado. */

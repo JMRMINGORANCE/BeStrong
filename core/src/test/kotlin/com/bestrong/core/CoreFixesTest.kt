@@ -241,4 +241,20 @@ class CoreFixesTest {
         assertEquals(listOf(45.0, 25.0, 10.0, 5.0), gym.platesIn(lb))
         assertEquals(false, gym.plateLoad(lb.toKg(140.0), lb).perSide.contains(2.5))
     }
+
+    @Test
+    fun cardioStopwatchIgnoresPausedTime() {
+        val run = ExerciseLibrary.byId("running")!!
+        val set = WorkoutSet(id = "s")
+        val start = Workout(id = "w", name = "W", startedAtEpochMs = 0, exercises = listOf(WorkoutExercise(id = "e", exercise = run, sets = listOf(set))))
+        val running = com.bestrong.core.session.WorkoutEditor.startCardio(start, "e", "s", 0)
+        val paused = com.bestrong.core.session.WorkoutEditor.pause(running, 60_000)
+        // Marcarla en pausa cuenta hasta la pausa, no hasta ahora
+        val done = com.bestrong.core.session.WorkoutEditor.toggleSetCompleted(paused, "e", "s", 600_000)
+        assertEquals(60, done.exercises[0].sets[0].durationSec)
+        // Al reanudar, el inicio se corre lo que duró la pausa
+        val resumed = com.bestrong.core.session.WorkoutEditor.resume(paused, 600_000)
+        val finished = com.bestrong.core.session.WorkoutEditor.toggleSetCompleted(resumed, "e", "s", 660_000)
+        assertEquals(120, finished.exercises[0].sets[0].durationSec)
+    }
 }

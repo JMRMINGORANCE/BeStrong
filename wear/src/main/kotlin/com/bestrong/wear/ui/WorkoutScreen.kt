@@ -205,7 +205,7 @@ fun WorkoutScreen(
                 when (we.exercise.tracking) {
                     TrackingType.DURATION -> BigValue("${set.durationSec}", "s", selected = true, onClick = null)
                     TrackingType.CARDIO -> if (set.isRunning) {
-                        CardioStopwatch(set.startedAtEpochMs ?: 0L)
+                        CardioStopwatch(set.startedAtEpochMs ?: 0L, w.pausedAtEpochMs)
                     } else {
                         BigValue("${set.durationSec / 60}", "min", selected = true, onClick = null)
                     }
@@ -321,12 +321,12 @@ internal val STEM_KEYS = setOf(
     android.view.KeyEvent.KEYCODE_STEM_3,
 )
 
-/** Cronómetro del bloque de cardio en marcha (mm:ss), actualizado cada segundo. */
+/** Cronómetro del bloque de cardio en marcha (mm:ss), actualizado cada segundo; parado con el entreno en pausa. */
 @Composable
-private fun CardioStopwatch(startedAtEpochMs: Long) {
-    val elapsed by androidx.compose.runtime.produceState(0L, startedAtEpochMs) {
+private fun CardioStopwatch(startedAtEpochMs: Long, pausedAt: Long?) {
+    val elapsed by androidx.compose.runtime.produceState(0L, startedAtEpochMs, pausedAt) {
         while (true) {
-            value = ((System.currentTimeMillis() - startedAtEpochMs) / 1000).coerceAtLeast(0)
+            value = (((pausedAt ?: System.currentTimeMillis()) - startedAtEpochMs) / 1000).coerceAtLeast(0)
             kotlinx.coroutines.delay(1000)
         }
     }
