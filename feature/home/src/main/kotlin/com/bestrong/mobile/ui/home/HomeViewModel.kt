@@ -261,7 +261,7 @@ class HomeViewModel @Inject constructor(
         // Con el descanso tal como iba: «Deshacer» lo recupera (como al descartar desde el entreno)
         val r = actions.rest.value
         repo.discardActive(r?.endsAtEpochMs, r?.totalSeconds ?: 0)
-        actions.closePartner()
+        actions.closePartnerOnDiscard()
     }
 
     /** Entreno recién descartado (para el aviso con «Deshacer»). */

@@ -44,12 +44,21 @@ class WorkoutActions @Inject constructor(
      * Termina el entreno de la pareja, si hay uno abierto, guardando lo que hizo (aparte: no cuenta para tus
      * récords). Al terminar o descartar el tuyo: sin esto quedaría huérfano, sin forma de volver a él.
      */
-    suspend fun closePartner(withGym: Boolean = true) {
-        val current = repository.takePartnerActive() ?: return
+    suspend fun closePartner(withGym: Boolean = true): Workout? {
+        val current = repository.takePartnerActive() ?: return null
         // Su descanso se acaba con su entreno (el tuyo, si lo hay, sigue)
         restTimer.skipFor(current.id)
         val finished = WorkoutEditor.finish(current, System.currentTimeMillis()).let { if (withGym) withGym(it) else it }
         if (finished.exercises.isNotEmpty()) repository.saveWorkout(finished)
+        return current
+    }
+
+    /** El entreno de la pareja tal como estaba al descartar el tuyo: «Deshacer» lo devuelve a medias, no terminado. */
+    private var partnerAtDiscard: Workout? = null
+
+    /** Al descartar tu entreno: se cierra el de la pareja, pero se recuerda por si se deshace. */
+    suspend fun closePartnerOnDiscard() {
+        partnerAtDiscard = closePartner()
     }
 
     /** Serie marcada en el reloj: el descanso del móvil pasa a ser el suyo (si no, el de la serie anterior avisa a destiempo). */
@@ -275,6 +284,12 @@ class WorkoutActions @Inject constructor(
     suspend fun restoreDiscarded(): Boolean {
         if (!repository.restoreDiscarded()) return false
         repository.restoredRestEnd?.let { (end, total) -> restTimer.restore(end, total) }
+        // El de la pareja vuelve a estar en curso (y deja de estar en el historial como terminado a medias)
+        partnerAtDiscard?.let { p ->
+            repository.deleteWorkout(p.id)
+            repository.setPartnerActive(p)
+        }
+        partnerAtDiscard = null
         return true
     }
 

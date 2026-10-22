@@ -807,7 +807,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         val rest = restTimer.rest.value
         restTimer.skip()
         repo.discardActive(rest?.endsAtEpochMs, rest?.totalSeconds ?: 0)
-        actions.closePartner()
+        actions.closePartnerOnDiscard()
     }
 
     fun saveSummaryAsRoutine() {
