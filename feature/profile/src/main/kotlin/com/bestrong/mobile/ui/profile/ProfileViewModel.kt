@@ -148,8 +148,10 @@ class ProfileViewModel @Inject constructor(
             weeklyStreak = WorkoutStats.weeklyStreak(history, today, zone),
             weeks = WorkoutStats.weeklySummary(history, 12, today, zone),
             muscles30d = WorkoutStats.setsPerMuscle(history, System.currentTimeMillis() - 30L * 24 * 3600 * 1000),
+            // Solo ejercicios de peso y reps: en los de peso corporal lastrados el 1RM saldría solo del lastre
             topOneRepMax = WorkoutStats.personalRecords(history).values
                 .mapNotNull { it[RecordType.BEST_ONE_REP_MAX] }
+                .filter { r -> history.any { w -> w.exercises.any { it.exercise.id == r.exerciseId && it.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS } } }
                 .sortedByDescending { it.value }
                 .take(8),
             weeklyMuscles = WorkoutStats.weeklySetsPerMuscle(history, today, zone),

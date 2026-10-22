@@ -35,6 +35,8 @@ fun EditPastSetDialog(
     val initialWeight = remember { if (set.weightKg == 0.0) "" else unit.format(set.weightKg * weightFactor) }
     var weight by remember { mutableStateOf(initialWeight) }
     var reps by remember { mutableStateOf(set.reps.toString()) }
+    // Unilateral: también el lado derecho (si no, solo se podría corregir el izquierdo)
+    var right by remember { mutableStateOf(set.repsRight?.toString().orEmpty()) }
     var seconds by remember { mutableStateOf(set.durationSec.toString()) }
     var meters by remember { mutableStateOf(set.distanceM.toInt().toString()) }
     // Como el peso: si no se tocan se guardan exactos (25:47 no pasa a 25:00 ni 45 s a 0)
@@ -59,13 +61,24 @@ fun EditPastSetDialog(
                     )
                 }
                 when (tracking) {
-                    TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY -> OutlinedTextField(
-                        reps,
-                        { reps = it.filter(Char::isDigit).take(4) },
-                        label = { Text(stringResource(R.string.set_reps)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    )
+                    TrackingType.WEIGHT_REPS, TrackingType.REPS_ONLY -> {
+                        OutlinedTextField(
+                            reps,
+                            { reps = it.filter(Char::isDigit).take(4) },
+                            label = { Text(stringResource(R.string.set_reps)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        )
+                        if (set.repsRight != null) {
+                            OutlinedTextField(
+                                right,
+                                { right = it.filter(Char::isDigit).take(4) },
+                                label = { Text(stringResource(R.string.set_reps_right)) },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            )
+                        }
+                    }
                     TrackingType.DURATION -> OutlinedTextField(
                         seconds,
                         { seconds = it.filter(Char::isDigit).take(5) },
@@ -112,6 +125,7 @@ fun EditPastSetDialog(
                     set.copy(
                         weightKg = kg,
                         reps = reps.toIntOrNull() ?: set.reps,
+                        repsRight = set.repsRight?.let { right.toIntOrNull() ?: it },
                         durationSec = when {
                             tracking != TrackingType.CARDIO -> seconds.toIntOrNull() ?: set.durationSec
                             minutes == initialMinutes -> set.durationSec

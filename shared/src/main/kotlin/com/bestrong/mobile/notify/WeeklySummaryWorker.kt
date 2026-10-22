@@ -24,12 +24,10 @@ class WeeklySummaryWorker(context: Context, params: WorkerParameters) : Coroutin
             val settings = deps.settings().settings.value
             val zone = ZoneId.systemDefault()
             val history = deps.repository().historyOnce()
-            // Programado el domingo a las 19:00: si el sistema lo retrasa al lunes (y esta semana aún está vacía), se
-            // resume la semana que acabó
-            val now = LocalDate.now(zone)
-            val thisWeek = Strength.weekSummary(history, now, zone)
-            val today = if (now.dayOfWeek == java.time.DayOfWeek.MONDAY && thisWeek.workouts == 0) now.minusDays(1) else now
-            val week = if (today == now) thisWeek else Strength.weekSummary(history, today, zone)
+            // Programado el domingo a las 19:00: si el sistema lo retrasa (lunes o martes, aunque ya hayas entrenado),
+            // se resume la semana que acabó ese domingo
+            val today = LocalDate.now(zone).with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY))
+            val week = Strength.weekSummary(history, today, zone)
             // Si la carga ha subido de golpe, el resumen lo avisa (riesgo de lesión)
             val loadRatio = TrainingLoad.weekly(history, today, zone).takeIf { it.tooHigh }?.acuteChronicRatio
             // Un resumen que llega a mitad de la semana siguiente ya no resume nada útil

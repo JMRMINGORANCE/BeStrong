@@ -420,7 +420,11 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             Icon(Icons.Default.EmojiEvents, null, Modifier.size(28.dp))
                             Text(pluralStringResource(R.plurals.n_records, records.size, records.size), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
                         }
-                        records.forEach { Text(stringResource(R.string.record_line, it.exerciseLabel(), it.type.label(), it.type.formatValue(it.value, unit)), style = MaterialTheme.typography.bodyMedium) }
+                        records.forEach {
+                            // Con «suma de las dos mancuernas», el peso y el 1RM del par, como en las series
+                            val factor = if (it.type == com.bestrong.core.stats.RecordType.HEAVIEST_WEIGHT || it.type == com.bestrong.core.stats.RecordType.BEST_ONE_REP_MAX) com.bestrong.mobile.ui.components.pairFactor(it.exerciseId) else 1
+                            Text(stringResource(R.string.record_line, it.exerciseLabel(), it.type.label(), it.type.formatValue(it.value * factor, unit)), style = MaterialTheme.typography.bodyMedium)
+                        }
                     }
                 }
             }
@@ -439,7 +443,9 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             Row(if (editing) Modifier.clickable { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
                                 Text(describeSet(set, we.exercise, unit, vm.weightFactor(we.exercise)), Modifier.weight(1f))
-                                if (set.estimatedOneRepMax > 0) Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax)), style = MaterialTheme.typography.bodySmall)
+                                if (set.estimatedOneRepMax > 0 && we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) {
+                                    Text(stringResource(R.string.one_rm_value, unit.format(set.estimatedOneRepMax * vm.weightFactor(we.exercise))), style = MaterialTheme.typography.bodySmall)
+                                }
                             }
                             // Nota de la serie y si fue con ayuda (se anotan en el entreno)
                             setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 24.dp)) }

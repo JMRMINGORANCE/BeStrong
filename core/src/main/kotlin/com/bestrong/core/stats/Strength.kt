@@ -296,7 +296,8 @@ object Strength {
         inYear.forEach { w ->
             w.exercises.forEach { we ->
                 val e1rm = we.completedSets.filter { it.countsForRecords }.maxOfOrNull { it.estimatedOneRepMax } ?: 0.0
-                if (e1rm <= 0) return@forEach
+                // En dominadas lastradas el 1RM saldría solo del lastre: no es una ganancia comparable
+                if (e1rm <= 0 || we.exercise.tracking != com.bestrong.core.model.TrackingType.WEIGHT_REPS) return@forEach
                 byId[we.exercise.id] = we.exercise
                 val cur = firstAndBest[we.exercise.id]
                 firstAndBest[we.exercise.id] = if (cur == null) e1rm to e1rm else cur.first to maxOf(cur.second, e1rm)
