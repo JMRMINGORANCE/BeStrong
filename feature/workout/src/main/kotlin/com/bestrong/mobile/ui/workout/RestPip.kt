@@ -32,6 +32,7 @@ import com.bestrong.mobile.workout.RestTimerController
 fun RestPip(repository: BeStrongRepository, restTimer: RestTimerController, unit: com.bestrong.core.util.WeightUnit, dumbbellTotal: Boolean) {
     val workout by repository.activeWorkout.collectAsStateWithLifecycle()
     val rest by restTimer.rest.collectAsStateWithLifecycle()
+    val partner by repository.partnerWorkout.collectAsStateWithLifecycle()
     val now = rememberNow(500)
     val w = workout
     Box(Modifier.fillMaxSize().background(com.bestrong.mobile.ui.theme.LocalScreenColor.current).padding(8.dp), contentAlignment = Alignment.Center) {
@@ -44,7 +45,8 @@ fun RestPip(repository: BeStrongRepository, restTimer: RestTimerController, unit
             } else if (w != null) {
                 Text(formatDuration(w.durationSeconds(now)), fontSize = 28.sp, fontWeight = FontWeight.Bold)
             }
-            w?.let { wk ->
+            // La siguiente serie de quien descansa (puede ser la pareja)
+            (partner?.takeIf { rest != null && it.id == rest?.workoutId } ?: w)?.let { wk ->
                 // Fuera del árbol de la app (sin su unidad): en tu unidad y con mancuernas como total, como la notificación
                 WorkoutEditor.upcomingSet(wk)?.let { (i, s) ->
                     val we = wk.exercises[i]

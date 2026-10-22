@@ -71,9 +71,9 @@ class WorkoutForegroundService : LifecycleService() {
             collector?.cancel()
             collector = lifecycleScope.launch {
                 if (repository.activeOnce() == null) return@launch stop()
-                combine(repository.activeWorkout, restTimer.rest) { w, r -> w to r }.collect { (w, r) ->
+                combine(repository.activeWorkout, restTimer.rest, repository.partnerWorkout) { w, r, p -> Triple(w, r, p) }.collect { (w, r, p) ->
                     when {
-                        w != null -> getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, build(w, r))
+                        w != null -> getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, build(w, r, p))
                         // El StateFlow empieza en null: se comprueba en la base de datos antes de parar
                         repository.activeOnce() == null -> stop()
                     }
@@ -133,7 +133,7 @@ class WorkoutForegroundService : LifecycleService() {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 
-    private fun build(w: Workout, rest: RestState?): Notification {
+    private fun build(w: Workout, rest: RestState?, partner: Workout? = null): Notification {
         val open = PendingIntent.getActivity(
             this, 0,
             AppIntents.main(this).setAction(AppIntents.ACTION_OPEN_WORKOUT).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
@@ -152,15 +152,17 @@ class WorkoutForegroundService : LifecycleService() {
             .setRequestPromotedOngoing(true)
         workoutProgress(w)?.let(b::setStyle)
         if (rest != null) {
+            // El descanso puede ser de la pareja: su nombre y su siguiente serie, no los tuyos
+            val shown = partner?.takeIf { it.id == rest.workoutId } ?: w
             // Qué viene después (lo que hay que cargar en la barra), visible en la pantalla de bloqueo
-            val next = WorkoutEditor.upcomingSet(w)?.let { (i, set) ->
-                val ex = w.exercises[i].exercise
+            val next = WorkoutEditor.upcomingSet(shown)?.let { (i, set) ->
+                val ex = shown.exercises[i].exercise
                 val prefs = settings.settings.value
                 // Con «suma de las dos mancuernas», el total del par (como en la fila de la serie)
                 val factor = if (prefs.dumbbellTotal && ex.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
                 getString(R.string.rest_next, ex.displayName(this) + " · " + com.bestrong.mobile.ui.workout.describeSet(set, ex, prefs.unit, factor))
             }
-            b.setContentTitle(getString(R.string.notif_rest_title, w.name))
+            b.setContentTitle(getString(R.string.notif_rest_title, shown.name))
                 .setContentText(next ?: getString(R.string.notif_rest_text))
                 .setWhen(rest.endsAtEpochMs)
                 .setChronometerCountDown(true)
