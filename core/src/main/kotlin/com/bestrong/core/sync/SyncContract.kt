@@ -170,6 +170,8 @@ data class SharedSettings(
     val weeklyCap: Double? = null,
     /** Mancuernas apuntadas como total del par (elegido en el móvil): el reloj muestra y entiende el mismo peso. */
     val dumbbellTotal: Boolean = false,
+    /** Planificación de esta semana y la siguiente (lunes en epochDay → día 1-7 → rutina): «hoy toca» del reloj. */
+    val weekPlans: Map<Long, Map<Int, String>> = emptyMap(),
 ) {
     /** 2 con [dumbbellTotal] en un ejercicio con mancuernas; si no, 1 (el peso se guarda siempre por mancuerna). */
     fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =

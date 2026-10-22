@@ -139,7 +139,14 @@ class AppSync @Inject constructor(
             emitAll(repository.history.dropWhile { it.isEmpty() }.map(::bestsOf))
             // La primera lista de la base de datos suele ser la misma que ya se leyó: no se reenvía
         }.distinctUntilChanged().flowOn(Dispatchers.Default)
-        combine(settings.settings, repository.activeProgram, notes, bests, planning.state.map { it.weeklyCap }.distinctUntilChanged()) { s, program, pinned, (best1rm, heaviest), cap ->
+        combine(
+            settings.settings, repository.activeProgram, notes, bests,
+            planning.state.combine(com.bestrong.mobile.widget.dayTicks()) { p, day ->
+                // El tope semanal y la planificación de esta semana y la siguiente (el reloj elige con ella qué toca hoy)
+                val monday = day.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                p.weeklyCap to listOf(monday, monday.plusWeeks(1)).associate { it.toEpochDay() to p.planFor(it).days }.filterValues { it.isNotEmpty() }
+            }.distinctUntilChanged(),
+        ) { s, program, pinned, (best1rm, heaviest), (cap, weekPlans) ->
             SharedSettings(
                 s.unit, s.progressionEnabled, s.restVibration,
                 weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal,
@@ -153,6 +160,7 @@ class AppSync @Inject constructor(
                 weeklyCardioMin = s.weeklyCardioMin,
                 dumbbellTotal = s.dumbbellTotal,
                 weeklyCap = cap,
+                weekPlans = weekPlans,
                 pinnedNotes = pinned,
                 warmupRestSeconds = s.warmupRestSeconds,
                 bestOneRepMaxKg = best1rm,
@@ -169,7 +177,9 @@ class AppSync @Inject constructor(
             // espera y el reloj recibiría «sin rutinas» (vacía de verdad solo si la base de datos también lo está)
             repository.routines.first { it.isNotEmpty() || repository.routinesOnce().isEmpty() }
             // La sesión de hoy del programa activo va la primera, con sus cargas calculadas
-            combine(repository.routines, repository.activeProgram, repository.history) { routines, program, history ->
+            // También al cambiar de día o de mesociclo: la semana de descarga aligera la sesión del reloj
+            val deloadInputs = combine(planning.state.map { it.mesocycle }.distinctUntilChanged(), com.bestrong.mobile.widget.dayTicks()) { m, d -> m to d }
+            combine(repository.routines, repository.activeProgram, repository.history, deloadInputs) { routines, program, history, _ ->
                 watchPush.routinesForWatch(routines, program, history)
             }.debounce(1_000).distinctUntilChanged().collect { watchSync.pushRoutines(it) }
         }

@@ -174,12 +174,20 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         get() = prefs.getFloat(KEY_REP_THRESHOLD, 1.2f)
         set(value) = prefs.edit { putFloat(KEY_REP_THRESHOLD, value) }
 
-    /** «Hoy toca»: la sesión del programa activo o la rutina que más tiempo lleva sin hacerse. */
+    /**
+     * «Hoy toca»: la sesión del programa activo (si no se ha hecho ya hoy en el reloj), la planificada para hoy en el
+     * móvil o la rutina que más tiempo lleva sin hacerse; lo mismo que Inicio y el widget del móvil.
+     */
     fun todayRoutine(): Routine? {
-        val routines = _routines.value.filter { it.exercises.isNotEmpty() }
-        routines.firstOrNull { it.id.startsWith(com.bestrong.core.training.Periodization.ROUTINE_PREFIX) }?.let { return it }
-        val last = _history.value.groupBy { it.routineId }.mapValues { (_, ws) -> ws.maxOf { it.startedAtEpochMs } }
-        return routines.minByOrNull { last[it.id] ?: 0L }
+        val (program, routines) = _routines.value.filter { it.exercises.isNotEmpty() }
+            .partition { it.id.startsWith(com.bestrong.core.training.Periodization.ROUTINE_PREFIX) }
+        val today = java.time.LocalDate.now()
+        val startOfToday = today.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val doneToday = _history.value.filter { it.startedAtEpochMs >= startOfToday }.mapNotNull { it.routineId }.toSet()
+        program.firstOrNull { it.id !in doneToday }?.let { return it }
+        val monday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)).toEpochDay()
+        val planned = _settings.value.weekPlans[monday]?.get(today.dayOfWeek.value)
+        return com.bestrong.core.training.QuickRoutines.pick(routines, _history.value, planned, startOfToday, 1).firstOrNull()
     }
 
     /** Rutina creada en el reloj: se guarda aquí y se envía al móvil. */
