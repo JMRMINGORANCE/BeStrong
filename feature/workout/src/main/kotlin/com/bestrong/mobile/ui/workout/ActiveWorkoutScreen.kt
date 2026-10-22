@@ -914,7 +914,7 @@ private fun ExerciseCard(
                             unilateral = we.exercise.unilateral,
                             onRepsRight = { vm.updateSetFields(we.id, set.id) { s -> s.copy(repsRight = it) } },
                             onDistance = { vm.updateSetFields(we.id, set.id) { s -> s.copy(distanceM = it) } },
-                            onStartTimer = { vm.startCardio(we.id, set.id) },
+                            onStartTimer = { if (we.exercise.tracking == TrackingType.CARDIO) vm.startCardio(we.id, set.id) else vm.startTimedSet() },
                             onNote = { vm.updateSetFields(we.id, set.id) { s -> s.copy(note = it) } },
                             onAssisted = { vm.updateSetFields(we.id, set.id) { s -> s.copy(assisted = it) } },
                             followingCount = WorkoutEditor.followingCount(we, set.id),

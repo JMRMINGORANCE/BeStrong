@@ -300,9 +300,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         s.copy(exerciseIncrementKg = if (kg == null) s.exerciseIncrementKg - exerciseId else s.exerciseIncrementKg + (exerciseId to kg))
     }
 
-    fun savePinnedNote(exerciseId: String, text: String) {
-        viewModelScope.launch { media.saveNote(exerciseId, text.trim()) }
-    }
+    fun savePinnedNote(exerciseId: String, text: String) = viewModelScope.launch { media.saveNote(exerciseId, text.trim()) }
 
     /** Por ejercicio: (mejor 1RM estimado, peso máximo) del historial, para marcar récords en vivo. */
     val bests: StateFlow<Map<String, Pair<Double, Double>>> = athleteHistory.map { h ->
@@ -760,6 +758,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** El entreno en texto (series, RPE), como «Compartir como texto» del historial. */
     fun shareText(workout: Workout): String = actions.shareText(workout) { it.displayName(appContext) }
     fun skipRest() = restTimer.skip()
+    fun startTimedSet() = restTimer.skipFor(workout.value?.id)
 
     fun finish() {
         if (partnerMode.value) {

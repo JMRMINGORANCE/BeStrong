@@ -362,7 +362,12 @@ class HistoryViewModel @Inject constructor(
             pausedTotalMs = 0,
             pausedAtEpochMs = null,
             exercises = w.exercises.map { we ->
-                we.copy(sets = we.sets.map { s -> s.copy(completedAtEpochMs = s.completedAtEpochMs?.plus(shift), startedAtEpochMs = s.startedAtEpochMs?.plus(shift)) })
+                // Dentro del nuevo horario (sin las pausas, el entreno acaba antes: como al copiarlo a otro día)
+                we.copy(
+                    sets = we.sets.map { s ->
+                        s.copy(completedAtEpochMs = s.completedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) }, startedAtEpochMs = s.startedAtEpochMs?.let { (it + shift).coerceIn(startMs, endMs) })
+                    },
+                )
             },
         )
     }

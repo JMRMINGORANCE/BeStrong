@@ -389,7 +389,11 @@ fun SetRow(
                 }
                 // Series por tiempo: cuenta atrás que marca la serie al acabar
                 if (tracking == TrackingType.DURATION && !set.completed && set.durationSec > 0) {
-                    IconButton(onClick = { timing = true }) { Icon(Icons.Default.Timer, stringResource(R.string.timed_set_start)) }
+                    // También avisa al empezar (se acaba el descanso que quedara: sin «ya» ni aviso de descanso largo a mitad)
+                    IconButton(onClick = {
+                        onStartTimer()
+                        timing = true
+                    }) { Icon(Icons.Default.Timer, stringResource(R.string.timed_set_start)) }
                 }
                 FilledIconToggleButton(
                     checked = set.completed,

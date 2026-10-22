@@ -72,19 +72,10 @@ object WorkoutEditor {
         /** Fin del descanso en marcha (lo que le queda también cuenta). */
         restEndsAtEpochMs: Long? = null,
     ): Int {
+        // En pausa, el cronómetro de cardio está parado donde se paró (como al marcarlo)
+        val clock = stopwatchEnd(workout, nowEpochMs)
         val pending = workout.exercises.withIndex().flatMap { (i, we) ->
-            val group = supersetGroup(workout, i)
-            we.sets.withIndex().filter { !it.value.completed }.map { (k, set) ->
-                // Se descansa al cerrar la ronda: si ningún ejercicio posterior del grupo tiene esa serie pendiente
-                val closesRound = group.filter { it > i }.none { j -> workout.exercises[j].sets.getOrNull(k)?.completed == false }
-                // Cronómetro en marcha: solo lo que le queda
-                val left = set.startedAtEpochMs?.let { (set.durationSec - ((nowEpochMs - it) / 1000).toInt()).coerceAtLeast(0) } ?: set.durationSec
-                // Como en afterSetCompleted: fuera de superserie no se descansa antes de un drop set
-                // y tras un calentamiento basta el descanso corto
-                val nextIsDrop = we.sets.drop(k + 1).firstOrNull { !it.completed }?.type == SetType.DROP
-                val rest = if (set.type == SetType.WARMUP && group.size == 1) we.restSeconds.coerceAtMost(warmupRestSeconds) else we.restSeconds
-                maxOf(if (set.isRunning) 0 else secondsPerSet, left) to if (closesRound && !nextIsDrop) rest else 0
-            }
+            we.sets.withIndex().filter { !it.value.completed }.map { (k, set) -> pendingCost(workout, i, k, set, secondsPerSet, clock, warmupRestSeconds) }
         }
         if (pending.isEmpty()) return 0
         val restLeft = restEndsAtEpochMs?.let { ((it - nowEpochMs) / 1000).toInt().coerceAtLeast(0) } ?: 0
@@ -612,6 +603,25 @@ object WorkoutEditor {
             else -> null
         }
     }
+
+    /** (tiempo de la serie, descanso tras ella) para [estimatedRemainingSeconds], como lo hará [afterSetCompleted]. */
+    private fun pendingCost(workout: Workout, i: Int, k: Int, set: WorkoutSet, secondsPerSet: Int, clock: Long, warmupRestSeconds: Int): Pair<Int, Int> {
+        val we = workout.exercises[i]
+        val group = supersetGroup(workout, i)
+        val warm = set.type == SetType.WARMUP
+        // La ronda se cuenta con las series efectivas (un calentamiento no la descuadra; un drop set va con la suya)
+        val round = (we.sets.take(k + 1).count(::isRoundSet) - 1).coerceAtLeast(0)
+        // Se descansa al cerrar la ronda (ningún ejercicio posterior del grupo la tiene pendiente) o tras un calentamiento
+        val closesRound = warm || group.filter { it > i }.none { j -> workout.exercises[j].sets.filter(::isRoundSet).getOrNull(round)?.completed == false }
+        // Cronómetro en marcha: solo lo que le queda
+        val left = set.startedAtEpochMs?.let { (set.durationSec - ((clock - it) / 1000).toInt()).coerceAtLeast(0) } ?: set.durationSec
+        // Antes de un drop set no se descansa, y tras un calentamiento basta el descanso corto
+        val nextIsDrop = we.sets.drop(k + 1).firstOrNull { !it.completed }?.type == SetType.DROP
+        val rest = if (warm) we.restSeconds.coerceAtMost(warmupRestSeconds) else we.restSeconds
+        return maxOf(if (set.isRunning) 0 else secondsPerSet, left) to if (closesRound && !nextIsDrop) rest else 0
+    }
+
+    private fun isRoundSet(s: WorkoutSet) = s.type != SetType.WARMUP && s.type != SetType.DROP
 
     /** [afterSetCompleted] dentro de una superserie: (siguiente, descanso), o null si el grupo ya está hecho. */
     private fun supersetNext(workout: Workout, group: List<Int>, index: Int, warmupRestSeconds: Int): Pair<Int, Int>? {
