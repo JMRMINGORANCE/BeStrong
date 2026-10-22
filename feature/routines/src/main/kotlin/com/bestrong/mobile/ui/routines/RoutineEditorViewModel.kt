@@ -171,12 +171,11 @@ class RoutineEditorViewModel @Inject constructor(
             r.copy(
                 exercises = r.exercises + ids.mapNotNull { repo.exercise(it) }.map { ex ->
                     val prev = lookup(ex.id)
+                    // Las reps planificadas, no las hechas: hacer 10/8/7 en un 3×10 no baja el plan
                     val sets = if (prev.isNotEmpty()) {
-                        prev.map { RoutineSet(it.weightKg, it.reps, it.durationSec, it.type) }
-                    } else if (ex.tracking == TrackingType.CARDIO) {
-                        listOf(RoutineSet(reps = 0, durationSec = TrackingType.DEFAULT_CARDIO_SEC))
+                        prev.map { RoutineSet(it.weightKg, it.targetReps ?: it.reps, it.durationSec, it.type) }
                     } else {
-                        List(3) { RoutineSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
+                        RoutineSet.defaultsFor(ex.tracking)
                     }
                     RoutineExercise(exercise = ex, sets = sets)
                 },

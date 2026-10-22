@@ -9,6 +9,7 @@ import com.bestrong.core.model.SetType
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
+import com.bestrong.core.model.withEdited
 import com.bestrong.core.stats.Strength
 import com.bestrong.core.training.Goal
 import com.bestrong.core.training.Injuries
@@ -256,5 +257,21 @@ class CoreFixesTest {
         val resumed = com.bestrong.core.session.WorkoutEditor.resume(paused, 600_000)
         val finished = com.bestrong.core.session.WorkoutEditor.toggleSetCompleted(resumed, "e", "s", 660_000)
         assertEquals(120, finished.exercises[0].sets[0].durationSec)
+    }
+
+    @Test
+    fun searchMatchesNamesInBothLanguages() {
+        val ext = ExerciseLibrary.byId("leg_extension")!!
+        val found = ExerciseLibrary.search(ExerciseLibrary.all, "leg extension", nameOf = { it.name })
+        assertTrue(ext in found)
+    }
+
+    @Test
+    fun editedTrackingResetsRoutineSets() {
+        val custom = com.bestrong.core.model.Exercise(id = "wall", name = "Sentadilla en pared", primaryMuscle = bench.primaryMuscle, equipment = Equipment.BODYWEIGHT, isCustom = true)
+        val re = com.bestrong.core.model.RoutineExercise(exercise = custom, sets = List(3) { com.bestrong.core.model.RoutineSet(reps = 10) }, targetRpe = 8.0)
+        val edited = re.withEdited(custom.copy(tracking = com.bestrong.core.model.TrackingType.DURATION))
+        assertEquals(List(3) { 30 }, edited.sets.map { it.durationSec })
+        assertEquals(null, edited.targetRpe)
     }
 }

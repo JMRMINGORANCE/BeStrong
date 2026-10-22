@@ -9,7 +9,16 @@ data class RoutineSet(
     val reps: Int = 10,
     val durationSec: Int = 0,
     val type: SetType = SetType.NORMAL,
-)
+) {
+    companion object {
+        /** Series de partida para un ejercicio sin historial: 3×10, 3×30 s o un bloque de cardio. */
+        fun defaultsFor(tracking: TrackingType, count: Int = 3): List<RoutineSet> = when (tracking) {
+            TrackingType.CARDIO -> listOf(RoutineSet(reps = 0, durationSec = TrackingType.DEFAULT_CARDIO_SEC))
+            TrackingType.DURATION -> List(count.coerceAtLeast(1)) { RoutineSet(reps = 0, durationSec = 30) }
+            else -> List(count.coerceAtLeast(1)) { RoutineSet(reps = 10) }
+        }
+    }
+}
 
 @Serializable
 data class RoutineExercise(
@@ -188,3 +197,13 @@ fun Routine.moveKeepingSupersets(from: Int, down: Boolean): Routine {
     }
     return copy(exercises = list)
 }
+
+/**
+ * El ejercicio corregido en la rutina. Con otro tipo de registro, las series vuelven a las de partida (las de antes
+ * ya no encajan: reps donde ahora van segundos) y el RPE objetivo solo queda con peso × reps.
+ */
+fun RoutineExercise.withEdited(ex: Exercise): RoutineExercise = copy(
+    exercise = ex,
+    sets = if (exercise.tracking != ex.tracking) RoutineSet.defaultsFor(ex.tracking, sets.size) else sets,
+    targetRpe = targetRpe.takeIf { ex.tracking == TrackingType.WEIGHT_REPS },
+)

@@ -321,7 +321,7 @@ class ExercisesViewModel @Inject constructor(
             settingsStore.update { s -> if (ex.id in s.exerciseBarKg) s.copy(exerciseBarKg = s.exerciseBarKg - ex.id) else s }
         }
         repo.routinesOnce().filter { r -> r.exercises.any { it.exercise.id == ex.id } }.forEach { r ->
-            repo.saveRoutine(r.copy(exercises = r.exercises.map { if (it.exercise.id == ex.id) it.copy(exercise = ex) else it }))
+            repo.saveRoutine(r.copy(exercises = r.exercises.map { if (it.exercise.id == ex.id) it.withEdited(ex) else it }))
         }
     }
 

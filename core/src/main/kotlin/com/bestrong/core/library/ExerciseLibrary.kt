@@ -266,8 +266,11 @@ object ExerciseLibrary {
             .filter { muscle == null || it.primaryMuscle == muscle || muscle in it.secondaryMuscles }
             .filter { equipment == null || it.equipment == equipment }
             .filter { ex ->
+                // Cualquiera de sus nombres (el de la app, el guardado y en inglés y español): lo que no se encuentra
+                // tampoco se puede crear con ese nombre
+                val names by lazy { listOf(nameOf(ex), ex.name, displayName(ex, "en"), displayName(ex, "es")).map { it.normalized() }.distinct() }
                 q.isBlank() ||
-                    q.split(' ').all { token -> nameOf(ex).normalized().contains(token) } ||
+                    q.split(' ').all { token -> names.any { it.contains(token) } } ||
                     // Un sinónimo vale si contiene lo buscado o todas sus palabras («remo con barra» ya no saca el
                     // remo ergómetro por «remo»)
                     // y «rdl mancuernas» sí saca el peso muerto rumano con mancuernas: cada palabra en el nombre o el sinónimo)
