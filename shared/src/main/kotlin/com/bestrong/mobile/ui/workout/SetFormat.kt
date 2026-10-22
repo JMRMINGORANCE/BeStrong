@@ -27,7 +27,7 @@ fun describeSet(
     TrackingType.DURATION -> "${set.durationSec} s"
     TrackingType.DISTANCE -> (if (set.weightKg > 0) "${unit.format(set.weightKg)} ${unit.label} · " else "") + "${set.distanceM.toInt()} m"
     TrackingType.CARDIO -> cardioText(set.durationSec, set.distanceM, withPace, pace)
-} + (set.repsRight?.let { " | $it" } ?: "") + (set.rpe?.let { " @${it.toString().removeSuffix(".0")}" } ?: "")
+} + (set.repsRight?.let { " | $it" } ?: "") + (set.rpe?.let { " @${com.bestrong.core.util.formatRpe(it)}" } ?: "")
 
 /** «20 min · 3,20 km» (o «12:30» si no son minutos exactos). */
 fun cardioText(durationSec: Int, distanceM: Double, withPace: Boolean = true, pace: com.bestrong.core.util.PaceStyle = com.bestrong.core.util.PaceStyle.PER_KM, paceSec: Int = durationSec): String {

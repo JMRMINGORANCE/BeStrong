@@ -6,8 +6,12 @@ import kotlin.math.roundToLong
  * Separador decimal del idioma: coma en español y casi toda Europa, punto en inglés. Los pesos salían siempre con
  * coma («82,5 kg» en inglés, junto a «12.5 km»). Al leer lo escrito se aceptan los dos.
  */
+// Solo coma o punto: en árabe o persa el separador del sistema (٫) no se puede teclear ni leer en los campos
 fun decimalSeparator(locale: java.util.Locale = java.util.Locale.getDefault()): Char =
-    java.text.DecimalFormatSymbols.getInstance(locale).decimalSeparator
+    if (java.text.DecimalFormatSymbols.getInstance(locale).decimalSeparator == ',') ',' else '.'
+
+/** RPE con el mismo separador que los pesos: «@8,5» junto a «82,5 kg» (y no «@8.5»). */
+fun formatRpe(rpe: Double): String = formatWeight(rpe)
 
 /** 80.0 → "80", 82.5 → "82,5" (o «82.5» en inglés) */
 fun formatWeight(kg: Double): String {

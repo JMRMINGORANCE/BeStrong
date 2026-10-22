@@ -28,6 +28,6 @@ fun TargetRpeChips(tracking: TrackingType, current: Double?, onPick: (Double?) -
     FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(stringResource(R.string.target_rpe), style = MaterialTheme.typography.labelMedium, modifier = Modifier.align(Alignment.CenterVertically))
         FilterChip(selected = current == null, onClick = { onPick(null) }, label = { Text("—") })
-        for (r in TARGET_RPES) FilterChip(selected = current == r, onClick = { onPick(r) }, label = { Text(r.toString().removeSuffix(".0")) })
+        for (r in TARGET_RPES) FilterChip(selected = current == r, onClick = { onPick(r) }, label = { Text(com.bestrong.core.util.formatRpe(r)) })
     }
 }

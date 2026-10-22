@@ -1076,7 +1076,7 @@ private fun TargetRpeLine(vm: ActiveWorkoutViewModel, we: com.bestrong.core.mode
     val hint = load?.let { (kg, reps) -> " · " + stringResource(R.string.target_rpe_hint, unit.format(kg * factor, withUnit = true), reps) }.orEmpty()
     Text(
         // Como el RPE de las series («@8.5»)
-        stringResource(R.string.target_rpe_line, rpe.toString().removeSuffix(".0")) + hint,
+        stringResource(R.string.target_rpe_line, com.bestrong.core.util.formatRpe(rpe)) + hint,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.secondary,
         // Tocar pone ese peso en las series pendientes
@@ -1121,8 +1121,8 @@ private fun RpeVsTargetLines(w: com.bestrong.core.model.Workout) {
             stringResource(
                 R.string.summary_rpe_line,
                 ExerciseLibrary.byId(r.exerciseId)?.displayName() ?: r.exerciseName,
-                "%.1f".format(java.util.Locale.ROOT, r.averageRpe).removeSuffix(".0"),
-                r.targetRpe.toString().removeSuffix(".0"),
+                com.bestrong.core.util.formatRpe(Math.round(r.averageRpe * 10) / 10.0),
+                com.bestrong.core.util.formatRpe(r.targetRpe),
             ),
             style = MaterialTheme.typography.bodySmall,
             color = when (r.direction) {

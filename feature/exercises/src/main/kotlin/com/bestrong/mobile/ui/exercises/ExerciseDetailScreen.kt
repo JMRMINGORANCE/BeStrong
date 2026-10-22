@@ -348,7 +348,7 @@ private fun RpeLoadCard(vm: ExercisesViewModel, exercise: com.bestrong.core.mode
             Text(stringResource(R.string.rpe_table_hint, unit.format(e1rm * factor, withUnit = true)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.reps_short), Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                RPE_TABLE_RPES.forEach { Text("@" + it.toString().removeSuffix(".0"), Modifier.weight(1f), fontWeight = FontWeight.Bold) }
+                RPE_TABLE_RPES.forEach { Text("@" + com.bestrong.core.util.formatRpe(it), Modifier.weight(1f), fontWeight = FontWeight.Bold) }
             }
             RPE_TABLE_REPS.forEach { reps ->
                 Row(Modifier.fillMaxWidth()) {

@@ -318,7 +318,7 @@ private fun ScalingLazyListScope.setCorrections(w: Workout, index: Int, session:
         item {
             Button(
                 onClick = { session.cycleLastSetRpe() },
-                label = { Text(stringResource(R.string.last_set_rpe, last.rpe?.toString()?.removeSuffix(".0") ?: "—")) },
+                label = { Text(stringResource(R.string.last_set_rpe, last.rpe?.let { com.bestrong.core.util.formatRpe(it) } ?: "—")) },
                 colors = ButtonDefaults.filledTonalButtonColors(),
                 modifier = Modifier.fillMaxWidth(),
             )

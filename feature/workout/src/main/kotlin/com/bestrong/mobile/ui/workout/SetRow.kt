@@ -234,7 +234,7 @@ fun SetRow(
                         Text(label + (if (set.note.isNotBlank()) " ✎" else "") + (if (set.assisted) " ⚑" else ""), fontWeight = FontWeight.Bold, color = labelColor, textAlign = TextAlign.Center)
                         // Récord en vivo, al momento de marcar la serie
                         if (isRecord) Text("🏆", style = MaterialTheme.typography.labelSmall)
-                        set.rpe?.let { Text("@${it.toString().removeSuffix(".0")}", style = MaterialTheme.typography.labelSmall) }
+                        set.rpe?.let { Text("@${com.bestrong.core.util.formatRpe(it)}", style = MaterialTheme.typography.labelSmall) }
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         // Lo más usado arriba: la lista de tipos y RPE es larga
@@ -256,7 +256,7 @@ fun SetRow(
                         HorizontalDivider()
                         Text(stringResource(R.string.rpe), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                         RPE_VALUES.forEach { v ->
-                            val t = v.toString().removeSuffix(".0")
+                            val t = com.bestrong.core.util.formatRpe(v)
                             DropdownMenuItem(text = { Text((if (set.rpe == v) "✓ " else "") + stringResource(R.string.rpe_value, t)) }, onClick = { onRpe(v); menu = false })
                         }
                         if (set.rpe != null) DropdownMenuItem(text = { Text(stringResource(R.string.rpe_remove)) }, onClick = { onRpe(null); menu = false })

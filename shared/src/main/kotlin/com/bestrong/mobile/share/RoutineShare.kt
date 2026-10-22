@@ -74,7 +74,7 @@ object RoutineShare {
                 y += 16f
                 // RPE objetivo y tempo, si los tiene, en otra línea (drawText no parte el texto)
                 val extras = listOfNotNull(
-                    re.targetRpe?.takeIf { re.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { "RPE " + it.toString().removeSuffix(".0") },
+                    re.targetRpe?.takeIf { re.exercise.tracking == TrackingType.WEIGHT_REPS }?.let { "RPE " + com.bestrong.core.util.formatRpe(it) },
                     re.tempo?.let { context.getString(R.string.tempo) + " " + it },
                 )
                 if (extras.isNotEmpty()) {
