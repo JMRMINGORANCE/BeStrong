@@ -163,7 +163,7 @@ class ProfileViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
     // Solo el sexo de los ajustes: cambiar el tema o las unidades no rehace estos cálculos (son caros con mucho historial)
-    val advanced: StateFlow<AdvancedStats> = combine(repo.history, repo.measurements, settingsStore.settings.map { it.sex }.distinctUntilChanged()) { history, measures, sex ->
+    val advanced: StateFlow<AdvancedStats> = combine(repo.history, repo.measurements, settingsStore.settings.map { it.sex to it.unit }.distinctUntilChanged()) { history, measures, (sex, unit) ->
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val now = System.currentTimeMillis()
@@ -179,7 +179,7 @@ class ProfileViewModel @Inject constructor(
             timeline = Strength.recordTimeline(history, setOf(RecordType.BEST_ONE_REP_MAX)).takeLast(12).reversed(),
             daysSince = Strength.daysSinceTrained(history, today, zone),
             soreness = Strength.soreness(history, now),
-            challenge = challenge(history),
+            challenge = challenge(history, unit),
             load = TrainingLoad.weekly(history, today, zone),
             dayParts = com.bestrong.core.stats.TimeOfDay.stats(history, zone, System.currentTimeMillis()),
             weekdays = com.bestrong.core.stats.TimeOfDay.byWeekday(history, zone, System.currentTimeMillis()),
@@ -187,11 +187,12 @@ class ProfileViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AdvancedStats())
 
     /** El básico con más sesiones: próximo múltiplo de 10 kg de 1RM y cuándo se alcanzará al ritmo actual. */
-    private fun challenge(history: List<com.bestrong.core.model.Workout>): Triple<String, Double, Long>? {
+    private fun challenge(history: List<com.bestrong.core.model.Workout>, unit: com.bestrong.core.util.WeightUnit): Triple<String, Double, Long>? {
         val lift = Strength.STANDARD_LIFTS.maxByOrNull { id -> history.count { w -> w.exercises.any { it.exercise.id == id } } } ?: return null
         val points = WorkoutStats.exerciseProgress(lift, history).filter { it.bestOneRepMax > 0 }.map { it.dateEpochMs to it.bestOneRepMax }
         val best = points.maxOfOrNull { it.second } ?: return null
-        val target = (kotlin.math.floor(best / 10.0) + 1) * 10.0
+        // Múltiplo de 10 en la unidad que se ve (en libras 230 lb, no los 242,5 de 110 kg)
+        val target = unit.toKg((kotlin.math.floor(unit.fromKg(best) / 10.0) + 1) * 10.0)
         val eta = Strength.predictDate(points, target) ?: return null
         return Triple(lift, target, eta)
     }

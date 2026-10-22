@@ -174,13 +174,30 @@ object Strength {
         RecordType.MOST_REPS -> set.recordReps.toDouble()
     }
 
+    /** Semanas seguidas (de lunes a domingo) con algún entreno, la racha más larga de [history]. */
+    fun longestWeeklyStreak(history: List<Workout>, zone: ZoneId): Int =
+        longestRun(history.filter { it.isFinished }.map { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() }.toSet())
+
+    private fun longestRun(days: Set<LocalDate>): Int {
+        var best = 0
+        var run = 0
+        var prev: LocalDate? = null
+        days.map { it.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }.toSortedSet().forEach { w ->
+            run = if (prev?.plusWeeks(1) == w) run + 1 else 1
+            best = maxOf(best, run)
+            prev = w
+        }
+        return best
+    }
+
     /** Logros: hitos de constancia, volumen y fuerza. */
     fun achievements(history: List<Workout>, today: LocalDate, zone: ZoneId, bodyWeightKg: Double?): List<Achievement> {
         val done = history.filter { it.isFinished }
         val count = done.size.toDouble()
         val volumeT = done.sumOf { it.totalVolume } / 1000.0
         val sets = done.sumOf { it.workSetCount }.toDouble()
-        val streak = WorkoutStats.weeklyStreak(done, today, zone).toDouble()
+        // La mejor racha de siempre: un logro conseguido no se pierde por saltarse una semana después
+        val streak = maxOf(longestWeeklyStreak(done, zone), WorkoutStats.weeklyStreak(done, today, zone)).toDouble()
         val best = bestOneRepMax(done)
         val list = mutableListOf(
             Achievement("first_workout", count, 1.0),
@@ -281,15 +298,7 @@ object Strength {
         val inYear = history.filter { it.isFinished && it.startedAtEpochMs in from until to }.sortedBy { it.startedAtEpochMs }
         if (inYear.isEmpty()) return null
         val days = inYear.map { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() }.toSet()
-        val weeks = days.map { it.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)) }.toSortedSet()
-        var best = 0
-        var run = 0
-        var prev: LocalDate? = null
-        weeks.forEach { w ->
-            run = if (prev?.plusWeeks(1) == w) run + 1 else 1
-            best = maxOf(best, run)
-            prev = w
-        }
+        val best = longestRun(days)
         // 1RM de la primera sesión del año frente al mejor del año, por ejercicio
         val firstAndBest = mutableMapOf<String, Pair<Double, Double>>()
         val byId = mutableMapOf<String, com.bestrong.core.model.Exercise>()

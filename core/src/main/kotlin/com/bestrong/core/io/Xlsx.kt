@@ -16,12 +16,12 @@ import java.util.zip.ZipOutputStream
 object Xlsx {
     fun workouts(workouts: List<Workout>, zone: ZoneId = ZoneId.systemDefault(), measurements: List<BodyMeasurement> = emptyList()): ByteArray {
         val fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-        val rows = mutableListOf<List<Any>>(listOf("Fecha", "Entreno", "Ejercicio", "Serie", "Tipo", "Peso (kg)", "Reps", "Segundos", "Metros", "RPE", "1RM est.", "Notas"))
+        val rows = mutableListOf<List<Any>>(listOf("Fecha", "Entreno", "Ejercicio", "Serie", "Tipo", "Peso (kg)", "Reps", "Reps dcha.", "Segundos", "Metros", "RPE", "1RM est.", "Notas"))
         workouts.sortedBy { it.startedAtEpochMs }.forEach { w ->
             val date = fmt.format(Instant.ofEpochMilli(w.startedAtEpochMs).atZone(zone))
             w.exercises.forEach { we ->
                 we.sets.filter { it.completed }.forEachIndexed { i, s ->
-                    rows += listOf(date, w.name, we.exercise.name, i + 1, s.type.name, s.weightKg, s.reps, s.durationSec, s.distanceM, s.rpe ?: "", Math.round(s.estimatedOneRepMax * 10) / 10.0, s.note)
+                    rows += listOf(date, w.name, we.exercise.name, i + 1, s.type.name, s.weightKg, s.reps, s.repsRight ?: "", s.durationSec, s.distanceM, s.rpe ?: "", Math.round(s.estimatedOneRepMax * 10) / 10.0, s.note)
                 }
             }
         }

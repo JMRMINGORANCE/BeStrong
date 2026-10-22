@@ -58,7 +58,7 @@
     <ID>ReturnCount:OneRepMax.kt$OneRepMax$fun estimate(weightKg: Double, reps: Int, formula: Formula): Double</ID>
     <ID>ReturnCount:Periodization.kt$Periodization$internal fun linearWeight(exerciseId: String, s: LoadScheme.Linear, active: ActiveProgram, done: List&lt;Workout&gt;): Double</ID>
     <ID>ReturnCount:Planning.kt$Calisthenics$fun next(exerciseId: String, history: List&lt;Workout&gt;): String?</ID>
-    <ID>ReturnCount:ProfileViewModel.kt$ProfileViewModel$private fun challenge(history: List&lt;com.bestrong.core.model.Workout&gt;): Triple&lt;String, Double, Long&gt;?</ID>
+    <ID>ReturnCount:ProfileViewModel.kt$ProfileViewModel$private fun challenge(history: List&lt;com.bestrong.core.model.Workout&gt;, unit: com.bestrong.core.util.WeightUnit): Triple&lt;String, Double, Long&gt;?</ID>
     <ID>ReturnCount:Strength.kt$Strength$fun predictDate(points: List&lt;Pair&lt;Long, Double&gt;&gt;, target: Double, nowEpochMs: Long = System.currentTimeMillis()): Long?</ID>
     <ID>ReturnCount:Strength.kt$Strength$fun standing(exerciseId: String, oneRepMaxKg: Double, bodyWeightKg: Double, sex: Sex): StrengthStanding?</ID>
     <ID>ReturnCount:Tempo.kt$Tempo.Companion$fun parse(text: String?): Tempo?</ID>

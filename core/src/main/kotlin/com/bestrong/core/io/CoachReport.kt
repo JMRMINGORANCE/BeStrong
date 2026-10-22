@@ -53,14 +53,22 @@ object CoachReport {
                 else -> reps
             }
             TrackingType.DURATION -> "${s.durationSec}s"
-            TrackingType.DISTANCE -> "${s.distanceM.toInt()}m"
+            // Con su peso (paseo del granjero: «40×30m»), como en la app
+            TrackingType.DISTANCE -> distance(s, unit)
             // Con distancia, también el ritmo (min/km): lo que mira quien entrena a alguien que corre
-            TrackingType.CARDIO -> "${s.durationSec / 60}min" + if (s.distanceM > 0) " " + decimal(s.distanceM / 1000) + "km" + com.bestrong.core.util.paceText(s.durationSec, s.distanceM, pace)?.let { " · $it" }.orEmpty() else ""
+            TrackingType.CARDIO -> clock(s.durationSec) + if (s.distanceM > 0) " " + decimal(s.distanceM / 1000) + "km" + com.bestrong.core.util.paceText(s.durationSec, s.distanceM, pace)?.let { " · $it" }.orEmpty() else ""
         }
         // Misma abreviatura que en el historial de la app
         val warm = if (s.type == SetType.WARMUP) SetType.WARMUP.short + ":" else ""
         return warm + body + extras(s)
     }
+
+    /** «40×30m» con peso (paseo del granjero) o «30m» sin él. */
+    private fun distance(s: WorkoutSet, unit: com.bestrong.core.util.WeightUnit): String =
+        (if (s.weightKg > 0) "${unit.format(s.weightKg)}×" else "") + "${s.distanceM.toInt()}m"
+
+    /** «12min» o «12:30» (no «12min» para 12:30 ni «0min» para 45 s). */
+    private fun clock(sec: Int): String = if (sec % 60 == 0) "${sec / 60}min" else "%d:%02d".format(sec / 60, sec % 60)
 
     /** RPE y nota de la serie: « @8,5 (lento)». */
     private fun extras(s: WorkoutSet): String = (s.rpe?.let { " @" + decimal(it) }.orEmpty()) + (if (s.note.isNotBlank()) " (${s.note})" else "")
