@@ -13,12 +13,14 @@ object RestSync {
      * descanso ya pasó o la serie no lleva descanso; null si no hay ninguna serie nueva (no se toca el descanso).
      */
     fun remainingAfterRemote(before: Workout?, after: Workout, nowEpochMs: Long, warmupRestSeconds: Int): Int? {
-        if (before == null || before.id != after.id) return null
+        if (before?.id != after.id) return null
         val latestBefore = before.exercises.flatMap { it.sets }.mapNotNull { s -> s.completedAtEpochMs?.takeIf { s.completed } }.maxOrNull() ?: 0L
-        val (index, doneAt) = after.exercises.withIndex()
+        val newest = after.exercises.withIndex()
             .flatMap { (i, we) -> we.sets.mapNotNull { s -> s.completedAtEpochMs?.takeIf { s.completed && it > latestBefore }?.let { i to it } } }
-            .maxByOrNull { it.second } ?: return null
-        val rest = WorkoutEditor.afterSetCompleted(after, index, warmupRestSeconds).second
-        return (rest - ((nowEpochMs - doneAt) / 1000).toInt()).coerceAtLeast(0)
+            .maxByOrNull { it.second }
+        return newest?.let { (index, doneAt) ->
+            val rest = WorkoutEditor.afterSetCompleted(after, index, warmupRestSeconds).second
+            (rest - ((nowEpochMs - doneAt) / 1000).toInt()).coerceAtLeast(0)
+        }
     }
 }

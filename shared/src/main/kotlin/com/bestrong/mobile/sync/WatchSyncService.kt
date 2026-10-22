@@ -129,14 +129,17 @@ class WatchSyncService : WearableListenerService() {
                 } else {
                     DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                         ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }
-                        ?.let {
-                            val before = repository.activeOnce()
-                            repository.applyRemoteActive(it)
-                            repository.activeOnce()?.let { after -> actions.followRemoteRest(before, after) }
-                        }
+                        ?.let { applyActive(it) }
                 }
             }
         }
+    }
+
+    /** Entreno en curso llegado del reloj: se fusiona y el descanso sigue a la última serie marcada. */
+    private suspend fun applyActive(remote: com.bestrong.core.model.Workout) {
+        val before = repository.activeOnce()
+        repository.applyRemoteActive(remote)
+        repository.activeOnce()?.let { actions.followRemoteRest(before, it) }
     }
 
     override fun onMessageReceived(event: MessageEvent) {
