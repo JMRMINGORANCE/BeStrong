@@ -205,7 +205,13 @@ class HomeViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** Semana actual: días entrenados frente al objetivo y adherencia de las 8 semanas anteriores. */
-    val week: StateFlow<WeekProgress> = combine(repo.history, repo.activeProgram, settingsStore.settings, planning.state, dayTick) { history, active, s, plan, _ ->
+    val week: StateFlow<WeekProgress> = combine(
+        repo.history,
+        repo.activeProgram,
+        settingsStore.settings,
+        combine(planning.state, repo.routines, ::Pair),
+        dayTick,
+    ) { history, active, s, (plan, routines), _ ->
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val goal = active?.weeklyGoal ?: s.weeklyGoal
@@ -221,7 +227,7 @@ class HomeViewModel @Inject constructor(
             // Días con una rutina planificada (Planificar o el programa a medida)
             // (solo rutinas que siguen existiendo: una borrada no deja el día marcado)
             plannedDays = plan.planFor(today.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))).days
-                .filterValues { id -> repo.routines.value.any { it.id == id } }.keys.map { DayOfWeek.of(it) }.toSet(),
+                .filterValues { id -> routines.any { it.id == id && !it.archived } }.keys.map { DayOfWeek.of(it) }.toSet(),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), WeekProgress())
 

@@ -143,28 +143,29 @@ private fun PlanCard(title: String, content: @Composable () -> Unit) {
 
 @Composable
 private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
-    var weekOffset by rememberSaveable { mutableIntStateOf(0) }
-    val weekStart = ui.weekStart.plusWeeks(weekOffset.toLong())
+    // Lunes que se está mirando (null = la semana actual): fijo aunque pase la medianoche del domingo
+    var shownMonday by rememberSaveable { mutableStateOf<Long?>(null) }
+    val weekStart = shownMonday?.let(LocalDate::ofEpochDay) ?: ui.weekStart
     val plan = ui.state.planFor(weekStart)
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     var cellWidth by remember { mutableIntStateOf(1) }
     PlanCard(stringResource(R.string.cal_title)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { weekOffset-- }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.week_previous)) }
+            IconButton(onClick = { shownMonday = weekStart.minusWeeks(1).toEpochDay() }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.week_previous)) }
             Text(
                 stringResource(R.string.cal_week_of, formatShortDate(weekStart.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli())),
                 // Lejos de hoy, tocar la fecha vuelve a esta semana
                 Modifier.weight(1f).then(
-                    if (weekOffset != 0) {
-                        Modifier.clickable(onClickLabel = stringResource(R.string.week_current)) { weekOffset = 0 }.minimumInteractiveComponentSize()
+                    if (weekStart != ui.weekStart) {
+                        Modifier.clickable(onClickLabel = stringResource(R.string.week_current)) { shownMonday = null }.minimumInteractiveComponentSize()
                     } else {
                         Modifier
                     },
                 ),
                 textAlign = TextAlign.Center,
-                color = if (weekOffset != 0) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Unspecified,
+                color = if (weekStart != ui.weekStart) MaterialTheme.colorScheme.primary else androidx.compose.ui.graphics.Color.Unspecified,
             )
-            IconButton(onClick = { weekOffset++ }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.week_next)) }
+            IconButton(onClick = { shownMonday = weekStart.plusWeeks(1).toEpochDay() }) { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.week_next)) }
         }
         Text(stringResource(R.string.cal_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(Modifier.fillMaxWidth().onSizeChanged { cellWidth = (it.width / 7).coerceAtLeast(1) }, horizontalArrangement = Arrangement.spacedBy(4.dp)) {

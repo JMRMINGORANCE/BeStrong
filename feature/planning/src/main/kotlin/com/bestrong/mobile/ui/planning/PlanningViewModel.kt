@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -75,8 +76,15 @@ class PlanningViewModel @Inject constructor(
     /** Hora de entrenar habitual (la de los recordatorios): la que se usa al añadir al calendario o exportar. */
     val usualTime: java.time.LocalTime get() = settings.settings.value.let { java.time.LocalTime.of(it.reminderHour, it.reminderMinute) }
 
-    val ui: StateFlow<PlanningUi> = combine(store.state, repo.history, repo.routines) { s, history, routines ->
-        val today = LocalDate.now(ZoneId.systemDefault())
+    /** Fecha de hoy mirada cada hora: con Planificar abierto pasada la medianoche, la semana y el mesociclo avanzan. */
+    private val dayTick = kotlinx.coroutines.flow.flow {
+        while (true) {
+            emit(LocalDate.now(ZoneId.systemDefault()))
+            kotlinx.coroutines.delay(java.util.concurrent.TimeUnit.HOURS.toMillis(1))
+        }
+    }.distinctUntilChanged()
+
+    val ui: StateFlow<PlanningUi> = combine(store.state, repo.history, repo.routines, dayTick) { s, history, routines, today ->
         val calis = Calisthenics.chains.map { (name, chain) ->
             // Nivel más alto de la cadena que ya se ha hecho
             val done = chain.lastOrNull { id -> history.any { w -> w.exercises.any { it.exercise.id == id && it.completedSets.isNotEmpty() } } }
