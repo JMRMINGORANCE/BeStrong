@@ -444,8 +444,14 @@ private fun StepBar(field: StepField, stepLabel: String, onStep: (Int) -> Unit) 
         )
         val minus = stringResource(R.string.step_decrease, stepLabel)
         val plus = stringResource(R.string.step_increase, stepLabel)
-        FilledTonalButton(onClick = { onStep(-1) }, modifier = Modifier.semantics { contentDescription = minus }) { Text("−$stepLabel") }
-        FilledTonalButton(onClick = { onStep(1) }, modifier = Modifier.semantics { contentDescription = plus }) { Text("+$stepLabel") }
+        // Un toque físico por paso: se pulsan seguidos sin mirar
+        val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+        fun step(d: Int) {
+            haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+            onStep(d)
+        }
+        FilledTonalButton(onClick = { step(-1) }, modifier = Modifier.semantics { contentDescription = minus }) { Text("−$stepLabel") }
+        FilledTonalButton(onClick = { step(1) }, modifier = Modifier.semantics { contentDescription = plus }) { Text("+$stepLabel") }
     }
 }
 

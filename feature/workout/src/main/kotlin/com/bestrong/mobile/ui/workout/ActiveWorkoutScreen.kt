@@ -312,7 +312,16 @@ fun ActiveWorkoutScreen(
         snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             Column {
-                if (!expanded && posture != FoldPosture.TABLETOP) rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal)) }
+                // Entra y sale deslizándose (la lista no salta al marcar una serie o saltar el descanso)
+                var shownRest by remember { mutableStateOf(rest) }
+                if (rest != null) shownRest = rest
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = rest != null && !expanded && posture != FoldPosture.TABLETOP,
+                    enter = androidx.compose.animation.slideInVertically { it } + androidx.compose.animation.fadeIn(),
+                    exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
+                ) {
+                    shownRest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal)) }
+                }
                 // Modo una mano: lo importante abajo, al alcance del pulgar
                 if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
             }
