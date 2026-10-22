@@ -48,7 +48,7 @@ data class GymProfile(
     fun nearestLoad(targetKg: Double, equipment: Equipment, unit: WeightUnit = WeightUnit.KG): Double = when {
         equipment == Equipment.BARBELL || equipment == Equipment.SMITH -> nearestBarbell(targetKg, unit)
         // Las kettlebells no van con el juego de mancuernas (32 kg no pasa a 30 si las mancuernas acaban ahí)
-        equipment == Equipment.DUMBBELL -> if (dumbbellsKg.isEmpty()) targetKg else dumbbellsKg.minBy { kotlin.math.abs(it - targetKg) }
+        equipment == Equipment.DUMBBELL -> dumbbellsIn(unit).let { d -> if (d.isEmpty()) targetKg else d.minBy { kotlin.math.abs(it - targetKg) } }
         else -> targetKg
     }
 
@@ -62,9 +62,16 @@ data class GymProfile(
             nearestBarbell(currentKg + step, unit).let { if (it > currentKg + 1e-6) it else currentKg + step }
         }
         // Las mancuernas se guardan en kg (también las de libras): se comparan igual en las dos unidades
-        equipment == Equipment.DUMBBELL -> dumbbellsKg.filter { it > currentKg + 1e-6 }.minOrNull() ?: currentKg
+        equipment == Equipment.DUMBBELL -> dumbbellsIn(unit).filter { it > currentKg + 1e-6 }.minOrNull() ?: currentKg
         else -> currentKg
     }
+
+    /**
+     * Mancuernas del gimnasio para [unit] (en kg). En libras, solo las que son de libras (a media libra): unas de 2 kg
+     * no pasan a «30,9 lb»; si no hay ninguna, cualquier peso (como los discos con [platesIn]).
+     */
+    private fun dumbbellsIn(unit: WeightUnit): List<Double> =
+        if (unit == WeightUnit.KG) dumbbellsKg else dumbbellsKg.filter { val lb = unit.fromKg(it) * 2; kotlin.math.abs(lb - kotlin.math.round(lb)) < 0.01 }
 
     /**
      * Peso alcanzable con la barra y los discos (lo mismo que monta la calculadora de discos, por lado). En libras,

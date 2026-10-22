@@ -243,6 +243,12 @@ class AppSync @Inject constructor(
         }
         // Recordatorios y copia de seguridad semanal (WorkManager)
         scheduleReminders()
+        // Tras reinstalar o cambiar de móvil vuelve la carpeta guardada, pero no su permiso: se avisa ya (no a la semana)
+        settings.settings.value.backupFolderUri?.let { u ->
+            if (context.contentResolver.persistedUriPermissions.none { it.uri.toString() == u && it.isWritePermission }) {
+                settings.update { it.copy(backupFolderUri = null, backupFolderLost = true) }
+            }
+        }
         scope.launch {
             settings.settings.map { it.backupFolderUri != null }.distinctUntilChanged()
                 .collect { on -> runCatching { AutoBackupWorker.schedule(context, on) }.onFailure { Log.w("AppSync", "Copia de seguridad", it) } }

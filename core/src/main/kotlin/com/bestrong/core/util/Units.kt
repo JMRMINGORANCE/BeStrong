@@ -33,6 +33,13 @@ enum class WeightUnit(val label: String, val kgPerUnit: Double, val defaultIncre
     /** Paso del bisel / botones ±. */
     fun stepKg(): Double = toKg(defaultIncrement)
 
+    /**
+     * El incremento propio de un ejercicio ([storedKg]) si es uno de los de esta unidad; si no (se eligió en la otra:
+     * 2,5 kg son 5,51 lb), el de siempre. Lo guardado no se toca: al volver a la otra unidad vuelve a valer.
+     */
+    fun stepOr(storedKg: Double?): Double =
+        storedKg?.takeIf { kg -> incrementChoices().any { kotlin.math.abs(toKg(it) - kg) < 1e-6 } } ?: stepKg()
+
     /** Incrementos que se pueden elegir por ejercicio, en esta unidad. */
     fun incrementChoices(): List<Double> = when (this) {
         KG -> listOf(0.5, 1.0, 1.25, 2.0, 2.5, 5.0, 10.0)

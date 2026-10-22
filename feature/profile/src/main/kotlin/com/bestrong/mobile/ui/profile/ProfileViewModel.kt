@@ -594,6 +594,8 @@ class ProfileViewModel @Inject constructor(
         // Sin permiso sobre la carpeta no es que no haya copias: la carpeta ya no está disponible
         val found = list.getOrElse { e ->
             _messages.tryEmit(context.getString(if (e is SecurityException) R.string.auto_backup_lost else R.string.restore_latest_none))
+            // Sin permiso, la copia automática no puede seguir: se marca como perdida (como hace la copia semanal)
+            if (e is SecurityException) settingsStore.update { it.copy(backupFolderUri = null, backupFolderLost = true) }
             return@launch
         }
         if (found.isEmpty()) {

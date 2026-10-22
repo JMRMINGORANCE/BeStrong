@@ -226,7 +226,7 @@ data class SharedSettings(
         }
     }
 
-    fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
+    fun stepKgFor(exerciseId: String): Double = unit.stepOr(exerciseIncrementKg[exerciseId])
     fun repRangeFor(exerciseId: String): IntRange? = com.bestrong.core.training.Progression.parseRepRange(exerciseRepRange[exerciseId])
 }
 

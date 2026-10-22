@@ -131,7 +131,10 @@ class SharedSettingsTest {
         val s = com.bestrong.core.sync.SyncContract.json.decodeFromString(com.bestrong.core.sync.SharedSettings.serializer(), old)
         assertEquals(4, s.weeklyGoal)
         assertEquals(com.bestrong.core.util.WeightUnit.LB.stepKg(), s.stepKgFor("bench_press"), 0.0)
-        assertEquals(2.0, s.copy(exerciseIncrementKg = mapOf("bench_press" to 2.0)).stepKgFor("bench_press"), 0.0)
+        // En libras vale un incremento de libras (2,5 lb); uno elegido en kg (2 kg) no, y vuelve al de siempre
+        val lb25 = com.bestrong.core.util.WeightUnit.LB.toKg(2.5)
+        assertEquals(lb25, s.copy(exerciseIncrementKg = mapOf("bench_press" to lb25)).stepKgFor("bench_press"), 1e-9)
+        assertEquals(com.bestrong.core.util.WeightUnit.LB.stepKg(), s.copy(exerciseIncrementKg = mapOf("bench_press" to 2.0)).stepKgFor("bench_press"), 1e-9)
     }
 }
 

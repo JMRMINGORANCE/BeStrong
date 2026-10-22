@@ -146,7 +146,7 @@ data class UserSettings(
     }
 
     /** Salto de peso de ese ejercicio: el suyo propio o el de la unidad (2,5 kg / 5 lb). */
-    fun stepKgFor(exerciseId: String): Double = exerciseIncrementKg[exerciseId] ?: unit.stepKg()
+    fun stepKgFor(exerciseId: String): Double = unit.stepOr(exerciseIncrementKg[exerciseId])
 
     /** Rango de repeticiones de ese ejercicio, si tiene (para la progresión). */
     fun repRangeFor(exerciseId: String): IntRange? = com.bestrong.core.training.Progression.parseRepRange(exerciseRepRange[exerciseId])
