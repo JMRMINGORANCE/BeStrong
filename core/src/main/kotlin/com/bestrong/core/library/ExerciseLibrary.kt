@@ -170,6 +170,8 @@ object ExerciseLibrary {
         ex("incline_push_up", "Flexiones inclinadas", CHEST, BODYWEIGHT, TRICEPS, tracking = TrackingType.REPS_ONLY),
         ex("knee_push_up", "Flexiones de rodillas", CHEST, BODYWEIGHT, TRICEPS, tracking = TrackingType.REPS_ONLY),
         ex("diamond_push_up", "Flexiones diamante", TRICEPS, BODYWEIGHT, CHEST, tracking = TrackingType.REPS_ONLY),
+        // El generador de rutinas la usa para el hombro sin material (sin ella, ese hueco quedaba vacío)
+        ex("pike_push_up", "Flexiones pica", SHOULDERS, BODYWEIGHT, TRICEPS, tracking = TrackingType.REPS_ONLY),
         ex("archer_push_up", "Flexiones arquero", CHEST, BODYWEIGHT, TRICEPS, tracking = TrackingType.REPS_ONLY),
         ex("one_arm_push_up", "Flexión a una mano", CHEST, BODYWEIGHT, TRICEPS, ABS, tracking = TrackingType.REPS_ONLY),
         ex("dead_hang", "Colgarse de la barra", BACK, BODYWEIGHT, FOREARMS, tracking = TrackingType.DURATION),

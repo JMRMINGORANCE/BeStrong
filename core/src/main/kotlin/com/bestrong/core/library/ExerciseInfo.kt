@@ -76,6 +76,7 @@ object ExerciseInfo {
         "incline_push_up" to "Manos en un banco o mesa; cuanto más bajo el apoyo, más difícil.",
         "knee_push_up" to "Apoya las rodillas y mantén la línea cadera-hombros; baja el pecho hasta casi tocar.",
         "diamond_push_up" to "Manos juntas formando un rombo bajo el pecho; codos pegados al cuerpo.",
+        "pike_push_up" to "Cadera alta en V invertida; baja la cabeza entre las manos y empuja hacia arriba.",
         "archer_push_up" to "Manos muy abiertas; baja hacia un lado con el otro brazo estirado. Alterna lados.",
         "one_arm_push_up" to "Piernas abiertas para equilibrarte, una mano bajo el pecho; abdomen muy firme.",
         "dead_hang" to "Cuélgate con los brazos estirados y hombros activos; aguanta el tiempo marcado.",
