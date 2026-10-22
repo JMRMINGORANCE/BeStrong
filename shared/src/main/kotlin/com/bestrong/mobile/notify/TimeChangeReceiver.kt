@@ -17,8 +17,9 @@ class TimeChangeReceiver : BroadcastReceiver() {
         if (intent.action != Intent.ACTION_TIMEZONE_CHANGED && intent.action != Intent.ACTION_TIME_CHANGED) return
         val app = context.applicationContext
         val s = EntryPointAccessors.fromApplication(app, WorkerEntryPoint::class.java).settings().settings.value
-        // Con la hora cambiada a mano el huso es el mismo: se fuerza para no quedarse con el retraso viejo
-        val force = intent.action == Intent.ACTION_TIME_CHANGED
+        // Sin forzar: cada aviso guarda su instante y WorkManager ya reprograma al cambiar la hora. Forzar con un
+        // ajuste automático de la hora tiraba el aviso retenido por el ahorro de batería y lo pasaba a la semana siguiente
+        val force = false
         runCatching {
             ReminderWorker.schedule(app, s.reminderDays, s.reminderHour, s.reminderMinute, force)
             WeighInWorker.schedule(app, s.weighInDay, force)

@@ -411,7 +411,7 @@ private fun GoalPaceLine(dateMs: Long?, remainingKg: Double, currentKg: Double?,
 private fun WeighInReminder(vm: ProfileViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
-    val notifPermission = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) {}
+    val askNotifications = com.bestrong.mobile.ui.components.rememberNotificationPermission()
     Column(Modifier.padding(top = 8.dp)) {
         Text(stringResource(R.string.weigh_in_reminder, com.bestrong.mobile.data.WEIGH_IN_HOUR), style = MaterialTheme.typography.labelMedium)
         androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -424,7 +424,7 @@ private fun WeighInReminder(vm: ProfileViewModel) {
                 androidx.compose.material3.FilterChip(
                     selected = settings.weighInDay == d.value,
                     onClick = {
-                        if (android.os.Build.VERSION.SDK_INT >= 33) notifPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        askNotifications()
                         vm.updateSettings { it.copy(weighInDay = d.value) }
                     },
                     label = { Text(d.getDisplayName(java.time.format.TextStyle.SHORT, locale)) },
@@ -437,7 +437,7 @@ private fun WeighInReminder(vm: ProfileViewModel) {
             androidx.compose.material3.Switch(
                 checked = settings.measureReminder,
                 onCheckedChange = { on ->
-                    if (on && android.os.Build.VERSION.SDK_INT >= 33) notifPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    if (on) askNotifications()
                     vm.updateSettings { it.copy(measureReminder = on) }
                 },
             )

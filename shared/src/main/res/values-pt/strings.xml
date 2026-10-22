@@ -612,6 +612,7 @@
     <string name="routine_edit">Editar rotina</string>
     <string name="routine_emoji">Emoji da rotina</string>
     <string name="routine_imported">Rotina “%1$s” importada</string>
+    <string name="notifications_off_hint">As notificações do BeStrong estão desativadas: ativa-as para receber os avisos</string>
     <string name="routine_already_imported">A rotina “%1$s” já está nas tuas rotinas</string>
     <string name="routine_link_invalid">Não foi possível ler a rotina da ligação (incompleta ou de uma versão mais recente do BeStrong).</string>
     <string name="share_qr_too_long">Demasiado longa para um código QR: envie a ligação.</string>

@@ -97,6 +97,9 @@ class WatchSyncService : WearableListenerService() {
                 val isNew = stored == null
                 repository.saveWorkout(workout)
                 repository.clearRemoteActive(workout.id)
+                // Entrenado hoy con el reloj solo: fuera el «hoy toca entrenar» del móvil
+                val day = java.time.Instant.ofEpochMilli(workout.startedAtEpochMs).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+                if (day == java.time.LocalDate.now()) com.bestrong.mobile.notify.Notifier.cancelReminder(this@WatchSyncService)
                 // Terminado el tuyo en el reloj, lo de la pareja se guarda (si no, quedaba abierto para la próxima vez)
                 if (repository.activeOnce() == null) actions.closePartner()
                 if (isNew) {

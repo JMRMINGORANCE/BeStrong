@@ -66,7 +66,20 @@ class RestTimerController @Inject constructor(
     val restEndedAt: StateFlow<Long?> = _restEndedAt.asStateFlow()
 
     init {
-        if (_rest.value != null) schedule()
+        if (_rest.value != null) schedule() else missedEnd()
+    }
+
+    /**
+     * Android cerró la app durante el descanso y vuelve justo después de que acabara: se avisa igualmente (una vez),
+     * que si no se seguía esperando sin saber que ya tocaba. Pasados unos minutos ya no tiene sentido.
+     */
+    private fun missedEnd() {
+        val ends = prefs.getLong("ends", 0)
+        val late = System.currentTimeMillis() - ends
+        if (ends <= 0 || late !in 0..MISSED_END_MS) return
+        persist(null)
+        if (vibrateEnabled()) vibrate()
+        announcer.say(context.getString(com.bestrong.mobile.shared.R.string.tts_go))
     }
 
     private fun restore(): RestState? {
@@ -187,6 +200,9 @@ class RestTimerController @Inject constructor(
 
         /** La cuenta atrás de los últimos segundos. */
         private const val COUNTDOWN_MS = 3_000L
+
+        /** Hasta cuánto después de acabar un descanso perdido (app cerrada por Android) aún se avisa. */
+        private const val MISSED_END_MS = 2 * 60_000L
 
         /** Margen del WakeLock sobre el descanso (se suelta antes al terminar). */
         private const val WAKE_MARGIN_MS = 10_000L

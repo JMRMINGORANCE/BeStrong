@@ -1,7 +1,5 @@
 package com.bestrong.mobile.ui.profile
 
-import android.Manifest
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -114,7 +112,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::importCsv) }
     val restoreLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::restoreBackup) }
     val folderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let(vm::setBackupFolder) }
-    val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    val askNotifications = com.bestrong.mobile.ui.components.rememberNotificationPermission()
     var showReminders by rememberSaveable { mutableStateOf(false) }
     var editingGym by remember { mutableStateOf<GymProfile?>(null) }
     var showAbout by rememberSaveable { mutableStateOf(false) }
@@ -153,7 +151,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
         RemindersDialog(
             settings = settings,
             onSave = { days, h, m ->
-                if (days.isNotEmpty() && Build.VERSION.SDK_INT >= 33) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                if (days.isNotEmpty()) askNotifications()
                 vm.updateSettings { it.copy(reminderDays = days, reminderHour = h, reminderMinute = m) }
                 showReminders = false
             },

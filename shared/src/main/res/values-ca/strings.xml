@@ -612,6 +612,7 @@
     <string name="routine_edit">Editar rutina</string>
     <string name="routine_emoji">Emoji de la rutina</string>
     <string name="routine_imported">Rutina «%1$s» importada</string>
+    <string name="notifications_off_hint">Les notificacions de BeStrong estan desactivades: activa-les per rebre els avisos</string>
     <string name="routine_already_imported">La rutina «%1$s» ja és a les teves rutines</string>
     <string name="routine_link_invalid">No s\'ha pogut llegir la rutina de l\'enllaç (incomplet o d\'una versió més nova de BeStrong).</string>
     <string name="share_qr_too_long">Massa llarga per a un codi QR: envia l\'enllaç.</string>
