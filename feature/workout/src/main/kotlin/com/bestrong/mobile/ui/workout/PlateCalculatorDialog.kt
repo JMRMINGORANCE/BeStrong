@@ -120,6 +120,5 @@ private fun barsFor(gym: GymProfile?, unit: WeightUnit): List<Double> {
     return (listOfNotNull(gymBar) + if (unit == WeightUnit.KG) listOf(20.0, 15.0, 10.0) else listOf(45.0, 35.0, 25.0)).distinct()
 }
 
-/** Discos del gimnasio (en kg); en libras, los estándar. */
-private fun platesFor(gym: GymProfile?, unit: WeightUnit): List<Double> =
-    gym?.platesKg?.map { unit.fromKg(it) }?.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
+/** Discos del gimnasio en la unidad (en libras, los de libras que se marcaron). */
+private fun platesFor(gym: GymProfile?, unit: WeightUnit): List<Double> = gym?.platesIn(unit) ?: PlateCalculator.defaultPlates(unit)

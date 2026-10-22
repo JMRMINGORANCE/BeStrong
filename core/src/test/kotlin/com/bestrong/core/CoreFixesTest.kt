@@ -233,4 +233,12 @@ class CoreFixesTest {
         assertEquals(null, com.bestrong.core.training.Tempo.parse("2.5-1-1"))
         assertEquals(com.bestrong.core.training.Tempo(3, 1, 1, 0), com.bestrong.core.training.Tempo.parse("3-1-1"))
     }
+
+    @Test fun poundGymUsesItsOwnPlates() {
+        val lb = com.bestrong.core.util.WeightUnit.LB
+        // Discos de libras elegidos sin el de 2,5 lb: 140 lb no se monta con 2,5
+        val gym = com.bestrong.core.training.GymProfile(name = "G", barKg = lb.toKg(45.0), platesKg = listOf(45.0, 25.0, 10.0, 5.0).map { lb.toKg(it) })
+        assertEquals(listOf(45.0, 25.0, 10.0, 5.0), gym.platesIn(lb))
+        assertEquals(false, gym.plateLoad(lb.toKg(140.0), lb).perSide.contains(2.5))
+    }
 }

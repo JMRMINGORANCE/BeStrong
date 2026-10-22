@@ -27,11 +27,19 @@ data class GymProfile(
     val loadedBarKg: Double get() = barKg + collarKg
 
     /**
-     * Discos por lado para [targetKg] con la barra y los discos de este gimnasio, en [unit]
-     * (en libras se usan los discos estándar, porque los del perfil están en kg).
+     * Discos del gimnasio en [unit]. En libras, los elegidos que son de libras (el editor los guarda en kg: 2,5 lb =
+     * 1,134 kg); si no hay ninguno (un perfil con discos de kg), los estándar de libras.
      */
+    fun platesIn(unit: WeightUnit): List<Double> {
+        if (unit == WeightUnit.KG) return platesKg.ifEmpty { PlateCalculator.defaultPlates(unit) }
+        val lb = platesKg.filter { it > 0 }.map { unit.fromKg(it) }.filter { kotlin.math.abs(it * 4 - kotlin.math.round(it * 4)) < 0.01 }
+            .map { kotlin.math.round(it * 4) / 4 }
+        return lb.ifEmpty { PlateCalculator.defaultPlates(unit) }
+    }
+
+    /** Discos por lado para [targetKg] con la barra y los discos de este gimnasio, en [unit]. */
     fun plateLoad(targetKg: Double, unit: WeightUnit): PlateLoad {
-        val plates = platesKg.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
+        val plates = platesIn(unit)
         val bar = barIn(unit, barKg) + unit.fromKg(collarKg)
         return PlateCalculator.calculate(unit.fromKg(targetKg), unit, bar, plates)
     }
@@ -39,8 +47,6 @@ data class GymProfile(
     /** Peso más cercano alcanzable con este material para el ejercicio dado. */
     fun nearestLoad(targetKg: Double, equipment: Equipment, unit: WeightUnit = WeightUnit.KG): Double = when {
         equipment == Equipment.BARBELL || equipment == Equipment.SMITH -> nearestBarbell(targetKg, unit)
-        // Las mancuernas del perfil están en kg: en libras no hay con qué redondear
-        unit != WeightUnit.KG -> targetKg
         // Las kettlebells no van con el juego de mancuernas (32 kg no pasa a 30 si las mancuernas acaban ahí)
         equipment == Equipment.DUMBBELL -> if (dumbbellsKg.isEmpty()) targetKg else dumbbellsKg.minBy { kotlin.math.abs(it - targetKg) }
         else -> targetKg
@@ -52,10 +58,10 @@ data class GymProfile(
      */
     fun loadAbove(currentKg: Double, equipment: Equipment, unit: WeightUnit = WeightUnit.KG): Double = when {
         equipment == Equipment.BARBELL || equipment == Equipment.SMITH -> {
-            val step = if (unit == WeightUnit.KG) (platesKg.filter { it > 0 }.minOrNull() ?: 1.25) * 2 else unit.toKg(PlateCalculator.LB_PLATES.min() * 2)
+            val step = unit.toKg((platesIn(unit).filter { it > 0 }.minOrNull() ?: unit.fromKg(1.25)) * 2)
             nearestBarbell(currentKg + step, unit).let { if (it > currentKg + 1e-6) it else currentKg + step }
         }
-        unit != WeightUnit.KG -> currentKg
+        // Las mancuernas se guardan en kg (también las de libras): se comparan igual en las dos unidades
         equipment == Equipment.DUMBBELL -> dumbbellsKg.filter { it > currentKg + 1e-6 }.minOrNull() ?: currentKg
         else -> currentKg
     }
@@ -65,7 +71,7 @@ data class GymProfile(
      * con la barra y los discos de libras, como la calculadora; el resultado siempre en kg.
      */
     fun nearestBarbell(targetKg: Double, unit: WeightUnit = WeightUnit.KG): Double {
-        val plates = platesKg.takeIf { unit == WeightUnit.KG && it.isNotEmpty() } ?: PlateCalculator.defaultPlates(unit)
+        val plates = platesIn(unit)
         val base = if (unit == WeightUnit.KG) loadedBarKg else barIn(unit, barKg) + unit.fromKg(collarKg)
         val target = unit.fromKg(targetKg)
         if (target <= base) return unit.toKg(base)
