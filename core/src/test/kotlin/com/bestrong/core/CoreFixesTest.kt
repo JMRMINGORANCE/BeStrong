@@ -285,4 +285,15 @@ class CoreFixesTest {
         assertEquals(82.5, merged.exercises[0].sets[0].weightKg, 0.0)
         assertEquals(6, merged.exercises[0].sets[1].reps)
     }
+
+    @Test
+    fun restFollowsSetCompletedOnOtherDevice() {
+        val sets = List(3) { WorkoutSet(id = "s$it", weightKg = 80.0, reps = 5) }
+        val before = Workout(id = "w", name = "W", startedAtEpochMs = 0, exercises = listOf(WorkoutExercise(id = "e", exercise = bench, sets = sets, restSeconds = 120)))
+        val after = com.bestrong.core.session.WorkoutEditor.toggleSetCompleted(before, "e", "s0", 10_000)
+        // Llega 30 s después de marcarse: quedan 90 s
+        assertEquals(90, com.bestrong.core.session.RestSync.remainingAfterRemote(before, after, 40_000, 60))
+        // Sin series nuevas no se toca el descanso
+        assertEquals(null, com.bestrong.core.session.RestSync.remainingAfterRemote(after, after, 40_000, 60))
+    }
 }

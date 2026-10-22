@@ -314,6 +314,9 @@ class WorkoutSession @Inject constructor(
         store.activeWorkout = remote
         // Se sigue en el mismo ejercicio aunque el móvil haya borrado o movido otros
         if (!isNew) _exerciseIndex.value = keptExerciseIndex(local, remote, _exerciseIndex.value)
+        // Serie marcada en el móvil: el descanso del reloj pasa a ser el suyo
+        com.bestrong.core.session.RestSync.remainingAfterRemote(local, remote, System.currentTimeMillis(), store.settings.value.warmupRestSeconds)
+            ?.let { if (it > 0) startRest(it) else stopRest() }
         if (isNew) startedFromPhone(remote)
     }
 

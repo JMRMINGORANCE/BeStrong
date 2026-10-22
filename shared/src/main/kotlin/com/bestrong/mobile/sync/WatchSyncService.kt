@@ -129,7 +129,11 @@ class WatchSyncService : WearableListenerService() {
                 } else {
                     DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                         ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }
-                        ?.let { repository.applyRemoteActive(it) }
+                        ?.let {
+                            val before = repository.activeOnce()
+                            repository.applyRemoteActive(it)
+                            repository.activeOnce()?.let { after -> actions.followRemoteRest(before, after) }
+                        }
                 }
             }
         }

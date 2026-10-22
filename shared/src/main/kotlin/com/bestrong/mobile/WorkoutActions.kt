@@ -52,6 +52,12 @@ class WorkoutActions @Inject constructor(
         if (finished.exercises.isNotEmpty()) repository.saveWorkout(finished)
     }
 
+    /** Serie marcada en el reloj: el descanso del móvil pasa a ser el suyo (si no, el de la serie anterior avisa a destiempo). */
+    fun followRemoteRest(before: Workout?, after: Workout) {
+        val left = com.bestrong.core.session.RestSync.remainingAfterRemote(before, after, System.currentTimeMillis(), settings.settings.value.warmupRestSeconds) ?: return
+        if (left > 0) restTimer.start(left, after.id) else restTimer.skipFor(after.id)
+    }
+
     /** Descarta el entreno de la pareja, con su descanso. */
     suspend fun discardPartner() {
         restTimer.skipFor(repository.partnerWorkout.value?.id)
