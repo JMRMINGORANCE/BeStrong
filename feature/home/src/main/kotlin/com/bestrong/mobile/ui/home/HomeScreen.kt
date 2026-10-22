@@ -409,7 +409,7 @@ private fun RoutineCard(
                     // Con una búsqueda activa no se reordena: el vecino real podría estar oculto
                     onMoveUp?.let { up -> DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; up() }) }
                     onMoveDown?.let { down -> DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; down() }) }
-                    DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; onDelete() })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menu = false; onDelete() })
                 }
             }
         }
@@ -422,7 +422,7 @@ private fun RoutineCard(
                     com.bestrong.mobile.ui.components.ExerciseThumbStrip(routine.exercises.map { it.exercise }, 46.dp, max = 4)
                 }
             }
-            Button(onClick = onStart, enabled = routine.exercises.isNotEmpty(), modifier = Modifier.height(48.dp)) {
+            Button(onClick = onStart, enabled = routine.exercises.isNotEmpty(), modifier = Modifier.heightIn(min = 48.dp)) {
                 Icon(Icons.Default.PlayArrow, null)
                 Text(stringResource(R.string.routine_start), Modifier.padding(start = 4.dp), fontWeight = FontWeight.Bold)
             }

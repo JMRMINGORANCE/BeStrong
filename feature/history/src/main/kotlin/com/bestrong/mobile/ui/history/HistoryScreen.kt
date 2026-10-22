@@ -118,13 +118,7 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
             if (snackbar.showSnackbar(deletedMsg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undoDelete() else vm.clearDeleted()
         }
     }
-    val gymEdit by vm.gymEdit.collectAsStateWithLifecycle()
-    val gymEditMsg = stringResource(R.string.undo_gym_changed)
-    LaunchedEffect(gymEdit) {
-        if (gymEdit != null) {
-            if (snackbar.showSnackbar(gymEditMsg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undoGymEdit() else vm.clearGymEdit()
-        }
-    }
+    EditUndoSnackbars(vm, snackbar, undoLabel)
 
     CopiedSnackbar(vm, snackbar) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
 
@@ -345,7 +339,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                 tracking = we.exercise.tracking,
                 weightFactor = vm.weightFactor(we.exercise),
                 onSave = { s -> vm.editWorkout(w) { WorkoutEditor.updateSet(it, weId, setId) { s } }; editSet = null },
-                onDelete = { vm.editWorkout(w) { WorkoutEditor.removeSet(it, weId, setId) }; editSet = null },
+                onDelete = { vm.removePastSet(w, weId, setId); editSet = null },
                 onDismiss = { editSet = null },
             )
         }
@@ -353,7 +347,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     val context = LocalContext.current
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text(w.name) },
+            title = { Text(w.name, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
             navigationIcon = { onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } } },
             actions = {
                 // Corregir series es a lo que más se entra en un entreno pasado: a la vista, no en el menú
@@ -385,7 +379,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                                 context.startActivity(android.content.Intent.createChooser(send, null))
                             },
                         )
-                        DropdownMenuItem(text = { Text(stringResource(R.string.action_delete)) }, onClick = { menu = false; vm.delete(w.id); onBack?.invoke() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menu = false; vm.delete(w.id); onBack?.invoke() })
                     }
                 }
             },
@@ -720,6 +714,25 @@ private fun CopiedSnackbar(vm: HistoryViewModel, snackbar: SnackbarHostState, on
                 vm.clearCopied()
                 if (snackbar.showSnackbar(msg, open, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) openCopy(id)
             }
+        }
+    }
+}
+
+/** «Deshacer» de los cambios en un entreno pasado: el gimnasio cambiado y la serie borrada. */
+@Composable
+private fun EditUndoSnackbars(vm: HistoryViewModel, snackbar: SnackbarHostState, undoLabel: String) {
+    val gymEdit by vm.gymEdit.collectAsStateWithLifecycle()
+    val gymEditMsg = stringResource(R.string.undo_gym_changed)
+    LaunchedEffect(gymEdit) {
+        if (gymEdit != null) {
+            if (snackbar.showSnackbar(gymEditMsg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undoGymEdit() else vm.clearGymEdit()
+        }
+    }
+    val setRemoved by vm.setRemoved.collectAsStateWithLifecycle()
+    val setRemovedMsg = stringResource(R.string.undo_set_deleted)
+    LaunchedEffect(setRemoved) {
+        if (setRemoved != null) {
+            if (snackbar.showSnackbar(setRemovedMsg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undoSetRemoved() else vm.clearSetRemoved()
         }
     }
 }

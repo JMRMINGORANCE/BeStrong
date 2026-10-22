@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -630,12 +629,19 @@ private fun ProfileTabs(selected: Int, onSelect: (Int) -> Unit) {
         labels.forEachIndexed { i, label ->
             val on = i == selected
             androidx.compose.foundation.layout.Box(
-                Modifier.weight(1f).height(44.dp).clip(androidx.compose.foundation.shape.CircleShape)
+                Modifier.weight(1f).heightIn(min = 48.dp).clip(androidx.compose.foundation.shape.CircleShape)
                     .background(if (on) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.Transparent))
                     .selectable(selected = on, role = androidx.compose.ui.semantics.Role.Tab) { onSelect(i) },
                 contentAlignment = androidx.compose.ui.Alignment.Center,
             ) {
-                Text(label, fontWeight = FontWeight.Bold, color = if (on) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    label,
+                    Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    color = if (on) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }

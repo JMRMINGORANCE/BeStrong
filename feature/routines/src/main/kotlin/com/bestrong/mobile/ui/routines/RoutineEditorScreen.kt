@@ -25,11 +25,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -451,9 +451,20 @@ private fun RoutineExerciseCard(
                         modifier = Modifier.minimumInteractiveComponentSize().clickable(onClickLabel = stringResource(R.string.rest)) { onEditRest(re.id) },
                     )
                 }
-                IconButton(onClick = { vm.moveExercise(index, index - 1) }, enabled = index > 0) { Icon(Icons.Default.KeyboardArrowUp, stringResource(R.string.action_move_up)) }
-                IconButton(onClick = { vm.moveExercise(index, index + 1) }, enabled = index < routine.exercises.lastIndex) { Icon(Icons.Default.KeyboardArrowDown, stringResource(R.string.action_move_down)) }
-                IconButton(onClick = { vm.duplicateExercise(re.id) }) { Icon(Icons.Default.ContentCopy, stringResource(R.string.duplicate_named, re.exercise.displayName())) }
+                // Subir, bajar y duplicar en un menú: con cuatro botones al lado, el nombre se partía palabra a palabra
+                var reMenu by remember { mutableStateOf(false) }
+                androidx.compose.foundation.layout.Box {
+                    IconButton(onClick = { reMenu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.exercise_options, re.exercise.displayName())) }
+                    androidx.compose.material3.DropdownMenu(expanded = reMenu, onDismissRequest = { reMenu = false }) {
+                        if (index > 0) {
+                            androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { reMenu = false; vm.moveExercise(index, index - 1) })
+                        }
+                        if (index < routine.exercises.lastIndex) {
+                            androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { reMenu = false; vm.moveExercise(index, index + 1) })
+                        }
+                        androidx.compose.material3.DropdownMenuItem(text = { Text(stringResource(R.string.action_duplicate)) }, onClick = { reMenu = false; vm.duplicateExercise(re.id) })
+                    }
+                }
                 IconButton(onClick = { vm.removeExercise(re.id) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_named, re.exercise.displayName())) }
             }
             if (index < routine.exercises.lastIndex) {

@@ -208,6 +208,26 @@ class HistoryViewModel @Inject constructor(
         _gymEdit.value = null
     }
 
+    /** Entreno tal como estaba antes de borrarle una serie (para deshacerlo); null = nada que deshacer. */
+    private val _setRemoved = MutableStateFlow<Workout?>(null)
+    val setRemoved: StateFlow<Workout?> = _setRemoved
+
+    /** Borra una serie de un entreno pasado; si era la última, se borra el entreno (con su propio «deshacer»). */
+    fun removePastSet(workout: Workout, workoutExerciseId: String, setId: String) {
+        if (WorkoutEditor.cleanupFinished(WorkoutEditor.removeSet(workout, workoutExerciseId, setId)).exercises.isNotEmpty()) _setRemoved.value = workout
+        editWorkout(workout) { WorkoutEditor.removeSet(it, workoutExerciseId, setId) }
+    }
+
+    fun undoSetRemoved() {
+        val before = _setRemoved.value ?: return
+        _setRemoved.value = null
+        editWorkout(before) { before }
+    }
+
+    fun clearSetRemoved() {
+        _setRemoved.value = null
+    }
+
     fun undoDelete() = viewModelScope.launch {
         deleteJob?.join()
         _deleted.value?.let { w ->
