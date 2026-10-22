@@ -158,6 +158,18 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         write(workout?.copy(updatedAtEpochMs = System.currentTimeMillis()))
     }
 
+    /**
+     * Empieza [workout] solo si no hay ya uno en curso, comprobado y escrito bajo el mismo cerrojo: el que acaba de
+     * llegar del reloj (o un segundo toque) no se pisa mientras se preparaba este. false = ya había uno.
+     */
+    suspend fun startActive(workout: Workout): Boolean = activeMutex.withLock {
+        if (currentActive() != null) return@withLock false
+        _discarded.value = null
+        forgetEnded(workout.id)
+        write(workout.copy(updatedAtEpochMs = System.currentTimeMillis()))
+        true
+    }
+
     /** Último entreno descartado (en memoria): se puede recuperar mientras no se empiece otro. */
     private val _discarded = MutableStateFlow<Workout?>(null)
     val discarded: StateFlow<Workout?> = _discarded
@@ -489,13 +501,17 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     private fun decodeTrash(raw: String?): List<TrashedWorkout> =
         raw?.let { runCatching { json.decodeFromString(trashSerializer, it) }.getOrNull() }.orEmpty()
 
+    // La papelera puede pesar cientos de KB (pulso incluido): se (de)codifica fuera del hilo principal
     private suspend fun saveTrash(list: List<TrashedWorkout>) =
-        dao.putValue(KeyValueEntity(KEY_TRASH, json.encodeToString(trashSerializer, list)))
+        dao.putValue(KeyValueEntity(KEY_TRASH, withContext(Dispatchers.Default) { json.encodeToString(trashSerializer, list) }))
 
     /** Ids de los entrenos en la papelera (al restaurar no se vuelven a añadir). */
     suspend fun trashedIds(): Set<String> = trashOnce().map { it.workout.id }.toSet()
 
-    private suspend fun trashOnce(): List<TrashedWorkout> = TrashedWorkout.fresh(decodeTrash(dao.valueOnce(KEY_TRASH)), System.currentTimeMillis())
+    private suspend fun trashOnce(): List<TrashedWorkout> {
+        val raw = dao.valueOnce(KEY_TRASH)
+        return withContext(Dispatchers.Default) { TrashedWorkout.fresh(decodeTrash(raw), System.currentTimeMillis()) }
+    }
 
     /** Borra un entreno dejándolo 30 días en la papelera. */
     suspend fun trashWorkout(workout: Workout) = trashMutex.withLock {

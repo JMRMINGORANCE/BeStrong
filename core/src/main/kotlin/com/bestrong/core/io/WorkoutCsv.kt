@@ -42,6 +42,7 @@ object WorkoutCsv {
         "reps_right", "distance_m", "assisted", "set_note", "target_rpe", "tempo", "gym", "athlete",
     )
     private val ISO: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    private val ISO_OFFSET: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
     /** Los CSV guardados con Excel en español usan coma decimal («82,5»). */
     private fun num(s: String): Double? = s.replace(',', '.').toDoubleOrNull()
@@ -67,8 +68,9 @@ object WorkoutCsv {
     fun export(workouts: List<Workout>, zone: ZoneId = ZoneId.systemDefault()): String {
         val rows = mutableListOf(HEADER)
         workouts.filter { it.isFinished }.sortedBy { it.startedAtEpochMs }.forEach { w ->
-            val start = ISO.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(w.startedAtEpochMs), zone))
-            val end = ISO.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(w.finishedAtEpochMs!!), zone))
+            // Con su desfase horario: importado en otro huso (o en la hora repetida del cambio de hora) no se mueve
+            val start = ISO_OFFSET.format(Instant.ofEpochMilli(w.startedAtEpochMs).atZone(zone))
+            val end = ISO_OFFSET.format(Instant.ofEpochMilli(w.finishedAtEpochMs!!).atZone(zone))
             w.exercises.forEach { we ->
                 // Solo lo hecho: al importar, cada fila se toma como serie completada
                 we.completedSets.forEachIndexed { i, s ->
@@ -317,8 +319,10 @@ object WorkoutCsv {
         return p.fold(0) { acc, v -> acc * 60 + v }
     }
 
+    // Con desfase (exportados desde ahora) o sin él (los de antes: en el huso de este móvil)
     private fun parseIso(s: String, zone: ZoneId): Long =
-        LocalDateTime.parse(s, ISO).atZone(zone).toInstant().toEpochMilli()
+        runCatching { java.time.OffsetDateTime.parse(s, ISO_OFFSET).toInstant().toEpochMilli() }
+            .getOrElse { LocalDateTime.parse(s, ISO).atZone(zone).toInstant().toEpochMilli() }
 
     private val hevyFormats = listOf("d MMM yyyy, HH:mm", "dd MMM yyyy, HH:mm", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss")
         .map { DateTimeFormatter.ofPattern(it, Locale.ENGLISH) }
@@ -357,6 +361,8 @@ object WorkoutCsv {
 
         fun resolve(name: String, id: String = ""): Exercise {
             if (id.isNotBlank()) byId[id]?.let { return it }
+            // Un propio de otro móvil (copia de BeStrong) conserva su id: si luego se restaura la copia completa, es el mismo
+            if (id.isNotBlank() && ExerciseLibrary.byId(id) == null) created.firstOrNull { it.id == id }?.let { return it }
             if (name.isBlank()) throw IllegalArgumentException("Ejercicio sin nombre")
             val n = name.normalized()
             byName[n]?.let { return it }
@@ -376,7 +382,7 @@ object WorkoutCsv {
             val ex = Exercise(
                 // Con nombres en otro alfabeto (ruso, chino…) el texto queda vacío: se añade un resumen del nombre para
                 // que dos ejercicios distintos no compartan id
-                id = "custom_import_" + n.replace(Regex("[^a-z0-9]+"), "_").trim('_').let { slug ->
+                id = id.takeIf { it.isNotBlank() && ExerciseLibrary.byId(it) == null } ?: "custom_import_" + n.replace(Regex("[^a-z0-9]+"), "_").trim('_').let { slug ->
                     if (slug.isEmpty() || slug.length < n.count { it.isLetterOrDigit() }) slug.ifEmpty { "x" } + "_" + n.hashCode().toUInt().toString(16) else slug
                 },
                 name = name.trim(),

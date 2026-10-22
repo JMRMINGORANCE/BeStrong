@@ -418,7 +418,7 @@ class HistoryViewModel @Inject constructor(
                     .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             }
             // Una sesión de programa repetida no cuenta como el siguiente día del programa
-            repo.setActive(again.copy(routineId = workout.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))
+            repo.startActive(again.copy(routineId = workout.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))
         }
         onStarted()
     }

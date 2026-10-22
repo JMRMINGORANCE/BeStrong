@@ -314,7 +314,7 @@ class HomeViewModel @Inject constructor(
                 },
             )
         }
-        repo.setActive(workout)
+        repo.startActive(workout)
         onStarted()
     }
 
@@ -338,7 +338,7 @@ class HomeViewModel @Inject constructor(
     private fun message(text: String) = _messages.trySend(text to System.currentTimeMillis())
 
     fun startEmpty(onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeOnce() == null) repo.setActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
+        if (repo.activeOnce() == null) repo.startActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
         onStarted()
     }
 
@@ -359,7 +359,7 @@ class HomeViewModel @Inject constructor(
                     .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
             }
             // Una sesión de programa repetida no cuenta como el siguiente día del programa
-            repo.setActive(again.copy(routineId = last.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))
+            repo.startActive(again.copy(routineId = last.routineId?.takeUnless { it.startsWith(Periodization.ROUTINE_PREFIX) }))
         }
         onStarted()
     }
@@ -373,7 +373,7 @@ class HomeViewModel @Inject constructor(
         // Su gimnasio pasa a ser el activo antes de rellenar: los pesos salen con su material
         actions.useRoutineGym(routine)
         val history = repo.history.value
-        repo.setActive(
+        repo.startActive(
             withContext(Dispatchers.Default) {
                 routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup(), previousBlock = { id, n -> com.bestrong.core.stats.WorkoutStats.previousBlock(id, n, history) })
             },
