@@ -27,6 +27,9 @@ data class SpokenSet(
  * y el segundo las reps («60 por 10»); con uno solo, son reps.
  */
 object VoiceSetParser {
+    /** Lo que va tras «coma»/«punto»: cifras («5», «25») o una palabra de 0 a 9 («cinco», «five»). */
+    private fun decimalWord(w: String?): String? = w?.takeIf { it.isNotEmpty() && it.all(Char::isDigit) } ?: units[w]?.takeIf { it in 0..9 }?.toString()
+
     private val units = mapOf(
         "cero" to 0, "zero" to 0, "un" to 1, "uno" to 1, "una" to 1, "one" to 1, "dos" to 2, "two" to 2, "tres" to 3, "three" to 3,
         "cuatro" to 4, "four" to 4, "cinco" to 5, "five" to 5, "seis" to 6, "six" to 6, "siete" to 7, "seven" to 7,
@@ -121,8 +124,9 @@ object VoiceSetParser {
                     a == "y" && b == "medio" -> { value += 0.5; i += 2 }
                     a == "and" && b == "a" && c == "half" -> { value += 0.5; i += 3 }
                     a == "and" && b == "half" -> { value += 0.5; i += 2 }
-                    (a == "coma" || a == "punto" || a == "point") && b?.toIntOrNull() != null -> {
-                        value = "${value.toLong()}.$b".toDouble()
+                    // El decimal en cifras («coma 5») o dicho («coma cinco»): si no, «cinco kilos» pasaba a ser el peso
+                    (a == "coma" || a == "punto" || a == "point") && decimalWord(b) != null -> {
+                        value = "${value.toLong()}.${decimalWord(b)}".toDouble()
                         i += 2
                     }
                 }

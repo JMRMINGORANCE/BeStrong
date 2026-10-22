@@ -26,7 +26,8 @@ object RpeLoad {
     fun oneRepMaxOf(set: com.bestrong.core.model.WorkoutSet): Double {
         val rpe = set.rpe?.takeIf { it in MIN_RELIABLE_RPE..MAX_RPE }
         // Unilateral: el lado más flojo, como el 1RM de siempre
-        val usable = set.countsForRecords && set.recordReps > 0 && set.weightKg > 0
+        // Una serie cluster suma varias mini-series: sus reps no dicen el 1RM (como estimatedOneRepMax)
+        val usable = set.countsForRecords && set.recordReps > 0 && set.weightKg > 0 && set.type != com.bestrong.core.model.SetType.CLUSTER
         return if (rpe != null && usable) set.weightKg / fraction(set.recordReps, rpe) else set.estimatedOneRepMax
     }
 

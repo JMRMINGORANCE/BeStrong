@@ -5,7 +5,12 @@ import com.bestrong.core.model.WorkoutExercise
 import kotlin.math.floor
 
 /** Ajuste propuesto para las series que quedan del ejercicio tras anotar el RPE de una serie. */
-data class RpeAdjustment(val newWeightKg: Double, val direction: Int)
+data class RpeAdjustment(
+    val newWeightKg: Double,
+    val direction: Int,
+    /** Peso de la serie que lo motivó: las que quedan se mueven lo mismo que ella. */
+    val fromWeightKg: Double = newWeightKg,
+)
 
 /**
  * Autorregulación por RPE respecto al objetivo del ejercicio (8 si no tiene, es decir, 2 reps en recámara):
@@ -49,8 +54,8 @@ object Autoregulation {
         if (pending.isEmpty()) return null
         val current = done.weightKg
         return when {
-            done.type != SetType.FAILURE && rpe >= high(exercise.targetRpe) -> RpeAdjustment(round(current * 0.95, stepKg).coerceAtLeast(0.0), -1).takeIf { it.newWeightKg < current }
-            rpe <= low(if (done.type == SetType.FAILURE) MAX_RPE else exercise.targetRpe) -> RpeAdjustment(current + stepKg, 1)
+            done.type != SetType.FAILURE && rpe >= high(exercise.targetRpe) -> RpeAdjustment(round(current * 0.95, stepKg).coerceAtLeast(0.0), -1, current).takeIf { it.newWeightKg < current }
+            rpe <= low(if (done.type == SetType.FAILURE) MAX_RPE else exercise.targetRpe) -> RpeAdjustment(current + stepKg, 1, current)
             else -> null
         }
     }
@@ -58,7 +63,12 @@ object Autoregulation {
     /** Aplica el nuevo peso a las series pendientes de trabajo. */
     fun apply(exercise: WorkoutExercise, adjustment: RpeAdjustment): WorkoutExercise =
         // Los drops van por debajo a propósito: no se tocan
-        exercise.copy(sets = exercise.sets.map { if (!it.completed && it.type in ADJUSTABLE) it.copy(weightKg = adjustment.newWeightKg) else it })
+        // Las que quedan se mueven lo mismo (una pirámide 60/70/80 sigue siéndolo; antes todas pasaban al nuevo peso)
+        exercise.copy(
+            sets = exercise.sets.map {
+                if (!it.completed && it.type in ADJUSTABLE) it.copy(weightKg = (it.weightKg + adjustment.newWeightKg - adjustment.fromWeightKg).coerceAtLeast(0.0)) else it
+            },
+        )
 
     private fun round(kg: Double, step: Double) = if (step <= 0) kg else floor(kg / step + 0.5) * step
 }

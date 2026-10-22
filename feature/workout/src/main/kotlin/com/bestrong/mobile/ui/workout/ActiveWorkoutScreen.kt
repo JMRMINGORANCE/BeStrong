@@ -250,7 +250,9 @@ fun ActiveWorkoutScreen(
                 }
                 is ActiveWorkoutViewModel.WorkoutEvent.RpeSuggestion -> {
                     val template = if (e.adjustment.direction < 0) rpeDown else rpeUp
-                    val msg = template.format(e.exercise.displayName(appContext), unitForShare.format(e.adjustment.newWeightKg, withUnit = true))
+                    // Con «suma de las dos mancuernas», el total del par (como las filas)
+                    val pair = if (vm.settings.value.dumbbellTotal && e.exercise.equipment == Equipment.DUMBBELL) 2 else 1
+                    val msg = template.format(e.exercise.displayName(appContext), unitForShare.format(e.adjustment.newWeightKg * pair, withUnit = true))
                     if (snackbar.showSnackbar(msg, applyLabel, duration = SnackbarDuration.Long) == SnackbarResult.ActionPerformed) {
                         vm.applyRpeAdjustment(e.weId, e.adjustment)
                     }
