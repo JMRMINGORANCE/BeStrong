@@ -270,18 +270,23 @@ private fun FatigueCard(vm: PlanningViewModel, ui: PlanningUi) {
         } else {
             Text(stringResource(R.string.meso_week, ui.mesocycleWeek ?: 1, meso.length), fontWeight = FontWeight.SemiBold)
             if (ui.deloadWeek) Text(stringResource(R.string.meso_deload_week), color = MaterialTheme.colorScheme.primary)
-            // Quitarlo borra en qué semana vas y la descarga: el primer toque pide confirmarlo
-            var sure by remember { mutableStateOf(false) }
-            TextButton(onClick = {
-                if (sure) vm.stopMesocycle()
-                sure = !sure
-            }) {
-                Text(
-                    stringResource(if (sure) R.string.meso_stop_confirm else R.string.meso_stop),
-                    color = if (sure) MaterialTheme.colorScheme.error else androidx.compose.ui.graphics.Color.Unspecified,
-                )
-            }
+            StopMesocycleButton(vm::stopMesocycle)
         }
+    }
+}
+
+/** Quitar el mesociclo borra en qué semana vas y la descarga: el primer toque pide confirmarlo. */
+@Composable
+private fun StopMesocycleButton(onStop: () -> Unit) {
+    var sure by remember { mutableStateOf(false) }
+    TextButton(onClick = {
+        if (sure) onStop()
+        sure = !sure
+    }) {
+        Text(
+            stringResource(if (sure) R.string.meso_stop_confirm else R.string.meso_stop),
+            color = if (sure) MaterialTheme.colorScheme.error else androidx.compose.ui.graphics.Color.Unspecified,
+        )
     }
 }
 
