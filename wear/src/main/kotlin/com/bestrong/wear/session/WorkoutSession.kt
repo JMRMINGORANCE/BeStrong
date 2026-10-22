@@ -209,7 +209,7 @@ class WorkoutSession @Inject constructor(
     private fun prefill(exerciseId: String): List<WorkoutSet> {
         val s = gymSettings()
         // Como en el móvil: con varios gimnasios, lo hecho en el activo si allí ya se hizo el ejercicio
-        val base = WorkoutStats.atGym(store.history.value, s.activeGym?.name?.takeIf { s.multiGym }, exerciseId)
+        val base = WorkoutStats.atGym(store.history.value, s.historyGym, exerciseId)
         val previous = WorkoutStats.previousSets(exerciseId, base)
         if (s.progressionEnabled) {
             val ex = store.exerciseFor(exerciseId)
@@ -240,8 +240,8 @@ class WorkoutSession @Inject constructor(
         routineGymId = routine.gymId
         // Las sesiones de un programa llevan las cargas calculadas: no se sustituyen por la última vez
         val lookup: (String) -> List<WorkoutSet> = if (routine.id.startsWith(Periodization.ROUTINE_PREFIX)) EMPTY_LOOKUP else ::prefill
-        // El mismo ejercicio en otro bloque: cada uno con lo suyo de la última vez (como en el móvil)
-        begin(routine.toWorkout(System.currentTimeMillis(), lookup, WorkoutSource.WATCH) { id, n -> WorkoutStats.previousBlock(id, n, store.history.value).takeIf { lookup != EMPTY_LOOKUP } })
+        // El mismo ejercicio en otro bloque: cada uno con lo suyo de la última vez en este gimnasio (como en el móvil)
+        begin(routine.toWorkout(System.currentTimeMillis(), lookup, WorkoutSource.WATCH) { id, n -> WorkoutStats.previousBlock(id, n, WorkoutStats.atGym(store.history.value, gymSettings().historyGym, id)).takeIf { lookup != EMPTY_LOOKUP } })
     }
 
     private fun begin(start: Workout) {

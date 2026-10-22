@@ -77,6 +77,7 @@ fun GymProfilesSection(settings: UserSettings, onSelect: (String) -> Unit, onEdi
 fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) -> Unit, onDelete: () -> Unit, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
     var name by remember { mutableStateOf(gym.name) }
+    val defaultName = stringResource(R.string.gym_default_gym)
     // Borrar un gimnasio se lleva su material y lo quita de sus rutinas: se confirma antes
     var confirmDelete by remember { mutableStateOf(false) }
     if (confirmDelete) {
@@ -173,7 +174,8 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                 }
                 onSave(
                     gym.copy(
-                        name = name.trim().ifBlank { gym.name },
+                        // Uno nuevo sin nombre se llama «Gimnasio» (sin nombre, sus entrenos salían en blanco)
+                        name = name.trim().ifBlank { gym.name.ifBlank { defaultName } },
                         equipment = equipment,
                         barKg = if (bar == initial[0]) gym.barKg else unit.parseToKg(bar) ?: gym.barKg,
                         collarKg = if (collars == initial[1]) {

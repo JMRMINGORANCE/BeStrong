@@ -179,6 +179,9 @@ data class SharedSettings(
     fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =
         if (dumbbellTotal && exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
 
+    /** Nombre del gimnasio activo para buscar en el historial (solo con varios gimnasios). */
+    val historyGym: String? get() = activeGym?.name?.takeIf { multiGym }
+
     /** Con el gimnasio [gymId] como activo, si existe (el de una rutina: sus mancuernas y lo hecho allí). */
     fun withGym(gymId: String?): SharedSettings = gyms.firstOrNull { it.id == gymId }?.let { copy(activeGym = it) } ?: this
 

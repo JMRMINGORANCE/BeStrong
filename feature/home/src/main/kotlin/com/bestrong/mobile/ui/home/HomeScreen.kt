@@ -555,7 +555,9 @@ private val GYM_CHIP_MAX_WIDTH = 140.dp
 @Composable
 private fun GymChip(vm: HomeViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
-    if (settings.gyms.size < 2) return
+    // Con un entreno en curso, el gimnasio se cambia desde el entreno (que ajusta los pesos pendientes)
+    val active by vm.active.collectAsStateWithLifecycle()
+    if (settings.gyms.size < 2 || active != null) return
     var open by remember { mutableStateOf(false) }
     TextButton(onClick = { open = true }, modifier = Modifier.widthIn(max = GYM_CHIP_MAX_WIDTH)) {
         // Con letra grande sobra el emoji: se deja sitio al nombre

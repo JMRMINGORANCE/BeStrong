@@ -376,7 +376,13 @@ class HomeViewModel @Inject constructor(
         val history = repo.history.value
         repo.startActive(
             withContext(Dispatchers.Default) {
-                routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup(), previousBlock = { id, n -> com.bestrong.core.stats.WorkoutStats.previousBlock(id, n, history) })
+                // El 2.º bloque del mismo ejercicio también con lo hecho en este gimnasio (como el 1.º)
+                val gym = actions.currentGymName()
+                routine.toWorkout(
+                    System.currentTimeMillis(),
+                    actions.prefillLookup(),
+                    previousBlock = { id, n -> com.bestrong.core.stats.WorkoutStats.previousBlock(id, n, com.bestrong.core.stats.WorkoutStats.atGym(history, gym, id)) },
+                )
             },
         )
         onStarted()
