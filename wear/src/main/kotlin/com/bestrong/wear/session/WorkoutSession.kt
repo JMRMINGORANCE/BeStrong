@@ -7,6 +7,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.content.ContextCompat
+import com.bestrong.core.model.Equipment
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.RoutineExercise
@@ -679,7 +680,8 @@ class WorkoutSession @Inject constructor(
         val we = currentExercise() ?: return
         // Con la barra del ejercicio (o la del gimnasio), como en el móvil
         val s = store.settings.value
-        val bar = s.unit.toKg(s.barInUnit(we.exercise.id))
+        // La barra solo con barra: mancuernas, máquinas y poleas empiezan sin ella (como en el móvil)
+        val bar = if (we.exercise.equipment == Equipment.BARBELL || we.exercise.equipment == Equipment.SMITH) s.unit.toKg(s.barInUnit(we.exercise.id)) else 0.0
         edit { WorkoutEditor.addWarmup(it, we.id, s.unit, bar) }
     }
 

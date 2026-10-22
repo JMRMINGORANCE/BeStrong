@@ -41,7 +41,8 @@ data class GymProfile(
         equipment == Equipment.BARBELL || equipment == Equipment.SMITH -> nearestBarbell(targetKg, unit)
         // Las mancuernas del perfil están en kg: en libras no hay con qué redondear
         unit != WeightUnit.KG -> targetKg
-        equipment == Equipment.DUMBBELL || equipment == Equipment.KETTLEBELL -> if (dumbbellsKg.isEmpty()) targetKg else dumbbellsKg.minBy { kotlin.math.abs(it - targetKg) }
+        // Las kettlebells no van con el juego de mancuernas (32 kg no pasa a 30 si las mancuernas acaban ahí)
+        equipment == Equipment.DUMBBELL -> if (dumbbellsKg.isEmpty()) targetKg else dumbbellsKg.minBy { kotlin.math.abs(it - targetKg) }
         else -> targetKg
     }
 
@@ -55,7 +56,7 @@ data class GymProfile(
             nearestBarbell(currentKg + step, unit).let { if (it > currentKg + 1e-6) it else currentKg + step }
         }
         unit != WeightUnit.KG -> currentKg
-        equipment == Equipment.DUMBBELL || equipment == Equipment.KETTLEBELL -> dumbbellsKg.filter { it > currentKg + 1e-6 }.minOrNull() ?: currentKg
+        equipment == Equipment.DUMBBELL -> dumbbellsKg.filter { it > currentKg + 1e-6 }.minOrNull() ?: currentKg
         else -> currentKg
     }
 

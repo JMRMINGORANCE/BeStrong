@@ -12,13 +12,22 @@ import kotlin.math.round
 object WarmupGenerator {
     private val steps = listOf(0.4 to 5, 0.6 to 3, 0.8 to 2)
 
-    fun generate(workingWeightKg: Double, unit: WeightUnit, barKg: Double = unit.toKg(PlateCalculator.defaultBar(unit))): List<WorkoutSet> {
+    /**
+     * [barKg] 0 = sin barra (mancuernas, máquina, polea): sin la serie con la barra sola. [loadable]: el peso montable
+     * más cercano con el material del gimnasio (discos o mancuernas que hay).
+     */
+    fun generate(
+        workingWeightKg: Double,
+        unit: WeightUnit,
+        barKg: Double = unit.toKg(PlateCalculator.defaultBar(unit)),
+        loadable: (Double) -> Double = { it },
+    ): List<WorkoutSet> {
         if (workingWeightKg <= barKg) return emptyList()
         val inc = unit.stepKg()
-        val sets = mutableListOf(WorkoutSet(weightKg = barKg, reps = 10, type = SetType.WARMUP))
+        val sets = if (barKg > 0) mutableListOf(WorkoutSet(weightKg = barKg, reps = 10, type = SetType.WARMUP)) else mutableListOf()
         steps.forEach { (pct, reps) ->
-            val w = (round(workingWeightKg * pct / inc) * inc).coerceAtLeast(barKg)
-            if (w > sets.last().weightKg && w < workingWeightKg) sets += WorkoutSet(weightKg = w, reps = reps, type = SetType.WARMUP)
+            val w = loadable((round(workingWeightKg * pct / inc) * inc).coerceAtLeast(barKg))
+            if (w > (sets.lastOrNull()?.weightKg ?: 0.0) && w < workingWeightKg) sets += WorkoutSet(weightKg = w, reps = reps, type = SetType.WARMUP)
         }
         return sets
     }

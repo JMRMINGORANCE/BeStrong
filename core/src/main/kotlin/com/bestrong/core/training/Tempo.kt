@@ -32,7 +32,10 @@ data class Tempo(val eccentric: Int, val bottomPause: Int, val concentric: Int, 
         private const val MAX_PHASE = 10
 
         fun parse(text: String?): Tempo? {
-            val parts = text?.trim()?.split('-', '/', ' ', '.')?.filter { it.isNotBlank() } ?: return null
+            // Un punto junto a otros separadores es un decimal («2.5-1-1»), no otra fase: no vale
+            val t0 = text?.trim() ?: return null
+            if ('.' in t0 && t0.any { it in "-/ " }) return null
+            val parts = t0.split('-', '/', ' ', '.').filter { it.isNotBlank() }
             if (parts.size !in 3..4) return null
             val values = parts.map { p -> if (p.equals("x", ignoreCase = true)) 0 else p.toIntOrNull()?.takeIf { it in 0..MAX_PHASE } ?: return null }
             val t = Tempo(values[0], values[1], values[2], values.getOrElse(3) { 0 })

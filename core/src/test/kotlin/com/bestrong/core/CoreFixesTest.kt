@@ -226,4 +226,11 @@ class CoreFixesTest {
         val w = routine.toWorkout(2, { com.bestrong.core.stats.WorkoutStats.previousSets(it, history) }) { id, n -> com.bestrong.core.stats.WorkoutStats.previousBlock(id, n, history) }
         assertEquals(listOf(100.0, 70.0), w.exercises.map { it.sets.first().weightKg })
     }
+
+    @Test fun dumbbellWarmupsSkipTheBarAndDecimalTempoIsRejected() {
+        val w = com.bestrong.core.training.WarmupGenerator.generate(30.0, com.bestrong.core.util.WeightUnit.KG, barKg = 0.0)
+        assertEquals(listOf(12.5, 17.5, 25.0), w.map { it.weightKg })
+        assertEquals(null, com.bestrong.core.training.Tempo.parse("2.5-1-1"))
+        assertEquals(com.bestrong.core.training.Tempo(3, 1, 1, 0), com.bestrong.core.training.Tempo.parse("3-1-1"))
+    }
 }

@@ -576,7 +576,8 @@ class ActiveWorkoutViewModel @Inject constructor(
         val to = repo.exercise(exerciseId) ?: return
         val previousOfNew = previousSets.value(exerciseId)
         val step = settings.value.stepKgFor(exerciseId)
-        edit { WorkoutEditor.substitute(it, weId, to, previousOfNew, step) }
+        // El peso convertido, a lo que hay en el gimnasio (34 kg en mancuernas de 2 en 2, no 35)
+        edit { w -> WorkoutEditor.substitute(w, weId, to, previousOfNew, step).let { r -> r.copy(exercises = r.exercises.map { e -> if (e.exercise.id == to.id) refitToGym(e, settings.value) else e }) } }
     }
     fun linkWithNext(weId: String) = edit { WorkoutEditor.linkWithNext(it, weId) }
     fun unlinkSuperset(weId: String) = edit { WorkoutEditor.unlinkSuperset(it, weId) }
@@ -634,10 +635,13 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Añade series de aproximación antes de la primera serie de trabajo. */
     fun addWarmup(weId: String) = edit { w ->
         // Con la barra del ejercicio (EZ, hexagonal…) si tiene una propia
-        val exerciseId = w.exercises.firstOrNull { it.id == weId }?.exercise?.id.orEmpty()
-        val gym = settings.value.gymFor(exerciseId)
-        val bar = com.bestrong.core.training.GymProfile.barIn(settings.value.unit, gym.barKg) + settings.value.unit.fromKg(gym.collarKg)
-        WorkoutEditor.addWarmup(w, weId, settings.value.unit, settings.value.unit.toKg(bar))
+        val ex = w.exercises.firstOrNull { it.id == weId }?.exercise
+        val gym = settings.value.gymFor(ex?.id.orEmpty())
+        val unit = settings.value.unit
+        // La barra solo con barra (mancuernas, máquinas y poleas empiezan sin ella), y pesos que se puedan montar
+        val barbell = ex?.equipment == Equipment.BARBELL || ex?.equipment == Equipment.SMITH
+        val bar = if (barbell) unit.toKg(com.bestrong.core.training.GymProfile.barIn(unit, gym.barKg) + unit.fromKg(gym.collarKg)) else 0.0
+        WorkoutEditor.addWarmup(w, weId, unit, bar) { kg -> ex?.let { gym.nearestLoad(kg, it.equipment, unit) } ?: kg }
     }
 
     /** «8-12» o null (sin rango: progresión normal). */
