@@ -171,18 +171,21 @@ class AppSync @Inject constructor(
     }
 
     @OptIn(FlowPreview::class)
+    private suspend fun syncRoutines() {
+        // No antes de cargar: con mucho historial la lista en memoria puede seguir vacía pasado el segundo de
+        // espera y el reloj recibiría «sin rutinas» (vacía de verdad solo si la base de datos también lo está)
+        repository.routines.first { it.isNotEmpty() || repository.routinesOnce().isEmpty() }
+        // La sesión de hoy del programa activo va la primera, con sus cargas calculadas
+        // También al cambiar de día o de mesociclo: la semana de descarga aligera la sesión del reloj
+        val deloadInputs = combine(planning.state.map { it.mesocycle }.distinctUntilChanged(), com.bestrong.mobile.widget.dayTicks()) { m, d -> m to d }
+        combine(repository.routines, repository.activeProgram, repository.history, deloadInputs) { routines, program, history, _ ->
+            watchPush.routinesForWatch(routines, program, history)
+        }.debounce(1_000).distinctUntilChanged().collect { watchSync.pushRoutines(it) }
+    }
+
+    @OptIn(FlowPreview::class)
     fun start() {
-        scope.launch {
-            // No antes de cargar: con mucho historial la lista en memoria puede seguir vacía pasado el segundo de
-            // espera y el reloj recibiría «sin rutinas» (vacía de verdad solo si la base de datos también lo está)
-            repository.routines.first { it.isNotEmpty() || repository.routinesOnce().isEmpty() }
-            // La sesión de hoy del programa activo va la primera, con sus cargas calculadas
-            // También al cambiar de día o de mesociclo: la semana de descarga aligera la sesión del reloj
-            val deloadInputs = combine(planning.state.map { it.mesocycle }.distinctUntilChanged(), com.bestrong.mobile.widget.dayTicks()) { m, d -> m to d }
-            combine(repository.routines, repository.activeProgram, repository.history, deloadInputs) { routines, program, history, _ ->
-                watchPush.routinesForWatch(routines, program, history)
-            }.debounce(1_000).distinctUntilChanged().collect { watchSync.pushRoutines(it) }
-        }
+        scope.launch { syncRoutines() }
         scope.launch {
             repository.history.first { it.isNotEmpty() || repository.historyOnce().isEmpty() }
             repository.history.debounce(2_000).collect { watchSync.pushHistory(it) }

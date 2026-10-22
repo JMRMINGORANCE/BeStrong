@@ -764,8 +764,6 @@ class ActiveWorkoutViewModel @Inject constructor(
         if (partnerMode.value) {
             // Entreno de la pareja: se guarda aparte (no cuenta para tus récords ni estadísticas)
             viewModelScope.launch {
-                // Su descanso se acaba con su entreno (el tuyo, si lo hay, sigue)
-                restTimer.skipFor(repo.partnerWorkout.value?.id)
                 actions.closePartner()
                 setPartnerMode(false)
             }
@@ -800,8 +798,7 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     fun discard() = viewModelScope.launch {
         if (partnerMode.value) {
-            restTimer.skipFor(repo.partnerWorkout.value?.id)
-            repo.setPartnerActive(null)
+            actions.discardPartner()
             setPartnerMode(false)
             return@launch
         }

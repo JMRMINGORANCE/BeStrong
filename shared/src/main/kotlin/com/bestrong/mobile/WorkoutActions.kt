@@ -46,8 +46,16 @@ class WorkoutActions @Inject constructor(
      */
     suspend fun closePartner(withGym: Boolean = true) {
         val current = repository.takePartnerActive() ?: return
+        // Su descanso se acaba con su entreno (el tuyo, si lo hay, sigue)
+        restTimer.skipFor(current.id)
         val finished = WorkoutEditor.finish(current, System.currentTimeMillis()).let { if (withGym) withGym(it) else it }
         if (finished.exercises.isNotEmpty()) repository.saveWorkout(finished)
+    }
+
+    /** Descarta el entreno de la pareja, con su descanso. */
+    suspend fun discardPartner() {
+        restTimer.skipFor(repository.partnerWorkout.value?.id)
+        repository.setPartnerActive(null)
     }
 
     /** El entreno en texto (series y RPE), para mandarlo al entrenador o a un grupo. */
