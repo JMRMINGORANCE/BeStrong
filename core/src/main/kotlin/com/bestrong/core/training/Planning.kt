@@ -279,8 +279,10 @@ object RoutineGenerator {
     ): List<Routine> {
         val main = main(goal).withLevel(level)
         val acc = accessory(goal).withLevel(level)
-        val perExercise = (main.sets * (40 + main.restSeconds) + acc.sets * (40 + acc.restSeconds)) / 2 / 60.0
-        val maxExercises = (minutesPerSession / perExercise).toInt().coerceIn(3, 8)
+        // Los dos primeros son básicos (los que más tardan) y el resto accesorios: con la media, 30 min daban 45
+        val mainCost = main.sets * (40 + main.restSeconds)
+        val accCost = acc.sets * (40 + acc.restSeconds)
+        val maxExercises = (2 + (minutesPerSession * 60 - 2 * mainCost) / accCost).coerceIn(3, 8)
         val usable: (Exercise) -> Boolean = { (it.equipment in equipment || it.equipment == Equipment.BODYWEIGHT) && allowed(it) }
         val limited = equipment.none { it == Equipment.BARBELL || it == Equipment.DUMBBELL || it == Equipment.MACHINE || it == Equipment.CABLE }
         val days = split(daysPerWeek, goal, limited)
@@ -305,9 +307,13 @@ object RoutineGenerator {
             val available = options.mapNotNull { ExerciseLibrary.byId(it) }.filter(usable)
             if (available.isEmpty()) null else available[variant % available.size]
         }.distinctBy { it.id }.filter { it.id != finisher?.id }.take(room)
+        // Con más tiempo, más ejercicios del mismo tipo de día (otras opciones de sus huecos) hasta llenar la sesión
+        val same = slots.getValue(type).flatten().distinct().mapNotNull(ExerciseLibrary::byId)
+            .filter { usable(it) && it.id != finisher?.id && base.none { b -> b.id == it.id } }
+        val filled = base + same.take((room - base.size).coerceAtLeast(0))
         // Con lesiones o poco material un día puede quedarse con 0-1 ejercicios: se completa con lo que se
         // pueda hacer de los demás tipos de día (mejor un día algo distinto que uno vacío)
-        return if (base.size >= MIN_DAY_EXERCISES) base else topUp(base, usable, finisher, minOf(room, MIN_DAY_EXERCISES))
+        return if (filled.size >= MIN_DAY_EXERCISES) filled else topUp(filled, usable, finisher, minOf(room, MIN_DAY_EXERCISES))
     }
 
     private fun topUp(base: List<Exercise>, usable: (Exercise) -> Boolean, finisher: Exercise?, target: Int): List<Exercise> {

@@ -536,7 +536,8 @@ class HomeViewModel @Inject constructor(
             kit.equipment,
             minutes,
             context.appLanguage(),
-            allowed = { com.bestrong.core.training.Injuries.isSafe(it, injuries) },
+            // Sin gimnasio no hay barra de dominadas ni paralelas (son «peso corporal», pero hace falta dónde colgarse)
+            allowed = { com.bestrong.core.training.Injuries.isSafe(it, injuries) && (kit == Kit.GYM || it.id !in NEEDS_BAR) },
             texts = texts,
             level = level,
         )
@@ -566,9 +567,14 @@ class HomeViewModel @Inject constructor(
 
     /** Crea las rutinas del programa elegido en el idioma de la app. */
     fun addProgram(program: TrainingProgram) = viewModelScope.launch {
-        val routines = program.toRoutines(context.appLanguage())
-        repo.addRoutines(routines)
-        message(context.getString(R.string.msg_program_added, program.name(context.appLanguage()), routines.size))
+        // Como el programa a medida: en su carpeta (« 2», « 3» si ya está) y con su objetivo de días a la semana
+        val name = program.name(context.appLanguage())
+        val folders = routines.value.mapNotNull { it.folder }.toSet()
+        val folder = if (name !in folders) name else generateSequence(2) { it + 1 }.map { "$name $it" }.first { it !in folders }
+        val created = program.toRoutines(context.appLanguage()).map { it.copy(folder = folder) }
+        repo.addRoutines(created)
+        settingsStore.update { it.copy(weeklyGoal = program.daysPerWeek.coerceIn(1, 7)) }
+        message(context.getString(R.string.msg_program_added, folder, created.size))
     }
 
     /** Última rutina borrada, para poder deshacerlo desde el aviso. */
@@ -649,10 +655,15 @@ val GOAL_LABELS = mapOf(
 /** Material con el que se entrena: decide qué ejercicios entran en el programa a medida. */
 enum class Kit(val equipment: Set<com.bestrong.core.model.Equipment>) {
     GYM(com.bestrong.core.model.Equipment.entries.toSet()),
-    DUMBBELLS(setOf(com.bestrong.core.model.Equipment.DUMBBELL, com.bestrong.core.model.Equipment.BODYWEIGHT, com.bestrong.core.model.Equipment.KETTLEBELL)),
+
+    // Solo mancuernas (y el cuerpo): una kettlebell no se da por hecha
+    DUMBBELLS(setOf(com.bestrong.core.model.Equipment.DUMBBELL, com.bestrong.core.model.Equipment.BODYWEIGHT)),
     BODYWEIGHT(setOf(com.bestrong.core.model.Equipment.BODYWEIGHT)),
 }
 
 private const val MESSAGE_TTL_MS = 15_000L
 
 private const val KEY_PENDING_LINK = "pending_routine_link"
+
+/** Ejercicios de peso corporal que necesitan una barra o paralelas (no se proponen sin gimnasio). */
+private val NEEDS_BAR = setOf("pull_up", "chin_up", "dips", "hanging_leg_raise", "negative_pull_up", "scapular_pull_up")
