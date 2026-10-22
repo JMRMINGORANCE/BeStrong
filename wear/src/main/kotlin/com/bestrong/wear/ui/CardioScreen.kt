@@ -100,7 +100,7 @@ fun CardioScreen(cardio: CardioSession, onDone: () -> Unit) {
                             Text(stringResource(R.string.cardio_speed, "%.1f".format(s.speedMps * 3.6)), style = MaterialTheme.typography.labelMedium)
                         } else {
                             val pace = s.paceSecPerKm(now)
-                            Text(stringResource(R.string.cardio_pace, if (pace > 0) formatDuration(pace) else "--"), style = MaterialTheme.typography.labelMedium)
+                            Text(stringResource(R.string.cardio_pace, if (pace in 1 until 3600) formatDuration(pace) else "--"), style = MaterialTheme.typography.labelMedium)
                         }
                         Text("♥ ${s.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.labelMedium)
                         if (noGps) Text(stringResource(R.string.cardio_no_gps), style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)

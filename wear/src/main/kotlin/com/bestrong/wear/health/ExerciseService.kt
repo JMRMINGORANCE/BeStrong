@@ -306,6 +306,8 @@ class ExerciseService : LifecycleService() {
             // Si Android reinició la app a mitad de la carrera, se sigue con ella: empezar otra pondría la
             // distancia y las calorías a cero
             if (ownsExerciseInProgress()) return
+            // Uno nuevo empieza de cero: lo que ya llevaba la carrera (si se retoma) se suma, no se pierde
+            cardio.rebase()
             exerciseClient.startExercise(
                 ExerciseConfig.builder(type)
                     .setDataTypes(wanted.filter { it in supported }.toSet())

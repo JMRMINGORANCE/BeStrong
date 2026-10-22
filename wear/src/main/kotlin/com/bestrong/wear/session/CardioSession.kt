@@ -39,7 +39,8 @@ data class CardioState(
     /** Ritmo medio en segundos por km (0 si aún no hay distancia). */
     fun paceSecPerKm(nowEpochMs: Long): Long {
         val km = distanceM / 1000.0
-        return if (km < 0.01) 0 else (((nowEpochMs - startedAtEpochMs) / 1000.0) / km).toLong()
+        // Con menos de 100 m (GPS recién enganchado) el ritmo no dice nada: salía «1h 06m /km»
+        return if (km < 0.1) 0 else (((nowEpochMs - startedAtEpochMs) / 1000.0) / km).toLong()
     }
 }
 
@@ -68,7 +69,22 @@ class CardioSession @Inject constructor(
 
     /** Pulso guardado antes de un reinicio del proceso (el nuevo contador empieza vacío). */
     private var restoredHr = _state.value?.let { it.avgHeartRate to it.maxHeartRate }
+
+    /** Cuándo se retomó tras el reinicio: la media guardada pesa lo que duró hasta entonces. */
+    private var restoredAt = if (_state.value != null) System.currentTimeMillis() else 0L
     private var lastSavedAt = 0L
+
+    /** Distancia y calorías de antes si Health Services empezó un ejercicio nuevo (los suyos vuelven a cero). */
+    private var baseM = 0.0
+    private var baseKcal = 0
+
+    /** Antes de empezar un ejercicio nuevo de Health Services con la carrera ya en marcha: se suma a lo que había. */
+    fun rebase() {
+        _state.value?.let {
+            baseM = it.distanceM
+            baseKcal = it.calories ?: 0
+        }
+    }
 
     fun start(type: CardioType) {
         if (_state.value != null) return
@@ -76,14 +92,26 @@ class CardioSession @Inject constructor(
         val now = System.currentTimeMillis()
         hr = HeartRateTracker(now)
         restoredHr = null
+        restoredAt = 0L
+        baseM = 0.0
+        baseKcal = 0
         _state.value = CardioState(type, now)
         save(force = true)
         ExerciseService.start(context)
     }
 
-    fun onDistance(totalM: Double) = changed { it.copy(distanceM = totalM) }
+    fun onDistance(totalM: Double) = changed { it.copy(distanceM = baseM + totalM) }
     fun onSpeed(mps: Double) = changed { it.copy(speedMps = mps) }
-    fun onCalories(kcal: Double) = changed { it.copy(calories = kcal.toInt()) }
+    fun onCalories(kcal: Double) = changed { it.copy(calories = baseKcal + kcal.toInt()) }
+
+    /** Media de toda la carrera tras un reinicio: la guardada y la nueva, cada una según el tiempo que cubre. */
+    private fun averageWithRestored(current: Int?, startedAt: Long, at: Long): Int? {
+        val before = restoredHr?.first
+        if (before == null || current == null || restoredAt == 0L) return current ?: before
+        val beforeMs = (restoredAt - startedAt).coerceAtLeast(0)
+        val afterMs = (at - restoredAt).coerceAtLeast(1)
+        return ((before * beforeMs + current * afterMs) / (beforeMs + afterMs)).toInt()
+    }
 
     /** Cada lectura con su hora real (las que llegan en lote con la pantalla apagada también). */
     fun onHeartRate(bpm: Int, atEpochMs: Long) {
@@ -92,7 +120,7 @@ class CardioSession @Inject constructor(
         changed {
             it.copy(
                 heartRate = hr.latest,
-                avgHeartRate = hr.average ?: restoredHr?.first,
+                avgHeartRate = averageWithRestored(hr.average, it.startedAtEpochMs, atEpochMs),
                 maxHeartRate = listOfNotNull(hr.max, restoredHr?.second).maxOrNull(),
             )
         }
