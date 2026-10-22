@@ -272,3 +272,9 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         const val MAX_LOCAL = 50
     }
 }
+
+/** El ejercicio por id: de la biblioteca o, si es propio, de las rutinas o el historial que mandó el móvil. */
+fun WearStore.exerciseFor(id: String): com.bestrong.core.model.Exercise? =
+    com.bestrong.core.library.ExerciseLibrary.byId(id)
+        ?: routines.value.flatMap { r -> r.exercises.map { it.exercise } }.firstOrNull { it.id == id }
+        ?: history.value.flatMap { w -> w.exercises.map { it.exercise } }.firstOrNull { it.id == id }

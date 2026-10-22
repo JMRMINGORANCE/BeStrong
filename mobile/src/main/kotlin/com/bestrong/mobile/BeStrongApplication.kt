@@ -155,6 +155,7 @@ class AppSync @Inject constructor(
                 gymBarKg = s.activeGym.loadedBarKg,
                 exerciseBarKg = s.exerciseBarKg,
                 activeGym = s.activeGym,
+                gyms = s.gyms,
                 multiGym = s.gyms.size > 1,
                 weeklyCardioKm = s.weeklyCardioKm,
                 weeklyCardioMin = s.weeklyCardioMin,

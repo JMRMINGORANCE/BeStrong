@@ -161,6 +161,8 @@ data class SharedSettings(
     val exerciseBarKg: Map<String, Double> = emptyMap(),
     /** Gimnasio activo (discos, mancuernas, cierres): el reloj redondea la sugerencia a lo que se puede montar. */
     val activeGym: com.bestrong.core.training.GymProfile? = null,
+    /** Todos los gimnasios: una rutina con el suyo se rellena en el reloj con su material y su historial, como en el móvil. */
+    val gyms: List<com.bestrong.core.training.GymProfile> = emptyList(),
     /** Hay más de un gimnasio: el reloj rellena con lo hecho en el activo (con uno solo no hace falta). */
     val multiGym: Boolean = false,
     /** Objetivo semanal de cardio elegido en el móvil (km o minutos), para la complicación del reloj. */
@@ -176,6 +178,9 @@ data class SharedSettings(
     /** 2 con [dumbbellTotal] en un ejercicio con mancuernas; si no, 1 (el peso se guarda siempre por mancuerna). */
     fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =
         if (dumbbellTotal && exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
+
+    /** Con el gimnasio [gymId] como activo, si existe (el de una rutina: sus mancuernas y lo hecho allí). */
+    fun withGym(gymId: String?): SharedSettings = gyms.firstOrNull { it.id == gymId }?.let { copy(activeGym = it) } ?: this
 
     /** El gimnasio activo con la barra propia del ejercicio, si la tiene (como en el móvil). */
     fun gymFor(exerciseId: String): com.bestrong.core.training.GymProfile? =

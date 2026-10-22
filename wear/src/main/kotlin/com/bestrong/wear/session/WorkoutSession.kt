@@ -36,6 +36,7 @@ import com.bestrong.core.training.VoiceSetParser
 import com.bestrong.wear.ApplicationScope
 import com.bestrong.wear.data.PhoneSync
 import com.bestrong.wear.data.WearStore
+import com.bestrong.wear.data.exerciseFor
 import com.bestrong.wear.health.ExerciseService
 import com.bestrong.wear.health.RepCounter
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -200,14 +201,18 @@ class WorkoutSession @Inject constructor(
 
     private fun previous(exerciseId: String): List<WorkoutSet> = WorkoutStats.previousSets(exerciseId, store.history.value)
 
+    /** Gimnasio de la rutina empezada: manda sobre el activo para rellenar y redondear (como en el móvil). */
+    private var routineGymId: String? = null
+    private fun gymSettings() = store.settings.value.withGym(routineGymId)
+
     /** Rellena con la sugerencia de progresión (si está activada en el móvil) o con la última sesión. */
     private fun prefill(exerciseId: String): List<WorkoutSet> {
-        val s = store.settings.value
+        val s = gymSettings()
         // Como en el móvil: con varios gimnasios, lo hecho en el activo si allí ya se hizo el ejercicio
         val base = WorkoutStats.atGym(store.history.value, s.activeGym?.name?.takeIf { s.multiGym }, exerciseId)
         val previous = WorkoutStats.previousSets(exerciseId, base)
         if (s.progressionEnabled) {
-            val ex = exerciseFor(exerciseId)
+            val ex = store.exerciseFor(exerciseId)
             if (ex != null) {
                 Progression.suggest(ex, base, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { sug ->
                     val lastWeekBest = com.bestrong.core.training.ProgressionCap.lastWeekBest(exerciseId, store.history.value, System.currentTimeMillis())
@@ -219,23 +224,20 @@ class WorkoutSession @Inject constructor(
         return previous
     }
 
-    private fun exerciseFor(id: String): Exercise? =
-        com.bestrong.core.library.ExerciseLibrary.byId(id)
-            ?: store.routines.value.flatMap { r -> r.exercises.map { it.exercise } }.firstOrNull { it.id == id }
-            ?: store.history.value.flatMap { w -> w.exercises.map { it.exercise } }.firstOrNull { it.id == id }
-
     fun previousFor(exerciseId: String): List<WorkoutSet> = previous(exerciseId)
 
     // --- Ciclo de vida -----------------------------------------------------------------------
 
     fun startEmpty() {
         if (_workout.value != null) return
+        routineGymId = null
         val now = System.currentTimeMillis()
         begin(WorkoutEditor.empty(now, WorkoutSource.WATCH, com.bestrong.wear.ui.defaultWorkoutName(context, now)))
     }
 
     fun startRoutine(routine: Routine) {
         if (_workout.value != null) return
+        routineGymId = routine.gymId
         // Las sesiones de un programa llevan las cargas calculadas: no se sustituyen por la última vez
         val lookup: (String) -> List<WorkoutSet> = if (routine.id.startsWith(Periodization.ROUTINE_PREFIX)) EMPTY_LOOKUP else ::prefill
         // El mismo ejercicio en otro bloque: cada uno con lo suyo de la última vez (como en el móvil)
@@ -244,7 +246,7 @@ class WorkoutSession @Inject constructor(
 
     private fun begin(start: Workout) {
         // Dónde se empieza (con varios gimnasios): así no depende del que tenga el móvil cuando llegue
-        val s = store.settings.value
+        val s = gymSettings()
         val w = if (start.gymName == null && s.multiGym) start.copy(gymName = s.activeGym?.name) else start
         _summary.value = null
         _exerciseIndex.value = 0
@@ -322,6 +324,7 @@ class WorkoutSession @Inject constructor(
 
     /** Entreno nuevo llegado del móvil: se empieza a medir desde cero en el reloj. */
     private fun startedFromPhone(remote: Workout) {
+        routineGymId = null
         _summary.value = null
         _metrics.value = HealthMetrics()
         hr = HeartRateTracker(remote.startedAtEpochMs)
@@ -523,7 +526,7 @@ class WorkoutSession @Inject constructor(
      * el mejor que envía el móvil), ajustado al material del gimnasio activo; null sin reps o sin marca.
      */
     fun targetRpeLoadKg(exercise: Exercise, reps: Int, rpe: Double): Double? {
-        val s = store.settings.value
+        val s = gymSettings()
         val e1rm = if (reps <= 0) {
             null
         } else {
