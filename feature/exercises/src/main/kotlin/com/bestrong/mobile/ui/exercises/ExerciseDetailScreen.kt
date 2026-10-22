@@ -73,9 +73,16 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
     var includeVariants by rememberSaveable(exerciseId) { mutableStateOf(false) }
     val flow = remember(exerciseId, includeVariants) { vm.detail(exerciseId, includeVariants) }
     val state by flow.collectAsStateWithLifecycle()
-    val s = state ?: return
+    // Al cambiar «incluir variantes» se sigue enseñando la ficha anterior mientras carga: sin ese hueco,
+    // la métrica elegida, el scroll y una nota sin guardar no se pierden
+    val last = remember(exerciseId) { java.util.concurrent.atomic.AtomicReference<ExerciseDetailState?>(null) }
+    val s = state ?: last.get() ?: return
+    last.set(s)
     val f = vm.weightFactor(s.exercise)
-    var metric by rememberSaveable { mutableIntStateOf(0) }
+    var chosenMetric by rememberSaveable { mutableIntStateOf(0) }
+    // Sin peso (dominadas, flexiones) solo tiene sentido la gráfica de reps: el resto serían líneas a 0
+    val repsOnly = s.exercise.tracking == com.bestrong.core.model.TrackingType.REPS_ONLY
+    val metric = if (repsOnly) METRIC_REPS else chosenMetric
     var editing by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf(false) }
     if (editing) {
@@ -151,7 +158,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             // Cardio, distancia y tiempo: su gráfica (distancia o tiempo); con peso y reps, la de 1RM y volumen
             val timed = s.exercise.tracking in TIMED_TRACKING
             if (timed) item { CardioProgressChart(s.progress, timeOnly = s.exercise.tracking == com.bestrong.core.model.TrackingType.DURATION) }
-            if (!timed) {
+            if (!timed && !repsOnly) {
                 item {
                     val labels = listOf(
                         stringResource(R.string.metric_1rm),
@@ -161,7 +168,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                     )
                     SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
                         labels.forEachIndexed { i, l ->
-                            SegmentedButton(selected = metric == i, onClick = { metric = i }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
+                            SegmentedButton(selected = metric == i, onClick = { chosenMetric = i }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
                         }
                     }
                 }
@@ -169,11 +176,13 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             if (!timed) {
                 item {
                     // Sin series que cuenten (asistidas, negativas) no hay 1RM, peso ni reps de ese día: no se pinta un 0
-                    val points = s.progress.filter { p -> metric == 2 || p.bestReps > 0 }.takeLast(30).map { p ->
+                    val points = s.progress.filter { p ->
+                        when (metric) { 0 -> p.bestOneRepMax > 0; 1 -> p.heaviestWeight > 0; 2 -> true; else -> p.bestReps > 0 }
+                    }.takeLast(30).map { p ->
                         ChartPoint(
                             formatShortDate(p.dateEpochMs),
-                            // Con mancuernas como total del par, en las mismas cifras que el entreno
-                            when (metric) { 0 -> p.bestOneRepMax * f; 1 -> p.heaviestWeight * f; 2 -> p.volume * f; else -> p.bestReps.toDouble() },
+                            // Peso con mancuernas como total del par, como en las series; el volumen, como en el resto de la app
+                            when (metric) { 0 -> p.bestOneRepMax * f; 1 -> p.heaviestWeight * f; 2 -> p.volume; else -> p.bestReps.toDouble() },
                         )
                     }
                     // Peso en tu unidad, volumen con su unidad y las reps tal cual
@@ -201,7 +210,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                                 Text(
                                     when (type) {
                                         RecordType.MOST_REPS -> pr.value.toInt().let { n -> pluralStringResource(R.plurals.n_reps, n, n) }
-                                        RecordType.BEST_SET_VOLUME -> unit.formatVolume(pr.value * f)
+                                        RecordType.BEST_SET_VOLUME -> unit.formatVolume(pr.value)
                                         else -> unit.format(pr.value * f, withUnit = true)
                                     },
                                     fontWeight = FontWeight.Bold,
@@ -294,6 +303,9 @@ private fun ExportExerciseButton(vm: ExercisesViewModel, exercise: com.bestrong.
 }
 
 private const val RPE_MIN_SESSIONS = 3
+
+/** Índice de la gráfica de reps en el selector (1RM, peso, volumen, reps). */
+private const val METRIC_REPS = 3
 
 /** RPE medio de las últimas sesiones y aviso si cuesta más sin progresar (fatiga). */
 @Composable

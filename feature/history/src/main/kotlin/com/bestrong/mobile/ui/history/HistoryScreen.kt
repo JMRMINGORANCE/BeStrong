@@ -415,8 +415,10 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             Text(pluralStringResource(R.plurals.n_records, records.size, records.size), Modifier.padding(start = 8.dp), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black)
                         }
                         records.forEach {
-                            // Con «suma de las dos mancuernas», el peso y el 1RM del par, como en las series
-                            val factor = if (it.type == com.bestrong.core.stats.RecordType.HEAVIEST_WEIGHT || it.type == com.bestrong.core.stats.RecordType.BEST_ONE_REP_MAX) com.bestrong.mobile.ui.components.pairFactor(it.exerciseId) else 1
+                            // Con «suma de las dos mancuernas», el peso y el 1RM del par, como en las series (también en los propios)
+                            val ex = w.exercises.firstOrNull { e -> e.exercise.id == it.exerciseId }?.exercise
+                            val pairs = it.type == com.bestrong.core.stats.RecordType.HEAVIEST_WEIGHT || it.type == com.bestrong.core.stats.RecordType.BEST_ONE_REP_MAX
+                            val factor = if (pairs && ex != null) vm.weightFactor(ex) else 1
                             Text(stringResource(R.string.record_line, it.exerciseLabel(), it.type.label(), it.type.formatValue(it.value * factor, unit)), style = MaterialTheme.typography.bodyMedium)
                         }
                     }
