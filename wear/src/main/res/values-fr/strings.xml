@@ -61,6 +61,7 @@
     <string name="exercise_done">Exercice terminé ✓</string>
     <string name="exercises">Exercices</string>
     <string name="finish">Terminer</string>
+    <string name="finish_confirm">Terminer ?</string>
     <string name="hr_zone">Z%1$d</string>
     <string name="info_best_1rm">Meilleur 1RM est. : %1$s</string>
     <string name="info_chart_desc">1RM estimé : de %1$s à %2$s</string>

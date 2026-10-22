@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -259,7 +261,8 @@ private fun tutorialTint(page: Int): androidx.compose.ui.graphics.Color = when (
 @Composable
 private fun TutorialScreen(page: TutorialPage, tint: androidx.compose.ui.graphics.Color) {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        TutorialIllustration(page, tint, Modifier.size(280.dp))
+        // La ilustración encoge si el texto no cabe (alemán, francés o letra grande): el texto no se corta
+        TutorialIllustration(page, tint, Modifier.weight(1f, fill = false).sizeIn(maxWidth = 280.dp, maxHeight = 280.dp).aspectRatio(1f))
         Spacer(Modifier.height(32.dp))
         Text(stringResource(page.title), style = MaterialTheme.typography.displaySmall, textAlign = TextAlign.Center, modifier = Modifier.semantics { heading() })
         Spacer(Modifier.height(16.dp))

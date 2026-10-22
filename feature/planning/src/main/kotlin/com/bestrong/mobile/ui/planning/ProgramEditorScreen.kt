@@ -239,10 +239,10 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.prog_create)) },
+                title = { Text(name.ifBlank { stringResource(R.string.prog_create) }, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
                 navigationIcon = { IconButton(onClick = leave) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back)) } },
                 actions = {
-                    TextButton(enabled = canSave, onClick = save) { Text(stringResource(R.string.prog_save)) }
+                    TextButton(enabled = canSave, onClick = save) { Text(stringResource(R.string.action_save)) }
                 },
             )
         },
@@ -256,7 +256,7 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             OutlinedTextField(day.name, { days[dayIndex] = day.copy(name = it) }, label = { Text(stringResource(R.string.prog_day_name)) }, singleLine = true, modifier = Modifier.weight(1f))
-                            if (days.size > 1) IconButton(onClick = { days.removeAt(dayIndex) }) { Icon(Icons.Default.Close, stringResource(R.string.action_delete)) }
+                            if (days.size > 1) IconButton(onClick = { days.removeAt(dayIndex) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_named, day.name)) }
                         }
                         day.items.forEachIndexed { i, item ->
                             ItemEditor(
@@ -283,7 +283,7 @@ private fun ItemEditor(item: ItemDraft, name: String, onChange: (ItemDraft) -> U
     Column(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(name, Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
-            IconButton(onClick = onRemove) { Icon(Icons.Default.Close, stringResource(R.string.action_delete)) }
+            IconButton(onClick = onRemove) { Icon(Icons.Default.Close, stringResource(R.string.remove_named, name)) }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             listOf(SchemeKind.LINEAR to R.string.scheme_linear, SchemeKind.FIXED to R.string.scheme_fixed, SchemeKind.FIVE_THREE_ONE to R.string.scheme_531).forEach { (k, l) ->
@@ -299,7 +299,7 @@ private fun ItemEditor(item: ItemDraft, name: String, onChange: (ItemDraft) -> U
                 } else {
                     // Incremento con decimales (1,25 / 2,5) y en la unidad elegida
                     ValueBox(
-                        label = stringResource(R.string.prog_increment) + " (" + unit.label + ")",
+                        label = "+" + unit.label,
                         value = item.incrementKg,
                         show = { unit.formatStep(it).removeSuffix(" " + unit.label) },
                         parse = { t -> unit.parseToKg(t)?.takeIf { it in 0.0..20.0 } },

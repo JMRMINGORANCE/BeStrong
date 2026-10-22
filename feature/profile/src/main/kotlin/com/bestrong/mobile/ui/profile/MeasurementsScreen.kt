@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -311,7 +312,8 @@ private fun MeasurementDialog(initial: BodyMeasurement?, unit: WeightUnit, onSav
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (initial == null) R.string.new_measurement else R.string.edit_measurement)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            // Con el teclado abierto o letra grande, las últimas medidas (brazo, muslo) quedaban fuera: se desplaza
+            Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 labels.forEachIndexed { i, l ->
                     OutlinedTextField(
                         fields[i].value,

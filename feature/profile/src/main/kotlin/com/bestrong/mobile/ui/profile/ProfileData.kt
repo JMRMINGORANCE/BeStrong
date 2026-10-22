@@ -229,6 +229,22 @@ private fun TrashItem(vm: ProfileViewModel) {
                             open = false
                         }) { Text(stringResource(R.string.trash_restore_all)) }
                     }
+                    // Borrar uno para siempre también se confirma (se abre la papelera para rescatar, un mal toque no perdona)
+                    var purging by remember { mutableStateOf<com.bestrong.core.model.Workout?>(null) }
+                    purging?.let { pw ->
+                        AlertDialog(
+                            onDismissRequest = { purging = null },
+                            title = { Text(stringResource(R.string.trash_delete_forever)) },
+                            text = { Text(pw.name + " · " + stringResource(R.string.cannot_undo)) },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    vm.purgeTrash(pw.id)
+                                    purging = null
+                                }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
+                            },
+                            dismissButton = { TextButton(onClick = { purging = null }) { Text(stringResource(R.string.action_cancel)) } },
+                        )
+                    }
                     trash.forEach { t ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
@@ -241,7 +257,7 @@ private fun TrashItem(vm: ProfileViewModel) {
                                 )
                             }
                             TextButton(onClick = { vm.restoreFromTrash(t.workout.id) }) { Text(stringResource(R.string.action_restore)) }
-                            IconButton(onClick = { vm.purgeTrash(t.workout.id) }) { Icon(Icons.Default.Delete, stringResource(R.string.trash_delete_forever)) }
+                            IconButton(onClick = { purging = t.workout }) { Icon(Icons.Default.Delete, stringResource(R.string.trash_delete_forever)) }
                         }
                     }
                 }

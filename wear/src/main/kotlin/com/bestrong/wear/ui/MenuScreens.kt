@@ -53,7 +53,6 @@ fun MenuScreen(
     val repCounting by session.repCounting.collectAsStateWithLifecycle()
     val unit = LocalWeightUnit.current
     val listState = rememberScalingLazyListState()
-    var confirmDiscard by remember { mutableStateOf(false) }
     val lowPower by session.lowPower.collectAsStateWithLifecycle()
     var maxHr by remember { mutableIntStateOf(session.maxHeartRate) }
     val voice = rememberVoiceInput(stringResource(R.string.voice_prompt)) { text -> if (session.applySpoken(text)) onBack() }
@@ -65,7 +64,7 @@ fun MenuScreen(
     ScreenScaffold(
         scrollState = listState,
         edgeButton = {
-            EdgeButton(onClick = session::finish) { Text(stringResource(R.string.finish)) }
+            FinishEdgeButton(session, pending = w.exercises.any { e -> e.sets.any { !it.completed } })
         },
     ) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
@@ -177,14 +176,7 @@ fun MenuScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            item {
-                Button(
-                    onClick = { if (confirmDiscard) { session.discard(); onDiscarded() } else confirmDiscard = true },
-                    label = { Text(stringResource(if (confirmDiscard) R.string.tap_again_discard else R.string.discard_workout)) },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
+            item { DiscardButton(session, onDiscarded) }
         }
     }
 }
@@ -355,3 +347,56 @@ private fun warnIfNotLighter(context: android.content.Context, added: Boolean, h
 /** Nombre del ejercicio del récord en el idioma del reloj (el récord lo guarda en español). */
 @Composable
 private fun recordName(pr: com.bestrong.core.stats.PersonalRecord): String = ExerciseLibrary.byId(pr.exerciseId)?.displayName() ?: pr.exerciseName
+
+/** Descartar: «toca otra vez» con vibración, y caduca a los 3 s (un toque mucho después no descarta el entreno). */
+@Composable
+private fun DiscardButton(session: WorkoutSession, onDiscarded: () -> Unit) {
+    var confirm by remember { mutableStateOf(false) }
+    val view = androidx.compose.ui.platform.LocalView.current
+    androidx.compose.runtime.LaunchedEffect(confirm) {
+        if (confirm) {
+            kotlinx.coroutines.delay(CONFIRM_TIMEOUT_MS)
+            confirm = false
+        }
+    }
+    Button(
+        onClick = {
+            if (confirm) {
+                session.discard()
+                onDiscarded()
+            } else {
+                confirm = true
+                view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+            }
+        },
+        label = { Text(stringResource(if (confirm) R.string.tap_again_discard else R.string.discard_workout)) },
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer, contentColor = MaterialTheme.colorScheme.onErrorContainer),
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+/** Terminar: con series pendientes pide un segundo toque (un roce desde el «⋯» no cierra el entreno para siempre). */
+@Composable
+private fun FinishEdgeButton(session: WorkoutSession, pending: Boolean) {
+    var confirm by remember { mutableStateOf(false) }
+    val view = androidx.compose.ui.platform.LocalView.current
+    androidx.compose.runtime.LaunchedEffect(confirm) {
+        if (confirm) {
+            kotlinx.coroutines.delay(CONFIRM_TIMEOUT_MS)
+            confirm = false
+        }
+    }
+    EdgeButton(
+        onClick = {
+            if (!pending || confirm) {
+                session.finish()
+            } else {
+                confirm = true
+                view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+            }
+        },
+    ) { Text(stringResource(if (confirm) R.string.finish_confirm else R.string.finish), maxLines = 1) }
+}
+
+/** Cuánto espera un «toca otra vez» antes de volver a su estado normal. */
+private const val CONFIRM_TIMEOUT_MS = 3_000L

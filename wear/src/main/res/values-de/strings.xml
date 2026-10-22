@@ -61,6 +61,7 @@
     <string name="exercise_done">Übung fertig ✓</string>
     <string name="exercises">Übungen</string>
     <string name="finish">Beenden</string>
+    <string name="finish_confirm">Beenden?</string>
     <string name="hr_zone">Z%1$d</string>
     <string name="info_best_1rm">Bester gesch. 1RM: %1$s</string>
     <string name="info_chart_desc">Geschätzter 1RM: von %1$s auf %2$s</string>
