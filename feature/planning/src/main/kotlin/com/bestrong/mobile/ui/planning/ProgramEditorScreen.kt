@@ -179,6 +179,10 @@ private val DraftsSaver = Saver<SnapshotStateList<DayDraft>, String>(
     restore = { mutableStateListOf<DayDraft>().apply { addAll(decodeDrafts(it)) } },
 )
 
+/** Nombre y días tal como están guardados (o los de un programa nuevo), para saber si hay cambios. */
+private fun savedDraft(existing: PeriodizedProgram?, dayLabel: String): Pair<String, List<DayDraft>> =
+    (existing?.nameEs ?: "") to (existing?.let(::draftsOf) ?: listOf(DayDraft(dayLabel)))
+
 private fun draftsOf(p: PeriodizedProgram): List<DayDraft> = p.days.map { d ->
     DayDraft(
         d.nameEs,
@@ -204,8 +208,7 @@ fun ProgramEditorScreen(vm: PlanningViewModel, programId: String?, onClose: () -
     val defaultDayName = stringResource(R.string.prog_day_n, days.size + 1)
     // Atrás con cambios sin guardar: se pregunta antes de perderlos (como en el editor de rutinas)
     // Del programa guardado (no del borrador restaurado): tras recrearse la pantalla los cambios siguen contando
-    val initialName = remember(existing) { existing?.nameEs ?: "" }
-    val initialDays = remember(existing) { existing?.let(::draftsOf) ?: listOf(DayDraft(dayLabel)) }
+    val (initialName, initialDays) = remember(existing) { savedDraft(existing, dayLabel) }
     var confirmLeave by rememberSaveable { mutableStateOf(false) }
     // El id viene de la navegación (no de la lista cargada, vacía tras matar el proceso): guardar no duplica el programa
     val newProgramId = rememberSaveable { "custom:${newId()}" }
