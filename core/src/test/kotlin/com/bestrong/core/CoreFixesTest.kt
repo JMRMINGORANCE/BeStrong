@@ -215,4 +215,15 @@ class CoreFixesTest {
         assertEquals(com.bestrong.core.training.SuggestionKind.REPEAT, s.kind)
         assertEquals(0, com.bestrong.core.training.NextTime.suggest(finished.exercises.single(), 2.5)!!.direction)
     }
+
+    @Test fun repeatedExerciseBlocksPrefillTheirOwnSets() {
+        val bench = com.bestrong.core.library.ExerciseLibrary.byId("bench_press")!!
+        val heavy = com.bestrong.core.model.WorkoutExercise(exercise = bench, sets = List(3) { com.bestrong.core.model.WorkoutSet(weightKg = 100.0, reps = 5, completed = true) })
+        val light = com.bestrong.core.model.WorkoutExercise(exercise = bench, sets = List(3) { com.bestrong.core.model.WorkoutSet(weightKg = 70.0, reps = 10, completed = true) })
+        val last = com.bestrong.core.model.Workout(name = "w", startedAtEpochMs = 0, finishedAtEpochMs = 1, exercises = listOf(heavy, light))
+        val routine = com.bestrong.core.model.Routine.fromWorkout(last)
+        val history = listOf(last)
+        val w = routine.toWorkout(2, { com.bestrong.core.stats.WorkoutStats.previousSets(it, history) }) { id, n -> com.bestrong.core.stats.WorkoutStats.previousBlock(id, n, history) }
+        assertEquals(listOf(100.0, 70.0), w.exercises.map { it.sets.first().weightKg })
+    }
 }

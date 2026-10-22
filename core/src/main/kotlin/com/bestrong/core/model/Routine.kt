@@ -51,13 +51,17 @@ data class Routine(
         nowEpochMs: Long,
         previousSets: (exerciseId: String) -> List<WorkoutSet> = { emptyList() },
         source: WorkoutSource = WorkoutSource.PHONE,
+        /** Lo hecho en el bloque n.º (ejercicio, n) la última vez, para el 2.º bloque del mismo ejercicio en adelante. */
+        previousBlock: (exerciseId: String, occurrence: Int) -> List<WorkoutSet>? = { _, _ -> null },
     ): Workout = Workout(
         name = name,
         routineId = id,
         startedAtEpochMs = nowEpochMs,
         source = source,
-        exercises = exercises.map { re ->
-            val previous = previousSets(re.exercise.id)
+        exercises = exercises.mapIndexed { index, re ->
+            // El mismo ejercicio en otro bloque (3×5 pesado y 3×10 de descarga): cada uno con lo suyo de la última vez
+            val occurrence = exercises.take(index).count { it.exercise.id == re.exercise.id }
+            val previous = (if (occurrence > 0) previousBlock(re.exercise.id, occurrence) else null) ?: previousSets(re.exercise.id)
             WorkoutExercise(
                 exercise = re.exercise,
                 restSeconds = re.restSeconds,

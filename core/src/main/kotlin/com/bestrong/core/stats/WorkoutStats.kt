@@ -95,6 +95,17 @@ object WorkoutStats {
             .firstOrNull()
             .orEmpty()
 
+    /**
+     * El bloque [occurrence] (0 = el primero) del ejercicio la última vez que se hizo con al menos ese número de
+     * bloques: una rutina con el mismo ejercicio dos veces (pesado y de descarga) rellena cada uno con lo suyo.
+     */
+    fun previousBlock(exerciseId: String, occurrence: Int, history: List<Workout>): List<WorkoutSet>? =
+        history.asSequence()
+            .filter { it.isFinished }
+            .sortedByDescending { it.startedAtEpochMs }
+            .mapNotNull { w -> w.exercises.filter { it.exercise.id == exerciseId }.getOrNull(occurrence)?.completedSets?.takeIf { it.isNotEmpty() } }
+            .firstOrNull()
+
     /** El ejercicio tal como se hizo la última vez (con series completadas): su RPE objetivo, notas… */
     fun previousExercise(exerciseId: String, history: List<Workout>): WorkoutExercise? =
         history.asSequence()

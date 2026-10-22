@@ -236,8 +236,9 @@ class WorkoutSession @Inject constructor(
     fun startRoutine(routine: Routine) {
         if (_workout.value != null) return
         // Las sesiones de un programa llevan las cargas calculadas: no se sustituyen por la última vez
-        val lookup: (String) -> List<WorkoutSet> = if (routine.id.startsWith(Periodization.ROUTINE_PREFIX)) ({ emptyList() }) else ::prefill
-        begin(routine.toWorkout(System.currentTimeMillis(), lookup, WorkoutSource.WATCH))
+        val lookup: (String) -> List<WorkoutSet> = if (routine.id.startsWith(Periodization.ROUTINE_PREFIX)) EMPTY_LOOKUP else ::prefill
+        // El mismo ejercicio en otro bloque: cada uno con lo suyo de la última vez (como en el móvil)
+        begin(routine.toWorkout(System.currentTimeMillis(), lookup, WorkoutSource.WATCH) { id, n -> WorkoutStats.previousBlock(id, n, store.history.value).takeIf { lookup != EMPTY_LOOKUP } })
     }
 
     private fun begin(start: Workout) {
@@ -951,3 +952,6 @@ private fun keptExerciseIndex(local: Workout?, remote: Workout, index: Int): Int
         else -> WorkoutEditor.nextPendingSet(remote)?.first ?: index.coerceIn(0, (remote.exercises.size - 1).coerceAtLeast(0))
     }
 }
+
+/** Sin rellenar desde el historial (sesiones de programa, con las cargas ya calculadas). */
+private val EMPTY_LOOKUP: (String) -> List<WorkoutSet> = { emptyList() }

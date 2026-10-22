@@ -362,7 +362,12 @@ class HomeViewModel @Inject constructor(
         }
         // Su gimnasio pasa a ser el activo antes de rellenar: los pesos salen con su material
         actions.useRoutineGym(routine)
-        repo.setActive(withContext(Dispatchers.Default) { routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup()) })
+        val history = repo.history.value
+        repo.setActive(
+            withContext(Dispatchers.Default) {
+                routine.toWorkout(System.currentTimeMillis(), actions.prefillLookup(), previousBlock = { id, n -> com.bestrong.core.stats.WorkoutStats.previousBlock(id, n, history) })
+            },
+        )
         onStarted()
     }
 
