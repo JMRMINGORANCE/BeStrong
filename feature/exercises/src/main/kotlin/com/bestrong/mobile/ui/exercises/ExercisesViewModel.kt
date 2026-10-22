@@ -200,7 +200,8 @@ class ExercisesViewModel @Inject constructor(
             // Ocultos: fuera de la lista, pero si los buscas por nombre aparecen (si no, parecería que no existen)
             .filter { if (f.showHidden) it.id in hiddenIds else it.id !in hiddenIds || f.query.isNotBlank() }
             // Lesiones marcadas en Planificación: fuera los ejercicios que cargan esas zonas
-            .filter { Injuries.isSafe(it, plan.injuries) }
+            // (como los ocultos, buscados por nombre sí salen: si no, ni se podía ver su historial)
+            .filter { f.query.isNotBlank() || Injuries.isSafe(it, plan.injuries) }
             .filter { !f.noEquipment || it.equipment == Equipment.BODYWEIGHT || it.equipment == Equipment.BAND }
         when {
             f.sort == ExerciseSort.NAME -> {
@@ -208,10 +209,12 @@ class ExercisesViewModel @Inject constructor(
                 found.sortedWith(compareBy(collator) { it.displayName(context) })
             }
             f.sort == ExerciseSort.MOST_USED -> {
-                val counts = history.flatMap { w -> w.exercises.map { it.exercise.id } }.groupingBy { it }.eachCount()
+                // Sesiones, no bloques (el mismo ejercicio dos veces en un entreno cuenta una)
+                val counts = history.flatMap { w -> w.exercises.map { it.exercise.id }.distinct() }.groupingBy { it }.eachCount()
                 found.sortedByDescending { counts[it.id] ?: 0 }
             }
-            f.query.isBlank() && f.muscle == null && f.equipment == null -> {
+            // También con músculo o material elegidos: solo una búsqueda por texto ordena por parecido
+            f.query.isBlank() -> {
                 // En el selector, favoritos primero (los de siempre a mano); en la biblioteca no, para que marcar
                 // la estrella no haga saltar la tarjeta
                 val favFirst = if (favoritesFirst) found.filter { it.id in favs } else emptyList()
@@ -224,17 +227,18 @@ class ExercisesViewModel @Inject constructor(
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val usageCount: StateFlow<Map<String, Int>> = repo.history.map { h ->
-        h.flatMap { w -> w.exercises.map { it.exercise.id } }.groupingBy { it }.eachCount()
+        h.flatMap { w -> w.exercises.map { it.exercise.id }.distinct() }.groupingBy { it }.eachCount()
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
     /** Por ejercicio: fecha de la última sesión y su mejor serie (para elegir de un vistazo). */
     val lastSession: StateFlow<Map<String, Pair<Long, WorkoutSet>>> = repo.history.map { h ->
         val result = HashMap<String, Pair<Long, WorkoutSet>>()
         h.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.forEach { w ->
-            w.exercises.forEach { we ->
-                val best = we.completedSets.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
+            // La mejor de toda la sesión (con el ejercicio en dos bloques, no solo la del primero)
+            w.exercises.groupBy { it.exercise.id }.forEach { (id, blocks) ->
+                val best = blocks.flatMap { it.completedSets }.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
                     .maxWithOrNull(compareBy({ it.estimatedOneRepMax }, { it.weightKg }, { it.reps }, { it.durationSec }))
-                if (best != null) result.putIfAbsent(we.exercise.id, w.startedAtEpochMs to best)
+                if (best != null) result.putIfAbsent(id, w.startedAtEpochMs to best)
             }
         }
         result
