@@ -43,7 +43,8 @@ object WorkoutEditor {
                 } else if (ex.tracking == TrackingType.CARDIO) {
                     listOf(WorkoutSet(durationSec = TrackingType.DEFAULT_CARDIO_SEC))
                 } else {
-                    List(3) { WorkoutSet(reps = if (ex.tracking == TrackingType.DURATION) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
+                    // De tiempo: 30 s; de distancia: sin reps (sumarían volumen fantasma); el resto, 3×10
+                    List(3) { WorkoutSet(reps = if (ex.tracking == TrackingType.DURATION || ex.tracking == TrackingType.DISTANCE) 0 else 10, durationSec = if (ex.tracking == TrackingType.DURATION) 30 else 0) }
                 }
                 WorkoutExercise(exercise = ex, sets = sets, restSeconds = restFor(ex))
             },

@@ -400,7 +400,8 @@ class HomeViewModel @Inject constructor(
         val routine = pendingImport.value ?: return@launch
         savedState[KEY_PENDING_LINK] = null
         // El mismo enlace o QR otra vez (mismo nombre, ejercicios y series) no duplica la rutina
-        fun key(r: Routine) = r.name to r.exercises.map { it.exercise.id to it.sets }
+        // Toda la rutina (descansos, tempo, RPE, notas…): una versión cambiada del mismo enlace sí se importa
+        fun key(r: Routine) = r.copy(id = "", position = 0, archived = false, gymId = null, folder = null)
         if (repo.routinesOnce().any { !it.archived && key(it) == key(routine) }) {
             message(context.getString(R.string.routine_already_imported, routine.name))
             return@launch

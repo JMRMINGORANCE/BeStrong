@@ -15,6 +15,8 @@ data class RoutineSet(
         fun defaultsFor(tracking: TrackingType, count: Int = 3): List<RoutineSet> = when (tracking) {
             TrackingType.CARDIO -> listOf(RoutineSet(reps = 0, durationSec = TrackingType.DEFAULT_CARDIO_SEC))
             TrackingType.DURATION -> List(count.coerceAtLeast(1)) { RoutineSet(reps = 0, durationSec = 30) }
+            // Distancia (paseo del granjero, trineo): sin reps (unas 10 ocultas sumaban volumen fantasma)
+            TrackingType.DISTANCE -> List(count.coerceAtLeast(1)) { RoutineSet(reps = 0) }
             else -> List(count.coerceAtLeast(1)) { RoutineSet(reps = 10) }
         }
     }
@@ -84,12 +86,13 @@ data class Routine(
                     val sameKindIndex = re.sets.take(i).count { (it.type == SetType.WARMUP) == warm }
                     // Una serie que la última vez se saltó toma la última hecha de su tipo (no el peso viejo de la rutina)
                     val prev = previous.filter { (it.type == SetType.WARMUP) == warm }.let { it.getOrNull(sameKindIndex) ?: it.lastOrNull() }
+                    val distance = re.exercise.tracking == TrackingType.DISTANCE
                     WorkoutSet(
                         weightKg = prev?.weightKg?.takeIf { it > 0 } ?: rs.weightKg,
-                        reps = prev?.reps?.takeIf { it > 0 } ?: rs.reps,
+                        reps = if (distance) 0 else prev?.reps?.takeIf { it > 0 } ?: rs.reps,
                         durationSec = prev?.durationSec?.takeIf { it > 0 } ?: rs.durationSec,
                         type = rs.type,
-                        targetReps = rs.reps.takeIf { it > 0 && rs.durationSec == 0 },
+                        targetReps = rs.reps.takeIf { it > 0 && rs.durationSec == 0 && !distance },
                     )
                 },
             )
@@ -100,12 +103,18 @@ data class Routine(
      * Rutina con la estructura del entreno que se hizo a partir de ella (ejercicios, orden, series,
      * descansos…), conservando su identidad, nombre, emoji, notas y posición.
      */
-    fun updatedFrom(workout: Workout): Routine = copy(exercises = exercisesOf(workout))
+    fun updatedFrom(workout: Workout): Routine = copy(
+        // La nota de cada ejercicio es la de la rutina: la escrita en el entreno era de ese día («hoy me dolió el hombro»)
+        exercises = exercisesOf(workout).map { re -> re.copy(notes = exercises.firstOrNull { it.exercise.id == re.exercise.id }?.notes ?: re.notes) },
+    )
 
     /** Si el entreno cambió la estructura de la rutina (ejercicios, orden, nº de series, tipos o descansos). */
     fun structureDiffersFrom(workout: Workout): Boolean {
-        fun RoutineExercise.shape() = listOf(exercise.id, sets.map { it.type }, restSeconds, supersetId)
-        return exercises.map { it.shape() } != exercisesOf(workout).map { it.shape() }
+        // Si va en superserie con el siguiente, no el id (desenlazar y volver a enlazar crea otro id con la misma forma)
+        fun shapes(l: List<RoutineExercise>) = l.mapIndexed { i, e ->
+            listOf(e.exercise.id, e.sets.map { it.type }, e.restSeconds, e.supersetId != null && e.supersetId == l.getOrNull(i + 1)?.supersetId)
+        }
+        return shapes(exercises) != shapes(exercisesOf(workout))
     }
 
     companion object {
