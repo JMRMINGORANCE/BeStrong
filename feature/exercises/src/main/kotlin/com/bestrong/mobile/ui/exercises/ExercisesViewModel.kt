@@ -10,6 +10,7 @@ import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutSet
+import com.bestrong.core.model.withEdited
 import com.bestrong.core.stats.ExerciseProgressPoint
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
