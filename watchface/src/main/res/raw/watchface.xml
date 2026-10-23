@@ -38,7 +38,7 @@
         <ComplicationSlot slotId="0" displayName="slot_today" x="45" y="280" width="170" height="90"
             supportedTypes="SHORT_TEXT LONG_TEXT" isCustomizable="TRUE">
             <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY"
-                primaryProvider="com.bestrong/com.bestrong.wear.complication.TodayComplicationService"
+                primaryProvider="com.copidev.bestrong/com.bestrong.wear.complication.TodayComplicationService"
                 primaryProviderType="SHORT_TEXT" />
             <BoundingBox x="0" y="0" width="170" height="90" />
             <Complication type="SHORT_TEXT">
@@ -72,7 +72,7 @@
         <ComplicationSlot slotId="1" displayName="slot_streak" x="235" y="280" width="170" height="90"
             supportedTypes="SHORT_TEXT RANGED_VALUE" isCustomizable="TRUE">
             <DefaultProviderPolicy defaultSystemProvider="EMPTY" defaultSystemProviderType="EMPTY"
-                primaryProvider="com.bestrong/com.bestrong.wear.complication.WeeklyComplicationService"
+                primaryProvider="com.copidev.bestrong/com.bestrong.wear.complication.WeeklyComplicationService"
                 primaryProviderType="SHORT_TEXT" />
             <BoundingBox x="0" y="0" width="170" height="90" />
             <Complication type="SHORT_TEXT">

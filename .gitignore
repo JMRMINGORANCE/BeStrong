@@ -14,3 +14,4 @@ mobile/build/outputs/roborazzi/
 *.jks
 detekt.jar
 .kotlin/
+__pycache__/

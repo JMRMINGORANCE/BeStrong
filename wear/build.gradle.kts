@@ -20,11 +20,12 @@ android {
 
     defaultConfig {
         // Mismo applicationId que el móvil: requisito de la Wearable Data Layer
-        applicationId = "com.bestrong"
+        applicationId = "com.copidev.bestrong"
         minSdk = 30 // Wear OS 3+ (Galaxy Watch Ultra usa Wear OS 5)
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.2.0"
+        // Play exige un versionCode distinto en cada bundle de la app: el del reloj va en su propio rango
+        versionCode = 100_000 + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1)
+        versionName = "0.2.0" + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()?.let { ".$it" } ?: "")
     }
     signingConfigs {
         if (keystoreProps.isNotEmpty()) {

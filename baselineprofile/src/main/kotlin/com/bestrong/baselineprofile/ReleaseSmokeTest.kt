@@ -30,12 +30,12 @@ class ReleaseSmokeTest {
 
     @Test
     fun coldStartAndWorkout() = rule.measureRepeated(
-        packageName = "com.bestrong",
+        packageName = "com.copidev.bestrong",
         metrics = listOf(StartupTimingMetric()),
         iterations = 1,
         startupMode = StartupMode.COLD,
         // El diálogo de permiso de notificaciones (Android 13+) taparía la app: se concede antes
-        setupBlock = { device.executeShellCommand("pm grant com.bestrong android.permission.POST_NOTIFICATIONS") },
+        setupBlock = { device.executeShellCommand("pm grant com.copidev.bestrong android.permission.POST_NOTIFICATIONS") },
     ) {
         pressHome()
         startActivityAndWait()

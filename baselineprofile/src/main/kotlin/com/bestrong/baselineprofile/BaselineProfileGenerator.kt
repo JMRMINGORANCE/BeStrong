@@ -42,7 +42,7 @@ class BaselineProfileGenerator {
     }
 
     @Test
-    fun generate() = rule.collect(packageName = "com.bestrong", includeInStartupProfile = true) {
+    fun generate() = rule.collect(packageName = "com.copidev.bestrong", includeInStartupProfile = true) {
         pressHome()
         startActivityAndWait()
 

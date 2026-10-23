@@ -20,7 +20,7 @@ class StartupBenchmark {
 
     @Test
     fun coldStartup() = rule.measureRepeated(
-        packageName = "com.bestrong",
+        packageName = "com.copidev.bestrong",
         metrics = listOf(StartupTimingMetric()),
         compilationMode = CompilationMode.Partial(),
         iterations = 8,

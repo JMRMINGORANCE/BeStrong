@@ -22,11 +22,13 @@ android {
 
     defaultConfig {
         // Debe coincidir con el applicationId del módulo wear para la Data Layer
-        applicationId = "com.bestrong"
+        // «com.bestrong» ya estaba cogido en Google Play
+        applicationId = "com.copidev.bestrong"
         minSdk = 30
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.3.0"
+        // En la CI el versionCode es el número de ejecución de «Android CI»: siempre sube en cada versión de Play
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+        versionName = "0.3.0" + (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()?.let { ".$it" } ?: "")
         // Enlace de «Invítame a un café» (Ko-fi, PayPal…): propiedad donationUrl en gradle.properties o -PdonationUrl=…
         buildConfigField("String", "DONATION_URL", "\"${providers.gradleProperty("donationUrl").getOrElse("")}\"")
         buildConfigField("String", "REPO_URL", "\"https://github.com/JMRMINGORANCE/BeStrong\"")
