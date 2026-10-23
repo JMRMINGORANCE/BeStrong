@@ -23,7 +23,9 @@ class ProgramGeneratorTest {
     }
 
     @Test fun splitDependsOnGoal() {
-        assertEquals(listOf("push", "pull", "legs"), RoutineGenerator.split(3, Goal.HYPERTROPHY))
+        // Con 3 días, cada músculo dos veces por semana (empuje/tirón/pierna solo con 6)
+        assertEquals(listOf("upper", "lower", "full"), RoutineGenerator.split(3, Goal.HYPERTROPHY))
+        assertEquals(listOf("push", "pull", "legs", "push", "pull", "legs"), RoutineGenerator.split(6, Goal.HYPERTROPHY))
         assertEquals(listOf("full", "full", "full"), RoutineGenerator.split(3, Goal.STRENGTH))
         assertEquals(listOf("upper", "lower", "full", "upper", "lower"), RoutineGenerator.split(5, Goal.FAT_LOSS))
     }
@@ -45,8 +47,11 @@ class ProgramGeneratorTest {
     }
 
     @Test fun bodyweightOnlyUsesBodyweight() {
+        // Salud: pesas solo de peso corporal y 10 min de cardio sin máquinas al final (caminar, comba, correr)
         val p = ProgramGenerator.build(4, Goal.GENERAL, setOf(Equipment.BODYWEIGHT), 45)
-        assertTrue(p.routines.all { r -> r.exercises.all { it.exercise.equipment == Equipment.BODYWEIGHT } })
+        assertTrue(p.routines.all { r -> r.exercises.dropLast(1).all { it.exercise.equipment == Equipment.BODYWEIGHT } })
+        assertTrue(p.routines.all { r -> r.exercises.last().exercise.id in setOf("walking", "running", "jump_rope") })
+        assertEquals(10 * 60, p.routines.first().exercises.last().sets.single().durationSec)
     }
 
     @Test fun uniqueDayNamesAndFullDaysWithoutWeights() {

@@ -151,54 +151,68 @@ enum class Level(val extraSets: Int) { BEGINNER(-1), INTERMEDIATE(0), ADVANCED(1
 data class Prescription(val sets: Int, val reps: Int, val restSeconds: Int)
 
 object RoutineGenerator {
-    /** Huecos de cada tipo de día: el primer ejercicio disponible de cada lista entra en la rutina. */
+    /**
+     * Huecos de cada tipo de día, de más a menos importante (básicos primero: si falta tiempo se recortan los del
+     * final). En cada hueco, opciones por preferencia: la primera que se pueda hacer entra en la rutina, las demás
+     * sirven para los días B/C y para quien entrena con mancuernas o solo con su peso.
+     */
     private val slots: Map<String, List<List<String>>> = mapOf(
         "full" to listOf(
-            listOf("squat", "goblet_squat", "leg_press", "air_squat"),
+            // Rodilla, empuje y tirón horizontales, cadera, empuje y tirón verticales y core
+            listOf("squat", "leg_press", "hack_squat", "goblet_squat", "bulgarian_split_squat", "air_squat"),
             listOf("bench_press", "db_bench_press", "machine_chest_press", "push_up"),
-            listOf("barbell_row", "db_row", "seated_cable_row", "pull_up", "band_pull_up"),
-            listOf("romanian_deadlift", "hip_thrust", "kb_swing", "glute_kickback", "lunge"),
-            listOf("overhead_press", "db_shoulder_press", "pike_push_up", "lateral_raise", "diamond_push_up"),
-            listOf("plank", "hanging_leg_raise", "crunch"),
+            listOf("barbell_row", "seated_cable_row", "db_row", "chin_up", "band_pull_up"),
+            listOf("romanian_deadlift", "hip_thrust", "deadlift", "kb_swing", "hyperextension"),
+            listOf("overhead_press", "db_shoulder_press", "arnold_press", "pike_push_up"),
+            listOf("lat_pulldown", "pull_up", "negative_pull_up", "band_pull_up"),
+            listOf("plank", "hanging_leg_raise", "ab_wheel", "side_plank", "hollow_hold"),
         ),
         "upper" to listOf(
+            // Tanto tirón como empuje (salud del hombro)
             listOf("bench_press", "db_bench_press", "machine_chest_press", "push_up"),
-            listOf("barbell_row", "db_row", "seated_cable_row", "band_pull_up"),
-            listOf("overhead_press", "db_shoulder_press", "diamond_push_up"),
-            listOf("pull_up", "lat_pulldown", "chin_up", "negative_pull_up"),
-            listOf("lateral_raise", "cable_lateral_raise", "face_pull"),
-            listOf("barbell_curl", "db_curl", "hammer_curl"),
-            listOf("triceps_pushdown", "skull_crusher", "dips", "diamond_push_up"),
+            listOf("barbell_row", "seated_cable_row", "db_row", "t_bar_row", "chin_up", "band_pull_up"),
+            listOf("overhead_press", "db_shoulder_press", "arnold_press", "pike_push_up"),
+            listOf("lat_pulldown", "pull_up", "negative_pull_up", "chin_up"),
+            listOf("db_incline_press", "incline_bench_press", "cable_crossover", "db_fly", "dips"),
+            listOf("lateral_raise", "face_pull", "cable_lateral_raise", "rear_delt_fly", "scapular_pull_up"),
+            listOf("db_curl", "barbell_curl", "hammer_curl", "cable_curl", "incline_db_curl"),
+            listOf("triceps_pushdown", "overhead_triceps_ext", "skull_crusher", "diamond_push_up"),
         ),
         "lower" to listOf(
-            listOf("squat", "hack_squat", "leg_press", "goblet_squat", "air_squat"),
-            listOf("romanian_deadlift", "deadlift", "hip_thrust", "kb_swing"),
-            listOf("bulgarian_split_squat", "lunge", "shrimp_squat"),
-            listOf("leg_curl", "seated_leg_curl", "glute_kickback"),
+            listOf("squat", "hack_squat", "leg_press", "front_squat", "goblet_squat", "air_squat"),
+            listOf("romanian_deadlift", "deadlift", "hip_thrust", "kb_swing", "hyperextension"),
+            listOf("bulgarian_split_squat", "lunge", "shrimp_squat", "pistol_squat"),
+            listOf("leg_curl", "seated_leg_curl", "glute_kickback", "hyperextension"),
+            listOf("leg_extension", "wall_sit"),
             listOf("standing_calf_raise", "seated_calf_raise"),
-            listOf("hanging_leg_raise", "plank", "hollow_hold"),
+            listOf("hanging_leg_raise", "plank", "ab_wheel", "hollow_hold", "side_plank"),
         ),
         "push" to listOf(
-            listOf("bench_press", "db_bench_press", "push_up"),
-            listOf("overhead_press", "db_shoulder_press", "pike_push_up"),
-            listOf("incline_bench_press", "db_incline_press", "incline_push_up"),
-            listOf("lateral_raise", "cable_lateral_raise", "archer_push_up"),
-            listOf("triceps_pushdown", "overhead_triceps_ext", "dips", "diamond_push_up"),
+            listOf("bench_press", "db_bench_press", "machine_chest_press", "push_up"),
+            listOf("overhead_press", "db_shoulder_press", "arnold_press", "pike_push_up"),
+            listOf("incline_bench_press", "db_incline_press", "machine_chest_press", "dips"),
+            listOf("cable_crossover", "pec_deck", "db_fly", "archer_push_up"),
+            listOf("lateral_raise", "cable_lateral_raise"),
+            listOf("triceps_pushdown", "overhead_triceps_ext", "skull_crusher", "diamond_push_up"),
         ),
         "pull" to listOf(
-            listOf("deadlift", "romanian_deadlift", "kb_swing", "hyperextension"),
-            listOf("pull_up", "lat_pulldown", "band_pull_up"),
-            listOf("barbell_row", "db_row", "seated_cable_row", "negative_pull_up"),
+            // Remo y jalón primero; la bisagra pesada va en el día de pierna
+            listOf("barbell_row", "t_bar_row", "db_row", "pendlay_row", "chin_up"),
+            listOf("pull_up", "lat_pulldown", "chin_up", "negative_pull_up", "band_pull_up"),
+            listOf("seated_cable_row", "db_row", "straight_arm_pulldown", "negative_pull_up"),
             listOf("face_pull", "rear_delt_fly", "scapular_pull_up"),
-            listOf("barbell_curl", "db_curl", "hammer_curl", "chin_up"),
+            listOf("barbell_curl", "db_curl", "incline_db_curl", "cable_curl", "preacher_curl"),
+            listOf("hammer_curl", "cable_curl", "shrug"),
+            listOf("hyperextension", "dead_hang"),
         ),
         "legs" to listOf(
-            listOf("squat", "hack_squat", "leg_press", "goblet_squat", "air_squat"),
-            listOf("romanian_deadlift", "hip_thrust"),
-            listOf("bulgarian_split_squat", "lunge", "pistol_squat"),
+            listOf("squat", "hack_squat", "front_squat", "leg_press", "goblet_squat", "air_squat"),
+            listOf("romanian_deadlift", "hip_thrust", "deadlift", "kb_swing", "hyperextension"),
+            listOf("leg_press", "bulgarian_split_squat", "lunge", "shrimp_squat", "pistol_squat"),
             listOf("leg_extension", "wall_sit"),
-            listOf("leg_curl", "seated_leg_curl", "hyperextension"),
+            listOf("leg_curl", "seated_leg_curl", "glute_kickback", "hyperextension"),
             listOf("standing_calf_raise", "seated_calf_raise"),
+            listOf("hanging_leg_raise", "ab_wheel", "cable_crunch", "plank"),
         ),
     )
 
@@ -213,7 +227,8 @@ object RoutineGenerator {
 
     /**
      * Qué toca cada día según los días y el objetivo: cuerpo completo con pocos días; con más, divisiones que dejan
-     * descansar cada músculo (para ganar músculo, empuje/tirón/pierna antes; para fuerza, torso/pierna).
+     * descansar cada músculo y lo entrenan dos veces por semana (para ganar músculo, torso/pierna/completo con 3 días
+     * y empuje/tirón/pierna con 5-6; para fuerza, torso/pierna y cuerpo completo para repetir los básicos).
      */
     fun split(days: Int, goal: Goal = Goal.HYPERTROPHY, limitedEquipment: Boolean = false): List<String> =
         // Sin pesas no hay ejercicios para llenar un día de tirón o de empuje: se reparte como para salud
@@ -222,14 +237,15 @@ object RoutineGenerator {
     private fun splitFor(days: Int, goal: Goal): List<String> = when (days.coerceIn(1, 6)) {
         1 -> listOf("full")
         2 -> listOf("full", "full")
-        3 -> if (goal == Goal.HYPERTROPHY) listOf("push", "pull", "legs") else listOf("full", "full", "full")
+        // Empuje/tirón/pierna en 3 días entrena cada músculo una sola vez: mejor dos veces
+        3 -> if (goal == Goal.HYPERTROPHY) listOf("upper", "lower", "full") else listOf("full", "full", "full")
         4 -> listOf("upper", "lower", "upper", "lower")
         5 -> when (goal) {
-            Goal.HYPERTROPHY, Goal.STRENGTH -> listOf("push", "pull", "legs", "upper", "lower")
+            Goal.HYPERTROPHY -> listOf("upper", "lower", "push", "pull", "legs")
             else -> listOf("upper", "lower", "full", "upper", "lower")
         }
         else -> when (goal) {
-            Goal.HYPERTROPHY, Goal.STRENGTH -> listOf("push", "pull", "legs", "push", "pull", "legs")
+            Goal.HYPERTROPHY -> listOf("push", "pull", "legs", "push", "pull", "legs")
             else -> listOf("upper", "lower", "full", "upper", "lower", "full")
         }
     }
@@ -241,16 +257,17 @@ object RoutineGenerator {
     fun main(goal: Goal): Prescription = when (goal) {
         Goal.STRENGTH -> Prescription(5, 5, 180)
         Goal.HYPERTROPHY -> Prescription(4, 8, 120)
-        Goal.FAT_LOSS -> Prescription(3, 12, 60)
+        // Al perder grasa, cargas algo más altas en los básicos para no perder músculo
+        Goal.FAT_LOSS -> Prescription(3, 10, 60)
         Goal.ENDURANCE -> Prescription(3, 15, 45)
         Goal.GENERAL -> Prescription(3, 10, 90)
     }
 
     /** El resto (accesorios). */
     fun accessory(goal: Goal): Prescription = when (goal) {
-        Goal.STRENGTH -> Prescription(3, 8, 120)
+        Goal.STRENGTH -> Prescription(3, 8, 90)
         Goal.HYPERTROPHY -> Prescription(3, 12, 75)
-        Goal.FAT_LOSS -> Prescription(3, 15, 45)
+        Goal.FAT_LOSS -> Prescription(3, 12, 45)
         Goal.ENDURANCE -> Prescription(3, 20, 30)
         Goal.GENERAL -> Prescription(3, 12, 60)
     }
@@ -263,15 +280,17 @@ object RoutineGenerator {
 
     /**
      * Minutos de cardio al final de la sesión: para perder grasa o ganar resistencia, una cuarta parte de la sesión
-     * (entre 10 y 20 min; 25 en resistencia), a múltiplos de 5. 0 con otros objetivos.
+     * (entre 10 y 20 min; 25 en resistencia), a múltiplos de 5. Para salud, 10 min si la sesión da para ello
+     * (hacia los 150 min semanales de actividad aeróbica). 0 con otros objetivos.
      */
     fun cardioMinutes(goal: Goal, minutesPerSession: Int): Int {
-        val max = when (goal) {
-            Goal.FAT_LOSS -> CARDIO_MAX_FAT_LOSS
-            Goal.ENDURANCE -> CARDIO_MAX_ENDURANCE
-            else -> return 0
+        val scaled = ((minutesPerSession / 4 + 2) / 5 * 5)
+        return when (goal) {
+            Goal.FAT_LOSS -> scaled.coerceIn(CARDIO_MIN, CARDIO_MAX_FAT_LOSS)
+            Goal.ENDURANCE -> scaled.coerceIn(CARDIO_MIN, CARDIO_MAX_ENDURANCE)
+            Goal.GENERAL -> if (minutesPerSession >= CARDIO_GENERAL_FROM) CARDIO_MIN else 0
+            else -> 0
         }
-        return ((minutesPerSession / 4 + 2) / 5 * 5).coerceIn(CARDIO_MIN, max)
     }
 
     /** Cardio del día: máquinas si las hay (cinta, elíptica, bici…), si no caminar, correr o comba; varía por día. */
@@ -287,9 +306,13 @@ object RoutineGenerator {
         return cardio to (if (cardio == null) finisher(goal)?.let(ExerciseLibrary::byId)?.takeIf(usable) else null)
     }
 
-    private val CARDIO_MACHINES = listOf("treadmill", "elliptical", "stationary_bike", "rowing_machine", "stair_climber")
-    private val CARDIO_FREE = listOf("walking", "running", "jump_rope")
+    // Alternando impacto y no impacto entre días (cinta, bici, elíptica, remo, escaladora)
+    private val CARDIO_MACHINES = listOf("treadmill", "stationary_bike", "elliptical", "rowing_machine", "stair_climber")
+
+    // Sin máquinas: caminar primero (lo puede hacer cualquiera), luego comba y carrera
+    private val CARDIO_FREE = listOf("walking", "jump_rope", "running")
     private const val CARDIO_MIN = 10
+    private const val CARDIO_GENERAL_FROM = 45
     private const val CARDIO_MAX_FAT_LOSS = 20
     private const val CARDIO_MAX_ENDURANCE = 25
 
@@ -342,8 +365,11 @@ object RoutineGenerator {
             val available = options.mapNotNull { ExerciseLibrary.byId(it) }.filter(usable)
             if (available.isEmpty()) null else available[variant % available.size]
         }.distinctBy { it.id }.filter { it.id != finisher?.id }.take(room)
-        // Con más tiempo, más ejercicios del mismo tipo de día (otras opciones de sus huecos) hasta llenar la sesión
-        val same = slots.getValue(type).flatten().distinct().mapNotNull(ExerciseLibrary::byId)
+        // Con más tiempo, más ejercicios del mismo tipo de día: otra opción de cada hueco por turnos (no tres
+        // sentadillas seguidas) hasta llenar la sesión
+        val options = slots.getValue(type)
+        val same = (0 until options.maxOf { it.size }).flatMap { k -> options.mapNotNull { it.getOrNull(k) } }.distinct()
+            .mapNotNull(ExerciseLibrary::byId)
             .filter { usable(it) && it.id != finisher?.id && base.none { b -> b.id == it.id } }
         val filled = base + same.take((room - base.size).coerceAtLeast(0))
         // Con lesiones o poco material un día puede quedarse con 0-1 ejercicios: se completa con lo que se
