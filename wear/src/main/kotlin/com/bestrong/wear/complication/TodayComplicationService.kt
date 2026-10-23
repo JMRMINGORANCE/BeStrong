@@ -56,7 +56,8 @@ class TodayComplicationService : SuspendingComplicationDataSourceService() {
         val description = PlainComplicationText.Builder(getString(R.string.complication_today_desc, text)).build()
         return when (type) {
             ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(
-                PlainComplicationText.Builder(text.take(7)).build(),
+                // Cortado con «…» (y sin partir un emoji): «Pierna B» y «Pierna A» no salen iguales
+                PlainComplicationText.Builder(if (text.codePointCount(0, text.length) > SHORT_MAX) text.take(text.offsetByCodePoints(0, SHORT_MAX - 1)).trimEnd() + "…" else text).build(),
                 description,
             ).setTitle(PlainComplicationText.Builder(getString(R.string.complication_today_label)).build())
                 .setMonochromaticImage(icon)
@@ -73,3 +74,5 @@ class TodayComplicationService : SuspendingComplicationDataSourceService() {
         }
     }
 }
+
+private const val SHORT_MAX = 7

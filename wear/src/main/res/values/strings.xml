@@ -134,6 +134,7 @@
     <string name="superset">Superserie</string>
     <string name="syncs_with_phone">Se sincroniza con el móvil</string>
     <string name="tap_again_discard">Toca otra vez para descartar</string>
+    <string name="tap_again_remove">Toca otra vez para quitar</string>
     <string name="tile_start">Empezar</string>
     <string name="tile_streak">🔥 %1$d sem · %2$s</string>
     <string name="tile_today">Hoy toca</string>

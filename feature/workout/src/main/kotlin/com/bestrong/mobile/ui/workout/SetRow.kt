@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
@@ -183,10 +184,18 @@ fun SetRow(
             state = dismissState,
             backgroundContent = {
                 if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
+                    // En una serie hecha, deslizar la desmarca: se ve «deshacer», no otra vez el ✓
+                    val undo = set.completed
                     Box(
-                        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.tertiaryContainer).padding(start = 16.dp),
+                        Modifier.fillMaxSize().background(if (undo) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.tertiaryContainer).padding(start = 16.dp),
                         contentAlignment = Alignment.CenterStart,
-                    ) { Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.onTertiaryContainer) }
+                    ) {
+                        Icon(
+                            if (undo) Icons.AutoMirrored.Filled.Undo else Icons.Default.Check,
+                            null,
+                            tint = if (undo) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onTertiaryContainer,
+                        )
+                    }
                 } else {
                     Box(
                         Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer).padding(end = 16.dp),

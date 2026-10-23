@@ -134,6 +134,7 @@
     <string name="superset">Superset</string>
     <string name="syncs_with_phone">Syncs with your phone</string>
     <string name="tap_again_discard">Tap again to discard</string>
+    <string name="tap_again_remove">Tap again to remove</string>
     <string name="tile_start">Start</string>
     <string name="tile_streak">🔥 %1$d wk · %2$s</string>
     <string name="tile_today">Today</string>

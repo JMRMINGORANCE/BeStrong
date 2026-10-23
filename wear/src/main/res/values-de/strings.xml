@@ -134,6 +134,7 @@
     <string name="superset">Supersatz</string>
     <string name="syncs_with_phone">Synchronisiert mit dem Handy</string>
     <string name="tap_again_discard">Zum Verwerfen erneut tippen</string>
+    <string name="tap_again_remove">Nochmal tippen zum Entfernen</string>
     <string name="tile_start">Starten</string>
     <string name="tile_streak">🔥 %1$d Wo. · %2$s</string>
     <string name="tile_today">Heute</string>

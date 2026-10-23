@@ -3,7 +3,6 @@ package com.bestrong.wear.ui
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,9 +22,9 @@ import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.Text
-import com.bestrong.core.model.Exercise
 import com.bestrong.wear.R
 import com.bestrong.wear.WearContainer
+import com.bestrong.wear.data.exerciseFor
 
 /**
  * Crear una rutina sin el móvil: nombre (por voz o automático) y ejercicios de la biblioteca.
@@ -36,14 +35,25 @@ fun RoutineCreateScreen(container: WearContainer, onSaved: () -> Unit) {
     val routines by container.store.routines.collectAsStateWithLifecycle()
     val defaultName = stringResource(R.string.routine_name_default, routines.size + 1)
     var name by rememberSaveable { mutableStateOf("") }
-    val exercises = remember { mutableStateListOf<Exercise>() }
-    var picking by remember { mutableStateOf(false) }
+    // Por id (guardable): si la actividad se recrea, p. ej. con el dictado por voz delante, no se pierde la lista
+    var exerciseIds by rememberSaveable { mutableStateOf(listOf<String>()) }
+    val exercises = exerciseIds.mapNotNull { container.store.exerciseFor(it) }
+    var picking by rememberSaveable { mutableStateOf(false) }
+    // Quitar: «toca otra vez» con vibración y caduca a los 3 s (un toque suelto al desplazarse no borra)
+    var armed by remember { mutableStateOf<Int?>(null) }
+    val view = androidx.compose.ui.platform.LocalView.current
+    androidx.compose.runtime.LaunchedEffect(armed) {
+        if (armed != null) {
+            kotlinx.coroutines.delay(REMOVE_CONFIRM_MS)
+            armed = null
+        }
+    }
     val voice = rememberVoiceInput(stringResource(R.string.routine_rename_voice)) { name = it.trim().replaceFirstChar { c -> c.uppercase() } }
     if (picking) {
         // Atrás (botón) cierra solo el selector: no se pierde la rutina a medias
         androidx.activity.compose.BackHandler { picking = false }
         ExercisePickerScreen(container) { ex ->
-            exercises += ex
+            exerciseIds = exerciseIds + ex.id
             picking = false
         }
         return
@@ -75,13 +85,25 @@ fun RoutineCreateScreen(container: WearContainer, onSaved: () -> Unit) {
             }
             itemsIndexed(exercises) { i, ex ->
                 Button(
-                    onClick = { exercises.removeAt(i) },
+                    onClick = {
+                        if (armed == i) {
+                            exerciseIds = exerciseIds.filterIndexed { j, _ -> j != i }
+                            armed = null
+                        } else {
+                            armed = i
+                            view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                        }
+                    },
                     label = { Text(ex.displayName(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
                     // Lo que se va a guardar: 3 × 10, 3 × 30 s o un bloque de cardio
-                    secondaryLabel = {
-                        val sets = com.bestrong.core.model.RoutineSet.defaultsFor(ex.tracking)
-                        val first = sets.first()
-                        Text("${sets.size} × " + (if (first.durationSec > 0) com.bestrong.core.util.formatDuration(first.durationSec.toLong()) else "${first.reps}") + " · ✕")
+                    secondaryLabel = if (armed == i) {
+                        { Text(stringResource(R.string.tap_again_remove)) }
+                    } else {
+                        {
+                            val sets = com.bestrong.core.model.RoutineSet.defaultsFor(ex.tracking)
+                            val first = sets.first()
+                            Text("${sets.size} × " + (if (first.durationSec > 0) com.bestrong.core.util.formatDuration(first.durationSec.toLong()) else "${first.reps}") + " · ✕")
+                        }
                     },
                     colors = ButtonDefaults.filledTonalButtonColors(),
                     modifier = Modifier.fillMaxWidth(),
@@ -93,3 +115,5 @@ fun RoutineCreateScreen(container: WearContainer, onSaved: () -> Unit) {
         }
     }
 }
+
+private const val REMOVE_CONFIRM_MS = 3_000L

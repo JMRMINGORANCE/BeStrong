@@ -100,7 +100,7 @@ fun RestScreen(session: WorkoutSession) {
                 Text(stringResource(R.string.rest), style = MaterialTheme.typography.labelMedium)
                 Text(formatDuration(remaining), fontSize = 40.sp, fontWeight = FontWeight.Bold)
                 val zone = session.heartRateZone(metrics.heartRate)
-                Text("♥ ${metrics.heartRate ?: "--"}" + if (zone > 0) " · Z$zone" else "", color = HeartRed, style = MaterialTheme.typography.labelSmall)
+                Text("♥ ${metrics.heartRate ?: "--"}" + if (zone > 0) " · " + stringResource(R.string.hr_zone, zone) else "", color = HeartRed, style = MaterialTheme.typography.labelSmall)
                 // Una sola línea de aviso (el récord manda): con las dos, los botones se iban contra el anillo
                 if (recovered && !record) Text(stringResource(R.string.recovered), color = Done, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
                 if (record) Text(stringResource(R.string.new_record_live), color = Done, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)

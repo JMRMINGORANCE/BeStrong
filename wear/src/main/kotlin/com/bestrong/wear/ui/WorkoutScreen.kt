@@ -137,11 +137,14 @@ fun WorkoutScreen(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     ElapsedText(w)
-                    Text("♥ ${metrics.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.labelSmall)
-                    session.heartRateZone(metrics.heartRate).takeIf { it > 0 }?.let { z ->
-                        Text(stringResource(R.string.hr_zone, z), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    Text("♥ ${metrics.heartRate ?: "--"}", color = HeartRed, style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    // Una sola línea en pantallas redondas pequeñas: con zona no caben también las kcal (siguen en el menú)
+                    val zone = session.heartRateZone(metrics.heartRate)
+                    if (zone > 0) {
+                        Text(stringResource(R.string.hr_zone, zone), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary, maxLines = 1, softWrap = false)
+                    } else {
+                        metrics.calories?.let { Text(stringResource(R.string.kcal, it), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false) }
                     }
-                    metrics.calories?.let { Text(stringResource(R.string.kcal, it), style = MaterialTheme.typography.labelSmall) }
                 }
                 if (we == null) {
                     Spacer(Modifier.height(8.dp))
