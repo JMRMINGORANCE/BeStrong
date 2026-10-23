@@ -88,6 +88,7 @@ import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.workout.describeSet
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 /** Pestaña "Ejercicios": lista y detalle lado a lado en el Fold desplegado. */
@@ -257,8 +258,15 @@ fun ExerciseSearchList(
             trailing = { VoiceSearchButton { q -> vm.filter.value = vm.filter.value.copy(query = q) } },
         )
         FilterChips(vm, filter, onCreate = if (title == null) ({ creating = true }) else null)
+        // Al buscar o filtrar, arriba del todo (los mejores resultados no quedan por encima de lo que se ve);
+        // al volver de la ficha de un ejercicio, donde estaba
+        val gridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+        androidx.compose.runtime.LaunchedEffect(gridState) {
+            vm.filter.drop(1).collect { gridState.scrollToItem(0) }
+        }
         // Cuadrícula de tarjetas con la animación grande: se reconoce el ejercicio sin leer
         androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
+            state = gridState,
             columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(minSize = 156.dp),
             modifier = Modifier.fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 96.dp),

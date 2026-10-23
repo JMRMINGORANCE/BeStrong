@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +44,7 @@ import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.displayName
+import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.theme.statusColors
@@ -175,10 +175,8 @@ fun AchievementsCard(stats: AdvancedStats) {
                 // Primero los conseguidos; luego los más cercanos
                 stats.achievements.sortedWith(compareByDescending<com.bestrong.core.stats.Achievement> { it.unlocked }.thenByDescending { it.progress }).forEach { a ->
                     val name = ACHIEVEMENT_NAMES[a.id]?.let { stringResource(it) } ?: a.id
-                    AssistChip(
-                        onClick = {},
-                        label = { Text(if (a.unlocked) "🏆 $name" else "$name · ${(a.progress * 100).toInt()} %") },
-                    )
+                    // Etiqueta, no botón (tocarla no hacía nada); el % con el formato del idioma («45 %» / «45%»)
+                    com.bestrong.mobile.ui.components.MetaPill(if (a.unlocked) "🏆 $name" else "$name · ${java.text.NumberFormat.getPercentInstance().format(a.progress)}")
                 }
             }
         }
@@ -194,7 +192,7 @@ fun RecordTimelineCard(stats: AdvancedStats) {
             SectionHeader(stringResource(R.string.record_timeline))
             stats.timeline.forEach { r ->
                 Text(
-                    stringResource(R.string.record_timeline_line, formatShortDate(r.dateEpochMs), liftName(r.exerciseId), unit.format(r.value * com.bestrong.mobile.ui.components.pairFactor(r.exerciseId), withUnit = true)),
+                    stringResource(R.string.record_timeline_line, formatShortDate(r.dateEpochMs), r.exerciseLabel(), unit.format(r.value * com.bestrong.mobile.ui.components.pairFactor(r.exerciseId), withUnit = true)),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -217,10 +215,7 @@ fun MuscleRecoveryCard(stats: AdvancedStats) {
                         0 -> stringResource(R.string.muscle_today)
                         else -> stringResource(R.string.muscle_days_ago, days)
                     }
-                    AssistChip(
-                        onClick = {},
-                        label = { Text("${m.label()} · $whenText" + if (sore >= 0.5) " · " + stringResource(R.string.muscle_sore) else "") },
-                    )
+                    com.bestrong.mobile.ui.components.MetaPill("${m.label()} · $whenText" + if (sore >= 0.5) " · " + stringResource(R.string.muscle_sore) else "")
                 }
             }
         }

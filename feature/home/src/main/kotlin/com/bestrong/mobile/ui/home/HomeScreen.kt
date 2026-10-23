@@ -491,7 +491,7 @@ private fun FolderHeader(name: String, count: Int, folded: Boolean, icon: String
         Box(Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) {
             Text(icon, Modifier.clearAndSetSemantics {})
         }
-        Text(name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f).padding(start = 12.dp))
+        Text(name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(start = 12.dp))
         com.bestrong.mobile.ui.components.MetaPill("$count")
         Icon(
             if (folded) Icons.Default.KeyboardArrowDown else Icons.Default.KeyboardArrowUp,

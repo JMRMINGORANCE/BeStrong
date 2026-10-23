@@ -257,7 +257,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                                 val max = stats.muscles30d.values.maxOrNull() ?: 1.0
                                 stats.muscles30d.forEach { (m, sets) ->
                                     Row {
-                                        Text(m.label(), Modifier.weight(0.4f), style = MaterialTheme.typography.bodySmall)
+                                        Text(m.label(), Modifier.weight(0.4f), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                                         LinearProgressIndicator(progress = { (sets / max).toFloat() }, modifier = Modifier.weight(0.45f).padding(top = 8.dp))
                                         Text(formatWeight(sets), Modifier.weight(0.15f).padding(start = 8.dp), style = MaterialTheme.typography.bodySmall)
                                     }
