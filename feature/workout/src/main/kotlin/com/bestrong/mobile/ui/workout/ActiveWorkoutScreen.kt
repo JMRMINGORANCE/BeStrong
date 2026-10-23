@@ -824,10 +824,12 @@ private fun ExerciseCard(
                 if (next > 0) {
                     val load = remember(next, gym, unit) { gym.plateLoad(next, unit) }
                     // Por debajo de la barra no hay «solo la barra» que valga: se avisa en otro color
-                    val belowBar = next < gym.loadedBarKg - 0.01
+                    // La barra como la usa la calculadora (en libras, la de 45 lb, no 20 kg = 44,1 lb)
+                    val barKg = unit.toKg(com.bestrong.core.training.GymProfile.barIn(unit, gym.barKg) + unit.fromKg(gym.collarKg))
+                    val belowBar = next < barKg - 0.01
                     Text(
                         if (belowBar) {
-                            stringResource(R.string.plates_below_bar, unit.format(gym.loadedBarKg, withUnit = true))
+                            stringResource(R.string.plates_below_bar, unit.format(barKg, withUnit = true))
                         } else if (load.perSide.isEmpty()) {
                             stringResource(R.string.plates_inline_bar)
                         } else {

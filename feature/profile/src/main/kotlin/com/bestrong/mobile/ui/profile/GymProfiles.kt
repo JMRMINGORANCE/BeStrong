@@ -99,7 +99,8 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
     // Textos de partida: si no se tocan se guarda el valor exacto (el texto va redondeado y, en lb, convertido)
     val initial = remember {
         listOf(
-            unit.format(gym.barKg),
+            // En libras, la barra como la ve el resto de la app (45 lb, no «44,1»)
+            unit.format(unit.toKg(GymProfile.barIn(unit, gym.barKg))),
             unit.format(gym.collarKg),
             unit.format(gym.dumbbellsKg.minOrNull() ?: 2.0),
             unit.format(gym.dumbbellsKg.maxOrNull() ?: 30.0),
@@ -108,7 +109,10 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
     }
     var bar by rememberSaveable { mutableStateOf(initial[0]) }
     var collars by rememberSaveable { mutableStateOf(initial[1]) }
-    var plates by rememberSaveable(stateSaver = PlatesSaver) { mutableStateOf(gym.platesKg.toSet()) }
+    // En libras, los discos que se usan en libras (no los de kg por defecto marcados como «55,1, 44,1…»)
+    var plates by rememberSaveable(stateSaver = PlatesSaver) {
+        mutableStateOf(if (unit == WeightUnit.LB) gym.platesIn(unit).map(unit::toKg).toSet() else gym.platesKg.toSet())
+    }
     var anyDumbbell by rememberSaveable { mutableStateOf(gym.dumbbellsKg.isEmpty()) }
     var dbFrom by rememberSaveable { mutableStateOf(initial[2]) }
     var dbTo by rememberSaveable { mutableStateOf(initial[3]) }
