@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
+import com.bestrong.core.model.withCurrentExercises
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.WorkoutStats
@@ -415,7 +416,7 @@ class HistoryViewModel @Inject constructor(
         )
     }
 
-    fun saveAsRoutine(workout: Workout) = viewModelScope.launch { repo.saveRoutine(Routine.fromWorkout(workout)) }
+    fun saveAsRoutine(workout: Workout) = viewModelScope.launch { repo.saveRoutine(Routine.fromWorkout(workout.withCurrentExercises(repo::exercise))) }
 
     /** Repite un entrenamiento pasado como entrenamiento activo. */
     fun repeat(workout: Workout, onStarted: () -> Unit) = viewModelScope.launch {
@@ -427,7 +428,7 @@ class HistoryViewModel @Inject constructor(
             // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya
             // Rellenar recorre el historial varias veces por ejercicio: fuera del hilo principal
             val again = withContext(Dispatchers.Default) {
-                Routine.repeatOf(workout, keepAllSets = template != null || fromProgram) { we ->
+                Routine.repeatOf(workout.withCurrentExercises(repo::exercise), keepAllSets = template != null || fromProgram) { we ->
                     if (fromProgram) we.notes else template?.exercises?.firstOrNull { it.exercise.id == we.exercise.id }?.notes.orEmpty()
                 }
                     .toWorkout(System.currentTimeMillis(), actions.prefillLookup())

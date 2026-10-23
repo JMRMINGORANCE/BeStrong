@@ -208,3 +208,10 @@ enum class CaloriesSource {
 /** Pulso en un momento del entreno: segundos desde el inicio y pulsaciones por minuto. */
 @Serializable
 data class HeartRateSample(val offsetSec: Int, val bpm: Int)
+
+/**
+ * El entreno con cada ejercicio tal y como está ahora en la biblioteca ([current]): un ejercicio propio renombrado o
+ * cambiado de tipo no vuelve con su nombre o tipo de entonces al repetirlo o guardarlo como rutina.
+ */
+fun Workout.withCurrentExercises(current: (String) -> Exercise?): Workout =
+    copy(exercises = exercises.map { we -> current(we.exercise.id)?.let { we.copy(exercise = it) } ?: we })

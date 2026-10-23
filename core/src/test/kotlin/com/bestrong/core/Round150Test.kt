@@ -112,3 +112,13 @@ class CompactSyncTest {
         org.junit.Assert.assertTrue("${bytes.size} vs $full", bytes.size < full * 0.8)
     }
 }
+
+class TimedPrefillTest {
+    @Test fun timedExerciseDoesNotInheritWeightAndReps() {
+        val plank = com.bestrong.core.model.Exercise("custom_p", "Plancha", com.bestrong.core.model.MuscleGroup.entries.first(), tracking = com.bestrong.core.model.TrackingType.DURATION, isCustom = true)
+        val r = Routine(name = "R", exercises = listOf(RoutineExercise(exercise = plank, sets = listOf(RoutineSet(reps = 0, durationSec = 30)))))
+        val s = r.toWorkout(0, { listOf(WorkoutSet(weightKg = 60.0, reps = 8, durationSec = 0, completed = true)) }).exercises.single().sets.single()
+        assertEquals(0.0, s.weightKg, 0.0)
+        assertEquals(30, s.durationSec)
+    }
+}

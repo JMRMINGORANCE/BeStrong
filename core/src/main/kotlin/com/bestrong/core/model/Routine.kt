@@ -86,19 +86,7 @@ data class Routine(
                     val sameKindIndex = re.sets.take(i).count { matchKind(it.type) == kind }
                     // Una serie que la última vez se saltó toma la última hecha de su tipo (no el peso viejo de la rutina)
                     val prev = previous.filter { matchKind(it.type) == kind }.let { it.getOrNull(sameKindIndex) ?: it.lastOrNull() }
-                    val distance = re.exercise.tracking == TrackingType.DISTANCE
-                    WorkoutSet(
-                        // También la ayuda de la última vez (dominada asistida: peso negativo)
-                        weightKg = prev?.weightKg?.takeIf { it != 0.0 } ?: rs.weightKg,
-                        // Unilateral: también el lado derecho (si no, al marcarla solo contaba el izquierdo)
-                        repsRight = prev?.repsRight,
-                        reps = if (distance) 0 else prev?.reps?.takeIf { it > 0 } ?: rs.reps,
-                        durationSec = prev?.durationSec?.takeIf { it > 0 } ?: rs.durationSec,
-                        // Los metros de la última vez (paseo del granjero, trineo): si no, salían a 0
-                        distanceM = prev?.distanceM ?: 0.0,
-                        type = rs.type,
-                        targetReps = rs.reps.takeIf { it > 0 && rs.durationSec == 0 && !distance },
-                    )
+                    prefilledSet(rs, prev, re.exercise.tracking)
                 },
             )
         },
@@ -227,4 +215,30 @@ internal fun matchKind(type: SetType): Int = when (type) {
     SetType.WARMUP -> 0
     SetType.DROP -> 1
     else -> 2
+}
+
+/** Serie de la rutina [rs] con lo de la última vez ([prev]) según cómo se registra el ejercicio. */
+private fun prefilledSet(rs: RoutineSet, prev: WorkoutSet?, tracking: TrackingType): WorkoutSet {
+    val distance = tracking == TrackingType.DISTANCE
+    // De tiempo o cardio (o pasado a serlo): sin el peso ni las reps de cuando era de peso y reps,
+    // que no se ven pero sumaban volumen y récords
+    val noLoad = tracking == TrackingType.DURATION || tracking == TrackingType.CARDIO
+    return WorkoutSet(
+        // También la ayuda de la última vez (dominada asistida: peso negativo)
+        weightKg = if (noLoad) rs.weightKg else prev?.weightKg?.takeIf { it != 0.0 } ?: rs.weightKg,
+        // Unilateral: también el lado derecho (si no, al marcarla solo contaba el izquierdo)
+        repsRight = prev?.repsRight,
+        reps = if (distance) {
+            0
+        } else if (noLoad) {
+            rs.reps
+        } else {
+            prev?.reps?.takeIf { it > 0 } ?: rs.reps
+        },
+        durationSec = prev?.durationSec?.takeIf { it > 0 } ?: rs.durationSec,
+        // Los metros de la última vez (paseo del granjero, trineo): si no, salían a 0
+        distanceM = prev?.distanceM ?: 0.0,
+        type = rs.type,
+        targetReps = rs.reps.takeIf { it > 0 && rs.durationSec == 0 && !distance },
+    )
 }

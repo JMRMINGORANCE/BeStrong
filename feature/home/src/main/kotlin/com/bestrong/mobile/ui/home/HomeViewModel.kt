@@ -8,6 +8,7 @@ import com.bestrong.core.library.Programs
 import com.bestrong.core.library.TrainingProgram
 import com.bestrong.core.model.Routine
 import com.bestrong.core.model.Workout
+import com.bestrong.core.model.withCurrentExercises
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.training.ActiveProgram
 import com.bestrong.core.training.Periodization
@@ -367,7 +368,7 @@ class HomeViewModel @Inject constructor(
             // Programa: su estructura y las notas de esa entrada (las genera el programa); rutina: la suya
             // Rellenar recorre el historial varias veces por ejercicio: fuera del hilo principal (si no, el toque se traba)
             val again = withContext(Dispatchers.Default) {
-                Routine.repeatOf(last, keepAllSets = template != null || fromProgram) { we ->
+                Routine.repeatOf(last.withCurrentExercises(repo::exercise), keepAllSets = template != null || fromProgram) { we ->
                     if (fromProgram) we.notes else template?.exercises?.firstOrNull { it.exercise.id == we.exercise.id }?.notes.orEmpty()
                 }
                     .toWorkout(System.currentTimeMillis(), actions.prefillLookup())
@@ -427,9 +428,21 @@ class HomeViewModel @Inject constructor(
         }
         // Sus ejercicios propios (o que esta versión no conoce) pasan a tu biblioteca: si no, no salen en el
         // selector, no se pueden editar ni tienen sugerencia de progresión
-        routine.exercises.map { it.exercise }.distinctBy { it.id }.filter { repo.exercise(it.id) == null }
+        // Uno propio con el mismo nombre y tipo que uno tuyo es ese (si no, quedaban dos «Press Landmine» con el
+        // historial repartido entre ambos)
+        val byName = repo.exercises.value.associateBy { it.name.trim().lowercase() }
+        val fixed = routine.copy(
+            exercises = routine.exercises.map { re ->
+                if (repo.exercise(re.exercise.id) != null) {
+                    re
+                } else {
+                    byName[re.exercise.name.trim().lowercase()]?.takeIf { it.tracking == re.exercise.tracking }?.let { re.copy(exercise = it) } ?: re
+                }
+            },
+        )
+        fixed.exercises.map { it.exercise }.distinctBy { it.id }.filter { repo.exercise(it.id) == null }
             .forEach { repo.saveCustomExercise(it.copy(isCustom = true)) }
-        repo.saveRoutine(routine)
+        repo.saveRoutine(fixed)
         message(context.getString(R.string.routine_imported, routine.name))
     }
 
