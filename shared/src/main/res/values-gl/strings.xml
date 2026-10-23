@@ -252,7 +252,10 @@
     <string name="gen_generate">Xerar</string>
     <string name="gen_goal">Obxectivo</string>
     <string name="gen_minutes">Minutos por sesión</string>
-    <string name="gen_preview">%1$s · %2$d exercicios · ~%3$d min</string>
+    <plurals name="gen_preview">
+        <item quantity="one">%1$s · %2$d exercicio · ~%3$d min</item>
+        <item quantity="other">%1$s · %2$d exercicios · ~%3$d min</item>
+    </plurals>
     <string name="gen_save">Gardar rutinas</string>
     <string name="gen_title">Xerador de rutinas</string>
     <string name="glossary">Glosario</string>
@@ -315,7 +318,10 @@
     <string name="import_error">Erro ao importar: %1$s</string>
     <string name="import_existing"> (%1$d xa existían)</string>
     <string name="import_formats">CSV de BeStrong, Hevy, Strong, FitNotes ou JEFIT</string>
-    <string name="import_new_exercises"> · %1$d exercicios novos</string>
+    <plurals name="import_new_exercises">
+        <item quantity="one"> · %1$d exercicio novo</item>
+        <item quantity="other"> · %1$d exercicios novos</item>
+    </plurals>
     <string name="import_skipped"> · %1$d filas ignoradas</string>
     <string name="in_superset_with_next">En superserie co seguinte</string>
     <string name="include_variants">Incluír variantes (%1$d)</string>
@@ -616,7 +622,10 @@
     <string name="share_qr_too_long">Demasiado longa para un código QR: envía a ligazón.</string>
     <string name="share_routine_too_big">Rutina demasiado grande para compartir (máx. 50 exercicios e 30 series por exercicio)</string>
     <string name="routine_import_confirm_title">Importar a rutina?</string>
-    <string name="routine_import_confirm_text">Engadirase «%1$s» (%2$d exercicios) a «As miñas rutinas». Impórtaa só se confías en quen cha enviou.</string>
+    <plurals name="routine_import_confirm_text">
+        <item quantity="one">Engadirase «%1$s» (%2$d exercicio) a «As miñas rutinas». Impórtaa só se confías en quen cha enviou.</item>
+        <item quantity="other">Engadirase «%1$s» (%2$d exercicios) a «As miñas rutinas». Impórtaa só se confías en quen cha enviou.</item>
+    </plurals>
     <string name="routine_last_done">Última vez: %1$s</string>
     <string name="routine_name">Nome da rutina</string>
     <string name="routine_new">Nova rutina</string>
@@ -686,7 +695,10 @@
     <string name="share_routine_title">Compartir «%1$s»</string>
     <string name="share_text">%1$s · adestrado con BeStrong 💪</string>
     <string name="share_workout">Compartir imaxe</string>
-    <string name="share_workout_text">%1$s · %2$s · %3$d series</string>
+    <plurals name="share_workout_text">
+        <item quantity="one">%1$s · %2$s · %3$d serie</item>
+        <item quantity="other">%1$s · %2$s · %3$d series</item>
+    </plurals>
     <string name="shortcut_empty_long">Comezar un adestramento baleiro</string>
     <string name="shortcut_empty_short">Adestramento baleiro</string>
     <string name="shortcut_open_long">Abrir o adestramento en curso</string>
@@ -938,7 +950,10 @@
     <string name="folder_collapsed">Pregado</string>
     <string name="folder_expanded">Despregado</string>
     <string name="next_target">A próxima vez</string>
-    <string name="next_target_line">%1$d series · %2$s</string>
+    <plurals name="next_target_line">
+        <item quantity="one">%1$d serie · %2$s</item>
+        <item quantity="other">%1$d series · %2$s</item>
+    </plurals>
     <string name="set_new_record">récord persoal</string>
     <string name="training_load">Carga de adestramento</string>
     <string name="training_load_ratio">Esta semana: %1$s× a túa media das 4 anteriores</string>

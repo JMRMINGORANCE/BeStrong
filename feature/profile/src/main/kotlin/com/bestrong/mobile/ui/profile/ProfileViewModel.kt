@@ -574,7 +574,7 @@ class ProfileViewModel @Inject constructor(
                 { (r, added) ->
                     context.getString(R.string.import_done, r.format.label, added) +
                         (if (r.workouts.size > added) context.getString(R.string.import_existing, r.workouts.size - added) else "") +
-                        (if (r.newExercises.isNotEmpty()) context.getString(R.string.import_new_exercises, r.newExercises.size) else "") +
+                        (if (r.newExercises.isNotEmpty()) context.resources.getQuantityString(R.plurals.import_new_exercises, r.newExercises.size, r.newExercises.size) else "") +
                         (if (r.skippedRows > 0) context.getString(R.string.import_skipped, r.skippedRows) else "")
                 },
                 { context.getString(R.string.import_error, it.message.orEmpty()) },

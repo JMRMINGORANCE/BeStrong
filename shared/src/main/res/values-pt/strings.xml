@@ -252,7 +252,10 @@
     <string name="gen_generate">Gerar</string>
     <string name="gen_goal">Objetivo</string>
     <string name="gen_minutes">Minutos por sessão</string>
-    <string name="gen_preview">%1$s · %2$d exercícios · ~%3$d min</string>
+    <plurals name="gen_preview">
+        <item quantity="one">%1$s · %2$d exercício · ~%3$d min</item>
+        <item quantity="other">%1$s · %2$d exercícios · ~%3$d min</item>
+    </plurals>
     <string name="gen_save">Guardar rotinas</string>
     <string name="gen_title">Gerador de rotinas</string>
     <string name="glossary">Glossário</string>
@@ -315,7 +318,10 @@
     <string name="import_error">Erro ao importar: %1$s</string>
     <string name="import_existing"> (%1$d já existiam)</string>
     <string name="import_formats">CSV do BeStrong, Hevy, Strong, FitNotes ou JEFIT</string>
-    <string name="import_new_exercises"> · %1$d exercícios novos</string>
+    <plurals name="import_new_exercises">
+        <item quantity="one"> · %1$d exercício novo</item>
+        <item quantity="other"> · %1$d exercícios novos</item>
+    </plurals>
     <string name="import_skipped"> · %1$d linhas ignoradas</string>
     <string name="in_superset_with_next">Em superset com o seguinte</string>
     <string name="include_variants">Incluir variantes (%1$d)</string>
@@ -616,7 +622,10 @@
     <string name="share_qr_too_long">Demasiado longa para um código QR: envie a ligação.</string>
     <string name="share_routine_too_big">Rotina demasiado grande para partilhar (máx. 50 exercícios e 30 séries por exercício)</string>
     <string name="routine_import_confirm_title">Importar rotina?</string>
-    <string name="routine_import_confirm_text">“%1$s” (%2$d exercícios) será adicionada a “As minhas rotinas”. Importa-a só se confiares em quem ta enviou.</string>
+    <plurals name="routine_import_confirm_text">
+        <item quantity="one">“%1$s” (%2$d exercício) será adicionada a “As minhas rotinas”. Importa-a só se confiares em quem ta enviou.</item>
+        <item quantity="other">“%1$s” (%2$d exercícios) será adicionada a “As minhas rotinas”. Importa-a só se confiares em quem ta enviou.</item>
+    </plurals>
     <string name="routine_last_done">Último: %1$s</string>
     <string name="routine_name">Nome da rotina</string>
     <string name="routine_new">Nova rotina</string>
@@ -686,7 +695,10 @@
     <string name="share_routine_title">Partilhar “%1$s”</string>
     <string name="share_text">%1$s · treinado com o BeStrong 💪</string>
     <string name="share_workout">Partilhar imagem</string>
-    <string name="share_workout_text">%1$s · %2$s · %3$d séries</string>
+    <plurals name="share_workout_text">
+        <item quantity="one">%1$s · %2$s · %3$d série</item>
+        <item quantity="other">%1$s · %2$s · %3$d séries</item>
+    </plurals>
     <string name="shortcut_empty_long">Começar um treino vazio</string>
     <string name="shortcut_empty_short">Treino vazio</string>
     <string name="shortcut_open_long">Abrir o treino atual</string>
@@ -938,7 +950,10 @@
     <string name="folder_collapsed">Recolhida</string>
     <string name="folder_expanded">Expandida</string>
     <string name="next_target">Da próxima vez</string>
-    <string name="next_target_line">%1$d séries · %2$s</string>
+    <plurals name="next_target_line">
+        <item quantity="one">%1$d série · %2$s</item>
+        <item quantity="other">%1$d séries · %2$s</item>
+    </plurals>
     <string name="set_new_record">recorde pessoal</string>
     <string name="training_load">Carga de treino</string>
     <string name="training_load_ratio">Esta semana: %1$s× a tua média das 4 anteriores</string>

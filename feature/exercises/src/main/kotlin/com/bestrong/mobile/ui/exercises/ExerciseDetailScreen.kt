@@ -227,7 +227,7 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             SectionHeader(stringResource(R.string.next_target))
                             Text(
-                                stringResource(R.string.next_target_line, t.sets.count { it.type != SetType.WARMUP }, describeSet(work, s.exercise, unit, vm.weightFactor(s.exercise))),
+                                t.sets.count { it.type != SetType.WARMUP }.let { n -> pluralStringResource(R.plurals.next_target_line, n, n, describeSet(work, s.exercise, unit, vm.weightFactor(s.exercise))) },
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                             )

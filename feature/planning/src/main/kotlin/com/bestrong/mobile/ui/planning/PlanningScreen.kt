@@ -61,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -318,7 +319,7 @@ private fun GeneratorCard(vm: PlanningViewModel) {
         }
         Button(onClick = { preview = vm.generate(days, equipment, goal, minutes) }) { Text(stringResource(R.string.gen_generate)) }
         preview.forEach { r ->
-            Text(stringResource(R.string.gen_preview, r.name, r.exercises.size, vm.estimateMinutes(r)), style = MaterialTheme.typography.bodySmall)
+            Text(pluralStringResource(R.plurals.gen_preview, r.exercises.size, r.name, r.exercises.size, vm.estimateMinutes(r)), style = MaterialTheme.typography.bodySmall)
         }
         if (preview.isNotEmpty()) {
             OutlinedButton(onClick = { vm.saveGenerated(preview); preview = emptyList() }) { Text(stringResource(R.string.gen_save)) }

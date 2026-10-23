@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -185,7 +186,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
         AlertDialog(
             onDismissRequest = home::dismissImport,
             title = { Text(stringResource(R.string.routine_import_confirm_title)) },
-            text = { Text(stringResource(R.string.routine_import_confirm_text, routine.name, routine.exercises.size)) },
+            text = { Text(pluralStringResource(R.plurals.routine_import_confirm_text, routine.exercises.size, routine.name, routine.exercises.size)) },
             confirmButton = { TextButton(onClick = { home.confirmImport() }) { Text(stringResource(R.string.action_import)) } },
             dismissButton = { TextButton(onClick = home::dismissImport) { Text(stringResource(R.string.action_cancel)) } },
         )

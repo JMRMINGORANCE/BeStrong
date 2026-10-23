@@ -570,7 +570,7 @@ private const val OVERRUN_FACTOR = 1.5
 @Composable
 private fun workoutText(w: Workout): String {
     val unit = LocalWeightUnit.current
-    val header = stringResource(R.string.share_workout_text, w.name, formatDate(w.startedAtEpochMs), w.completedSetCount)
+    val header = pluralStringResource(R.plurals.share_workout_text, w.completedSetCount, w.name, formatDate(w.startedAtEpochMs), w.completedSetCount)
     val lines = w.exercises.map { we ->
         val best = we.sets.filter { it.completed }.maxByOrNull { it.estimatedOneRepMax }
         "• " + we.exercise.displayName() + (best?.let { " — " + describeSet(it, we.exercise, unit) } ?: "")

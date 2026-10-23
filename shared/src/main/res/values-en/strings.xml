@@ -252,7 +252,10 @@
     <string name="gen_generate">Generate</string>
     <string name="gen_goal">Goal</string>
     <string name="gen_minutes">Minutes per session</string>
-    <string name="gen_preview">%1$s · %2$d exercises · ~%3$d min</string>
+    <plurals name="gen_preview">
+        <item quantity="one">%1$s · %2$d exercise · ~%3$d min</item>
+        <item quantity="other">%1$s · %2$d exercises · ~%3$d min</item>
+    </plurals>
     <string name="gen_save">Save routines</string>
     <string name="gen_title">Routine generator</string>
     <string name="glossary">Glossary</string>
@@ -315,7 +318,10 @@
     <string name="import_error">Import failed: %1$s</string>
     <string name="import_existing"> (%1$d already existed)</string>
     <string name="import_formats">CSV from BeStrong, Hevy, Strong, FitNotes or JEFIT</string>
-    <string name="import_new_exercises"> · %1$d new exercises</string>
+    <plurals name="import_new_exercises">
+        <item quantity="one"> · %1$d new exercise</item>
+        <item quantity="other"> · %1$d new exercises</item>
+    </plurals>
     <string name="import_skipped"> · %1$d rows skipped</string>
     <string name="in_superset_with_next">In superset with next</string>
     <string name="include_variants">Include variants (%1$d)</string>
@@ -616,7 +622,10 @@
     <string name="share_qr_too_long">Too long for a QR code: send the link instead.</string>
     <string name="share_routine_too_big">Routine too large to share (max. 50 exercises and 30 sets per exercise)</string>
     <string name="routine_import_confirm_title">Import routine?</string>
-    <string name="routine_import_confirm_text">“%1$s” (%2$d exercises) will be added to “My routines”. Only import it if you trust whoever sent it.</string>
+    <plurals name="routine_import_confirm_text">
+        <item quantity="one">“%1$s” (%2$d exercise) will be added to “My routines”. Only import it if you trust whoever sent it.</item>
+        <item quantity="other">“%1$s” (%2$d exercises) will be added to “My routines”. Only import it if you trust whoever sent it.</item>
+    </plurals>
     <string name="routine_last_done">Last done: %1$s</string>
     <string name="routine_name">Routine name</string>
     <string name="routine_new">New routine</string>
@@ -686,7 +695,10 @@
     <string name="share_routine_title">Share “%1$s”</string>
     <string name="share_text">%1$s · trained with BeStrong 💪</string>
     <string name="share_workout">Share image</string>
-    <string name="share_workout_text">%1$s · %2$s · %3$d sets</string>
+    <plurals name="share_workout_text">
+        <item quantity="one">%1$s · %2$s · %3$d set</item>
+        <item quantity="other">%1$s · %2$s · %3$d sets</item>
+    </plurals>
     <string name="shortcut_empty_long">Start an empty workout</string>
     <string name="shortcut_empty_short">Empty workout</string>
     <string name="shortcut_open_long">Open the current workout</string>
@@ -938,7 +950,10 @@
     <string name="folder_collapsed">Collapsed</string>
     <string name="folder_expanded">Expanded</string>
     <string name="next_target">Next time</string>
-    <string name="next_target_line">%1$d sets · %2$s</string>
+    <plurals name="next_target_line">
+        <item quantity="one">%1$d set · %2$s</item>
+        <item quantity="other">%1$d sets · %2$s</item>
+    </plurals>
     <string name="set_new_record">personal record</string>
     <string name="training_load">Training load</string>
     <string name="training_load_ratio">This week: %1$s× your average of the previous 4</string>
