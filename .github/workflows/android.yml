@@ -140,3 +140,69 @@ jobs:
             mobile/build/outputs/apk/debug/*.apk
             wear/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+  # Cada versión de main se sube sola a Google Play (prueba cerrada del móvil y del reloj). Mira PLAY_STORE.md.
+  # Sin la clave de subida (KEYSTORE_*) o sin la cuenta de servicio (PLAY_SERVICE_ACCOUNT_JSON) el trabajo se salta.
+  play:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: Comprobar secretos
+        id: secrets
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::warning::Faltan los secretos KEYSTORE_* o PLAY_SERVICE_ACCOUNT_JSON: no se sube a Google Play (mira PLAY_STORE.md)"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.ok == 'true'
+
+      - uses: actions/setup-java@v4
+        if: steps.secrets.outputs.ok == 'true'
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.secrets.outputs.ok == 'true'
+
+      - name: Preparar clave de subida
+        if: steps.secrets.outputs.ok == 'true'
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > release.jks
+          printf "storeFile=release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n" "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > keystore.properties
+
+      - name: Compilar los .aab (móvil y reloj)
+        if: steps.secrets.outputs.ok == 'true'
+        run: ./gradlew :mobile:bundleRelease :wear:bundleRelease
+
+      - name: Subir a Google Play
+        if: steps.secrets.outputs.ok == 'true'
+        env:
+          PLAY_TRACK: ${{ vars.PLAY_TRACK }}
+          PLAY_WEAR_TRACK: ${{ vars.PLAY_WEAR_TRACK }}
+        run: |
+          export BESTRONG_VERSION="$(grep -m1 'versionName = "' mobile/build.gradle.kts | cut -d'"' -f2).${GITHUB_RUN_NUMBER}"
+          pip install -q google-auth requests
+          python3 .github/scripts/play_upload.py mobile/build/outputs/bundle/release/mobile-release.aab wear/build/outputs/bundle/release/wear-release.aab
+
+      - uses: actions/upload-artifact@v4
+        if: steps.secrets.outputs.ok == 'true'
+        with:
+          name: aab-play
+          path: |
+            mobile/build/outputs/bundle/release/*.aab
+            wear/build/outputs/bundle/release/*.aab
+          retention-days: 14
