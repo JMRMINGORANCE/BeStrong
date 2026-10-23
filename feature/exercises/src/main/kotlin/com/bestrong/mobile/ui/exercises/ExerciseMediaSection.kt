@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -57,6 +58,7 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise, afterImage:
     val uriHandler = LocalUriHandler.current
     val version by vm.mediaVersion.collectAsStateWithLifecycle()
     val items = remember(exercise.id, version) { vm.mediaItems(exercise.id) }
+    var toDelete by remember { mutableStateOf<com.bestrong.mobile.data.MediaItem?>(null) }
     val image = remember(exercise.id) { vm.image(exercise.id) }
     var note by rememberSaveable(exercise.id) { mutableStateOf(vm.note(exercise.id)) }
     // Lo guardado de verdad (no la nota restaurada al volver a la vista, que puede estar sin guardar)
@@ -106,6 +108,17 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise, afterImage:
                 savedNote = note
             }) { Text(stringResource(R.string.action_save)) }
         }
+        toDelete?.let { item ->
+            AlertDialog(
+                onDismissRequest = { toDelete = null },
+                title = { Text(stringResource(R.string.media_delete)) },
+                text = { Text(stringResource(if (item.isVideo) R.string.media_open_video else R.string.media_open_photo)) },
+                confirmButton = {
+                    TextButton(onClick = { vm.deleteMedia(item); toDelete = null }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
+                },
+                dismissButton = { TextButton(onClick = { toDelete = null }) { Text(stringResource(R.string.action_cancel)) } },
+            )
+        }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             items(items, key = { it.file.name }) { item ->
                 val open = stringResource(if (item.isVideo) R.string.media_open_video else R.string.media_open_photo)
@@ -128,8 +141,9 @@ fun ExerciseMediaSection(vm: ExercisesViewModel, exercise: Exercise, afterImage:
                     } else {
                         AsyncImage(model = item.file, contentDescription = open, contentScale = ContentScale.Crop, modifier = Modifier.size(96.dp))
                     }
-                    IconButton(onClick = { vm.deleteMedia(item) }, modifier = Modifier.align(Alignment.TopEnd).size(32.dp)) {
-                        Icon(Icons.Default.Close, stringResource(R.string.media_delete))
+                    // 48 dp de zona táctil y con confirmación: un toque torcido en la miniatura no borra tu vídeo para siempre
+                    IconButton(onClick = { toDelete = item }, modifier = Modifier.align(Alignment.TopEnd)) {
+                        Icon(Icons.Default.Close, stringResource(R.string.media_delete), Modifier.size(20.dp))
                     }
                 }
             }

@@ -114,7 +114,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     val folderLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let(vm::setBackupFolder) }
     val askNotifications = com.bestrong.mobile.ui.components.rememberNotificationPermission()
     var showReminders by rememberSaveable { mutableStateOf(false) }
-    var editingGym by remember { mutableStateOf<GymProfile?>(null) }
+    var editingGym by rememberSaveable(stateSaver = GymSaver) { mutableStateOf<GymProfile?>(null) }
     var showAbout by rememberSaveable { mutableStateOf(false) }
     if (showAbout) AboutDialog { showAbout = false }
     var showHelp by rememberSaveable { mutableStateOf(false) }

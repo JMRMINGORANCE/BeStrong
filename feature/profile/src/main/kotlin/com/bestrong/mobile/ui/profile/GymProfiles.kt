@@ -25,6 +25,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,10 +78,10 @@ fun GymProfilesSection(settings: UserSettings, onSelect: (String) -> Unit, onEdi
 @Composable
 fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) -> Unit, onDelete: () -> Unit, onDismiss: () -> Unit) {
     val unit = LocalWeightUnit.current
-    var name by remember { mutableStateOf(gym.name) }
+    var name by rememberSaveable { mutableStateOf(gym.name) }
     val defaultName = stringResource(R.string.gym_default_gym)
     // Borrar un gimnasio se lleva su material y lo quita de sus rutinas: se confirma antes
-    var confirmDelete by remember { mutableStateOf(false) }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
     if (confirmDelete) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
@@ -93,7 +95,7 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
-    var equipment by remember { mutableStateOf(gym.equipment) }
+    var equipment by rememberSaveable(stateSaver = EquipmentSaver) { mutableStateOf(gym.equipment) }
     // Textos de partida: si no se tocan se guarda el valor exacto (el texto va redondeado y, en lb, convertido)
     val initial = remember {
         listOf(
@@ -104,13 +106,13 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
             unit.format(gym.dumbbellsKg.sorted().zipWithNext { a, b -> b - a }.minOrNull() ?: 2.0),
         )
     }
-    var bar by remember { mutableStateOf(initial[0]) }
-    var collars by remember { mutableStateOf(initial[1]) }
-    var plates by remember { mutableStateOf(gym.platesKg.toSet()) }
-    var anyDumbbell by remember { mutableStateOf(gym.dumbbellsKg.isEmpty()) }
-    var dbFrom by remember { mutableStateOf(initial[2]) }
-    var dbTo by remember { mutableStateOf(initial[3]) }
-    var dbStep by remember { mutableStateOf(initial[4]) }
+    var bar by rememberSaveable { mutableStateOf(initial[0]) }
+    var collars by rememberSaveable { mutableStateOf(initial[1]) }
+    var plates by rememberSaveable(stateSaver = PlatesSaver) { mutableStateOf(gym.platesKg.toSet()) }
+    var anyDumbbell by rememberSaveable { mutableStateOf(gym.dumbbellsKg.isEmpty()) }
+    var dbFrom by rememberSaveable { mutableStateOf(initial[2]) }
+    var dbTo by rememberSaveable { mutableStateOf(initial[3]) }
+    var dbStep by rememberSaveable { mutableStateOf(initial[4]) }
     // «Desde» mayor que «Hasta» (o un número mal escrito) dejaría la lista vacía, que significa «cualquier peso»: no se guarda
     val dbParsed = listOf(dbFrom, dbTo, dbStep).map { unit.parseToKg(it) }
     val dbValid = anyDumbbell || (dbParsed.all { it != null && it > 0 } && dbParsed[0]!! <= dbParsed[1]!!)
@@ -205,3 +207,31 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
 
 /** Límite razonable para los dos cierres (evita un «50» tecleado por error). */
 private const val MAX_COLLARS_KG = 10.0
+
+// Lo que se está editando sobrevive a recrear la actividad (tema oscuro automático, cambio de idioma)
+private val EquipmentSaver = Saver<Set<Equipment>, List<String>>({ it.map { e -> e.name } }, { it.map(Equipment::valueOf).toSet() })
+private val PlatesSaver = Saver<Set<Double>, DoubleArray>({ it.toDoubleArray() }, { it.toSet() })
+
+/** El gimnasio abierto en el editor (null = ninguno), guardado campo a campo. */
+internal val GymSaver = Saver<GymProfile?, List<Any>>(
+    save = { g ->
+        g?.let { listOf(it.id, it.name, it.equipment.map { e -> e.name }, it.barKg, it.platesKg.toDoubleArray(), it.dumbbellsKg.toDoubleArray(), it.collarKg) }
+            ?: emptyList()
+    },
+    restore = { l ->
+        @Suppress("UNCHECKED_CAST")
+        l.takeIf { it.size == GYM_FIELDS }?.let {
+            GymProfile(
+                id = it[0] as String,
+                name = it[1] as String,
+                equipment = (it[2] as List<String>).map(Equipment::valueOf).toSet(),
+                barKg = it[3] as Double,
+                platesKg = (it[4] as DoubleArray).toList(),
+                dumbbellsKg = (it[5] as DoubleArray).toList(),
+                collarKg = it[6] as Double,
+            )
+        }
+    },
+)
+
+private const val GYM_FIELDS = 7

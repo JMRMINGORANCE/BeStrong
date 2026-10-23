@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -33,12 +34,12 @@ fun EditPastSetDialog(
 ) {
     val unit = LocalWeightUnit.current
     val initialWeight = remember { if (set.weightKg == 0.0) "" else unit.format(set.weightKg * weightFactor) }
-    var weight by remember { mutableStateOf(initialWeight) }
-    var reps by remember { mutableStateOf(set.reps.toString()) }
+    var weight by rememberSaveable { mutableStateOf(initialWeight) }
+    var reps by rememberSaveable { mutableStateOf(set.reps.toString()) }
     // Unilateral: también el lado derecho (si no, solo se podría corregir el izquierdo)
-    var right by remember { mutableStateOf(set.repsRight?.toString().orEmpty()) }
-    var seconds by remember { mutableStateOf(set.durationSec.toString()) }
-    var meters by remember { mutableStateOf(set.distanceM.toInt().toString()) }
+    var right by rememberSaveable { mutableStateOf(set.repsRight?.toString().orEmpty()) }
+    var seconds by rememberSaveable { mutableStateOf(set.durationSec.toString()) }
+    var meters by rememberSaveable { mutableStateOf(set.distanceM.toInt().toString()) }
     // Como el peso: si no se tocan se guardan exactos (25:47 no pasa a 25:00 ni 45 s a 0)
     val initialMinutes = remember { (set.durationSec / 60).toString() }
     val initialKm = remember { if (set.distanceM > 0) "%.2f".format(set.distanceM / 1000) else "" }
@@ -164,8 +165,8 @@ fun EditPastWorkoutInfoDialog(
     onSave: (name: String, notes: String, range: Pair<Long, Long>?) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var n by remember { mutableStateOf(name) }
-    var t by remember { mutableStateOf(notes) }
+    var n by rememberSaveable { mutableStateOf(name) }
+    var t by rememberSaveable { mutableStateOf(notes) }
     val time = rememberWorkoutTimeState(startEpochMs, durationMin)
     AlertDialog(
         onDismissRequest = onDismiss,

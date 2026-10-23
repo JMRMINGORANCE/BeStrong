@@ -54,6 +54,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -300,9 +301,11 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
     val unit = LocalWeightUnit.current
     var menu by remember { mutableStateOf(false) }
     var editing by remember(w.id) { mutableStateOf(false) }
-    var editInfo by remember { mutableStateOf(false) }
-    var editSet by remember { mutableStateOf<Pair<String, String>?>(null) }
-    var copying by remember { mutableStateOf(false) }
+    var editInfo by rememberSaveable { mutableStateOf(false) }
+    var editSet by rememberSaveable(stateSaver = androidx.compose.runtime.saveable.Saver<Pair<String, String>?, List<String>>({ it?.toList().orEmpty() }, { l -> l.takeIf { it.size == 2 }?.let { it[0] to it[1] } })) {
+        mutableStateOf(null)
+    }
+    var copying by rememberSaveable { mutableStateOf(false) }
     if (copying) {
         CopyToDayDialog(
             durationMin = w.durationSeconds() / 60,

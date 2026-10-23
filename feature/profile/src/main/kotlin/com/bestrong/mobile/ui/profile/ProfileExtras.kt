@@ -24,7 +24,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -136,7 +136,9 @@ fun reminderSummary(s: UserSettings): String {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun RemindersDialog(settings: UserSettings, onSave: (Set<Int>, Int, Int) -> Unit, onDismiss: () -> Unit) {
-    var days by remember { mutableStateOf(settings.reminderDays) }
+    var days by rememberSaveable(stateSaver = androidx.compose.runtime.saveable.Saver<Set<Int>, IntArray>({ it.toIntArray() }, { it.toSet() })) {
+        mutableStateOf(settings.reminderDays)
+    }
     val time = rememberTimePickerState(settings.reminderHour, settings.reminderMinute, is24Hour = true)
     val locale = LocalConfiguration.current.locales[0]
     AlertDialog(
