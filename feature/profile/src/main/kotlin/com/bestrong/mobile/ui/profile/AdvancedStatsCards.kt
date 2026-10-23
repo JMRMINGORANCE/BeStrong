@@ -158,7 +158,7 @@ fun AchievementsCard(stats: AdvancedStats) {
                 stats.achievements.sortedWith(compareByDescending<com.bestrong.core.stats.Achievement> { it.unlocked }.thenByDescending { it.progress }).forEach { a ->
                     val name = com.bestrong.mobile.ui.components.achievementLabelRes(a.id)?.let { stringResource(it) } ?: a.id
                     // Etiqueta, no botón (tocarla no hacía nada); el % con el formato del idioma («45 %» / «45%»)
-                    com.bestrong.mobile.ui.components.MetaPill(if (a.unlocked) "🏆 $name" else "$name · ${java.text.NumberFormat.getPercentInstance().format(a.progress)}")
+                    com.bestrong.mobile.ui.components.MetaPill(if (a.unlocked) "🏆 $name" else "$name · ${java.text.NumberFormat.getPercentInstance().apply { roundingMode = java.math.RoundingMode.FLOOR }.format(a.progress)}")
                 }
             }
         }

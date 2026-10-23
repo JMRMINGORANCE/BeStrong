@@ -617,9 +617,11 @@ private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>
     val waistCm = points.last().second
     Row(verticalAlignment = Alignment.CenterVertically) {
         // La misma estimación que el peso objetivo, con la tendencia de las medidas de cintura
-        // La dirección la marca la medida de hoy frente al objetivo (bajar o subir cintura): un objetivo por encima
-        // no sale «conseguido» sin más, y el aviso y la fecha estimada dicen lo mismo
-        val prog = remember(points, goalCm) { goalCm?.let { com.bestrong.core.stats.BodyWeightGoal.progress(points, it, startKg = waistCm) } }
+        // La dirección (bajar o subir cintura) la marca la medida más lejana al objetivo: de 95 a 84 con objetivo 85
+        // está conseguido; con 70 y objetivo 74, no. Así el aviso y la fecha estimada dicen lo mismo
+        val prog = remember(points, goalCm) {
+            goalCm?.let { g -> com.bestrong.core.stats.BodyWeightGoal.progress(points, g, startKg = points.maxBy { kotlin.math.abs(it.second - g) }.second) }
+        }
         val left = prog?.remainingKg ?: 0.0
         val eta = prog?.etaEpochMs
         val text = when {
