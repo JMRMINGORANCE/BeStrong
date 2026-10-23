@@ -375,6 +375,8 @@ fun ActiveWorkoutScreen(
 
     if (confirmFinish) {
         val pending = w.totalSetCount - w.completedSetCount
+        // Un cardio con el cronómetro en marcha cuenta como hecho al terminar (se cierra y guarda)
+        val nothingDone = w.completedSetCount == 0 && com.bestrong.core.session.WorkoutEditor.runningCardio(w) == null
         AlertDialog(
             onDismissRequest = { confirmFinish = false },
             title = { Text(stringResource(R.string.workout_finish_q)) },
@@ -382,7 +384,7 @@ fun ActiveWorkoutScreen(
                 Column {
                     Text(
                         when {
-                            w.completedSetCount == 0 -> stringResource(R.string.workout_finish_empty)
+                            nothingDone -> stringResource(R.string.workout_finish_empty)
                             pending > 0 -> pluralStringResource(R.plurals.workout_finish_pending, pending, pending)
                             else -> stringResource(R.string.workout_finish_ok)
                         },
@@ -396,7 +398,7 @@ fun ActiveWorkoutScreen(
                     }
                 }
             },
-            confirmButton = { Button(onClick = { confirmFinish = false; vm.finish(); if (w.completedSetCount == 0) onFinished() }) { Text(stringResource(R.string.workout_finish)) } },
+            confirmButton = { Button(onClick = { confirmFinish = false; val partner = vm.partnerMode.value; vm.finish(); if (nothingDone && !partner) onFinished() }) { Text(stringResource(R.string.workout_finish)) } },
             dismissButton = { TextButton(onClick = { confirmFinish = false }) { Text(stringResource(R.string.action_keep_going)) } },
         )
     }
@@ -405,7 +407,7 @@ fun ActiveWorkoutScreen(
             onDismissRequest = { confirmDiscard = false },
             title = { Text(stringResource(R.string.workout_discard_q)) },
             text = { Text(stringResource(R.string.workout_discard_body)) },
-            confirmButton = { Button(onClick = { confirmDiscard = false; vm.discard(); onDiscarded() }) { Text(stringResource(R.string.action_discard)) } },
+            confirmButton = { Button(onClick = { confirmDiscard = false; val partner = vm.partnerMode.value; vm.discard(); if (!partner) onDiscarded() }) { Text(stringResource(R.string.action_discard)) } },
             dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }

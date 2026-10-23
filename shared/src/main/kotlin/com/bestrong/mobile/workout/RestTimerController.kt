@@ -101,10 +101,10 @@ class RestTimerController @Inject constructor(
     }
 
     /** Retoma un descanso que ya estaba en marcha (al deshacer un descarte), con su duración total. */
-    fun restore(endsAtEpochMs: Long, totalSeconds: Int) {
+    fun restore(endsAtEpochMs: Long, totalSeconds: Int, workoutId: String? = null) {
         if (endsAtEpochMs <= System.currentTimeMillis()) return skip()
         _restEndedAt.value = null
-        _rest.value = RestState(endsAtEpochMs, totalSeconds.coerceAtLeast(1))
+        _rest.value = RestState(endsAtEpochMs, totalSeconds.coerceAtLeast(1), workoutId)
         persist(_rest.value)
         schedule()
     }

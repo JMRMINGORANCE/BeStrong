@@ -283,7 +283,10 @@ class WorkoutActions @Inject constructor(
     /** Recupera el entreno descartado y, si se descartó en mitad de un descanso, lo sigue donde iba. */
     suspend fun restoreDiscarded(): Boolean {
         if (!repository.restoreDiscarded()) return false
-        repository.restoredRestEnd?.let { (end, total) -> restTimer.restore(end, total) }
+        repository.restoredRestEnd?.let { (end, total) ->
+            // Con su dueño: lo que haga la pareja (pausar, desmarcar) no corta tu descanso
+            restTimer.restore(end, total, repository.activeOnce()?.id)
+        }
         // El de la pareja vuelve a estar en curso (y deja de estar en el historial como terminado a medias)
         partnerAtDiscard?.let { p ->
             repository.deleteWorkout(p.id)

@@ -88,7 +88,9 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Modo pareja: true = se está viendo y editando el entreno de la otra persona (sobrevive a la muerte del proceso). */
     // (y lo sabe WorkoutActions: las teclas de volumen marcan la serie de quien se ve)
-    val partnerMode: StateFlow<Boolean> = savedState.getStateFlow(KEY_PARTNER_MODE, false).also { actions.partnerOnScreen.value = it.value }
+    // Solo mientras exista el de la pareja: cerrado fuera de esta pantalla, los cambios van a tu entreno, no a ninguno
+    val partnerMode: StateFlow<Boolean> = combine(savedState.getStateFlow(KEY_PARTNER_MODE, false), repo.partnerWorkout) { on, p -> on && p != null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false).also { actions.partnerOnScreen.value = savedState[KEY_PARTNER_MODE] ?: false }
 
     private fun setPartnerMode(on: Boolean) {
         savedState[KEY_PARTNER_MODE] = on.also { actions.partnerOnScreen.value = it }
