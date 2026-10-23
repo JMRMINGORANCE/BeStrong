@@ -13,3 +13,4 @@ keystore.properties
 mobile/build/outputs/roborazzi/
 *.jks
 detekt.jar
+__pycache__/
