@@ -26,7 +26,9 @@ class ProgressPhotoStore @Inject constructor(@ApplicationContext private val con
 
     suspend fun add(uri: Uri, dateEpochMs: Long = System.currentTimeMillis()) = withContext(Dispatchers.IO) {
         dir.mkdirs()
-        val target = File(dir, "${dateEpochMs}_${System.nanoTime() % 100000}.jpg")
+        // La fecha en que se hizo la foto (si la galería la sabe), no la de hoy: varias antiguas a la vez se ordenan bien
+        val date = takenAt(uri)?.takeIf { it in 1..System.currentTimeMillis() } ?: dateEpochMs
+        val target = File(dir, "${date}_${System.nanoTime() % 100000}.jpg")
         // Si la copia falla a medias, no queda una foto rota
         runCatching {
             context.contentResolver.openInputStream(uri)?.use { input -> target.outputStream().use { input.copyTo(it) } }
@@ -34,6 +36,12 @@ class ProgressPhotoStore @Inject constructor(@ApplicationContext private val con
         }.onFailure { target.delete() }.getOrThrow()
         _photos.value = read()
     }
+
+    private fun takenAt(uri: Uri): Long? = runCatching {
+        context.contentResolver.query(uri, arrayOf(android.provider.MediaStore.MediaColumns.DATE_TAKEN), null, null, null)?.use { c ->
+            if (c.moveToFirst() && !c.isNull(0)) c.getLong(0) else null
+        }
+    }.getOrNull()
 
     suspend fun delete(photo: ProgressPhoto) = withContext(Dispatchers.IO) {
         photo.file.delete()

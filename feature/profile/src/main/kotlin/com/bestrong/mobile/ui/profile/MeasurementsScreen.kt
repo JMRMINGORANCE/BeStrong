@@ -617,12 +617,16 @@ private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>
     val waistCm = points.last().second
     Row(verticalAlignment = Alignment.CenterVertically) {
         // La misma estimación que el peso objetivo, con la tendencia de las medidas de cintura
-        val eta = remember(points, goalCm) { goalCm?.let { com.bestrong.core.stats.BodyWeightGoal.progress(points, it)?.etaEpochMs } }
+        // La dirección la marca la medida de hoy frente al objetivo (bajar o subir cintura): un objetivo por encima
+        // no sale «conseguido» sin más, y el aviso y la fecha estimada dicen lo mismo
+        val prog = remember(points, goalCm) { goalCm?.let { com.bestrong.core.stats.BodyWeightGoal.progress(points, it, startKg = waistCm) } }
+        val left = prog?.remainingKg ?: 0.0
+        val eta = prog?.etaEpochMs
         val text = when {
             goalCm == null -> stringResource(R.string.waist_goal_none)
-            waistCm <= goalCm + WAIST_GOAL_TOLERANCE_CM -> stringResource(R.string.waist_goal_reached, formatWeight(goalCm))
-            eta != null -> stringResource(R.string.weight_goal_eta, formatWeight(waistCm - goalCm) + " cm", formatWeight(goalCm) + " cm", formatDate(eta))
-            else -> stringResource(R.string.waist_goal_left, formatWeight(goalCm), formatWeight(waistCm - goalCm))
+            prog?.reached == true || left <= WAIST_GOAL_TOLERANCE_CM -> stringResource(R.string.waist_goal_reached, formatWeight(goalCm))
+            eta != null -> stringResource(R.string.weight_goal_eta, formatWeight(left) + " cm", formatWeight(goalCm) + " cm", formatDate(eta))
+            else -> stringResource(R.string.waist_goal_left, formatWeight(goalCm), formatWeight(left))
         }
         Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
         TextButton(onClick = { editing = true }) { Text(stringResource(R.string.goal_set)) }

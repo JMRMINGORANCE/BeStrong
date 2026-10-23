@@ -28,9 +28,10 @@ class EnergyCalculator @Inject constructor(
         val snapshot = runCatching { reader.read() }.getOrNull()
         // De la base de datos: al arrancar la app en frío (entreno llegado del reloj) la lista en memoria aún está vacía
         val measured = repository.measurementsOnce().sortedByDescending { it.dateEpochMs }
-        val weight = (measured.filter { it.dateEpochMs <= atEpochMs }.firstNotNullOfOrNull { it.weightKg } ?: measured.lastOrNull { it.weightKg != null }?.weightKg)
-            ?: snapshot?.weights?.filter { it.first <= atEpochMs }?.maxByOrNull { it.first }?.second
-            ?: snapshot?.weights?.maxByOrNull { it.first }?.second
+        // El peso más reciente a esa fecha, sea apuntado a mano o de la báscula (Health Connect): uno manual de
+        // hace un año ya no gana a la báscula de esta semana; sin ninguno anterior, el más antiguo que haya
+        val dated = measured.mapNotNull { m -> m.weightKg?.let { m.dateEpochMs to it } } + snapshot?.weights.orEmpty()
+        val weight = (dated.filter { it.first <= atEpochMs }.maxByOrNull { it.first } ?: dated.minByOrNull { it.first })?.second
         return BodyProfile(
             weightKg = weight,
             heightCm = s.heightCm?.toDouble() ?: snapshot?.heightCm,
