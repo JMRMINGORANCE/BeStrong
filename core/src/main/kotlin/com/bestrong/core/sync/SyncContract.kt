@@ -47,16 +47,22 @@ object SyncContract {
     // coerceInputValues: un valor de enum nuevo (de una versión más reciente del otro lado) usa el de por defecto en vez de romper
     val json = Json { ignoreUnknownKeys = true; encodeDefaults = true; coerceInputValues = true }
 
+    /**
+     * Listas para el reloj sin los valores por defecto (se leen igual con [json]): un entreno o una rutina ocupan
+     * bastante menos y caben muchas más en los ~100 KB de un DataItem (antes llegaban unas 25 de 200 rutinas).
+     */
+    private val compact = Json(json) { encodeDefaults = false }
+
     private val workoutList = ListSerializer(Workout.serializer())
     private val routineList = ListSerializer(Routine.serializer())
 
     fun encodeWorkout(workout: Workout): ByteArray = json.encodeToString(Workout.serializer(), workout).encodeToByteArray()
     fun decodeWorkout(bytes: ByteArray): Workout = json.decodeFromString(Workout.serializer(), bytes.decodeToString())
 
-    fun encodeWorkouts(workouts: List<Workout>): ByteArray = json.encodeToString(workoutList, workouts).encodeToByteArray()
+    fun encodeWorkouts(workouts: List<Workout>): ByteArray = compact.encodeToString(workoutList, workouts).encodeToByteArray()
     fun decodeWorkouts(bytes: ByteArray): List<Workout> = json.decodeFromString(workoutList, bytes.decodeToString())
 
-    fun encodeRoutines(routines: List<Routine>): ByteArray = json.encodeToString(routineList, routines).encodeToByteArray()
+    fun encodeRoutines(routines: List<Routine>): ByteArray = compact.encodeToString(routineList, routines).encodeToByteArray()
     fun decodeRoutines(bytes: ByteArray): List<Routine> = json.decodeFromString(routineList, bytes.decodeToString())
 
     fun encodeMetrics(m: LiveMetrics): ByteArray = json.encodeToString(LiveMetrics.serializer(), m).encodeToByteArray()

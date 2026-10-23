@@ -102,3 +102,13 @@ class NewlyUnlockedTest {
         org.junit.Assert.assertFalse("first_workout" in com.bestrong.core.stats.Strength.newlyUnlocked(listOf(w("b", now), first), "b", zone, null))
     }
 }
+
+class CompactSyncTest {
+    @Test fun routinesRoundTripAndShrink() {
+        val r = Routine(name = "R", exercises = ExerciseLibrary.all.take(6).map { RoutineExercise(exercise = it) })
+        val bytes = com.bestrong.core.sync.SyncContract.encodeRoutines(listOf(r))
+        assertEquals(listOf(r), com.bestrong.core.sync.SyncContract.decodeRoutines(bytes))
+        val full = com.bestrong.core.sync.SyncContract.json.encodeToString(kotlinx.serialization.builtins.ListSerializer(Routine.serializer()), listOf(r)).length
+        org.junit.Assert.assertTrue("${bytes.size} vs $full", bytes.size < full * 0.8)
+    }
+}

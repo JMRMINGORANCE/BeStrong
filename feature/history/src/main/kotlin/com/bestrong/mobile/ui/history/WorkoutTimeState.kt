@@ -147,7 +147,8 @@ fun LogPastWorkoutDialog(
                     Text(stringResource(R.string.log_past_no_routines))
                 } else {
                     Text(stringResource(R.string.log_past_routine), style = MaterialTheme.typography.labelLarge)
-                    routines.forEach { r ->
+                    // Sin las archivadas (con cientos de rutinas, la hora quedaba muy abajo)
+                    routines.filterNot { it.archived }.forEach { r ->
                         FilterChip(
                             selected = selected?.id == r.id,
                             onClick = { selected = r },

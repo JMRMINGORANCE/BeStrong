@@ -33,7 +33,8 @@ class WatchPush @Inject constructor(
     }
 
     /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
-    suspend fun pushToWatchNow() {
+    // Fuera del hilo principal: leer, preparar y codificar 800 entrenos y 200 rutinas trababa el toque
+    suspend fun pushToWatchNow() = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
         // De la base de datos: recién arrancada la app, las listas en memoria aún están vacías y el reloj se quedaría sin nada
         val history = repository.historyOnce()
         watchSync.pushRoutines(routinesForWatch(repository.routinesOnce(), repository.activeProgramOnce(), history))

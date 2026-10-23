@@ -106,19 +106,26 @@ class PhoneSync @Inject constructor(@ApplicationContext private val context: Con
     suspend fun pullFromPhone(onActive: (Workout) -> Unit) {
         val items = runCatching { dataClient.dataItems.await() }.getOrNull() ?: return
         val local = localNodeId()
-        try {
-            items.forEach { item ->
-                val path = item.uri.path.orEmpty()
-                val payload = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
-                if (path == SyncContract.PATH_ACTIVE_WORKOUT) {
-                    if (item.uri.host != local) payload?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }?.let(onActive)
-                } else {
-                    applyDataItem(store, path, payload)
+        // Decodificar (rutinas e historial de hasta ~90 KB) fuera del hilo principal: al abrir la app no se traba;
+        // el entreno en curso se entrega después, en el hilo de quien llama
+        val active = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
+            var remote: Workout? = null
+            try {
+                items.forEach { item ->
+                    val path = item.uri.path.orEmpty()
+                    val payload = DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
+                    if (path == SyncContract.PATH_ACTIVE_WORKOUT) {
+                        if (item.uri.host != local) payload?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }?.let { remote = it }
+                    } else {
+                        applyDataItem(store, path, payload)
+                    }
                 }
+            } finally {
+                items.release()
             }
-        } finally {
-            items.release()
+            remote
         }
+        active?.let(onActive)
     }
 
     companion object {
