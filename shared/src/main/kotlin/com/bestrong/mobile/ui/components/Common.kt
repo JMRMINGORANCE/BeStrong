@@ -52,9 +52,9 @@ private fun shortDateFormatter() = localized("dMMM")
 fun formatDate(epochMs: Long): String =
     dateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault())).replaceFirstChar { it.uppercase() }
 
-/** Hora y fecha corta, p. ej. «18:42 · 9 oct» (12 o 24 h según el idioma: «6:42 PM · Oct 9»). */
-fun formatTime(epochMs: Long): String =
-    Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()).let { t -> localized("jm").format(t) + " · " + shortDateFormatter().format(t) }
+/** Hora y fecha corta, p. ej. «18:42 · 9 oct» (o «6:42 PM · Oct 9», según el ajuste de 12/24 h del sistema). */
+fun formatTime(epochMs: Long, is24Hour: Boolean): String =
+    Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()).let { t -> localized(if (is24Hour) "Hm" else "hm").format(t) + " · " + shortDateFormatter().format(t) }
 
 /** Solo la hora, con el formato de 12/24 h que tenga el sistema («18:42» o «6:42 PM»). */
 fun formatClock(epochMs: Long, is24Hour: Boolean): String {

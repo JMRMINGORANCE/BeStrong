@@ -578,7 +578,7 @@ private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             SectionHeader(stringResource(R.string.body_comp_title))
             // La cintura objetivo no necesita la altura
-            waist?.let { WaistGoalLine(vm, sorted.mapNotNull { m -> m.waistCm?.let { m.dateEpochMs to it } }.reversed(), settings.waistGoalCm) }
+            waist?.let { WaistGoalLine(vm, sorted.mapNotNull { m -> m.waistCm?.let { m.dateEpochMs to it } }.reversed(), settings.waistGoalCm, settings.waistGoalStartCm) }
             if (height == null) {
                 Text(stringResource(R.string.body_comp_need_height), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 return@Column
@@ -612,16 +612,14 @@ private fun WaistToHeightLine(ratio: Double) {
  * botón para fijarla o cambiarla. [points]: (fecha, cm) de la más antigua a la última.
  */
 @Composable
-private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>, goalCm: Double?) {
+private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>, goalCm: Double?, startCm: Double?) {
     var editing by rememberSaveable { mutableStateOf(false) }
     val waistCm = points.last().second
     Row(verticalAlignment = Alignment.CenterVertically) {
         // La misma estimación que el peso objetivo, con la tendencia de las medidas de cintura
-        // La dirección (bajar o subir cintura) la marca la medida más lejana al objetivo: de 95 a 84 con objetivo 85
-        // está conseguido; con 70 y objetivo 74, no. Así el aviso y la fecha estimada dicen lo mismo
-        val prog = remember(points, goalCm) {
-            goalCm?.let { g -> com.bestrong.core.stats.BodyWeightGoal.progress(points, g, startKg = points.maxBy { kotlin.math.abs(it.second - g) }.second) }
-        }
+        // La dirección (bajar o subir cintura) la marca la cintura al fijar el objetivo (de 95 a 84 con objetivo 85:
+        // conseguido; con 70 y objetivo 74, no); sin ella (objetivos de antes), la de hace unas semanas
+        val prog = remember(points, goalCm, startCm) { goalCm?.let { g -> com.bestrong.core.stats.BodyWeightGoal.progress(points, g, startKg = startCm) } }
         val left = prog?.remainingKg ?: 0.0
         val eta = prog?.etaEpochMs
         val text = when {
@@ -650,7 +648,7 @@ private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>
             },
             confirmButton = {
                 TextButton(enabled = parsed != null, onClick = {
-                    vm.updateSettings { it.copy(waistGoalCm = parsed) }
+                    vm.updateSettings { it.copy(waistGoalCm = parsed, waistGoalStartCm = points.last().second) }
                     editing = false
                 }) { Text(stringResource(R.string.action_save)) }
             },
@@ -659,7 +657,7 @@ private fun WaistGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>
                 Row {
                     if (goalCm != null) {
                         TextButton(onClick = {
-                            vm.updateSettings { it.copy(waistGoalCm = null) }
+                            vm.updateSettings { it.copy(waistGoalCm = null, waistGoalStartCm = null) }
                             editing = false
                         }) { Text(stringResource(R.string.goal_remove), color = MaterialTheme.colorScheme.error) }
                     }

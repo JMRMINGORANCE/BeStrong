@@ -220,18 +220,18 @@ internal fun matchKind(type: SetType): Int = when (type) {
 /** Serie de la rutina [rs] con lo de la última vez ([prev]) según cómo se registra el ejercicio. */
 private fun prefilledSet(rs: RoutineSet, prev: WorkoutSet?, tracking: TrackingType): WorkoutSet {
     val distance = tracking == TrackingType.DISTANCE
-    // De tiempo o cardio (o pasado a serlo): sin el peso ni las reps de cuando era de peso y reps,
-    // que no se ven pero sumaban volumen y récords
+    // De tiempo o cardio (o pasado a serlo): sin peso ni reps (no se ven; los de cuando era de peso y reps, también
+    // al repetir un entreno viejo, sumaban volumen y récords)
     val noLoad = tracking == TrackingType.DURATION || tracking == TrackingType.CARDIO
     return WorkoutSet(
         // También la ayuda de la última vez (dominada asistida: peso negativo)
-        weightKg = if (noLoad) rs.weightKg else prev?.weightKg?.takeIf { it != 0.0 } ?: rs.weightKg,
+        weightKg = if (noLoad) 0.0 else prev?.weightKg?.takeIf { it != 0.0 } ?: rs.weightKg,
         // Unilateral: también el lado derecho (si no, al marcarla solo contaba el izquierdo)
         repsRight = prev?.repsRight,
         reps = if (distance) {
             0
         } else if (noLoad) {
-            rs.reps
+            0
         } else {
             prev?.reps?.takeIf { it > 0 } ?: rs.reps
         },

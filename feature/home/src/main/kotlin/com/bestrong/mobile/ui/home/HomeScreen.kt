@@ -644,7 +644,7 @@ private fun ForgottenWorkoutDialog(vm: HomeViewModel) {
         AlertDialog(
             onDismissRequest = close,
             title = { Text(stringResource(R.string.forgotten_title)) },
-            text = { Text(stringResource(R.string.forgotten_body, fw.name, formatTime(fw.updatedAtEpochMs))) },
+            text = { Text(stringResource(R.string.forgotten_body, fw.name, formatTime(fw.updatedAtEpochMs, android.text.format.DateFormat.is24HourFormat(LocalContext.current)))) },
             confirmButton = { Button(onClick = { vm.finishForgotten(); close() }) { Text(stringResource(R.string.forgotten_finish)) } },
             dismissButton = {
                 Row {

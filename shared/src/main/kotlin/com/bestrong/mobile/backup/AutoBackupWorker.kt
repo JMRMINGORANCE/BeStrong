@@ -56,7 +56,8 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             val date = LocalDate.now()
             // Una copia de hoy con más entrenos (la del móvil viejo, al elegir la misma carpeta en el nuevo) no se
             // sustituye por una casi vacía: se restaura desde ella
-            if (sameDayHistorySize(tree, "$PREFIX$date.json") > data.history.size) return@runCatching
+            // (solo en un móvil que aún no ha copiado nada: si no, borrar entrenos y copiar dejaba la copia sin actualizar)
+            if (settingsStore.settings.value.lastBackupEpochMs == 0L && sameDayHistorySize(tree, "$PREFIX$date.json") > data.history.size) return@runCatching
             // Prefijo propio: la rotación nunca toca las exportaciones manuales («bestrong-fecha.csv»)
             write(tree, "$PREFIX$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
             write(tree, "$PREFIX$date.json", "application/json", Backup.encode(data).toByteArray())

@@ -150,12 +150,13 @@ class WatchSyncService : WearableListenerService() {
         val before = repository.activeOnce()
         // Empezado en el reloj con el gimnasio de su rutina: ese pasa a ser el activo del móvil (anterior, discos,
         // sugerencias y «la próxima vez» del mismo gimnasio en que se guardará)
-        if (before?.id != remote.id) {
+        repository.applyRemoteActive(remote)
+        // (después de fusionar: un mensaje atrasado de un entreno ya terminado o descartado no cambia el gimnasio)
+        if (before?.id != remote.id && repository.activeOnce()?.id == remote.id) {
             remote.gymName?.let { n -> settings.settings.value.gyms.firstOrNull { it.name == n } }
                 ?.takeIf { it.id != settings.settings.value.activeGym.id }
                 ?.let { g -> settings.update { it.copy(activeGymId = g.id) } }
         }
-        repository.applyRemoteActive(remote)
         repository.activeOnce()?.let { actions.followRemoteRest(before, it) }
     }
 

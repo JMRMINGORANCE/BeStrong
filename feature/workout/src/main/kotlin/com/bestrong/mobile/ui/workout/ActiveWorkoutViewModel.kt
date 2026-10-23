@@ -297,8 +297,8 @@ class ActiveWorkoutViewModel @Inject constructor(
         val (before, after) = update(partner) { w -> w.copy(gymName = w.gymName?.let { settings.value.activeGym.name }, exercises = w.exercises.map { e -> refitToGym(e, settings.value) }) } ?: return null
         val old = before.exercises.flatMap { it.sets }.associateBy { it.id }
         val changed = after.exercises.flatMap { it.sets }.filter { old[it.id] != null && old[it.id] != it }.associateBy { it.id }
-        return changed.takeIf { it.isNotEmpty() }?.let { c ->
-            { w: Workout -> w.copy(exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { s -> if (c[s.id] == s) old.getValue(s.id) else s }) }) }
+        return changed.takeIf { it.isNotEmpty() || before.gymName != after.gymName }?.let { c ->
+            { w: Workout -> w.copy(gymName = before.gymName, exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { s -> if (c[s.id] == s) old.getValue(s.id) else s }) }) }
         }
     }
 
