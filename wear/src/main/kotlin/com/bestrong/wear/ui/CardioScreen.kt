@@ -44,9 +44,13 @@ fun CardioScreen(cardio: CardioSession, onDone: () -> Unit) {
     val finished by cardio.finished.collectAsStateWithLifecycle()
     var pending by remember { mutableStateOf<CardioType?>(null) }
     var noGps by remember { mutableStateOf(false) }
+    var noSensors by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { granted ->
         noGps = granted[Manifest.permission.ACCESS_FINE_LOCATION] != true
-        pending?.let(cardio::start)
+        // Sin pulso ni actividad física el reloj no mide nada: una carrera de 0 km se guardaba sin avisar
+        noSensors = !com.bestrong.wear.health.ExerciseService.hasSensorPermission(context)
+        if (!noSensors) pending?.let(cardio::start)
         pending = null
     }
     val s = state
@@ -74,11 +78,21 @@ fun CardioScreen(cardio: CardioSession, onDone: () -> Unit) {
             ScreenScaffold(scrollState = listState) { padding ->
                 ScalingLazyColumn(state = listState, contentPadding = padding, modifier = Modifier.fillMaxWidth()) {
                     item { ListHeader { Text(stringResource(R.string.cardio)) } }
+                    if (noSensors) {
+                        item { Text(stringResource(R.string.cardio_needs_sensors), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center) }
+                    }
                     items(CardioType.entries) { type ->
                         Button(
                             onClick = {
                                 pending = type
-                                permission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+                                permission.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                                        com.bestrong.wear.health.ExerciseService.HEART_RATE_PERMISSION,
+                                        Manifest.permission.ACTIVITY_RECOGNITION,
+                                    ),
+                                )
                             },
                             label = { Text(cardioLabel(type)) },
                             colors = ButtonDefaults.filledTonalButtonColors(),

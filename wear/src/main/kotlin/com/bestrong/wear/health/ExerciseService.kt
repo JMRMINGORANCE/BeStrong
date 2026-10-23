@@ -244,6 +244,9 @@ class ExerciseService : LifecycleService() {
                 .setIsGpsEnabled(false)
                 .build(),
         )
+        // Empieza en marcha: con el entreno en pausa (al volver a pesas o abrir la app pausado), se pausa ya
+        // (si no, las kcal seguían sumando toda la pausa)
+        if (session.workout.value?.isPaused == true) runCatching { exerciseClient.pauseExercise() }
     }
 
     /**

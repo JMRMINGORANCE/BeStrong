@@ -191,4 +191,5 @@
     <string name="next_any">Sig.: %1$s %2$s</string>
     <string name="copy_previous">Usar lo de la última vez</string>
     <string name="unit_reps">reps</string>
+    <string name="cardio_needs_sensors">Da permiso de pulso y actividad física para medir la distancia</string>
 </resources>

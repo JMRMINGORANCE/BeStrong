@@ -191,4 +191,5 @@
     <string name="next_any">Suiv. : %1$s %2$s</string>
     <string name="copy_previous">Reprendre la dernière fois</string>
     <string name="unit_reps">rép.</string>
+    <string name="cardio_needs_sensors">Autorisez la fréquence cardiaque et l\'activité physique pour mesurer la distance</string>
 </resources>

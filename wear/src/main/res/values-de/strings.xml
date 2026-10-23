@@ -191,4 +191,5 @@
     <string name="next_any">Nächst.: %1$s %2$s</string>
     <string name="copy_previous">Letztes Mal übernehmen</string>
     <string name="unit_reps">Wdh.</string>
+    <string name="cardio_needs_sensors">Erlaube Herzfrequenz und körperliche Aktivität, um die Distanz zu messen</string>
 </resources>
