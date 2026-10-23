@@ -148,6 +148,13 @@ class WatchSyncService : WearableListenerService() {
     /** Entreno en curso llegado del reloj: se fusiona y el descanso sigue a la última serie marcada. */
     private suspend fun applyActive(remote: com.bestrong.core.model.Workout) {
         val before = repository.activeOnce()
+        // Empezado en el reloj con el gimnasio de su rutina: ese pasa a ser el activo del móvil (anterior, discos,
+        // sugerencias y «la próxima vez» del mismo gimnasio en que se guardará)
+        if (before?.id != remote.id) {
+            remote.gymName?.let { n -> settings.settings.value.gyms.firstOrNull { it.name == n } }
+                ?.takeIf { it.id != settings.settings.value.activeGym.id }
+                ?.let { g -> settings.update { it.copy(activeGymId = g.id) } }
+        }
         repository.applyRemoteActive(remote)
         repository.activeOnce()?.let { actions.followRemoteRest(before, it) }
     }

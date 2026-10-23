@@ -197,7 +197,7 @@ class WorkoutSession @Inject constructor(
 
     private fun edit(block: (Workout) -> Workout) = _workout.value?.let { set(block(it)) }
 
-    private fun previous(exerciseId: String): List<WorkoutSet> = WorkoutStats.previousSets(exerciseId, store.history.value)
+    private fun previous(exerciseId: String): List<WorkoutSet> = WorkoutStats.previousSets(exerciseId, WorkoutStats.atGym(store.history.value, gymSettings().historyGym, exerciseId))
 
     /** Gimnasio de la rutina empezada: manda sobre el activo para rellenar y redondear (como en el móvil). */
     private var routineGymId: String? = null

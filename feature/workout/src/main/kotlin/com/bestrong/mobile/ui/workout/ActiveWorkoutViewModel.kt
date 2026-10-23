@@ -293,7 +293,8 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Ajusta lo pendiente de uno de los dos entrenos; devuelve cómo deshacerlo (null si no cambió nada). */
     private suspend fun refitActive(partner: Boolean): ((Workout) -> Workout)? {
-        val (before, after) = update(partner) { w -> w.copy(exercises = w.exercises.map { e -> refitToGym(e, settings.value) }) } ?: return null
+        // Si ya llevaba gimnasio (empezado en el reloj), se guarda en el nuevo
+        val (before, after) = update(partner) { w -> w.copy(gymName = w.gymName?.let { settings.value.activeGym.name }, exercises = w.exercises.map { e -> refitToGym(e, settings.value) }) } ?: return null
         val old = before.exercises.flatMap { it.sets }.associateBy { it.id }
         val changed = after.exercises.flatMap { it.sets }.filter { old[it.id] != null && old[it.id] != it }.associateBy { it.id }
         return changed.takeIf { it.isNotEmpty() }?.let { c ->
