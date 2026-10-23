@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.mobile.i18n.TranslationsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-23T12:40:12.440Z" hostname="runnervm8k3b6" time="0.161">
+  <properties/>
+  <testcase name="watchFaceTranslationsMatchSpanish" classname="com.bestrong.mobile.i18n.TranslationsTest" time="0.013"/>
+  <testcase name="phoneTranslationsMatchSpanish" classname="com.bestrong.mobile.i18n.TranslationsTest" time="0.132"/>
+  <testcase name="watchTranslationsMatchSpanish" classname="com.bestrong.mobile.i18n.TranslationsTest" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Exception in thread "DefaultDispatcher-worker-16 @coroutine#477" java.lang.IllegalStateException: Cannot perform this operation because the connection pool has been closed.
+	at android.database.sqlite.SQLiteConnectionPool.throwIfClosedLocked(SQLiteConnectionPool.java:1096)
+	at android.database.sqlite.SQLiteConnectionPool.waitForConnection(SQLiteConnectionPool.java:709)
+	at android.database.sqlite.SQLiteConnectionPool.acquireConnection(SQLiteConnectionPool.java:392)
+	at android.database.sqlite.SQLiteSession.acquireConnection(SQLiteSession.java:896)
+	at android.database.sqlite.SQLiteSession.executeForCursorWindow(SQLiteSession.java:836)
+	at android.database.sqlite.SQLiteQuery.fillWindow(SQLiteQuery.java:62)
+	at android.database.sqlite.SQLiteCursor.fillWindow(SQLiteCursor.java:145)
+	at android.database.sqlite.SQLiteCursor.getCount(SQLiteCursor.java:132)
+	at android.database.AbstractCursor.moveToPosition(AbstractCursor.java:238)
+	at android.database.AbstractCursor.moveToNext(AbstractCursor.java:287)
+	at androidx.room.driver.SupportSQLiteStatement$SupportAndroidSQLiteStatement.step(SupportSQLiteStatement.android.kt:232)
+	at com.bestrong.mobile.data.db.BeStrongDao_Impl.value$lambda$13(BeStrongDao_Impl.kt:367)
+	at androidx.room.util.DBUtil__DBUtil_androidKt$performSuspending$lambda$1$$inlined$internalPerform$1.invokeSuspend(DBUtil.kt:68)
+	at androidx.room.util.DBUtil__DBUtil_androidKt$performSuspending$lambda$1$$inlined$internalPerform$1.invoke(DBUtil.kt)
+	at androidx.room.driver.SupportSQLiteConnectionPool.useConnection(SupportSQLiteConnectionPool.android.kt:42)
+	at androidx.room.RoomConnectionManager.useConnection(RoomConnectionManager.android.kt:126)
+	at androidx.room.RoomDatabase.useConnection$room_runtime_release(RoomDatabase.android.kt:593)
+	at androidx.room.util.DBUtil__DBUtil_androidKt$performSuspending$$inlined$compatCoroutineExecute$DBUtil__DBUtil_androidKt$1.invokeSuspend(DBUtil.android.kt:113)
+	at _COROUTINE._BOUNDARY._(CoroutineDebugging.kt:42)
+	at androidx.room.util.DBUtil__DBUtil_androidKt.performSuspending(DBUtil.android.kt:251)
+	at androidx.room.coroutines.FlowUtil$createFlow$$inlined$map$1$2.emit(FlowBuilder.kt:224)
+	at kotlinx.coroutines.flow.FlowKt__ChannelsKt.emitAllImpl$FlowKt__ChannelsKt(Channels.kt:33)
+	at kotlinx.coroutines.flow.internal.ChannelFlow$collect$2.invokeSuspend(ChannelFlow.kt:119)
+	at kotlinx.coroutines.flow.FlowKt__ShareKt$launchSharing$1.invokeSuspend(Share.kt:210)
+	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [CoroutineId(477), "coroutine#477":StandaloneCoroutine{Cancelling}@7031015b, Dispatchers.IO]
+Caused by: java.lang.IllegalStateException: Cannot perform this operation because the connection pool has been closed.
+	at android.database.sqlite.SQLiteConnectionPool.throwIfClosedLocked(SQLiteConnectionPool.java:1096)
+	at android.database.sqlite.SQLiteConnectionPool.waitForConnection(SQLiteConnectionPool.java:709)
+	at android.database.sqlite.SQLiteConnectionPool.acquireConnection(SQLiteConnectionPool.java:392)
+	at android.database.sqlite.SQLiteSession.acquireConnection(SQLiteSession.java:896)
+	at android.database.sqlite.SQLiteSession.executeForCursorWindow(SQLiteSession.java:836)
+	at android.database.sqlite.SQLiteQuery.fillWindow(SQLiteQuery.java:62)
+	at android.database.sqlite.SQLiteCursor.fillWindow(SQLiteCursor.java:145)
+	at android.database.sqlite.SQLiteCursor.getCount(SQLiteCursor.java:132)
+	at android.database.AbstractCursor.moveToPosition(AbstractCursor.java:238)
+	at android.database.AbstractCursor.moveToNext(AbstractCursor.java:287)
+	at androidx.room.driver.SupportSQLiteStatement$SupportAndroidSQLiteStatement.step(SupportSQLiteStatement.android.kt:232)
+	at com.bestrong.mobile.data.db.BeStrongDao_Impl.value$lambda$13(BeStrongDao_Impl.kt:367)
+	at androidx.room.util.DBUtil__DBUtil_androidKt$performSuspending$lambda$1$$inlined$internalPerform$1.invokeSuspend(DBUtil.kt:68)
+	at androidx.room.util.DBUtil__DBUtil_androidKt$performSuspending$lambda$1$$inlined$internalPerform$1.invoke(DBUtil.kt)
+	at androidx.room.driver.SupportSQLiteConnectionPool.useConnection(SupportSQLiteConnectionPool.android.kt:42)
+	at androidx.room.RoomConnectionManager.useConnection(RoomConnectionManager.android.kt:126)
+	at androidx.room.RoomDatabase.useConnection$room_runtime_release(RoomDatabase.android.kt:593)
+	at androidx.room.util.DBUtil__DBUtil_androidKt$performSuspending$$inlined$compatCoroutineExecute$DBUtil__DBUtil_androidKt$1.invokeSuspend(DBUtil.android.kt:113)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+]]></system-err>
+</testsuite>
