@@ -75,3 +75,16 @@ class AutoregulationSnapTest {
         assertEquals(22.0, a!!.newWeightKg, 0.0)
     }
 }
+
+class CopyToDayTest {
+    @Test fun copyIsNotAProgramSessionNorFromWatch() {
+        val w = Workout(
+            id = "w", name = "A", startedAtEpochMs = 0, finishedAtEpochMs = 3_600_000, routineId = "program:p:0",
+            source = com.bestrong.core.model.WorkoutSource.WATCH,
+            exercises = listOf(WorkoutExercise(exercise = ExerciseLibrary.byId("squat")!!, sets = listOf(WorkoutSet(weightKg = 100.0, reps = 5, completed = true)))),
+        )
+        val c = WorkoutEditor.copyToDay(w, 86_400_000, 90_000_000, 0)
+        assertEquals(null, c.routineId)
+        assertEquals(com.bestrong.core.model.WorkoutSource.PHONE, c.source)
+    }
+}

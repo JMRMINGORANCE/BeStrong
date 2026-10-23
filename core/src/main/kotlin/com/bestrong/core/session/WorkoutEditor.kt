@@ -709,6 +709,9 @@ object WorkoutEditor {
             // El tiempo elegido ya es el activo: sin las pausas de aquel día
             pausedAtEpochMs = null,
             pausedTotalMs = 0,
+            // Una copia no es otro día del programa (no adelanta su siguiente sesión) ni se hizo con el reloj
+            routineId = workout.routineId?.takeUnless { it.startsWith(com.bestrong.core.training.Periodization.ROUTINE_PREFIX) },
+            source = WorkoutSource.PHONE,
             // Sin uno de los dos de una superserie, el otro queda suelto (no una «superserie» de uno)
             exercises = normalizedSupersets(
                 workout.exercises.filter { onlyExercises == null || it.id in onlyExercises }.map { we ->
