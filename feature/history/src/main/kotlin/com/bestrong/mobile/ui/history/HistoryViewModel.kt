@@ -228,14 +228,17 @@ class HistoryViewModel @Inject constructor(
         _setRemoved.value = null
     }
 
-    fun undoDelete() = viewModelScope.launch {
-        deleteJob?.join()
-        _deleted.value?.let { w ->
+    fun undoDelete() {
+        // El borrado de ahora, no el que haya cuando acabe de borrarse (otro borrado rápido lo cambiaría)
+        val w = _deleted.value ?: return
+        val job = deleteJob
+        _deleted.value = null
+        viewModelScope.launch {
+            job?.join()
             // Si la papelera ya no lo tiene (se vació entre medias), se guarda el del aviso
             val restored = repo.restoreFromTrash(w.id) ?: w.also { repo.saveWorkout(it) }
             if (restored.athlete == null) actions.exportToHealthConnectIfEnabled(restored)
         }
-        _deleted.value = null
     }
 
     fun clearDeleted() {
