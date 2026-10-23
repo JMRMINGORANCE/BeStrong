@@ -71,7 +71,8 @@ class WorkoutForegroundService : LifecycleService() {
             collector?.cancel()
             collector = lifecycleScope.launch {
                 if (repository.activeOnce() == null) return@launch stop()
-                combine(repository.activeWorkout, restTimer.rest, repository.partnerWorkout) { w, r, p -> Triple(w, r, p) }.collect { (w, r, p) ->
+                // También con los ajustes: cambiar kg/lb o el total de mancuernas se ve ya en «Siguiente»
+                combine(repository.activeWorkout, restTimer.rest, repository.partnerWorkout, settings.settings) { w, r, p, _ -> Triple(w, r, p) }.collect { (w, r, p) ->
                     when {
                         w != null -> getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, build(w, r, p))
                         // El StateFlow empieza en null: se comprueba en la base de datos antes de parar

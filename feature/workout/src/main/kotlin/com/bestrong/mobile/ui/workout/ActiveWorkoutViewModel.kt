@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -90,11 +91,12 @@ class ActiveWorkoutViewModel @Inject constructor(
     // (y lo sabe WorkoutActions: las teclas de volumen marcan la serie de quien se ve)
     // Solo mientras exista el de la pareja: cerrado fuera de esta pantalla, los cambios van a tu entreno, no a ninguno
     val partnerMode: StateFlow<Boolean> = combine(savedState.getStateFlow(KEY_PARTNER_MODE, false), repo.partnerWorkout) { on, p -> on && p != null }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false).also { actions.partnerOnScreen.value = savedState[KEY_PARTNER_MODE] ?: false }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
-    private fun setPartnerMode(on: Boolean) {
-        savedState[KEY_PARTNER_MODE] = on.also { actions.partnerOnScreen.value = it }
-    }
+    /** Las teclas de volumen marcan la serie de la pareja solo con su entreno a la vista (no desde Inicio). */
+    fun onScreen(visible: Boolean) = actions.partnerOnScreen.update { visible && (savedState[KEY_PARTNER_MODE] ?: false) }
+
+    private fun setPartnerMode(on: Boolean) = savedState.set(KEY_PARTNER_MODE, on.also { actions.partnerOnScreen.value = it })
 
     val workout: StateFlow<Workout?> = combine(repo.activeWorkout, repo.partnerWorkout, partnerMode) { me, partner, isPartner ->
         // Sin entreno de la pareja (se cerró desde Inicio, el reloj o al terminar el tuyo): el tuyo, no «sin entreno»
@@ -319,9 +321,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val _focusExercise = MutableSharedFlow<Int>(extraBufferCapacity = 1)
     val focusExercise: SharedFlow<Int> = _focusExercise
 
-    private fun edit(block: (Workout) -> Workout) {
-        viewModelScope.launch { update(block = block) }
-    }
+    private fun edit(block: (Workout) -> Workout) = viewModelScope.launch { update(block = block) }
 
     /** Cambio bajo el cerrojo del repositorio: devuelve el estado antes y después (null sin entreno). */
     private suspend fun update(partner: Boolean = partnerMode.value, block: (Workout) -> Workout): Pair<Workout, Workout>? =

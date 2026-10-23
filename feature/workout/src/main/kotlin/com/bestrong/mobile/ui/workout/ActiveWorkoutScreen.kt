@@ -162,6 +162,12 @@ fun ActiveWorkoutScreen(
     val deadline by vm.deadline.collectAsStateWithLifecycle()
     val suggestions by vm.suggestions.collectAsStateWithLifecycle()
     val metrics by vm.watchMetrics.collectAsStateWithLifecycle()
+    // Volumen = serie de la pareja solo mientras su entreno está a la vista (al salir de esta pantalla, la tuya)
+    val partnerShown by vm.partnerMode.collectAsStateWithLifecycle()
+    androidx.compose.runtime.DisposableEffect(partnerShown) {
+        vm.onScreen(true)
+        onDispose { vm.onScreen(false) }
+    }
     var confirmFinish by rememberSaveable { mutableStateOf(false) }
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
     var renaming by rememberSaveable { mutableStateOf(false) }

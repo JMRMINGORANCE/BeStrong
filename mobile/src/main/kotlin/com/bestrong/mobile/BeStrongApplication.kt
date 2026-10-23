@@ -202,7 +202,8 @@ class AppSync @Inject constructor(
         scope.launch { syncSettings() }
         // Entreno en curso compartido en vivo con el reloj + servicio en primer plano
         // Un descanso guardado sin entreno abierto (el reloj lo terminó con la app cerrada) no vuelve a sonar
-        scope.launch { if (repository.activeOnce() == null) restTimer.skip() }
+        // (y si sigue abierto y el descanso acabó con la app cerrada, se avisa una vez)
+        scope.launch { if (repository.activeOnce() == null) restTimer.skip() else restTimer.alertIfMissed() }
         scope.launch {
             repository.activeWorkout.drop(1).debounce(300).collect { w ->
                 watchSync.pushActive(w)

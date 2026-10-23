@@ -66,14 +66,15 @@ class RestTimerController @Inject constructor(
     val restEndedAt: StateFlow<Long?> = _restEndedAt.asStateFlow()
 
     init {
-        if (_rest.value != null) schedule() else missedEnd()
+        // El aviso de un descanso perdido lo decide quien sabe si sigue habiendo entreno ([alertIfMissed])
+        if (_rest.value != null) schedule()
     }
 
     /**
      * Android cerró la app durante el descanso y vuelve justo después de que acabara: se avisa igualmente (una vez),
      * que si no se seguía esperando sin saber que ya tocaba. Pasados unos minutos ya no tiene sentido.
      */
-    private fun missedEnd() {
+    fun alertIfMissed() {
         val ends = prefs.getLong("ends", 0)
         val late = System.currentTimeMillis() - ends
         if (ends <= 0 || late !in 0..MISSED_END_MS) return
