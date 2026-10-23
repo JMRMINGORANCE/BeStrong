@@ -75,7 +75,9 @@ fun ExerciseInfoScreen(session: WorkoutSession) {
                 }
                 Text(text, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
             }
-            progress.maxOfOrNull { it.bestOneRepMax }?.takeIf { it > 0 }?.let { best ->
+            // Con «suma de las dos mancuernas», el 1RM del par (como «la última vez» y el móvil)
+            val f = settings.weightFactor(we.exercise)
+            progress.maxOfOrNull { it.bestOneRepMax * f }?.takeIf { it > 0 }?.let { best ->
                 item {
                     Text(
                         stringResource(R.string.info_best_1rm, unit.format(best, withUnit = true)),
@@ -86,7 +88,7 @@ fun ExerciseInfoScreen(session: WorkoutSession) {
                 }
             }
             if (progress.size >= 2) {
-                item { CrownChart(progress.map { it.dateEpochMs to it.bestOneRepMax }, brand) }
+                item { CrownChart(progress.map { it.dateEpochMs to it.bestOneRepMax * f }, brand) }
             }
             // Últimos 3 pesos como accesos rápidos para la serie actual
             val recent = session.recentWeights(we.exercise.id)

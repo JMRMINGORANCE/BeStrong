@@ -154,6 +154,10 @@ data class SharedSettings(
     val heaviestKg: Map<String, Double> = emptyMap(),
     /** Descanso máximo tras una serie de calentamiento (s). */
     val warmupRestSeconds: Int = 60,
+    /** Ejercicios ocultos en la biblioteca del móvil: el selector del reloj tampoco los ofrece. */
+    val hiddenExercises: Set<String> = emptySet(),
+    /** Vibrar al acabar el descanso (y a 10 s): apagado en el móvil, también en el reloj. */
+    val vibrateOnRestEnd: Boolean = true,
     /** Rango de repeticiones por ejercicio («8-12»): la misma doble progresión que en el móvil. */
     val exerciseRepRange: Map<String, String> = emptyMap(),
     /** Barra del gimnasio activo y las propias de cada ejercicio (kg), para el calentamiento del reloj. */

@@ -645,7 +645,7 @@ class WorkoutSession @Inject constructor(
         restJob = scope.launch {
             if (remaining > 10_000) {
                 delay(remaining - 10_000)
-                context.haptic(Haptics.REST_WARNING) // aviso: quedan 10 s
+                if (store.settings.value.vibrateOnRestEnd) context.haptic(Haptics.REST_WARNING) // aviso: quedan 10 s
                 delay(10_000)
             } else {
                 delay(remaining.coerceAtLeast(0))
@@ -653,7 +653,7 @@ class WorkoutSession @Inject constructor(
             _rest.value = null
             store.activeRest = null
             repCounter.reset()
-            context.haptic(store.settings.value.restVibration.pattern)
+            store.settings.value.takeIf { it.vibrateOnRestEnd }?.let { context.haptic(it.restVibration.pattern) }
             releaseRestWakeLock()
         }
     }

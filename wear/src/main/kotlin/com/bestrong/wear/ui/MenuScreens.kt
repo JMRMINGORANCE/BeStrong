@@ -215,6 +215,8 @@ fun ExercisePickerScreen(container: WearContainer, onPick: (Exercise) -> Unit) {
             routines.flatMap { r -> r.exercises.map { it.exercise } } +
             history.flatMap { w -> w.exercises.map { it.exercise } }
         ).distinctBy { it.id }
+        // Sin los ocultos en la biblioteca del móvil (los recientes sí: ya se hicieron)
+        .filter { it.id !in container.store.settings.value.hiddenExercises }
     val recent = history.flatMap { w -> w.exercises.map { it.exercise } }.distinctBy { it.id }.take(6)
 
     ScreenScaffold(scrollState = listState) { contentPadding ->

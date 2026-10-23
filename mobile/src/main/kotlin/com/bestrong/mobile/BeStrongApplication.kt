@@ -164,6 +164,8 @@ class AppSync @Inject constructor(
                 weekPlans = weekPlans,
                 pinnedNotes = pinned,
                 warmupRestSeconds = s.warmupRestSeconds,
+                hiddenExercises = s.hiddenExercises,
+                vibrateOnRestEnd = s.vibrateOnRestEnd,
                 bestOneRepMaxKg = best1rm,
                 heaviestKg = heaviest,
             )
