@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -176,7 +177,7 @@ fun ProgramBuilderScreen(
             item { SectionHeader(stringResource(R.string.builder_equipment), large = true) }
             item { KitPicker(kit) { kit = it } }
             item { SectionHeader(stringResource(R.string.builder_minutes), large = true) }
-            item { Segmented(MINUTES.map { "$it" }, MINUTES.indexOf(minutes)) { minutes = MINUTES[it] } }
+            item { Segmented(MINUTES.map { "$it min" }, MINUTES.indexOf(minutes)) { minutes = MINUTES[it] } }
             item { SectionHeader(stringResource(R.string.builder_preview), large = true) }
             item { ProgramHeader(program.name, program.description) }
             items(program.routines.size, key = { "gen-$it" }) { i -> GeneratedRoutineCard(program.routines[i]) }
@@ -262,12 +263,13 @@ private fun Segmented(labels: List<String>, selected: Int, onSelect: (Int) -> Un
         labels.forEachIndexed { i, label ->
             val on = i == selected
             Box(
-                Modifier.weight(1f).height(44.dp).clip(CircleShape)
+                // Alto mínimo, no fijo: «Fortgeschritten» o la letra grande ocupan dos líneas sin cortarse
+                Modifier.weight(1f).heightIn(min = 44.dp).clip(CircleShape)
                     .background(if (on) brandGradient() else SolidColor(androidx.compose.ui.graphics.Color.Transparent))
                     .selectable(selected = on, role = Role.RadioButton) { onSelect(i) },
                 contentAlignment = Alignment.Center,
             ) {
-                Text(label, fontWeight = FontWeight.Bold, color = if (on) scheme.onPrimary else scheme.onSurfaceVariant)
+                Text(label, fontWeight = FontWeight.Bold, color = if (on) scheme.onPrimary else scheme.onSurfaceVariant, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(vertical = 4.dp))
             }
         }
     }

@@ -447,7 +447,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             Text(we.exercise.displayName(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
                         }
                         we.sets.forEachIndexed { i, set ->
-                            Row(if (editing) Modifier.clickable { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
+                            Row(if (editing) Modifier.clickable(onClickLabel = stringResource(R.string.history_edit_set), role = androidx.compose.ui.semantics.Role.Button) { editSet = we.id to set.id }.padding(vertical = 8.dp) else Modifier) {
                                 Text(if (set.type.short.isEmpty()) "${i + 1}" else set.type.short, Modifier.padding(end = 12.dp), fontWeight = FontWeight.Bold)
                                 Text(describeSet(set, we.exercise, unit, vm.weightFactor(we.exercise)), Modifier.weight(1f))
                                 if (set.estimatedOneRepMax > 0 && we.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) {

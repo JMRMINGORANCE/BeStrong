@@ -235,7 +235,7 @@ private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi) {
         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.gen_minutes), style = MaterialTheme.typography.labelMedium)
             listOf(30, 45, 60, 75, 90).forEach { m ->
-                FilterChip(selected = ui.state.minutesPerSession == m, onClick = { vm.setMinutesPerSession(m) }, label = { Text("$m") })
+                FilterChip(selected = ui.state.minutesPerSession == m, onClick = { vm.setMinutesPerSession(m) }, label = { Text("$m min") })
             }
             DuplicateWeekButton { weeks -> vm.duplicateWeek(weekStart, weeks) }
             OutlinedButton(onClick = { vm.exportWeekToCalendar(weekStart) }) { Text(stringResource(R.string.cal_export_ics)) }

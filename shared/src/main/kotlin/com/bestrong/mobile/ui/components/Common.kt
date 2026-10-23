@@ -42,16 +42,19 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// Formato de fecha localizado al idioma del sistema
-private fun dateFormatter() = DateTimeFormatter.ofPattern("EEE d MMM yyyy", Locale.getDefault())
-private fun shortDateFormatter() = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
+// Formato de fecha localizado al idioma del sistema: el orden y la puntuación de cada idioma («vie 23 oct 2026»,
+// «Fri, Oct 23, 2026»), no un patrón fijo de día primero
+private fun localized(skeleton: String): DateTimeFormatter =
+    Locale.getDefault().let { DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(it, skeleton), it) }
+private fun dateFormatter() = localized("EEEdMMMyyyy")
+private fun shortDateFormatter() = localized("dMMM")
 
 fun formatDate(epochMs: Long): String =
     dateFormatter().format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault())).replaceFirstChar { it.uppercase() }
 
-/** Hora (HH:mm) y fecha corta, p. ej. «18:42 · 9 oct». */
+/** Hora y fecha corta, p. ej. «18:42 · 9 oct» (12 o 24 h según el idioma: «6:42 PM · Oct 9»). */
 fun formatTime(epochMs: Long): String =
-    DateTimeFormatter.ofPattern("HH:mm · d MMM", Locale.getDefault()).format(Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()))
+    Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()).let { t -> localized("jm").format(t) + " · " + shortDateFormatter().format(t) }
 
 /** Solo la hora, con el formato de 12/24 h que tenga el sistema («18:42» o «6:42 PM»). */
 fun formatClock(epochMs: Long, is24Hour: Boolean): String {
