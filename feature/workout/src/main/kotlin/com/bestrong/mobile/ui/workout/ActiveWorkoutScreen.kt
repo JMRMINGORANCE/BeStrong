@@ -676,7 +676,8 @@ private fun ExerciseItem(
         index = index,
         count = w.exercises.size,
         previous = previous(we.exercise.id),
-        suggestion = suggestions[we.exercise.id],
+        // Solo en el primer bloque del ejercicio (la sugerencia es de ese): en el de descarga pisaba sus series
+        suggestion = suggestions[we.exercise.id].takeIf { w.exercises.first { it.exercise.id == we.exercise.id }.id == we.id },
         supersetLabel = groupIndex?.let { stringResource(R.string.superset_label, ('A' + it).toString()) },
         supersetColor = groupIndex?.let { supersetColors[it % supersetColors.size] },
         nextInSuperset = w.exercises.getOrNull(index + 1)?.supersetId?.let { it == we.supersetId } == true,

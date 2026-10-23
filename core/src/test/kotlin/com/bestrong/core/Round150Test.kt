@@ -62,3 +62,16 @@ class RoutineLinkFitsTest {
         org.junit.Assert.assertFalse(com.bestrong.core.io.RoutineLink.fits(big))
     }
 }
+
+class AutoregulationSnapTest {
+    @Test fun rpeUpSnapsToLoadableWeight() {
+        val curl = ExerciseLibrary.all.first { it.equipment == com.bestrong.core.model.Equipment.DUMBBELL }
+        val we = WorkoutExercise(
+            id = "e", exercise = curl,
+            sets = listOf(WorkoutSet(id = "s1", weightKg = 20.0, reps = 10, rpe = 6.0, completed = true), WorkoutSet(id = "s2", weightKg = 20.0, reps = 10)),
+        )
+        // Mancuernas de 2 en 2: +2,5 se convierte en 22
+        val a = com.bestrong.core.training.Autoregulation.suggest(we, "s1", 2.5) { kg, _ -> Math.round(kg / 2.0) * 2.0 }
+        assertEquals(22.0, a!!.newWeightKg, 0.0)
+    }
+}

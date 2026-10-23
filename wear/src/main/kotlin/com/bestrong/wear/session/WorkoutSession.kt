@@ -679,10 +679,10 @@ class WorkoutSession @Inject constructor(
     fun addWarmup() {
         val we = currentExercise() ?: return
         // Con la barra del ejercicio (o la del gimnasio), como en el móvil
-        val s = store.settings.value
+        val s = gymSettings()
         // La barra solo con barra: mancuernas, máquinas y poleas empiezan sin ella (como en el móvil)
         val bar = if (we.exercise.equipment == Equipment.BARBELL || we.exercise.equipment == Equipment.SMITH) s.unit.toKg(s.barInUnit(we.exercise.id)) else 0.0
-        edit { WorkoutEditor.addWarmup(it, we.id, s.unit, bar) }
+        edit { WorkoutEditor.addWarmup(it, we.id, s.unit, bar) { kg -> s.gymFor(we.exercise.id)?.nearestLoad(kg, we.exercise.equipment, s.unit) ?: kg } }
     }
 
     /** Drop set (−20 %); false si con ese peso no se puede bajar más (para avisar). */

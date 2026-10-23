@@ -49,7 +49,7 @@
     <ID>NestedBlockDepth:VoiceSetParser.kt$VoiceSetParser$fun parse(text: String): SpokenSet</ID>
     <ID>NestedBlockDepth:WorkoutStats.kt$WorkoutStats$fun personalRecords(history: List&lt;Workout&gt;): Map&lt;String, Map&lt;RecordType, PersonalRecord&gt;&gt;</ID>
     <ID>ReturnCount:Alternatives.kt$Alternatives$fun convertSets(from: Exercise, to: Exercise, sets: List&lt;WorkoutSet&gt;, previousOfNew: List&lt;WorkoutSet&gt;, stepKg: Double): List&lt;WorkoutSet&gt;</ID>
-    <ID>ReturnCount:Autoregulation.kt$Autoregulation$fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double): RpeAdjustment?</ID>
+    <ID>ReturnCount:Autoregulation.kt$Autoregulation$fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double, snap: (Double, Double) -&gt; Double = { kg, _ -&gt; kg }): RpeAdjustment?</ID>
     <ID>ReturnCount:BarVelocity.kt$BarVelocity$fun velocityLoss(velocities: List&lt;Double&gt;): Double</ID>
     <ID>ReturnCount:CardioSession.kt$CardioSession$fun finish()</ID>
     <ID>ReturnCount:ExerciseService.kt$ExerciseService$override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int</ID>

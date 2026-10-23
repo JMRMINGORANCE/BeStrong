@@ -179,7 +179,15 @@ class WorkoutActions @Inject constructor(
      */
     fun nextTimeAfter(finished: Workout, history: List<Workout>): List<com.bestrong.core.training.NextTimeSuggestion> {
         val s = settings.settings.value
-        if (!s.progressionEnabled) return com.bestrong.core.training.NextTime.forWorkout(finished) { s.stepKgFor(it) }
+        // Sin sobrecarga progresiva: la regla sencilla, pero con lo que hay en el gimnasio y una fila por ejercicio
+        if (!s.progressionEnabled) {
+            return com.bestrong.core.training.NextTime.forWorkout(finished) { s.stepKgFor(it) }.distinctBy { it.exerciseId }.map { n ->
+                val eq = finished.exercises.first { it.exercise.id == n.exerciseId }.exercise.equipment
+                val g = s.gymFor(n.exerciseId)
+                val top = n.weightKg - s.stepKgFor(n.exerciseId)
+                n.copy(weightKg = g.nearestLoad(n.weightKg, eq, s.unit).let { k -> if (n.direction > 0 && k <= top) g.loadAbove(top, eq, s.unit) else k })
+            }
+        }
         val all = if (history.any { it.id == finished.id }) history else listOf(finished) + history
         val gymName = s.activeGym.name.takeIf { s.gyms.size > 1 }
         return finished.exercises.distinctBy { it.exercise.id }.mapNotNull { we ->

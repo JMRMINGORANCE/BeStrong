@@ -44,7 +44,8 @@ object Autoregulation {
         return if (t >= MAX_RPE) MAX_RPE else minOf(t + 1, HIGH)
     }
 
-    fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double): RpeAdjustment? {
+    /** [snap] (peso, desde): lo lleva a algo que se pueda cargar en el gimnasio (mancuernas, discos); por defecto, tal cual. */
+    fun suggest(exercise: WorkoutExercise, completedSetId: String, stepKg: Double, snap: (Double, Double) -> Double = { kg, _ -> kg }): RpeAdjustment? {
         // Solo con la serie ya hecha: un RPE puesto antes de marcarla no ajusta esa misma serie
         val done = exercise.sets.firstOrNull { it.id == completedSetId && it.completed } ?: return null
         val rpe = done.rpe ?: return null
@@ -54,8 +55,10 @@ object Autoregulation {
         if (pending.isEmpty()) return null
         val current = done.weightKg
         return when {
-            done.type != SetType.FAILURE && rpe >= high(exercise.targetRpe) -> RpeAdjustment(round(current * 0.95, stepKg).coerceAtLeast(0.0), -1, current).takeIf { it.newWeightKg < current }
-            rpe <= low(if (done.type == SetType.FAILURE) MAX_RPE else exercise.targetRpe) -> RpeAdjustment(current + stepKg, 1, current)
+            done.type != SetType.FAILURE && rpe >= high(exercise.targetRpe) ->
+                RpeAdjustment(snap(round(current * 0.95, stepKg), current).coerceAtLeast(0.0), -1, current).takeIf { it.newWeightKg < current }
+            rpe <= low(if (done.type == SetType.FAILURE) MAX_RPE else exercise.targetRpe) ->
+                RpeAdjustment(snap(current + stepKg, current), 1, current).takeIf { it.newWeightKg > current }
             else -> null
         }
     }

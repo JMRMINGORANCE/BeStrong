@@ -533,9 +533,7 @@ class ActiveWorkoutViewModel @Inject constructor(
             val last = we.sets.lastOrNull { it.completed }
             // Ya no es la última serie hecha, o el RPE definitivo lo puso el móvil (que ya avisó al ponerlo)
             if (last?.id != setId || localRpes[setId] == last.rpe) return@launch
-            Autoregulation.suggest(we, setId, settings.value.stepKgFor(we.exercise.id))?.let {
-                _events.tryEmit(WorkoutEvent.RpeSuggestion(we.id, we.exercise, it))
-            }
+            rpeSuggestion(we, setId)
         }
     }
 
@@ -548,8 +546,13 @@ class ActiveWorkoutViewModel @Inject constructor(
         rpeSuggestion(updated.exercises.firstOrNull { it.id == weId } ?: return, setId)
     }
 
-    private fun rpeSuggestion(we: com.bestrong.core.model.WorkoutExercise, setId: String) =
-        Autoregulation.suggest(we, setId, settings.value.stepKgFor(we.exercise.id))?.let { _events.tryEmit(WorkoutEvent.RpeSuggestion(we.id, we.exercise, it)) }
+    // Con lo que hay en el gimnasio: «+2,5 kg» no propone mancuernas de 22,5 si van de 2 en 2
+    private fun rpeSuggestion(we: com.bestrong.core.model.WorkoutExercise, setId: String) = settings.value.let { s ->
+        val (g, eq) = s.gymFor(we.exercise.id) to we.exercise.equipment
+        Autoregulation.suggest(we, setId, s.stepKgFor(we.exercise.id)) { kg, from ->
+            g.nearestLoad(kg, eq, s.unit).let { n -> if (kg > from && n <= from) g.loadAbove(from, eq, s.unit) else n }
+        }?.let { _events.tryEmit(WorkoutEvent.RpeSuggestion(we.id, we.exercise, it)) }
+    }
 
     fun applyRpeAdjustment(weId: String, adjustment: RpeAdjustment) = edit { w ->
         WorkoutEditor.updateExercise(w, weId) { Autoregulation.apply(it, adjustment) }
