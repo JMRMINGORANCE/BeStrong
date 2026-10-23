@@ -63,6 +63,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -204,21 +206,26 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
                                 }
                             }
                             item { FilteredSummary(vm, filtered) }
-                            items(filtered, key = { it.id }) { w ->
-                                val records = recordCounts.getOrDefault(w.id, 0)
-                                // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
-                                val dragText = workoutText(w)
-                                WorkoutCard(
-                                    w,
-                                    records,
-                                    Modifier.clip(MaterialTheme.shapes.large).combinedClickable(
-                                        // Con etiquetas, TalkBack ofrece también la pulsación larga (si no, no se descubre)
-                                        onClickLabel = stringResource(R.string.action_open),
-                                        onLongClickLabel = stringResource(R.string.action_drag_share),
-                                        onLongClick = { DragShare.start(view, w.name, dragText) },
-                                        onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } },
-                                    ),
-                                )
+                            // Separada por meses («Octubre 2026 · 12 entrenos»): con cientos de entrenos se sabe dónde se está
+                            val byMonth = filtered.groupBy { java.time.YearMonth.from(java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(java.time.ZoneId.systemDefault())) }
+                            byMonth.forEach { (month, monthWorkouts) ->
+                                item(key = "m-$month") { MonthHeader(month, monthWorkouts.size) }
+                                items(monthWorkouts, key = { it.id }) { w ->
+                                    val records = recordCounts.getOrDefault(w.id, 0)
+                                    // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
+                                    val dragText = workoutText(w)
+                                    WorkoutCard(
+                                        w,
+                                        records,
+                                        Modifier.clip(MaterialTheme.shapes.large).combinedClickable(
+                                            // Con etiquetas, TalkBack ofrece también la pulsación larga (si no, no se descubre)
+                                            onClickLabel = stringResource(R.string.action_open),
+                                            onLongClickLabel = stringResource(R.string.action_drag_share),
+                                            onLongClick = { DragShare.start(view, w.name, dragText) },
+                                            onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } },
+                                        ),
+                                    )
+                                }
                             }
                         }
                     }
@@ -428,6 +435,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                 }
             }
             item { RestSummaryLine(w) }
+            item { com.bestrong.mobile.ui.components.WorkoutMuscleChips(w) }
             item { WorkoutGymLine(w, vm) }
             if (w.notes.isNotBlank()) item { Text(w.notes) }
             items(w.exercises, key = { it.id }) { we ->
@@ -740,4 +748,18 @@ private fun EditUndoSnackbars(vm: HistoryViewModel, snackbar: SnackbarHostState,
             if (snackbar.showSnackbar(setRemovedMsg, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) vm.undoSetRemoved() else vm.clearSetRemoved()
         }
     }
+}
+
+/** Cabecera de mes en la lista: «Octubre 2026 · 12 entrenos». */
+@Composable
+private fun MonthHeader(month: java.time.YearMonth, count: Int) {
+    val name = month.format(java.time.format.DateTimeFormatter.ofPattern("LLLL yyyy", java.util.Locale.getDefault()))
+        .replaceFirstChar { it.titlecase(java.util.Locale.getDefault()) }
+    Text(
+        name + " · " + pluralStringResource(R.plurals.n_workouts_count, count, count),
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 8.dp, start = 4.dp).semantics { heading() },
+    )
 }

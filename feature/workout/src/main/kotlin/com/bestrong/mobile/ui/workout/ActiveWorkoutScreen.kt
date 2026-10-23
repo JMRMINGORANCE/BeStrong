@@ -1232,6 +1232,11 @@ fun WorkoutSummaryDialog(
                 summary.weeklyGoalReached?.let { goal ->
                     Text(pluralStringResource(R.plurals.weekly_goal_reached, goal, goal), fontWeight = FontWeight.Bold, color = statusColors.good)
                 }
+                summary.achievements.forEach { id ->
+                    com.bestrong.mobile.ui.components.achievementLabelRes(id)?.let { res ->
+                        Text("🏅 " + stringResource(R.string.achievement_unlocked, stringResource(res)), fontWeight = FontWeight.Bold, color = statusColors.good)
+                    }
+                }
                 // Los récords arriba, antes de la valoración: es lo primero que se quiere ver
                 if (summary.records.isNotEmpty()) {
                     Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
@@ -1241,6 +1246,8 @@ fun WorkoutSummaryDialog(
                         Text(stringResource(R.string.record_line, pr.exerciseLabel(), pr.type.label(), pr.type.formatValue(pr.value * f, unit)), style = MaterialTheme.typography.bodySmall)
                     }
                 }
+                // Qué ha trabajado hoy cada músculo
+                com.bestrong.mobile.ui.components.WorkoutMuscleChips(w)
                 // Frente a la última vez que hiciste cada ejercicio
                 SummaryComparisons(summary)
                 RpeVsTargetLines(w)

@@ -142,24 +142,6 @@ fun WeekSummaryCard(stats: AdvancedStats) {
     }
 }
 
-private val ACHIEVEMENT_NAMES = mapOf(
-    "first_workout" to R.string.ach_first_workout,
-    "workouts_10" to R.string.ach_workouts_10,
-    "workouts_50" to R.string.ach_workouts_50,
-    "workouts_100" to R.string.ach_workouts_100,
-    "workouts_250" to R.string.ach_workouts_250,
-    "streak_4" to R.string.ach_streak_4,
-    "streak_12" to R.string.ach_streak_12,
-    "streak_26" to R.string.ach_streak_26,
-    "volume_10t" to R.string.ach_volume_10t,
-    "volume_100t" to R.string.ach_volume_100t,
-    "volume_1000t" to R.string.ach_volume_1000t,
-    "sets_1000" to R.string.ach_sets_1000,
-    "bench_bw" to R.string.ach_bench_bw,
-    "squat_1_5bw" to R.string.ach_squat_1_5bw,
-    "deadlift_2bw" to R.string.ach_deadlift_2bw,
-)
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AchievementsCard(stats: AdvancedStats) {
@@ -174,7 +156,7 @@ fun AchievementsCard(stats: AdvancedStats) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 // Primero los conseguidos; luego los más cercanos
                 stats.achievements.sortedWith(compareByDescending<com.bestrong.core.stats.Achievement> { it.unlocked }.thenByDescending { it.progress }).forEach { a ->
-                    val name = ACHIEVEMENT_NAMES[a.id]?.let { stringResource(it) } ?: a.id
+                    val name = com.bestrong.mobile.ui.components.achievementLabelRes(a.id)?.let { stringResource(it) } ?: a.id
                     // Etiqueta, no botón (tocarla no hacía nada); el % con el formato del idioma («45 %» / «45%»)
                     com.bestrong.mobile.ui.components.MetaPill(if (a.unlocked) "🏆 $name" else "$name · ${java.text.NumberFormat.getPercentInstance().format(a.progress)}")
                 }

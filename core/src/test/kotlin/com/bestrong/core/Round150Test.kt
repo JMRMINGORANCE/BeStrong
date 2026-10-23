@@ -88,3 +88,17 @@ class CopyToDayTest {
         assertEquals(com.bestrong.core.model.WorkoutSource.PHONE, c.source)
     }
 }
+
+class NewlyUnlockedTest {
+    @Test fun firstWorkoutUnlocksFirstAchievementOnce() {
+        fun w(id: String, start: Long) = Workout(
+            id = id, name = id, startedAtEpochMs = start, finishedAtEpochMs = start + 3_600_000,
+            exercises = listOf(WorkoutExercise(exercise = ExerciseLibrary.byId("squat")!!, sets = listOf(WorkoutSet(weightKg = 60.0, reps = 5, completed = true)))),
+        )
+        val zone = java.time.ZoneOffset.UTC
+        val now = System.currentTimeMillis()
+        val first = w("a", now - 86_400_000)
+        org.junit.Assert.assertTrue("first_workout" in com.bestrong.core.stats.Strength.newlyUnlocked(listOf(first), "a", zone, null))
+        org.junit.Assert.assertFalse("first_workout" in com.bestrong.core.stats.Strength.newlyUnlocked(listOf(w("b", now), first), "b", zone, null))
+    }
+}

@@ -1364,4 +1364,5 @@
     <string name="gym_default_home">Zuhause</string>
     <string name="setup_sex">Geschlecht (für Kalorien und Kraftniveaus)</string>
     <string name="deload_label">Deload</string>
+    <string name="achievement_unlocked">Erfolg freigeschaltet: %1$s</string>
 </resources>

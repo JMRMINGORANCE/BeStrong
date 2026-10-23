@@ -71,6 +71,8 @@ data class FinishedSummary(
     val planned: Workout? = null,
     /** Objetivo semanal (días) que se acaba de cumplir con este entreno; null si no. */
     val weeklyGoalReached: Int? = null,
+    /** Logros (ids) que se consiguen con este entreno: se celebran al momento, no solo en Perfil. */
+    val achievements: List<String> = emptyList(),
 )
 
 @HiltViewModel
@@ -857,6 +859,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         // Lo mismo que se rellenará al empezar la próxima vez (no una regla aparte que a veces lo contradecía)
         actions.nextTimeAfter(finished, history),
         weeklyGoalReached = weeklyGoalReachedBy(finished, history),
+        achievements = if (finished.athlete != null) emptyList() else com.bestrong.core.stats.Strength.newlyUnlocked(history, finished.id, java.time.ZoneId.systemDefault(), repo.measurements.value.filter { it.weightKg != null }.maxByOrNull { it.dateEpochMs }?.weightKg),
     )
 
     /** Si con este entreno se llega justo al objetivo de días de la semana (el del programa o el propio). */

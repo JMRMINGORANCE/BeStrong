@@ -1364,4 +1364,5 @@
     <string name="gym_default_home">Casa</string>
     <string name="setup_sex">Sexo (para calorias e níveis de força)</string>
     <string name="deload_label">descarga</string>
+    <string name="achievement_unlocked">Conquista desbloqueada: %1$s</string>
 </resources>

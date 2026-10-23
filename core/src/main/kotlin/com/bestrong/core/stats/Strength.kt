@@ -191,6 +191,13 @@ object Strength {
     }
 
     /** Logros: hitos de constancia, volumen y fuerza. */
+    /** Logros que se consiguen justo con el entreno [finishedId] (estaban sin conseguir sin él). */
+    fun newlyUnlocked(history: List<Workout>, finishedId: String, zone: ZoneId, bodyWeightKg: Double?): List<String> {
+        val today = LocalDate.now(zone)
+        val before = achievements(history.filter { it.id != finishedId }, today, zone, bodyWeightKg).filter { it.unlocked }.map { it.id }.toSet()
+        return achievements(history, today, zone, bodyWeightKg).filter { it.unlocked && it.id !in before }.map { it.id }
+    }
+
     fun achievements(history: List<Workout>, today: LocalDate, zone: ZoneId, bodyWeightKg: Double?): List<Achievement> {
         val done = history.filter { it.isFinished }
         val count = done.size.toDouble()
