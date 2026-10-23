@@ -35,7 +35,14 @@ class RoutineEditorViewModel @Inject constructor(
     /** Rango elegido para toda la rutina, pendiente de guardar (así «Descartar» lo deshace como lo demás). */
     private data class RangeChange(val range: String?)
 
-    private var pendingRange: RangeChange? = null
+    // En el estado guardado, como el borrador: si Android cierra la app en segundo plano no se pierde
+    private var pendingRange: RangeChange? =
+        if (savedStateHandle.get<Boolean>(KEY_RANGE_SET) == true) RangeChange(savedStateHandle[KEY_RANGE]) else null
+        set(v) {
+            field = v
+            savedStateHandle[KEY_RANGE_SET] = v != null
+            savedStateHandle[KEY_RANGE] = v?.range
+        }
 
     /** Pone (o quita) el mismo rango de repeticiones a todos los ejercicios con peso de la rutina (al guardar). */
     fun setRangeForAll(range: String?) {
@@ -63,6 +70,8 @@ class RoutineEditorViewModel @Inject constructor(
         const val MIXED_RANGE = "mixed"
         private const val KEY_DRAFT = "routine_draft"
         private const val KEY_ORIGINAL = "routine_original"
+        private const val KEY_RANGE_SET = "routine_range_set"
+        private const val KEY_RANGE = "routine_range"
     }
 
     /** Argumento de navegación "id" (null = rutina nueva). */

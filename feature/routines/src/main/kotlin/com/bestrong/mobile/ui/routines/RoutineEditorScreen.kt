@@ -206,7 +206,9 @@ private fun SmallNumberField(label: String, value: String, modifier: Modifier, d
     OutlinedTextField(
         value = text,
         onValueChange = { new ->
-            text = new.filter { it.isDigit() || (decimal && (it == '.' || it == ',')) }.take(6)
+            val f = new.filter { it.isDigit() || (decimal && (it == '.' || it == ',')) }.take(6)
+            // Un solo separador: «82,,5» no se lee y se guardaban 0 kg
+            text = if (f.count { it == '.' || it == ',' } > 1) text else f
             onChange(text)
         },
         label = { Text(label) },
@@ -521,7 +523,9 @@ private fun RoutineSetRow(vm: RoutineEditorViewModel, re: com.bestrong.core.mode
         } else {
             val factor = vm.weightFactor(re.exercise)
             SmallNumberField(unit.label, unit.format(set.weightKg * factor), Modifier.weight(1f), decimal = true) { v ->
-                vm.updateSet(re.id, i) { it.copy(weightKg = (unit.parseToKg(v) ?: 0.0) / factor) }
+                // Vacío = 0 kg; un texto a medias que no se lee no borra el peso que había
+                val kg = if (v.isEmpty()) 0.0 else unit.parseToKg(v)
+                if (kg != null) vm.updateSet(re.id, i) { it.copy(weightKg = kg / factor) }
             }
             // De distancia, solo el peso (las reps no se usan; los metros salen de la última vez)
             if (re.exercise.tracking != TrackingType.DISTANCE) {

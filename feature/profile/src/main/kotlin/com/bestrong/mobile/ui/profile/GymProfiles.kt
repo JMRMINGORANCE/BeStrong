@@ -111,6 +111,9 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
     var dbFrom by remember { mutableStateOf(initial[2]) }
     var dbTo by remember { mutableStateOf(initial[3]) }
     var dbStep by remember { mutableStateOf(initial[4]) }
+    // «Desde» mayor que «Hasta» (o un número mal escrito) dejaría la lista vacía, que significa «cualquier peso»: no se guarda
+    val dbParsed = listOf(dbFrom, dbTo, dbStep).map { unit.parseToKg(it) }
+    val dbValid = anyDumbbell || (dbParsed.all { it != null && it > 0 } && dbParsed[0]!! <= dbParsed[1]!!)
     // Los de la unidad del usuario y los que ya tuviera el gimnasio
     val plateChoices = remember(unit) { ((if (unit == WeightUnit.LB) STANDARD_PLATES_LB else STANDARD_PLATES) + gym.platesKg).distinct().sortedDescending() }
     AlertDialog(
@@ -152,24 +155,24 @@ fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) ->
                 if (!anyDumbbell) {
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         val kb = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                        OutlinedTextField(dbFrom, { dbFrom = it }, label = { Text(stringResource(R.string.gym_db_from)) }, singleLine = true, keyboardOptions = kb, modifier = Modifier.weight(1f))
-                        OutlinedTextField(dbTo, { dbTo = it }, label = { Text(stringResource(R.string.gym_db_to)) }, singleLine = true, keyboardOptions = kb, modifier = Modifier.weight(1f))
-                        OutlinedTextField(dbStep, { dbStep = it }, label = { Text(stringResource(R.string.gym_db_step)) }, singleLine = true, keyboardOptions = kb, modifier = Modifier.weight(1f))
+                        OutlinedTextField(dbFrom, { dbFrom = it }, label = { Text(stringResource(R.string.gym_db_from)) }, singleLine = true, isError = !dbValid, keyboardOptions = kb, modifier = Modifier.weight(1f))
+                        OutlinedTextField(dbTo, { dbTo = it }, label = { Text(stringResource(R.string.gym_db_to)) }, singleLine = true, isError = !dbValid, keyboardOptions = kb, modifier = Modifier.weight(1f))
+                        OutlinedTextField(dbStep, { dbStep = it }, label = { Text(stringResource(R.string.gym_db_step)) }, singleLine = true, isError = !dbValid, keyboardOptions = kb, modifier = Modifier.weight(1f))
                     }
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            TextButton(enabled = dbValid, onClick = {
                 val dumbbellsUntouched = listOf(dbFrom, dbTo, dbStep) == initial.subList(2, 5) && gym.dumbbellsKg.isNotEmpty()
                 val dumbbells = if (anyDumbbell) {
                     emptyList()
                 } else if (dumbbellsUntouched) {
                     gym.dumbbellsKg
                 } else {
-                    val from = unit.parseToKg(dbFrom) ?: 2.0
-                    val to = unit.parseToKg(dbTo) ?: 30.0
-                    val step = (unit.parseToKg(dbStep) ?: 2.0).coerceAtLeast(0.5)
+                    val (from, to) = dbParsed[0]!! to dbParsed[1]!!
+                    // Mínimo 0,1 kg: un paso de 1 lb (0,45 kg) se respeta
+                    val step = dbParsed[2]!!.coerceAtLeast(0.1)
                     generateSequence(from) { it + step }.takeWhile { it <= to + 1e-6 }.take(200).toList()
                 }
                 onSave(
