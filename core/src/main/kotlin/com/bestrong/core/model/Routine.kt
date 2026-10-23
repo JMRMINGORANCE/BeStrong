@@ -81,14 +81,17 @@ data class Routine(
                 tempo = re.tempo,
                 targetRpe = re.targetRpe,
                 sets = re.sets.mapIndexed { i, rs ->
-                    // Calentamientos con calentamientos y efectivas (normal, drop, fallo…) con efectivas
-                    val warm = rs.type == SetType.WARMUP
-                    val sameKindIndex = re.sets.take(i).count { (it.type == SetType.WARMUP) == warm }
+                    // Calentamientos con calentamientos, drop sets con drop sets y efectivas (normal, fallo…) con efectivas
+                    val kind = matchKind(rs.type)
+                    val sameKindIndex = re.sets.take(i).count { matchKind(it.type) == kind }
                     // Una serie que la última vez se saltó toma la última hecha de su tipo (no el peso viejo de la rutina)
-                    val prev = previous.filter { (it.type == SetType.WARMUP) == warm }.let { it.getOrNull(sameKindIndex) ?: it.lastOrNull() }
+                    val prev = previous.filter { matchKind(it.type) == kind }.let { it.getOrNull(sameKindIndex) ?: it.lastOrNull() }
                     val distance = re.exercise.tracking == TrackingType.DISTANCE
                     WorkoutSet(
-                        weightKg = prev?.weightKg?.takeIf { it > 0 } ?: rs.weightKg,
+                        // También la ayuda de la última vez (dominada asistida: peso negativo)
+                        weightKg = prev?.weightKg?.takeIf { it != 0.0 } ?: rs.weightKg,
+                        // Unilateral: también el lado derecho (si no, al marcarla solo contaba el izquierdo)
+                        repsRight = prev?.repsRight,
                         reps = if (distance) 0 else prev?.reps?.takeIf { it > 0 } ?: rs.reps,
                         durationSec = prev?.durationSec?.takeIf { it > 0 } ?: rs.durationSec,
                         // Los metros de la última vez (paseo del granjero, trineo): si no, salían a 0
@@ -218,3 +221,10 @@ fun RoutineExercise.withEdited(ex: Exercise): RoutineExercise = copy(
     sets = if (exercise.tracking != ex.tracking) RoutineSet.defaultsFor(ex.tracking, sets.size) else sets,
     targetRpe = targetRpe.takeIf { ex.tracking == TrackingType.WEIGHT_REPS },
 )
+
+/** Grupo con el que se empareja una serie con la de la última vez: calentamiento, drop set o efectiva. */
+internal fun matchKind(type: SetType): Int = when (type) {
+    SetType.WARMUP -> 0
+    SetType.DROP -> 1
+    else -> 2
+}

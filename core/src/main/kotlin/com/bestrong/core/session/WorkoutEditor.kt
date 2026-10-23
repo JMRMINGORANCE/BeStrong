@@ -7,6 +7,7 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.WorkoutSource
+import com.bestrong.core.model.matchKind
 import com.bestrong.core.training.RestPolicy
 import com.bestrong.core.training.WarmupGenerator
 import com.bestrong.core.util.WeightUnit
@@ -129,6 +130,8 @@ object WorkoutEditor {
             sets = com.bestrong.core.library.Alternatives.convertSets(we.exercise, to, pending, previousOfNew, stepKg).map { it.copy(id = com.bestrong.core.util.newId()) },
             restSeconds = we.restSeconds,
             targetRpe = targetRpe,
+            // Sigue en la misma superserie (si no, al normalizar se deshacía la de todos)
+            supersetId = we.supersetId,
         )
         val exercises = workout.exercises.flatMap { if (it.id == we.id) listOf(it.copy(sets = done), replacement) else listOf(it) }
         val tombstones = we.sets.filterNot { it.completed }.associate { it.id to emptySet<String>() }
@@ -581,7 +584,7 @@ object WorkoutEditor {
             val justDone = current.sets.filter { it.completed }.maxByOrNull { it.completedAtEpochMs ?: 0L }
             val rest = when {
                 // Un drop set se hace seguido, sin descanso: solo el tiempo de quitar discos
-                current.sets.firstOrNull { !it.completed }?.type == SetType.DROP -> 0
+                nextIn(current)?.type == SetType.DROP -> 0
                 justDone?.type == SetType.WARMUP -> current.restSeconds.coerceAtMost(warmupRestSeconds)
                 else -> current.restSeconds
             }
@@ -596,7 +599,7 @@ object WorkoutEditor {
 
     /** Descanso para seguir en el mismo ejercicio: tras un calentamiento (corto) o antes de un drop set (ninguno). */
     private fun stayOn(current: WorkoutExercise, justDone: WorkoutSet?, warmupRestSeconds: Int): Int? {
-        val pendingHere = current.sets.firstOrNull { !it.completed }
+        val pendingHere = nextIn(current)
         return when {
             justDone?.type == SetType.WARMUP && pendingHere != null -> current.restSeconds.coerceAtMost(warmupRestSeconds)
             pendingHere?.type == SetType.DROP -> 0
@@ -653,7 +656,16 @@ object WorkoutEditor {
             .mapNotNull { (i, we) -> we.sets.filter { it.completed }.maxOfOrNull { it.completedAtEpochMs ?: 0L }?.let { i to it } }
             .maxByOrNull { it.second }?.first
         val next = lastDone?.let { afterSetCompleted(workout, it).first }
-        return next?.let { i -> workout.exercises.getOrNull(i)?.sets?.firstOrNull { !it.completed }?.let { i to it } } ?: nextPendingSet(workout)
+        return next?.let { i -> workout.exercises.getOrNull(i)?.let(::nextIn)?.let { i to it } } ?: nextPendingSet(workout)
+    }
+
+    /**
+     * La siguiente serie pendiente de [we]: la de después de la última hecha (una aproximación que se saltó no vuelve
+     * a salir como «siguiente» tras la primera efectiva); si no queda ninguna después, la primera pendiente.
+     */
+    private fun nextIn(we: WorkoutExercise): WorkoutSet? {
+        val last = we.sets.withIndex().filter { it.value.completed }.maxByOrNull { it.value.completedAtEpochMs ?: 0L }?.index ?: -1
+        return we.sets.drop(last + 1).firstOrNull { !it.completed } ?: we.sets.firstOrNull { !it.completed }
     }
 
     /**
@@ -662,9 +674,9 @@ object WorkoutEditor {
      */
     fun previousMatch(sets: List<WorkoutSet>, index: Int, previous: List<WorkoutSet>): WorkoutSet? {
         val set = sets.getOrNull(index) ?: return null
-        val warm = set.type == SetType.WARMUP
-        val sameKind = sets.take(index).count { (it.type == SetType.WARMUP) == warm }
-        return previous.filter { (it.type == SetType.WARMUP) == warm }.getOrNull(sameKind)
+        val kind = matchKind(set.type)
+        val sameKind = sets.take(index).count { matchKind(it.type) == kind }
+        return previous.filter { matchKind(it.type) == kind }.getOrNull(sameKind)
     }
 
     /** La última serie normal hecha de un ejercicio de peso y reps en todo el entreno (para ponerle el RPE). */
