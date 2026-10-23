@@ -366,6 +366,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         val customIds = customExercises.first().map { it.id }.toSet()
         val newExercises = data.customExercises.filter { it.id !in customIds }
         val workouts = importWorkouts(data.history, newExercises)
+        // Los que ya estaban, si la copia los tiene más recientes (pesos o notas corregidos después): se actualizan
+        val before = historyOnce(includePartner = true).associateBy { it.id }
+        saveWorkouts(data.history.filter { b -> before[b.id]?.let { b.updatedAtEpochMs > it.updatedAtEpochMs } == true })
         val routineIds = routinesOnce().map { it.id }.toSet()
         val newRoutines = data.routines.filter { it.id !in routineIds }
         addRoutines(newRoutines)

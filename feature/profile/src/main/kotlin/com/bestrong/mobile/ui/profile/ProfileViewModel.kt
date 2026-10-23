@@ -494,7 +494,10 @@ class ProfileViewModel @Inject constructor(
         val data = pendingRestore.value ?: return@launch
         pendingRestore.value = null
         // Sin ajustes: tampoco el programa (sus training max y su objetivo semanal son configuración)
-        val result = runCatching { fullBackup.restore(if (includeSettings) data else data.copy(settings = null, planning = null, activeProgram = null)) }
+        // Hasta el final aunque se salga de Perfil (si no, entrenos sí y rutinas, ajustes o notas no, sin avisar)
+        val result = runCatching {
+            withContext(kotlinx.coroutines.NonCancellable) { fullBackup.restore(if (includeSettings) data else data.copy(settings = null, planning = null, activeProgram = null)) }
+        }
         _messages.tryEmit(
             result.fold(
                 { added -> context.getString(R.string.restore_done, data.history.size, data.routines.size, added) },

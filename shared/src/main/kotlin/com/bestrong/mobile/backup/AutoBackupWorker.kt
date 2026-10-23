@@ -54,6 +54,9 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             // buena del mismo día o, con la rotación, acabaría borrando la última copia con datos
             if (data.history.isEmpty() && data.routines.isEmpty() && data.measurements.isEmpty()) return@runCatching
             val date = LocalDate.now()
+            // Una copia de hoy con más entrenos (la del móvil viejo, al elegir la misma carpeta en el nuevo) no se
+            // sustituye por una casi vacía: se restaura desde ella
+            if (sameDayHistorySize(tree, "$PREFIX$date.json") > data.history.size) return@runCatching
             // Prefijo propio: la rotación nunca toca las exportaciones manuales («bestrong-fecha.csv»)
             write(tree, "$PREFIX$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
             write(tree, "$PREFIX$date.json", "application/json", Backup.encode(data).toByteArray())
@@ -103,6 +106,13 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         // El proveedor la habrá creado como «nombre (1)»: se le devuelve el nombre si se puede
         if (olds.isNotEmpty()) runCatching { DocumentsContract.renameDocument(resolver, doc, name) }
     }
+
+    /** Cuántos entrenos tiene la copia de hoy ya escrita ([name]); 0 si no hay o no se puede leer. */
+    private fun sameDayHistorySize(tree: Uri, name: String): Int = runCatching {
+        childList(applicationContext, tree).firstOrNull { it.first == name }?.second?.let { uri ->
+            applicationContext.contentResolver.openInputStream(uri)?.use { Backup.decode(it.readBytes().decodeToString()).history.size }
+        } ?: 0
+    }.getOrDefault(0)
 
     private fun children(tree: Uri): Map<String, Uri> = children(applicationContext, tree)
 
