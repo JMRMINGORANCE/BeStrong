@@ -52,3 +52,13 @@ class Round150Test {
         assertEquals(100.0, sets[2].weightKg, 0.0)
     }
 }
+
+class RoutineLinkFitsTest {
+    @Test fun tooManySetsDoesNotFit() {
+        val bench = ExerciseLibrary.byId("bench_press")!!
+        val ok = Routine(name = "R", exercises = listOf(RoutineExercise(exercise = bench, sets = List(30) { RoutineSet() })))
+        val big = Routine(name = "R", exercises = listOf(RoutineExercise(exercise = bench, sets = List(31) { RoutineSet() })))
+        org.junit.Assert.assertTrue(com.bestrong.core.io.RoutineLink.fits(ok))
+        org.junit.Assert.assertFalse(com.bestrong.core.io.RoutineLink.fits(big))
+    }
+}

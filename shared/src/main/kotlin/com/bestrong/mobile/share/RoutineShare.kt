@@ -41,7 +41,7 @@ object RoutineShare {
     }
 
     /** PDF A4 con los ejercicios, series × reps, descansos, RPE objetivo y tempo, para imprimir o enviar. */
-    fun sharePdf(context: Context, routines: List<Routine>, title: String) {
+    fun sharePdf(context: Context, routines: List<Routine>, title: String, unit: com.bestrong.core.util.WeightUnit = com.bestrong.core.util.WeightUnit.KG) {
         val doc = PdfDocument()
         val w = 595
         val h = 842
@@ -67,7 +67,7 @@ object RoutineShare {
             r.exercises.forEach { re ->
                 ensure(16f)
                 val work = re.sets.filter { it.type != SetType.WARMUP }
-                val reps = targetText(re.exercise.tracking, work.firstOrNull())
+                val reps = targetText(re.exercise.tracking, work.firstOrNull(), unit)
                 val line = "• " + re.exercise.displayName(context) + "  —  " + context.getString(R.string.pdf_routine_sets, work.size, reps) +
                     "  ·  " + context.getString(R.string.pdf_rest, formatDuration(re.restSeconds.toLong()))
                 page.canvas.drawText(line, 52f, y, bodyP)
@@ -98,10 +98,10 @@ object RoutineShare {
 }
 
 /** Objetivo de la serie en el PDF: repeticiones, segundos o minutos de cardio. */
-private fun targetText(tracking: TrackingType, set: com.bestrong.core.model.RoutineSet?): String = when (tracking) {
+private fun targetText(tracking: TrackingType, set: com.bestrong.core.model.RoutineSet?, unit: com.bestrong.core.util.WeightUnit): String = when (tracking) {
     TrackingType.DURATION -> "${set?.durationSec ?: 0} s"
     TrackingType.CARDIO -> com.bestrong.mobile.ui.workout.cardioText(set?.durationSec ?: 0, 0.0)
     // Distancia: su peso (sin reps; los metros no se planifican en la rutina)
-    TrackingType.DISTANCE -> set?.weightKg?.takeIf { it > 0 }?.let { "${com.bestrong.core.util.formatWeight(it)} kg" } ?: "—"
+    TrackingType.DISTANCE -> set?.weightKg?.takeIf { it > 0 }?.let { unit.format(it, withUnit = true) } ?: "—"
     else -> "${set?.reps ?: 0}"
 }

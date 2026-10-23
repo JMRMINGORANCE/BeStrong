@@ -40,7 +40,7 @@ object WorkoutShareCard {
     private const val PAD = 72f
     private const val MAX_EXERCISES = 8
 
-    fun render(context: Context, w: Workout, records: List<PersonalRecord>, unit: WeightUnit): Bitmap {
+    fun render(context: Context, w: Workout, records: List<PersonalRecord>, unit: WeightUnit, weightFactor: (com.bestrong.core.model.Exercise) -> Int = { 1 }): Bitmap {
         val bmp = Bitmap.createBitmap(W, H, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
         val bg = Paint().apply { shader = LinearGradient(0f, 0f, W.toFloat(), H.toFloat(), Color.rgb(18, 18, 24), Color.rgb(40, 20, 12), Shader.TileMode.CLAMP) }
@@ -90,7 +90,7 @@ object WorkoutShareCard {
         val nameP = text(if (roomy) 48f else 40f, bold = true)
         val detailP = text(if (roomy) 42f else 36f, Color.LTGRAY)
         done.take(MAX_EXERCISES).forEach { e ->
-            val detail = exerciseDetail(e, unit)
+            val detail = exerciseDetail(e, unit, weightFactor(e.exercise))
             val dw = detailP.measureText(detail)
             c.drawText(fit(e.exercise.displayName(context), nameP, contentWidth - dw - 32f), PAD, y, nameP)
             c.drawText(detail, W - PAD - dw, y, detailP)
@@ -108,7 +108,7 @@ object WorkoutShareCard {
             y += 60f
             records.take(3).forEach { pr ->
                 if (y > H - 120f) return@forEach
-                val line = context.getString(R.string.record_line, pr.exerciseLabel(context), context.getString(pr.type.labelRes()), pr.type.formatValue(pr.value, unit))
+                val line = context.getString(R.string.record_line, pr.exerciseLabel(context), context.getString(pr.type.labelRes()), pr.type.formatValue(pr.value * recordFactor(w, pr, weightFactor), unit))
                 c.drawText(fit(line, detailP, contentWidth), PAD, y, detailP)
                 y += 54f
             }
@@ -121,10 +121,10 @@ object WorkoutShareCard {
     }
 
     /** Genera la imagen en la caché y abre la hoja de compartir del sistema. */
-    fun share(context: Context, w: Workout, records: List<PersonalRecord>, unit: WeightUnit) {
+    fun share(context: Context, w: Workout, records: List<PersonalRecord>, unit: WeightUnit, weightFactor: (com.bestrong.core.model.Exercise) -> Int = { 1 }) {
         val dir = File(context.cacheDir, "share").apply { mkdirs() }
         val file = File(dir, "bestrong-workout.png")
-        val bmp = render(context, w, records, unit)
+        val bmp = render(context, w, records, unit, weightFactor)
         FileOutputStream(file).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
         bmp.recycle()
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", file)
@@ -139,7 +139,7 @@ object WorkoutShareCard {
 }
 
 /** «3 × 80 kg × 8», «3 × 30 s», «25 min · 5 km», «3 × 40 kg · 40 m»: lo hecho en un ejercicio, para la tarjeta. */
-private fun exerciseDetail(e: com.bestrong.core.model.WorkoutExercise, unit: com.bestrong.core.util.WeightUnit): String {
+private fun exerciseDetail(e: com.bestrong.core.model.WorkoutExercise, unit: com.bestrong.core.util.WeightUnit, factor: Int = 1): String {
     val sets = e.sets.filter { it.completed && it.type != SetType.WARMUP }.ifEmpty { e.sets.filter { it.completed } }
     val best = sets.maxByOrNull { it.estimatedOneRepMax.takeIf { v -> v > 0 } ?: (it.reps + it.durationSec).toDouble() }
     return when {
@@ -154,7 +154,15 @@ private fun exerciseDetail(e: com.bestrong.core.model.WorkoutExercise, unit: com
         e.exercise.tracking == TrackingType.DISTANCE -> sets.maxWith(compareBy({ it.weightKg }, { it.distanceM })).let { b ->
             "${sets.size} × " + (if (b.weightKg > 0) "${unit.format(b.weightKg, withUnit = true)} · " else "") + "${b.distanceM.toInt()} m"
         }
-        best.weightKg > 0 -> "${sets.size} × ${unit.format(best.weightKg, withUnit = true)} × ${best.reps}"
+        best.weightKg > 0 -> "${sets.size} × ${unit.format(best.weightKg * factor, withUnit = true)} × ${best.reps}"
         else -> "${sets.size} × ${best.reps}"
     }
 }
+
+/** Peso y 1RM de mancuernas como el par (si se apuntan así), como en la app; el resto tal cual. */
+private fun recordFactor(w: Workout, pr: PersonalRecord, weightFactor: (com.bestrong.core.model.Exercise) -> Int): Int =
+    if (pr.type == com.bestrong.core.stats.RecordType.HEAVIEST_WEIGHT || pr.type == com.bestrong.core.stats.RecordType.BEST_ONE_REP_MAX) {
+        w.exercises.firstOrNull { it.exercise.id == pr.exerciseId }?.let { weightFactor(it.exercise) } ?: 1
+    } else {
+        1
+    }

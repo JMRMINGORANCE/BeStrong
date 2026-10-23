@@ -177,7 +177,12 @@ fun ActiveWorkoutScreen(
     val unitForShare = LocalWeightUnit.current
     summary?.let { s ->
         WorkoutSummaryDialog(
-            onShare = { WorkoutShareCard.share(context, s.workout, s.records, unitForShare) },
+            onShare = {
+                val total = vm.settings.value.dumbbellTotal
+                WorkoutShareCard.share(context, s.workout, s.records, unitForShare) { e ->
+                    if (total && e.equipment == Equipment.DUMBBELL && e.tracking == TrackingType.WEIGHT_REPS) 2 else 1
+                }
+            },
             onRate = vm::rateWorkout,
             summary = s,
             onSaveRoutine = { vm.saveSummaryAsRoutine(); vm.dismissSummary(); onFinished() },

@@ -614,6 +614,7 @@
     <string name="routine_already_imported">La rutina «%1$s» ja és a les teves rutines</string>
     <string name="routine_link_invalid">No s\'ha pogut llegir la rutina de l\'enllaç (incomplet o d\'una versió més nova de BeStrong).</string>
     <string name="share_qr_too_long">Massa llarga per a un codi QR: envia l\'enllaç.</string>
+    <string name="share_routine_too_big">Rutina massa gran per compartir (màx. 50 exercicis i 30 sèries per exercici)</string>
     <string name="routine_import_confirm_title">Importar la rutina?</string>
     <string name="routine_import_confirm_text">S\'afegirà «%1$s» (%2$d exercicis) a «Les meves rutines». Importa-la només si confies en qui te l\'ha enviat.</string>
     <string name="routine_last_done">Última vegada: %1$s</string>

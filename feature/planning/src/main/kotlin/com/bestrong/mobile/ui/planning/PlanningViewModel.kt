@@ -172,7 +172,7 @@ class PlanningViewModel @Inject constructor(
         val routines = ui.value.routines
         val events = DayOfWeek.entries.mapNotNull { d ->
             val r = plan.routineFor(d)?.let { id -> routines.firstOrNull { it.id == id } } ?: return@mapNotNull null
-            CalendarEvent(weekStart.plusDays((d.value - 1).toLong()), "BeStrong · ${r.name}", RoutineTime.estimateMinutes(r), r.exercises.joinToString { it.exercise.name })
+            CalendarEvent(weekStart.plusDays((d.value - 1).toLong()), "BeStrong · ${r.name}", RoutineTime.estimateMinutes(r), r.exercises.joinToString { com.bestrong.core.library.ExerciseLibrary.displayName(it.exercise, context.uiLanguage()) })
         }
         if (events.isEmpty()) return
         runCatching {

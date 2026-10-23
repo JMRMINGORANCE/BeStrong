@@ -371,6 +371,7 @@ private fun RoutineCard(
     /** Id → nombre de los gimnasios: se enseña el de la rutina, si tiene (y sigue existiendo). */
     gymNames: Map<String, String> = emptyMap(),
 ) {
+    val unit = com.bestrong.mobile.ui.components.LocalWeightUnit.current
     val gymName = routine.gymId?.let(gymNames::get)
     var menu by remember { mutableStateOf(false) }
     var sharing by remember { mutableStateOf(false) }
@@ -406,7 +407,7 @@ private fun RoutineCard(
                         onClick = { menu = false; onArchive() },
                     )
                     DropdownMenuItem(text = { Text(stringResource(R.string.share_routine_link)) }, onClick = { menu = false; sharing = true })
-                    DropdownMenuItem(text = { Text(stringResource(R.string.export_routine_pdf)) }, onClick = { menu = false; RoutineShare.sharePdf(context, listOf(routine), routine.name) })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.export_routine_pdf)) }, onClick = { menu = false; RoutineShare.sharePdf(context, listOf(routine), routine.name, unit) })
                     // Con una búsqueda activa no se reordena: el vecino real podría estar oculto
                     onMoveUp?.let { up -> DropdownMenuItem(text = { Text(stringResource(R.string.action_move_up)) }, onClick = { menu = false; up() }) }
                     onMoveDown?.let { down -> DropdownMenuItem(text = { Text(stringResource(R.string.action_move_down)) }, onClick = { menu = false; down() }) }
@@ -439,14 +440,18 @@ private fun RoutineCard(
 private fun ShareRoutineDialog(routine: Routine, onDismiss: () -> Unit) {
     val context = LocalContext.current
     val link = remember(routine) { RoutineShare.link(routine) }
+    // Demasiado grande para que el otro móvil la abra: se dice aquí, no «enlace no válido» allí
+    val fits = remember(routine) { com.bestrong.core.io.RoutineLink.fits(routine) }
     // Una rutina muy larga no cabe en un QR (fallaba al abrir): entonces solo el enlace
-    val qr = remember(link) { runCatching { RoutineShare.qr(link).asImageBitmap() }.getOrNull() }
+    val qr = remember(link) { if (fits) runCatching { RoutineShare.qr(link).asImageBitmap() }.getOrNull() else null }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.share_routine_title, routine.name)) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (qr != null) {
+                if (!fits) {
+                    Text(stringResource(R.string.share_routine_too_big), style = MaterialTheme.typography.bodyMedium)
+                } else if (qr != null) {
                     Image(qr, contentDescription = stringResource(R.string.share_routine_link), modifier = Modifier.size(240.dp))
                     Text(stringResource(R.string.share_routine_hint), style = MaterialTheme.typography.bodySmall)
                 } else {
@@ -454,7 +459,7 @@ private fun ShareRoutineDialog(routine: Routine, onDismiss: () -> Unit) {
                 }
             }
         },
-        confirmButton = { TextButton(onClick = { RoutineShare.shareLink(context, routine); onDismiss() }) { Text(stringResource(R.string.share_routine_send)) } },
+        confirmButton = { TextButton(enabled = fits, onClick = { RoutineShare.shareLink(context, routine); onDismiss() }) { Text(stringResource(R.string.share_routine_send)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
     )
 }

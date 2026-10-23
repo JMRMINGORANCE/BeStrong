@@ -29,13 +29,13 @@
     <ID>CyclomaticComplexMethod:WorkoutCsv.kt$WorkoutCsv$fun import( text: String, known: List&lt;Exercise&gt;, zone: ZoneId = ZoneId.systemDefault(), strongUnit: WeightUnit = WeightUnit.KG, ): ImportResult</ID>
     <ID>CyclomaticComplexMethod:WorkoutCsv.kt$WorkoutCsv.ExerciseResolver$fun resolve(name: String, id: String = ""): Exercise</ID>
     <ID>CyclomaticComplexMethod:WorkoutScreen.kt$@Composable fun WorkoutScreen( session: WorkoutSession, onRest: () -&gt; Unit, onMenu: () -&gt; Unit, onAddExercise: () -&gt; Unit, onNoWorkout: () -&gt; Unit, )</ID>
-    <ID>CyclomaticComplexMethod:WorkoutShareCard.kt$WorkoutShareCard$fun render(context: Context, w: Workout, records: List&lt;PersonalRecord&gt;, unit: WeightUnit): Bitmap</ID>
+    <ID>CyclomaticComplexMethod:WorkoutShareCard.kt$WorkoutShareCard$fun render(context: Context, w: Workout, records: List&lt;PersonalRecord&gt;, unit: WeightUnit, weightFactor: (com.bestrong.core.model.Exercise) -&gt; Int = { 1 }): Bitmap</ID>
     <ID>ForEachOnRange:AdvancedStatsCards.kt$0..2</ID>
     <ID>ForEachOnRange:PlanningScreen.kt$2..6</ID>
     <ID>ForEachOnRange:SessionRating.kt$1..5</ID>
     <ID>LongMethod:MonthlyReport.kt$MonthlyReport$private fun draw(c: Canvas, context: Context, month: YearMonth, s: PeriodSummary, trainedDays: Set&lt;LocalDate&gt;, unit: WeightUnit)</ID>
     <ID>LongMethod:WorkoutCsv.kt$WorkoutCsv$fun import( text: String, known: List&lt;Exercise&gt;, zone: ZoneId = ZoneId.systemDefault(), strongUnit: WeightUnit = WeightUnit.KG, ): ImportResult</ID>
-    <ID>LongMethod:WorkoutShareCard.kt$WorkoutShareCard$fun render(context: Context, w: Workout, records: List&lt;PersonalRecord&gt;, unit: WeightUnit): Bitmap</ID>
+    <ID>LongMethod:WorkoutShareCard.kt$WorkoutShareCard$fun render(context: Context, w: Workout, records: List&lt;PersonalRecord&gt;, unit: WeightUnit, weightFactor: (com.bestrong.core.model.Exercise) -&gt; Int = { 1 }): Bitmap</ID>
     <ID>LongParameterList:ActiveWorkoutViewModel.kt$ActiveWorkoutViewModel$( private val repo: BeStrongRepository, private val settingsStore: SettingsStore, private val restTimer: RestTimerController, private val metricsStore: WatchMetricsStore, private val energy: EnergyCalculator, private val actions: WorkoutActions, private val announcer: Announcer, @ApplicationContext private val appContext: Context, private val savedState: SavedStateHandle, private val media: ExerciseMediaStore, )</ID>
     <ID>LongParameterList:HomeViewModel.kt$HomeViewModel$( private val repo: BeStrongRepository, private val actions: WorkoutActions, private val watchSync: WatchSync, private val settingsStore: SettingsStore, private val watchPush: WatchPush, private val planning: PlanningStore, private val healthReader: HealthConnectReader, private val intakeStore: IntakeStore, @ApplicationContext private val context: Context, private val savedState: androidx.lifecycle.SavedStateHandle, )</ID>
     <ID>LoopWithTooManyJumpStatements:VoiceSetParser.kt$VoiceSetParser$while</ID>

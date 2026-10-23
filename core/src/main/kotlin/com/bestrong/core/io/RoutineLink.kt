@@ -22,6 +22,10 @@ object RoutineLink {
     const val HOST = "routine"
     const val PARAM = "d"
 
+    /** Si la rutina cabe en un enlace que el otro móvil pueda abrir (los mismos límites que [decode]). */
+    fun fits(routine: Routine): Boolean = routine.exercises.size <= MAX_EXERCISES && routine.exercises.all { it.sets.size <= MAX_SETS } &&
+        encode(routine).substringAfter("$PARAM=").length <= MAX_LINK_CHARS
+
     fun encode(routine: Routine): String {
         val json = SyncContract.json.encodeToString(Routine.serializer(), routine.copy(id = "shared", position = 0, archived = false, gymId = null))
         val deflater = Deflater(Deflater.BEST_COMPRESSION)

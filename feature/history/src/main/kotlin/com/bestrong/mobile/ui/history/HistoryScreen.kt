@@ -360,7 +360,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                     IconButton(onClick = { editing = true }) { Icon(Icons.Default.Edit, stringResource(R.string.history_edit)) }
                 }
                 Box {
-                    IconButton(onClick = { WorkoutShareCard.share(context, w, records, unit) }) { Icon(Icons.Default.Share, stringResource(R.string.share_workout)) }
+                    IconButton(onClick = { WorkoutShareCard.share(context, w, records, unit, vm::weightFactor) }) { Icon(Icons.Default.Share, stringResource(R.string.share_workout)) }
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.history_edit_info)) }, onClick = { menu = false; editInfo = true })
