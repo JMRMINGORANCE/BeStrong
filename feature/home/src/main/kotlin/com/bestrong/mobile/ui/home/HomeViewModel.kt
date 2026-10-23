@@ -77,7 +77,9 @@ class HomeViewModel @Inject constructor(
     fun refreshReadiness() = viewModelScope.launch {
         val snap = runCatching { healthReader.read() }.getOrNull()
         healthConnected.value = snap != null && (snap.sleepHours != null || snap.restingHr != null)
-        val lastRating = repo.history.value.firstOrNull { it.rating != null }?.rating
+        // Solo una valoración reciente (48 h): una de hace semanas no dice cómo estás hoy
+        val cutoff = System.currentTimeMillis() - READINESS_RATING_MS
+        val lastRating = repo.history.value.firstOrNull { it.rating != null && it.startedAtEpochMs >= cutoff }?.rating
         // Sin ningún dato (ni sueño, ni pulso en reposo, ni valoración) no hay nota: antes salía un «70 · Normal» inventado
         val anyData = snap?.sleepHours != null || snap?.restingHr != null || lastRating != null
         _readiness.value = if (anyData) Readiness.score(snap?.sleepHours, snap?.restingHr, snap?.baselineRestingHr, lastRating) else null
@@ -255,12 +257,14 @@ class HomeViewModel @Inject constructor(
         // Sin sello de gimnasio: pudo quedar abierto días y el activo de ahora no tiene por qué ser aquel
         // Como al terminarlo en el entreno: calorías, lo del reloj que llegara y Health Connect
         val finished = actions.withEnergy(WorkoutEditor.finishAtLastActivity(w))
-        if (finished.exercises.isNotEmpty()) {
+        val saved = finished.exercises.isNotEmpty()
+        if (saved) {
             repo.saveWorkout(finished)
             actions.applyPendingWatchHealth(finished.id)
             actions.exportToHealthConnectIfEnabled(finished)
         }
-        message(context.getString(R.string.msg_forgotten_saved))
+        // Sin series hechas no queda nada que guardar: no se dice «guardado»
+        message(context.getString(if (saved) R.string.msg_forgotten_saved else R.string.msg_forgotten_empty))
     }
 
     fun discardActive() = viewModelScope.launch {
@@ -306,7 +310,7 @@ class HomeViewModel @Inject constructor(
     /** Empieza la sesión del programa con las cargas prescritas (sin sustituirlas por la última vez). */
     fun startProgramSession(session: ProgramSession, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() != null) {
-            message(context.getString(R.string.msg_workout_already_active))
+            alreadyActive()
             onStarted()
             return@launch
         }
@@ -344,8 +348,11 @@ class HomeViewModel @Inject constructor(
 
     private fun message(text: String) = _messages.trySend(text to System.currentTimeMillis())
 
+    /** Aviso que sobrevive a abrir el entreno en curso (el snackbar de Inicio se cancela al salir de la pantalla). */
+    private fun alreadyActive() = android.widget.Toast.makeText(context, R.string.msg_workout_already_active, android.widget.Toast.LENGTH_LONG).show()
+
     fun startEmpty(onStarted: () -> Unit) = viewModelScope.launch {
-        if (repo.activeOnce() == null) repo.startActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis())))
+        if (repo.activeOnce() == null) repo.startActive(WorkoutEditor.empty(System.currentTimeMillis(), name = defaultWorkoutName(context, System.currentTimeMillis()))) else alreadyActive()
         onStarted()
     }
 
@@ -373,7 +380,7 @@ class HomeViewModel @Inject constructor(
 
     fun startRoutine(routine: Routine, onStarted: () -> Unit) = viewModelScope.launch {
         if (repo.activeOnce() != null) {
-            message(context.getString(R.string.msg_workout_already_active))
+            alreadyActive()
             onStarted()
             return@launch
         }
@@ -668,6 +675,9 @@ enum class Kit(val equipment: Set<com.bestrong.core.model.Equipment>) {
 }
 
 private const val MESSAGE_TTL_MS = 15_000L
+
+/** Una valoración de sesión cuenta para la disposición de hoy solo si es de las últimas 48 h. */
+private const val READINESS_RATING_MS = 48 * 60 * 60 * 1000L
 
 private const val KEY_PENDING_LINK = "pending_routine_link"
 

@@ -128,7 +128,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
     // Después del estado de la rejilla: al volver de preparar un programa sigue igual que estaba
     setupProgramId?.let { id -> vm.periodizedPrograms.firstOrNull { it.id == id } }?.let { p ->
-        ProgramSetupScreen(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgramId = null }, onDismiss = { setupProgramId = null })
+        ProgramSetupScreen(p, vm::suggestedTrainingMax, onConfirm = { tms -> vm.activateProgram(p, tms); setupProgramId = null; showPrograms = false }, onDismiss = { setupProgramId = null })
         return
     }
     UndoRoutineDelete(vm, snackbar)
@@ -138,7 +138,8 @@ fun HomeScreen(
     if (showPrograms) {
         ProgramBuilderScreen(
             vm = vm,
-            onPickPeriodized = { setupProgramId = it.id; showPrograms = false },
+            // El creador sigue debajo: «Atrás» en la preparación vuelve a elegir programa
+            onPickPeriodized = { setupProgramId = it.id },
             onPickClassic = { vm.addProgram(it); showPrograms = false },
             onDismiss = { showPrograms = false },
         )

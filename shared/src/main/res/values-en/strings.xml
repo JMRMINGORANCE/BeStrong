@@ -373,6 +373,7 @@
     <string name="week_current">Back to this week</string>
     <string name="more_options">More options</string>
     <string name="msg_forgotten_saved">Workout saved with the time of the last set</string>
+    <string name="msg_forgotten_empty">No sets done: the workout wasn\'t saved</string>
     <string name="msg_no_watch">No connected watch found</string>
     <string name="msg_opening_on_watch">Opening BeStrong on your Galaxy Watch</string>
     <string name="msg_program_added">%1$s: %2$d routines added</string>
