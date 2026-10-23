@@ -350,7 +350,7 @@ private fun <T> ValueBox(label: String, value: T, show: (T) -> String, parse: (S
 /** Selector sencillo de ejercicios de la biblioteca con búsqueda. */
 @Composable
 fun ExercisePickDialog(onPick: (String) -> Unit, onDismiss: () -> Unit, hidden: Set<String> = emptySet()) {
-    var query by remember { mutableStateOf("") }
+    var query by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("") }
     val lang = com.bestrong.mobile.ui.components.uiLanguage()
     // Los ocultos solo salen si se buscan por nombre
     val results = remember(query) {
@@ -363,6 +363,8 @@ fun ExercisePickDialog(onPick: (String) -> Unit, onDismiss: () -> Unit, hidden: 
         text = {
             Column {
                 OutlinedTextField(query, { query = it }, label = { Text(stringResource(R.string.prog_search)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                // Sin resultados: se dice (antes quedaba en blanco)
+                if (results.isEmpty()) Text(stringResource(R.string.search_no_results), Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 LazyColumn(Modifier.heightIn(max = 360.dp)) {
                     items(results, key = { it.id }) { ex ->
                         ListItem(headlineContent = { Text(ex.displayName()) }, modifier = Modifier.clickable { onPick(ex.id) })

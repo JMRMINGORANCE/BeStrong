@@ -7,15 +7,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -78,9 +77,9 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
     // Leído aquí para que el título y el botón de borrar cambien si el borrador pasa a ser rutina nueva
     val isNew by vm.isNewState.collectAsStateWithLifecycle()
     CloseIfMissing(vm, onClose)
-    var confirmLeave by remember { mutableStateOf(false) }
-    var confirmDelete by remember { mutableStateOf(false) }
-    var restFor by remember { mutableStateOf<String?>(null) }
+    var confirmLeave by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    var confirmDelete by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    var restFor by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
     // Atrás con cambios sin guardar: se pregunta antes de perderlos
     val leave = { if (vm.hasChanges) confirmLeave = true else onClose() }
     BackHandler(onBack = leave)
@@ -107,10 +106,8 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
             if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) vm.undoRemove()
         }
     }
-    // El teclado también cuenta como borde: así las series de abajo pueden subir por encima de él
     Scaffold(
         snackbarHost = { androidx.compose.material3.SnackbarHost(snackbar) },
-        contentWindowInsets = androidx.compose.material3.ScaffoldDefaults.contentWindowInsets.union(WindowInsets.ime),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(if (isNew) R.string.routine_new else R.string.routine_edit)) },
@@ -133,8 +130,10 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
         },
     ) { padding ->
         var moreOptions by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+        // El teclado también cuenta como borde (con barra inferior, el Scaffold no lo suma): así las series de
+        // abajo pueden subir por encima de él
         LazyColumn(
-            Modifier.padding(padding).fillMaxSize(),
+            Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -147,10 +146,17 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
                         vm::rename,
                         label = { Text(stringResource(R.string.routine_name)) },
                         singleLine = true,
+                        keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences),
                         textStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    OutlinedTextField(routine.notes, vm::setNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.fillMaxWidth())
+                    OutlinedTextField(
+                        routine.notes,
+                        vm::setNotes,
+                        label = { Text(stringResource(R.string.notes)) },
+                        keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                     // Lo que se toca poco (emoji, carpeta, gimnasio y los ajustes para toda la rutina), plegado
                     val moreState = stringResource(if (moreOptions) R.string.folder_expanded else R.string.folder_collapsed)
                     com.bestrong.mobile.ui.components.Panel(
@@ -313,7 +319,13 @@ private fun ExerciseExtras(notes: String, tempo: String, showTempo: Boolean, onN
     var tempoText by remember(resetKey) { mutableStateOf(tempo) }
     val tempoValid = tempoText.isBlank() || Tempo.parse(tempoText) != null
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
-        OutlinedTextField(notes, onNotes, label = { Text(stringResource(R.string.notes)) }, modifier = Modifier.weight(2f))
+        OutlinedTextField(
+            notes,
+            onNotes,
+            label = { Text(stringResource(R.string.notes)) },
+            keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences),
+            modifier = Modifier.weight(2f),
+        )
         if (showTempo) {
             OutlinedTextField(
                 tempoText,

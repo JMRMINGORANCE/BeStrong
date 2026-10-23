@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
@@ -165,7 +167,9 @@ fun ExercisePickerScreen(vm: ExercisesViewModel, onBack: () -> Unit, onPicked: (
             dismissButton = { androidx.compose.material3.TextButton(onClick = { confirmLeave = false; onBack() }) { Text(stringResource(R.string.action_discard)) } },
         )
     }
+    // Con el teclado abierto, «Añadir N» y los últimos resultados suben por encima de él
     Scaffold(
+        contentWindowInsets = androidx.compose.material3.ScaffoldDefaults.contentWindowInsets.union(androidx.compose.foundation.layout.WindowInsets.ime),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.add_exercises)) },
