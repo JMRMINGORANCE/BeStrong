@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         // Las esferas WFF deben ir en un paquete propio: <app>.watchfacepush o similar
-        applicationId = "com.bestrong.watchface"
+        applicationId = "com.copidev.bestrong.watchface"
         minSdk = 33 // Watch Face Format v1: Wear OS 4+
         targetSdk = 36
         versionCode = 1

@@ -1,0 +1,4 @@
+- Cronómetro de cardio y cambio de ejercicio desde el reloj
+- Cardio dentro de las rutinas, con calorías por bloque
+- Calorías más fiables: metabolismo basal propio e intensidad según el pulso
+- Botón para abrir tu app de música desde el entreno

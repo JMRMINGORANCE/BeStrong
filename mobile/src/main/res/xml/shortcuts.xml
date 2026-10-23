@@ -10,7 +10,7 @@
         <intent
             android:action="com.bestrong.START_EMPTY"
             android:targetClass="com.bestrong.mobile.MainActivity"
-            android:targetPackage="com.bestrong" />
+            android:targetPackage="com.copidev.bestrong" />
     </shortcut>
     <shortcut
         android:shortcutId="open_workout"
@@ -21,6 +21,6 @@
         <intent
             android:action="com.bestrong.OPEN_WORKOUT"
             android:targetClass="com.bestrong.mobile.MainActivity"
-            android:targetPackage="com.bestrong" />
+            android:targetPackage="com.copidev.bestrong" />
     </shortcut>
 </shortcuts>
