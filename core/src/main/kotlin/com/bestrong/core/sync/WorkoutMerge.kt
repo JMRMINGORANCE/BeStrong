@@ -27,9 +27,10 @@ object WorkoutMerge {
 
         val deleted = (a.deletedIds.keys + b.deletedIds.keys).associateWith { a.deletedIds[it].orEmpty() + b.deletedIds[it].orEmpty() }
         val merged = newer.exercises.map { ne -> olderById[ne.id]?.let { mergeExercise(it, ne, deleted) } ?: ne }.toMutableList()
-        // Ejercicios que solo están en el lado antiguo: se conservan si tienen series hechas
+        // Ejercicios que solo están en el lado antiguo: se conservan salvo que se borraran (todo borrado deja su marca);
+        // uno recién añadido en el otro dispositivo, aún sin series hechas, no se pierde por un cambio cruzado
         older.exercises.forEachIndexed { index, oe ->
-            if (oe.id !in newerIds && !gone(oe, deleted) && oe.sets.any { it.completed }) {
+            if (oe.id !in newerIds && !gone(oe, deleted)) {
                 merged.add(index.coerceAtMost(merged.size), oe)
             }
         }

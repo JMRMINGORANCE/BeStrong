@@ -92,7 +92,14 @@ class WatchSyncService : WearableListenerService() {
                 val stored = repository.storedWorkout(received.id)
                 // Series hechas en el móvil que el reloj no llegó a recibir: se fusionan con su terminado
                 val withLocal = repository.localCopyOf(received.id)
-                    ?.let { WorkoutMerge.merge(it, received).copy(finishedAtEpochMs = received.finishedAtEpochMs) } ?: received
+                    ?.let { local ->
+                        val merged = WorkoutMerge.merge(local, received)
+                        // Terminado: solo lo hecho (lo pendiente de la copia del móvil no entra en el historial)
+                        merged.copy(
+                            finishedAtEpochMs = received.finishedAtEpochMs,
+                            exercises = merged.exercises.map { it.copy(sets = it.completedSets) }.filter { it.sets.isNotEmpty() },
+                        )
+                    } ?: received
                 val workout = completeFromWatch(withLocal, stored)
                 val isNew = stored == null
                 repository.saveWorkout(workout)

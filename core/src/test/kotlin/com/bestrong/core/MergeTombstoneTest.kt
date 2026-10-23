@@ -32,6 +32,18 @@ class MergeTombstoneTest {
         assertTrue(WorkoutMerge.merge(again, stale).exercises[0].sets[0].completed)
     }
 
+    @Test fun exerciseAddedOnOtherSideSurvivesCrossedEdit() {
+        // Móvil añade un ejercicio (aún sin series hechas); el reloj, sin recibirlo, cambia algo después
+        val phone = WorkoutEditor.addExercises(base, listOf(ExerciseLibrary.byId("squat")!!)).copy(updatedAtEpochMs = 1_000)
+        val watch = WorkoutEditor.toggleSetCompleted(base, "e1", "s1", nowEpochMs = 2_000).copy(updatedAtEpochMs = 2_000)
+        val merged = WorkoutMerge.merge(watch, phone)
+        assertEquals(2, merged.exercises.size)
+        assertTrue(merged.exercises[0].sets[0].completed)
+        // Pero uno borrado de verdad (con su marca) no vuelve
+        val removed = WorkoutEditor.removeExercise(merged, merged.exercises[1].id).copy(updatedAtEpochMs = 3_000)
+        assertEquals(1, WorkoutMerge.merge(removed, phone).exercises.size)
+    }
+
     @Test fun deletedCompletedSetDoesNotComeBack() {
         val done = WorkoutEditor.toggleSetCompleted(base, "e1", "s1", nowEpochMs = 1_000).copy(updatedAtEpochMs = 1_000)
         val removed = WorkoutEditor.removeSet(done, "e1", "s1").copy(updatedAtEpochMs = 2_000)

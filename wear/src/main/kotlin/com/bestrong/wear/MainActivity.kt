@@ -80,15 +80,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        // Desde el tile «Hoy toca»: empezar esa rutina
-        intent?.getStringExtra(EXTRA_ROUTINE)?.let {
-            startRequest.value = it
-            return
-        }
-        val data = intent?.data ?: return
-        if (data.scheme == SyncContract.DEEP_LINK_SCHEME && data.host == SyncContract.DEEP_LINK_HOST) {
-            startRequest.value = data.getQueryParameter(SyncContract.DEEP_LINK_PARAM_ROUTINE).orEmpty()
-        }
+        // Desde Recientes, Android repite el intent con el que se abrió: no se vuelve a empezar esa rutina
+        if (intent == null || intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
+        val data = intent.data
+        // Desde el tile «Hoy toca»: empezar esa rutina; o desde el enlace de la complicación o del móvil
+        val routine = intent.getStringExtra(EXTRA_ROUTINE)
+            ?: data?.takeIf { it.scheme == SyncContract.DEEP_LINK_SCHEME && it.host == SyncContract.DEEP_LINK_HOST }
+                ?.let { it.getQueryParameter(SyncContract.DEEP_LINK_PARAM_ROUTINE).orEmpty() }
+        if (routine != null) startRequest.value = routine
     }
 
     companion object {

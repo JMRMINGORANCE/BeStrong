@@ -195,9 +195,7 @@ class WorkoutSession @Inject constructor(
         }
     }
 
-    private fun edit(block: (Workout) -> Workout) {
-        _workout.value?.let { set(block(it)) }
-    }
+    private fun edit(block: (Workout) -> Workout) = _workout.value?.let { set(block(it)) }
 
     private fun previous(exerciseId: String): List<WorkoutSet> = WorkoutStats.previousSets(exerciseId, store.history.value)
 
@@ -294,9 +292,7 @@ class WorkoutSession @Inject constructor(
         if (finished.exercises.isNotEmpty()) scope.launch { phoneSync.sendFinishedWorkout(finished) }
     }
 
-    fun dismissSummary() {
-        _summary.value = null
-    }
+    fun dismissSummary() = _summary.update { null }
 
     // --- Sincronización en vivo con el móvil ------------------------------------------------
 
@@ -419,9 +415,7 @@ class WorkoutSession @Inject constructor(
         return true
     }
 
-    fun setRotaryTarget(target: RotaryTarget) {
-        _rotaryTarget.value = target
-    }
+    fun setRotaryTarget(target: RotaryTarget) = _rotaryTarget.update { target }
 
     private val _stemAction = MutableStateFlow(store.stemAction)
     val stemAction: StateFlow<StemAction> = _stemAction.asStateFlow()
@@ -726,6 +720,8 @@ class WorkoutSession @Inject constructor(
         val tempo = Tempo.parse(we.tempo) ?: return
         val reps = currentSet()?.reps?.takeIf { it > 0 } ?: 10
         _tempoActive.value = true
+        // Con la pantalla apagada la CPU duerme y los avisos llegarían tarde (como en el descanso)
+        if (_rest.value == null) acquireRestWakeLock(1_500L + reps * tempo.guidePhases.sumOf { it.second } * 1_000L + WAKE_LOCK_MARGIN_MS)
         tempoJob = scope.launch {
             context.haptic(longArrayOf(0, 60, 120, 60, 120, 60)) // preparados
             delay(1_500)
@@ -742,14 +738,13 @@ class WorkoutSession @Inject constructor(
                 }
             }
             context.haptic(longArrayOf(0, 400))
-            _tempoActive.value = false
+            stopTempo()
         }
     }
 
     private fun stopTempo() {
-        tempoJob?.cancel()
-        tempoJob = null
-        _tempoActive.value = false
+        tempoJob?.cancel().also { tempoJob = null }
+        _tempoActive.value = false.also { if (_rest.value == null) releaseRestWakeLock() }
     }
 
     // --- Pulso: zonas y recuperación, bajo consumo --------------------------------------------
@@ -801,6 +796,7 @@ class WorkoutSession @Inject constructor(
         val we = currentExercise() ?: return false
         val s = currentSet() ?: return false
         val kg = spoken.weightKg(store.settings.value.unit)?.div(store.settings.value.weightFactor(we.exercise)) // dicho como total del par
+        if (spoken.reps != null) repCounter.reset() // las dichas mandan: el contador no las pisa al marcar
         edit { w ->
             WorkoutEditor.updateSet(w, we.id, s.id) {
                 it.copy(
