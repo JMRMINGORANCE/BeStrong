@@ -529,6 +529,7 @@ class HomeViewModel @Inject constructor(
         level: com.bestrong.core.training.Level = com.bestrong.core.training.Level.INTERMEDIATE,
     ): com.bestrong.core.training.GeneratedProgram {
         val injuries = planning.state.value.injuries
+        val hidden = settingsStore.settings.value.hiddenExercises
         val res = context.resources
         val goalLabel = context.getString(GOAL_LABELS.getValue(goal))
         val texts = com.bestrong.core.training.ProgramGenerator.Texts(
@@ -550,7 +551,8 @@ class HomeViewModel @Inject constructor(
             minutes,
             context.appLanguage(),
             // Sin gimnasio no hay barra de dominadas ni paralelas (son «peso corporal», pero hace falta dónde colgarse)
-            allowed = { com.bestrong.core.training.Injuries.isSafe(it, injuries) && (kit == Kit.GYM || it.id !in NEEDS_BAR) },
+            // Tampoco los ocultos en la biblioteca
+            allowed = { it.id !in hidden && com.bestrong.core.training.Injuries.isSafe(it, injuries) && (kit == Kit.GYM || it.id !in NEEDS_BAR) },
             texts = texts,
             level = level,
         )

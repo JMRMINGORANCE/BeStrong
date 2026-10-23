@@ -116,7 +116,8 @@ class PlanningViewModel @Inject constructor(
         // Se filtra antes de emparejar superseries: así ninguna se queda con un solo ejercicio
         RoutineGenerator.generate(
             days, equipment, goal, minutes, context.appLanguage(),
-            allowed = { com.bestrong.core.training.Injuries.isSafe(it, store.state.value.injuries) },
+            // Ni lesiones ni ejercicios ocultos en la biblioteca
+            allowed = { it.id !in hiddenExercises && com.bestrong.core.training.Injuries.isSafe(it, store.state.value.injuries) },
             // Nombres de los días como en el creador de programas (traducidos a todos los idiomas)
             dayLabels = mapOf(
                 "full" to context.getString(R.string.day_full),
@@ -151,7 +152,8 @@ class PlanningViewModel @Inject constructor(
         val n = weeks.coerceIn(1, MAX_DUPLICATE_WEEKS)
         val targets = (1..n).map { weekStart.plusWeeks(it.toLong()).toEpochDay() }
         // Solo rutinas que siguen existiendo: una semana con rutinas borradas (todo «Descanso») está libre
-        val alive = repo.routines.value.map { it.id }.toSet()
+        // (ni archivadas: el resto de la app tampoco las cuenta como planificadas)
+        val alive = repo.routines.value.filterNot { it.archived }.map { it.id }.toSet()
         fun planned(day: Long) = store.state.value.weekPlans[day]?.days?.values?.any { it in alive } == true
         val kept = targets.count(::planned)
         store.update { s ->
@@ -202,6 +204,13 @@ class PlanningViewModel @Inject constructor(
     fun saveProgram(p: PeriodizedProgram) {
         store.saveProgram(p)
         _messages.tryEmit(context.getString(R.string.plan_program_saved, p.nameEs))
+        // Si es el que se sigue y ahora tiene un básico sin training max, se le pone el sugerido (si no, 0 kg en cada serie)
+        viewModelScope.launch {
+            val a = repo.activeProgramOnce()?.takeIf { it.programId == p.id } ?: return@launch
+            val added = p.mainLifts.filter { it !in a.trainingMaxKg }
+                .mapNotNull { id -> com.bestrong.core.training.Periodization.suggestedTrainingMax(id, repo.historyOnce())?.let { id to it } }
+            if (added.isNotEmpty()) repo.setActiveProgram(a.copy(trainingMaxKg = a.trainingMaxKg + added))
+        }
     }
 
     /** Borra un programa propio; si era el activo, se deja de seguir (si no, quedaba activo sin sesiones ni forma de pararlo). */
