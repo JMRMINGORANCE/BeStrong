@@ -23,7 +23,10 @@ class WeighInWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             val today = LocalDate.now(zone)
             val weighedToday = deps.repository().measurementsOnce()
                 .any { it.weightKg != null && Instant.ofEpochMilli(it.dateEpochMs).atZone(zone).toLocalDate() == today }
-            if (day != null && today.dayOfWeek.value == day && !weighedToday) Notifier.weighIn(applicationContext)
+            // Con el móvil apagado hasta la noche, el «pésate en ayunas» ya no tiene sentido
+            val late = ExactWork.isStale(inputData, LATE_MS, sameDay = true)
+            val due = day != null && today.dayOfWeek.value == day
+            if (due && !late && !weighedToday) Notifier.weighIn(applicationContext)
         } finally {
             runCatching { schedule(applicationContext, day, force = true) }.onFailure { Log.w("WeighInWorker", "No se pudo reprogramar", it) }
         }
@@ -32,6 +35,7 @@ class WeighInWorker(context: Context, params: WorkerParameters) : CoroutineWorke
 
     companion object {
         private const val NAME = "weigh-in-reminder"
+        private const val LATE_MS = 4 * 60 * 60 * 1000L
 
         /** Programa (o cancela si [day] es null) el próximo aviso. */
         fun schedule(context: Context, day: Int?, force: Boolean = false) {

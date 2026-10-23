@@ -192,9 +192,9 @@ class AppSync @Inject constructor(
             repository.history.debounce(2_000).collect { watchSync.pushHistory(it) }
         }
         // El widget muestra la semana y la rutina que toca: se redibuja si cambia el historial, las rutinas,
-        // el mínimo de series por músculo, el objetivo de cardio o la planificación (la rutina de hoy)
+        // el mínimo de series por músculo, el objetivo de cardio o la planificación (la rutina de hoy), y al cambiar de día
         scope.launch {
-            merge(repository.history, repository.routines, settings.settings.map { Triple(it.weeklySetsTarget, it.weeklyCardioKm, it.weeklyCardioMin) }.distinctUntilChanged(), planning.state).debounce(2_000).collect {
+            widgetTriggers().debounce(2_000).collect {
                 BeStrongWidget.refresh(context)
                 com.bestrong.mobile.widget.MuscleWidget.refresh(context)
             }
@@ -256,6 +256,15 @@ class AppSync @Inject constructor(
     }
 
     /** Recordatorio de entreno y de pesarse: se reprograman cuando cambian sus ajustes. */
+    /** Lo que cambia los widgets: historial, rutinas, objetivos semanales, la planificación y el cambio de día. */
+    private fun widgetTriggers() = merge(
+        repository.history,
+        repository.routines,
+        settings.settings.map { Triple(it.weeklySetsTarget, it.weeklyCardioKm, it.weeklyCardioMin) }.distinctUntilChanged(),
+        planning.state,
+        com.bestrong.mobile.widget.dayTicks(),
+    )
+
     private fun scheduleReminders() {
         scope.launch {
             settings.settings.map { Triple(it.reminderDays, it.reminderHour, it.reminderMinute) }.distinctUntilChanged()

@@ -22,6 +22,8 @@ data class BodyMeasurement(
     /** Esta medida con lo que le falta tomado de [row] (lo que ya tenía no se toca): juntar dos del mismo día. */
     fun filledFrom(row: BodyMeasurement): BodyMeasurement = copy(
         weightKg = weightKg ?: row.weightKg,
+        // El peso viene con su origen: uno de la báscula (Health Connect) no pasa a «manual» al juntarlos
+        weightFromHealth = if (weightKg != null) weightFromHealth else row.weightFromHealth,
         bodyFatPct = bodyFatPct ?: row.bodyFatPct,
         waistCm = waistCm ?: row.waistCm,
         chestCm = chestCm ?: row.chestCm,
