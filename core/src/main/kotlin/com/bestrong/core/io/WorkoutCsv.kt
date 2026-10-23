@@ -430,4 +430,5 @@ private fun equipmentIn(name: String): Equipment? {
 
 /** El ejercicio [aliasId] encaja con el material que dice [name] (o [name] no dice ninguno). */
 private fun sameEquipment(name: String, aliasId: String): Boolean =
-    equipmentIn(name)?.let { it == ExerciseLibrary.byId(aliasId)?.equipment } ?: true
+    // «Pull Up (Assisted)»: el peso es la ayuda (en positivo); como dominada con lastre falsearía récords y progresión
+    "(assisted" !in name && equipmentIn(name)?.let { it == ExerciseLibrary.byId(aliasId)?.equipment } ?: true

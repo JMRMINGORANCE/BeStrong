@@ -131,7 +131,8 @@ object WorkoutStats {
         RecordType.HEAVIEST_WEIGHT -> set.weightKg
         RecordType.BEST_ONE_REP_MAX -> set.estimatedOneRepMax
         RecordType.BEST_SET_VOLUME -> set.volume
-        RecordType.MOST_REPS -> if (set.type == SetType.CLUSTER) 0.0 else set.recordReps.toDouble()
+        // Con ayuda de máquina (peso negativo) las reps no son récord: 15 asistidas no superan 6 estrictas
+        RecordType.MOST_REPS -> if (set.type == SetType.CLUSTER || set.weightKg < 0) 0.0 else set.recordReps.toDouble()
     }
 
     /**
@@ -334,7 +335,7 @@ object WorkoutStats {
                         // Como los récords: sin negativas, parciales ni asistidas (120 kg en negativa no es tu peso máximo)
                         heaviestWeight = sets.filter { it.countsForRecords }.maxOfOrNull { it.weightKg } ?: 0.0,
                         volume = sets.sumOf { it.volume },
-                        bestReps = sets.filter { it.countsForRecords }.maxOfOrNull { it.recordReps } ?: 0,
+                        bestReps = sets.filter { it.countsForRecords && it.weightKg >= 0 }.maxOfOrNull { it.recordReps } ?: 0,
                         distanceM = sets.sumOf { it.distanceM },
                         durationSec = sets.sumOf { it.durationSec },
                     )

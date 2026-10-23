@@ -71,6 +71,25 @@ class CoreFixesTest {
         assertEquals(0.0, Strength.monthSummary(h, YearMonth.of(2026, 2), ZoneOffset.UTC).volumeChange!!, 1e-9)
     }
 
+    @Test fun monthInProgressComparesSameDaysOfPreviousMonth() {
+        fun w(id: String, d: LocalDate, kg: Double) = Workout(
+            id = id, name = id,
+            startedAtEpochMs = d.atTime(18, 0).toInstant(ZoneOffset.UTC).toEpochMilli(),
+            finishedAtEpochMs = d.atTime(19, 0).toInstant(ZoneOffset.UTC).toEpochMilli(),
+            exercises = listOf(WorkoutExercise(exercise = bench, sets = listOf(WorkoutSet(weightKg = kg, reps = 10, completed = true)))),
+        )
+        // Día 5: solo cuentan los 5 primeros días de septiembre, no el mes entero
+        val h = listOf(w("a", LocalDate.of(2026, 9, 3), 100.0), w("b", LocalDate.of(2026, 9, 25), 500.0), w("c", LocalDate.of(2026, 10, 3), 100.0))
+        val now = LocalDate.of(2026, 10, 5).atTime(20, 0).toInstant(ZoneOffset.UTC).toEpochMilli()
+        assertEquals(0.0, Strength.monthSummary(h, YearMonth.of(2026, 10), ZoneOffset.UTC, now).volumeChange!!, 1e-9)
+    }
+
+    @Test fun assistedPullUpImportIsNotWeightedPullUp() {
+        val csv = "Date,Workout Name,Exercise Name,Set Order,Weight,Reps\n2026-01-05 18:00:00,A,Pull Up (Assisted),1,30,8\n"
+        val w = WorkoutCsv.import(csv, ExerciseLibrary.all, ZoneOffset.UTC).workouts.single()
+        assertTrue(w.exercises.single().exercise.id != "pull_up")
+    }
+
     @Test fun csvKeepsTwoEntriesOfSameExercise() {
         val w = Workout(
             id = "w2", name = "N", startedAtEpochMs = 1_700_000_000_000, finishedAtEpochMs = 1_700_000_360_000,

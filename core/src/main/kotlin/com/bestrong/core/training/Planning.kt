@@ -493,8 +493,9 @@ object Calisthenics {
     fun next(exerciseId: String, history: List<Workout>): String? {
         val chain = chainOf(exerciseId) ?: return null
         val ex = ExerciseLibrary.byId(exerciseId) ?: return null
+        // Con ayuda de máquina (peso negativo) aún no toca el siguiente paso
         val last = WorkoutStats.previousSets(exerciseId, history).filter { it.type != SetType.WARMUP }
-        if (last.isEmpty()) return exerciseId
+        if (last.isEmpty() || last.any { it.weightKg < 0 }) return exerciseId
         val ready = if (ex.tracking == TrackingType.DURATION) last.all { it.durationSec >= SECONDS_TO_ADVANCE } else last.all { it.reps >= REPS_TO_ADVANCE }
         val i = chain.indexOf(exerciseId)
         return if (ready && i < chain.lastIndex) chain[i + 1] else exerciseId

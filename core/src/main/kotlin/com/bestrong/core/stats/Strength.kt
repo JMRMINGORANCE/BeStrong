@@ -171,7 +171,7 @@ object Strength {
         RecordType.HEAVIEST_WEIGHT -> set.weightKg
         RecordType.BEST_ONE_REP_MAX -> set.estimatedOneRepMax
         RecordType.BEST_SET_VOLUME -> set.volume
-        RecordType.MOST_REPS -> set.recordReps.toDouble()
+        RecordType.MOST_REPS -> if (set.type == com.bestrong.core.model.SetType.CLUSTER || set.weightKg < 0) 0.0 else set.recordReps.toDouble()
     }
 
     /** Semanas seguidas (de lunes a domingo) con algún entreno, la racha más larga de [history]. */
@@ -350,12 +350,14 @@ object Strength {
         return rpeUp && noGain
     }
 
-    fun monthSummary(history: List<Workout>, month: YearMonth, zone: ZoneId): PeriodSummary {
+    fun monthSummary(history: List<Workout>, month: YearMonth, zone: ZoneId, nowEpochMs: Long? = null): PeriodSummary {
         val from = month.atDay(1).atStartOfDay(zone).toInstant().toEpochMilli()
         val to = month.plusMonths(1).atDay(1).atStartOfDay(zone).toInstant().toEpochMilli()
         // Frente al mes natural anterior (no a los mismos días hacia atrás: febrero no se compara con 28 días de enero)
         val prevFrom = month.minusMonths(1).atDay(1).atStartOfDay(zone).toInstant().toEpochMilli()
-        return summary(history, from, to, prevFrom = prevFrom)
+        // El mes en curso, frente a los mismos días del anterior (si no, el día 5 sale «−83 %» yendo a buen ritmo)
+        val prevTo = nowEpochMs?.takeIf { it in from until to }?.let { minOf(from, prevFrom + (it - from)) } ?: from
+        return summary(history, from, to, prevFrom = prevFrom, prevTo = prevTo)
     }
 
     /** Días desde la última vez que se entrenó cada músculo (como principal). Null = nunca. */

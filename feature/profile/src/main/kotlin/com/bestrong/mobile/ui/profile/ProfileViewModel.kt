@@ -219,7 +219,7 @@ class ProfileViewModel @Inject constructor(
         val zone = ZoneId.systemDefault()
         val month = YearMonth.now(zone).minusMonths(monthsAgo.toLong())
         val history = repo.historyOnce()
-        val summary = withContext(Dispatchers.Default) { Strength.monthSummary(history, month, zone) }
+        val summary = withContext(Dispatchers.Default) { Strength.monthSummary(history, month, zone, System.currentTimeMillis()) }
         val days = WorkoutStats.trainingDays(history, zone).filter { YearMonth.from(it) == month }.toSet()
         runCatching { MonthlyReport.share(context, month, summary, days, settings.value.unit, pdf) }
             .onFailure { _messages.tryEmit(context.getString(R.string.export_error, it.message.orEmpty())) }
