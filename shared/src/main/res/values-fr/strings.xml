@@ -1346,6 +1346,7 @@
     <string name="day_pull">Tirage</string>
     <string name="day_legs">Jambes</string>
     <string name="program_generated_desc">%1$s. Mouvements de base %2$d×%3$d (repos %4$d s), accessoires %5$d×%6$d (repos %7$d s).</string>
+    <string name="program_cardio_suffix">" + %1$d min de cardio à la fin."</string>
     <string name="program_generated_name">%1$s · %2$s</string>
     <string name="measurements_empty_title">Commence à suivre tes progrès</string>
     <string name="measurements_empty_body">Poids, masse grasse, tour de taille, poitrine, bras… Avec deux mesures, tu verras ton évolution en graphiques.</string>

@@ -1346,6 +1346,7 @@
     <string name="day_pull">Ziehen</string>
     <string name="day_legs">Beine</string>
     <string name="program_generated_desc">%1$s. Grundübungen %2$d×%3$d (Pause %4$d s), Zusatzübungen %5$d×%6$d (Pause %7$d s).</string>
+    <string name="program_cardio_suffix">" + %1$d Min. Cardio am Ende."</string>
     <string name="program_generated_name">%1$s · %2$s</string>
     <string name="measurements_empty_title">Fang an, deinen Fortschritt zu messen</string>
     <string name="measurements_empty_body">Gewicht, Körperfett, Taille, Brust, Arme… Ab zwei Einträgen siehst du deinen Verlauf in Diagrammen.</string>

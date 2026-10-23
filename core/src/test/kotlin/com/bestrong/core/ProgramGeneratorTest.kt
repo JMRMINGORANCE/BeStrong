@@ -32,11 +32,16 @@ class ProgramGeneratorTest {
         val strength = ProgramGenerator.build(3, Goal.STRENGTH, gym, 60).routines.first()
         assertEquals(5, strength.exercises.first().sets.size)
         assertEquals(5, strength.exercises.first().sets.first().reps)
-        // Perder grasa: descansos cortos, superseries y remate de burpees
+        // Perder grasa: descansos cortos, superseries y cardio al final (15 min en una sesión de 60)
         val fat = ProgramGenerator.build(3, Goal.FAT_LOSS, gym, 60).routines.first()
         assertTrue(fat.exercises.all { it.restSeconds <= 60 })
         assertTrue(fat.exercises.any { it.supersetId != null })
-        assertEquals("burpee", fat.exercises.last().exercise.id)
+        assertEquals(com.bestrong.core.model.TrackingType.CARDIO, fat.exercises.last().exercise.tracking)
+        assertEquals(15 * 60, fat.exercises.last().sets.single().durationSec)
+        // Sin máquinas, cardio sin material (caminar, correr, comba); con fuerza, ninguno
+        val home = ProgramGenerator.build(3, Goal.FAT_LOSS, setOf(Equipment.BODYWEIGHT), 45).routines
+        assertTrue(home.all { it.exercises.last().exercise.id in setOf("walking", "running", "jump_rope") })
+        assertTrue(ProgramGenerator.build(3, Goal.STRENGTH, gym, 60).routines.none { r -> r.exercises.any { it.exercise.tracking == com.bestrong.core.model.TrackingType.CARDIO } })
     }
 
     @Test fun bodyweightOnlyUsesBodyweight() {

@@ -548,6 +548,7 @@ class HomeViewModel @Inject constructor(
         val texts = com.bestrong.core.training.ProgramGenerator.Texts(
             name = context.getString(R.string.program_generated_name, goalLabel, res.getQuantityString(R.plurals.days_count, days, days)),
             describe = { split, m, a -> context.getString(R.string.program_generated_desc, split, m.sets, m.reps, m.restSeconds, a.sets, a.reps, a.restSeconds) },
+            cardio = { min -> context.getString(R.string.program_cardio_suffix, min) },
             dayLabels = mapOf(
                 "full" to context.getString(R.string.day_full),
                 "upper" to context.getString(R.string.day_upper),

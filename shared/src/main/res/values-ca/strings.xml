@@ -1346,6 +1346,7 @@
     <string name="day_pull">Estirada</string>
     <string name="day_legs">Cama</string>
     <string name="program_generated_desc">%1$s. Bàsics %2$d×%3$d (descans %4$d s), accessoris %5$d×%6$d (descans %7$d s).</string>
+    <string name="program_cardio_suffix">" + %1$d min de cardio al final."</string>
     <string name="program_generated_name">%1$s · %2$s</string>
     <string name="measurements_empty_title">Comença a mesurar el teu progrés</string>
     <string name="measurements_empty_body">Pes, greix corporal, cintura, pit, braços… Amb dues mesures veuràs la teva evolució en gràfiques.</string>

@@ -258,8 +258,40 @@ object RoutineGenerator {
     /** Series según el nivel (siempre al menos 2). */
     private fun Prescription.withLevel(level: Level) = copy(sets = (sets + level.extraSets).coerceAtLeast(2))
 
-    /** Para perder grasa o ganar resistencia, el día acaba con un remate metabólico. */
+    /** Para perder grasa o ganar resistencia, el día acaba con un remate metabólico (si no hay cardio que hacer). */
     private fun finisher(goal: Goal): String? = if (goal == Goal.FAT_LOSS || goal == Goal.ENDURANCE) "burpee" else null
+
+    /**
+     * Minutos de cardio al final de la sesión: para perder grasa o ganar resistencia, una cuarta parte de la sesión
+     * (entre 10 y 20 min; 25 en resistencia), a múltiplos de 5. 0 con otros objetivos.
+     */
+    fun cardioMinutes(goal: Goal, minutesPerSession: Int): Int {
+        val max = when (goal) {
+            Goal.FAT_LOSS -> CARDIO_MAX_FAT_LOSS
+            Goal.ENDURANCE -> CARDIO_MAX_ENDURANCE
+            else -> return 0
+        }
+        return ((minutesPerSession / 4 + 2) / 5 * 5).coerceIn(CARDIO_MIN, max)
+    }
+
+    /** Cardio del día: máquinas si las hay (cinta, elíptica, bici…), si no caminar, correr o comba; varía por día. */
+    private fun cardioFor(dayIndex: Int, equipment: Set<Equipment>, allowed: (Exercise) -> Boolean): Exercise? {
+        val ids = if (Equipment.MACHINE in equipment) CARDIO_MACHINES else CARDIO_FREE
+        val options = ids.mapNotNull(ExerciseLibrary::byId).filter(allowed)
+        return options.getOrNull(dayIndex % options.size.coerceAtLeast(1))
+    }
+
+    /** Final del día: cardio de verdad (cinta, bici, caminar…) y, solo si no hay ninguno que se pueda hacer, burpees. */
+    private fun dayEnd(goal: Goal, cardioMin: Int, dayIndex: Int, equipment: Set<Equipment>, allowed: (Exercise) -> Boolean, usable: (Exercise) -> Boolean): Pair<Exercise?, Exercise?> {
+        val cardio = if (cardioMin > 0) cardioFor(dayIndex, equipment, allowed) else null
+        return cardio to (if (cardio == null) finisher(goal)?.let(ExerciseLibrary::byId)?.takeIf(usable) else null)
+    }
+
+    private val CARDIO_MACHINES = listOf("treadmill", "elliptical", "stationary_bike", "rowing_machine", "stair_climber")
+    private val CARDIO_FREE = listOf("walking", "running", "jump_rope")
+    private const val CARDIO_MIN = 10
+    private const val CARDIO_MAX_FAT_LOSS = 20
+    private const val CARDIO_MAX_ENDURANCE = 25
 
     /**
      * Rutinas para [daysPerWeek] días con el material disponible y el objetivo. Cuantos más
@@ -282,12 +314,14 @@ object RoutineGenerator {
         // Los dos primeros son básicos (los que más tardan) y el resto accesorios: con la media, 30 min daban 45
         val mainCost = main.sets * (40 + main.restSeconds)
         val accCost = acc.sets * (40 + acc.restSeconds)
-        val maxExercises = (2 + (minutesPerSession * 60 - 2 * mainCost) / accCost).coerceIn(3, 8)
+        // El cardio del final (perder grasa, resistencia) sale del tiempo de la sesión
+        val cardioMin = cardioMinutes(goal, minutesPerSession)
+        val maxExercises = (2 + ((minutesPerSession - cardioMin) * 60 - 2 * mainCost) / accCost).coerceIn(3, 8)
         val usable: (Exercise) -> Boolean = { (it.equipment in equipment || it.equipment == Equipment.BODYWEIGHT) && allowed(it) }
         val limited = equipment.none { it == Equipment.BARBELL || it == Equipment.DUMBBELL || it == Equipment.MACHINE || it == Equipment.CABLE }
         val days = split(daysPerWeek, goal, limited)
-        val finisherEx = finisher(goal)?.let(ExerciseLibrary::byId)?.takeIf(usable)
         return days.mapIndexed { dayIndex, type ->
+            val (cardio, finisherEx) = dayEnd(goal, cardioMin, dayIndex, equipment, allowed, usable)
             // Segundo/tercer día del mismo tipo (A/B/C): otra opción de cada hueco para variar
             val variant = days.take(dayIndex).count { it == type }
             // El remate cuenta dentro del tiempo de la sesión
@@ -297,7 +331,8 @@ object RoutineGenerator {
             val letter = if (days.count { it == type } > 1) " " + ('A' + variant) else ""
             // Superseries solo entre accesorios; el remate va suelto al final
             val exercises = pairAccessories(picks.mapIndexed { i, ex -> routineExercise(ex, if (i < 2) main else acc) }, goal)
-            Routine(name = label + letter, exercises = exercises + listOfNotNull(finisherEx?.let { routineExercise(it, acc) }))
+            val cardioBlock = cardio?.let { RoutineExercise(exercise = it, sets = listOf(RoutineSet(reps = 0, durationSec = cardioMin * 60)), restSeconds = 0) }
+            Routine(name = label + letter, exercises = exercises + listOfNotNull(finisherEx?.let { routineExercise(it, acc) }, cardioBlock))
         }
     }
 
@@ -408,7 +443,13 @@ object ProgramGenerator {
     )
 
     /** Nombre y descripción a medida (para los idiomas que no son español ni inglés): días, básicos y accesorios. */
-    data class Texts(val name: String, val describe: (split: String, main: Prescription, accessory: Prescription) -> String, val dayLabels: Map<String, String>)
+    data class Texts(
+        val name: String,
+        val describe: (split: String, main: Prescription, accessory: Prescription) -> String,
+        val dayLabels: Map<String, String>,
+        /** « + 15 min de cardio al final» en el idioma de la app (perder grasa, resistencia). */
+        val cardio: (minutes: Int) -> String = { "" },
+    )
 
     fun build(
         daysPerWeek: Int,
@@ -432,7 +473,9 @@ object ProgramGenerator {
             "$split. Main lifts ${m.sets}×${m.reps} (rest ${m.restSeconds}s), accessories ${a.sets}×${a.reps} (rest ${a.restSeconds}s)."
         } else {
             "$split. Básicos ${m.sets}×${m.reps} (descanso ${m.restSeconds} s), accesorios ${a.sets}×${a.reps} (descanso ${a.restSeconds} s)."
-        }
+        } + RoutineGenerator.cardioMinutes(goal, minutesPerSession).takeIf { it > 0 }?.let { min ->
+            texts?.cardio?.invoke(min) ?: if (lang == "en") " + $min min of cardio at the end." else " + $min min de cardio al final."
+        }.orEmpty()
         // Todas en una carpeta con el nombre del programa, para tenerlas juntas en Inicio
         return GeneratedProgram(name, description, routines.map { it.copy(folder = name) })
     }
