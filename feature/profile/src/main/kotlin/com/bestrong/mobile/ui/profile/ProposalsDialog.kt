@@ -56,23 +56,26 @@ import kotlinx.coroutines.launch
 fun ProposalsDialog(initialTab: Int = 0, onDismiss: () -> Unit) {
     var tab by rememberSaveable { mutableIntStateOf(initialTab) }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(stringResource(R.string.proposals_title)) },
-                    navigationIcon = { IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.action_close)) } },
-                )
-            },
-        ) { padding ->
-            Column(Modifier.padding(padding).fillMaxSize()) {
-                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                    listOf(R.string.proposals_tab_new, R.string.proposals_tab_mine).forEachIndexed { i, label ->
-                        SegmentedButton(selected = tab == i, onClick = { tab = i }, shape = SegmentedButtonDefaults.itemShape(i, 2)) { Text(stringResource(label)) }
+        // Fondo opaco: el tema deja transparente el de Scaffold y se veía la pantalla de detrás
+        com.bestrong.mobile.ui.theme.ScreenBackdrop(MaterialTheme.colorScheme.primary) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text(stringResource(R.string.proposals_title)) },
+                        navigationIcon = { IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.action_close)) } },
+                    )
+                },
+            ) { padding ->
+                Column(Modifier.padding(padding).fillMaxSize()) {
+                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                        listOf(R.string.proposals_tab_new, R.string.proposals_tab_mine).forEachIndexed { i, label ->
+                            SegmentedButton(selected = tab == i, onClick = { tab = i }, shape = SegmentedButtonDefaults.itemShape(i, 2)) { Text(stringResource(label)) }
+                        }
                     }
-                }
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-                    val content = Modifier.widthIn(max = 720.dp).fillMaxWidth()
-                    if (tab == 0) NewProposal(content, onSent = { tab = 1 }) else MyProposals(content)
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+                        val content = Modifier.widthIn(max = 720.dp).fillMaxWidth()
+                        if (tab == 0) NewProposal(content, onSent = { tab = 1 }) else MyProposals(content)
+                    }
                 }
             }
         }
