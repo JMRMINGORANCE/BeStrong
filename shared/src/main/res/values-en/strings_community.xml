@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comunidad: pestaña de Perfil, aviso de Ajustes y pantalla de la bienvenida -->
+<resources>
+    <string name="community_tab">Community</string>
+    <string name="community_title">Built by the community</string>
+    <string name="community_body">BeStrong was born on Forocoches and grows with the ideas of the people who use it. You can improve it too: free, no account, in a minute.</string>
+    <string name="community_how">How to contribute</string>
+    <string name="community_step1">Suggest your idea: what you would improve and how you picture it.</string>
+    <string name="community_step2">Suggestions are reviewed every day. If something is missing, we ask you right here.</string>
+    <string name="community_step3">Good ideas get built and arrive in an upcoming version.</string>
+    <string name="community_step4">Follow how yours is going in “My suggestions”.</string>
+    <string name="community_banner_title">Got an idea for an improvement?</string>
+    <string name="community_banner_body">We build BeStrong together. Suggest it in a minute.</string>
+    <string name="tut_community_t">Built by the community</string>
+    <string name="tut_community_d">BeStrong was born on Forocoches and you make it better. In Profile › Community you can suggest an idea in a minute, no account needed, and the good ones arrive in upcoming versions.</string>
+    <!-- Novedades de esta versión (sustituye a whats_new_body) -->
+    <string name="whats_new_latest">• New Community tab in Profile: suggest improvements and follow the replies
+• BeStrong is built together: good ideas arrive in upcoming versions
+• Cardio timer and exercise switching from the watch
+• Cardio inside routines, with calories per block
+• More reliable calories using your basal metabolism and heart rate</string>
+</resources>

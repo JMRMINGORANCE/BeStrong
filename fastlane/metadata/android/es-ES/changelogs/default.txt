@@ -1,4 +1,5 @@
-- Nuevo buzón de ideas: propón mejoras desde Ajustes (icono de la bombilla) y sigue sus respuestas
+- Nueva pestaña Comunidad en Perfil: BeStrong se hace entre todos, propón mejoras y sigue sus respuestas
+- Aviso bien visible en Ajustes para proponer ideas en un minuto
 - Cronómetro de cardio y cambio de ejercicio desde el reloj
 - Cardio dentro de las rutinas, con calorías por bloque
 - Calorías más fiables: metabolismo basal propio e intensidad según el pulso

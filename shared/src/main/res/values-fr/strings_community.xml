@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comunidad: pestaña de Perfil, aviso de Ajustes y pantalla de la bienvenida -->
+<resources>
+    <string name="community_tab">Communauté</string>
+    <string name="community_title">Faite par la communauté</string>
+    <string name="community_body">BeStrong est née sur Forocoches et grandit avec les idées de celles et ceux qui l\'utilisent. Toi aussi, tu peux l\'améliorer : gratuit, sans compte, en une minute.</string>
+    <string name="community_how">Comment contribuer</string>
+    <string name="community_step1">Propose ton idée : ce que tu améliorerais et comment tu l\'imagines.</string>
+    <string name="community_step2">Les propositions sont étudiées chaque jour. S\'il manque quelque chose, on te le demande ici même.</string>
+    <string name="community_step3">Les bonnes idées sont développées et arrivent dans une prochaine version.</string>
+    <string name="community_step4">Suis l\'avancement de la tienne dans « Mes propositions ».</string>
+    <string name="community_banner_title">Une idée d\'amélioration ?</string>
+    <string name="community_banner_body">On fait BeStrong tous ensemble. Propose-la en une minute.</string>
+    <string name="tut_community_t">Faite par la communauté</string>
+    <string name="tut_community_d">BeStrong est née sur Forocoches et c\'est vous qui l\'améliorez. Dans Profil › Communauté, tu proposes une idée en une minute, sans compte, et les bonnes arrivent dans les prochaines versions.</string>
+    <!-- Novedades de esta versión (sustituye a whats_new_body) -->
+    <string name="whats_new_latest">• Nouvel onglet Communauté dans Profil : propose des améliorations et suis les réponses
+• BeStrong se fait ensemble : les bonnes idées arrivent dans les prochaines versions
+• Chrono de cardio et changement d\'exercice depuis la montre
+• Cardio dans les routines, avec calories par bloc
+• Calories plus fiables avec ton métabolisme de base et ton pouls</string>
+</resources>

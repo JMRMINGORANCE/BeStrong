@@ -49,5 +49,9 @@ class TabsScreenshotTest {
         compose.onNodeWithText("Ajustes").performClick()
         settle()
         shot("dark_settings")
+        // Y la de comunidad (proponer mejoras)
+        compose.onNodeWithText("Comunidad").performClick()
+        settle()
+        shot("dark_community")
     }
 }
