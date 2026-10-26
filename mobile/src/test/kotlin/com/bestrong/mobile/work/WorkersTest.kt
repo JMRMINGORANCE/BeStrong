@@ -63,7 +63,15 @@ class WorkersTest {
         val repo = EntryPointAccessors.fromApplication(app, WorkerEntryPoint::class.java).repository()
         TestListenableWorkerBuilder<WeeklySummaryWorker>(app).build().doWork()
         assertTrue("Sin entrenos no hay resumen", notifications().isEmpty())
-        val now = System.currentTimeMillis()
+        // Lunes y martes el resumen es de la semana que acabó el domingo: el entreno va en esa semana
+        val today = java.time.LocalDate.now()
+        val late = today.dayOfWeek == java.time.DayOfWeek.MONDAY || today.dayOfWeek == java.time.DayOfWeek.TUESDAY
+        val now = if (late) {
+            today.with(java.time.temporal.TemporalAdjusters.previous(java.time.DayOfWeek.SUNDAY))
+                .atTime(12, 0).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        } else {
+            System.currentTimeMillis()
+        }
         val bench = ExerciseLibrary.byId("bench_press")!!
         repo.saveWorkout(
             Workout(
