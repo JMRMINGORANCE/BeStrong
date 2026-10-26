@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comunidad: pestaña de Perfil, aviso de Ajustes y pantalla de la bienvenida -->
+<resources>
+    <string name="community_tab">Community</string>
+    <string name="community_title">Von der Community gemacht</string>
+    <string name="community_body">BeStrong ist auf Forocoches entstanden und wächst mit den Ideen der Leute, die sie nutzen. Auch du kannst sie verbessern: kostenlos, ohne Konto, in einer Minute.</string>
+    <string name="community_how">So machst du mit</string>
+    <string name="community_step1">Schlag deine Idee vor: was du verbessern würdest und wie du es dir vorstellst.</string>
+    <string name="community_step2">Vorschläge werden täglich geprüft. Fehlt etwas, fragen wir dich direkt hier.</string>
+    <string name="community_step3">Gute Ideen werden umgesetzt und kommen in einer der nächsten Versionen.</string>
+    <string name="community_step4">Verfolge den Stand deines Vorschlags unter „Meine Vorschläge“.</string>
+    <string name="community_banner_title">Hast du eine Idee für eine Verbesserung?</string>
+    <string name="community_banner_body">BeStrong machen wir gemeinsam. Schlag sie in einer Minute vor.</string>
+    <string name="tut_community_t">Von der Community gemacht</string>
+    <string name="tut_community_d">BeStrong ist auf Forocoches entstanden und ihr macht sie besser. Unter Profil › Community schlägst du in einer Minute eine Idee vor, ohne Konto, und die guten kommen in den nächsten Versionen.</string>
+    <!-- Novedades de esta versión (sustituye a whats_new_body) -->
+    <string name="whats_new_latest">• Neuer Tab Community im Profil: Verbesserungen vorschlagen und Antworten verfolgen
+• BeStrong entsteht gemeinsam: gute Ideen kommen in den nächsten Versionen
+• Cardio-Stoppuhr und Übungswechsel an der Uhr
+• Cardio in Routinen, mit Kalorien pro Block
+• Genauere Kalorien mit deinem Grundumsatz und Puls</string>
+</resources>

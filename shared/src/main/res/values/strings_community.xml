@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comunidad: pestaña de Perfil, aviso de Ajustes y pantalla de la bienvenida -->
+<resources>
+    <string name="community_tab">Comunidad</string>
+    <string name="community_title">Hecha en comunidad</string>
+    <string name="community_body">BeStrong nació en Forocoches y crece con las ideas de quien la usa. Tú también puedes mejorarla: gratis, sin cuentas y en un minuto.</string>
+    <string name="community_how">Cómo aportar</string>
+    <string name="community_step1">Propón tu idea: qué mejorarías y cómo te lo imaginas.</string>
+    <string name="community_step2">Cada día se revisan las propuestas. Si falta algo, te preguntamos aquí mismo.</string>
+    <string name="community_step3">Las buenas ideas se programan y llegan en una próxima versión.</string>
+    <string name="community_step4">Sigue cómo va la tuya en «Mis propuestas».</string>
+    <string name="community_banner_title">¿Se te ocurre una mejora?</string>
+    <string name="community_banner_body">BeStrong la hacemos entre todos. Proponla en un minuto.</string>
+    <string name="tut_community_t">Hecha en comunidad</string>
+    <string name="tut_community_d">BeStrong nació en Forocoches y la mejoráis vosotros. En Perfil › Comunidad propones una idea en un minuto, sin cuentas, y las buenas llegan en las próximas versiones.</string>
+    <!-- Novedades de esta versión (sustituye a whats_new_body) -->
+    <string name="whats_new_latest">• Nueva pestaña Comunidad en Perfil: propón mejoras y sigue sus respuestas
+• BeStrong se hace entre todos: las buenas ideas llegan en las próximas versiones
+• Cronómetro de cardio y cambio de ejercicio desde el reloj
+• Cardio dentro de las rutinas, con calorías por bloque
+• Calorías más fiables con tu metabolismo basal y tu pulso</string>
+</resources>

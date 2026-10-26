@@ -50,11 +50,11 @@ import androidx.compose.ui.window.DialogProperties
 import com.bestrong.mobile.shared.R
 import kotlinx.coroutines.launch
 
-/** Buzón de ideas: proponer una mejora y ver las respuestas (se abre desde el icono discreto de Ajustes). */
+/** Buzón de ideas: proponer una mejora y ver las respuestas (se abre desde Perfil › Comunidad o el aviso de Ajustes). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProposalsDialog(onDismiss: () -> Unit) {
-    var tab by rememberSaveable { mutableIntStateOf(0) }
+fun ProposalsDialog(initialTab: Int = 0, onDismiss: () -> Unit) {
+    var tab by rememberSaveable { mutableIntStateOf(initialTab) }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Scaffold(
             topBar = {

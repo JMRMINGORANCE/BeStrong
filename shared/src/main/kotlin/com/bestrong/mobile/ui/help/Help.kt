@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
@@ -31,6 +32,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Lightbulb
@@ -133,7 +136,7 @@ fun HelpDialog(onDismiss: () -> Unit, onReplayTutorial: () -> Unit) {
                         OutlinedButton(onClick = onReplayTutorial, modifier = content) { Text(stringResource(R.string.tutorial_replay)) }
                     }
                     item { Heading(R.string.whats_new, content) }
-                    item { Text(stringResource(R.string.whats_new_body), content) }
+                    item { Text(stringResource(R.string.whats_new_latest), content) }
                     item { Heading(R.string.glossary, content) }
                     items(GLOSSARY) { (term, def) -> Entry(term, def, content) }
                     item { Heading(R.string.faq, content) }
@@ -179,6 +182,8 @@ private val TUTORIAL = listOf(
     TutorialPage(R.string.tut3_t, R.string.tut3_d, Icons.Default.CheckCircle, listOf(Icons.Default.Timer, Icons.Default.Vibration, Icons.Default.SwipeRight)),
     TutorialPage(R.string.tut5_t, R.string.tut5_d, Icons.Default.Watch, listOf(Icons.Default.Favorite, Icons.Default.Timer, Icons.AutoMirrored.Filled.DirectionsRun)),
     TutorialPage(R.string.tut4_t, R.string.tut4_d, Icons.Default.EmojiEvents, listOf(Icons.Default.Insights, Icons.Default.LocalFireDepartment, Icons.Default.Straighten)),
+    // Hecha en comunidad (nació en Forocoches) y cómo aportar ideas
+    TutorialPage(R.string.tut_community_t, R.string.tut_community_d, Icons.Default.Groups, listOf(Icons.Default.Lightbulb, Icons.Default.Forum, Icons.Default.AutoAwesome)),
 )
 
 /**
@@ -473,7 +478,7 @@ fun WhatsNewDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.whats_new)) },
-        text = { Text(stringResource(R.string.whats_new_body)) },
+        text = { Text(stringResource(R.string.whats_new_latest)) },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.got_it)) } },
     )
 }

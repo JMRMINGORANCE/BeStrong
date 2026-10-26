@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comunidad: pestaña de Perfil, aviso de Ajustes y pantalla de la bienvenida -->
+<resources>
+    <string name="community_tab">Comunitat</string>
+    <string name="community_title">Feta en comunitat</string>
+    <string name="community_body">BeStrong va néixer a Forocoches i creix amb les idees de qui la fa servir. Tu també la pots millorar: de franc, sense comptes i en un minut.</string>
+    <string name="community_how">Com aportar</string>
+    <string name="community_step1">Proposa la teva idea: què milloraries i com te la imagines.</string>
+    <string name="community_step2">Cada dia es revisen les propostes. Si falta alguna cosa, t\'ho preguntem aquí mateix.</string>
+    <string name="community_step3">Les bones idees es programen i arriben en una propera versió.</string>
+    <string name="community_step4">Segueix com va la teva a «Les meves propostes».</string>
+    <string name="community_banner_title">Se t\'acut una millora?</string>
+    <string name="community_banner_body">BeStrong la fem entre tots. Proposa-la en un minut.</string>
+    <string name="tut_community_t">Feta en comunitat</string>
+    <string name="tut_community_d">BeStrong va néixer a Forocoches i la milloreu vosaltres. A Perfil › Comunitat proposes una idea en un minut, sense comptes, i les bones arriben en les properes versions.</string>
+    <!-- Novedades de esta versión (sustituye a whats_new_body) -->
+    <string name="whats_new_latest">• Nova pestanya Comunitat a Perfil: proposa millores i segueix-ne les respostes
+• BeStrong es fa entre tots: les bones idees arriben en les properes versions
+• Cronòmetre de cardio i canvi d\'exercici des del rellotge
+• Cardio dins de les rutines, amb calories per bloc
+• Calories més fiables amb el teu metabolisme basal i el pols</string>
+</resources>
