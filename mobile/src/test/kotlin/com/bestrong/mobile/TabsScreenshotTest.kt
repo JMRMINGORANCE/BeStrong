@@ -53,5 +53,9 @@ class TabsScreenshotTest {
         compose.onNodeWithText("Comunidad").performClick()
         settle()
         shot("dark_community")
+        // El buzón de ideas, a pantalla completa y con fondo opaco
+        compose.onNodeWithText("Proponer una mejora").performClick()
+        settle()
+        shot("dark_proposals")
     }
 }
