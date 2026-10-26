@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -117,6 +118,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     var editingGym by rememberSaveable(stateSaver = GymSaver) { mutableStateOf<GymProfile?>(null) }
     var showAbout by rememberSaveable { mutableStateOf(false) }
     if (showAbout) AboutDialog { showAbout = false }
+    var showProposals by rememberSaveable { mutableStateOf(false) }
+    if (showProposals) ProposalsDialog { showProposals = false }
     var showHelp by rememberSaveable { mutableStateOf(false) }
     var showTutorial by rememberSaveable { mutableStateOf(false) }
     if (showHelp) HelpDialog(onDismiss = { showHelp = false }, onReplayTutorial = { showHelp = false; showTutorial = true })
@@ -333,7 +336,17 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                         Column(Modifier.padding(vertical = 8.dp)) {
-                            SectionHeader(stringResource(R.string.settings), Modifier.padding(horizontal = 16.dp))
+                            // Buzón de ideas: un icono discreto junto al título de Ajustes
+                            Row(Modifier.padding(start = 4.dp, end = 16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                                androidx.compose.material3.IconButton(onClick = { showProposals = true }) {
+                                    Icon(
+                                        Icons.Outlined.Lightbulb,
+                                        stringResource(R.string.proposals_open),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                SectionHeader(stringResource(R.string.settings))
+                            }
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.weight_unit)) },
                                 trailingContent = {

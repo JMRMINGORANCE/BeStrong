@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Buzón de propuestas de mejora (Ajustes → bombilla) -->
+<resources>
+    <string name="proposals_title">Ideas for BeStrong</string>
+    <string name="proposals_open">Suggest an improvement</string>
+    <string name="proposals_tab_new">Suggest</string>
+    <string name="proposals_tab_mine">My suggestions</string>
+    <string name="proposals_intro">Missing something? Tell us and we will look into it. If it is a good idea, it may arrive in a future version.</string>
+    <string name="proposals_field_title">Short title</string>
+    <string name="proposals_field_what">What would you improve?</string>
+    <string name="proposals_field_how">How do you picture it? (optional)</string>
+    <string name="proposals_privacy">Only what you write and the app version are sent, without your name or your workouts. Do not include personal data.</string>
+    <string name="proposals_send">Send</string>
+    <string name="proposals_sent">Thanks! Your suggestion has been sent</string>
+    <string name="proposals_error_limit">You have sent many suggestions today. Try again tomorrow.</string>
+    <string name="proposals_error_short">Write a bit more so the idea is clear.</string>
+    <string name="proposals_error_network">Could not send. Check your connection and try again.</string>
+    <string name="proposals_empty">You have not sent any suggestions yet.</string>
+    <string name="proposals_load_error">Could not load your suggestions.</string>
+    <string name="proposals_retry">Retry</string>
+    <string name="proposals_reply_hint">Your reply</string>
+    <string name="proposals_reply_send">Reply</string>
+    <string name="proposals_from_team">BeStrong</string>
+    <string name="proposals_from_you">You</string>
+    <string name="proposals_status_recibida">Received</string>
+    <string name="proposals_status_necesita_info">We asked you something</string>
+    <string name="proposals_status_aceptada">Accepted</string>
+    <string name="proposals_status_en_desarrollo">In development</string>
+    <string name="proposals_status_implementada">Implemented</string>
+    <string name="proposals_status_descartada">Declined</string>
+    <string name="proposals_status_revision_humana">Under review</string>
+    <string name="privacy_proposals_title">Improvement suggestions</string>
+    <string name="privacy_proposals">If you send a suggestion from Settings (light bulb icon), the text you write, the app version and a random identifier of this installation (to show you the replies) are sent. They are stored in a Google Apps Script service and in a private GitHub repository of the developer, only to study the idea. Your name, account and workouts are not sent. It is only sent when you tap Send.</string>
+</resources>

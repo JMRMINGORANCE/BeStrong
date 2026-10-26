@@ -64,6 +64,8 @@ fun PrivacyPolicy(onBack: () -> Unit) {
             Text(stringResource(R.string.privacy_csv))
             Text(stringResource(R.string.privacy_images_title), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.privacy_images))
+            Text(stringResource(R.string.privacy_proposals_title), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.privacy_proposals))
             Text(stringResource(R.string.privacy_credits_title), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.privacy_credits))
             Text(stringResource(R.string.privacy_delete_title), style = MaterialTheme.typography.titleMedium)

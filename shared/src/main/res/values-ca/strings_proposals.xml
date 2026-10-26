@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Buzón de propuestas de mejora (Ajustes → bombilla) -->
+<resources>
+    <string name="proposals_title">Idees per a BeStrong</string>
+    <string name="proposals_open">Proposa una millora</string>
+    <string name="proposals_tab_new">Proposa</string>
+    <string name="proposals_tab_mine">Les meves propostes</string>
+    <string name="proposals_intro">Trobes a faltar alguna cosa? Explica-ho i ho estudiarem. Si és una bona idea, pot arribar en una versió futura.</string>
+    <string name="proposals_field_title">Títol curt</string>
+    <string name="proposals_field_what">Què milloraries?</string>
+    <string name="proposals_field_how">Com t\'ho imagines? (opcional)</string>
+    <string name="proposals_privacy">Només s\'envia el que escrius i la versió de l\'app, sense el teu nom ni els teus entrenaments. No hi posis dades personals.</string>
+    <string name="proposals_send">Envia</string>
+    <string name="proposals_sent">Gràcies! S\'ha enviat la teva proposta</string>
+    <string name="proposals_error_limit">Avui has enviat moltes propostes. Torna-ho a provar demà.</string>
+    <string name="proposals_error_short">Escriu una mica més perquè s\'entengui la idea.</string>
+    <string name="proposals_error_network">No s\'ha pogut enviar. Revisa la connexió i torna-ho a provar.</string>
+    <string name="proposals_empty">Encara no has enviat cap proposta.</string>
+    <string name="proposals_load_error">No s\'han pogut carregar les teves propostes.</string>
+    <string name="proposals_retry">Torna-ho a provar</string>
+    <string name="proposals_reply_hint">La teva resposta</string>
+    <string name="proposals_reply_send">Respon</string>
+    <string name="proposals_from_team">BeStrong</string>
+    <string name="proposals_from_you">Tu</string>
+    <string name="proposals_status_recibida">Rebuda</string>
+    <string name="proposals_status_necesita_info">T\'hem preguntat una cosa</string>
+    <string name="proposals_status_aceptada">Acceptada</string>
+    <string name="proposals_status_en_desarrollo">En desenvolupament</string>
+    <string name="proposals_status_implementada">Implementada</string>
+    <string name="proposals_status_descartada">Descartada</string>
+    <string name="proposals_status_revision_humana">En revisió</string>
+    <string name="privacy_proposals_title">Propostes de millora</string>
+    <string name="privacy_proposals">Si envies una proposta des d\'Ajustos (icona de la bombeta), s\'envia el text que escrius, la versió de l\'app i un identificador aleatori d\'aquesta instal·lació (per mostrar-te les respostes). Es desa en un servei de Google Apps Script i en un repositori privat de GitHub del desenvolupador, només per estudiar la idea. No s\'envia el teu nom, el teu compte ni els teus entrenaments. Només s\'envia si tu ho prems.</string>
+</resources>

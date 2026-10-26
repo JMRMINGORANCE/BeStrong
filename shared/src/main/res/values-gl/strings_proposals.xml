@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Buzón de propuestas de mejora (Ajustes → bombilla) -->
+<resources>
+    <string name="proposals_title">Ideas para BeStrong</string>
+    <string name="proposals_open">Propor unha mellora</string>
+    <string name="proposals_tab_new">Propor</string>
+    <string name="proposals_tab_mine">As miñas propostas</string>
+    <string name="proposals_intro">Botas algo en falta? Cóntao e estudarémolo. Se é boa idea, pode chegar nunha próxima versión.</string>
+    <string name="proposals_field_title">Título curto</string>
+    <string name="proposals_field_what">Que mellorarías?</string>
+    <string name="proposals_field_how">Como o imaxinas? (opcional)</string>
+    <string name="proposals_privacy">Só se envía o que escribes e a versión da app, sen o teu nome nin os teus adestramentos. Non inclúas datos persoais.</string>
+    <string name="proposals_send">Enviar</string>
+    <string name="proposals_sent">Grazas! A túa proposta enviouse</string>
+    <string name="proposals_error_limit">Hoxe enviaches moitas propostas. Téntao mañá.</string>
+    <string name="proposals_error_short">Escribe un pouco máis para que se entenda a idea.</string>
+    <string name="proposals_error_network">Non se puido enviar. Revisa a conexión e téntao de novo.</string>
+    <string name="proposals_empty">Aínda non enviaches ningunha proposta.</string>
+    <string name="proposals_load_error">Non se puideron cargar as túas propostas.</string>
+    <string name="proposals_retry">Tentar de novo</string>
+    <string name="proposals_reply_hint">A túa resposta</string>
+    <string name="proposals_reply_send">Responder</string>
+    <string name="proposals_from_team">BeStrong</string>
+    <string name="proposals_from_you">Ti</string>
+    <string name="proposals_status_recibida">Recibida</string>
+    <string name="proposals_status_necesita_info">Preguntámosche algo</string>
+    <string name="proposals_status_aceptada">Aceptada</string>
+    <string name="proposals_status_en_desarrollo">En desenvolvemento</string>
+    <string name="proposals_status_implementada">Implementada</string>
+    <string name="proposals_status_descartada">Descartada</string>
+    <string name="proposals_status_revision_humana">En revisión</string>
+    <string name="privacy_proposals_title">Propostas de mellora</string>
+    <string name="privacy_proposals">Se envías unha proposta desde Axustes (icona da bombilla), envíase o texto que escribes, a versión da app e un identificador aleatorio desta instalación (para amosarche as respostas). Gárdase nun servizo de Google Apps Script e nun repositorio privado de GitHub do desenvolvedor, só para estudar a idea. Non se envía o teu nome, a túa conta nin os teus adestramentos. Só se envía se ti o premes.</string>
+</resources>
