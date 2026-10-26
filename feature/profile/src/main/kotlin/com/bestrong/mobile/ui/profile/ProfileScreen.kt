@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,7 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -118,8 +118,9 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     var editingGym by rememberSaveable(stateSaver = GymSaver) { mutableStateOf<GymProfile?>(null) }
     var showAbout by rememberSaveable { mutableStateOf(false) }
     if (showAbout) AboutDialog { showAbout = false }
-    var showProposals by rememberSaveable { mutableStateOf(false) }
-    if (showProposals) ProposalsDialog { showProposals = false }
+    // Buzón de ideas abierto en «Proponer» (0) o «Mis propuestas» (1); -1, cerrado
+    var proposalsTab by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(-1) }
+    if (proposalsTab >= 0) ProposalsDialog(initialTab = proposalsTab) { proposalsTab = -1 }
     var showHelp by rememberSaveable { mutableStateOf(false) }
     var showTutorial by rememberSaveable { mutableStateOf(false) }
     if (showHelp) HelpDialog(onDismiss = { showHelp = false }, onReplayTutorial = { showHelp = false; showTutorial = true })
@@ -177,7 +178,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // Dos pestañas: el progreso (lo que se mira a menudo) y los ajustes (lo que se toca de vez en cuando)
+            // Tres pestañas: el progreso (lo que se mira a menudo), los ajustes (lo que se toca de vez en cuando) y la comunidad
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     com.bestrong.mobile.ui.components.ScreenTitle(
@@ -330,23 +331,20 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
                         )
                     }
                 }
+            } else if (tab == 2) {
+                // Comunidad: la app se hace con las ideas de quien la usa
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    CommunitySection(onPropose = { proposalsTab = 0 }, onMine = { proposalsTab = 1 }, modifier = Modifier.widthIn(max = 720.dp))
+                }
             } else {
+                // Lo primero de Ajustes, bien a la vista: proponer mejoras
+                item(span = { GridItemSpan(maxLineSpan) }) { CommunityBanner(onClick = { tab = 2 }) }
                 item { BodyDataCard(settings, vm::updateSettings) }
                 item(span = { GridItemSpan(maxLineSpan) }) { AppearanceCard(settings, vm::updateSettings) }
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                         Column(Modifier.padding(vertical = 8.dp)) {
-                            // Buzón de ideas: un icono discreto junto al título de Ajustes
-                            Row(Modifier.padding(start = 4.dp, end = 16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                                androidx.compose.material3.IconButton(onClick = { showProposals = true }) {
-                                    Icon(
-                                        Icons.Outlined.Lightbulb,
-                                        stringResource(R.string.proposals_open),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                                SectionHeader(stringResource(R.string.settings))
-                            }
+                            SectionHeader(stringResource(R.string.settings), Modifier.padding(horizontal = 16.dp))
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.weight_unit)) },
                                 trailingContent = {
@@ -637,10 +635,10 @@ private fun AutoBackupPicker(vm: ProfileViewModel) {
     )
 }
 
-/** Selector de las dos pestañas de Perfil, en píldora: la elegida, rellena con el degradado de marca. */
+/** Selector de las pestañas de Perfil (progreso, ajustes y comunidad), en píldora: la elegida, rellena con el degradado de marca. */
 @Composable
 private fun ProfileTabs(selected: Int, onSelect: (Int) -> Unit) {
-    val labels = listOf(stringResource(R.string.profile_progress), stringResource(R.string.settings))
+    val labels = listOf(stringResource(R.string.profile_progress), stringResource(R.string.settings), stringResource(R.string.community_tab))
     Row(
         Modifier.fillMaxWidth().then(Modifier.clip(androidx.compose.foundation.shape.CircleShape)).background(MaterialTheme.colorScheme.surfaceContainer).padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
