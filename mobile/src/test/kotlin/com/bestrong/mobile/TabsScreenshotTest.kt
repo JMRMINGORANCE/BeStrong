@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.captureScreenRoboImage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,9 +54,9 @@ class TabsScreenshotTest {
         compose.onNodeWithText("Comunidad").performClick()
         settle()
         shot("dark_community")
-        // El buzón de ideas, a pantalla completa y con fondo opaco
+        // El buzón de ideas, a pantalla completa y con fondo opaco (es otra ventana: captura de toda la pantalla)
         compose.onNodeWithText("Proponer una mejora").performClick()
         settle()
-        shot("dark_proposals")
+        captureScreenRoboImage("build/outputs/roborazzi/dark_proposals.png")
     }
 }
