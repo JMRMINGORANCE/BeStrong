@@ -198,8 +198,9 @@ jobs:
           pip install -q google-auth requests
           python3 .github/scripts/play_upload.py mobile/build/outputs/bundle/release/mobile-release.aab wear/build/outputs/bundle/release/wear-release.aab
 
+      # También si Google Play rechaza la subida: así el .aab se puede subir a mano desde Play Console
       - uses: actions/upload-artifact@v4
-        if: steps.secrets.outputs.ok == 'true'
+        if: always() && steps.secrets.outputs.ok == 'true'
         with:
           name: aab-play
           path: |
