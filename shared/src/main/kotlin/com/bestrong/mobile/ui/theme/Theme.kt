@@ -69,12 +69,13 @@ fun ScreenBackdrop(
     content: @Composable () -> Unit,
 ) {
     val dark = LocalScreenColor.current.luminance() < 0.5f
-    val glow by androidx.compose.animation.animateColorAsState(tint.copy(alpha = if (dark) 0.30f else 0.20f), label = "glow")
+    // Un toque de color arriba, sin teñir media pantalla (con más se veía turbio, marrón)
+    val glow by androidx.compose.animation.animateColorAsState(tint.copy(alpha = if (dark) 0.16f else 0.10f), label = "glow")
     androidx.compose.foundation.layout.Box(
         modifier.fillMaxSize()
             .background(LocalScreenColor.current)
             // Cola suave (sin cambio brusco de pendiente: se veía una línea a media pantalla)
-            .background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to glow, 0.18f to glow.copy(alpha = glow.alpha * 0.55f), 0.32f to glow.copy(alpha = glow.alpha * 0.2f), 0.5f to Color.Transparent)),
+            .background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to glow, 0.12f to glow.copy(alpha = glow.alpha * 0.5f), 0.24f to glow.copy(alpha = glow.alpha * 0.15f), 0.38f to Color.Transparent)),
     ) { content() }
 }
 val LocalAppearance = staticCompositionLocalOf { Appearance() }
@@ -98,9 +99,9 @@ private fun brandDark(accent: Accent): ColorScheme {
         onPrimaryContainer = if (orange) Color(0xFFFFDBCA) else lerp(accent.seed, Color.White, 0.82f),
         secondary = P.Amber,
         onSecondary = Color(0xFF2B1A00),
-        // Más intenso: es el fondo de los chips elegidos y tiene que verse sobre las tarjetas oscuras
-        secondaryContainer = Color(0xFF5C3F12),
-        onSecondaryContainer = Color(0xFFFFDDB0),
+        // El chip o botón segmentado elegido, en el color de acento: se ve de un vistazo (antes, marrón apagado)
+        secondaryContainer = primary,
+        onSecondaryContainer = if (orange) Color(0xFF2A0E00) else lerp(accent.seed, Color.Black, 0.75f),
         tertiary = P.Success,
         onTertiary = Color(0xFF00391A),
         tertiaryContainer = P.SuccessContainerDark,
@@ -122,19 +123,20 @@ private fun brandDark(accent: Accent): ColorScheme {
     )
 }
 
-/** Claro de marca: papel cálido, tarjetas blancas y el mismo acento con más fuerza. */
+/** Claro de marca: fondo gris muy claro, tarjetas blancas y el mismo acento con más fuerza. */
 private fun brandLight(accent: Accent): ColorScheme {
     val orange = accent == Accent.ORANGE
+    val primary = if (orange) Color(0xFFE85A0C) else lerp(accent.seed, Color.Black, 0.12f)
     return lightColorScheme(
-        primary = if (orange) Color(0xFFE85A0C) else lerp(accent.seed, Color.Black, 0.12f),
+        primary = primary,
         onPrimary = Color.White,
         primaryContainer = if (orange) P.OrangeContainerLight else lerp(accent.seed, Color.White, 0.8f),
         onPrimaryContainer = if (orange) P.OnOrangeContainerLight else lerp(accent.seed, Color.Black, 0.75f),
         secondary = P.AmberDark,
         onSecondary = Color.White,
-        // Más intenso: es el fondo de los chips elegidos y tiene que verse sobre las tarjetas beis
-        secondaryContainer = Color(0xFFFFD596),
-        onSecondaryContainer = Color(0xFF2B1A00),
+        // El chip o botón segmentado elegido, en el color de acento
+        secondaryContainer = primary,
+        onSecondaryContainer = Color.White,
         tertiary = P.SuccessDark,
         tertiaryContainer = P.SuccessContainerLight,
         background = P.LightBackground,
@@ -148,8 +150,8 @@ private fun brandLight(accent: Accent): ColorScheme {
         surfaceContainer = P.LightSurfaceMid,
         surfaceContainerHigh = P.LightSurfaceHigh,
         surfaceContainerHighest = P.LightSurfaceHighest,
-        outline = Color(0xFFB9B2AA),
-        outlineVariant = Color(0xFFDDD6CE),
+        outline = Color(0xFFB4B8BF),
+        outlineVariant = Color(0xFFDDE0E5),
     )
 }
 
