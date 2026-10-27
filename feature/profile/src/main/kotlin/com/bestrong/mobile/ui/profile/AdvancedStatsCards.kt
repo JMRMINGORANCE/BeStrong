@@ -11,11 +11,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -206,14 +210,16 @@ fun MuscleRecoveryCard(stats: AdvancedStats) {
 
 @Composable
 fun ToolsCard(onOneRm: () -> Unit, onScores: () -> Unit, onReport: () -> Unit = {}, onShareWeek: () -> Unit = {}) {
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader(stringResource(R.string.tools))
-            OutlinedButton(onClick = onOneRm, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_1rm)) }
-            OutlinedButton(onClick = onScores, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_scores)) }
-            OutlinedButton(onClick = onReport, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_monthly_report)) }
-            OutlinedButton(onClick = onShareWeek, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.tool_share_week)) }
-        }
+    // Como los Ajustes: una fila por herramienta con su icono de color (antes, cuatro botones iguales)
+    com.bestrong.mobile.ui.components.SettingsGroup(stringResource(R.string.tools)) {
+        val tint = com.bestrong.mobile.ui.components.SettingsTint
+        com.bestrong.mobile.ui.components.SettingsNavRow(stringResource(R.string.tool_1rm), Icons.Default.Calculate, tint.Orange, onOneRm)
+        com.bestrong.mobile.ui.components.SettingsDivider()
+        com.bestrong.mobile.ui.components.SettingsNavRow(stringResource(R.string.tool_scores), Icons.Default.EmojiEvents, tint.Amber, onScores)
+        com.bestrong.mobile.ui.components.SettingsDivider()
+        com.bestrong.mobile.ui.components.SettingsNavRow(stringResource(R.string.tool_monthly_report), Icons.Default.Description, tint.Blue, onReport)
+        com.bestrong.mobile.ui.components.SettingsDivider()
+        com.bestrong.mobile.ui.components.SettingsNavRow(stringResource(R.string.tool_share_week), Icons.Default.Share, tint.Green, onShareWeek)
     }
 }
 
