@@ -60,4 +60,5 @@
     <string name="perm_backup_t">Carpeta de copias automáticas</string>
     <string name="perm_backup_d">Una copia semanal de todos tus datos en la carpeta que elijas.</string>
     <string name="perm_watch_note">En el reloj, BeStrong pide los sensores, la actividad física y la ubicación la primera vez que empiezas un entreno desde él.</string>
+    <string name="hc_enable_in_settings">Activa los permisos de BeStrong aquí (Health Connect ya no muestra el aviso tras rechazarlo dos veces)</string>
 </resources>
