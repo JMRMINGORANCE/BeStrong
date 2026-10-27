@@ -108,6 +108,7 @@ class ProfileViewModel @Inject constructor(
     private val photoStore: ProgressPhotoStore,
     private val healthReader: HealthConnectReader,
     private val fullBackup: FullBackup,
+    private val watchSync: com.bestrong.mobile.sync.WatchSync,
 ) : ViewModel() {
 
     val healthReadPermissions: Set<String> = healthReader.permissions
@@ -234,9 +235,26 @@ class ProfileViewModel @Inject constructor(
     /** Todos los permisos de exportación (los nuevos, como el peso, se piden aunque ya exportes). */
     val healthConnectComplete = MutableStateFlow(true)
 
+    /** Lectura de Health Connect (peso, sueño, pulso en reposo): ninguna, alguna o todas concedidas. */
+    val healthReadState = MutableStateFlow(GrantState.NONE)
+
+    /** ¿Hay un reloj con Wear OS conectado ahora? (null mientras se comprueba). */
+    val watchConnected = MutableStateFlow<Boolean?>(null)
+
     fun refreshHealthConnect() = viewModelScope.launch {
         healthConnectGranted.value = runCatching { healthConnect.hasPermissions() }.getOrDefault(false)
         healthConnectComplete.value = runCatching { healthConnect.hasAllPermissions() }.getOrDefault(false)
+        val granted = runCatching { healthReader.granted() }.getOrDefault(emptySet())
+        val read = healthReadPermissions.filter { it in granted }
+        healthReadState.value = when {
+            read.isEmpty() -> GrantState.NONE
+            read.size == healthReadPermissions.size -> GrantState.ALL
+            else -> GrantState.SOME
+        }
+    }
+
+    fun refreshWatch() = viewModelScope.launch {
+        watchConnected.value = watchSync.hasWatch()
     }
 
     fun updateSettings(block: (UserSettings) -> UserSettings) = settingsStore.update(block)
@@ -776,6 +794,9 @@ class ProfileViewModel @Inject constructor(
     /** El ejercicio (también los propios), para su equipo en el 1RM de Perfil. */
     fun exerciseOf(id: String): com.bestrong.core.model.Exercise? = repo.exercise(id)
 }
+
+/** Permiso de varios elementos (como la lectura de Health Connect): nada, en parte o del todo. */
+enum class GrantState { NONE, SOME, ALL }
 
 enum class ExportRange { ALL, YEAR, DAYS_90, DAYS_30 }
 

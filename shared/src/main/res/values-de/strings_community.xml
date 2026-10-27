@@ -14,9 +14,9 @@
     <string name="tut_community_t">Von der Community gemacht</string>
     <string name="tut_community_d">BeStrong ist auf Forocoches entstanden und ihr macht sie besser. Unter Profil › Community schlägst du in einer Minute eine Idee vor, ohne Konto, und die guten kommen in den nächsten Versionen.</string>
     <!-- Novedades de esta versión (sustituye a whats_new_body) -->
-    <string name="whats_new_latest">• Neuer Tab Community im Profil: Verbesserungen vorschlagen und Antworten verfolgen
-• BeStrong entsteht gemeinsam: gute Ideen kommen in den nächsten Versionen
-• Cardio-Stoppuhr und Übungswechsel an der Uhr
-• Cardio in Routinen, mit Kalorien pro Block
-• Genauere Kalorien mit deinem Grundumsatz und Puls</string>
+    <string name="whats_new_latest">• Neues, aufgeräumtes Design in Hell und Dunkel
+• Einstellungen nach Themen geordnet, jedes auf einem eigenen Bildschirm
+• Neuer Bildschirm „Berechtigungen und Verbindungen“: alles mit einem Tipp einschalten
+• Tab Community: Verbesserungen vorschlagen und Antworten verfolgen
+• Cardio-Stoppuhr und Übungswechsel an der Uhr</string>
 </resources>

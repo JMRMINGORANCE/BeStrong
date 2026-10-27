@@ -1,5 +1,5 @@
-- Nueva pestaña Comunidad en Perfil: BeStrong se hace entre todos, propón mejoras y sigue sus respuestas
-- Aviso bien visible en Ajustes para proponer ideas en un minuto
+- Nuevo diseño más limpio y moderno, en claro y en oscuro
+- Ajustes ordenados por apartados, cada uno en su propia pantalla
+- Nueva pantalla «Permisos y conexiones»: ve qué está activo y actívalo todo de un toque
+- Pestaña Comunidad: propón mejoras y sigue sus respuestas
 - Cronómetro de cardio y cambio de ejercicio desde el reloj
-- Cardio dentro de las rutinas, con calorías por bloque
-- Calorías más fiables: metabolismo basal propio e intensidad según el pulso

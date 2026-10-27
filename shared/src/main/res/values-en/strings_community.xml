@@ -14,9 +14,9 @@
     <string name="tut_community_t">Built by the community</string>
     <string name="tut_community_d">BeStrong was born on Forocoches and you make it better. In Profile › Community you can suggest an idea in a minute, no account needed, and the good ones arrive in upcoming versions.</string>
     <!-- Novedades de esta versión (sustituye a whats_new_body) -->
-    <string name="whats_new_latest">• New Community tab in Profile: suggest improvements and follow the replies
-• BeStrong is built together: good ideas arrive in upcoming versions
-• Cardio timer and exercise switching from the watch
-• Cardio inside routines, with calories per block
-• More reliable calories using your basal metabolism and heart rate</string>
+    <string name="whats_new_latest">• New, cleaner design in light and dark
+• Settings grouped by topic, each on its own screen
+• New “Permissions and connections” screen: turn everything on in one tap
+• Community tab: suggest improvements and follow the replies
+• Cardio timer and exercise switching from the watch</string>
 </resources>

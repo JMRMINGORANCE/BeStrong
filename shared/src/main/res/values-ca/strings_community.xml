@@ -14,9 +14,9 @@
     <string name="tut_community_t">Feta en comunitat</string>
     <string name="tut_community_d">BeStrong va néixer a Forocoches i la milloreu vosaltres. A Perfil › Comunitat proposes una idea en un minut, sense comptes, i les bones arriben en les properes versions.</string>
     <!-- Novedades de esta versión (sustituye a whats_new_body) -->
-    <string name="whats_new_latest">• Nova pestanya Comunitat a Perfil: proposa millores i segueix-ne les respostes
-• BeStrong es fa entre tots: les bones idees arriben en les properes versions
-• Cronòmetre de cardio i canvi d\'exercici des del rellotge
-• Cardio dins de les rutines, amb calories per bloc
-• Calories més fiables amb el teu metabolisme basal i el pols</string>
+    <string name="whats_new_latest">• Nou disseny més net, en clar i en fosc
+• Configuració ordenada per apartats, cadascun a la seva pantalla
+• Nova pantalla «Permisos i connexions»: activa-ho tot d\'un toc
+• Pestanya Comunitat: proposa millores i segueix-ne les respostes
+• Cronòmetre de cardio i canvi d\'exercici des del rellotge</string>
 </resources>
