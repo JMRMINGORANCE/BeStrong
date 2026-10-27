@@ -351,6 +351,16 @@ class UiFlowTest {
         compose.onNodeWithText("Perfil").performClick()
         settle()
         shot("profile_folded")
+        // Ajustes en tema claro: el menú y la pantalla de permisos
+        compose.onNodeWithText("Ajustes").performClick()
+        settle()
+        shot("settings_folded")
+        compose.mainClock.autoAdvance = true
+        compose.onNodeWithText("Permisos y conexiones").performScrollTo()
+        compose.mainClock.autoAdvance = false
+        compose.onNodeWithText("Permisos y conexiones").performClick()
+        settle()
+        com.github.takahirom.roborazzi.captureScreenRoboImage("build/outputs/roborazzi/permissions_folded.png")
     }
 }
 
