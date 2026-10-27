@@ -60,4 +60,5 @@
     <string name="perm_backup_t">Dossier de sauvegardes automatiques</string>
     <string name="perm_backup_d">Une copie hebdomadaire de toutes tes données dans le dossier de ton choix.</string>
     <string name="perm_watch_note">Sur la montre, BeStrong demande les capteurs, l\'activité physique et la position la première fois que tu y lances une séance.</string>
+    <string name="hc_enable_in_settings">Active ici les autorisations de BeStrong (Health Connect ne demande plus après deux refus)</string>
 </resources>
