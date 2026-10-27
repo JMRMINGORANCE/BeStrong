@@ -1,3 +1,4 @@
+- Arreglado: conectar con Health Connect (guardar y leer) no hacía nada; ahora abre sus permisos si hace falta
 - Nuevo diseño más limpio y moderno, en claro y en oscuro
 - Ajustes ordenados por apartados, cada uno en su propia pantalla
 - Nueva pantalla «Permisos y conexiones»: ve qué está activo y actívalo todo de un toque

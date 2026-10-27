@@ -60,4 +60,5 @@
     <string name="perm_backup_t">Automatic backup folder</string>
     <string name="perm_backup_d">A weekly copy of all your data in the folder you choose.</string>
     <string name="perm_watch_note">On the watch, BeStrong asks for sensors, physical activity and location the first time you start a workout from it.</string>
+    <string name="hc_enable_in_settings">Turn on BeStrong\'s permissions here (Health Connect stops asking after being declined twice)</string>
 </resources>

@@ -1,9 +1,13 @@
 package com.bestrong.mobile.ui.profile
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.SystemClock
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +58,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -63,6 +68,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.training.GymProfile
@@ -710,21 +716,55 @@ internal fun rememberNotificationRequest(onResult: () -> Unit): () -> Unit {
     }
 }
 
-/** Lanzadores de Health Connect (escritura y lectura), con lo que pasa al volver. */
+/**
+ * Lanzadores de Health Connect (escritura y lectura), con lo que pasa al volver.
+ *
+ * Health Connect deja de mostrar su diálogo tras denegar dos veces (o si lo bloquea el sistema) y devuelve al
+ * instante sin conceder nada: parecía que el botón no hacía nada. En ese caso se abren directamente los permisos de
+ * BeStrong dentro de Health Connect, donde se pueden activar a mano.
+ */
 @Composable
 internal fun rememberHealthLaunchers(vm: ProfileViewModel, onResult: () -> Unit): Pair<() -> Unit, () -> Unit> {
+    val context = LocalContext.current
+    var launchedAt by remember { mutableLongStateOf(0L) }
+    fun silentlyRefused(granted: Set<String>, wanted: Set<String>) =
+        granted.none { it in wanted } && SystemClock.elapsedRealtime() - launchedAt < SILENT_REFUSAL_MS
     val write = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
         // Basta con la sesión; si no se conceden calorías o pulso, se exporta lo demás
         if (vm.healthConnectRequired in granted) vm.updateSettings { it.copy(healthConnectExport = true) }
+        if (silentlyRefused(granted, vm.healthConnectPermissions)) openHealthConnectPermissions(context)
         vm.refreshHealthConnect()
         onResult()
     }
-    val read = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) {
+    val read = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
+        if (silentlyRefused(granted, vm.healthReadPermissions)) openHealthConnectPermissions(context)
         vm.importHealthWeights()
         vm.refreshHealthConnect()
         onResult()
     }
-    return { write.launch(vm.healthConnectPermissions) } to { read.launch(vm.healthReadPermissions) }
+    fun launch(block: () -> Unit) {
+        launchedAt = SystemClock.elapsedRealtime()
+        // Si ni siquiera se puede abrir el diálogo, a los ajustes de Health Connect
+        if (runCatching(block).isFailure) openHealthConnectPermissions(context)
+    }
+    return { launch { write.launch(vm.healthConnectPermissions) } } to { launch { read.launch(vm.healthReadPermissions) } }
+}
+
+/** Menos que esto entre pedir y recibir la respuesta: no llegó a verse ningún diálogo. */
+private const val SILENT_REFUSAL_MS = 900L
+
+/** Abre los permisos de BeStrong en Health Connect (o Health Connect sin más si el sistema no deja ir tan directo). */
+internal fun openHealthConnectPermissions(context: Context) {
+    val pkg = context.packageName
+    val intents = buildList {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            add(Intent("android.health.connect.action.MANAGE_HEALTH_PERMISSIONS").putExtra(Intent.EXTRA_PACKAGE_NAME, pkg))
+        }
+        add(Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS))
+        add(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.healthdata")))
+    }
+    val opened = intents.any { intent -> runCatching { context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.isSuccess }
+    if (opened) Toast.makeText(context, R.string.hc_enable_in_settings, Toast.LENGTH_LONG).show()
 }
 
 @Composable

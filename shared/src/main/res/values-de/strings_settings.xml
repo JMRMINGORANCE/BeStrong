@@ -60,4 +60,5 @@
     <string name="perm_backup_t">Ordner für automatische Backups</string>
     <string name="perm_backup_d">Eine wöchentliche Kopie aller Daten im Ordner deiner Wahl.</string>
     <string name="perm_watch_note">Auf der Uhr fragt BeStrong beim ersten dort gestarteten Training nach Sensoren, körperlicher Aktivität und Standort.</string>
+    <string name="hc_enable_in_settings">Aktiviere hier die Berechtigungen von BeStrong (Health Connect fragt nach zweimaliger Ablehnung nicht mehr)</string>
 </resources>
