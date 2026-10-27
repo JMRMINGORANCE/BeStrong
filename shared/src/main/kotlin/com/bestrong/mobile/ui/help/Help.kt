@@ -493,22 +493,17 @@ val LocalTips = staticCompositionLocalOf { Tips(emptySet()) {} }
 fun TipCard(id: String, @StringRes text: Int, modifier: Modifier = Modifier) {
     val tips = LocalTips.current
     if (id in tips.dismissed) return
-    // Como los demás paneles: esquinas grandes y la bombilla en su círculo
+    // Como los demás paneles: esquinas grandes, fondo neutro y la bombilla en su cuadrado de color
     Card(
         modifier,
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
     ) {
         Row(Modifier.padding(start = 14.dp, end = 4.dp, top = 12.dp, bottom = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Default.Lightbulb, null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(20.dp))
-            }
+            com.bestrong.mobile.ui.components.IconTile(Icons.Default.Lightbulb, com.bestrong.mobile.ui.components.SettingsTint.Amber, size = 34)
             // El botón debajo: al lado estrechaba el consejo a una palabra por línea
-            Column(Modifier.weight(1f).padding(horizontal = 8.dp)) {
-                Text(stringResource(text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
+            Column(Modifier.weight(1f).padding(horizontal = 10.dp)) {
+                Text(stringResource(text), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
                 TextButton(onClick = { tips.onDismiss(id) }, modifier = Modifier.align(Alignment.End)) { Text(stringResource(R.string.got_it)) }
             }
         }
