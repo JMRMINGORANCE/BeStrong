@@ -60,4 +60,5 @@
     <string name="perm_backup_t">Carpeta de còpies automàtiques</string>
     <string name="perm_backup_d">Una còpia setmanal de totes les teves dades a la carpeta que triïs.</string>
     <string name="perm_watch_note">Al rellotge, BeStrong demana els sensors, l\'activitat física i la ubicació la primera vegada que comences un entrenament des d\'ell.</string>
+    <string name="hc_enable_in_settings">Activa els permisos de BeStrong aquí (Health Connect ja no ho pregunta després de rebutjar-ho dues vegades)</string>
 </resources>
