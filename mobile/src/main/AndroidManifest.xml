@@ -13,21 +13,21 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <!-- Android 16: notificación del entreno como Live Update (Now Bar en Samsung) -->
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
-    <uses-permission android:name="android.health.permission.WRITE_EXERCISE" />
-    <uses-permission android:name="android.health.permission.WRITE_TOTAL_CALORIES_BURNED" />
-    <uses-permission android:name="android.health.permission.WRITE_HEART_RATE" />
-    <uses-permission android:name="android.health.permission.WRITE_WEIGHT" />
-    <uses-permission android:name="android.health.permission.WRITE_BODY_FAT" />
+    <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
+    <uses-permission android:name="android.permission.health.WRITE_TOTAL_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.WRITE_WEIGHT" />
+    <uses-permission android:name="android.permission.health.WRITE_BODY_FAT" />
     <!-- Peso corporal y preparación del día (sueño y pulso en reposo) -->
-    <uses-permission android:name="android.health.permission.READ_WEIGHT" />
-    <uses-permission android:name="android.health.permission.READ_SLEEP" />
-    <uses-permission android:name="android.health.permission.READ_RESTING_HEART_RATE" />
-    <uses-permission android:name="android.health.permission.READ_HEIGHT" />
-    <uses-permission android:name="android.health.permission.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    <uses-permission android:name="android.permission.health.READ_RESTING_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_HEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
     <!-- Historial de más de 30 días (peso de los últimos 90 días, altura) -->
-    <uses-permission android:name="android.health.permission.READ_HEALTH_DATA_HISTORY" />
-    <uses-permission android:name="android.health.permission.WRITE_ACTIVE_CALORIES_BURNED" />
-    <uses-permission android:name="android.health.permission.WRITE_DISTANCE" />
+    <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
+    <uses-permission android:name="android.permission.health.WRITE_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.WRITE_DISTANCE" />
 
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
