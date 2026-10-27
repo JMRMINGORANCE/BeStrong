@@ -60,4 +60,5 @@
     <string name="perm_backup_t">Cartafol de copias automáticas</string>
     <string name="perm_backup_d">Unha copia semanal de todos os teus datos no cartafol que escollas.</string>
     <string name="perm_watch_note">No reloxo, BeStrong pide os sensores, a actividade física e a localización a primeira vez que comezas un adestramento desde el.</string>
+    <string name="hc_enable_in_settings">Activa aquí os permisos de BeStrong (Health Connect xa non pregunta tras rexeitalo dúas veces)</string>
 </resources>
