@@ -14,9 +14,9 @@
     <string name="tut_community_t">Faite par la communauté</string>
     <string name="tut_community_d">BeStrong est née sur Forocoches et c\'est vous qui l\'améliorez. Dans Profil › Communauté, tu proposes une idée en une minute, sans compte, et les bonnes arrivent dans les prochaines versions.</string>
     <!-- Novedades de esta versión (sustituye a whats_new_body) -->
-    <string name="whats_new_latest">• Nouvel onglet Communauté dans Profil : propose des améliorations et suis les réponses
-• BeStrong se fait ensemble : les bonnes idées arrivent dans les prochaines versions
-• Chrono de cardio et changement d\'exercice depuis la montre
-• Cardio dans les routines, avec calories par bloc
-• Calories plus fiables avec ton métabolisme de base et ton pouls</string>
+    <string name="whats_new_latest">• Nouveau design plus épuré, en clair et en sombre
+• Réglages classés par thème, chacun sur son écran
+• Nouvel écran « Autorisations et connexions » : tout activer d\'un geste
+• Onglet Communauté : propose des améliorations et suis les réponses
+• Chrono de cardio et changement d\'exercice depuis la montre</string>
 </resources>
