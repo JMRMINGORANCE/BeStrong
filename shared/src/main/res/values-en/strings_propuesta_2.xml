@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuesta #2: permisos tras la bienvenida del primer arranque -->
+<resources>
+    <string name="onb_perm_title">Turn on what you want to use</string>
+    <string name="onb_perm_body">Everything is optional: BeStrong works just the same without it. Notifications tell you when your rest is over; Health Connect shares your workouts with other health apps.</string>
+    <string name="onb_perm_later">Not now</string>
+    <string name="onb_perm_continue">Continue</string>
+    <string name="onb_perm_hint">You can change this any time in Profile → Settings → Permissions and connections.</string>
+</resources>
