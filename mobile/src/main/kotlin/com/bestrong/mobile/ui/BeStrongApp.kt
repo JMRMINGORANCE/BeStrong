@@ -20,7 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -67,6 +70,7 @@ import com.bestrong.mobile.ui.planning.PlanningScreen
 import com.bestrong.mobile.ui.planning.PlanningViewModel
 import com.bestrong.mobile.ui.planning.ProgramEditorScreen
 import com.bestrong.mobile.ui.profile.MeasurementsScreen
+import com.bestrong.mobile.ui.profile.OnboardingPermissionsDialog
 import com.bestrong.mobile.ui.profile.ProfileScreen
 import com.bestrong.mobile.ui.profile.ProfileViewModel
 import com.bestrong.mobile.ui.routines.RoutineEditorScreen
@@ -128,6 +132,10 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
     val settings by appVm.settings.collectAsStateWithLifecycle()
     val request by launchRequest.collectAsStateWithLifecycle()
 
+    // Tras la bienvenida del primer arranque, los permisos (notificaciones y Health Connect) en una pantalla
+    var askPermissions by rememberSaveable { mutableStateOf(false) }
+    if (askPermissions) OnboardingPermissionsDialog(hiltViewModel<ProfileViewModel>(), onDone = { askPermissions = false })
+
     // Tutorial la primera vez; novedades una vez tras cada actualización
     if (!isRobolectric) {
         if (!settings.tutorialDone) {
@@ -135,7 +143,10 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             val gymName = stringResource(R.string.gym_default_gym)
             val homeName = stringResource(R.string.gym_default_home)
             TutorialDialog(
-                onDone = { appVm.update { it.copy(tutorialDone = true, lastSeenVersion = BuildConfig.VERSION_CODE) } },
+                onDone = {
+                    appVm.update { it.copy(tutorialDone = true, lastSeenVersion = BuildConfig.VERSION_CODE) }
+                    askPermissions = true
+                },
                 // En EE. UU. (y Liberia, Myanmar) se entrena en libras: la opción marcada de partida
                 unit = if (java.util.Locale.getDefault().country in POUND_COUNTRIES) com.bestrong.core.util.WeightUnit.LB else settings.unit,
                 weeklyGoal = settings.weeklyGoal,
