@@ -1,7 +1,7 @@
 package com.bestrong.mobile.ui.profile
 
 import android.content.Context
-import java.net.HttpURLConnection
+import com.bestrong.mobile.net.AppsScript
 import java.net.URL
 import java.net.URLEncoder
 import java.util.UUID
@@ -24,9 +24,8 @@ data class ProposalResult(val ok: Boolean, val error: String? = null)
  * escribe, la versión de la app y un identificador aleatorio de este dispositivo para enseñarle sus respuestas.
  */
 object ProposalsApi {
-    private const val ENDPOINT = "https://script.google.com/macros/s/AKfycbymPpeaVYJgZWpKv98aTi71Y84DxffJudFzdTCaJFeWfiHQK0e5_NYnIqVgYv2G_XBG/exec"
-    private const val APP_KEY = "bs-propuestas-v1"
-    private const val TIMEOUT_MS = 20_000
+    private const val ENDPOINT = AppsScript.ENDPOINT
+    private const val APP_KEY = AppsScript.APP_KEY
 
     /** Identificador aleatorio de esta instalación (no está ligado a la cuenta ni al dispositivo). */
     fun deviceId(context: Context): String {
@@ -53,7 +52,7 @@ object ProposalsApi {
     suspend fun list(context: Context): List<Proposal>? = withContext(Dispatchers.IO) {
         runCatching {
             val device = URLEncoder.encode(deviceId(context), "UTF-8")
-            val json = JSONObject(request(URL("$ENDPOINT?key=$APP_KEY&device=$device"), null))
+            val json = JSONObject(AppsScript.request(URL("$ENDPOINT?key=$APP_KEY&device=$device"), null))
             if (!json.optBoolean("ok")) null else parseProposals(json.optJSONArray("proposals") ?: JSONArray())
         }.getOrNull()
     }
@@ -73,45 +72,12 @@ object ProposalsApi {
     }
 
     private suspend fun post(body: JSONObject): JSONObject? = withContext(Dispatchers.IO) {
-        runCatching { JSONObject(request(URL(ENDPOINT), body.toString())) }.getOrNull()
+        runCatching { JSONObject(AppsScript.request(URL(ENDPOINT), body.toString())) }.getOrNull()
     }
 
     private fun result(json: JSONObject?): ProposalResult = when {
         json == null -> ProposalResult(false, "red")
         json.optBoolean("ok") -> ProposalResult(true)
         else -> ProposalResult(false, json.optString("error", "servidor"))
-    }
-
-    /** Apps Script responde con una redirección: se sigue a mano para no perder la respuesta. */
-    private fun request(url: URL, body: String?): String {
-        var target = url
-        var payload = body
-        repeat(3) {
-            val bytes = payload?.toByteArray()
-            val conn = (target.openConnection() as HttpURLConnection).apply {
-                connectTimeout = TIMEOUT_MS
-                readTimeout = TIMEOUT_MS
-                instanceFollowRedirects = false
-                if (bytes != null) {
-                    requestMethod = "POST"
-                    doOutput = true
-                    setRequestProperty("Content-Type", "application/json; charset=utf-8")
-                    outputStream.use { it.write(bytes) }
-                }
-            }
-            try {
-                val code = conn.responseCode
-                val location = conn.getHeaderField("Location")
-                if (code in 300..399 && location != null) {
-                    target = URL(location)
-                    payload = null
-                } else {
-                    return conn.inputStream.bufferedReader().use { it.readText() }
-                }
-            } finally {
-                conn.disconnect()
-            }
-        }
-        error("Demasiadas redirecciones")
     }
 }
