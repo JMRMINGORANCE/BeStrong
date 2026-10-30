@@ -10,6 +10,7 @@
  *   {action:"create", key, device, title, what, how, version}  → crea la propuesta
  *   {action:"reply",  key, device, number, text}               → el usuario responde a una pregunta
  * GET ?key=…&device=…                                          → lista de propuestas de ese dispositivo
+ * GET ?key=…&action=avisos                                     → avisos del equipo vigentes (avisos.json)
  */
 
 var REPO = 'JMRMINGORANCE/bestrong-propuestas';
@@ -38,6 +39,7 @@ function doGet(e) {
   try {
     var p = e.parameter || {};
     if (p.key !== APP_KEY) return json_({ok: false, error: 'clave'});
+    if (p.action === 'avisos') return json_({ok: true, avisos: avisos_()});
     var device = cleanDevice_(p.device);
     if (!device) return json_({ok: false, error: 'dispositivo'});
     return json_({ok: true, proposals: list_(device)});
@@ -100,6 +102,62 @@ function list_(device) {
         }),
     };
   });
+}
+
+/**
+ * Avisos del equipo: archivo avisos.json en la raíz del repositorio de propuestas (solo lo edita el
+ * equipo; nunca sale de issues, para que una propuesta no pueda convertirse en aviso). Formato:
+ *   {"avisos": [{"id": 1, "fecha": "2026-10-30", "caduca": "2026-11-15",
+ *                "titulo": {"es": "…", "en": "…"}, "texto": {"es": "…", "en": "…"}}]}
+ * «titulo» y «texto» pueden ser también un texto sin idiomas. Sin «caduca», vale 14 días desde «fecha».
+ * Se guarda 15 minutos en caché para no gastar el cupo de GitHub con cada móvil.
+ */
+var AVISOS_CACHE_S = 900;
+var AVISOS_DIAS = 14;
+
+function avisos_() {
+  var cache = CacheService.getScriptCache();
+  var hit = cache.get('avisos');
+  if (hit) return JSON.parse(hit);
+  var today = Utilities.formatDate(new Date(), 'Europe/Madrid', 'yyyy-MM-dd');
+  var data;
+  try {
+    var file = gh_('get', '/repos/' + REPO + '/contents/avisos.json');
+    data = JSON.parse(Utilities.newBlob(Utilities.base64Decode(file.content)).getDataAsString());
+  } catch (err) {
+    console.log('avisos.json: ' + err.message);
+    data = {avisos: []};
+  }
+  var out = (data.avisos || [])
+    .filter(function (a) { return parseInt(a.id, 10) > 0 && vigente_(a, today); })
+    .map(function (a) { return {id: parseInt(a.id, 10), titulo: idiomas_(a.titulo, 80), texto: idiomas_(a.texto, 500)}; })
+    .sort(function (x, y) { return y.id - x.id; })
+    .slice(0, 5);
+  cache.put('avisos', JSON.stringify(out), AVISOS_CACHE_S);
+  return out;
+}
+
+function vigente_(a, today) {
+  var fecha = String(a.fecha || '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) || fecha > today) return false;
+  var caduca = String(a.caduca || '');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(caduca)) {
+    var d = new Date(fecha + 'T12:00:00Z');
+    d.setUTCDate(d.getUTCDate() + AVISOS_DIAS);
+    caduca = Utilities.formatDate(d, 'UTC', 'yyyy-MM-dd');
+  }
+  return today <= caduca;
+}
+
+/** Texto plano por idioma ({es: "…"}), recortado. */
+function idiomas_(v, max) {
+  var out = {};
+  if (typeof v === 'string') {
+    out.es = text_(v, max);
+  } else if (v && typeof v === 'object') {
+    Object.keys(v).slice(0, 10).forEach(function (k) { if (/^[a-z]{2}$/.test(k)) out[k] = text_(v[k], max); });
+  }
+  return out;
 }
 
 function status_(issue) {
