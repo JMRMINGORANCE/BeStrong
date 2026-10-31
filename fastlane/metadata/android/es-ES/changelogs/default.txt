@@ -1,7 +1,8 @@
-- Arreglado: conectar con Health Connect (guardar y leer) no hacía nada; ahora abre sus permisos si hace falta
+- Arreglado: conectar con Health Connect no hacía nada; ahora abre sus permisos
 - Nuevo diseño más limpio y moderno, en claro y en oscuro
 - Al empezar, activa los permisos en una sola pantalla
 - Ajustes ordenados por apartados, cada uno en su propia pantalla
-- Nueva pantalla «Permisos y conexiones»: ve qué está activo y actívalo todo de un toque
+- Nueva pantalla «Permisos y conexiones»: actívalo todo de un toque
 - Pestaña Comunidad: propón mejoras y sigue sus respuestas
 - Cronómetro de cardio y cambio de ejercicio desde el reloj
+- Avisos del equipo con las novedades
