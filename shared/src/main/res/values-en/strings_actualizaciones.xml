@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Versión nueva en Google Play (AppUpdates, UpdateCheckWorker) -->
+<resources>
+    <string name="update_available_title">New version of BeStrong</string>
+    <string name="update_available_text">A new version is available. It downloads in the background while you keep using the app.</string>
+    <string name="update_now">Update</string>
+    <string name="update_later">Not now</string>
+    <string name="update_ready_title">Update ready</string>
+    <string name="update_ready_text">The new version has been downloaded. Restart the app to install it.</string>
+    <string name="update_restart">Restart</string>
+    <string name="update_notification_text">Tap to open the app and update.</string>
+</resources>
