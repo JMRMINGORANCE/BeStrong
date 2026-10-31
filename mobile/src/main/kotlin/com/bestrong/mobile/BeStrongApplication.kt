@@ -18,6 +18,7 @@ import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.ExerciseMediaStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.di.ApplicationScope
+import com.bestrong.mobile.notify.AnnouncementsWorker
 import com.bestrong.mobile.notify.ReminderWorker
 import com.bestrong.mobile.notify.WeeklySummaryWorker
 import com.bestrong.mobile.shared.R
@@ -65,6 +66,16 @@ class AppSync @Inject constructor(
 ) {
     /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
     suspend fun pushToWatchNow() = watchPush.pushToWatchNow()
+
+    /** Trabajos en segundo plano que no dependen de los ajustes. */
+    private fun scheduleBackgroundWork() {
+        // Animaciones de ejercicios en caché para el gimnasio sin cobertura (solo con Wi-Fi)
+        runCatching { ImagePrefetchWorker.schedule(context) }
+        // Resumen de la semana el domingo por la tarde
+        runCatching { WeeklySummaryWorker.schedule(context) }
+        // Avisos del equipo (cada pocas horas, solo con conexión)
+        runCatching { AnnouncementsWorker.schedule(context) }
+    }
 
     private suspend fun scheduleCardioNudge() =
         settings.settings.map { it.cardioNudgeDay }.distinctUntilChanged().collect { day ->
@@ -217,10 +228,7 @@ class AppSync @Inject constructor(
                 }
             }
         }
-        // Animaciones de ejercicios en caché para el gimnasio sin cobertura (solo con Wi-Fi)
-        runCatching { ImagePrefetchWorker.schedule(context) }
-        // Resumen de la semana el domingo por la tarde
-        runCatching { WeeklySummaryWorker.schedule(context) }
+        scheduleBackgroundWork()
         // Empujón si el cardio de la semana va por detrás del objetivo, el día elegido (se reprograma si cambia)
         scope.launch { scheduleCardioNudge() }
         scope.launch { notifyCardioGoal() }

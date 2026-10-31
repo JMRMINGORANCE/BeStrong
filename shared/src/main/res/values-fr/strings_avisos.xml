@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Avisos del equipo (AnnouncementsWorker) -->
+<resources>
+    <string name="notif_channel_announcements">Annonces de BeStrong</string>
+    <string name="notif_announcement_title">Annonce de BeStrong</string>
+</resources>
