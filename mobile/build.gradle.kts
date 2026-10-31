@@ -104,6 +104,8 @@ dependencies {
     implementation(libs.coil.gif)
     // Códigos QR para compartir rutinas
     implementation(libs.zxing.core)
+    // Actualizaciones dentro de la app (Google Play In-App Updates): avisa de versiones nuevas con un botón
+    implementation(libs.play.app.update)
     implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
