@@ -23,6 +23,8 @@ import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.ui.BeStrongApp
 import com.bestrong.mobile.ui.theme.BeStrongTheme
 import com.bestrong.mobile.ui.workout.RestPip
+import com.bestrong.mobile.update.AppUpdates
+import com.bestrong.mobile.update.UpdateDialog
 import com.bestrong.mobile.workout.RestTimerController
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -62,6 +64,9 @@ class MainActivity : ComponentActivity() {
     private val inPip = MutableStateFlow(false)
 
     private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
+
+    /** Versión nueva en Google Play: diálogo con «Actualizar» (y «Reiniciar» cuando se ha descargado). */
+    private val updates = AppUpdates(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,10 +124,19 @@ class MainActivity : ComponentActivity() {
                 } else {
                     holder.SaveableStateProvider("app") {
                         BeStrongApp(launchRequest = launchRequest, onLaunchHandled = { launchRequest.value = null })
+                        UpdatePromptIfIdle()
                     }
                 }
             }
         }
+    }
+
+    /** El aviso de versión nueva espera a que no haya un entreno en marcha (no interrumpe una serie). */
+    @androidx.compose.runtime.Composable
+    private fun UpdatePromptIfIdle() {
+        val prompt by updates.prompt.collectAsStateWithLifecycle()
+        val active by repository.activeWorkout.collectAsStateWithLifecycle()
+        if (active == null) UpdateDialog(prompt, updates)
     }
 
     private fun updatePipParams(active: Boolean) {
