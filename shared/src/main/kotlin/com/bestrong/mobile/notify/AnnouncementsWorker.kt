@@ -13,7 +13,9 @@ import androidx.core.content.ContextCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -39,6 +41,7 @@ class AnnouncementsWorker(context: Context, params: WorkerParameters) : Coroutin
         // Sin conexión o sin respuesta del script: se prueba en la siguiente vuelta
         val list = runCatching { fetch() }.getOrNull().orEmpty()
         val prefs = applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        prefs.edit().putLong(KEY_LAST_CHECK, System.currentTimeMillis()).apply()
         pick(list, prefs.getInt(KEY_SEEN, 0))?.let { next ->
             notify(applicationContext, next)
             prefs.edit().putInt(KEY_SEEN, list.maxOf { it.id }).apply()
@@ -80,6 +83,9 @@ class AnnouncementsWorker(context: Context, params: WorkerParameters) : Coroutin
         private const val NAME = "announcements"
         private const val PREFS = "announcements"
         private const val KEY_SEEN = "seen"
+        private const val KEY_LAST_CHECK = "last_check"
+        private const val NAME_NOW = "announcements-now"
+        private const val MIN_GAP_MS = 30 * 60 * 1000L
         private const val CHANNEL = "announcements"
         private const val NOTIFICATION_ID = 27
         private const val EVERY_HOURS = 6L
@@ -91,6 +97,19 @@ class AnnouncementsWorker(context: Context, params: WorkerParameters) : Coroutin
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .build()
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.KEEP, request)
+        }
+
+        /**
+         * Al abrir la app: comprobación inmediata (con conexión), para no esperar a la periódica, que Android
+         * puede retrasar horas. Como mucho una cada 30 minutos.
+         */
+        fun checkNow(context: Context) {
+            val last = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getLong(KEY_LAST_CHECK, 0)
+            if (System.currentTimeMillis() - last < MIN_GAP_MS) return
+            val request = OneTimeWorkRequestBuilder<AnnouncementsWorker>()
+                .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+                .build()
+            WorkManager.getInstance(context).enqueueUniqueWork(NAME_NOW, ExistingWorkPolicy.KEEP, request)
         }
 
         /** El aviso más reciente que aún no se ha enseñado (uno solo, aunque haya varios nuevos). */
