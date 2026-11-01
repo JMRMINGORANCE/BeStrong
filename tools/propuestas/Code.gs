@@ -39,7 +39,10 @@ function doGet(e) {
   try {
     var p = e.parameter || {};
     if (p.key !== APP_KEY) return json_({ok: false, error: 'clave'});
-    if (p.action === 'avisos') return json_({ok: true, avisos: avisos_()});
+    if (p.action === 'avisos') {
+      var r = avisos_();
+      return json_(r.error ? {ok: true, avisos: r.list, error: r.error} : {ok: true, avisos: r.list});
+    }
     var device = cleanDevice_(p.device);
     if (!device) return json_({ok: false, error: 'dispositivo'});
     return json_({ok: true, proposals: list_(device)});
@@ -118,23 +121,41 @@ var AVISOS_DIAS = 14;
 function avisos_() {
   var cache = CacheService.getScriptCache();
   var hit = cache.get('avisos');
-  if (hit) return JSON.parse(hit);
+  if (hit) return {list: JSON.parse(hit)};
   var today = Utilities.formatDate(new Date(), 'Europe/Madrid', 'yyyy-MM-dd');
   var data;
   try {
-    var file = gh_('get', '/repos/' + REPO + '/contents/avisos.json');
-    data = JSON.parse(Utilities.newBlob(Utilities.base64Decode(file.content)).getDataAsString());
+    data = leerAvisos_();
   } catch (err) {
-    console.log('avisos.json: ' + err.message);
-    data = {avisos: []};
+    // Sin caché: en cuanto se arregle, se lee bien a la siguiente
+    console.error('avisos.json: ' + err.message);
+    return {list: [], error: String(err.message).slice(0, 120)};
   }
-  var out = (data.avisos || [])
+  var list = (data.avisos || [])
     .filter(function (a) { return parseInt(a.id, 10) > 0 && vigente_(a, today); })
     .map(function (a) { return {id: parseInt(a.id, 10), titulo: idiomas_(a.titulo, 80), texto: idiomas_(a.texto, 500)}; })
     .sort(function (x, y) { return y.id - x.id; })
     .slice(0, 5);
-  cache.put('avisos', JSON.stringify(out), AVISOS_CACHE_S);
-  return out;
+  cache.put('avisos', JSON.stringify(list), AVISOS_CACHE_S);
+  return {list: list};
+}
+
+/** avisos.json tal cual (formato «raw» de GitHub: sin base64). */
+function leerAvisos_() {
+  var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var res = UrlFetchApp.fetch('https://api.github.com/repos/' + REPO + '/contents/avisos.json', {
+    muteHttpExceptions: true,
+    headers: {Authorization: 'Bearer ' + token, Accept: 'application/vnd.github.raw+json', 'X-GitHub-Api-Version': '2022-11-28'},
+  });
+  var code = res.getResponseCode();
+  if (code !== 200) throw new Error('GitHub ' + code + ': ' + res.getContentText().slice(0, 80));
+  return JSON.parse(res.getContentText('UTF-8'));
+}
+
+/** Prueba manual desde el editor: elige «probarAvisos» y pulsa Ejecutar; el resultado sale en el registro. */
+function probarAvisos() {
+  CacheService.getScriptCache().remove('avisos');
+  console.log(JSON.stringify(avisos_()));
 }
 
 function vigente_(a, today) {
