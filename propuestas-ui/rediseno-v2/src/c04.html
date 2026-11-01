@@ -1,0 +1,210 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame15.css">
+<style>
+:root{--sheet:#1b1f21;--bg:#262C2F;--ink:#EEEDE6;--muted:#97A0A3;--accent:#F2D45C;--display:'Space Grotesk';--body:'Space Grotesk';--mono:'Space Mono';--rule:#3a4246;--y:#F2D45C;--pk:#F29A8E;--bl:#8FC7E8}
+body{background:radial-gradient(1000px 700px at 70% 15%,#252a2d,#16191b 75%)}
+.meta h1{font-family:'Kalam';font-weight:700;font-size:64px;color:var(--y);letter-spacing:0}
+.k{font-family:'Kalam';font-weight:700}
+.chalk{filter:url(#chalk)}
+.scr{background:#262C2F}
+.scr:before{content:"";position:absolute;inset:0;background:radial-gradient(500px 300px at 30% 10%,rgba(255,255,255,.05),transparent 70%),radial-gradient(400px 400px at 80% 90%,rgba(255,255,255,.035),transparent 70%);pointer-events:none}
+.grain{position:absolute;inset:0;width:100%;height:100%;opacity:.22;mix-blend-mode:screen;pointer-events:none}
+.pad{padding:4px 20px;position:relative;z-index:1}
+.hd{margin:10px 0 8px}
+.hd small{font:400 15px 'Kalam';color:var(--muted)}
+.hd .t{font:700 22px/1 'Kalam';color:var(--y);margin-top:6px}
+.hd h2{font:700 34px/1 'Space Grotesk';letter-spacing:-1px;margin-top:4px}
+.under{display:block;margin-top:2px}
+.board{position:relative;padding:16px 16px 14px;margin-top:12px}
+.board>svg.fr{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;font:500 14px 'Space Grotesk'}
+.row .w{font:700 17px 'Kalam';color:var(--y)}
+.row .w.pk{color:var(--pk)}
+.meta2{display:flex;gap:14px;font:400 14px 'Kalam';color:var(--muted);margin-bottom:6px}
+.cta{display:flex;gap:10px;margin-top:12px}
+.cta .b{flex:1;height:50px;border-radius:14px;background:var(--y);color:#262C2F;font:700 15px/50px 'Space Grotesk';display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.cta .w2{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;font-size:21px;box-shadow:inset 0 0 0 2px rgba(238,237,230,.7)}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px}
+.sec b{font:600 15px 'Space Grotesk'}
+.sec span{font:700 16px 'Kalam';color:var(--y)}
+.tw{display:flex;align-items:center;gap:14px;margin-top:6px}
+.days{display:flex;justify-content:space-between;flex:1}
+.days span{position:relative;width:28px;height:28px;display:grid;place-items:center;font:700 15px 'Kalam';color:var(--muted)}
+.days span.d{color:var(--ink)}
+.days span svg{position:absolute;inset:-4px;width:36px;height:36px;overflow:visible}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.stat{position:relative;padding:12px 14px}
+.stat small{font:500 12px 'Space Grotesk';color:var(--muted)}
+.stat b{display:block;font:700 30px/1.1 'Space Grotesk';letter-spacing:-1px}
+.stat em{position:absolute;right:10px;top:8px;font:700 17px 'Kalam';font-style:normal;color:var(--pk);transform:rotate(-8deg)}
+.nav{position:absolute;left:0;right:0;bottom:0;height:72px;display:flex;justify-content:space-around;align-items:center;z-index:2;background:linear-gradient(180deg,rgba(38,44,47,0),#20262a 30%);border-top:2px solid #4a3a2a}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:3px;font:400 13px 'Kalam';color:var(--muted)}
+.nav div i{font-size:21px}
+.nav .on{color:var(--ink)}
+.note{margin-top:12px;padding:10px 14px;border-radius:12px;border:2px dashed rgba(242,154,142,.45);font:500 13px/1.45 'Space Grotesk';color:#cfd3d0}
+.note .k{color:var(--pk);font-size:16px;margin-right:4px}
+.pr{display:flex;align-items:center;gap:8px;margin-top:18px;transform:rotate(-2deg)}
+.pr span{font-size:19px;color:var(--pk);line-height:1.1}
+/* entreno */
+.ab{display:flex;align-items:center;gap:10px;margin:8px 0 6px}
+.ab .c{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;box-shadow:inset 0 0 0 2px rgba(238,237,230,.6)}
+.ab .t{flex:1}.ab b{display:block;font:700 22px/1 'Space Grotesk'}.ab span{font:400 14px 'Kalam';color:var(--muted)}
+.ab .f{height:38px;padding:0 14px;border-radius:12px;font:700 13px/38px 'Space Grotesk';color:var(--pk);box-shadow:inset 0 0 0 2px var(--pk)}
+.rest{display:flex;align-items:center;gap:16px;margin-top:8px}
+.rc{position:relative;width:118px;height:118px;flex-shrink:0}
+.rc svg{position:absolute;inset:0;overflow:visible}
+.rc b{position:absolute;inset:0;display:grid;place-items:center;font:700 36px 'Kalam';color:var(--ink);padding-top:6px}
+.rest .r small{font:700 16px 'Kalam';color:var(--y)}
+.rest .r p{font:500 13px/1.4 'Space Grotesk';color:var(--muted);margin:4px 0 10px}
+.rest .r p b{color:var(--ink)}
+.rest .btns{display:flex;gap:6px}
+.rest .btns div{white-space:nowrap;height:34px;padding:0 9px;border-radius:10px;font:700 12px/34px 'Space Grotesk';box-shadow:inset 0 0 0 1.5px rgba(238,237,230,.55)}
+.rest .btns .s{background:var(--ink);color:#262C2F;box-shadow:none}
+.ex{margin-top:16px}
+.ex .h{display:flex;justify-content:space-between;align-items:baseline}
+.ex .h b{font:700 19px 'Space Grotesk'}
+.ex .h span{font:400 14px 'Kalam';color:var(--muted)}
+.sr{position:relative;display:grid;grid-template-columns:30px 1fr 74px 30px;align-items:center;padding:9px 6px;font:600 17px 'Space Grotesk'}
+.sr .n{font:700 16px 'Kalam';color:var(--muted)}
+.sr .p{font:400 14px 'Kalam';color:var(--muted)}
+.sr .ok{color:var(--y);font-size:22px;justify-self:end}
+.sr.cur svg.box{position:absolute;inset:-2px -4px;width:calc(100% + 8px);height:calc(100% + 4px);overflow:visible}
+.sr.cur .n{color:var(--y)}
+.tally{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;border-top:2px dashed rgba(238,237,230,.18)}
+.tally span{font:400 15px 'Kalam';color:var(--muted)}
+.nxt{margin-top:12px;font:400 15px 'Kalam';color:var(--muted)}
+.nxt b{font:600 14px 'Space Grotesk';color:var(--ink)}
+/* reloj */
+.disp{background:#262C2F;color:#EEEDE6}
+.wf{position:absolute;inset:0;overflow:visible}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+ <filter id="chalk" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G" result="d"/>
+  <feTurbulence type="fractalNoise" baseFrequency="2.4" numOctaves="1" seed="8" result="g"/><feColorMatrix in="g" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 -1.3 1.45" result="gm"/><feComposite in="d" in2="gm" operator="in"/></filter>
+ <filter id="dust"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" seed="2"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .35 -.12"/></filter>
+</defs></svg>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 04 · Móvil + reloj</div>
+ <h1 class="chalk">Pizarra</h1>
+ <p class="lead">La pizarra del gimnasio en el bolsillo y en la muñeca: gris pizarra, cifras limpias y, solo en los acentos, trazos de tiza a mano. Las series se cuentan con palotes (卌), lo que toca se rodea con un círculo y los récords se anotan al margen.</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:#262C2F"></b><span><em>Pizarra</em>#262C2F</span></div>
+  <div class="sw"><b style="background:#EEEDE6"></b><span><em>Tiza</em>#EEEDE6</span></div>
+  <div class="sw"><b style="background:#F2D45C"></b><span><em>Tiza amarilla</em>#F2D45C</span></div>
+  <div class="sw"><b style="background:#F29A8E"></b><span><em>Tiza rosa</em>#F29A8E</span></div>
+  <div class="sw"><b style="background:#8FC7E8"></b><span><em>Tiza azul</em>#8FC7E8</span></div>
+  <div class="sw"><b style="background:#4A3A2A"></b><span><em>Marco</em>#4A3A2A</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font-family:'Space Grotesk';font-weight:700">Día de Press</span><small>Space Grotesk</small></div>
+  <div><span class="s k chalk" style="color:#F2D45C">¡+2,5 kg!</span><small>Kalam (acentos)</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>Palotes para contar series y sesiones de la semana.</li><li>Círculo de tiza = lo que toca ahora; anotaciones al margen para récords.</li><li>Tiza solo en acentos: los datos siempre en tipografía limpia.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr"><svg class="grain"><rect width="100%" height="100%" filter="url(#dust)"/></svg><div class="cam"></div>
+ <div class="sb"><span>21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="hd"><small>domingo, 1 de noviembre</small><div class="t chalk">Hoy toca…</div><h2>Día de Press</h2><svg class="under chalk" width="200" height="10" id="u1"></svg></div>
+  <div class="board"><svg class="fr chalk" id="fr1"></svg>
+   <div class="meta2"><span>5/3/1 · semana 2</span><span>≈ 55 min</span></div>
+   <div class="row"><span>Press militar 3×3</span><span class="w chalk">47,5 · 52,5 · 57,5+</span></div>
+   <div class="row"><span>Press militar 5×10</span><span class="w chalk">32,5 kg</span></div>
+   <div class="row"><span>Dominadas 5×10</span><span class="w chalk">peso corporal</span></div>
+   <div class="cta"><div class="b"><i data-i="play"></i>Empezar</div><div class="w2"><i data-i="watch"></i></div></div>
+  </div>
+  <div class="sec"><b>Esta semana</b><span class="chalk">3 de 4</span></div>
+  <div class="tw"><svg width="62" height="40" class="chalk" id="t1"></svg><div class="days" id="days"></div></div>
+  <div class="duo">
+   <div class="stat"><svg class="fr chalk" id="fr2" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible"></svg><small>Racha</small><b>12 sem.</b></div>
+   <div class="stat"><svg class="fr chalk" id="fr3" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible"></svg><small>1RM banca</small><b>104,5</b><em class="chalk">¡+3!</em></div>
+  </div>
+  <div class="note"><span class="k chalk">nota del coach:</span> +2,5 kg en militar si hoy sacas 5 reps.</div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="dumb"></i>entrenar</div><div><i data-i="hist"></i>historial</div><div><i data-i="chart"></i>progreso</div><div><i data-i="user"></i>perfil</div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><svg class="grain"><rect width="100%" height="100%" filter="url(#dust)"/></svg><div class="cam"></div>
+ <div class="sb"><span>21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="ab"><div class="c"><i data-i="back"></i></div><div class="t"><b>Torso A</b><span>38:20 · 7 de 16 series</span></div><div class="f">Terminar</div></div>
+  <div class="rest"><div class="rc"><svg viewBox="0 0 118 118" class="chalk" id="rc"></svg><b class="chalk">1:34</b></div>
+   <div class="r"><small class="k chalk">descanso…</small><p>Después:<br><b>Remo con barra · 90 × 8</b></p><div class="btns"><div>−15 s</div><div>+15 s</div><div class="s">Saltar</div></div></div></div>
+  <div class="ex"><div class="h"><b>Press banca</b><span>agarre 1,5× hombros</span></div>
+   <div class="sr"><span class="n">C</span><span>40 × 10</span><span class="p">ant. 40×10</span><span class="ok chalk k">✓</span></div>
+   <div class="sr"><span class="n">1</span><span>82,5 × 8</span><span class="p">ant. 80×8</span><span class="ok chalk k">✓</span></div>
+   <div class="sr"><span class="n">2</span><span>82,5 × 8</span><span class="p">ant. 80×8</span><span class="ok chalk k">✓</span></div>
+   <div class="sr cur"><svg class="box chalk" id="box"></svg><span class="n">3</span><span>82,5 × 8</span><span class="p">ant. 80×7</span><span></span></div>
+   <div class="sr" style="opacity:.55"><span class="n">4</span><span>82,5 × 8</span><span class="p">ant. 80×6</span><span></span></div>
+  </div>
+  <div class="tally"><svg width="110" height="40" class="chalk" id="t2"></svg><span>7 series hechas · faltan 9</span></div>
+  <div class="nxt">luego → <b>Remo con barra</b> · <b>Fondos</b></div>
+  <div class="pr"><svg width="54" height="40" class="chalk" id="arr"></svg><span class="k chalk">¡récord si haces 9 reps en la serie 3!</span></div>
+ </div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="grain" style="width:100%;height:100%"><rect width="100%" height="100%" filter="url(#dust)"/></svg>
+   <div class="wc" style="padding-top:30px"><div class="k chalk" style="font-size:14px;color:#F2D45C">press banca</div>
+    <div style="font:700 42px/1 'Space Grotesk';letter-spacing:-1.5px;margin-top:2px">82,5</div>
+    <div style="font:600 13px 'Space Grotesk';color:#97A0A3">kg × 8 · <span style="color:#F29A8E"><i data-i="heart"></i> 128</span></div>
+    <svg width="64" height="30" class="chalk" id="t3" style="margin-top:6px"></svg></div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="grain" style="width:100%;height:100%"><rect width="100%" height="100%" filter="url(#dust)"/></svg><svg class="wf chalk" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc" style="padding-top:44px"><div class="k chalk" style="font-size:14px;color:#F2D45C">descanso</div>
+    <div class="k chalk" style="font-size:48px;line-height:.9;margin-top:4px">1:34</div>
+    <div style="font:600 10.5px 'Space Grotesk';color:#97A0A3;margin-top:4px">luego remo 90×8</div>
+    <div style="margin-top:8px;font:700 10px 'Space Grotesk';padding:6px 12px;border-radius:9px;background:#EEEDE6;color:#262C2F">Saltar</div></div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="grain" style="width:100%;height:100%"><rect width="100%" height="100%" filter="url(#dust)"/></svg>
+   <div class="wc" style="padding-top:34px"><div style="font:600 10px 'Space Grotesk';color:#97A0A3">Esta semana</div>
+    <svg width="78" height="44" class="chalk" id="t4" style="margin-top:6px"></svg>
+    <div class="k chalk" style="font-size:15px;color:#F29A8E;margin-top:4px">¡a por la 4ª!</div>
+    <div style="margin-top:8px;font:700 11px 'Space Grotesk';padding:7px 16px;border-radius:10px;background:#F2D45C;color:#262C2F">Entrenar</div></div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons15.js"></script>
+<script>
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+const J=(v,a)=>v+(rnd()-.5)*a;
+// línea temblorosa
+function wline(x1,y1,x2,y2,j=1.4){let d=`M${J(x1,1)} ${J(y1,1)}`;const n=6;for(let i=1;i<=n;i++){const t=i/n;d+=` L${J(x1+(x2-x1)*t,j)} ${J(y1+(y2-y1)*t,j)}`}return d}
+function rrect(w,h,r=12){const p=[];const pts=[[r,0],[w-r,0],[w,r],[w,h-r],[w-r,h],[r,h],[0,h-r],[0,r]];
+ return `M${J(r+2,2)} ${J(0,2)} L${J(w-r,2)} ${J(0,2)} Q${w} 0 ${J(w,2)} ${J(r,2)} L${J(w,2)} ${J(h-r,2)} Q${w} ${h} ${J(w-r,2)} ${J(h,2)} L${J(r,2)} ${J(h,2)} Q0 ${h} ${J(0,2)} ${J(h-r,2)} L${J(0,2)} ${J(r,2)} Q0 0 ${J(r+6,2)} ${J(-1,2)}`}
+function rcircle(cx,cy,r,turn=1.08,j=2){let d='';for(let a=0;a<=360*turn;a+=8){const rr=r+Math.sin(a/37)*1.6+J(0,j);const t=(a-100)*Math.PI/180;d+=(a?'L':'M')+(cx+rr*Math.cos(t)).toFixed(1)+' '+(cy+rr*Math.sin(t)).toFixed(1)}return d}
+function rarc(cx,cy,r,a0,a1,j=1.5){let d='';for(let a=a0;a<=a1;a+=6){const rr=r+J(0,j);const t=(a-90)*Math.PI/180;d+=(a===a0?'M':'L')+(cx+rr*Math.cos(t)).toFixed(1)+' '+(cy+rr*Math.sin(t)).toFixed(1)}return d}
+const S=(c,w=2.4)=>`fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
+function frame(id,c='rgba(238,237,230,.55)',w=2){const s=document.getElementById(id);const b=s.getBoundingClientRect();s.setAttribute('viewBox',`0 0 ${b.width} ${b.height}`);s.innerHTML=`<path d="${rrect(b.width,b.height,14)}" ${S(c,w)}/>`}
+frame('fr1','rgba(238,237,230,.7)',2.2);frame('fr2');frame('fr3');
+// subrayado
+document.getElementById('u1').innerHTML=`<path d="M2 6 C 50 2, 110 9, 196 4" ${S('#F2D45C',3)}/>`;
+// palotes: n trazos (grupos de 5 con diagonal); faltan = trazos discontinuos
+function tally(id,n,total,{h=30,gap=9,col='#EEEDE6',miss='rgba(238,237,230,.3)'}={}){const s=document.getElementById(id);let x=4,h2='';
+ for(let i=0;i<total;i++){const inGroup=i%5;if(inGroup===4){const gx=x-gap*4-2;h2+=`<path d="${wline(gx-3,h-4,x-gap+6,6,1)}" ${S(i<n?col:miss,2.6)}${i<n?'':' stroke-dasharray="3 4"'}/>`;x+=gap+4;continue}
+  h2+=`<path d="${wline(x,4,x+1,h,1)}" ${S(i<n?col:miss,2.6)}${i<n?'':' stroke-dasharray="3 4"'}/>`;x+=gap}
+ s.innerHTML=h2}
+tally('t1',3,4,{h:32,gap:11});tally('t2',7,7,{h:32,gap:11,col:'#F2D45C'});tally('t3',2,4,{h:28,gap:12});tally('t4',3,4,{h:38,gap:14,col:'#F2D45C'});
+// días con círculo de tiza en los entrenados
+(function(){const d=document.getElementById('days');const L=['L','M','X','J','V','S','D'];const done=[0,2,4];
+d.innerHTML=L.map((l,i)=>`<span class="${done.includes(i)?'d':''}">${l}${done.includes(i)?`<svg viewBox="0 0 36 36" class="chalk"><path d="${rcircle(18,18,14,1.12,1.6)}" ${S('#F2D45C',2)}/></svg>`:''}${i===6?`<svg viewBox="0 0 36 36" class="chalk"><path d="${wline(6,32,30,32,1)}" ${S('#F29A8E',2)}/></svg>`:''}</span>`).join('')})();
+// círculo de descanso: tiza amarilla para lo que queda
+(function(){const s=document.getElementById('rc');s.innerHTML=`<path d="${rcircle(59,59,52,1.05,1.2)}" ${S('rgba(238,237,230,.25)',3)}/><path d="${rarc(59,59,52,0,226,1.4)}" ${S('#F2D45C',4)}/>`})();
+// recuadro de la serie actual
+(function(){const s=document.getElementById('box');const b=s.getBoundingClientRect();s.setAttribute('viewBox',`0 0 ${b.width} ${b.height}`);s.innerHTML=`<path d="${rrect(b.width,b.height,10)}" ${S('#F2D45C',2.2)}/>`})();
+// anillo del reloj (descanso)
+document.getElementById('w2').innerHTML=`<path d="${rcircle(96,96,84,1.04,1.4)}" ${S('rgba(238,237,230,.22)',3)}/><path d="${rarc(96,96,84,0,226,1.6)}" ${S('#F2D45C',4.5)}/>`;
+document.getElementById('arr').innerHTML=`<path d="M50 36 C 30 34, 14 26, 8 6" ${S('#F29A8E',2.4)}/><path d="M2 13 L8 5 L15 11" ${S('#F29A8E',2.4)}/>`;
+icons(1.9);
+</script>
+</body></html>

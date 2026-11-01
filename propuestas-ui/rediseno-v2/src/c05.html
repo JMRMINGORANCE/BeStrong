@@ -1,0 +1,211 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame15.css">
+<style>
+:root{--sheet:#03060a;--bg:#05080B;--ink:#D9F4F5;--muted:#5F7D84;--accent:#3FE0E8;--display:'Saira Semi Condensed';--body:'Inter';--mono:'IBM Plex Mono';--h1w:700;--rule:#13252b;--c:#3FE0E8;--cd:rgba(63,224,232,.35);--cf:rgba(63,224,232,.12);--am:#FFB020}
+body{background:radial-gradient(1100px 700px at 70% 10%,#0b141a,#03060a 70%)}
+.meta h1{letter-spacing:2px;text-transform:uppercase;font-size:58px}
+.m{font-family:'IBM Plex Mono';font-feature-settings:"zero" 1}
+.sc{font-family:'Saira Semi Condensed'}
+.scr{background:radial-gradient(420px 300px at 50% 0%,rgba(63,224,232,.08),transparent 70%),#05080B}
+.scr:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(63,224,232,.025) 0 1px,transparent 1px 3px);pointer-events:none}
+.pad{padding:4px 18px;position:relative;z-index:1}
+.lbl{font:500 9.5px/1 'IBM Plex Mono';letter-spacing:1.8px;text-transform:uppercase;color:var(--muted)}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;margin:10px 0 14px}
+.hd h2{white-space:nowrap;font:600 23px/1 'Saira Semi Condensed';letter-spacing:.3px;margin-top:6px}
+.hd .st{text-align:right}.hd .st b{display:block;font:500 12px 'IBM Plex Mono';color:var(--c);margin-top:5px}
+.br{position:relative;padding:14px}
+.br:before,.br:after{content:"";position:absolute;width:14px;height:14px;border:1.5px solid var(--c)}
+.br:before{left:0;top:0;border-right:0;border-bottom:0}.br:after{right:0;bottom:0;border-left:0;border-top:0}
+.br .c2,.br .c3{position:absolute;width:14px;height:14px;border:1.5px solid var(--c)}
+.br .c2{right:0;top:0;border-left:0;border-bottom:0}.br .c3{left:0;bottom:0;border-right:0;border-top:0}
+.panel{background:linear-gradient(180deg,rgba(63,224,232,.06),rgba(63,224,232,.015));box-shadow:inset 0 0 0 1px rgba(63,224,232,.12)}
+.hero .t{display:flex;justify-content:space-between;align-items:center}
+.hero .tag{font:600 10px 'IBM Plex Mono';letter-spacing:1.8px;color:var(--c)}
+.hero h3{font:700 32px/1 'Saira Semi Condensed';margin:10px 0 12px;letter-spacing:.2px}
+.gauge{position:relative;height:34px;margin-bottom:6px}
+.gauge svg{position:absolute;inset:0}
+.ex div{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid rgba(63,224,232,.1);font:500 13px 'Inter';color:#b9d3d6}
+.ex div span:last-child{font:500 12.5px 'IBM Plex Mono';color:var(--ink)}
+.go{display:flex;gap:8px;margin-top:10px}
+.go .b{flex:1;height:46px;display:flex;align-items:center;justify-content:center;gap:9px;font:600 14px 'Saira Semi Condensed';letter-spacing:2.5px;color:#031417;background:var(--c);clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);box-shadow:0 0 24px rgba(63,224,232,.35)}
+.go .w{width:46px;height:46px;display:grid;place-items:center;font-size:19px;color:var(--c);box-shadow:inset 0 0 0 1px var(--cd);clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px)}
+.row2{display:grid;grid-template-columns:1.1fr 1fr;gap:10px;margin-top:12px}
+.semi{position:relative;height:118px}
+.semi svg{position:absolute;inset:0}
+.semi .v{position:absolute;left:0;right:0;top:56px;text-align:center}
+.semi .v b{font:600 26px/1 'IBM Plex Mono'}.semi .v b small{font-size:13px;color:var(--muted)}
+.rd{display:flex;flex-direction:column;gap:8px}
+.rd div{padding:9px 10px;box-shadow:inset 2px 0 0 var(--c);background:rgba(63,224,232,.05)}
+.rd b{display:block;font:600 19px/1 'IBM Plex Mono';margin-top:5px}.rd b small{font-size:11px;color:var(--muted);font-weight:500}
+.nav{position:absolute;left:0;right:0;bottom:0;height:70px;display:flex;justify-content:space-around;align-items:center;border-top:1px solid rgba(63,224,232,.14);background:#04070a;z-index:2}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:5px;font:500 8.5px 'IBM Plex Mono';letter-spacing:1.4px;color:#46626a;text-transform:uppercase}
+.nav div i{font-size:20px}
+.nav .on{color:var(--c);text-shadow:0 0 10px rgba(63,224,232,.6)}
+/* entreno */
+.ab{display:flex;align-items:center;gap:10px;margin:8px 0 6px}
+.ab .k{width:36px;height:36px;display:grid;place-items:center;color:var(--c);box-shadow:inset 0 0 0 1px var(--cd);font-size:17px}
+.ab .t{flex:1}.ab b{display:block;font:700 20px/1 'Saira Semi Condensed';letter-spacing:1px}.ab span{font:500 11px 'IBM Plex Mono';color:var(--c)}
+.ab .f{height:36px;padding:0 12px;font:600 12px/36px 'Saira Semi Condensed';letter-spacing:2px;color:var(--am);box-shadow:inset 0 0 0 1px var(--am)}
+.ret{position:relative;width:236px;height:236px;margin:2px auto 0}
+.ret svg{position:absolute;inset:0}
+.ret .v{position:absolute;left:0;right:0;top:84px;text-align:center}
+.ret .v b{display:block;font:500 46px/1 'IBM Plex Mono';letter-spacing:-1px;text-shadow:0 0 16px rgba(63,224,232,.35)}
+.btns{display:flex;justify-content:center;gap:8px;margin-top:4px}
+.btns div{height:32px;padding:0 12px;font:500 11.5px/32px 'IBM Plex Mono';color:var(--ink);box-shadow:inset 0 0 0 1px var(--cd)}
+.btns .s{background:var(--c);color:#031417;box-shadow:none;font-weight:600}
+.tab{margin-top:12px}
+.tab .h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.tab .h b{font:600 17px 'Saira Semi Condensed';letter-spacing:.5px}
+.tr{display:grid;grid-template-columns:30px 1fr 64px 40px 24px;align-items:center;height:34px;font:500 14px 'IBM Plex Mono';border-bottom:1px solid rgba(63,224,232,.08)}
+.tr .n{color:var(--muted);font-size:11px}.tr .p{color:#456269;font-size:12px}
+.tr .dt{width:8px;height:8px;background:var(--c);box-shadow:0 0 8px var(--c);justify-self:end;transform:rotate(45deg)}
+.tr.cur{background:rgba(63,224,232,.08);box-shadow:inset 2px 0 0 var(--c)}
+.tr.cur .n{color:var(--c)}
+.tr.cur .dt{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+.th{display:grid;grid-template-columns:30px 1fr 64px 40px 24px;font:500 8.5px 'IBM Plex Mono';letter-spacing:1.4px;color:var(--muted);padding-bottom:4px}
+.hr{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 10px;background:rgba(255,176,32,.05);box-shadow:inset 0 0 0 1px rgba(255,176,32,.2)}
+.hr b{font:600 16px 'IBM Plex Mono';color:var(--am)}
+.log{margin-top:14px}
+.log>div:not(.lbl){display:grid;grid-template-columns:76px 1fr auto;align-items:center;height:30px;border-top:1px solid rgba(63,224,232,.1);font:500 11px 'IBM Plex Mono';color:var(--muted)}
+.log b{font:600 14px 'Saira Semi Condensed';color:var(--ink);letter-spacing:.5px}
+.log span:last-child{color:var(--c)}
+.nx{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.nx div{padding:8px 10px;box-shadow:inset 0 0 0 1px rgba(63,224,232,.14)}
+.nx b{display:block;font:600 14px 'Saira Semi Condensed';letter-spacing:.5px;margin:4px 0 2px}
+.nx span.m{font-size:11px;color:#9fbfc4}
+/* reloj */
+.disp{background:#03070a;color:#D9F4F5}
+.wf{position:absolute;inset:0}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 05 · Móvil + reloj</div>
+ <h1>HUD</h1>
+ <p class="lead">Un visor de instrumentos para entrenar: negro profundo, líneas finas cian, retículas y escalas graduadas. Cada cifra tiene su sitio fijo, como en una cabina; el ámbar se reserva para las alertas (pulso alto, descanso pasado).</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:#05080B"></b><span><em>Vacío</em>#05080B</span></div>
+  <div class="sw"><b style="background:#3FE0E8;box-shadow:0 0 18px rgba(63,224,232,.5)"></b><span><em>Cian</em>#3FE0E8</span></div>
+  <div class="sw"><b style="background:#FFB020"></b><span><em>Alerta</em>#FFB020</span></div>
+  <div class="sw"><b style="background:#D9F4F5"></b><span><em>Lectura</em>#D9F4F5</span></div>
+  <div class="sw"><b style="background:#5F7D84"></b><span><em>Escala</em>#5F7D84</span></div>
+  <div class="sw"><b style="background:#0E1C22"></b><span><em>Panel</em>#0E1C22</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s sc" style="font-weight:700;letter-spacing:.5px">DÍA DE PRESS</span><small>Saira Semi Condensed</small></div>
+  <div><span class="s m" style="font-weight:500">082.5×08</span><small>IBM Plex Mono</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>Retícula de descanso con escala en segundos y cuenta T−.</li><li>Esquinas en corchete en vez de tarjetas: más contenido, menos ruido.</li><li>En el reloj, pulso y series en arcos graduados alrededor del borde.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="m">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="hd"><div><div class="lbl">Dom 01.11 · Sem 45</div><h2>Buenas noches, Juan</h2></div><div class="st"><div class="lbl">Disposición</div><b>87%</b></div></div>
+  <div class="br panel hero"><i class="c2"></i><i class="c3"></i>
+   <div class="t"><span class="tag">▸ HOY TOCA</span><span class="lbl" style="color:#9fbfc4">5/3/1 · S2 · ≈55 MIN</span></div>
+   <h3>Día de Press</h3>
+   <div class="gauge"><svg viewBox="0 0 300 34" id="g1"></svg></div>
+   <div class="ex"><div><span>Press militar 3×3</span><span>47.5 · 52.5 · 57.5+</span></div><div><span>Press militar BBB 5×10</span><span>32.5 KG</span></div><div><span>Dominadas 5×10</span><span>PC</span></div></div>
+   <div class="go"><div class="b"><i data-i="play"></i>INICIAR</div><div class="w"><i data-i="watch"></i></div></div>
+  </div>
+  <div class="row2">
+   <div class="br panel semi" style="padding:0"><i class="c2"></i><i class="c3"></i><svg viewBox="0 0 170 118" id="semi"></svg><div class="v"><b>3<small>/4</small></b><div class="lbl" style="margin-top:6px">Sesiones semana</div></div></div>
+   <div class="rd"><div><span class="lbl">Racha</span><b>12<small> SEM</small></b></div><div><span class="lbl">1RM banca</span><b>104.5<small> KG</small></b></div></div>
+  </div>
+  <div class="log"><div class="lbl" style="margin-bottom:6px">Registro reciente</div>
+   <div><span>JUE 29.10</span><b>Torso B</b><span>12.8 T · 3 PR</span></div><div><span>MAR 27.10</span><b>Pierna A</b><span>16.1 T</span></div></div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="target"></i>Entrenar</div><div><i data-i="hist"></i>Registro</div><div><i data-i="chart"></i>Progreso</div><div><i data-i="user"></i>Perfil</div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="m">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="ab"><div class="k"><i data-i="back"></i></div><div class="t"><b>TORSO A</b><span>T+38:20 · 07/16</span></div><div class="f">TERMINAR</div></div>
+  <div class="ret"><svg viewBox="0 0 236 236" id="ret"></svg>
+   <div class="v"><div class="lbl" style="color:var(--c)">Descanso · T−</div><b>1:34</b><div class="lbl" style="margin-top:6px">Sig. remo · 90×8</div></div></div>
+  <div class="btns"><div>−15S</div><div>+15S</div><div class="s">SALTAR</div></div>
+  <div class="tab"><div class="h"><b>PRESS BANCA</b><span class="lbl">Agarre 1.5× · 3-1-1</span></div>
+   <div class="th"><span>SET</span><span>ANT</span><span>KG</span><span>REP</span><span></span></div>
+   <div class="tr"><span class="n">W</span><span class="p">40×10</span><span>40.0</span><span>10</span><span class="dt"></span></div>
+   <div class="tr"><span class="n">01</span><span class="p">80×8</span><span>82.5</span><span>08</span><span class="dt"></span></div>
+   <div class="tr"><span class="n">02</span><span class="p">80×8</span><span>82.5</span><span>08</span><span class="dt"></span></div>
+   <div class="tr cur"><span class="n">▸03</span><span class="p">80×7</span><span>82.5</span><span>08</span><span class="dt"></span></div>
+  </div>
+  <div class="nx"><div><span class="lbl">Sig.</span><b>REMO CON BARRA</b><span class="m">3×08 · 90.0</span></div><div><span class="lbl">Después</span><b>FONDOS</b><span class="m">3×12</span></div></div>
+  <div class="hr"><i data-i="heart" style="color:var(--am);font-size:16px"></i><b>128</b><span class="lbl" style="color:#b48a3a">BPM · Z3</span><svg width="130" height="22" id="ecg" style="margin-left:auto"></svg></div>
+ </div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1"></svg>
+   <div class="wc" style="padding-top:58px"><div class="lbl" style="font-size:7px;color:#3FE0E8;letter-spacing:1.2px">PRESS BANCA · 03/04</div>
+    <div class="m" style="font:500 40px/1 'IBM Plex Mono';letter-spacing:-1.5px;margin-top:4px">82.5</div>
+    <div class="m" style="font:500 12px 'IBM Plex Mono';color:#9fbfc4">KG × 08</div></div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc" style="padding-top:60px"><div class="lbl" style="font-size:7.5px;color:#3FE0E8">DESCANSO · T−</div>
+    <div style="font:500 40px/1 'IBM Plex Mono';letter-spacing:-1px;margin-top:4px;text-shadow:0 0 12px rgba(63,224,232,.4)">1:34</div>
+    <div class="lbl" style="font-size:7px;margin-top:6px">SIG · REMO 90×8</div></div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w3"></svg>
+   <div class="wc" style="padding-top:62px"><div class="lbl" style="font-size:7.5px">SEMANA</div>
+    <div style="font:500 34px/1 'IBM Plex Mono';margin-top:3px">3<span style="font-size:16px;color:#5F7D84">/4</span></div>
+    <div style="margin-top:12px;font:600 10px/1 'Saira Semi Condensed';letter-spacing:2px;padding:7px 14px;background:#3FE0E8;color:#031417;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)">INICIAR</div></div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons15.js"></script>
+<script>
+const C='#3FE0E8',CD='rgba(63,224,232,.35)',CF='rgba(63,224,232,.18)',AM='#FFB020',MU='#5F7D84';
+const put=(id,h)=>document.getElementById(id).insertAdjacentHTML('beforeend',h);
+// escala de carga prevista
+(function(){let h='';for(let i=0;i<=50;i++){const x=4+i*5.84;const M=i%10===0;h+=`<line x1="${x}" x2="${x}" y1="${M?4:10}" y2="16" stroke="${M?C:CD}" stroke-width="1"/>`}
+const p=4+292*.66;h+=`<rect x="4" y="20" width="${p-4}" height="3" fill="${C}"/><rect x="${p}" y="20" width="${296-p}" height="3" fill="${CF}"/><path d="M${p-5} 32 L${p} 25 L${p+5} 32Z" fill="${C}"/>`;
+h+=`<text x="${p+9}" y="32" font-family="IBM Plex Mono" font-size="8.5" fill="${C}">CARGA 9.8 T</text>`;put('g1',h)})();
+// semicírculo de la semana
+(function(){const s=document.getElementById('semi');ticks(s,{n:29,cx:85,cy:84,r:66,len:4,major:7,mlen:9,color:CD,mcolor:C,w:1,mw:1.4,from:-90,to:90});
+s.insertAdjacentHTML('beforeend',`<path d="${arc(85,84,54,-90,45)}" stroke="${C}" stroke-width="4" fill="none"/><path d="${arc(85,84,54,45,90)}" stroke="${CF}" stroke-width="4" fill="none"/>`)})();
+// retícula de descanso
+(function(){const s=document.getElementById('ret');const cx=118;ticks(s,{n:150,cx,cy:cx,r:114,len:4,major:10,mlen:10,color:'rgba(63,224,232,.25)',mcolor:C,w:.8,mw:1.4});
+s.insertAdjacentHTML('beforeend',`<circle cx="${cx}" cy="${cx}" r="96" fill="none" stroke="${CF}"/><path d="${arc(cx,cx,102,0,94/150*360)}" stroke="${C}" stroke-width="3" fill="none"/><path d="${arc(cx,cx,102,94/150*360,360)}" stroke="rgba(63,224,232,.1)" stroke-width="3" fill="none"/>`);
+// cruz y marcas de la retícula
+[[cx,6,cx,22],[cx,214,cx,230],[6,cx,22,cx],[214,cx,230,cx]].forEach(([a,b,c,d])=>s.insertAdjacentHTML('beforeend',`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="${C}" stroke-width="1.2"/>`));
+const a=(94/150*360-90)*Math.PI/180;const x=cx+Math.cos(a)*102,y=cx+Math.sin(a)*102;s.insertAdjacentHTML('beforeend',`<circle cx="${x}" cy="${y}" r="5" fill="#05080B" stroke="${C}" stroke-width="2"/>`);
+[['0',0],['0:30',72],['1:00',144],['1:30',216],['2:00',288]].forEach(([t,d])=>{const r=(d-90)*Math.PI/180;s.insertAdjacentHTML('beforeend',`<text x="${cx+Math.cos(r)*84}" y="${cx+Math.sin(r)*84}" font-family="IBM Plex Mono" font-size="8" fill="${MU}" text-anchor="middle" dominant-baseline="central">${t}</text>`)});
+// pips de series
+for(let i=0;i<4;i++){const xx=cx-27+i*18;s.insertAdjacentHTML('beforeend',`<rect x="${xx-4}" y="168" width="8" height="8" transform="rotate(45 ${xx} 172)" fill="${i<2?C:'none'}" stroke="${C}" stroke-width="1.2"/>`)}})();
+// ecg
+(function(){let d='M0 11';const pts=[[10,11],[16,11],[19,7],[22,11],[28,11],[31,2],[34,20],[37,11],[52,11],[55,8],[58,11],[70,11],[73,2],[76,20],[79,11],[94,11],[97,8],[100,11],[112,11],[115,2],[118,20],[121,11],[130,11]];pts.forEach(([x,y])=>d+=` L${x} ${y}`);
+put('ecg',`<path d="${d}" stroke="${AM}" stroke-width="1.4" fill="none"/>`)})();
+// relojes
+function ring(id){const s=document.getElementById(id);ticks(s,{n:72,cx:96,cy:96,r:93,len:3,major:6,mlen:7,color:'rgba(63,224,232,.22)',mcolor:C,w:.8,mw:1.2})}
+ring('w1');ring('w2');ring('w3');
+// w1: arco de pulso (zonas) arriba y series abajo
+(function(){const s=document.getElementById('w1');
+const z=[[-60,-36,'rgba(63,224,232,.25)'],[-34,-10,'rgba(63,224,232,.5)'],[-8,16,C],[18,42,AM],[44,60,'rgba(255,176,32,.35)']];
+z.forEach(([a,b,c])=>s.insertAdjacentHTML('beforeend',`<path d="${arc(96,96,80,a,b)}" stroke="${c}" stroke-width="5" fill="none"/>`));
+const a=(6-90)*Math.PI/180;s.insertAdjacentHTML('beforeend',`<path d="M${96+Math.cos(a)*70} ${96+Math.sin(a)*70} l-4 -1 l4 -6 l4 6z" fill="${C}"/>`);
+s.insertAdjacentHTML('beforeend',`<text x="96" y="47" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" font-weight="600" fill="${C}">♥ 128</text>`);
+for(let i=0;i<4;i++){const ang=150+i*20;s.insertAdjacentHTML('beforeend',`<path d="${arc(96,96,80,ang-8,ang+8)}" stroke="${i<2?C:(i===2?C:'rgba(63,224,232,.2)')}" stroke-width="5" fill="none" ${i===2?'stroke-dasharray="2 2"':''}/>`)}
+s.insertAdjacentHTML('beforeend',`<text x="96" y="160" text-anchor="middle" font-family="IBM Plex Mono" font-size="7" letter-spacing="1" fill="${MU}">SERIES</text>`)})();
+// w2: arco de descanso
+(function(){const s=document.getElementById('w2');s.insertAdjacentHTML('beforeend',`<path d="${arc(96,96,80,0,226)}" stroke="${C}" stroke-width="4" fill="none"/><path d="${arc(96,96,80,226,360)}" stroke="rgba(63,224,232,.12)" stroke-width="4" fill="none"/>`);
+[[96,4,96,16],[96,176,96,188],[4,96,16,96],[176,96,188,96]].forEach(([a,b,c,d])=>s.insertAdjacentHTML('beforeend',`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="${C}" stroke-width="1.2"/>`));
+s.insertAdjacentHTML('beforeend',`<g font-family="IBM Plex Mono" font-size="8" fill="${C}"><rect x="58" y="134" width="34" height="18" fill="none" stroke="${CD}"/><text x="75" y="146" text-anchor="middle">+15</text><rect x="98" y="134" width="40" height="18" fill="${C}"/><text x="118" y="146" text-anchor="middle" fill="#031417" font-weight="600">SALTAR</text></g>`)})();
+// w3: semicírculo semana
+(function(){const s=document.getElementById('w3');s.insertAdjacentHTML('beforeend',`<path d="${arc(96,96,78,-120,60)}" stroke="${C}" stroke-width="5" fill="none"/><path d="${arc(96,96,78,60,120)}" stroke="rgba(63,224,232,.15)" stroke-width="5" fill="none"/>`);
+[-120,-60,0,60,120].forEach(d=>{const r=(d-90)*Math.PI/180;s.insertAdjacentHTML('beforeend',`<line x1="${96+Math.cos(r)*68}" y1="${96+Math.sin(r)*68}" x2="${96+Math.cos(r)*86}" y2="${96+Math.sin(r)*86}" stroke="#03070a" stroke-width="2.5"/>`)});
+s.insertAdjacentHTML('beforeend',`<text x="96" y="164" text-anchor="middle" font-family="IBM Plex Mono" font-size="7.5" letter-spacing="1" fill="${MU}">RACHA 12 SEM</text>`)})();
+icons(1.6);
+</script>
+</body></html>

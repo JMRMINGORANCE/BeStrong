@@ -1,0 +1,202 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame15.css">
+<style>
+:root{--sheet:#E6F0EB;--bg:#F4FBF7;--ink:#0F201B;--muted:#4C635B;--accent:#006B5A;--display:'Figtree';--body:'Figtree';--mono:'DM Mono';--h1w:900;--rule:#c8d9d1;
+ --p:#006B5A;--pc:#9DF2DA;--onpc:#00201A;--sc:#D3E8E0;--tc:#FFDCC8;--ontc:#331200;--t:#E8875A;--cont:#E3F0EA;--conth:#D7E8E0}
+body{background:radial-gradient(900px 600px at 70% 10%,#F6FBF8,#DFEBE5 75%)}
+.phone{background:#1b2420;box-shadow:0 0 0 1.5px #9fb3ab,0 40px 80px -24px rgba(0,60,45,.35)}
+.scr{font-feature-settings:"tnum" 1}
+.pad{padding:4px 18px}
+.top{display:flex;justify-content:space-between;align-items:center;margin:12px 0 16px}
+.top small{font:600 13px 'Figtree';color:var(--muted)}
+.top h2{font:900 34px/1 'Figtree';letter-spacing:-1px;margin-top:4px}
+.avc{width:50px;height:50px;position:relative}
+.avc svg{position:absolute;inset:0}
+.avc b{position:absolute;inset:0;display:grid;place-items:center;font:800 15px 'Figtree';color:var(--onpc)}
+.hero{position:relative;background:var(--pc);border-radius:36px;padding:20px 20px 18px;overflow:hidden;color:var(--onpc)}
+.pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:14px;font:800 12px 'Figtree'}
+.hero .pill{background:var(--p);color:#fff}
+.hero h3{font:900 36px/.95 'Figtree';letter-spacing:-1.2px;margin:14px 0 6px;width:190px}
+.hero .sub{font:600 13px 'Figtree';opacity:.75}
+.hero .ex{margin-top:16px;display:flex;flex-direction:column;gap:6px}
+.hero .ex div{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.55);border-radius:18px;padding:9px 12px;font:700 13px 'Figtree'}
+.hero .ex div span:last-child{font:800 13px 'Figtree';color:var(--p)}
+.startc{position:absolute;right:14px;top:18px;width:92px;height:92px;transform:rotate(-8deg)}
+.startc svg{position:absolute;inset:0}
+.startc i{position:absolute;left:50%;top:50%;font-size:34px;color:#fff;margin:-17px 0 0 -14px;transform:rotate(8deg)}
+.hero .wb{position:absolute;right:30px;top:118px;width:58px;height:34px;border-radius:17px;background:rgba(255,255,255,.6);display:grid;place-items:center;font-size:18px;color:var(--p)}
+.wk{margin-top:12px;background:var(--cont);border-radius:30px;padding:14px 16px}
+.wk .h{display:flex;justify-content:space-between;align-items:baseline}
+.wk .h b{font:800 16px 'Figtree'}.wk .h span{font:800 14px 'Figtree';color:var(--p)}
+.days{display:flex;justify-content:space-between;margin-top:12px}
+.day{width:36px;height:36px;position:relative;display:grid;place-items:center;font:800 13px 'Figtree';color:var(--muted)}
+.day svg{position:absolute;inset:0}
+.day b{position:relative}
+.day.d b{color:#fff}
+.day.t{width:44px}
+.duo{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:12px}
+.flw{position:relative;height:104px}
+.flw svg{position:absolute;inset:0}
+.flw div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ontc)}
+.flw b{font:900 34px/1 'Figtree'}.flw span{font:700 11px 'Figtree';margin-top:2px}
+.vol{background:var(--sc);border-radius:55px;padding:18px 20px;display:flex;flex-direction:column;justify-content:center}
+.vol span{font:700 12px 'Figtree';color:var(--muted)}.vol b{font:900 28px/1.1 'Figtree'}.vol em{font:800 12px 'Figtree';font-style:normal;color:var(--p)}
+.tb{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:6px;align-items:center;background:#0E3B32;border-radius:32px;padding:7px;box-shadow:0 12px 26px -10px rgba(0,50,40,.6)}
+.tb div{height:48px;min-width:48px;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:8px;color:#A6CFC3;font-size:21px}
+.tb .on{background:var(--pc);color:var(--onpc);padding:0 16px;font:800 13px 'Figtree'}
+.tb .on i{font-size:20px}
+/* entreno */
+.abar{display:flex;align-items:center;gap:10px;margin:10px 0 14px}
+.cb{width:44px;height:44px;border-radius:22px;background:var(--cont);display:grid;place-items:center;font-size:20px}
+.abar .t{flex:1}.abar .t b{display:block;font:900 22px/1 'Figtree'}.abar .t span{font:700 12px 'Figtree';color:var(--muted)}
+.fin{height:44px;padding:0 16px;border-radius:22px;background:var(--p);color:#fff;font:800 13px/44px 'Figtree'}
+.rest{background:var(--tc);border-radius:32px;padding:16px 18px;color:var(--ontc)}
+.rest .r1{display:flex;justify-content:space-between;align-items:center}
+.rest .big{font:900 44px/1 'Figtree';letter-spacing:-1px}
+.rest small{font:700 12px 'Figtree';opacity:.75}
+.rest .btns{display:flex;gap:6px}
+.rest .btns div{height:40px;min-width:40px;border-radius:20px;background:rgba(255,255,255,.6);display:grid;place-items:center;font:800 12px 'Figtree';padding:0 10px}
+.rest .btns .s{background:#5C2A10;color:#FFDCC8}
+.rest svg{display:block;margin-top:10px}
+.cur{margin-top:12px;background:var(--cont);border-radius:32px;padding:16px}
+.cur .h{display:flex;align-items:center;gap:10px}
+.cur .h b{font:900 18px 'Figtree';flex:1}
+.setdots{display:flex;gap:6px;align-items:center}
+.setdots .s{width:22px;height:22px;position:relative}
+.setdots .s svg{position:absolute;inset:0}
+.setdots .c{width:34px;height:22px;border-radius:11px;background:var(--p)}
+.setdots .o{width:22px;height:22px;border-radius:11px;box-shadow:inset 0 0 0 2px #9db4ab}
+.vals{display:grid;grid-template-columns:1.2fr 1fr;gap:8px;margin-top:14px}
+.val{background:#fff;border-radius:26px;padding:12px 12px 10px;text-align:center}
+.val b{display:block;font:900 44px/1 'Figtree';letter-spacing:-1.5px}
+.val span{font:700 12px 'Figtree';color:var(--muted)}
+.val .pm{display:flex;justify-content:space-between;margin-top:8px}
+.val .pm div{width:38px;height:38px;border-radius:19px;background:var(--sc);display:grid;place-items:center;font-size:18px;color:var(--onpc)}
+.val .pm div+div{border-radius:12px;background:var(--pc)}
+.prev{margin-top:10px;display:flex;justify-content:space-between;font:700 13px 'Figtree';color:var(--muted);padding:0 4px}
+.prev b{color:var(--p)}
+.done{margin-top:12px;height:64px;border-radius:32px;background:var(--p);color:#fff;font:900 19px/64px 'Figtree';display:flex;gap:10px;align-items:center;justify-content:center;box-shadow:0 10px 22px -10px rgba(0,107,90,.7)}
+.done i{font-size:24px}
+.nxt{margin-top:12px;display:flex;gap:8px}
+.nxt div{flex:1;background:var(--cont);border-radius:22px;padding:10px 12px;font:800 12.5px 'Figtree'}
+.nxt div span{display:block;font:600 11px 'Figtree';color:var(--muted);margin-top:2px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.stats div{border-radius:24px;padding:12px 10px;text-align:center;box-shadow:inset 0 0 0 1.5px #CFE0D8}
+.stats b{display:block;font:900 18px 'Figtree'}.stats b i{color:#E8875A}
+.stats span{font:700 11px 'Figtree';color:var(--muted)}
+.stats .pr{background:var(--pc);box-shadow:none}
+/* reloj */
+.disp{background:#0A1412;color:#E6F5EF}
+.wf{position:absolute;inset:0}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;text-align:center;padding-top:36px}
+.edge{position:absolute;left:50%;bottom:3px;width:128px;height:44px;margin-left:-64px;border-radius:23px 23px 58px 58px;background:var(--pc);color:var(--onpc);font:900 13px/40px 'Figtree';display:flex;gap:5px;justify-content:center;align-items:center;padding-bottom:6px}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 02 · Móvil + reloj</div>
+ <h1>Expresivo</h1>
+ <p class="lead">Material 3 Expressive llevado al gimnasio: formas que se transforman (galleta, flor, pastilla), color tonal verde azulado, tipografía enorme y redondeada y barras onduladas que celebran el avance. Alegre, cercano y muy Android.</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:#006B5A"></b><span><em>Primario</em>#006B5A</span></div>
+  <div class="sw"><b style="background:#9DF2DA"></b><span><em>Contenedor</em>#9DF2DA</span></div>
+  <div class="sw"><b style="background:#FFDCC8"></b><span><em>Terciario</em>#FFDCC8</span></div>
+  <div class="sw"><b style="background:#D3E8E0"></b><span><em>Secundario</em>#D3E8E0</span></div>
+  <div class="sw"><b style="background:#F4FBF7"></b><span><em>Superficie</em>#F4FBF7</span></div>
+  <div class="sw"><b style="background:#0F201B"></b><span><em>Tinta</em>#0F201B</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font-weight:900">Día de Press</span><small>Figtree Black</small></div>
+  <div><span class="s" style="font-weight:600;font-size:24px">82,5 kg × 8</span><small>Figtree · tabular</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>La forma comunica estado: galleta = hecho, pastilla = ahora, círculo = pendiente.</li><li>Progreso ondulado (M3) en descanso y en el borde del reloj.</li><li>Wear OS M3: botón de borde para la acción principal.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span>21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="top"><div><small>Domingo, 1 de noviembre</small><h2>Hola, Juan</h2></div><div class="avc"><svg viewBox="0 0 100 100"><path id="ck0" fill="#9DF2DA"/></svg><b>JM</b></div></div>
+  <div class="hero">
+   <span class="pill"><i data-i="bolt" data-w="2.2"></i>Hoy toca</span>
+   <h3>Día de Press</h3>
+   <div class="sub">5/3/1 · Semana 2 · 55 min</div>
+   <div class="startc"><svg viewBox="0 0 100 100"><path id="ck1" fill="#006B5A"/></svg><i data-i="play"></i></div>
+   <div class="ex"><div><span>Press militar 3×3</span><span>47,5 → 57,5+</span></div><div><span>Press militar 5×10</span><span>32,5 kg</span></div><div><span>Dominadas 5×10</span><span>Peso corporal</span></div></div>
+  </div>
+  <div class="wk"><div class="h"><b>Tu semana</b><span>3 de 4</span></div>
+   <div class="days" id="days"></div></div>
+  <div class="duo"><div class="flw"><svg viewBox="0 0 110 110"><path id="fl" fill="#FFDCC8"/></svg><div><b>12</b><span>semanas seguidas</span></div></div>
+   <div class="vol"><span>Volumen semanal</span><b>18,4 t</b><em>+8 % vs la anterior</em></div></div>
+ </div>
+ <div class="tb"><div class="on"><i data-i="dumb" data-w="2.2"></i>Entrenar</div><div><i data-i="hist"></i></div><div><i data-i="chart"></i></div><div><i data-i="user"></i></div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span>21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="abar"><div class="cb"><i data-i="back" data-w="2.2"></i></div><div class="t"><b>Torso A</b><span>38:20 · 7 de 16 series</span></div><div class="fin">Terminar</div></div>
+  <div class="rest"><div class="r1"><div><small>Descansando</small><div class="big">1:34</div></div><div class="btns"><div>+15</div><div class="s">Saltar</div></div></div>
+   <svg width="288" height="20" viewBox="0 0 288 20" id="wave"></svg>
+   <small>Después: Remo con barra · 90 kg × 8</small></div>
+  <div class="cur"><div class="h"><b>Press banca</b><div class="setdots" id="sd"></div></div>
+   <div class="vals"><div class="val"><b>82,5</b><span>kg</span><div class="pm"><div><i data-i="minus" data-w="2.4"></i></div><div><i data-i="plus" data-w="2.4"></i></div></div></div>
+    <div class="val"><b>8</b><span>reps</span><div class="pm"><div><i data-i="minus" data-w="2.4"></i></div><div><i data-i="plus" data-w="2.4"></i></div></div></div></div>
+   <div class="prev"><span>La última vez · 80 × 8</span><b>+2,5 kg</b></div>
+   <div class="done"><i data-i="check" data-w="2.8"></i>Serie hecha</div>
+  </div>
+  <div class="nxt"><div>Remo con barra<span>3 × 8 · 90 kg</span></div><div>Fondos<span>3 × 12</span></div></div>
+  <div class="stats"><div><b>4,2 t</b><span>volumen</span></div><div><b><i data-i="heart"></i> 128</b><span>pulso</span></div><div class="pr"><b>1 rep</b><span>para récord</span></div></div>
+ </div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1"></svg>
+   <div class="wc"><div style="font:800 10px 'Figtree';color:#9DF2DA">Press banca · 3 de 4</div>
+    <div style="font:900 44px/1 'Figtree';letter-spacing:-1.5px;margin-top:4px">82,5</div>
+    <div style="font:800 13px 'Figtree';color:#B9D3CA">kg × 8 · <span style="color:#FFB08A"><i data-i="heart"></i> 128</span></div></div>
+   <div class="edge"><i data-i="check" data-w="3"></i>Hecha</div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc" style="padding-top:42px"><div style="font:800 10px 'Figtree';color:#FFB08A">Descanso</div>
+    <div style="font:900 48px/1 'Figtree';letter-spacing:-1.5px;margin-top:2px">1:34</div>
+    <div style="font:700 10.5px 'Figtree';color:#B9D3CA;margin-top:2px">Remo · 90 × 8</div></div>
+   <div class="edge" style="background:#FFDCC8;color:#331200">Saltar</div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w3"></svg>
+   <div class="wc" style="padding-top:26px"><div style="position:relative;width:78px;height:78px"><svg viewBox="0 0 100 100" style="position:absolute;inset:0"><path id="ck3" fill="#9DF2DA"/></svg>
+    <div style="position:absolute;inset:0;display:grid;place-items:center;font:900 26px 'Figtree';color:#00201A">3/4</div></div>
+    <div style="font:800 10.5px 'Figtree';color:#B9D3CA;margin-top:4px">Racha · 12 semanas</div></div>
+   <div class="edge"><i data-i="play"></i>Entrenar</div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons15.js"></script>
+<script>
+const set=(id,d)=>document.getElementById(id).setAttribute('d',d);
+set('ck0',cookie(48,8,.1));set('ck1',cookie(48,9,.09));set('ck3',cookie(48,8,.09));
+// flor (4 pétalos suaves)
+set('fl',cookie(54,6,.13,55,55));
+// días
+(function(){const d=document.getElementById('days');const L=['L','M','X','J','V','S','D'];const done=[0,2,4];let h='';
+L.forEach((l,i)=>{if(done.includes(i))h+=`<div class="day d"><svg viewBox="0 0 100 100"><path d="${cookie(48,i%2?7:9,.1)}" fill="#006B5A"/></svg><b>${l}</b></div>`;
+ else if(i===6)h+=`<div class="day t" style="border-radius:18px;background:#9DF2DA;color:#00201A">${l}</div>`;
+ else h+=`<div class="day" style="border-radius:50%;box-shadow:inset 0 0 0 2px #B4CAC1">${l}</div>`});d.innerHTML=h})();
+// onda de progreso
+(function(){const s=document.getElementById('wave');const p=.63,W=288;let d='';for(let x=4;x<=W*p;x+=2){const y=10+Math.sin(x/7)*4;d+=(x===4?'M':'L')+x+' '+y.toFixed(2)}
+s.innerHTML=`<path d="${d}" stroke="#7A3A1A" stroke-width="5" fill="none" stroke-linecap="round"/><line x1="${W*p+10}" y1="10" x2="${W-4}" y2="10" stroke="#E8B49A" stroke-width="5" stroke-linecap="round"/><circle cx="${W-4}" cy="10" r="2.5" fill="#7A3A1A"/>`})();
+// puntos de series
+(function(){const s=document.getElementById('sd');let h='';for(let i=0;i<2;i++)h+=`<div class="s"><svg viewBox="0 0 100 100"><path d="${cookie(48,7,.12)}" fill="#006B5A"/></svg></div>`;h+='<div class="c"></div><div class="o"></div>';s.innerHTML=h})();
+// anillos ondulados del reloj
+function wavy(id,p,col,track){const s=document.getElementById(id);let d='';const R=84;for(let a=0;a<=360*p;a+=1.5){const rr=R+Math.sin(a*Math.PI/180*16)*2.6;const t=(a-90)*Math.PI/180;d+=(a?'L':'M')+(96+rr*Math.cos(t)).toFixed(2)+' '+(96+rr*Math.sin(t)).toFixed(2)}
+s.innerHTML=`<path d="${arc(96,96,84,360*p+6,354)}" stroke="${track}" stroke-width="5" fill="none" stroke-linecap="round"/><path d="${d}" stroke="${col}" stroke-width="5" fill="none" stroke-linecap="round"/>`}
+wavy('w1',.69,'#9DF2DA','#1F3A33');wavy('w2',.63,'#FFB08A','#3A2A22');wavy('w3',.75,'#9DF2DA','#1F3A33');
+icons(2);
+</script>
+</body></html>
