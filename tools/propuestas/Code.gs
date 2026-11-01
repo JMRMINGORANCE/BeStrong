@@ -1,17 +1,15 @@
-/**
- * BeStrong · Propuestas de mejora desde la app (sin cuenta de GitHub).
- *
- * Google Apps Script publicado como «Aplicación web» (ejecutar como: yo; acceso: cualquiera).
- * La app envía las propuestas aquí y este script las guarda como issues en el repositorio
- * privado JMRMINGORANCE/bestrong-propuestas. La clave de GitHub vive solo en las
- * «Propiedades del script» (GITHUB_TOKEN), nunca en la app.
- *
- * Peticiones (JSON en el cuerpo del POST):
- *   {action:"create", key, device, title, what, how, version}  → crea la propuesta
- *   {action:"reply",  key, device, number, text}               → el usuario responde a una pregunta
- * GET ?key=…&device=…                                          → lista de propuestas de ese dispositivo
- * GET ?key=…&action=avisos                                     → avisos del equipo vigentes (avisos.json)
- */
+// BeStrong · Propuestas de mejora desde la app (sin cuenta de GitHub).
+//
+// Google Apps Script publicado como «Aplicación web» (ejecutar como: yo; acceso: cualquiera).
+// La app envía las propuestas aquí y este script las guarda como issues en el repositorio
+// privado JMRMINGORANCE/bestrong-propuestas. La clave de GitHub vive solo en las
+// «Propiedades del script» (GITHUB_TOKEN), nunca en la app.
+//
+// Peticiones (JSON en el cuerpo del POST):
+//   {action:"create", key, device, title, what, how, version}  → crea la propuesta
+//   {action:"reply",  key, device, number, text}               → el usuario responde a una pregunta
+// GET ?key=…&device=…                                          → lista de propuestas de ese dispositivo
+// GET ?key=…&action=avisos                                     → avisos del equipo vigentes (avisos.json)
 
 var REPO = 'JMRMINGORANCE/bestrong-propuestas';
 var APP_KEY = 'bs-propuestas-v1'; // No es secreto (va en la app): solo evita el ruido de bots genéricos
@@ -107,14 +105,12 @@ function list_(device) {
   });
 }
 
-/**
- * Avisos del equipo: archivo avisos.json en la raíz del repositorio de propuestas (solo lo edita el
- * equipo; nunca sale de issues, para que una propuesta no pueda convertirse en aviso). Formato:
- *   {"avisos": [{"id": 1, "fecha": "2026-10-30", "caduca": "2026-11-15",
- *                "titulo": {"es": "…", "en": "…"}, "texto": {"es": "…", "en": "…"}}]}
- * «titulo» y «texto» pueden ser también un texto sin idiomas. Sin «caduca», vale 14 días desde «fecha».
- * Se guarda 15 minutos en caché para no gastar el cupo de GitHub con cada móvil.
- */
+// Avisos del equipo: archivo avisos.json en la raíz del repositorio de propuestas (solo lo edita el
+// equipo; nunca sale de issues, para que una propuesta no pueda convertirse en aviso). Formato:
+//   {"avisos": [{"id": 1, "fecha": "2026-10-30", "caduca": "2026-11-15",
+//                "titulo": {"es": "…", "en": "…"}, "texto": {"es": "…", "en": "…"}}]}
+// «titulo» y «texto» pueden ser también un texto sin idiomas. Sin «caduca», vale 14 días desde «fecha».
+// Se guarda 15 minutos en caché para no gastar el cupo de GitHub con cada móvil.
 var AVISOS_CACHE_S = 900;
 var AVISOS_DIAS = 14;
 
@@ -140,7 +136,7 @@ function avisos_() {
   return {list: list};
 }
 
-/** avisos.json tal cual (formato «raw» de GitHub: sin base64). */
+// avisos.json tal cual (formato «raw» de GitHub: sin base64).
 function leerAvisos_() {
   var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
   var res = UrlFetchApp.fetch('https://api.github.com/repos/' + REPO + '/contents/avisos.json', {
@@ -152,7 +148,7 @@ function leerAvisos_() {
   return JSON.parse(res.getContentText('UTF-8'));
 }
 
-/** Prueba manual desde el editor: elige «probarAvisos» y pulsa Ejecutar; el resultado sale en el registro. */
+// Prueba manual desde el editor: elige «probarAvisos» y pulsa Ejecutar; el resultado sale en el registro.
 function probarAvisos() {
   CacheService.getScriptCache().remove('avisos');
   console.log(JSON.stringify(avisos_()));
@@ -170,7 +166,7 @@ function vigente_(a, today) {
   return today <= caduca;
 }
 
-/** Texto plano por idioma ({es: "…"}), recortado. */
+// Texto plano por idioma ({es: "…"}), recortado.
 function idiomas_(v, max) {
   var out = {};
   if (typeof v === 'string') {
@@ -192,7 +188,7 @@ function hasLabel_(issue, name) {
   return (issue.labels || []).some(function (l) { return (l.name || l) === name; });
 }
 
-/** Límite por dispositivo y día, y global por día (protege de spam y del cupo de GitHub). */
+// Límite por dispositivo y día, y global por día (protege de spam y del cupo de GitHub).
 function allow_(device) {
   var lock = LockService.getScriptLock();
   lock.waitLock(5000);
@@ -212,7 +208,7 @@ function allow_(device) {
   }
 }
 
-/** Borra los contadores de días anteriores (programado a diario con un activador). */
+// Borra los contadores de días anteriores (programado a diario con un activador).
 function limpiarContadores() {
   var props = PropertiesService.getScriptProperties();
   var today = Utilities.formatDate(new Date(), 'Europe/Madrid', 'yyyyMMdd');
@@ -239,7 +235,7 @@ function gh_(method, path, payload) {
   return JSON.parse(res.getContentText());
 }
 
-/** Identificador anónimo del dispositivo en el issue: un resumen, no el id que guarda la app. */
+// Identificador anónimo del dispositivo en el issue: un resumen, no el id que guarda la app.
 function tag_(device) {
   var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, 'bestrong:' + device);
   return 'dev-' + bytes.slice(0, 8).map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
@@ -258,7 +254,7 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
-/** Prueba manual desde el editor: comprueba que la clave de GitHub funciona y crea las etiquetas. */
+// Prueba manual desde el editor: comprueba que la clave de GitHub funciona y crea las etiquetas.
 function prepararRepositorio() {
   var colors = {propuesta: '0e8a16', recibida: 'c5def5', 'necesita-info': 'fbca04', aceptada: '0e8a16', 'en-desarrollo': '1d76db',
     implementada: '5319e7', descartada: 'cccccc', 'revision-humana': 'd93f0b'};
