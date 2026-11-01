@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.mobile.health.HealthPermissionsManifestTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-11-01T14:46:32.579Z" hostname="runnervmnwato" time="0.057">
+  <properties/>
+  <testcase name="noMisspelledHealthPermissions" classname="com.bestrong.mobile.health.HealthPermissionsManifestTest" time="0.023"/>
+  <testcase name="everyRequestedHealthPermissionIsDeclared" classname="com.bestrong.mobile.health.HealthPermissionsManifestTest" time="0.033"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[android.os.ServiceManager$ServiceNotFoundException: No service published for: healthconnect
+	at android.os.ServiceManager.getServiceOrThrow(ServiceManager.java:166)
+	at android.app.SystemServiceRegistry$139.createService(SystemServiceRegistry.java:1872)
+	at android.app.SystemServiceRegistry$CachedServiceFetcher.getService(SystemServiceRegistry.java:1971)
+	at android.app.SystemServiceRegistry.getSystemService(SystemServiceRegistry.java:1645)
+	at android.app.ContextImpl.getSystemService(ContextImpl.java:2212)
+	at jdk.internal.reflect.GeneratedMethodAccessor11.invoke(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at org.robolectric.shadows.ShadowContextImpl$ContextImplReflector$$Reflector5.getSystemService(Unknown Source)
+	at org.robolectric.shadows.ShadowContextImpl.getSystemService(ShadowContextImpl.java:84)
+	at android.app.ContextImpl.getSystemService(ContextImpl.java)
+	at android.content.ContextWrapper.getSystemService(ContextWrapper.java:934)
+	at androidx.health.connect.client.HealthConnectClient$Api34Impl.getSdkStatus(HealthConnectClient.kt:496)
+	at androidx.health.connect.client.HealthConnectClient$Companion.getSdkStatus(HealthConnectClient.kt:383)
+	at androidx.health.connect.client.HealthConnectClient$Companion.getSdkStatus$default(HealthConnectClient.kt:377)
+	at com.bestrong.mobile.health.HealthConnectReader.available(HealthConnectReader.kt:39)
+	at com.bestrong.mobile.health.HealthConnectReader.historyAvailable(HealthConnectReader.kt:57)
+	at com.bestrong.mobile.health.HealthConnectReader.permissions_delegate$lambda$2(HealthConnectReader.kt:51)
+	at kotlin.SynchronizedLazyImpl.getValue(LazyJVM.kt:86)
+	at com.bestrong.mobile.health.HealthConnectReader.getPermissions(HealthConnectReader.kt:42)
+	at com.bestrong.mobile.health.HealthPermissionsManifestTest.everyRequestedHealthPermissionIsDeclared(HealthPermissionsManifestTest.kt:31)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.robolectric.RobolectricTestRunner$HelperTestRunner$1.evaluate(RobolectricTestRunner.java:524)
+	at org.robolectric.internal.SandboxTestRunner.executeInSandbox(SandboxTestRunner.java:494)
+	at org.robolectric.internal.SandboxTestRunner.access$900(SandboxTestRunner.java:67)
+	at org.robolectric.internal.SandboxTestRunner$7.evaluate(SandboxTestRunner.java:442)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.robolectric.internal.SandboxTestRunner.access$600(SandboxTestRunner.java:67)
+	at org.robolectric.internal.SandboxTestRunner$6.evaluate(SandboxTestRunner.java:333)
+	at org.robolectric.internal.SandboxTestRunner$3.evaluate(SandboxTestRunner.java:233)
+	at org.robolectric.internal.SandboxTestRunner$5.lambda$evaluate$0(SandboxTestRunner.java:317)
+	at org.robolectric.internal.bytecode.Sandbox.lambda$runOnMainThread$0(Sandbox.java:101)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+]]></system-err>
+</testsuite>
