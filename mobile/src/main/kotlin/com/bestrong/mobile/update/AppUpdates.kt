@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.bestrong.mobile.notify.AnnouncementsWorker
 import com.bestrong.mobile.shared.R
 import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
@@ -78,6 +79,8 @@ class AppUpdates(private val activity: ComponentActivity) : DefaultLifecycleObse
         // La app está abierta: la notificación de versión nueva ya no hace falta
         prefs.edit().putLong(UpdateCheckWorker.KEY_LAST_OPEN, System.currentTimeMillis()).apply()
         activity.lifecycleScope.launch { check() }
+        // Y los avisos del equipo, sin esperar a la comprobación periódica
+        runCatching { AnnouncementsWorker.checkNow(activity.applicationContext) }
     }
 
     private suspend fun check() {

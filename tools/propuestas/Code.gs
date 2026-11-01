@@ -1,17 +1,15 @@
-/**
- * BeStrong · Propuestas de mejora desde la app (sin cuenta de GitHub).
- *
- * Google Apps Script publicado como «Aplicación web» (ejecutar como: yo; acceso: cualquiera).
- * La app envía las propuestas aquí y este script las guarda como issues en el repositorio
- * privado JMRMINGORANCE/bestrong-propuestas. La clave de GitHub vive solo en las
- * «Propiedades del script» (GITHUB_TOKEN), nunca en la app.
- *
- * Peticiones (JSON en el cuerpo del POST):
- *   {action:"create", key, device, title, what, how, version}  → crea la propuesta
- *   {action:"reply",  key, device, number, text}               → el usuario responde a una pregunta
- * GET ?key=…&device=…                                          → lista de propuestas de ese dispositivo
- * GET ?key=…&action=avisos                                     → avisos del equipo vigentes (avisos.json)
- */
+// BeStrong · Propuestas de mejora desde la app (sin cuenta de GitHub).
+//
+// Google Apps Script publicado como «Aplicación web» (ejecutar como: yo; acceso: cualquiera).
+// La app envía las propuestas aquí y este script las guarda como issues en el repositorio
+// privado JMRMINGORANCE/bestrong-propuestas. La clave de GitHub vive solo en las
+// «Propiedades del script» (GITHUB_TOKEN), nunca en la app.
+//
+// Peticiones (JSON en el cuerpo del POST):
+//   {action:"create", key, device, title, what, how, version}  → crea la propuesta
+//   {action:"reply",  key, device, number, text}               → el usuario responde a una pregunta
+// GET ?key=…&device=…                                          → lista de propuestas de ese dispositivo
+// GET ?key=…&action=avisos                                     → avisos del equipo vigentes (avisos.json)
 
 var REPO = 'JMRMINGORANCE/bestrong-propuestas';
 var APP_KEY = 'bs-propuestas-v1'; // No es secreto (va en la app): solo evita el ruido de bots genéricos
@@ -39,7 +37,10 @@ function doGet(e) {
   try {
     var p = e.parameter || {};
     if (p.key !== APP_KEY) return json_({ok: false, error: 'clave'});
-    if (p.action === 'avisos') return json_({ok: true, avisos: avisos_()});
+    if (p.action === 'avisos') {
+      var r = avisos_();
+      return json_(r.error ? {ok: true, avisos: r.list, error: r.error} : {ok: true, avisos: r.list});
+    }
     var device = cleanDevice_(p.device);
     if (!device) return json_({ok: false, error: 'dispositivo'});
     return json_({ok: true, proposals: list_(device)});
@@ -104,37 +105,53 @@ function list_(device) {
   });
 }
 
-/**
- * Avisos del equipo: archivo avisos.json en la raíz del repositorio de propuestas (solo lo edita el
- * equipo; nunca sale de issues, para que una propuesta no pueda convertirse en aviso). Formato:
- *   {"avisos": [{"id": 1, "fecha": "2026-10-30", "caduca": "2026-11-15",
- *                "titulo": {"es": "…", "en": "…"}, "texto": {"es": "…", "en": "…"}}]}
- * «titulo» y «texto» pueden ser también un texto sin idiomas. Sin «caduca», vale 14 días desde «fecha».
- * Se guarda 15 minutos en caché para no gastar el cupo de GitHub con cada móvil.
- */
+// Avisos del equipo: archivo avisos.json en la raíz del repositorio de propuestas (solo lo edita el
+// equipo; nunca sale de issues, para que una propuesta no pueda convertirse en aviso). Formato:
+//   {"avisos": [{"id": 1, "fecha": "2026-10-30", "caduca": "2026-11-15",
+//                "titulo": {"es": "…", "en": "…"}, "texto": {"es": "…", "en": "…"}}]}
+// «titulo» y «texto» pueden ser también un texto sin idiomas. Sin «caduca», vale 14 días desde «fecha».
+// Se guarda 15 minutos en caché para no gastar el cupo de GitHub con cada móvil.
 var AVISOS_CACHE_S = 900;
 var AVISOS_DIAS = 14;
 
 function avisos_() {
   var cache = CacheService.getScriptCache();
   var hit = cache.get('avisos');
-  if (hit) return JSON.parse(hit);
+  if (hit) return {list: JSON.parse(hit)};
   var today = Utilities.formatDate(new Date(), 'Europe/Madrid', 'yyyy-MM-dd');
   var data;
   try {
-    var file = gh_('get', '/repos/' + REPO + '/contents/avisos.json');
-    data = JSON.parse(Utilities.newBlob(Utilities.base64Decode(file.content)).getDataAsString());
+    data = leerAvisos_();
   } catch (err) {
-    console.log('avisos.json: ' + err.message);
-    data = {avisos: []};
+    // Sin caché: en cuanto se arregle, se lee bien a la siguiente
+    console.error('avisos.json: ' + err.message);
+    return {list: [], error: String(err.message).slice(0, 120)};
   }
-  var out = (data.avisos || [])
+  var list = (data.avisos || [])
     .filter(function (a) { return parseInt(a.id, 10) > 0 && vigente_(a, today); })
     .map(function (a) { return {id: parseInt(a.id, 10), titulo: idiomas_(a.titulo, 80), texto: idiomas_(a.texto, 500)}; })
     .sort(function (x, y) { return y.id - x.id; })
     .slice(0, 5);
-  cache.put('avisos', JSON.stringify(out), AVISOS_CACHE_S);
-  return out;
+  cache.put('avisos', JSON.stringify(list), AVISOS_CACHE_S);
+  return {list: list};
+}
+
+// avisos.json tal cual (formato «raw» de GitHub: sin base64).
+function leerAvisos_() {
+  var token = PropertiesService.getScriptProperties().getProperty('GITHUB_TOKEN');
+  var res = UrlFetchApp.fetch('https://api.github.com/repos/' + REPO + '/contents/avisos.json', {
+    muteHttpExceptions: true,
+    headers: {Authorization: 'Bearer ' + token, Accept: 'application/vnd.github.raw+json', 'X-GitHub-Api-Version': '2022-11-28'},
+  });
+  var code = res.getResponseCode();
+  if (code !== 200) throw new Error('GitHub ' + code + ': ' + res.getContentText().slice(0, 80));
+  return JSON.parse(res.getContentText('UTF-8'));
+}
+
+// Prueba manual desde el editor: elige «probarAvisos» y pulsa Ejecutar; el resultado sale en el registro.
+function probarAvisos() {
+  CacheService.getScriptCache().remove('avisos');
+  console.log(JSON.stringify(avisos_()));
 }
 
 function vigente_(a, today) {
@@ -149,7 +166,7 @@ function vigente_(a, today) {
   return today <= caduca;
 }
 
-/** Texto plano por idioma ({es: "…"}), recortado. */
+// Texto plano por idioma ({es: "…"}), recortado.
 function idiomas_(v, max) {
   var out = {};
   if (typeof v === 'string') {
@@ -171,7 +188,7 @@ function hasLabel_(issue, name) {
   return (issue.labels || []).some(function (l) { return (l.name || l) === name; });
 }
 
-/** Límite por dispositivo y día, y global por día (protege de spam y del cupo de GitHub). */
+// Límite por dispositivo y día, y global por día (protege de spam y del cupo de GitHub).
 function allow_(device) {
   var lock = LockService.getScriptLock();
   lock.waitLock(5000);
@@ -191,7 +208,7 @@ function allow_(device) {
   }
 }
 
-/** Borra los contadores de días anteriores (programado a diario con un activador). */
+// Borra los contadores de días anteriores (programado a diario con un activador).
 function limpiarContadores() {
   var props = PropertiesService.getScriptProperties();
   var today = Utilities.formatDate(new Date(), 'Europe/Madrid', 'yyyyMMdd');
@@ -218,7 +235,7 @@ function gh_(method, path, payload) {
   return JSON.parse(res.getContentText());
 }
 
-/** Identificador anónimo del dispositivo en el issue: un resumen, no el id que guarda la app. */
+// Identificador anónimo del dispositivo en el issue: un resumen, no el id que guarda la app.
 function tag_(device) {
   var bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, 'bestrong:' + device);
   return 'dev-' + bytes.slice(0, 8).map(function (b) { return ('0' + (b & 0xff).toString(16)).slice(-2); }).join('');
@@ -237,7 +254,7 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
-/** Prueba manual desde el editor: comprueba que la clave de GitHub funciona y crea las etiquetas. */
+// Prueba manual desde el editor: comprueba que la clave de GitHub funciona y crea las etiquetas.
 function prepararRepositorio() {
   var colors = {propuesta: '0e8a16', recibida: 'c5def5', 'necesita-info': 'fbca04', aceptada: '0e8a16', 'en-desarrollo': '1d76db',
     implementada: '5319e7', descartada: 'cccccc', 'revision-humana': 'd93f0b'};
