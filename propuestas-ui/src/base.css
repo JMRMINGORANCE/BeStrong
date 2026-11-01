@@ -1,0 +1,24 @@
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0B0C0F;--s1:#131519;--s2:#181A1F;--s3:#21242A;--s4:#2B2F36;--ol:#3B3F47;--on:#EDEFF3;--muted:#B4BAC5;--or:#FF8A4C;--or2:#FF6B1A;--amb:#FFB547;--ok:#7DD99A;--ok2:#34A853;--warn:#F5A623;--bad:#E5484D;--heart:#FF5252}
+body{background:#1a1b20;font-family:'Inter',system-ui,sans-serif;color:var(--on);padding:40px;display:flex;gap:40px;align-items:flex-start}
+.meta{width:360px;padding-top:20px}
+.meta .n{font-size:15px;color:var(--or);font-weight:800;letter-spacing:2px}
+.meta h1{font-size:34px;line-height:1.1;margin:10px 0 14px;font-weight:800}
+.meta p{color:var(--muted);font-size:16px;line-height:1.5;margin-bottom:14px}
+.meta ul{list-style:none;color:var(--on);font-size:15px;line-height:1.5}
+.meta li{padding:8px 0;border-top:1px solid #2b2f36}
+.meta li b{color:var(--or)}
+.phone{width:400px;height:860px;border-radius:44px;background:var(--bg);border:10px solid #000;box-shadow:0 0 0 2px #333,0 30px 60px #0008;overflow:hidden;position:relative;flex-shrink:0}
+.glow{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,138,76,.16) 0%,rgba(255,138,76,.08) 12%,rgba(255,138,76,.02) 24%,transparent 38%);pointer-events:none}
+.sb{height:36px;display:flex;justify-content:space-between;align-items:center;padding:0 24px;font-size:13px;font-weight:600;position:relative}
+.scr{padding:4px 18px;position:relative}
+.card{background:var(--s2);border-radius:20px;padding:16px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:var(--s3);font-size:12px;font-weight:600;color:var(--muted)}
+.btn{background:var(--or);color:#2A0E00;font-weight:800;border-radius:99px;padding:14px;text-align:center;font-size:16px}
+.muted{color:var(--muted)}
+.nav{position:absolute;bottom:0;left:0;right:0;height:76px;background:var(--s1);display:flex;justify-content:space-around;align-items:center;font-size:11px;color:var(--muted)}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.nav .on{color:var(--on)}
+.nav .on span{background:#5C2408;padding:3px 18px;border-radius:99px}
+.row{display:flex;align-items:center}
+.sp{justify-content:space-between}

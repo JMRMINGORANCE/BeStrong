@@ -1,0 +1,39 @@
+<html><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"><style>
+body{flex-direction:column}.meta{width:auto;max-width:1000px}
+.fold{width:1000px;height:760px;border-radius:36px;background:var(--bg);border:10px solid #000;box-shadow:0 0 0 2px #333,0 30px 60px #0008;overflow:hidden;position:relative;display:flex}
+.hinge{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#ffffff10}
+.rail{width:72px;background:var(--s1);display:flex;flex-direction:column;align-items:center;gap:22px;padding-top:30px;font-size:20px;color:var(--muted)}.rail .on{background:#5C2408;border-radius:14px;padding:6px 12px;color:var(--on)}
+.l{flex:1.15;min-width:0;padding:24px;position:relative}.r{flex:1;min-width:0;padding:24px;background:var(--s1);display:flex;flex-direction:column;gap:14px}
+.h{font-size:24px;font-weight:800}.ex{margin-top:14px}.ex .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+table{width:100%;border-collapse:separate;border-spacing:0 5px;font-size:14px}th{font-size:11px;color:var(--muted);text-align:left;font-weight:600;padding:0 8px}td{padding:9px 8px;background:var(--s2)}td:first-child{border-radius:10px 0 0 10px}td:last-child{border-radius:0 10px 10px 0;text-align:center}
+tr.d td{background:#1E4D2B55}tr.c td{background:var(--s3);outline:none}tr.c td:first-child{box-shadow:inset 3px 0 0 var(--or)}
+.ck{display:inline-block;width:24px;height:24px;border-radius:7px;background:var(--s4)}tr.d .ck{background:var(--ok)}
+.restbox{display:flex;align-items:center;gap:16px;background:var(--s2);border-radius:24px;padding:20px}
+.ring{width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--or) 0 62%,var(--s4) 0);display:flex;align-items:center;justify-content:center;flex-shrink:0}.ring div{width:128px;height:128px;border-radius:50%;background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center}.ring b{font-size:44px;letter-spacing:-1px}
+.pill{white-space:nowrap;border-radius:99px;background:var(--s4);padding:9px 12px;font-weight:700;font-size:13px;text-align:center}
+.hr{background:var(--s2);border-radius:20px;padding:16px}.hr svg{width:100%;height:70px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.plates{display:flex;align-items:center;gap:3px;justify-content:center;margin-top:10px}.plates i{display:block;width:12px;border-radius:3px}
+</style></head><body>
+<div class="meta"><div class="n">PROPUESTA 05</div><h1>Fold desplegado: «Centro de mando» del entreno</h1>
+<p style="max-width:900px">En la pantalla interior del Z Fold el entreno se convierte en un panel de dos columnas: a la izquierda la tabla de series de siempre; a la derecha, el descanso gigante, el pulso en vivo del Galaxy Watch, los discos de la serie actual y la evolución del ejercicio. Todo visible sin cambiar de pantalla. En modo mesa, la columna derecha pasa a la mitad superior.</p></div>
+<div class="fold"><div class="rail"><span class="on">🏋</span><span>🏠</span><span>📅</span><span>📈</span><span>👤</span></div>
+<div class="l"><div class="row sp"><div><div class="muted" style="font-size:13px">Torso A · 38:20</div><div class="h" style="white-space:nowrap">Entreno en curso</div></div><div style="display:flex;gap:8px"><span class="chip" style="white-space:nowrap">⌚ Conectado</span><span class="btn" style="padding:9px 18px;font-size:14px">Terminar</span></div></div>
+<div class="ex"><div class="hd"><b style="font-size:17px;color:var(--or)">Press banca con barra</b><span class="chip">📝 Agarre 1,5× hombros</span></div>
+<table><tr><th>SERIE</th><th>ANTERIOR</th><th>KG</th><th>REPS</th><th>RPE</th><th>✓</th></tr>
+<tr class="d"><td>C</td><td class="muted">40×10</td><td>40</td><td>10</td><td>–</td><td><span class="ck"></span></td></tr>
+<tr class="d"><td>1</td><td class="muted">80×8</td><td>82,5</td><td>8</td><td>8</td><td><span class="ck"></span></td></tr>
+<tr class="d"><td>2</td><td class="muted">80×8</td><td>82,5</td><td>8</td><td>8,5</td><td><span class="ck"></span></td></tr>
+<tr class="c"><td>3</td><td class="muted">80×7</td><td><b>82,5</b></td><td><b>8</b></td><td>–</td><td><span class="ck"></span></td></tr></table></div>
+<div class="ex"><div class="hd"><b style="font-size:17px">Remo con barra</b><span class="muted" style="font-size:12px">Superserie A2</span></div>
+<table><tr><td>1</td><td class="muted">85×8</td><td>90</td><td>8</td><td>–</td><td><span class="ck"></span></td></tr><tr><td>2</td><td class="muted">85×8</td><td>90</td><td>8</td><td>–</td><td><span class="ck"></span></td></tr></table></div>
+<div class="ex"><div class="hd"><b style="font-size:17px">Fondos en paralelas</b><span class="muted" style="font-size:12px">3 × 12</span></div></div>
+</div>
+<div class="r"><div class="restbox"><div class="ring"><div><span class="muted" style="font-size:12px">DESCANSO</span><b>1:34</b><span class="muted" style="font-size:12px">de 2:30</span></div></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px"><div class="muted" style="font-size:12px">A CONTINUACIÓN</div><b style="font-size:18px">Remo con barra</b><div class="muted">Serie 3 · 90 kg × 8</div><div style="display:flex;gap:8px"><div class="pill">−15 s</div><div class="pill">+15 s</div><div class="pill" style="background:var(--or);color:#2A0E00">Saltar</div></div></div></div>
+<div class="hr"><div class="row sp"><b>❤ 118 <span class="muted" style="font-weight:400;font-size:13px">ppm · bajando</span></b><span class="muted" style="font-size:12px">Galaxy Watch Ultra · 286 kcal</span></div>
+<svg viewBox="0 0 300 70" preserveAspectRatio="none"><path d="M0 50 L20 46 L40 30 L55 18 L70 25 L90 44 L110 50 L130 48 L150 28 L165 15 L180 22 L200 42 L220 50 L240 47 L260 30 L275 20 L290 34 L300 40" stroke="#FF5252" stroke-width="2.5" fill="none"/></svg></div>
+<div class="g2"><div class="hr"><b style="font-size:14px">Discos por lado</b><div class="plates"><i style="height:20px;width:30px;background:#555"></i><i style="height:80px;background:#3B82F6"></i><i style="height:64px;background:#22C55E"></i><i style="height:34px;background:#ddd"></i><i style="height:20px;width:60px;background:#888"></i></div><div class="muted" style="text-align:center;font-size:12px;margin-top:8px">20 + 10 + 1,25 kg</div></div>
+<div class="hr"><b style="font-size:14px">1RM estimado</b><div style="font-size:26px;font-weight:800;margin-top:4px">104,5 <span class="muted" style="font-size:13px">kg</span></div>
+<svg viewBox="0 0 140 40" style="height:40px"><path d="M0 34 L20 30 L40 31 L60 24 L80 20 L100 16 L120 12 L140 6" stroke="#FF8A4C" stroke-width="2.5" fill="none"/></svg><div style="color:var(--ok);font-size:12px">▲ PR si haces 8 reps</div></div></div>
+</div></div></body></html>
