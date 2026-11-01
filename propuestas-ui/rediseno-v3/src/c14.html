@@ -190,7 +190,7 @@ function field(svg,c,R,p,{num=true,fs=11,showN=[]}={}){let h=`<circle cx="${c}" 
  svg.insertAdjacentHTML('beforeend',h)}
 // teléfono: esfera con aguja
 (function(){const s=document.getElementById('fd');field(s,54,54,.63,{fs:11,showN:[12,3,9]});
- const a=(.63*360-90)*Math.PI/180;s.insertAdjacentHTML('beforeend',`<path d="M54 54 L${54+Math.cos(a)*34} ${54+Math.sin(a)*34}" stroke="#EDE3C8" stroke-width="3" stroke-linecap="round"/><path d="M54 54 L${54-Math.cos(a)*9} ${54-Math.sin(a)*9}" stroke="#EDE3C8" stroke-width="3" stroke-linecap="round"/><circle cx="54" cy="54" r="4" fill="#C98A4B" stroke="#22150a" stroke-width="1.5"/><text x="54" y="84" font-family="Space Mono" font-weight="700" font-size="11" fill="#C98A4B" text-anchor="middle">1:34</text>`)})();
+ const a=(.63*360-90)*Math.PI/180;s.insertAdjacentHTML('beforeend',`<path d="M54 54 L${54+Math.cos(a)*34} ${54+Math.sin(a)*34}" stroke="#EDE3C8" stroke-width="3" stroke-linecap="round"/><path d="M54 54 L${54-Math.cos(a)*9} ${54-Math.sin(a)*9}" stroke="#EDE3C8" stroke-width="3" stroke-linecap="round"/><circle cx="54" cy="54" r="4" fill="#C98A4B" stroke="#22150a" stroke-width="1.5"/><text x="70" y="78" font-family="Space Mono" font-weight="700" font-size="11" fill="#C98A4B" text-anchor="middle">1:34</text>`)})();
 // reloj: solo 12, 3, 6, 9 para no chocar con el contenido
 [['w1',.69],['w2',.63],['w3',.75]].forEach(([id,p])=>field(document.getElementById(id),96,96,p,{fs:13,showN:[12,6]}));
 </script>
