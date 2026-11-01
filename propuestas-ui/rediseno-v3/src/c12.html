@@ -1,0 +1,184 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame-a.css">
+<style>
+:root{--sheet:#ECE8E1;--bg:#F5F2ED;--ink:#121315;--muted:#7D7A75;--accent:#1F4FD8;--display:'Manrope';--body:'Manrope';--mono:'DM Mono';--rule:#DCD7CF;--swBorder:rgba(0,0,0,.08);--swBg:#fbfaf7}
+body{background:radial-gradient(1200px 700px at 72% 18%,#fbf9f5,#e6e1d9 75%)}
+.mono{font-family:'DM Mono'}
+.lbl{font:500 10px/1 'DM Mono';letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.phone{background:linear-gradient(145deg,#fdfcfa,#e9e5de 45%,#fbfaf7 70%,#ddd8d0);box-shadow:0 0 0 1px #d2ccc2,0 40px 80px -28px rgba(60,45,20,.35),0 8px 24px -12px rgba(60,45,20,.2)}
+.cam{background:#121315;box-shadow:0 0 0 1.5px #d8d3ca}
+.scr{background:linear-gradient(180deg,#F7F5F1,#F1EDE7)}
+.pad{padding:6px 18px}
+.cer{border-radius:24px;background:radial-gradient(120% 90% at 20% 0%,#ffffff 0%,#fbfaf8 45%,#f3f0ea 100%);box-shadow:0 1px 0 #fff inset,0 0 0 1px rgba(0,0,0,.04),0 10px 24px -14px rgba(60,45,20,.28),0 2px 6px -3px rgba(60,45,20,.12)}
+.hdr{display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px}
+.hdr h2{font:800 24px/1.05 'Manrope';letter-spacing:-.8px;margin-top:6px}
+.av{width:40px;height:40px;border-radius:50%;background:#121315;color:#fff;display:grid;place-items:center;font:700 13px 'Manrope'}
+.hero{padding:18px}
+.hero .top{display:flex;justify-content:space-between;align-items:center}
+.dot{font:500 10px/1 'DM Mono';letter-spacing:1.2px;color:var(--accent);display:flex;gap:7px;align-items:center}
+.dot:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.pill{font:500 10.5px/1 'DM Mono';padding:6px 9px;border-radius:20px;background:#efebe4;color:#4b4945}
+.hero h3{font:800 30px/1 'Manrope';letter-spacing:-1.2px;margin:10px 0 4px}
+.hero .sub{font:500 13px 'Manrope';color:var(--muted);margin-bottom:12px}
+.exl div{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid #ebe6de;font:600 13.5px 'Manrope'}
+.exl div span:last-child{font:500 12.5px 'DM Mono';color:#2b2c2f}
+.go{display:flex;gap:10px;margin-top:12px}
+.go .b{flex:1;height:50px;border-radius:25px;background:#121315;color:#fff;font:700 15px/50px 'Manrope';display:flex;gap:8px;align-items:center;justify-content:center;box-shadow:0 10px 20px -10px rgba(0,0,0,.5)}
+.go .w{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:var(--accent);background:#e9eefc;box-shadow:inset 0 0 0 1px #d3ddf8}
+.week{margin-top:12px;padding:16px 18px}
+.week .row{display:flex;justify-content:space-between;align-items:baseline}
+.week .big{font:800 22px 'Manrope';letter-spacing:-.5px}.week .big small{color:var(--muted);font-size:13px;font-weight:600}
+.beads{display:flex;justify-content:space-between;margin-top:14px}
+.beads div{display:flex;flex-direction:column;align-items:center;gap:7px;font:500 10px 'DM Mono';color:var(--muted)}
+.beads i{width:30px;height:30px;border-radius:50%;display:block;background:radial-gradient(circle at 35% 30%,#fff,#ebe7e0 70%);box-shadow:inset 0 0 0 1px #e1dcd3,0 2px 4px -2px rgba(0,0,0,.15)}
+.beads .d i{background:radial-gradient(circle at 35% 30%,#7f9cf0,#1F4FD8 55%,#163a9f);box-shadow:0 4px 8px -3px rgba(31,79,216,.6)}
+.beads .t i{box-shadow:inset 0 0 0 2px #121315}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.duo .cer{padding:14px 16px;border-radius:20px}
+.duo b{display:block;font:800 24px/1 'Manrope';letter-spacing:-.6px;margin-top:9px}
+.duo b small{font-size:12px;color:var(--muted);font-weight:600}
+.nav{position:absolute;left:14px;right:14px;bottom:14px;height:62px;border-radius:31px;display:flex;justify-content:space-around;align-items:center;background:#121315;box-shadow:0 14px 30px -12px rgba(0,0,0,.5)}
+.nav div{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-size:21px;color:#8a8780}
+.nav .on{background:#fff;color:#121315}
+/* entreno */
+.wtop{display:flex;align-items:center;gap:10px;margin:10px 0 14px}
+.wtop .t{flex:1}.wtop .t b{display:block;font:800 19px 'Manrope';letter-spacing:-.4px}.wtop .t span{font:500 11px 'DM Mono';color:var(--muted)}
+.ib{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.05),0 4px 10px -6px rgba(0,0,0,.25)}
+.fin{height:38px;padding:0 16px;border-radius:19px;font:700 13px/38px 'Manrope';background:#121315;color:#fff}
+.rest{display:flex;gap:16px;align-items:center;padding:14px 16px}
+.dial{width:96px;height:96px;flex-shrink:0;position:relative;border-radius:50%;background:radial-gradient(circle at 35% 28%,#fff,#efebe4 70%);box-shadow:inset 0 0 0 1px #e3ded5,0 6px 14px -8px rgba(0,0,0,.25)}
+.dial svg{position:absolute;inset:0}
+.dial b{position:absolute;inset:0;display:grid;place-items:center;font:800 21px 'Manrope';letter-spacing:-.5px}
+.nx b{display:block;font:800 15px 'Manrope';margin:7px 0 2px}
+.nx span{font:500 12px 'DM Mono';color:#4b4945}
+.ctr{display:flex;gap:6px;margin-top:10px}
+.ctr div{white-space:nowrap;font:500 11px/1 'DM Mono';padding:8px 10px;border-radius:16px;background:#efebe4}
+.ctr .o{background:var(--accent);color:#fff}
+.exc{margin-top:14px;padding:14px 12px 10px}
+.exh{display:flex;align-items:center;gap:10px;padding:0 4px 10px}
+.th{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:19px;color:#121315;background:radial-gradient(circle at 35% 30%,#fff,#ece8e1);box-shadow:inset 0 0 0 1px #e1dcd3}
+.exh b{display:block;font:800 15px 'Manrope';letter-spacing:-.2px}.exh span{font:500 11px 'DM Mono';color:var(--muted)}
+table{width:100%;border-collapse:separate;border-spacing:0 5px}
+th{font:500 9px 'DM Mono';letter-spacing:1.2px;color:var(--muted);text-align:left;padding:2px 8px}
+td{font:600 14px 'Manrope';padding:9px 8px;background:#f4f1eb}
+td:first-child{border-radius:14px 0 0 14px;color:var(--muted);width:30px;text-align:center;font-family:'DM Mono';font-weight:500}
+td:last-child{border-radius:0 14px 14px 0;width:38px}
+td.pv{color:#9a968f;font:500 12.5px 'DM Mono'}
+.ck{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px #cfc9bf;color:transparent;font-size:14px}
+tr.d .ck{background:#121315;box-shadow:none;color:#fff}
+tr.c td{background:#fff;box-shadow:0 0 0 1.5px var(--accent) inset}
+tr.c td:first-child{color:var(--accent);box-shadow:inset 1.5px 0 0 var(--accent),inset 0 1.5px 0 var(--accent),inset 0 -1.5px 0 var(--accent)}
+tr.c td:not(:first-child):not(:last-child){box-shadow:inset 0 1.5px 0 var(--accent),inset 0 -1.5px 0 var(--accent)}
+tr.c td:last-child{box-shadow:inset -1.5px 0 0 var(--accent),inset 0 1.5px 0 var(--accent),inset 0 -1.5px 0 var(--accent)}
+.ex2{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 14px;border-radius:20px}
+.ex2 b{flex:1;font:700 14px 'Manrope'}.ex2 span{font:500 11px 'DM Mono';color:var(--muted)}
+/* reloj cerámica */
+.case{background:linear-gradient(145deg,#ffffff 0%,#e9e6e0 25%,#fbfaf7 48%,#d8d3ca 75%,#f4f2ee 100%);box-shadow:0 18px 36px -14px rgba(60,45,20,.45),inset 0 1px 1px #fff}
+.case:after{background:linear-gradient(160deg,#f6f4f0,#dcd7ce)}
+.btn{background:linear-gradient(90deg,#d9d4cb,#ffffff,#cfc9bf)}
+.btn.q{background:linear-gradient(90deg,#163a9f,#3b6cf0,#163a9f)}
+.disp{color:#121315;background:radial-gradient(circle at 40% 30%,#ffffff,#f1ede6 60%,#e5e0d7)}
+.wf{position:absolute;inset:0}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.wl{font:500 8.5px/1 'DM Mono';letter-spacing:1.2px;color:#7d7a75}
+.wbig{font:800 42px/1 'Manrope';letter-spacing:-2px;color:#121315}
+.wbig small{font:600 12px 'Manrope';letter-spacing:0;color:#7d7a75;margin-left:2px}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 12 · Móvil + reloj</div>
+ <h1>Cerámica</h1>
+ <p class="lead">Un tema claro de lujo inspirado en los relojes de cerámica pulida: blanco hueso, negro y un único acento azul cobalto. Sombras muy suaves, piezas redondeadas como cuentas de cerámica y nada de bordes duros.</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:#F5F2ED"></b><span><em>Hueso</em>#F5F2ED</span></div>
+  <div class="sw"><b style="background:radial-gradient(circle at 30% 20%,#fff,#f3f0ea)"></b><span><em>Cerámica</em>#FFFFFF</span></div>
+  <div class="sw"><b style="background:#121315"></b><span><em>Ónice</em>#121315</span></div>
+  <div class="sw"><b style="background:#1F4FD8"></b><span><em>Cobalto</em>#1F4FD8</span></div>
+  <div class="sw"><b style="background:#7D7A75"></b><span><em>Arcilla</em>#7D7A75</span></div>
+  <div class="sw"><b style="background:#E9EEFC"></b><span><em>Cobalto 10</em>#E9EEFC</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font:800 30px 'Manrope';letter-spacing:-1px">Día de Press</span><small>Manrope</small></div>
+  <div><span class="s mono">82,5 × 8</span><small>DM Mono</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>Superficies con brillo de cerámica y sombras de dos capas, muy suaves.</li><li>Cobalto solo para lo que está activo; negro para las acciones.</li><li>Los días y las series son «cuentas» pulidas que se rellenan.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="hdr"><div><div class="lbl">Domingo · 1 noviembre</div><h2>Buenas noches, Juan</h2></div><div class="av">JM</div></div>
+  <div class="cer hero">
+   <div class="top"><span class="dot">HOY TOCA</span><span class="pill">5/3/1 · semana 2</span></div>
+   <h3>Día de Press</h3><div class="sub">5 ejercicios · 55 min</div>
+   <div class="exl"><div><span>Press militar 3×3</span><span>47,5 · 52,5 · 57,5+</span></div><div><span>Press militar BBB 5×10</span><span>32,5 kg</span></div><div><span>Dominadas 5×10</span><span>corporal</span></div></div>
+   <div class="go"><div class="b"><i data-i="play"></i>Empezar</div><div class="w"><i data-i="watch"></i></div></div>
+  </div>
+  <div class="cer week">
+   <div class="row"><span class="lbl">Esta semana</span><span class="big">3<small> de 4</small></span></div>
+   <div class="beads"><div class="d"><i></i>L</div><div><i></i>M</div><div class="d"><i></i>X</div><div><i></i>J</div><div class="d"><i></i>V</div><div><i></i>S</div><div class="t"><i></i>D</div></div>
+  </div>
+  <div class="duo"><div class="cer"><span class="lbl">Racha</span><b>12<small> sem</small></b></div><div class="cer"><span class="lbl">1RM banca</span><b>104,5<small> kg</small></b></div></div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="dumb"></i></div><div><i data-i="hist"></i></div><div><i data-i="chart"></i></div><div><i data-i="user"></i></div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="wtop"><div class="ib"><i data-i="back"></i></div><div class="t"><b>Torso A</b><span>38:20 · 7 de 16 series</span></div><div class="fin">Terminar</div></div>
+  <div class="cer rest">
+   <div class="dial"><svg viewBox="0 0 96 96" id="rdial"></svg><b>1:34</b></div>
+   <div class="nx"><span class="lbl" style="color:var(--accent)">Descanso · 2:30</span><b>Remo con barra</b><span>Serie 3 · 90 kg × 8</span>
+    <div class="ctr"><div>−15 s</div><div>+15 s</div><div class="o">Saltar</div></div></div>
+  </div>
+  <div class="cer exc">
+   <div class="exh"><div class="th"><i data-i="dumb"></i></div><div style="flex:1"><b>Press banca con barra</b><span>Agarre 1,5× · tempo 3-1-1</span></div><i data-i="more" style="font-size:18px;color:var(--muted)"></i></div>
+   <table><tr><th>SERIE</th><th>ANTERIOR</th><th>KG</th><th>REPS</th><th></th></tr>
+    <tr class="d"><td>C</td><td class="pv">40×10</td><td>40</td><td>10</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>1</td><td class="pv">80×8</td><td>82,5</td><td>8</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>2</td><td class="pv">80×8</td><td>82,5</td><td>8</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="c"><td>3</td><td class="pv">80×7</td><td>82,5</td><td>8</td><td><div class="ck"></div></td></tr>
+   </table>
+  </div>
+  <div class="cer ex2"><div class="th"><i data-i="dumb"></i></div><b>Remo con barra</b><span>0/3</span></div>
+  <div class="cer ex2"><div class="th"><i data-i="dumb"></i></div><b>Fondos en paralelas</b><span>0/3</span></div>
+ </div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1"></svg>
+   <div class="wc"><div class="wl">PRESS BANCA · 3/4</div><div class="wbig" style="margin-top:8px">82,5<small>kg</small></div>
+    <div style="font:800 20px 'Manrope';color:#121315;margin-top:2px">× 8</div>
+    <div style="font:500 11px 'DM Mono';color:#1F4FD8;margin-top:8px;display:flex;gap:4px;align-items:center"><i data-i="heart"></i>128</div></div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc"><div class="wl" style="color:#1F4FD8">DESCANSO</div><div class="wbig" style="font-size:46px;margin-top:6px">1:34</div>
+    <div class="wl" style="margin-top:6px;letter-spacing:.4px">Remo · 90 × 8</div>
+    <div style="display:flex;gap:6px;margin-top:10px"><span style="font:500 9.5px/1 'DM Mono';padding:6px 9px;border-radius:12px;background:#fff;box-shadow:0 0 0 1px #e1dcd3">+15</span><span style="font:500 9.5px/1 'DM Mono';padding:6px 9px;border-radius:12px;background:#121315;color:#fff">SALTAR</span></div></div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w3"></svg>
+   <div class="wc"><div class="wl">ESTA SEMANA</div><div class="wbig" style="font-size:38px;margin-top:6px">3<small style="font-size:16px">/4</small></div>
+    <div class="wl" style="margin-top:5px;color:#4b4945">Racha 12 semanas</div>
+    <div style="margin-top:10px;font:700 10.5px/1 'Manrope';padding:8px 15px;border-radius:14px;background:#121315;color:#fff">Entrenar</div></div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons-a.js"></script>
+<script>
+icons(1.8);
+(function(){const s=document.getElementById('rdial');s.innerHTML=`<path d="${arc(48,48,40,0,360)}" stroke="#e6e1d8" stroke-width="5" fill="none"/><path d="${arc(48,48,40,0,226)}" stroke="#1F4FD8" stroke-width="5" fill="none" stroke-linecap="round"/>`})();
+// esfera: 12 índices pulidos + arco cobalto
+function dial(id,p){const s=document.getElementById(id);let h=`<circle cx="96" cy="96" r="86" fill="none" stroke="#e6e1d8" stroke-width="5"/><path d="${arc(96,96,86,0,360*p)}" stroke="#1F4FD8" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+for(let i=0;i<12;i++){const a=(i*30-90)*Math.PI/180;const r1=80,r2=i%3===0?73:77;h+=`<line x1="${96+Math.cos(a)*r1}" y1="${96+Math.sin(a)*r1}" x2="${96+Math.cos(a)*r2}" y2="${96+Math.sin(a)*r2}" stroke="#121315" stroke-width="${i%3===0?2.4:1.4}" stroke-linecap="round"/>`}s.innerHTML=h}
+dial('w1',.69);dial('w2',.63);dial('w3',.75);
+</script>
+</body></html>

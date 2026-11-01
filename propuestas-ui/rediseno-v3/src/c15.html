@@ -1,0 +1,211 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame-a.css">
+<style>
+:root{--sheet:#dcdbd7;--bg:#ECEBE7;--ink:#1D1F22;--muted:#6E7176;--accent:#FF5A1F;--display:'Inter Tight';--body:'Inter Tight';--mono:'JetBrains Mono';--rule:#c9c8c3;--line:#D3D2CD;--swBorder:rgba(0,0,0,.12);--swBg:#f3f2ef}
+body{background:radial-gradient(1200px 700px at 75% 20%,#f4f3f0,#d6d5d1 75%)}
+.mono{font-family:'JetBrains Mono';font-feature-settings:"zero" 1}
+.lbl{font:600 9.5px/1 'JetBrains Mono';letter-spacing:1.6px;text-transform:uppercase;color:var(--muted)}
+.plate{position:relative;border-radius:22px;background:
+ repeating-linear-gradient(90deg,rgba(0,0,0,.022) 0 1px,transparent 1px 3px),
+ linear-gradient(165deg,#fbfaf8 0%,#efeeea 55%,#e7e6e2 100%);
+ box-shadow:inset 0 1px 0 #fff,inset 0 0 0 1px #d6d5d0,0 6px 16px -10px rgba(0,0,0,.25)}
+.scr{background:linear-gradient(180deg,#f1f0ec,#e6e5e1)}
+.pad{padding:6px 18px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0 14px}
+.hdr h2{font:700 25px/1.05 'Inter Tight';letter-spacing:-.6px;margin-top:7px}
+.av{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font:700 13px 'Inter Tight';color:#fff;background:linear-gradient(145deg,#4a4d52,#1d1f22)}
+.hero{padding:16px 16px 14px}
+.hero .top{display:flex;justify-content:space-between;align-items:center}
+.tag{font:700 9.5px/1 'JetBrains Mono';letter-spacing:1.6px;color:var(--accent);display:flex;gap:6px;align-items:center}
+.tag:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(255,90,31,.18)}
+.chip{font:600 10px/1 'JetBrains Mono';color:var(--ink);border:1px solid #cfcec9;border-radius:7px;padding:5px 7px;background:#fff}
+.hero h3{font:800 30px/1 'Inter Tight';letter-spacing:-1px;margin:10px 0 12px}
+.read{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #d6d5d0;border-bottom:1px solid #d6d5d0}
+.read div{padding:9px 0 9px 10px}.read div+div{border-left:1px solid #d6d5d0}
+.read b{display:block;font:700 19px/1 'JetBrains Mono';margin-top:6px;letter-spacing:-.5px}
+.read b small{font-size:11px;color:var(--muted);font-weight:500;margin-left:2px}
+.exl{margin:8px 0 10px}
+.exl div{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;color:#43464b}
+.exl div span:last-child{font:600 12px 'JetBrains Mono';color:var(--ink)}
+.go{display:flex;gap:8px}
+.go .b{flex:1;height:48px;border-radius:14px;background:linear-gradient(180deg,#ff6a2e,#f04e12);color:#1a0800;font:800 14px/48px 'Inter Tight';letter-spacing:.3px;display:flex;gap:8px;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 8px 18px -6px rgba(255,90,31,.6)}
+.go .w{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:20px;background:#fff;box-shadow:inset 0 0 0 1px #d2d1cc}
+.week{margin-top:12px;padding:14px 16px}
+.week .row{display:flex;justify-content:space-between;align-items:baseline}
+.week .big{font:700 22px 'JetBrains Mono'}.week .big small{color:var(--muted);font-size:13px}
+.scale{position:relative;height:44px;margin-top:10px}
+.scale svg{position:absolute;inset:0}
+.days{display:flex;justify-content:space-between;padding:0 4px;margin-top:2px}
+.days span{font:600 10px 'JetBrains Mono';color:var(--muted);width:18px;text-align:center}
+.days span.d{color:var(--accent)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.duo .plate{padding:12px 14px}
+.duo b{display:block;font:700 22px/1 'JetBrains Mono';margin-top:8px}
+.duo b small{font-size:11px;color:var(--muted);font-weight:500}
+.nav{position:absolute;left:0;right:0;bottom:0;height:70px;display:flex;justify-content:space-around;align-items:center;background:linear-gradient(180deg,rgba(236,235,231,.6),#f3f2ef 40%);border-top:1px solid #d6d5d0;padding-bottom:6px}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:5px;font:600 9px 'JetBrains Mono';letter-spacing:1px;color:#8a8d92;text-transform:uppercase}
+.nav div i{font-size:21px}
+.nav .on{color:var(--ink)}.nav .on:after{content:"";width:16px;height:2px;background:var(--accent);border-radius:2px;margin-top:-1px}
+/* entreno */
+.wtop{display:flex;align-items:center;gap:10px;margin:8px 0 14px}
+.wtop .t{flex:1}.wtop .t b{display:block;font:700 18px 'Inter Tight'}.wtop .t span{font:500 11px 'JetBrains Mono';color:var(--muted)}
+.ib{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#fff;box-shadow:inset 0 0 0 1px #d2d1cc;font-size:18px}
+.fin{height:36px;padding:0 14px;border-radius:11px;font:700 12.5px/36px 'Inter Tight';color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.rest{display:flex;gap:14px;align-items:center;padding:12px 14px}
+.rest .dial{width:92px;height:92px;flex-shrink:0;position:relative}
+.rest .dial svg{position:absolute;inset:0}
+.rest .dial b{position:absolute;inset:0;display:grid;place-items:center;font:700 19px 'JetBrains Mono'}
+.rest .nx b{display:block;font:700 15px 'Inter Tight';margin:7px 0 2px}
+.rest .nx span{font:500 12px 'JetBrains Mono';color:#43464b}
+.rest .ctr{display:flex;gap:6px;margin-top:10px}
+.rest .ctr div{font:600 11px/1 'JetBrains Mono';padding:7px 9px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px #d2d1cc}
+.rest .ctr .o{background:var(--accent);color:#1a0800;box-shadow:none}
+.exc{margin-top:12px;padding:14px 12px 10px}
+.exh{display:flex;align-items:center;gap:10px;padding:0 4px 10px}
+.th{width:40px;height:40px;border-radius:11px;background:linear-gradient(145deg,#ffffff,#e9e8e4);display:grid;place-items:center;font-size:20px;color:#4a4d52;box-shadow:inset 0 0 0 1px #d2d1cc}
+.exh b{display:block;font:700 15px 'Inter Tight'}.exh span{font:500 11px 'JetBrains Mono';color:var(--muted)}
+table{width:100%;border-collapse:separate;border-spacing:0 4px}
+th{font:600 9px 'JetBrains Mono';letter-spacing:1.4px;color:var(--muted);text-align:left;padding:2px 6px}
+td{font:600 14px 'JetBrains Mono';padding:9px 6px;background:#f7f6f3}
+td:first-child{border-radius:9px 0 0 9px;color:var(--muted);width:28px;text-align:center}
+td:last-child{border-radius:0 9px 9px 0;width:36px}
+td.pv{color:#8a8d92;font-weight:500;font-size:12.5px}
+.ck{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px #b9b8b3;color:transparent;font-size:15px}
+tr.d td{background:#f1f0ec;color:#5b5e63}
+tr.d .ck{background:var(--accent);box-shadow:none;color:#1a0800}
+tr.c td{background:#fff;color:var(--ink);box-shadow:0 2px 8px -4px rgba(0,0,0,.2)}
+tr.c td:first-child{box-shadow:inset 3px 0 0 var(--accent);color:var(--accent)}
+.ex2{display:flex;align-items:center;gap:10px;margin-top:10px;padding:12px}
+.ex2 b{flex:1;font:700 14px 'Inter Tight'}.ex2 span{font:600 11px 'JetBrains Mono';color:var(--muted)}
+.prog{position:absolute;left:18px;right:18px;bottom:22px}
+.prog .row{display:flex;justify-content:space-between;margin-bottom:8px}
+.prog .row b{font:700 12px 'JetBrains Mono'}
+.bar{height:6px;border-radius:3px;background:#d6d5d0;position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;width:44%;background:linear-gradient(90deg,#ff6a2e,#f04e12)}
+/* reloj */
+.disp{background:radial-gradient(circle at 50% 40%,#f7f6f3,#e3e2dd)}
+.case{background:linear-gradient(145deg,#d9dadb 0%,#f5f5f4 20%,#bfc0c2 45%,#eceded 68%,#a9aaad 100%)}
+.case:after{background:linear-gradient(160deg,#cfd0d1,#b5b6b8)}
+.btn{background:linear-gradient(90deg,#b8b9bb,#f2f2f2,#a9aaac)}
+.wf{position:absolute;inset:0}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.wl{font:700 8px/1 'JetBrains Mono';letter-spacing:1.4px;color:#6e7176}
+.wbig{font:700 40px/1 'JetBrains Mono';letter-spacing:-2px;color:#1d1f22}
+.wbig small{font-size:12px;letter-spacing:0;color:#6e7176;margin-left:2px}
+.phone{background:linear-gradient(145deg,#d7d8d9,#f4f4f3 30%,#bcbdbf 60%,#e4e4e3);box-shadow:0 0 0 1.5px #a9aaac,0 40px 80px -24px rgba(0,0,0,.35)}
+.cam{background:#1d1f22;box-shadow:0 0 0 1.5px #c9c8c3}
+.go .b{color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.15)}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 15 · Móvil + reloj</div>
+ <h1>Titanio Blanco</h1>
+ <p class="lead">La versión clara de Titanio, como el Watch Ultra en titanio blanco: superficies satinadas plata, texto grafito y el mismo naranja internacional. Mismas cifras de instrumento y marcas de bisel; pensada para entrenar con luz de día o en exterior.</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:#ECEBE7"></b><span><em>Plata satinada</em>#ECEBE7</span></div>
+  <div class="sw"><b style="background:linear-gradient(145deg,#fbfaf8,#e7e6e2)"></b><span><em>Titanio blanco</em>#FBFAF8</span></div>
+  <div class="sw"><b style="background:#FF5A1F"></b><span><em>Naranja int.</em>#FF5A1F</span></div>
+  <div class="sw"><b style="background:#1D1F22"></b><span><em>Grafito</em>#1D1F22</span></div>
+  <div class="sw"><b style="background:#6E7176"></b><span><em>Acero</em>#6E7176</span></div>
+  <div class="sw"><b style="background:#C9C8C3"></b><span><em>Bisel</em>#C9C8C3</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font-family:'Inter Tight';font-weight:800">Día de Press</span><small>Inter Tight</small></div>
+  <div><span class="s mono" style="font-weight:700">82.5×8</span><small>JetBrains Mono</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>Familia directa de Titanio: misma estructura, tipos y escalas.</li><li>Contraste AA con grafito sobre plata; el naranja se oscurece en texto pequeño.</li><li>Esfera clara en el reloj de día; de noche cambia sola a Titanio.</li></ul>
+</aside>
+
+<!-- INICIO -->
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="hdr"><div><div class="lbl">Dom 01 Nov · Semana 45</div><h2>Buenas noches, Juan</h2></div><div class="av">JM</div></div>
+  <div class="plate hero">
+   <div class="top"><span class="tag">HOY TOCA</span><span class="chip">5/3/1 · S2 · C3</span></div>
+   <h3>Día de Press</h3>
+   <div class="read"><div><span class="lbl">Ejerc.</span><b>5</b></div><div><span class="lbl">Durac.</span><b>55<small>min</small></b></div><div><span class="lbl">Vol.</span><b>9.8<small>t</small></b></div></div>
+   <div class="exl"><div><span>Press militar · 3×3</span><span>47.5 · 52.5 · 57.5+</span></div><div><span>Press militar BBB · 5×10</span><span>32.5 kg</span></div><div><span>Dominadas · 5×10</span><span>PC</span></div></div>
+   <div class="go"><div class="b"><i data-i="play"></i>EMPEZAR</div><div class="w"><i data-i="watch"></i></div></div>
+  </div>
+  <div class="plate week">
+   <div class="row"><span class="lbl">Esta semana</span><span class="big">3<small>/4 sesiones</small></span></div>
+   <div class="scale"><svg viewBox="0 0 288 44" id="scale"></svg></div>
+   <div class="days"><span class="d">L</span><span>M</span><span class="d">X</span><span>J</span><span class="d">V</span><span>S</span><span>D</span></div>
+  </div>
+  <div class="duo"><div class="plate"><span class="lbl">Racha</span><b>12<small> sem</small></b></div><div class="plate"><span class="lbl">1RM banca</span><b>104.5<small> kg</small></b></div></div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="dumb"></i>Entrenar</div><div><i data-i="hist"></i>Historial</div><div><i data-i="chart"></i>Progreso</div><div><i data-i="user"></i>Perfil</div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<!-- ENTRENO -->
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="wtop"><div class="ib"><i data-i="back"></i></div><div class="t"><b>Torso A</b><span>38:20 · 7/16 series</span></div><div class="fin">Terminar</div></div>
+  <div class="plate rest">
+   <div class="dial"><svg viewBox="0 0 92 92" id="rdial"></svg><b>1:34</b></div>
+   <div class="nx"><span class="lbl" style="color:var(--accent)">Descanso · 2:30</span><b>Remo con barra</b><span>Serie 3 · 90 kg × 8</span>
+    <div class="ctr"><div>−15s</div><div>+15s</div><div class="o">Saltar</div></div></div>
+  </div>
+  <div class="plate exc">
+   <div class="exh"><div class="th"><i data-i="dumb"></i></div><div style="flex:1"><b>Press banca con barra</b><span>Agarre 1.5× · tempo 3-1-1</span></div><i data-i="more" style="font-size:18px;color:var(--muted)"></i></div>
+   <table><tr><th>SET</th><th>ANTERIOR</th><th>KG</th><th>REPS</th><th></th></tr>
+    <tr class="d"><td>C</td><td class="pv">40×10</td><td>40</td><td>10</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>1</td><td class="pv">80×8</td><td>82.5</td><td>8</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>2</td><td class="pv">80×8</td><td>82.5</td><td>8</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="c"><td>3</td><td class="pv">80×7</td><td>82.5</td><td>8</td><td><div class="ck"></div></td></tr>
+   </table>
+  </div>
+  <div class="plate ex2"><div class="th"><i data-i="dumb"></i></div><b>Remo con barra</b><span>0/3 · A2</span></div>
+  <div class="plate ex2"><div class="th"><i data-i="dumb"></i></div><b>Fondos en paralelas</b><span>0/3</span></div>
+ </div>
+ <div class="prog"><div class="row"><span class="lbl">Progreso</span><b>7 / 16</b></div><div class="bar"><i></i></div></div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<!-- RELOJ -->
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1"></svg>
+   <div class="wc"><div class="wl">PRESS BANCA · 3/4</div><div class="wbig" style="margin-top:8px">82.5<small>kg</small></div>
+    <div style="font:700 20px 'JetBrains Mono';color:#1d1f22;margin-top:3px">× 8</div>
+    <div style="font:700 11px 'JetBrains Mono';color:#FF5A1F;margin-top:9px;display:flex;gap:4px;align-items:center"><i data-i="heart"></i>128</div></div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc"><div class="wl" style="color:#FF5A1F">DESCANSO</div><div class="wbig" style="font-size:46px;margin-top:6px">1:34</div>
+    <div class="wl" style="margin-top:7px;letter-spacing:.6px">Remo · 90 × 8</div>
+    <div style="display:flex;gap:6px;margin-top:10px"><span style="font:700 9.5px/1 'JetBrains Mono';padding:6px 8px;border-radius:12px;background:#fff;color:#1d1f22;box-shadow:inset 0 0 0 1px #cfcec9">+15</span><span style="font:700 9.5px/1 'JetBrains Mono';padding:6px 8px;border-radius:12px;background:#FF5A1F;color:#1a0800">SALTAR</span></div></div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w3"></svg>
+   <div class="wc"><div class="wl">SEMANA</div><div class="wbig" style="font-size:36px;margin-top:6px">3<small style="font-size:16px">/4</small></div>
+    <div class="wl" style="margin-top:6px;color:#43464b">Racha 12 sem</div>
+    <div style="margin-top:10px;font:800 10px/1 'Inter Tight';letter-spacing:.6px;padding:8px 14px;border-radius:14px;background:#FF5A1F;color:#1a0800">ENTRENAR</div></div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons-a.js"></script>
+<script>
+icons(1.8);
+// escala tipo bisel de la semana: 7 días, marcas finas entre medias
+(function(){const s=document.getElementById('scale');let h='';const W=288,x0=13,x1=275;const done=[0,2,4];
+for(let i=0;i<=60;i++){const x=x0+(x1-x0)*i/60;const M=i%10===0;h+=`<line x1="${x}" x2="${x}" y1="${M?6:14}" y2="26" stroke="${M?'#6e7176':'#c2c1bc'}" stroke-width="${M?1.6:1}"/>`}
+const p=x0+(x1-x0)*(4.4/6);h+=`<rect x="${x0}" y="31" width="${p-x0}" height="4" rx="2" fill="#FF5A1F"/><rect x="${p}" y="31" width="${x1-p}" height="4" rx="2" fill="#d6d5d0"/>`;
+done.forEach(d=>{const x=x0+(x1-x0)*d/6;h+=`<circle cx="${x}" cy="33" r="5" fill="#FF5A1F" stroke="#f7f6f3" stroke-width="2"/>`});
+const t=x0+(x1-x0)*6/6;h+=`<path d="M${t-5} 0 L${t+5} 0 L${t} 6Z" fill="#1D1F22"/>`;s.innerHTML=h})();
+// dial de descanso
+(function(){const s=document.getElementById('rdial');ticks(s,{n:30,cx:46,cy:46,r:44,len:4,major:5,mlen:7,color:'#c2c1bc',mcolor:'#6e7176',w:1,mw:1.6});
+s.insertAdjacentHTML('beforeend',`<path d="${arc(46,46,33,0,226)}" stroke="#FF5A1F" stroke-width="4" fill="none" stroke-linecap="round"/><path d="${arc(46,46,33,226,360)}" stroke="#d6d5d0" stroke-width="4" fill="none"/>`)})();
+// esferas del reloj
+function bezel(id,prog){const s=document.getElementById(id);ticks(s,{n:60,cx:96,cy:96,r:94,len:5,major:5,mlen:10,color:'#b9b8b3',mcolor:'#55585d',w:1.2,mw:2});
+s.insertAdjacentHTML('beforeend',`<path d="${arc(96,96,80,0,360*prog)}" stroke="#FF5A1F" stroke-width="5" fill="none" stroke-linecap="round"/>`)}
+bezel('w1',.69);bezel('w2',.63);bezel('w3',.75);
+// segmentos de series en w1
+</script>
+</body></html>

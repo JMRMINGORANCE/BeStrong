@@ -1,0 +1,213 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame-a.css">
+<style>
+:root{--sheet:#09090a;--bg:#0b0b0c;--ink:#F4F4F2;--muted:#8A8B8F;--accent:#E10600;--yel:#FFD400;--grn:#00D26A;--pur:#B14CFF;--display:'Titillium Web';--body:'Titillium Web';--mono:'Roboto Mono';--rule:#26262a}
+body{background:radial-gradient(1100px 700px at 70% 15%,#1a1a1c,#09090a 70%)}
+.cf{background:
+ repeating-linear-gradient(45deg,rgba(255,255,255,.028) 0 2px,transparent 2px 4px),
+ repeating-linear-gradient(-45deg,rgba(0,0,0,.35) 0 2px,transparent 2px 4px),
+ linear-gradient(160deg,#1c1c1f,#121214)}
+.mono{font-family:'Roboto Mono'}
+.lbl{font:600 9.5px/1 'Roboto Mono';letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.scr{background:#0b0b0c}
+.pad{padding:6px 16px}
+.panel{border-radius:14px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px #2a2a2e}
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0 12px}
+.hdr h2{font:900 italic 26px/1 'Titillium Web';letter-spacing:-.3px;margin-top:6px;text-transform:uppercase}
+.hdr .pos{font:900 italic 13px/1 'Titillium Web';background:var(--accent);color:#fff;padding:7px 9px;border-radius:6px;transform:skewX(-8deg)}
+.hero{padding:14px 14px 12px 18px}
+.hero:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--accent),#7a0300)}
+.hero .top{display:flex;justify-content:space-between;align-items:center}
+.flag{font:700 9.5px/1 'Roboto Mono';letter-spacing:1.4px;color:var(--yel);display:flex;gap:6px;align-items:center}
+.hero h3{font:900 italic 30px/1 'Titillium Web';letter-spacing:-.4px;margin:9px 0 10px;text-transform:uppercase}
+.sect{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:10px}
+.sect div{height:5px;border-radius:2px}
+.exl div{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;font-size:13.5px;padding:6px 0;border-top:1px solid #222226}
+.exl div .s{font:700 10px 'Roboto Mono';color:var(--muted)}
+.exl div b{font:600 12px 'Roboto Mono'}
+.go{display:flex;gap:8px;margin-top:10px}
+.go .b{flex:1;height:46px;border-radius:10px;background:var(--accent);color:#fff;font:900 italic 16px/46px 'Titillium Web';letter-spacing:.6px;display:flex;gap:8px;align-items:center;justify-content:center;text-transform:uppercase;box-shadow:0 10px 22px -10px rgba(225,6,0,.8)}
+.go .w{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;font-size:20px;background:#1c1c1f;box-shadow:inset 0 0 0 1px #333338}
+.tele{margin-top:10px;padding:12px 14px}
+.tele .row{display:flex;justify-content:space-between;align-items:baseline}
+.tele .big{font:700 20px 'Roboto Mono'}
+.tele .big small{font-size:11px;color:var(--muted)}
+.lg{display:flex;gap:12px;margin-top:6px}
+.lg span{font:600 9px 'Roboto Mono';color:var(--muted);display:flex;gap:5px;align-items:center}
+.lg i{width:10px;height:2px;display:block}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.duo .panel{padding:11px 12px}
+.duo b{display:block;font:700 21px/1 'Roboto Mono';margin-top:8px}
+.duo b small{font-size:11px;color:var(--muted);font-weight:500}
+.delta{font:700 11px 'Roboto Mono';margin-top:5px;display:block}
+.nav{position:absolute;left:0;right:0;bottom:0;height:68px;display:flex;justify-content:space-around;align-items:center;background:#0b0b0c;border-top:1px solid #1f1f23;padding-bottom:6px}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:5px;font:700 9px 'Roboto Mono';letter-spacing:1px;color:#66676b;text-transform:uppercase}
+.nav div i{font-size:21px}.nav .on{color:var(--ink)}
+.nav .on i{color:var(--accent)}
+/* entreno */
+.wtop{display:flex;align-items:center;gap:10px;margin:8px 0 10px}
+.wtop .t{flex:1}.wtop .t b{display:block;font:900 italic 19px 'Titillium Web';text-transform:uppercase}.wtop .t span{font:500 11px 'Roboto Mono';color:var(--muted)}
+.ib{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:#1a1a1d;box-shadow:inset 0 0 0 1px #2c2c30;font-size:18px}
+.fin{height:36px;padding:0 13px;border-radius:9px;font:900 italic 13px/36px 'Titillium Web';text-transform:uppercase;background:#fff;color:#0b0b0c}
+.laps{display:flex;gap:3px;margin-bottom:10px}
+.laps i{flex:1;height:6px;border-radius:1px;background:#26262a}
+.pit{padding:12px 14px;background:linear-gradient(100deg,#2a2500,#121214 60%);box-shadow:inset 0 0 0 1px #4d4400}
+.pit .row{display:flex;justify-content:space-between;align-items:center}
+.pit .t{font:900 italic 44px/1 'Titillium Web';letter-spacing:-1px;color:var(--yel)}
+.pit .nx{text-align:right}
+.pit .nx b{display:block;font:700 14px 'Titillium Web'}
+.pit .nx span{font:500 11px 'Roboto Mono';color:#cfcfcf}
+.pbar{height:4px;background:#2a2a2e;border-radius:2px;margin:10px 0 9px;overflow:hidden}
+.pbar i{display:block;height:100%;width:63%;background:var(--yel)}
+.ctr{display:flex;gap:6px}
+.ctr div{flex:1;text-align:center;font:700 11px/1 'Roboto Mono';padding:8px 0;border-radius:7px;background:#1c1c1f;box-shadow:inset 0 0 0 1px #333338}
+.ctr .o{background:var(--yel);color:#141100;box-shadow:none}
+.exc{margin-top:10px;padding:12px 10px 8px}
+.exh{display:flex;align-items:center;gap:10px;padding:0 4px 8px}
+.th{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;font-size:19px;color:#d0d0d0;background:#1c1c1f;box-shadow:inset 0 0 0 1px #333338}
+.exh b{display:block;font:700 15px 'Titillium Web'}.exh span{font:500 10.5px 'Roboto Mono';color:var(--muted)}
+table{width:100%;border-collapse:separate;border-spacing:0 3px}
+th{font:600 8.5px 'Roboto Mono';letter-spacing:1.2px;color:var(--muted);text-align:left;padding:2px 5px}
+td{font:600 13.5px 'Roboto Mono';padding:9px 5px;background:#151517}
+td:first-child{border-radius:7px 0 0 7px;color:var(--muted);width:24px;text-align:center}
+td:last-child{border-radius:0 7px 7px 0;width:30px}
+td.pv{color:#727377;font-weight:500;font-size:12px}
+td.dl{font-size:11.5px;font-weight:700}
+.ck{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px #44444a;color:transparent;font-size:14px}
+tr.d .ck{background:var(--grn);box-shadow:none;color:#00240f}
+tr.c td{background:#1f1f22}
+tr.c td:first-child{box-shadow:inset 3px 0 0 var(--accent);color:var(--ink)}
+.ex2{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px}
+.ex2 b{flex:1;font:700 14px 'Titillium Web'}.ex2 span{font:600 10.5px 'Roboto Mono';color:var(--muted)}
+/* reloj */
+.case{background:linear-gradient(145deg,#2c2c2f 0%,#4a4a4e 18%,#1b1b1d 42%,#3a3a3d 66%,#121214 100%)}
+.case:after{background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 2px,transparent 2px 4px),linear-gradient(160deg,#1d1d20,#0b0b0c)}
+.btn{background:linear-gradient(90deg,#2a2a2d,#5a5a5e,#1e1e20)}
+.btn.q{background:linear-gradient(90deg,#b50500,#ff2a1f,#a00400)}
+.disp{background:#000}
+.wf{position:absolute;inset:0}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.wl{font:700 8px/1 'Roboto Mono';letter-spacing:1.3px;color:#8a8b8f}
+.wbig{font:900 italic 46px/1 'Titillium Web';letter-spacing:-1px;color:#fff}
+.wbig small{font:700 12px 'Roboto Mono';letter-spacing:0;color:#8a8b8f;margin-left:3px}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 11 · Móvil + reloj</div>
+ <h1 style="font-style:italic;font-weight:900;text-transform:uppercase">Carbono</h1>
+ <p class="lead">Cada entreno es una vuelta rápida. Negro mate con fibra de carbono, rojo racing para actuar, amarillo de bandera para el descanso (el «pit stop») y la telemetría de la Fórmula 1 para comparar: verde mejora, morado récord personal.</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b class="cf"></b><span><em>Carbono</em>#121214</span></div>
+  <div class="sw"><b style="background:#E10600"></b><span><em>Rojo racing</em>#E10600</span></div>
+  <div class="sw"><b style="background:#FFD400"></b><span><em>Bandera</em>#FFD400</span></div>
+  <div class="sw"><b style="background:#00D26A"></b><span><em>Mejora</em>#00D26A</span></div>
+  <div class="sw"><b style="background:#B14CFF"></b><span><em>Récord</em>#B14CFF</span></div>
+  <div class="sw"><b style="background:#F4F4F2"></b><span><em>Tiza</em>#F4F4F2</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font:900 italic 30px 'Titillium Web';text-transform:uppercase">Día de Press</span><small>Titillium Web</small></div>
+  <div><span class="s mono" style="font-weight:600">+2.5 kg</span><small>Roboto Mono</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>Series = vueltas; ejercicios = sectores con su color de rendimiento.</li><li>Delta frente a la última vez en cada serie, como en un cronómetro de carrera.</li><li>El descanso es un «pit stop» amarillo, visible a 2 m.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="hdr"><div><div class="lbl">Dom 01 Nov · GP semana 45</div><h2>Buenas noches, Juan</h2></div><div class="pos">P3/4</div></div>
+  <div class="panel cf hero">
+   <div class="top"><span class="flag"><i data-i="flag"></i>HOY TOCA</span><span class="lbl">5/3/1 · S2</span></div>
+   <h3>Día de Press</h3>
+   <div class="sect"><div style="background:var(--pur)"></div><div style="background:var(--grn)"></div><div style="background:var(--yel)"></div></div>
+   <div class="exl">
+    <div><span class="s">S1</span><span>Press militar · 3×3</span><b style="color:var(--pur)">57.5+</b></div>
+    <div><span class="s">S2</span><span>Press militar BBB · 5×10</span><b style="color:var(--grn)">32.5 kg</b></div>
+    <div><span class="s">S3</span><span>Dominadas · 5×10</span><b>PC</b></div>
+   </div>
+   <div class="go"><div class="b"><i data-i="play"></i>Salir a pista</div><div class="w"><i data-i="watch"></i></div></div>
+  </div>
+  <div class="panel cf tele">
+   <div class="row"><span class="lbl">Telemetría · volumen</span><span class="big">18.4<small> t</small> <small style="color:var(--grn)">▲ 8%</small></span></div>
+   <svg viewBox="0 0 300 64" style="width:100%;height:64px;margin-top:6px" id="tele"></svg>
+   <div class="lg"><span><i style="background:var(--accent)"></i>Esta semana</span><span><i style="background:#55565b"></i>Semana pasada</span></div>
+  </div>
+  <div class="duo">
+   <div class="panel cf"><span class="lbl">Racha</span><b>12<small> sem</small></b><span class="delta" style="color:var(--grn)">+1 sem</span></div>
+   <div class="panel cf"><span class="lbl">1RM banca</span><b>104.5<small> kg</small></b><span class="delta" style="color:var(--pur)">● Récord</span></div>
+  </div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="dumb"></i>Entrenar</div><div><i data-i="hist"></i>Historial</div><div><i data-i="chart"></i>Telemetría</div><div><i data-i="user"></i>Perfil</div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="wtop"><div class="ib"><i data-i="back"></i></div><div class="t"><b>Torso A</b><span>38:20 · vuelta 7/16</span></div><div class="fin">Bandera</div></div>
+  <div class="laps" id="laps"></div>
+  <div class="panel pit">
+   <div class="row"><div><span class="lbl" style="color:var(--yel)">Pit stop · 2:30</span><div class="t" style="margin-top:6px">1:34</div></div>
+    <div class="nx"><span class="lbl">Siguiente</span><b style="margin-top:6px">Remo con barra</b><span>S3 · 90 kg × 8</span></div></div>
+   <div class="pbar"><i></i></div>
+   <div class="ctr"><div>−15s</div><div>+15s</div><div class="o">Saltar</div></div>
+  </div>
+  <div class="panel cf exc">
+   <div class="exh"><div class="th"><i data-i="dumb"></i></div><div style="flex:1"><b>Press banca con barra</b><span>Sector 1 · agarre 1.5×</span></div><i data-i="more" style="font-size:18px;color:var(--muted)"></i></div>
+   <table><tr><th>V</th><th>ANTERIOR</th><th>KG</th><th>REPS</th><th>Δ</th><th></th></tr>
+    <tr class="d"><td>C</td><td class="pv">40×10</td><td>40</td><td>10</td><td class="dl" style="color:var(--muted)">=</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>1</td><td class="pv">80×8</td><td>82.5</td><td>8</td><td class="dl" style="color:var(--grn)">+2.5</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>2</td><td class="pv">80×8</td><td>82.5</td><td>9</td><td class="dl" style="color:var(--pur)">PB</td><td><div class="ck" style="background:var(--pur);color:#1c0030"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="c"><td>3</td><td class="pv">80×7</td><td>82.5</td><td>8</td><td class="dl" style="color:var(--yel)">—</td><td><div class="ck"></div></td></tr>
+   </table>
+  </div>
+  <div class="panel cf ex2"><div class="th"><i data-i="dumb"></i></div><b>Remo con barra</b><span>S2 · 0/3</span></div>
+  <div class="panel cf ex2"><div class="th"><i data-i="dumb"></i></div><b>Fondos en paralelas</b><span>S3 · 0/3</span></div>
+ </div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1"></svg>
+   <div class="wc"><div class="wl">PRESS BANCA · V3</div><div class="wbig" style="margin-top:7px">82.5<small>kg</small></div>
+    <div style="font:900 italic 22px 'Titillium Web';color:#fff;margin-top:1px">× 8</div>
+    <div style="display:flex;gap:10px;margin-top:8px;font:700 10.5px 'Roboto Mono'"><span style="color:#00D26A">+2.5</span><span style="color:#FF3b30;display:flex;gap:3px;align-items:center"><i data-i="heart"></i>128</span></div></div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp" style="background:radial-gradient(circle at 50% 40%,#1f1b00,#000 70%)"><svg class="wf" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc"><div class="wl" style="color:#FFD400">PIT STOP</div><div class="wbig" style="font-size:52px;color:#FFD400;margin-top:4px">1:34</div>
+    <div class="wl" style="margin-top:5px;letter-spacing:.5px;color:#cfcfcf">Remo · 90 × 8</div>
+    <div style="display:flex;gap:6px;margin-top:9px"><span style="font:700 9.5px/1 'Roboto Mono';padding:6px 8px;border-radius:6px;background:#222;color:#ddd">+15</span><span style="font:700 9.5px/1 'Roboto Mono';padding:6px 8px;border-radius:6px;background:#FFD400;color:#141100">SALTAR</span></div></div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w3"></svg>
+   <div class="wc"><div class="wl">CLASIFICACIÓN</div><div class="wbig" style="font-size:40px;margin-top:5px">P3<small style="font-size:14px">/4</small></div>
+    <div class="wl" style="margin-top:5px;color:#00D26A">Racha 12 sem</div>
+    <div style="margin-top:9px;font:900 italic 11px/1 'Titillium Web';letter-spacing:.6px;padding:8px 14px;border-radius:8px;background:#E10600;color:#fff">SALIR A PISTA</div></div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons-a.js"></script>
+<script>
+icons(1.8);
+// telemetría: dos trazas
+(function(){const s=document.getElementById('tele');const a=[8,14,14,22,22,30,38],b=[6,12,18,18,25,31,34];
+const pts=(v,max)=>v.map((y,i)=>`${(i*300/6).toFixed(1)},${(60-y/max*54).toFixed(1)}`).join(' ');
+let h='';for(let i=0;i<=6;i++)h+=`<line x1="${i*50}" x2="${i*50}" y1="0" y2="64" stroke="#1f1f23"/>`;
+h+=`<polyline points="${pts(b,40)}" fill="none" stroke="#55565b" stroke-width="2" stroke-dasharray="4 3"/>`;
+h+=`<polyline points="${pts(a,40)}" fill="none" stroke="#E10600" stroke-width="2.5" stroke-linejoin="round"/>`;
+h+=`<circle cx="${6*50-3}" cy="${60-38/40*54}" r="4" fill="#E10600" stroke="#0b0b0c" stroke-width="2"/>`;
+['L','M','X','J','V','S','D'].forEach((d,i)=>{});s.innerHTML=h})();
+// vueltas
+(function(){const l=document.getElementById('laps');let h='';for(let i=0;i<16;i++){const c=i<4?'#00D26A':i<6?'#B14CFF':i===6?'#E10600':'#26262a';h+=`<i style="background:${c}"></i>`}l.innerHTML=h})();
+// reloj: anillo segmentado por series
+function segs(id,done,total,col){const s=document.getElementById(id);let h='';const g=4;for(let i=0;i<total;i++){const a0=i*360/total+g/2,a1=(i+1)*360/total-g/2;h+=`<path d="${arc(96,96,88,a0,a1)}" stroke="${i<done?col:'#26262a'}" stroke-width="6" fill="none"/>`}s.innerHTML=h}
+segs('w1',7,16,'#00D26A');
+(function(){const s=document.getElementById('w2');let h=`<path d="${arc(96,96,88,0,360)}" stroke="#2a2600" stroke-width="6" fill="none"/><path d="${arc(96,96,88,0,227)}" stroke="#FFD400" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+for(let i=0;i<10;i++){const a=(i*36-90)*Math.PI/180;h+=`<line x1="${96+Math.cos(a)*78}" y1="${96+Math.sin(a)*78}" x2="${96+Math.cos(a)*73}" y2="${96+Math.sin(a)*73}" stroke="#55500a" stroke-width="2"/>`}s.innerHTML=h})();
+segs('w3',3,4,'#E10600');
+</script>
+</body></html>

@@ -1,0 +1,198 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame-a.css">
+<style>
+:root{--sheet:#06101d;--bg:#071426;--ink:#EEF3F8;--muted:#8CA0B8;--accent:#A6FF8C;--display:'Archivo';--body:'Archivo';--mono:'IBM Plex Mono';--rule:#18304d;--steel:#C7D0D9;--orange:#FF7A1A}
+body{background:radial-gradient(1200px 760px at 70% 18%,#0f2744,#050d18 72%)}
+.mono{font-family:'IBM Plex Mono'}
+.x{font-stretch:118%}
+.lbl{font:500 9.5px/1 'IBM Plex Mono';letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.scr{background:radial-gradient(130% 70% at 50% 0%,#123058 0%,#0a1c36 45%,#06122a 100%)}
+.pad{padding:6px 18px}
+.dial{border-radius:22px;background:radial-gradient(140% 120% at 50% 0%,#1a4278 0%,#0d2a52 45%,#081c3a 100%);box-shadow:inset 0 0 0 1px rgba(199,208,217,.18),inset 0 1px 0 rgba(255,255,255,.12),0 12px 26px -16px #000}
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0 14px}
+.hdr h2{font:800 22px/1.05 'Archivo';font-stretch:108%;letter-spacing:-.4px;margin-top:7px}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:700 12px 'Archivo';color:#081c3a;background:linear-gradient(145deg,#f1f4f7,#9aa6b2);box-shadow:inset 0 0 0 2px #dfe5eb}
+.hero{padding:16px 16px 14px;position:relative;overflow:hidden}
+.hero .top{display:flex;justify-content:space-between;align-items:center}
+.lume{font:600 9.5px/1 'IBM Plex Mono';letter-spacing:1.5px;color:var(--accent);display:flex;gap:7px;align-items:center}
+.lume:before{content:"";width:8px;height:8px;border-radius:2px;background:var(--accent);box-shadow:0 0 10px rgba(166,255,140,.8)}
+.pill{font:500 10px/1 'IBM Plex Mono';padding:6px 8px;border-radius:6px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px rgba(199,208,217,.25)}
+.hero h3{font:900 31px/1 'Archivo';font-stretch:120%;letter-spacing:-.6px;margin:11px 0 12px;text-transform:uppercase}
+.depth{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.depth div{border-radius:10px;padding:8px 10px;background:rgba(0,0,0,.22);box-shadow:inset 0 0 0 1px rgba(199,208,217,.14)}
+.depth b{display:block;font:600 18px/1 'IBM Plex Mono';margin-top:6px}
+.depth b small{font-size:10px;color:var(--muted)}
+.exl div{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;border-top:1px solid rgba(199,208,217,.12)}
+.exl div span:last-child{font:600 12px 'IBM Plex Mono';color:#fff}
+.go{display:flex;gap:8px;margin-top:10px}
+.go .b{flex:1;height:48px;border-radius:24px;background:linear-gradient(180deg,#f3f6f9,#b9c3cd);color:#081c3a;font:800 14px/48px 'Archivo';font-stretch:118%;letter-spacing:.8px;display:flex;gap:8px;align-items:center;justify-content:center;text-transform:uppercase;box-shadow:inset 0 1px 0 #fff,0 8px 18px -8px #000}
+.go .w{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:20px;color:var(--accent);background:rgba(0,0,0,.3);box-shadow:inset 0 0 0 1px rgba(166,255,140,.4)}
+.week{margin-top:12px;padding:14px 16px;display:flex;gap:14px;align-items:center}
+.week svg{width:96px;height:96px;flex-shrink:0}
+.week .big{font:800 26px/1 'Archivo';font-stretch:115%}
+.week .big small{font-size:13px;color:var(--muted);font-weight:600}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.duo .dial{padding:12px 14px}
+.duo b{display:block;font:600 21px/1 'IBM Plex Mono';margin-top:8px}
+.duo b small{font-size:11px;color:var(--muted)}
+.nav{position:absolute;left:0;right:0;bottom:0;height:70px;display:flex;justify-content:space-around;align-items:center;background:linear-gradient(180deg,rgba(6,18,42,.4),#050f22 40%);border-top:1px solid rgba(199,208,217,.12);padding-bottom:6px}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:5px;font:500 9px 'IBM Plex Mono';letter-spacing:1px;color:#6c809a;text-transform:uppercase}
+.nav div i{font-size:21px}.nav .on{color:var(--accent)}
+/* entreno */
+.wtop{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
+.wtop .t{flex:1}.wtop .t b{display:block;font:800 18px 'Archivo';font-stretch:115%}.wtop .t span{font:500 11px 'IBM Plex Mono';color:var(--muted)}
+.ib{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-size:18px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 1px rgba(199,208,217,.25)}
+.fin{height:36px;padding:0 14px;border-radius:18px;font:800 12px/36px 'Archivo';font-stretch:115%;letter-spacing:.6px;text-transform:uppercase;background:linear-gradient(180deg,#f3f6f9,#b9c3cd);color:#081c3a}
+.rest{display:flex;gap:14px;align-items:center;padding:12px 14px}
+.bz{width:112px;height:112px;flex-shrink:0;position:relative}
+.bz svg{position:absolute;inset:0}
+.bz b{position:absolute;inset:0;display:grid;place-items:center;font:700 21px 'IBM Plex Mono';color:var(--accent);text-shadow:0 0 12px rgba(166,255,140,.45)}
+.nx b{display:block;font:800 15px 'Archivo';margin:7px 0 2px}
+.nx span{font:500 11.5px 'IBM Plex Mono';color:#c6d2df}
+.ctr{display:flex;gap:6px;margin-top:10px}
+.ctr div{white-space:nowrap;font:600 10.5px/1 'IBM Plex Mono';padding:7px 9px;border-radius:14px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px rgba(199,208,217,.2)}
+.ctr .o{background:var(--accent);color:#06210a;box-shadow:none}
+.exc{margin-top:12px;padding:12px 10px 8px}
+.exh{display:flex;align-items:center;gap:10px;padding:0 4px 8px}
+.th{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:19px;color:#081c3a;background:linear-gradient(145deg,#eef2f6,#9aa6b2)}
+.exh b{display:block;font:800 15px 'Archivo'}.exh span{font:500 10.5px 'IBM Plex Mono';color:var(--muted)}
+table{width:100%;border-collapse:separate;border-spacing:0 4px}
+th{font:500 8.5px 'IBM Plex Mono';letter-spacing:1.3px;color:var(--muted);text-align:left;padding:2px 6px}
+td{font:600 14px 'IBM Plex Mono';padding:9px 6px;background:rgba(0,0,0,.22)}
+td:first-child{border-radius:10px 0 0 10px;color:var(--muted);width:28px;text-align:center}
+td:last-child{border-radius:0 10px 10px 0;width:34px}
+td.pv{color:#7f93ab;font-weight:500;font-size:12px}
+.ck{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px #3c5675;color:transparent;font-size:13px}
+tr.d .ck{background:var(--accent);box-shadow:0 0 10px rgba(166,255,140,.5);color:#06210a}
+tr.c td{background:rgba(166,255,140,.08)}
+tr.c td:first-child{box-shadow:inset 3px 0 0 var(--accent);color:var(--accent)}
+.ex2{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px;border-radius:16px}
+.ex2 b{flex:1;font:700 14px 'Archivo'}.ex2 span{font:500 10.5px 'IBM Plex Mono';color:var(--muted)}
+/* reloj buceo */
+.case{background:linear-gradient(145deg,#9aa3ad 0%,#f2f5f8 18%,#7d8690 40%,#e3e8ed 62%,#5d656e 100%)}
+.case:after{background:linear-gradient(160deg,#20262d,#0b0e12)}
+.btn{background:linear-gradient(90deg,#8a939c,#eef2f5,#7a838c)}
+.btn.q{background:linear-gradient(90deg,#d9600d,#ff8c3a,#c45208)}
+.disp{background:radial-gradient(circle at 50% 42%,#1d4f8f 0%,#0d2c58 48%,#06162f 100%)}
+.wf{position:absolute;inset:0}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.wl{font:600 7.5px/1 'IBM Plex Mono';letter-spacing:1.2px;color:#9fb3ca}
+.wbig{font:800 36px/1 'Archivo';font-stretch:118%;letter-spacing:-1px;color:#fff}
+.wbig small{font:600 11px 'IBM Plex Mono';letter-spacing:0;color:#9fb3ca;margin-left:2px}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 13 · Móvil + reloj</div>
+ <h1 style="font-stretch:120%;font-weight:900">Buceo</h1>
+ <p class="lead">El reloj de buceo como interfaz: esfera azul profundo con degradado radial, acero pulido y marcadores con lume verde que se leen en cualquier luz. El descanso es el bisel giratorio unidireccional: marcas el inicio y el lume avanza hasta volver a la serie.</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:radial-gradient(circle at 50% 30%,#1d4f8f,#06162f)"></b><span><em>Abisal</em>#0D2C58</span></div>
+  <div class="sw"><b style="background:#06122A"></b><span><em>Fosa</em>#06122A</span></div>
+  <div class="sw"><b style="background:#A6FF8C;box-shadow:inset 0 0 16px #6fe050"></b><span><em>Lume</em>#A6FF8C</span></div>
+  <div class="sw"><b style="background:linear-gradient(145deg,#f2f5f8,#7d8690)"></b><span><em>Acero</em>#C7D0D9</span></div>
+  <div class="sw"><b style="background:#FF7A1A"></b><span><em>Aguja min.</em>#FF7A1A</span></div>
+  <div class="sw"><b style="background:#8CA0B8"></b><span><em>Bruma</em>#8CA0B8</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font:900 24px 'Archivo';font-stretch:115%;white-space:nowrap">DÍA DE PRESS</span><small>Archivo</small></div>
+  <div><span class="s mono" style="font-weight:600">82.5 × 8</span><small>IBM Plex Mono</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>Bisel de descanso con triángulo de inicio: se ve cuánto queda sin leer números.</li><li>Lume verde solo para lo hecho y lo que corre ahora.</li><li>Botón rápido naranja = aguja de minutos: completar serie.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="hdr"><div><div class="lbl">Dom 01 Nov · Semana 45</div><h2>Buenas noches, Juan</h2></div><div class="av">JM</div></div>
+  <div class="dial hero">
+   <div class="top"><span class="lume">HOY TOCA</span><span class="pill">5/3/1 · S2</span></div>
+   <h3>Día de Press</h3>
+   <div class="depth"><div><span class="lbl">Ejerc.</span><b>5</b></div><div><span class="lbl">Tiempo</span><b>55<small>min</small></b></div><div><span class="lbl">Vol.</span><b>9.8<small>t</small></b></div></div>
+   <div class="exl"><div><span>Press militar · 3×3</span><span>47.5 · 52.5 · 57.5+</span></div><div><span>Press militar BBB · 5×10</span><span>32.5 kg</span></div><div><span>Dominadas · 5×10</span><span>corporal</span></div></div>
+   <div class="go"><div class="b"><i data-i="play"></i>Sumergirse</div><div class="w"><i data-i="watch"></i></div></div>
+  </div>
+  <div class="dial week">
+   <svg viewBox="0 0 96 96" id="wk"></svg>
+   <div><span class="lbl">Esta semana</span><div class="big" style="margin-top:8px">3<small> / 4 sesiones</small></div><div class="lbl" style="margin-top:9px;color:var(--accent)">L · X · V hechos</div></div>
+  </div>
+  <div class="duo"><div class="dial"><span class="lbl">Racha</span><b>12<small> sem</small></b></div><div class="dial"><span class="lbl">1RM banca</span><b>104.5<small> kg</small></b></div></div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="dumb"></i>Entrenar</div><div><i data-i="hist"></i>Historial</div><div><i data-i="chart"></i>Progreso</div><div><i data-i="user"></i>Perfil</div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="wtop"><div class="ib"><i data-i="back"></i></div><div class="t"><b>Torso A</b><span>38:20 · 7/16 series</span></div><div class="fin">Emerger</div></div>
+  <div class="dial rest">
+   <div class="bz"><svg viewBox="0 0 112 112" id="bz"></svg><b>1:34</b></div>
+   <div class="nx"><span class="lbl" style="color:var(--accent)">Descanso · 2:30</span><b>Remo con barra</b><span>Serie 3 · 90 kg × 8</span>
+    <div class="ctr"><div>−15s</div><div>+15s</div><div class="o">Saltar</div></div></div>
+  </div>
+  <div class="dial exc">
+   <div class="exh"><div class="th"><i data-i="dumb"></i></div><div style="flex:1"><b>Press banca con barra</b><span>Agarre 1.5× · tempo 3-1-1</span></div><i data-i="more" style="font-size:18px;color:var(--muted)"></i></div>
+   <table><tr><th>SERIE</th><th>ANTERIOR</th><th>KG</th><th>REPS</th><th></th></tr>
+    <tr class="d"><td>C</td><td class="pv">40×10</td><td>40</td><td>10</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>1</td><td class="pv">80×8</td><td>82.5</td><td>8</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>2</td><td class="pv">80×8</td><td>82.5</td><td>8</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="c"><td>3</td><td class="pv">80×7</td><td>82.5</td><td>8</td><td><div class="ck"></div></td></tr>
+   </table>
+  </div>
+  <div class="dial ex2"><div class="th"><i data-i="dumb"></i></div><b>Remo con barra</b><span>0/3</span></div>
+  <div class="dial ex2"><div class="th"><i data-i="dumb"></i></div><b>Fondos en paralelas</b><span>0/3</span></div>
+ </div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1"></svg>
+   <div class="wc"><div class="wl">PRESS BANCA · 3/4</div><div class="wbig" style="margin-top:7px">82.5<small>kg</small></div>
+    <div style="font:800 18px 'Archivo';font-stretch:118%;color:#fff;margin-top:2px">× 8</div>
+    <div style="font:600 10px 'IBM Plex Mono';color:#A6FF8C;margin-top:7px;display:flex;gap:4px;align-items:center"><i data-i="heart"></i>128</div></div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc"><div class="wl" style="color:#A6FF8C">DESCANSO</div><div class="wbig" style="font-size:40px;margin-top:5px;color:#A6FF8C;text-shadow:0 0 14px rgba(166,255,140,.4)">1:34</div>
+    <div class="wl" style="margin-top:5px;letter-spacing:.4px">Remo · 90 × 8</div>
+    <div style="display:flex;gap:5px;margin-top:8px"><span style="font:600 8.5px/1 'IBM Plex Mono';padding:5px 7px;border-radius:10px;background:rgba(0,0,0,.35);color:#dfe8f1">+15</span><span style="font:600 8.5px/1 'IBM Plex Mono';padding:5px 7px;border-radius:10px;background:#A6FF8C;color:#06210a">SALTAR</span></div></div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w3"></svg>
+   <div class="wc"><div class="wl">SEMANA</div><div class="wbig" style="font-size:34px;margin-top:5px">3<small style="font-size:14px">/4</small></div>
+    <div class="wl" style="margin-top:5px;color:#A6FF8C">Racha 12 sem</div>
+    <div style="margin-top:8px;font:800 9.5px/1 'Archivo';font-stretch:118%;letter-spacing:.6px;padding:7px 12px;border-radius:12px;background:linear-gradient(180deg,#f3f6f9,#b9c3cd);color:#081c3a">ENTRENAR</div></div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons-a.js"></script>
+<script>
+icons(1.8);
+const LUME='#A6FF8C';
+// bisel de buceo: anillo negro con numerales cada 10 y triángulo en 0; arco de lume hasta p
+function bezel(svg,c,R,w,p,{nums=true,size=8}={}){let h=`<circle cx="${c}" cy="${c}" r="${R-w/2}" fill="none" stroke="#0a0d12" stroke-width="${w}"/>`;
+ if(p>0)h+=`<path d="${arc(c,c,R-w/2,0,360*p)}" stroke="${LUME}" stroke-opacity=".22" stroke-width="${w}" fill="none"/>`;
+ for(let i=0;i<60;i++){const a=(i*6-90)*Math.PI/180;const inR=R-w+2,outR=R-2;
+  if(i===0){const t=[[c,c-R+3],[c-size*.55,c-R+w-2],[c+size*.55,c-R+w-2]];h+=`<path d="M${t.map(q=>q.join(' ')).join('L')}Z" fill="${LUME}"/>`;continue}
+  if(nums&&i%10===0){const r=R-w/2;h+=`<text x="${c+Math.cos(a)*r}" y="${c+Math.sin(a)*r+size*.36}" font-family="Archivo" font-weight="800" font-size="${size}" fill="#dfe6ee" text-anchor="middle">${i}</text>`}
+  else if(i%5===0){h+=`<circle cx="${c+Math.cos(a)*(R-w/2)}" cy="${c+Math.sin(a)*(R-w/2)}" r="1.6" fill="#dfe6ee"/>`}
+  else if(i<15){h+=`<line x1="${c+Math.cos(a)*(R-w/2-2.5)}" y1="${c+Math.sin(a)*(R-w/2-2.5)}" x2="${c+Math.cos(a)*(R-w/2+2.5)}" y2="${c+Math.sin(a)*(R-w/2+2.5)}" stroke="#b9c3cd" stroke-width="1"/>`}}
+ svg.insertAdjacentHTML('beforeend',h)}
+// índices de esfera con lume
+function indices(svg,c,r,len){let h='';for(let i=0;i<12;i++){const a=(i*30-90)*Math.PI/180;if(i%6===0){const x=c+Math.cos(a)*(r-len/2),y=c+Math.sin(a)*(r-len/2);h+=`<rect x="${x-3}" y="${y-len/2}" width="6" height="${len}" rx="1.5" fill="${LUME}" stroke="#dfe6ee" stroke-width="1" transform="rotate(${i*30} ${x} ${y})"/>`}else if(i%3!==0){h+=`<circle cx="${c+Math.cos(a)*(r-4)}" cy="${c+Math.sin(a)*(r-4)}" r="3" fill="${LUME}" stroke="#dfe6ee" stroke-width="1"/>`}}svg.insertAdjacentHTML('beforeend',h)}
+// teléfono: bisel del descanso
+(function(){const s=document.getElementById('bz');bezel(s,56,56,14,.63,{size:8});s.insertAdjacentHTML('beforeend',`<circle cx="56" cy="56" r="40" fill="url(#g)"/><defs><radialGradient id="g" cx=".5" cy=".4"><stop offset="0" stop-color="#1d4f8f"/><stop offset="1" stop-color="#081c3a"/></radialGradient></defs>`);
+})();
+// semana: mini esfera con 7 índices
+(function(){const s=document.getElementById('wk');let h=`<circle cx="48" cy="48" r="46" fill="#0a0d12"/><circle cx="48" cy="48" r="36" fill="url(#g2)"/><defs><radialGradient id="g2" cx=".5" cy=".4"><stop offset="0" stop-color="#1d4f8f"/><stop offset="1" stop-color="#081c3a"/></radialGradient></defs>`;
+ const done=[0,2,4];['L','M','X','J','V','S','D'].forEach((d,i)=>{const a=(i*360/7-90)*Math.PI/180;const x=48+Math.cos(a)*41,y=48+Math.sin(a)*41;h+=`<text x="${x}" y="${y+3}" font-family="IBM Plex Mono" font-weight="600" font-size="8" fill="${done.includes(i)?LUME:'#7f93ab'}" text-anchor="middle">${d}</text>`;
+ const x2=48+Math.cos(a)*29,y2=48+Math.sin(a)*29;h+=done.includes(i)?`<circle cx="${x2}" cy="${y2}" r="4" fill="${LUME}" stroke="#dfe6ee" stroke-width="1"/>`:`<circle cx="${x2}" cy="${y2}" r="2" fill="#3c5675"/>`});
+ h+=`<text x="48" y="53" font-family="Archivo" font-weight="800" font-size="15" fill="#fff" text-anchor="middle">3/4</text>`;s.innerHTML=h})();
+// reloj
+['w1','w2','w3'].forEach((id,k)=>{const s=document.getElementById(id);bezel(s,96,96,20,[0,.63,0][k],{size:10});indices(s,96,74,11)});
+</script>
+</body></html>

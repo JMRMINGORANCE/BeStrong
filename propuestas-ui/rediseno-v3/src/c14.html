@@ -1,0 +1,197 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@600;700;800;900&family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame-a.css">
+<style>
+:root{--sheet:#141710;--bg:#1E2418;--ink:#EDE3C8;--muted:#A49C83;--accent:#C98A4B;--olive:#2F3A26;--red:#C2452D;--display:'Big Shoulders Stencil Display';--body:'Barlow Semi Condensed';--mono:'Space Mono';--rule:#3a412f}
+body{background:radial-gradient(1200px 760px at 70% 18%,#262c1e,#11140d 72%)}
+.mono{font-family:'Space Mono'}
+.st{font-family:'Big Shoulders Stencil Display'}
+.lbl{font:700 9px/1 'Space Mono';letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.phone{background:linear-gradient(145deg,#6b4a2a,#b98654 25%,#7d5a35 50%,#a77a4b 72%,#4e3a26);box-shadow:0 0 0 1.5px #3a2b1c,0 40px 80px -20px rgba(0,0,0,.6)}
+.scr{background:linear-gradient(180deg,#232a1c,#1a1f15);background-image:radial-gradient(rgba(237,227,200,.035) 1px,transparent 1px),linear-gradient(180deg,#232a1c,#1a1f15);background-size:4px 4px,auto}
+.pad{padding:6px 18px}
+.card{border-radius:16px;background:linear-gradient(170deg,#2f3a26,#262f1f);box-shadow:inset 0 0 0 1px #45503a,0 10px 20px -14px #000}
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0 14px}
+.hdr h2{font:800 30px/1 'Big Shoulders Stencil Display';letter-spacing:.3px;text-transform:uppercase;margin-top:7px}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:800 15px 'Big Shoulders Stencil Display';color:#2a1a0b;background:radial-gradient(circle at 35% 30%,#e3b27a,#b07842 55%,#6e4a26);box-shadow:inset 0 0 0 2px rgba(126,160,120,.35)}
+.hero{padding:16px}
+.hero .top{display:flex;justify-content:space-between;align-items:center}
+.tag{font:700 9.5px/1 'Space Mono';letter-spacing:1.5px;color:var(--accent);display:flex;gap:6px;align-items:center}
+.pill{font:700 9.5px/1 'Space Mono';padding:5px 7px;border:1px dashed #6a7258;border-radius:4px;color:#d7cdb2}
+.hero h3{font:900 40px/.92 'Big Shoulders Stencil Display';text-transform:uppercase;letter-spacing:.5px;margin:10px 0 12px;color:#F2E8CC}
+.ord{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #4a5540;border-radius:8px;margin-bottom:8px}
+.ord div{padding:8px 10px}.ord div+div{border-left:1px solid #4a5540}
+.ord b{display:block;font:800 22px/1 'Big Shoulders Stencil Display';margin-top:5px}
+.ord b small{font:400 10px 'Space Mono';color:var(--muted)}
+.exl div{display:flex;justify-content:space-between;font:500 14px 'Barlow Semi Condensed';padding:6px 0;border-bottom:1px dashed #45503a}
+.exl div span:last-child{font:700 12px 'Space Mono';color:#F2E8CC}
+.go{display:flex;gap:8px;margin-top:12px}
+.go .b{flex:1;height:48px;border-radius:10px;background:linear-gradient(180deg,#d49a5c,#a8703c);color:#22150a;font:900 19px/48px 'Big Shoulders Stencil Display';letter-spacing:1.2px;display:flex;gap:8px;align-items:center;justify-content:center;text-transform:uppercase;box-shadow:inset 0 1px 0 rgba(255,235,200,.5),0 8px 16px -8px #000}
+.go .w{width:48px;height:48px;border-radius:10px;display:grid;place-items:center;font-size:20px;color:var(--ink);background:#1d2316;box-shadow:inset 0 0 0 1px #4a5540}
+.week{margin-top:12px;padding:12px 16px}
+.week .row{display:flex;justify-content:space-between;align-items:baseline}
+.week .big{font:900 26px 'Big Shoulders Stencil Display'}.week .big small{font:400 11px 'Space Mono';color:var(--muted)}
+.ruler{display:flex;justify-content:space-between;margin-top:10px}
+.ruler div{width:34px;text-align:center}
+.ruler i{display:block;height:24px;border-radius:4px;background:#1a2014;box-shadow:inset 0 0 0 1px #45503a;margin-bottom:6px;position:relative}
+.ruler .d i{background:repeating-linear-gradient(-45deg,#c98a4b 0 5px,#a8703c 5px 10px);box-shadow:none}
+.ruler .t i{box-shadow:inset 0 0 0 2px #EDE3C8}
+.ruler span{font:700 10px 'Space Mono';color:var(--muted)}
+.ruler .d span{color:var(--accent)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.duo .card{padding:12px 14px}
+.duo b{display:block;font:900 30px/1 'Big Shoulders Stencil Display';margin-top:6px}
+.duo b small{font:400 11px 'Space Mono';color:var(--muted)}
+.nav{position:absolute;left:0;right:0;bottom:0;height:70px;display:flex;justify-content:space-around;align-items:center;background:#171b12;border-top:1px solid #3a412f;padding-bottom:6px}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:5px;font:700 8.5px 'Space Mono';letter-spacing:1px;color:#7b7660;text-transform:uppercase}
+.nav div i{font-size:21px}.nav .on{color:var(--accent)}
+/* entreno */
+.wtop{display:flex;align-items:center;gap:10px;margin:8px 0 12px}
+.wtop .t{flex:1}.wtop .t b{display:block;font:900 24px/1 'Big Shoulders Stencil Display';text-transform:uppercase}.wtop .t span{font:400 10.5px 'Space Mono';color:var(--muted)}
+.ib{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:18px;background:#1d2316;box-shadow:inset 0 0 0 1px #4a5540}
+.fin{height:36px;padding:0 14px;border-radius:9px;font:900 16px/36px 'Big Shoulders Stencil Display';letter-spacing:1px;text-transform:uppercase;color:#F2E8CC;background:var(--red)}
+.rest{display:flex;gap:14px;align-items:center;padding:12px 14px}
+.fd{width:108px;height:108px;flex-shrink:0;position:relative}
+.fd svg{position:absolute;inset:0}
+.nx b{display:block;font:800 19px 'Big Shoulders Stencil Display';text-transform:uppercase;margin:7px 0 2px}
+.nx span{font:400 11px 'Space Mono';color:#d7cdb2}
+.ctr{display:flex;gap:6px;margin-top:10px}
+.ctr div{white-space:nowrap;font:700 10.5px/1 'Space Mono';padding:7px 8px;border-radius:6px;background:#1d2316;box-shadow:inset 0 0 0 1px #4a5540}
+.ctr .o{background:var(--accent);color:#22150a;box-shadow:none}
+.exc{margin-top:12px;padding:12px 10px 8px}
+.exh{display:flex;align-items:center;gap:10px;padding:0 4px 8px}
+.th{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:19px;color:#2a1a0b;background:radial-gradient(circle at 35% 30%,#e3b27a,#a8703c 60%,#6e4a26)}
+.exh b{display:block;font:800 18px/1.1 'Big Shoulders Stencil Display';text-transform:uppercase}.exh span{font:400 10px 'Space Mono';color:var(--muted)}
+table{width:100%;border-collapse:separate;border-spacing:0 4px}
+th{font:700 8.5px 'Space Mono';letter-spacing:1.2px;color:var(--muted);text-align:left;padding:2px 6px}
+td{font:700 14px 'Space Mono';padding:8px 6px;background:#1d2316}
+td:first-child{border-radius:7px 0 0 7px;color:var(--muted);width:28px;text-align:center}
+td:last-child{border-radius:0 7px 7px 0;width:34px}
+td.pv{color:#857e67;font-weight:400;font-size:12px}
+.ck{width:22px;height:22px;border-radius:5px;display:grid;place-items:center;box-shadow:inset 0 0 0 1.5px #5c654d;color:transparent;font-size:13px}
+tr.d .ck{background:var(--accent);box-shadow:none;color:#22150a}
+tr.c td{background:#323d28}
+tr.c td:first-child{box-shadow:inset 3px 0 0 var(--accent);color:var(--accent)}
+.ex2{display:flex;align-items:center;gap:10px;margin-top:8px;padding:10px 12px}
+.ex2 b{flex:1;font:800 17px 'Big Shoulders Stencil Display';text-transform:uppercase}.ex2 span{font:400 10.5px 'Space Mono';color:var(--muted)}
+/* reloj bronce */
+.case{background:
+ radial-gradient(40px 26px at 22% 78%,rgba(92,140,110,.55),transparent 70%),
+ radial-gradient(30px 22px at 82% 20%,rgba(92,140,110,.45),transparent 70%),
+ linear-gradient(145deg,#7a5530 0%,#d29a5f 18%,#8a6036 40%,#c48e57 62%,#5a3f22 100%)}
+.case:after{background:linear-gradient(160deg,#2a2016,#120e09)}
+.btn{background:linear-gradient(90deg,#7a5530,#d6a066,#6a4a2a)}
+.btn.q{background:linear-gradient(90deg,#9e3220,#d4573c,#8a2b1a)}
+.disp{background:radial-gradient(circle at 50% 40%,#3a4730,#2a3422 55%,#1c2317)}
+.wf{position:absolute;inset:0}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.wl{font:700 7.5px/1 'Space Mono';letter-spacing:1.2px;color:#b7ae93}
+.wbig{font:900 46px/1 'Big Shoulders Stencil Display';color:#F2E8CC}
+.wbig small{font:400 11px 'Space Mono';color:#b7ae93;margin-left:2px}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 14 · Móvil + reloj</div>
+ <h1 style="font:900 64px/1 'Big Shoulders Stencil Display';letter-spacing:1px;text-transform:uppercase">Bronce</h1>
+ <p class="lead">El reloj de campo militar: caja de bronce que coge pátina, esfera verde oliva oscuro, numerales crema y letras de estarcido como las de una caja de munición. Cálido, robusto y fácil de leer con sudor y sin gafas.</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:linear-gradient(145deg,#d29a5f,#8a6036)"></b><span><em>Bronce</em>#C98A4B</span></div>
+  <div class="sw"><b style="background:#5C8C6E"></b><span><em>Pátina</em>#5C8C6E</span></div>
+  <div class="sw"><b style="background:#2F3A26"></b><span><em>Oliva</em>#2F3A26</span></div>
+  <div class="sw"><b style="background:#EDE3C8"></b><span><em>Crema</em>#EDE3C8</span></div>
+  <div class="sw"><b style="background:#A49C83"></b><span><em>Caqui</em>#A49C83</span></div>
+  <div class="sw"><b style="background:#C2452D"></b><span><em>Señal</em>#C2452D</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font:900 34px 'Big Shoulders Stencil Display';text-transform:uppercase">Día de Press</span><small>Big Shoulders Stencil</small></div>
+  <div><span class="s mono" style="font-size:26px;font-weight:700">82.5 × 8</span><small>Space Mono</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>Esfera de campo con numerales 1–12 para el descanso: un vistazo y sabes cuánto queda.</li><li>Lo hecho se «graba» en bronce rayado; lo pendiente queda en oliva.</li><li>Rojo señal solo para terminar o alertas.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="hdr"><div><div class="lbl">Dom 01 Nov · Sem 45</div><h2>Buenas noches, Juan</h2></div><div class="av">JM</div></div>
+  <div class="card hero">
+   <div class="top"><span class="tag"><i data-i="target"></i>ORDEN DEL DÍA</span><span class="pill">5/3/1 · S2</span></div>
+   <h3>Día de Press</h3>
+   <div class="ord"><div><span class="lbl">Ejerc.</span><b>5</b></div><div><span class="lbl">Tiempo</span><b>55<small>min</small></b></div><div><span class="lbl">Vol.</span><b>9.8<small>t</small></b></div></div>
+   <div class="exl"><div><span>Press militar · 3×3</span><span>47.5 · 52.5 · 57.5+</span></div><div><span>Press militar BBB · 5×10</span><span>32.5 kg</span></div><div><span>Dominadas · 5×10</span><span>corporal</span></div></div>
+   <div class="go"><div class="b"><i data-i="play"></i>En marcha</div><div class="w"><i data-i="watch"></i></div></div>
+  </div>
+  <div class="card week">
+   <div class="row"><span class="lbl">Esta semana</span><span class="big">3<small> / 4 sesiones</small></span></div>
+   <div class="ruler"><div class="d"><i></i><span>L</span></div><div><i></i><span>M</span></div><div class="d"><i></i><span>X</span></div><div><i></i><span>J</span></div><div class="d"><i></i><span>V</span></div><div><i></i><span>S</span></div><div class="t"><i></i><span>D</span></div></div>
+  </div>
+  <div class="duo"><div class="card"><span class="lbl">Racha</span><b>12<small> sem</small></b></div><div class="card"><span class="lbl">1RM banca</span><b>104.5<small> kg</small></b></div></div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="dumb"></i>Entrenar</div><div><i data-i="hist"></i>Historial</div><div><i data-i="chart"></i>Progreso</div><div><i data-i="user"></i>Perfil</div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="wtop"><div class="ib"><i data-i="back"></i></div><div class="t"><b>Torso A</b><span>38:20 · 7/16 series</span></div><div class="fin">Terminar</div></div>
+  <div class="card rest">
+   <div class="fd"><svg viewBox="0 0 108 108" id="fd"></svg></div>
+   <div class="nx"><span class="lbl" style="color:var(--accent)">Descanso · 2:30</span><b>Remo con barra</b><span>Serie 3 · 90 kg × 8</span>
+    <div class="ctr"><div>−15s</div><div>+15s</div><div class="o">Saltar</div></div></div>
+  </div>
+  <div class="card exc">
+   <div class="exh"><div class="th"><i data-i="dumb"></i></div><div style="flex:1"><b>Press banca con barra</b><span>Agarre 1.5× · tempo 3-1-1</span></div><i data-i="more" style="font-size:18px;color:var(--muted)"></i></div>
+   <table><tr><th>SERIE</th><th>ANTERIOR</th><th>KG</th><th>REPS</th><th></th></tr>
+    <tr class="d"><td>C</td><td class="pv">40×10</td><td>40</td><td>10</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>1</td><td class="pv">80×8</td><td>82.5</td><td>8</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="d"><td>2</td><td class="pv">80×8</td><td>82.5</td><td>8</td><td><div class="ck"><i data-i="check" data-w="3"></i></div></td></tr>
+    <tr class="c"><td>3</td><td class="pv">80×7</td><td>82.5</td><td>8</td><td><div class="ck"></div></td></tr>
+   </table>
+  </div>
+  <div class="card ex2"><div class="th"><i data-i="dumb"></i></div><b>Remo con barra</b><span>0/3</span></div>
+  <div class="card ex2"><div class="th"><i data-i="dumb"></i></div><b>Fondos en paralelas</b><span>0/3</span></div>
+ </div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1"></svg>
+   <div class="wc"><div class="wl">PRESS BANCA · 3/4</div><div class="wbig" style="margin-top:6px">82.5<small>kg</small></div>
+    <div style="font:900 22px 'Big Shoulders Stencil Display';color:#F2E8CC">× 8</div>
+    <div style="font:700 10px 'Space Mono';color:#C98A4B;margin-top:5px;display:flex;gap:4px;align-items:center"><i data-i="heart"></i>128</div></div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc"><div class="wl" style="color:#C98A4B">DESCANSO</div><div class="wbig" style="font-size:50px;margin-top:4px">1:34</div>
+    <div class="wl" style="margin-top:4px;letter-spacing:.4px">Remo · 90 × 8</div>
+    <div style="display:flex;gap:5px;margin-top:7px"><span style="font:700 8.5px/1 'Space Mono';padding:5px 7px;border-radius:5px;background:#1d2316;color:#EDE3C8;box-shadow:inset 0 0 0 1px #4a5540">+15</span><span style="font:700 8.5px/1 'Space Mono';padding:5px 7px;border-radius:5px;background:#C98A4B;color:#22150a">SALTAR</span></div></div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w3"></svg>
+   <div class="wc"><div class="wl">SEMANA</div><div class="wbig" style="font-size:42px;margin-top:4px">3<small style="font-size:14px">/4</small></div>
+    <div class="wl" style="margin-top:3px;color:#C98A4B">Racha 12 sem</div>
+    <div style="margin-top:8px;font:900 13px/1 'Big Shoulders Stencil Display';letter-spacing:1px;padding:6px 12px;border-radius:6px;background:linear-gradient(180deg,#d49a5c,#a8703c);color:#22150a">EN MARCHA</div></div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons-a.js"></script>
+<script>
+icons(1.8);
+// esfera de campo: numerales 1–12 crema, minutero de pista; arco bronce hasta p
+function field(svg,c,R,p,{num=true,fs=11,showN=[]}={}){let h=`<circle cx="${c}" cy="${c}" r="${R}" fill="#1c2317"/><circle cx="${c}" cy="${c}" r="${R-2}" fill="url(#gf${c})"/><defs><radialGradient id="gf${c}" cx=".5" cy=".4"><stop offset="0" stop-color="#3a4730"/><stop offset="1" stop-color="#232b1c"/></radialGradient></defs>`;
+ // pista de minutos
+ h+=`<circle cx="${c}" cy="${c}" r="${R-6}" fill="none" stroke="#5a6248" stroke-width=".8"/><circle cx="${c}" cy="${c}" r="${R-12}" fill="none" stroke="#5a6248" stroke-width=".8"/>`;
+ for(let i=0;i<60;i++){const a=(i*6-90)*Math.PI/180;const M=i%5===0;h+=`<line x1="${c+Math.cos(a)*(R-6)}" y1="${c+Math.sin(a)*(R-6)}" x2="${c+Math.cos(a)*(R-(M?13:12))}" y2="${c+Math.sin(a)*(R-(M?13:12))}" stroke="${M?'#EDE3C8':'#8a8670'}" stroke-width="${M?1.8:.8}"/>`}
+ if(p>0)h+=`<path d="${arc(c,c,R-9,0,360*p)}" stroke="#C98A4B" stroke-width="5" fill="none" opacity=".85"/>`;
+ if(num)for(let i=1;i<=12;i++){if(showN.length&&!showN.includes(i))continue;const a=(i*30-90)*Math.PI/180;const r=R-12-fs*.85;h+=`<text x="${c+Math.cos(a)*r}" y="${c+Math.sin(a)*r+fs*.36}" font-family="Big Shoulders Stencil Display" font-weight="800" font-size="${fs}" fill="#EDE3C8" text-anchor="middle">${i}</text>`}
+ svg.insertAdjacentHTML('beforeend',h)}
+// teléfono: esfera con aguja
+(function(){const s=document.getElementById('fd');field(s,54,54,.63,{fs:11,showN:[12,3,9]});
+ const a=(.63*360-90)*Math.PI/180;s.insertAdjacentHTML('beforeend',`<path d="M54 54 L${54+Math.cos(a)*34} ${54+Math.sin(a)*34}" stroke="#EDE3C8" stroke-width="3" stroke-linecap="round"/><path d="M54 54 L${54-Math.cos(a)*9} ${54-Math.sin(a)*9}" stroke="#EDE3C8" stroke-width="3" stroke-linecap="round"/><circle cx="54" cy="54" r="4" fill="#C98A4B" stroke="#22150a" stroke-width="1.5"/><text x="54" y="84" font-family="Space Mono" font-weight="700" font-size="11" fill="#C98A4B" text-anchor="middle">1:34</text>`)})();
+// reloj: solo 12, 3, 6, 9 para no chocar con el contenido
+[['w1',.69],['w2',.63],['w3',.75]].forEach(([id,p])=>field(document.getElementById(id),96,96,p,{fs:13,showN:[12,6]}));
+</script>
+</body></html>
