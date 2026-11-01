@@ -1,0 +1,170 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame610.css"><style>
+:root{--sand:#EDE6D6;--paper:#F7F3EA;--olive:#4B5320;--od:#262A17;--sig:#FF5F1F;--stone:#8A8270;--ink:#1E1F17;--line:rgba(30,31,23,.12)}
+body{background:#DCD3BF;color:var(--ink);font-family:'IBM Plex Sans',sans-serif}
+.meta h1{font-family:'Chakra Petch';font-weight:700;text-transform:uppercase;letter-spacing:0}
+.meta .num{color:var(--sig);opacity:1}
+.screen{background:var(--sand);color:var(--ink)}
+.topo{position:absolute;inset:0;pointer-events:none}
+.k{font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:1.6px;color:var(--stone);text-transform:uppercase}
+.num2{font-family:'Chakra Petch';font-weight:700;font-variant-numeric:tabular-nums}
+.pad{padding:6px 20px;position:relative}
+.card{background:var(--paper);border-radius:18px;padding:16px;border:1px solid var(--line);position:relative}
+.nav{position:absolute;bottom:0;left:0;right:0;height:76px;display:flex;justify-content:space-around;align-items:center;font-size:22px;color:#a39b86;background:var(--paper);border-top:1px solid var(--line)}
+.nav .on{color:var(--sig)}
+.cp{display:grid;grid-template-columns:30px 1fr auto 34px;align-items:center;gap:10px;height:48px;position:relative;font-size:16px}
+.cp .dot{width:14px;height:14px;border-radius:50%;margin-left:8px;border:2px solid var(--olive);background:var(--paper);position:relative;z-index:2}
+.cp.done .dot{background:var(--olive)}
+.cp.cur .dot{border-color:var(--sig);background:var(--sig);box-shadow:0 0 0 5px rgba(255,95,31,.2)}
+.cp .ck{width:30px;height:30px;border-radius:8px;border:1.5px solid #c9c0aa;display:flex;align-items:center;justify-content:center;font-size:15px}
+.cp.done .ck{background:var(--olive);border-color:var(--olive);color:#fff}
+.dial{background:var(--od);color:#EDE6D6;font-family:'Chakra Petch'}
+</style></head><body>
+<div class="meta">
+ <div class="num">CONCEPTO 09</div>
+ <h1>Outdoor</h1>
+ <p class="lead">La estética del Galaxy Watch Ultra llevada al gimnasio. Arena, oliva y naranja señal sobre curvas de nivel. Cada entreno es una ruta con etapas y puntos de control; el volumen se ve como un perfil de desnivel. Técnico, robusto y legible a pleno sol.</p>
+ <h3>Paleta</h3>
+ <div class="sw">
+  <div style="background:#EDE6D6;color:#8A8270;box-shadow:inset 0 0 0 1px #cfc6b0">#EDE6D6<br>Arena</div>
+  <div style="background:#F7F3EA;color:#8A8270;box-shadow:inset 0 0 0 1px #cfc6b0">#F7F3EA<br>Papel</div>
+  <div style="background:#8A8270;color:#fff">#8A8270<br>Piedra</div>
+  <div style="background:#4B5320;color:#EDE6D6">#4B5320<br>Oliva</div>
+  <div style="background:#262A17;color:#EDE6D6">#262A17<br>Oliva noche</div>
+  <div style="background:#FF5F1F;color:#2a0c00">#FF5F1F<br>Señal</div>
+ </div>
+ <h3>Tipografía</h3>
+ <div class="fonts">
+  <div><b style="font-family:'Chakra Petch'">82,5 KG</b><span>Chakra Petch · cifras</span></div>
+  <div><b style="font-size:20px;font-weight:600">Press banca</b><span>IBM Plex Sans · texto</span></div>
+ </div>
+ <h3>Lenguaje</h3>
+ <ul class="notes"><li>Entreno = ruta · ejercicio = etapa · serie = punto de control</li><li>Volumen como perfil de desnivel</li><li>Botón naranja del Ultra = completar serie</li></ul>
+</div>
+
+<div class="stage">
+ <div><div class="phone"><div class="screen"><svg class="topo" id="t1"></svg>
+  <div class="sb"><span>9:41</span><span class="cam"></span><span class="ic"><i data-i="signal"></i><i data-i="wifi"></i><i data-i="battery"></i></span></div>
+  <div class="pad">
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+    <div><div class="k">Dom 01 Nov · Gimnasio Centro</div><div class="num2" style="font-size:30px;margin-top:6px;text-transform:uppercase">Base de hoy</div></div>
+    <div style="width:44px;height:44px;border-radius:12px;background:var(--od);color:var(--sig);display:flex;align-items:center;justify-content:center;font-size:22px"><i data-i="compass"></i></div>
+   </div>
+   <div class="card" style="margin-top:14px;padding:0;overflow:hidden">
+    <div style="padding:16px 16px 6px">
+     <div style="display:flex;justify-content:space-between"><span class="k" style="color:var(--sig)">Hoy toca · Etapa 3 de 4</span><span class="k">5/3/1 · S2</span></div>
+     <div class="num2" style="font-size:28px;margin-top:8px;text-transform:uppercase">Empuje A</div>
+     <div style="position:absolute;right:16px;top:58px;text-align:right"><div class="k" style="color:var(--sig);font-size:9px">Cumbre</div><div class="num2" style="font-size:15px">57,5+ KG</div></div>
+     <div style="display:flex;gap:16px;margin-top:8px;font-size:13px;color:#5c5748"><span><i data-i="route"></i> 5 etapas</span><span><i data-i="clock"></i> 55 min</span><span><i data-i="mountain"></i> 9,8 t</span></div>
+    </div>
+    <svg width="100%" height="74" viewBox="0 0 340 74" preserveAspectRatio="none" style="display:block">
+     <path d="M0 64 L40 50 L70 54 L110 22 L150 30 L190 12 L230 34 L270 40 L310 52 L340 58 L340 74 L0 74Z" fill="#4B5320" opacity=".14"/>
+     <path d="M0 64 L40 50 L70 54 L110 22 L150 30 L190 12 L230 34 L270 40 L310 52 L340 58" fill="none" stroke="#4B5320" stroke-width="2"/>
+     
+    </svg>
+    <div style="display:flex;gap:10px;padding:12px 16px 16px">
+     <div style="flex:1;height:52px;border-radius:12px;background:var(--sig);color:#fff;font-family:'Chakra Petch';font-weight:700;font-size:18px;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase"><i data-i="play"></i>Salir</div>
+     <div style="width:52px;height:52px;border-radius:12px;background:var(--od);color:#EDE6D6;display:flex;align-items:center;justify-content:center;font-size:21px"><i data-i="watch"></i></div>
+    </div>
+   </div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+    <div class="card" style="padding:14px"><div class="k"><i data-i="flag"></i> Racha</div><div class="num2" style="font-size:34px;margin-top:6px">12<span style="font-size:14px;color:var(--stone)"> SEM</span></div></div>
+    <div class="card" style="padding:14px"><div class="k"><i data-i="mountain"></i> Desnivel sem.</div><div class="num2" style="font-size:34px;margin-top:6px">18,4<span style="font-size:14px;color:var(--stone)"> T</span></div></div>
+   </div>
+   <div class="card" style="margin-top:10px;padding:14px 16px">
+    <div class="k">Ruta de la semana · 3 de 4</div>
+    <div style="position:relative;display:flex;justify-content:space-between;margin-top:14px">
+     <i style="position:absolute;left:10px;right:10px;top:10px;height:2px;background:repeating-linear-gradient(90deg,#4B5320 0 6px,transparent 6px 11px)"></i>
+     <div style="text-align:center;z-index:1"><span style="display:block;width:22px;height:22px;border-radius:50%;background:#4B5320;color:#fff;font-size:12px;line-height:22px"><i data-i="check"></i></span><span class="k" style="font-size:9px">L</span></div>
+     <div style="text-align:center;z-index:1"><span style="display:block;width:22px;height:22px;border-radius:50%;background:var(--paper);border:2px solid #c9c0aa"></span><span class="k" style="font-size:9px">M</span></div>
+     <div style="text-align:center;z-index:1"><span style="display:block;width:22px;height:22px;border-radius:50%;background:#4B5320;color:#fff;font-size:12px;line-height:22px"><i data-i="check"></i></span><span class="k" style="font-size:9px">X</span></div>
+     <div style="text-align:center;z-index:1"><span style="display:block;width:22px;height:22px;border-radius:50%;background:var(--paper);border:2px solid #c9c0aa"></span><span class="k" style="font-size:9px">J</span></div>
+     <div style="text-align:center;z-index:1"><span style="display:block;width:22px;height:22px;border-radius:50%;background:#4B5320;color:#fff;font-size:12px;line-height:22px"><i data-i="check"></i></span><span class="k" style="font-size:9px">V</span></div>
+     <div style="text-align:center;z-index:1"><span style="display:block;width:22px;height:22px;border-radius:50%;background:var(--paper);border:2px solid #c9c0aa"></span><span class="k" style="font-size:9px">S</span></div>
+     <div style="text-align:center;z-index:1"><span style="display:block;width:22px;height:22px;border-radius:50%;background:var(--sig);color:#fff;font-size:12px;line-height:22px"><i data-i="flag"></i></span><span class="k" style="font-size:9px;color:var(--sig)">D</span></div>
+    </div>
+   </div>
+   <div class="card" style="margin-top:10px;padding:14px 16px;display:flex;align-items:center;gap:14px">
+    <div style="width:40px;height:40px;border-radius:10px;background:rgba(255,95,31,.12);color:var(--sig);display:flex;align-items:center;justify-content:center;font-size:20px"><i data-i="target"></i></div>
+    <div style="flex:1"><div style="display:flex;justify-content:space-between"><span style="font-weight:600;font-size:14px">Cumbre: 100 kg en banca</span><span class="num2" style="font-size:14px;white-space:nowrap">92 %</span></div>
+    <div style="height:6px;border-radius:3px;background:#e2dac6;margin-top:8px"><div style="width:92%;height:100%;border-radius:3px;background:linear-gradient(90deg,#4B5320,#FF5F1F)"></div></div></div>
+   </div>
+  </div>
+  <div class="nav"><span class="on"><i data-i="compass"></i></span><span><i data-i="history"></i></span><span><i data-i="dumbbell"></i></span><span><i data-i="mountain"></i></span><span><i data-i="user"></i></span></div>
+ </div></div><div class="cap">Móvil · Inicio</div></div>
+
+ <div><div class="phone"><div class="screen"><svg class="topo" id="t2"></svg>
+  <div class="sb"><span>9:41</span><span class="cam"></span><span class="ic"><i data-i="signal"></i><i data-i="wifi"></i><i data-i="battery"></i></span></div>
+  <div class="pad">
+   <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="k">T+ 32:14 · <span style="color:var(--sig)"><i data-i="heart"></i> 128</span></span><span style="font-family:'Chakra Petch';font-weight:700;font-size:13px;padding:8px 14px;border-radius:10px;background:var(--od);color:#EDE6D6;text-transform:uppercase">Llegada</span></div>
+   <div style="display:flex;gap:4px;margin-top:16px">
+    <i style="flex:1;height:6px;border-radius:2px;background:#4B5320"></i><i style="flex:1;height:6px;border-radius:2px;background:#4B5320"></i><i style="flex:1;height:6px;border-radius:2px;background:var(--sig)"></i><i style="flex:1;height:6px;border-radius:2px;background:#d4cbb5"></i><i style="flex:1;height:6px;border-radius:2px;background:#d4cbb5"></i>
+   </div>
+   <div class="k" style="margin-top:16px;color:var(--sig)">Etapa 3 / 5 · Punto 3 / 4</div>
+   <div style="font-size:26px;font-weight:700;margin-top:6px">Press banca</div>
+   <div class="card" style="margin-top:12px;padding:14px 16px;background:var(--od);color:#EDE6D6;border:none">
+    <div style="display:flex;align-items:baseline;gap:8px"><span class="num2" style="font-size:78px;line-height:1;letter-spacing:-1px">82,5</span><span class="k" style="color:#b8b09a">KG</span><span class="num2" style="font-size:44px;margin-left:auto">×8</span></div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid rgba(237,230,214,.15)"><span class="k" style="color:#b8b09a">Anterior 80×8</span><span class="k" style="color:#b8b09a">Discos 20 · 10 · 1,25</span></div>
+   </div>
+   <div class="card" style="margin-top:12px;padding:8px 14px">
+    <i style="position:absolute;left:36px;top:28px;bottom:28px;width:2px;background:repeating-linear-gradient(180deg,#4B5320 0 5px,transparent 5px 9px)"></i>
+    <div class="cp done"><span class="dot"></span><span class="num2" style="font-size:17px">40 × 10</span><span class="k">Calent.</span><span class="ck"><i data-i="check"></i></span></div>
+    <div class="cp done"><span class="dot"></span><span class="num2" style="font-size:17px">80 × 8</span><span class="k">RPE 8</span><span class="ck"><i data-i="check"></i></span></div>
+    <div class="cp done"><span class="dot"></span><span class="num2" style="font-size:17px">82,5 × 8</span><span class="k">RPE 8,5</span><span class="ck"><i data-i="check"></i></span></div>
+    <div class="cp cur"><span class="dot"></span><span class="num2" style="font-size:17px;color:var(--sig)">82,5 × 8</span><span class="k" style="color:var(--sig)">Ahora</span><span class="ck" style="border-color:var(--sig)"></span></div>
+    <div class="cp"><span class="dot" style="border-color:#c9c0aa"></span><span class="num2" style="font-size:17px;color:#a39b86">82,5 × 8</span><span class="k"></span><span class="ck"></span></div>
+   </div>
+   <div style="margin-top:12px;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1.5px dashed #c9c0aa">
+    <i data-i="route" style="font-size:20px;color:var(--olive)"></i>
+    <div><div class="k">Siguiente etapa</div><div style="font-weight:600;font-size:14px;margin-top:4px">Press inclinado · 3 × 10 · 28 kg</div></div>
+   </div>
+  </div>
+  <div style="position:absolute;left:14px;right:14px;bottom:16px;border-radius:16px;padding:12px 14px;background:var(--sig);color:#fff;display:flex;align-items:center;gap:12px">
+   <i data-i="clock" style="font-size:26px"></i>
+   <div><div class="k" style="color:#ffe1d3">Descanso</div><div class="num2" style="font-size:28px;line-height:1.1">01:34</div></div>
+   <span style="margin-left:auto;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,.18);font-family:'Chakra Petch';font-weight:700;font-size:14px;white-space:nowrap">+15 S</span>
+   <span style="padding:10px 12px;border-radius:10px;background:#fff;color:var(--sig);font-family:'Chakra Petch';font-weight:700;font-size:14px">SEGUIR</span>
+  </div>
+ </div></div><div class="cap">Móvil · Entreno</div></div>
+
+ <div class="watches">
+  <div><div class="watch"><div class="strap t" style="background:#5a5f3a"></div><div class="strap b" style="background:#5a5f3a"></div><div class="case"><i class="btn a"></i><i class="btn c"></i><div class="dial">
+   <div class="bz" style="position:absolute;inset:0"></div>
+   <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div class="k" style="font-size:9px;color:var(--sig)">ETAPA 3 · PUNTO 3/4</div>
+    <div class="num2" style="font-size:56px;line-height:1;margin-top:6px">82,5</div>
+    <div class="k" style="font-size:10px;color:#b8b09a;margin-top:2px">KG <span style="color:#EDE6D6;font-size:16px;font-family:'Chakra Petch'">× 8</span></div>
+    <div style="display:flex;gap:14px;margin-top:10px;font-size:14px"><span style="color:var(--sig)"><i data-i="heart"></i> 128</span><span style="color:#b8b09a"><i data-i="clock"></i> 32:14</span></div>
+   </div></div></div></div><div class="cap">Reloj · Serie</div></div>
+  <div><div class="watch"><div class="strap t" style="background:#5a5f3a"></div><div class="strap b" style="background:#5a5f3a"></div><div class="case"><i class="btn a"></i><i class="btn c"></i><div class="dial">
+   <div class="bz2" style="position:absolute;inset:0"></div>
+   <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div class="k" style="font-size:9px;color:#b8b09a">ALTO · DESCANSO</div>
+    <div class="num2" style="font-size:60px;line-height:1;margin-top:4px;color:var(--sig)">1:34</div>
+    <div class="k" style="font-size:9px;margin-top:8px;color:#EDE6D6">SIGUE 82,5 × 8</div>
+    <div style="margin-top:10px;font-size:10px;color:#b8b09a;font-family:'JetBrains Mono'">BOTÓN <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--sig);vertical-align:-1px"></span> = SEGUIR</div>
+   </div></div></div></div><div class="cap">Reloj · Descanso</div></div>
+  <div><div class="watch"><div class="strap t" style="background:#5a5f3a"></div><div class="strap b" style="background:#5a5f3a"></div><div class="case"><i class="btn a"></i><i class="btn c"></i><div class="dial">
+   <svg class="topo" id="t3" style="opacity:.5"></svg>
+   <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div class="k" style="font-size:9px;color:#b8b09a">RUTA SEMANAL</div>
+    <div class="num2" style="font-size:46px;line-height:1.1;margin-top:4px">3<span style="color:#7d7a62">/4</span></div>
+    <svg width="120" height="30" viewBox="0 0 120 30"><path d="M4 24 L24 16 L44 20 L64 8 L84 14 L104 6" fill="none" stroke="#EDE6D6" stroke-width="1.6" stroke-dasharray="3 3"/><circle cx="4" cy="24" r="3" fill="#EDE6D6"/><circle cx="44" cy="20" r="3" fill="#EDE6D6"/><circle cx="84" cy="14" r="3" fill="#EDE6D6"/><circle cx="104" cy="6" r="4" fill="#FF5F1F"/></svg>
+    <div style="margin-top:8px;padding:7px 16px;border-radius:10px;background:var(--sig);color:#fff;font-weight:700;font-size:13px;text-transform:uppercase"><i data-i="play"></i> Empuje A</div>
+   </div></div></div></div><div class="cap">Reloj · Tile</div></div>
+ </div>
+</div>
+<script>
+// Curvas de nivel: anillos deformados alrededor de varios centros
+function topo(svg,w,h,cx,stroke,n,seed){svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('width',w);svg.setAttribute('height',h);let out='';
+ cx.forEach(([x,y],ci)=>{for(let r=18;r<n*22;r+=18){let d='';for(let a=0;a<=360;a+=6){const t=a*Math.PI/180;const rr=r*(1+.18*Math.sin(3*t+ci+seed)+.1*Math.cos(5*t+r*.05));d+=(a?'L':'M')+(x+rr*Math.cos(t)).toFixed(1)+' '+(y+rr*.8*Math.sin(t)).toFixed(1)}out+=`<path d="${d}Z" fill="none" stroke="${stroke}" stroke-width="1"/>`}});svg.innerHTML=out}
+topo(document.getElementById('t1'),360,780,[[300,120],[40,620]],'rgba(75,83,32,.13)',12,1);
+topo(document.getElementById('t2'),360,780,[[60,200],[320,700]],'rgba(75,83,32,.11)',12,2);
+topo(document.getElementById('t3'),212,212,[[150,60]],'rgba(237,230,214,.18)',8,3);
+// Bisel: marcas de brújula; el segundo, la cuenta atrás en naranja
+function bezel(el,fill,count){let h='';for(let i=0;i<72;i++){const on=i<fill;const big=i%9==0;h+=`<i style="position:absolute;left:105px;top:3px;width:2px;height:${big?12:6}px;background:${on?'#FF5F1F':'rgba(237,230,214,'+(big?.6:.25)+')'};transform-origin:1px 103px;transform:rotate(${i*5}deg)"></i>`}
+ ['N','E','S','O'].forEach((c,i)=>{const a=i*90*Math.PI/180;h+=`<span style="position:absolute;left:${106+82*Math.sin(a)-5}px;top:${106-82*Math.cos(a)-7}px;font:700 11px 'Chakra Petch';color:${i==0?'#FF5F1F':'#b8b09a'}">${c}</span>`});el.innerHTML=h}
+bezel(document.querySelector('.bz'),0);bezel(document.querySelector('.bz2'),45);
+</script>
+<script src="icons610.js"></script></body></html>
