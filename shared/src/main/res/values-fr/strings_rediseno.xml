@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuestas de interfaz 1–5: modo foco, Inicio, mapa corporal, resumen y centro de mando del Fold -->
+<resources>
+    <string name="rd_focus_mode">Mode focus</string>
+    <string name="rd_focus_show_list">Voir la liste</string>
+    <string name="rd_focus_position">Exercice %1$d sur %2$d · Série %3$d sur %4$d</string>
+    <string name="rd_focus_rest">Repos %1$s</string>
+    <string name="rd_reps">rép.</string>
+    <string name="rd_focus_use_list">Ce type de série se saisit dans la liste.</string>
+    <string name="rd_focus_done">Série faite</string>
+    <string name="rd_focus_undo">Décocher la série</string>
+    <string name="rd_focus_plates">Disques par côté : %1$s</string>
+    <string name="rd_focus_swipe">Balayez sur les côtés pour changer de série</string>
+    <string name="rd_focus_less">Moins %1$s</string>
+    <string name="rd_focus_more">Plus %1$s</string>
+    <string name="rd_focus_copy_previous">Copier dans cette série</string>
+    <string name="rd_focus_previous">Précédent</string>
+    <string name="rd_focus_open_set">Ouvrir la série %1$d</string>
+    <string name="rd_focus_next">Ensuite</string>
+    <string name="rd_focus_all_done">Tout est fait !</string>
+    <string name="rd_focus_all_done_body">Vous avez terminé toutes les séries. Terminez la séance pour voir le résumé.</string>
+    <string name="rd_hr_rising">en hausse</string>
+    <string name="rd_hr_falling">en baisse</string>
+    <string name="rd_hr_steady">stable</string>
+    <string name="rd_hr_chart">Fréquence cardiaque pendant la séance, entre %1$d et %2$d bpm</string>
+    <string name="rd_plates_title">Disques par côté</string>
+    <string name="rd_plates_empty">Barre seule</string>
+    <string name="rd_e1rm_title">1RM estimé</string>
+    <string name="rd_summary_title_records">Séance de feu !</string>
+    <string name="rd_summary_avg_hr">FC moyenne</string>
+    <string name="rd_summary_last_time">La dernière fois</string>
+    <string name="rd_home_streak">Série</string>
+    <string name="rd_home_vs_last_week">%1$d %% vs semaine dernière</string>
+    <string name="rd_home_week_volume">Volume hebdo</string>
+    <string name="rd_home_muscles_title">Muscles cette semaine</string>
+    <string name="rd_home_muscles_target">séries · minimum %1$d</string>
+    <string name="rd_home_muscle_open">Voir les exercices de ce muscle</string>
+    <string name="rd_home_start_watch">Démarrer sur la montre</string>
+    <string name="rd_body_map_desc">Carte du corps avec les séries de la semaine par muscle. Touchez un muscle pour voir le détail.</string>
+    <string name="rd_body_front">FACE</string>
+    <string name="rd_body_back">DOS</string>
+    <string name="rd_body_high">Au-dessus de la recommandation : envisagez de retirer une série cette semaine.</string>
+    <string name="rd_body_optimal">Pile dans la cible : continuez.</string>
+    <string name="rd_body_low_with">Il manque %1$s séries pour votre minimum. Essayez %2$s.</string>
+    <string name="rd_body_low">Il manque %1$s séries pour votre minimum.</string>
+    <plurals name="rd_pr_if_reps">
+        <item quantity="one">Record si vous faites %1$d rép. !</item>
+        <item quantity="other">Record si vous faites %1$d rép. !</item>
+    </plurals>
+    <plurals name="rd_summary_records">
+        <item quantity="one">%1$d nouveau record</item>
+        <item quantity="other">%1$d nouveaux records</item>
+    </plurals>
+    <plurals name="rd_home_streak_weeks">
+        <item quantity="one">%1$d semaine d\'affilée</item>
+        <item quantity="other">%1$d semaines d\'affilée</item>
+    </plurals>
+</resources>

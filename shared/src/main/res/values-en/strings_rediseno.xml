@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuestas de interfaz 1–5: modo foco, Inicio, mapa corporal, resumen y centro de mando del Fold -->
+<resources>
+    <string name="rd_focus_mode">Focus mode</string>
+    <string name="rd_focus_show_list">Show list</string>
+    <string name="rd_focus_position">Exercise %1$d of %2$d · Set %3$d of %4$d</string>
+    <string name="rd_focus_rest">Rest %1$s</string>
+    <string name="rd_reps">reps</string>
+    <string name="rd_focus_use_list">This kind of set is logged in the list.</string>
+    <string name="rd_focus_done">Set done</string>
+    <string name="rd_focus_undo">Unmark set</string>
+    <string name="rd_focus_plates">Plates per side: %1$s</string>
+    <string name="rd_focus_swipe">Swipe sideways to change set</string>
+    <string name="rd_focus_less">Less %1$s</string>
+    <string name="rd_focus_more">More %1$s</string>
+    <string name="rd_focus_copy_previous">Copy into this set</string>
+    <string name="rd_focus_previous">Previous</string>
+    <string name="rd_focus_open_set">Open set %1$d</string>
+    <string name="rd_focus_next">Next</string>
+    <string name="rd_focus_all_done">All done!</string>
+    <string name="rd_focus_all_done_body">You have completed every set. Finish the workout to see the summary.</string>
+    <string name="rd_hr_rising">rising</string>
+    <string name="rd_hr_falling">falling</string>
+    <string name="rd_hr_steady">steady</string>
+    <string name="rd_hr_chart">Heart rate during the workout, between %1$d and %2$d bpm</string>
+    <string name="rd_plates_title">Plates per side</string>
+    <string name="rd_plates_empty">Bar only</string>
+    <string name="rd_e1rm_title">Estimated 1RM</string>
+    <string name="rd_summary_title_records">Beast of a workout!</string>
+    <string name="rd_summary_avg_hr">avg heart rate</string>
+    <string name="rd_summary_last_time">Last time</string>
+    <string name="rd_home_streak">Streak</string>
+    <string name="rd_home_vs_last_week">%1$d %% vs last week</string>
+    <string name="rd_home_week_volume">Weekly volume</string>
+    <string name="rd_home_muscles_title">Muscles this week</string>
+    <string name="rd_home_muscles_target">sets · minimum %1$d</string>
+    <string name="rd_home_muscle_open">See exercises for this muscle</string>
+    <string name="rd_home_start_watch">Start on the watch</string>
+    <string name="rd_body_map_desc">Body map with this week\'s sets per muscle. Tap a muscle to see its details.</string>
+    <string name="rd_body_front">FRONT</string>
+    <string name="rd_body_back">BACK</string>
+    <string name="rd_body_high">Above the recommended range: consider dropping a set this week.</string>
+    <string name="rd_body_optimal">Right on target: keep it up.</string>
+    <string name="rd_body_low_with">%1$s sets left to reach your minimum. Try %2$s.</string>
+    <string name="rd_body_low">%1$s sets left to reach your minimum.</string>
+    <plurals name="rd_pr_if_reps">
+        <item quantity="one">PR if you do %1$d rep!</item>
+        <item quantity="other">PR if you do %1$d reps!</item>
+    </plurals>
+    <plurals name="rd_summary_records">
+        <item quantity="one">%1$d new record</item>
+        <item quantity="other">%1$d new records</item>
+    </plurals>
+    <plurals name="rd_home_streak_weeks">
+        <item quantity="one">%1$d week in a row</item>
+        <item quantity="other">%1$d weeks in a row</item>
+    </plurals>
+</resources>

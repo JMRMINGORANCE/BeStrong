@@ -53,7 +53,7 @@ import java.time.format.TextStyle
 private val MAP_MUSCLES = MuscleGroup.entries - MuscleGroup.FULL_BODY - MuscleGroup.CARDIO
 
 @Composable
-private fun VolumeStatus.color(): Color = when (this) {
+internal fun VolumeStatus.color(): Color = when (this) {
     VolumeStatus.NONE -> MaterialTheme.colorScheme.outlineVariant
     VolumeStatus.LOW -> statusColors.warn
     VolumeStatus.OPTIMAL -> statusColors.good
@@ -62,7 +62,7 @@ private fun VolumeStatus.color(): Color = when (this) {
 
 /** Con modo daltónico, cada estado lleva además su símbolo (▲ ● ▼). */
 @Composable
-private fun VolumeStatus.label(): String = when (this) {
+internal fun VolumeStatus.label(): String = when (this) {
     VolumeStatus.NONE -> ""
     VolumeStatus.LOW -> statusColors.warnMark
     VolumeStatus.OPTIMAL -> statusColors.goodMark
@@ -91,6 +91,8 @@ fun WeeklyMuscleMap(weekly: Map<MuscleGroup, Double>, target: Int = MuscleTarget
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            // Silueta coloreada por series (propuesta 3); la lista de abajo da el detalle y es la versión accesible
+            BodyMuscleMap(weekly, target)
             // Tu mínimo semanal (también lo usan Inicio y el widget)
             // FlowRow: con letra grande los chips bajan de línea en vez de salirse
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.Center) {

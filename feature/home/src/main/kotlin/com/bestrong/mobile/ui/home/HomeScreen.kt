@@ -163,9 +163,9 @@ fun HomeScreen(
             active?.let { w -> item(span = full) { ActiveWorkoutHero(w, vm.rest.collectAsStateWithLifecycle().value, onOpenWorkout) } }
             if (active == null) {
                 today?.let { s ->
-                    item(span = full) { TodayCard(s, onStart = { vm.startProgramSession(s, onOpenWorkout) }, onStopProgram = vm::stopProgram) }
+                    item(span = full) { TodayCard(s, onStart = { vm.startProgramSession(s, onOpenWorkout) }, onStopProgram = vm::stopProgram, onStartWatch = { vm.startOnWatch(s.routine) }) }
                 } ?: suggested?.let { r ->
-                    item(span = full) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }) }
+                    item(span = full) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }, onStartWatch = { vm.startOnWatch(r) }) }
                 }
             }
             // Una sesión planificada que se pasó, con «hacerla hoy»: arriba, no debajo de todas las rutinas
@@ -183,6 +183,8 @@ fun HomeScreen(
                 )
             }
             item(span = full) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) }
+            // Racha, volumen y músculos de la semana de un vistazo (propuesta 2)
+            item(span = full) { WeekDashboard(week, history, vm.weeklySetsTarget, onOpenMuscle) }
             item(span = full) {
                 Column {
                     SectionHeader(stringResource(R.string.home_my_routines, routines.count { !it.archived }), large = true) {

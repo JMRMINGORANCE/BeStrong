@@ -34,15 +34,15 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -93,7 +93,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -103,7 +102,6 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import com.bestrong.core.library.ExerciseInfo
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Equipment
-import com.bestrong.core.model.SessionRating
 import com.bestrong.core.model.SetType
 import com.bestrong.core.model.TrackingType
 import com.bestrong.core.model.Workout
@@ -111,7 +109,6 @@ import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.core.stats.formatValue
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.ProgressionSuggestion
 import com.bestrong.core.training.SuggestionKind
@@ -125,7 +122,6 @@ import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.RestTimerBar
 import com.bestrong.mobile.ui.components.StatTile
 import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.components.reasonText
 import com.bestrong.mobile.ui.components.rememberNow
@@ -172,6 +168,9 @@ fun ActiveWorkoutScreen(
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
     var renaming by rememberSaveable { mutableStateOf(false) }
     var editingNotes by rememberSaveable { mutableStateOf(false) }
+    // Modo foco (propuesta 1): una serie a pantalla completa en vez de la tabla
+    var focusMode by rememberSaveable { mutableStateOf(false) }
+    val pinnedNotes by vm.pinnedNotes.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val dumbbellTotal = vm.settings.collectAsStateWithLifecycle().value.dumbbellTotal
@@ -300,6 +299,15 @@ fun ActiveWorkoutScreen(
                 actions = {
                     var menu by remember { mutableStateOf(false) }
                     val openGyms = gymSwitch(vm)
+                    // Modo foco solo en una columna (desplegado ya se ve todo a la vez)
+                    if (!expanded && posture != FoldPosture.TABLETOP) {
+                        IconButton(onClick = { focusMode = !focusMode }) {
+                            Icon(
+                                if (focusMode) Icons.AutoMirrored.Filled.ViewList else Icons.Default.CenterFocusStrong,
+                                stringResource(if (focusMode) R.string.rd_focus_show_list else R.string.rd_focus_mode),
+                            )
+                        }
+                    }
                     IconButton(onClick = vm::togglePause) {
                         if (w.isPaused) {
                             Icon(Icons.Default.PlayArrow, stringResource(R.string.workout_resume))
@@ -359,27 +367,48 @@ fun ActiveWorkoutScreen(
                 HorizontalDivider()
                 listContent(Modifier.weight(1f))
             }
+            // «Centro de mando» (propuesta 5): las series a la izquierda; a la derecha, descanso, pulso del reloj,
+            // discos y 1RM de la serie que toca, todo a la vista sin cambiar de pantalla
             expanded -> Row(content) {
+                listContent(Modifier.weight(0.58f))
+                val bests by vm.bests.collectAsStateWithLifecycle()
                 Column(
-                    Modifier.weight(0.38f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    Modifier.weight(0.42f).fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                        .verticalScroll(rememberScrollState()).padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     if (w.isPaused) PausedBanner(vm::togglePause)
                     rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w, dumbbellTotal).takeIf { _ -> it.workoutId == null || it.workoutId == w.id }) }
                     if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
+                    HeartRateCard(w.id, liveMetrics)
+                    UpcomingLoadCards(w, vm, bests, barKgFor = { settings.exerciseBarKg[it] })
                     if (settings.mediaControls) MediaControls(settings.musicApp)
                     SummaryPanel(w, previous, liveMetrics, eta = eta, dumbbellTotal = dumbbellTotal)
                 }
-                listContent(Modifier.weight(0.62f))
             }
             else -> Column(content) {
                 if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                 if (w.isPaused) PausedBanner(vm::togglePause)
                 RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                 if (settings.mediaControls) MediaControls(settings.musicApp)
-                StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), eta)
-                listContent(Modifier.weight(1f))
+                if (focusMode) {
+                    FocusSetView(
+                        w = w,
+                        previous = previous,
+                        vm = vm,
+                        dumbbellTotal = dumbbellTotal,
+                        barKgFor = { settings.exerciseBarKg[it] },
+                        pinnedNote = { pinnedNotes[it] },
+                        onFinish = { confirmFinish = true },
+                        onShowList = { focusMode = false },
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                    )
+                } else {
+                    StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), eta)
+                    listContent(Modifier.weight(1f))
+                }
             }
         }
     }
@@ -1133,7 +1162,7 @@ private fun gymSwitch(vm: ActiveWorkoutViewModel): () -> Unit {
 
 /** «Press banca: RPE 8.5 de media (objetivo 8)»: más duro en rojo, en el objetivo en verde. */
 @Composable
-private fun RpeVsTargetLines(w: com.bestrong.core.model.Workout) {
+internal fun RpeVsTargetLines(w: com.bestrong.core.model.Workout) {
     val items = remember(w) { com.bestrong.core.stats.RpeTarget.vsTarget(w) }
     if (items.isEmpty()) return
     Text(stringResource(R.string.summary_rpe_title), fontWeight = FontWeight.Bold)
@@ -1157,7 +1186,7 @@ private fun RpeVsTargetLines(w: com.bestrong.core.model.Workout) {
 
 /** «Frente a la última vez»: volumen con peso, reps sin peso y tiempo en los de tiempo (como el historial y el reloj). */
 @Composable
-private fun SummaryComparisons(summary: FinishedSummary) {
+internal fun SummaryComparisons(summary: FinishedSummary) {
     val unit = LocalWeightUnit.current
     val kinds = summary.workout.exercises.associate { it.exercise.id to com.bestrong.core.util.ComparisonKind.of(it.exercise.tracking) }
     val shown = summary.comparisons.filter { kinds[it.exerciseId] != com.bestrong.core.util.ComparisonKind.NONE }
@@ -1177,126 +1206,6 @@ private fun SummaryComparisons(summary: FinishedSummary) {
             color = if (up) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
-}
-
-@Composable
-fun WorkoutSummaryDialog(
-    summary: FinishedSummary,
-    onSaveRoutine: () -> Unit,
-    onDone: () -> Unit,
-    onShare: () -> Unit = {},
-    onRate: (SessionRating) -> Unit = {},
-    onUpdateRoutine: () -> Unit = {},
-    onShareText: () -> Unit = {},
-    dumbbellTotal: Boolean = false,
-) {
-    val w = summary.workout
-    val unit = LocalWeightUnit.current
-    AlertDialog(
-        onDismissRequest = onDone,
-        // Un toque fuera sin querer no se lleva la valoración ni «Guardar como rutina» (Atrás y «Hecho» sí cierran)
-        properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = false),
-        icon = { Icon(Icons.Default.EmojiEvents, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary) },
-        title = { Text(stringResource(R.string.workout_completed), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black) },
-        text = {
-            // Con récords, comparaciones y próxima vez puede no caber: se desplaza
-            Column(Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Los datos con el color normal del texto (el diálogo los atenuaría)
-                androidx.compose.runtime.CompositionLocalProvider(androidx.compose.material3.LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        // Un tono más que el diálogo (si no, las tarjetas se funden con él); sin peso, las series en vez de «0 kg»
-                        val tile = MaterialTheme.colorScheme.surfaceContainerHighest
-                        StatTile(stringResource(R.string.stat_duration), formatDuration(w.durationSeconds()), Modifier.weight(1f), container = tile)
-                        if (w.totalVolume > 0) {
-                            StatTile(stringResource(R.string.stat_volume), unit.formatVolume(w.totalVolume), Modifier.weight(1f), container = tile)
-                        } else {
-                            StatTile(stringResource(R.string.stat_sets), "${w.completedSetCount}", Modifier.weight(1f), container = tile)
-                        }
-                    }
-                }
-                // «1 serie · 1 ejercicio»: con plurales
-                Text(
-                    androidx.compose.ui.res.pluralStringResource(R.plurals.history_sets_done, w.completedSetCount, w.completedSetCount) + " · " +
-                        androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, w.exercises.size, w.exercises.size),
-                )
-                val kcal = w.calories?.let { c -> (if (w.caloriesEstimated) "≈" else "") + stringResource(R.string.kcal_value, c) }
-                listOfNotNull(w.avgHeartRate?.let { stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--") }, kcal)
-                    .takeIf { it.isNotEmpty() }?.let { Text(it.joinToString(" · ")) }
-                if (w.notes.isNotBlank()) Text(w.notes, style = MaterialTheme.typography.bodySmall, fontStyle = FontStyle.Italic)
-                // Cuánto descansaste de verdad frente a lo previsto
-                remember(w) { com.bestrong.core.stats.RestStats.summary(w) }?.let { r ->
-                    Text(
-                        stringResource(R.string.rest_real_avg, formatDuration(r.realSeconds.toLong()), formatDuration(r.plannedSeconds.toLong())),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                summary.weeklyGoalReached?.let { goal ->
-                    Text(pluralStringResource(R.plurals.weekly_goal_reached, goal, goal), fontWeight = FontWeight.Bold, color = statusColors.good)
-                }
-                summary.achievements.forEach { id ->
-                    com.bestrong.mobile.ui.components.achievementLabelRes(id)?.let { res ->
-                        Text("🏅 " + stringResource(R.string.achievement_unlocked, stringResource(res)), fontWeight = FontWeight.Bold, color = statusColors.good)
-                    }
-                }
-                // Los récords arriba, antes de la valoración: es lo primero que se quiere ver
-                if (summary.records.isNotEmpty()) {
-                    Text(stringResource(R.string.new_records), fontWeight = FontWeight.Bold)
-                    summary.records.forEach { pr ->
-                        // Con «suma de las dos mancuernas», el peso y el 1RM del par (como en las series y el historial)
-                        val f = if (pr.type == com.bestrong.core.stats.RecordType.HEAVIEST_WEIGHT || pr.type == com.bestrong.core.stats.RecordType.BEST_ONE_REP_MAX) com.bestrong.mobile.ui.components.pairFactor(pr.exerciseId) else 1
-                        Text(stringResource(R.string.record_line, pr.exerciseLabel(), pr.type.label(), pr.type.formatValue(pr.value * f, unit)), style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-                // Qué ha trabajado hoy cada músculo
-                com.bestrong.mobile.ui.components.WorkoutMuscleChips(w)
-                // Frente a la última vez que hiciste cada ejercicio
-                SummaryComparisons(summary)
-                RpeVsTargetLines(w)
-                summary.imbalances.forEach { (id, ratio) ->
-                    Text(
-                        stringResource(R.string.summary_imbalance, ExerciseLibrary.byId(id)?.displayName() ?: id, (ratio * 100).toInt()),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-                // Doble progresión: qué peso usar la próxima vez
-                if (summary.nextTime.isNotEmpty()) {
-                    Text(stringResource(R.string.summary_next_time), fontWeight = FontWeight.Bold)
-                    summary.nextTime.take(6).forEach { n ->
-                        val arrow = when {
-                            n.direction > 0 -> "↑"
-                            n.direction < 0 -> "↓"
-                            else -> "="
-                        }
-                        Text(
-                            stringResource(R.string.summary_next_line, arrow, ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName, unit.format(n.weightKg * pairFactor(w.exercises.firstOrNull { it.exercise.id == n.exerciseId }?.exercise, dumbbellTotal), withUnit = true), n.reps),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (n.direction > 0) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    // Por qué se mantiene alguno: le falta el RPE de la serie pesada
-                    if (summary.nextTime.take(6).any { it.needsRpe }) {
-                        Text(stringResource(R.string.summary_next_needs_rpe), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-                SessionRatingPicker(onRate)
-                OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Default.Share, null)
-                    Text(stringResource(R.string.share_workout), Modifier.padding(start = 8.dp))
-                }
-                // Series y RPE en texto, para mandárselo al entrenador o al grupo (sin ir al historial)
-                TextButton(onClick = onShareText, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.share_as_text)) }
-            }
-        },
-        confirmButton = { Button(onClick = onDone) { Text(stringResource(R.string.action_done)) } },
-        dismissButton = when {
-            w.routineId == null -> ({ TextButton(onClick = onSaveRoutine) { Text(stringResource(R.string.save_as_routine)) } })
-            // El entreno cambió la rutina (ejercicios, series, descansos): se ofrece guardar esos cambios en ella
-            summary.routineToUpdate != null -> ({ TextButton(onClick = onUpdateRoutine) { Text(stringResource(R.string.update_routine, summary.routineToUpdate.name)) } })
-            else -> null
-        },
-    )
 }
 
 /** «Press banca · 80 kg × 8»: la siguiente serie por hacer, para la barra de descanso. */

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuestas de interfaz 1–5: modo foco, Inicio, mapa corporal, resumen y centro de mando del Fold -->
+<resources>
+    <string name="rd_focus_mode">Mode focus</string>
+    <string name="rd_focus_show_list">Veure la llista</string>
+    <string name="rd_focus_position">Exercici %1$d de %2$d · Sèrie %3$d de %4$d</string>
+    <string name="rd_focus_rest">Descans %1$s</string>
+    <string name="rd_reps">reps</string>
+    <string name="rd_focus_use_list">Aquest tipus de sèrie es registra a la llista.</string>
+    <string name="rd_focus_done">Sèrie feta</string>
+    <string name="rd_focus_undo">Desmarcar la sèrie</string>
+    <string name="rd_focus_plates">Discos per costat: %1$s</string>
+    <string name="rd_focus_swipe">Llisca als costats per canviar de sèrie</string>
+    <string name="rd_focus_less">Menys %1$s</string>
+    <string name="rd_focus_more">Més %1$s</string>
+    <string name="rd_focus_copy_previous">Copiar en aquesta sèrie</string>
+    <string name="rd_focus_previous">Anterior</string>
+    <string name="rd_focus_open_set">Obrir la sèrie %1$d</string>
+    <string name="rd_focus_next">Següent</string>
+    <string name="rd_focus_all_done">Tot fet!</string>
+    <string name="rd_focus_all_done_body">Has completat totes les sèries. Acaba l\'entrenament per veure el resum.</string>
+    <string name="rd_hr_rising">pujant</string>
+    <string name="rd_hr_falling">baixant</string>
+    <string name="rd_hr_steady">estable</string>
+    <string name="rd_hr_chart">Pols durant l\'entrenament, entre %1$d i %2$d ppm</string>
+    <string name="rd_plates_title">Discos per costat</string>
+    <string name="rd_plates_empty">Només la barra</string>
+    <string name="rd_e1rm_title">1RM estimat</string>
+    <string name="rd_summary_title_records">Entrenament brutal!</string>
+    <string name="rd_summary_avg_hr">pols mitjà</string>
+    <string name="rd_summary_last_time">L\'última vegada</string>
+    <string name="rd_home_streak">Ratxa</string>
+    <string name="rd_home_vs_last_week">%1$d %% vs la setmana passada</string>
+    <string name="rd_home_week_volume">Volum setmanal</string>
+    <string name="rd_home_muscles_title">Músculs aquesta setmana</string>
+    <string name="rd_home_muscles_target">sèries · mínim %1$d</string>
+    <string name="rd_home_muscle_open">Veure exercicis d\'aquest múscul</string>
+    <string name="rd_home_start_watch">Començar al rellotge</string>
+    <string name="rd_body_map_desc">Mapa del cos amb les sèries de la setmana per múscul. Toca un múscul per veure\'n el detall.</string>
+    <string name="rd_body_front">DAVANT</string>
+    <string name="rd_body_back">DARRERE</string>
+    <string name="rd_body_high">Per sobre del recomanat: considera treure alguna sèrie aquesta setmana.</string>
+    <string name="rd_body_optimal">Al punt: continua així.</string>
+    <string name="rd_body_low_with">Falten %1$s sèries per al teu mínim. Prova amb %2$s.</string>
+    <string name="rd_body_low">Falten %1$s sèries per al teu mínim.</string>
+    <plurals name="rd_pr_if_reps">
+        <item quantity="one">Rècord si fas %1$d rep!</item>
+        <item quantity="other">Rècord si fas %1$d reps!</item>
+    </plurals>
+    <plurals name="rd_summary_records">
+        <item quantity="one">%1$d rècord nou</item>
+        <item quantity="other">%1$d rècords nous</item>
+    </plurals>
+    <plurals name="rd_home_streak_weeks">
+        <item quantity="one">%1$d setmana seguida</item>
+        <item quantity="other">%1$d setmanes seguides</item>
+    </plurals>
+</resources>
