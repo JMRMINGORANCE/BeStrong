@@ -1,0 +1,87 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="v4a-frame.css"><link rel="stylesheet" href="v4a.css">
+<style>
+html,body{width:1440px}
+.sbar{display:flex;align-items:center;gap:10px;height:48px;border-radius:12px;padding:0 12px;background:#141416;box-shadow:inset 0 0 0 1.5px var(--accent);margin:8px 0 12px}
+.sbar .q{flex:1;font:600 15px 'Titillium Web'}.sbar .q u{text-decoration:none;border-right:2px solid var(--accent);padding-right:1px}
+.sbar kbd{font:600 10px 'Roboto Mono';color:var(--muted);background:#1f1f22;border-radius:5px;padding:4px 6px}
+.chips{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.grp{margin-bottom:12px}.grp .lbl{margin:0 2px 7px;display:flex;justify-content:space-between}
+.it{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:10px}
+.it+.it{border-top:1px solid #1e1e21}
+.it .ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:#1c1c1f;font-size:17px;flex-shrink:0}
+.it .t{flex:1;min-width:0}.it .t b{display:block;font:700 14px/1.2 'Titillium Web';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.it .t span{font:500 10.5px 'Roboto Mono';color:var(--muted)}
+.it mark{background:none;color:var(--accent)}
+.act{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;background:linear-gradient(100deg,#2a0503,#141416 70%);box-shadow:inset 0 0 0 1px #4a0d0a;margin-bottom:8px}
+.act .ico{width:30px;height:30px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:15px}
+.act b{flex:1;font:900 italic 14px 'Titillium Web';text-transform:uppercase;letter-spacing:.2px}
+.act span{font:600 10px 'Roboto Mono';color:#ff8a84}
+.go{font-size:16px;color:var(--muted)}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.sheetup{position:absolute;left:0;right:0;bottom:0;top:74px;border-radius:22px 22px 0 0;background:#0e0e10;box-shadow:0 -1px 0 #2a2a2e;padding:10px 16px}
+.grab{width:40px;height:4px;border-radius:2px;background:#3a3a3e;margin:0 auto 6px}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Propuesta 01 · Móvil</div>
+ <h1>Búsqueda universal</h1>
+ <p class="lead">Una sola barra para todo: rutinas, ejercicios, entrenos pasados (por fecha, nota o récord) y ajustes. Escribe «press» y aparecen la rutina, el ejercicio, el día que batiste el récord y la acción para empezar, sin cambiar de pestaña.</p>
+ <h4>Detalles</h4>
+ <ul>
+  <li><b>Pantalla:</b> nueva, se abre desde el icono de lupa de la barra superior o deslizando hacia abajo en Inicio.</li>
+  <li><b>Reutiliza:</b> búsqueda sin tildes de la biblioteca, nombres en/es de ExerciseLibrary, historial (notas, fechas, récords) y la lista de ajustes.</li>
+  <li><b>Acciones rápidas:</b> «Empezar Torso A», «Ver récords de press banca», «Repetir el entreno del martes», «Activar AMOLED».</li>
+  <li><b>Atajos:</b> búsquedas recientes y comandos por voz; funciona sin conexión.</li>
+ </ul>
+</aside>
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div><div class="sb"><span class="mono">18:42</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="sbar"><i data-i="search" style="font-size:19px;color:var(--accent)"></i><span class="q m">Buscar en BeStrong…</span><kbd>VOZ</kbd></div>
+  <div class="chips"><span class="pill on">Todo</span><span class="pill">Rutinas</span><span class="pill">Ejercicios</span><span class="pill">Entrenos</span><span class="pill">Ajustes</span></div>
+  <div class="grp"><div class="lbl"><span>Acciones sugeridas</span></div>
+   <div class="act"><span class="ico"><i data-i="play"></i></span><b>Empezar Torso A</b><span>HOY TOCA</span></div>
+   <div class="act" style="background:linear-gradient(100deg,#231d00,#141416 70%);box-shadow:inset 0 0 0 1px #4d4400"><span class="ico" style="background:var(--yel);color:#231d00"><i data-i="swap"></i></span><b>Repetir el del martes</b><span style="color:var(--yel)">PIERNA B</span></div>
+  </div>
+  <div class="grp"><div class="lbl"><span>Recientes</span><span style="color:var(--accent)">Borrar</span></div>
+   <div class="panel" style="padding:2px 4px">
+    <div class="it"><span class="ico"><i data-i="hist"></i></span><div class="t"><b>récord peso muerto</b><span>hace 2 días</span></div><i data-i="arrow" class="go"></i></div>
+    <div class="it"><span class="ico"><i data-i="hist"></i></span><div class="t"><b>«rodilla» en notas</b><span>la semana pasada</span></div><i data-i="arrow" class="go"></i></div>
+    <div class="it"><span class="ico"><i data-i="hist"></i></span><div class="t"><b>discos de 1,25</b><span>12 oct</span></div><i data-i="arrow" class="go"></i></div>
+   </div>
+  </div>
+  <div class="grp"><div class="lbl"><span>Prueba a buscar</span></div>
+   <div class="chips"><span class="pill">«octubre»</span><span class="pill">«RPE 9»</span><span class="pill">«gimnasio casa»</span><span class="pill">«superserie»</span></div>
+  </div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="dumb"></i>Entrenar</div><div><i data-i="hist"></i>Historial</div><div><i data-i="list"></i>Ejercicios</div><div><i data-i="user"></i>Perfil</div></div>
+</div></div><div class="cap">Al abrir</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div><div class="sb"><span class="mono">18:42</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="sbar"><i data-i="search" style="font-size:19px;color:var(--accent)"></i><span class="q"><u>press</u></span><i data-i="x" class="m" style="font-size:16px"></i></div>
+  <div class="chips"><span class="pill on">Todo · 14</span><span class="pill">Rutinas 3</span><span class="pill">Ejercicios 5</span><span class="pill">Entrenos 6</span></div>
+  <div class="act"><span class="ico"><i data-i="trophy"></i></span><b>Récords de press banca</b><span>4 PR</span></div>
+  <div class="grp"><div class="lbl"><span>Ejercicios</span><span>5</span></div>
+   <div class="panel" style="padding:2px 4px">
+    <div class="it"><span class="ico" style="color:var(--accent)"><i data-i="dumb"></i></span><div class="t"><b><mark>Press</mark> banca</b><span>1RM 104,5 kg · ayer</span></div><span class="pill" style="height:24px">Ficha</span></div>
+    <div class="it"><span class="ico" style="color:var(--accent)"><i data-i="dumb"></i></span><div class="t"><b><mark>Press</mark> militar</b><span>1RM 62 kg · hace 3 d</span></div><span class="pill" style="height:24px">Ficha</span></div>
+    <div class="it"><span class="ico" style="color:var(--accent)"><i data-i="dumb"></i></span><div class="t"><b><mark>Press</mark> inclinado mancuernas</b><span>2×30 kg × 9 · 28 oct</span></div><span class="pill" style="height:24px">Ficha</span></div>
+   </div>
+  </div>
+  <div class="grp"><div class="lbl"><span>Rutinas</span><span>3</span></div>
+   <div class="panel" style="padding:2px 4px">
+    <div class="it"><span class="ico"><i data-i="list"></i></span><div class="t"><b>Día de <mark>Press</mark> · 5/3/1</b><span>5 ejercicios · ≈ 55 min</span></div><span class="pill on" style="height:24px"><i data-i="play"></i>Empezar</span></div>
+   </div>
+  </div>
+  <div class="grp"><div class="lbl"><span>Entrenos</span><span>6</span></div>
+   <div class="panel" style="padding:2px 4px">
+    <div class="it"><span class="ico p"><i data-i="star"></i></span><div class="t"><b>Torso A · 31 oct</b><span class="p">PR <mark style="color:var(--pur)">press</mark> banca 85 kg × 6</span></div><i data-i="arrow" class="go"></i></div>
+    <div class="it"><span class="ico"><i data-i="note"></i></span><div class="t"><b>Torso B · 24 oct</b><span>nota: «<mark>press</mark> con pausa, hombro ok»</span></div><i data-i="arrow" class="go"></i></div>
+   </div>
+  </div>
+ </div>
+</div></div><div class="cap">Escribiendo «press»</div></div>
+</div>
+<script src="v4a-icons.js"></script><script>icons(1.8)</script></body></html>

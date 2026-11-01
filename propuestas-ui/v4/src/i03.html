@@ -1,0 +1,93 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="v4a-frame.css"><link rel="stylesheet" href="v4a.css">
+<style>
+html,body{width:1440px}
+.top{display:flex;align-items:center;gap:10px;margin:6px 0 10px}
+.top .t{flex:1}
+.chart{padding:12px 12px 8px}
+.chart .v{display:flex;align-items:baseline;gap:8px;margin:6px 0 4px}.chart .v b{font:700 26px 'Roboto Mono'}.chart .v small{font:600 11px 'Roboto Mono'}
+.filt{display:flex;gap:6px;margin:10px 0;flex-wrap:nowrap;overflow:hidden}
+.tl{position:relative;padding-left:30px}
+.tl:before{content:"";position:absolute;left:11px;top:6px;bottom:0;width:2px;background:linear-gradient(#3a3a3f,#1e1e21)}
+.ev{position:relative;padding:0 0 12px}
+.ev .dot{position:absolute;left:-30px;top:2px;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:13px;background:#1a1a1d;box-shadow:inset 0 0 0 1px #2c2c30}
+.ev .when{font:600 9.5px 'Roboto Mono';letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.ev .card{margin-top:5px;padding:9px 11px;border-radius:10px;background:#141416;box-shadow:inset 0 0 0 1px #26262a}
+.ev .card b{font:700 13.5px/1.25 'Titillium Web';display:block}
+.ev .card span{font:500 10.5px/1.4 'Roboto Mono';color:var(--muted)}
+.ev.pr .dot{background:var(--pur);color:#fff;box-shadow:none}
+.ev.pr .card{background:linear-gradient(100deg,#1c0b2a,#141416 70%);box-shadow:inset 0 0 0 1px #3a1a55}
+.ev.mile .dot{background:var(--yel);color:#231d00;box-shadow:none}
+.ev.warn .dot{background:#3a0c0a;color:#ff6b62;box-shadow:inset 0 0 0 1px #6a1612}
+.ev.del .dot{background:#0a2d1a;color:var(--grn)}
+.det h3{font:900 italic 26px/1.05 'Titillium Web';text-transform:uppercase;margin:6px 0 4px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.kv .panel{padding:10px 12px}.kv b{display:block;font:700 19px 'Roboto Mono';margin-top:6px}
+.setl{padding:4px 12px}
+.setl div{display:grid;grid-template-columns:22px 1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid #1f1f22;font:600 12.5px 'Roboto Mono'}
+.setl div:first-child{border-top:none}
+.quote{margin-top:10px;padding:11px 12px;border-left:3px solid var(--yel);background:#141416;border-radius:0 10px 10px 0;font:500 13px/1.45 'Titillium Web';color:#d8d9dc}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Propuesta 03 · Móvil</div>
+ <h1>Línea de tiempo del ejercicio</h1>
+ <p class="lead">La historia completa de un ejercicio contada por hitos, no solo con gráficas: récords, la primera vez que levantaste 100 kg, cambios de gimnasio, descargas, avisos de dolor y tus notas de técnica, en orden y con la curva de 1RM arriba.</p>
+ <h4>Detalles</h4>
+ <ul>
+  <li><b>Pantalla:</b> nueva pestaña «Historia» en la ficha del ejercicio, junto a Progreso y Técnica.</li>
+  <li><b>Reutiliza:</b> récords personales, 1RM estimado (Epley), gimnasios del entreno, mesociclos y descargas, avisos de lesión y notas de técnica con foto/vídeo.</li>
+  <li><b>Hitos automáticos:</b> primeros 60/80/100 kg, mejor serie del año, racha sin fallar, vuelta tras un parón.</li>
+  <li><b>Interacción:</b> filtros por tipo; tocar un hito abre la sesión con sus series y notas.</li>
+ </ul>
+</aside>
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div><div class="sb"><span class="mono">18:42</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="top"><div class="ib"><i data-i="back"></i></div><div class="t"><div class="lbl">Ficha · Barra · Pecho</div><div class="ttl">Press banca</div></div><div class="ib"><i data-i="more"></i></div></div>
+  <div class="filt"><span class="pill">Progreso</span><span class="pill on">Historia</span><span class="pill">Técnica</span><span class="pill">Récords</span></div>
+  <div class="panel cf chart">
+   <div class="row sp"><span class="lbl">1RM estimado · 2 años</span><span class="lbl p">◆ 6 PR</span></div>
+   <div class="v"><b>104,5</b><small class="m">kg</small><small class="g">▲ +31,5 desde nov 2024</small></div>
+   <svg id="ch" viewBox="0 0 300 70" style="width:100%;height:70px"></svg>
+  </div>
+  <div class="filt"><span class="pill on">Todo</span><span class="pill">Récords</span><span class="pill">Hitos</span><span class="pill">Notas</span><span class="pill">Avisos</span></div>
+  <div class="tl">
+   <div class="ev pr"><div class="dot"><i data-i="star"></i></div><div class="when">31 oct 2026 · Torso A</div><div class="card"><b>Récord: 85 kg × 6</b><span>1RM est. 104,5 kg · +2,5 kg</span></div></div>
+   <div class="ev mile"><div class="dot"><i data-i="flag"></i></div><div class="when">12 sep 2026</div><div class="card"><b>Primera vez con 100 kg</b><span>100 × 1 · RPE 9,5 · Gym Centro</span></div></div>
+   <div class="ev del"><div class="dot"><i data-i="down"></i></div><div class="when">18 ago 2026</div><div class="card"><b>Semana de descarga al 90 %</b><span>3 sesiones sin mejorar el 1RM</span></div></div>
+   <div class="ev warn"><div class="dot"><i data-i="alert"></i></div><div class="when">02 jul 2026</div><div class="card"><b>Aviso: molestia en hombro</b><span>Pausa de 12 días · vuelta con 70 kg</span></div></div>
+  </div>
+ </div>
+</div></div><div class="cap">Historia del ejercicio</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div><div class="sb"><span class="mono">18:42</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="top"><div class="ib"><i data-i="back"></i></div><div class="t"><div class="lbl">Hito · 12 sep 2026</div></div><div class="ib"><i data-i="swap"></i></div></div>
+  <div class="det"><span class="pill" style="background:var(--yel);color:#231d00;box-shadow:none"><i data-i="flag"></i>HITO</span><h3>Primera vez con 100 kg</h3><div class="sub">Pecho y tríceps · Gym Centro · 1 h 02 min</div></div>
+  <div class="kv">
+   <div class="panel"><div class="lbl">Mejor serie</div><b>100 × 1</b><span class="sub">RPE 9,5</span></div>
+   <div class="panel"><div class="lbl">Días desde 90 kg</div><b>147</b><span class="sub">21 sesiones</span></div>
+  </div>
+  <div class="lbl" style="margin:4px 2px 7px">Series del día</div>
+  <div class="panel setl">
+   <div><span class="m">C</span><span class="m">60 × 5</span><span class="m">calent.</span><span></span></div>
+   <div><span class="m">1</span><span>90 × 3</span><span class="m">@8</span><span></span></div>
+   <div><span class="m">2</span><span>95 × 2</span><span class="m">@9</span><span></span></div>
+   <div><span class="m">3</span><span class="y" style="font-weight:700">100 × 1</span><span class="m">@9,5</span><i data-i="flag" class="y"></i></div>
+   <div><span class="m">4</span><span>80 × 8</span><span class="m">@8</span><span></span></div>
+  </div>
+  <div class="quote">«Pies más atrás y pausa de 1 s en el pecho. El 100 salió limpio.»<div class="sub" style="margin-top:6px">Nota de técnica · con vídeo</div></div>
+  <div style="display:flex;gap:8px;margin-top:12px"><div class="btn-g" style="flex:1"><i data-i="cam"></i>Ver vídeo</div><div class="btn-r" style="flex:1"><i data-i="arrow"></i>Abrir sesión</div></div>
+ </div>
+</div></div><div class="cap">Al tocar un hito</div></div>
+</div>
+<script src="v4a-icons.js"></script><script>icons(1.8);
+(function(){const s=document.getElementById('ch');const v=[73,76,78,80,83,82,86,88,85,90,93,95,92,97,99,102,104.5];const mn=70,mx=108;
+const pts=v.map((y,i)=>[i*300/(v.length-1),66-(y-mn)/(mx-mn)*60]);let h='';
+[0,1,2].forEach(k=>h+='<line x1="0" x2="300" y1="'+(8+k*28)+'" y2="'+(8+k*28)+'" stroke="#1f1f23"/>');
+h+='<polygon points="0,70 '+pts.map(p=>p.join(',')).join(' ')+' 300,70" fill="rgba(225,6,0,.12)"/>';
+h+='<polyline points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="#E10600" stroke-width="2.4" stroke-linejoin="round"/>';
+[[3,'#FFD400'],[7,'#B14CFF'],[12,'#00D26A'],[16,'#B14CFF']].forEach(([i,c])=>h+='<circle cx="'+pts[i][0]+'" cy="'+pts[i][1]+'" r="3.6" fill="'+c+'" stroke="#0b0b0c" stroke-width="1.5"/>');
+s.innerHTML=h})();</script></body></html>

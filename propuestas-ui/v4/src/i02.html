@@ -1,0 +1,106 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="v4a-frame.css"><link rel="stylesheet" href="v4a.css">
+<style>
+html,body{width:1720px}
+.fold{width:1180px;height:720px;border-radius:38px;padding:10px;background:#0b0b0c;box-shadow:0 0 0 1.5px #3a3a3e,0 40px 80px -20px rgba(0,0,0,.55)}
+.fscr{width:100%;height:100%;border-radius:30px;overflow:hidden;background:#0b0b0c;position:relative;display:flex}
+.hinge{position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.05)}
+.rail{width:68px;border-right:1px solid #1d1d20;display:flex;flex-direction:column;align-items:center;gap:22px;padding-top:56px;color:#66676b;font-size:22px}
+.rail .on{color:var(--accent)}
+.main{flex:1;padding:18px 24px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.top{display:flex;align-items:center;gap:12px}
+.sel{flex:1;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;background:#141416;box-shadow:inset 0 0 0 1px #2a2a2e}
+.sel .dot{width:10px;height:10px;border-radius:2px}
+.sel b{font:900 italic 17px 'Titillium Web';text-transform:uppercase}.sel span{font:500 10.5px 'Roboto Mono';color:var(--muted);margin-left:auto}
+.vs{font:900 italic 16px 'Titillium Web';color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.kpi{padding:10px 12px}
+.kpi .v{display:flex;align-items:baseline;gap:8px;margin-top:8px}
+.kpi .v b{font:700 20px 'Roboto Mono'}.kpi .v s{font:500 12px 'Roboto Mono';color:#5f6064;text-decoration:none}
+.kpi .d{font:700 11px 'Roboto Mono';margin-top:4px;display:block}
+.tbl{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start}
+.ex{padding:12px 14px}
+.ex h5{font:900 italic 15px 'Titillium Web';text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ex h5 .sect{width:16px;height:4px;border-radius:2px}
+.ex h5 small{margin-left:auto;font:600 10px 'Roboto Mono';color:var(--muted);text-transform:none;font-style:normal}
+.srow{display:grid;grid-template-columns:22px 1fr 1fr 64px;align-items:center;gap:6px;padding:5px 0;border-top:1px solid #1f1f22;font:600 12px 'Roboto Mono'}
+.srow.h{border-top:none;font:600 9px 'Roboto Mono';letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.srow .n{color:var(--muted)}.srow .old{color:#7a7b80}
+.srow .dl{text-align:right;font-weight:700}
+.bar{height:4px;border-radius:2px;background:#222226;margin-top:8px;position:relative}
+.ins{display:flex;gap:10px;align-items:center;padding:10px 14px;background:linear-gradient(100deg,#1c0b2a,#141416 60%);box-shadow:inset 0 0 0 1px #3a1a55}
+.ins b{font:900 italic 13px 'Titillium Web';text-transform:uppercase;color:var(--pur)}
+.ins span{font:500 12.5px 'Titillium Web';color:#cfd0d3}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Propuesta 02 · Fold desplegado</div>
+ <h1>Comparador de sesiones</h1>
+ <p class="lead">Dos entrenos frente a frente, como dos vueltas en la telemetría: Torso A de hoy contra el de hace 4 semanas. Diferencias por ejercicio y por serie, volumen, 1RM, duración y descansos reales, con el veredicto arriba.</p>
+ <h4>Detalles</h4>
+ <ul>
+  <li><b>Pantalla:</b> Historial › entreno › «Comparar con…». En el Fold desplegado, cada sesión ocupa media pantalla; plegado, se alternan con pestañas.</li>
+  <li><b>Reutiliza:</b> WorkoutStats.ExerciseComparison (volumen, 1RM, reps), RestStats (descanso real) y el emparejamiento de series de «Anterior».</li>
+  <li><b>Interacción:</b> elige cualquier par (misma rutina sugerida primero); toca una serie para ver ambas con RPE y notas.</li>
+  <li><b>Colores:</b> verde mejora, morado récord, gris igual, rojo peor.</li>
+ </ul>
+</aside>
+<div class="dev"><div class="fold"><div class="fscr"><div class="hinge"></div>
+ <div class="rail"><i data-i="dumb"></i><i data-i="hist" class="on"></i><i data-i="list"></i><i data-i="user"></i></div>
+ <div class="main">
+  <div class="top">
+   <div class="sel"><span class="dot" style="background:var(--accent)"></span><b>Torso A · Hoy</b><span>01 nov · 58 min</span></div>
+   <span class="vs">VS</span>
+   <div class="sel"><span class="dot" style="background:#7a7b80"></span><b>Torso A · 04 oct</b><span>hace 4 sem · 1 h 06</span></div>
+   <div class="ib"><i data-i="swap"></i></div>
+  </div>
+  <div class="kpis">
+   <div class="panel kpi"><div class="lbl">Volumen</div><div class="v"><b>12,8 t</b><s>11,6</s></div><span class="d g">▲ +10,3 %</span></div>
+   <div class="panel kpi"><div class="lbl">1RM press banca</div><div class="v"><b>104,5</b><s>99,0</s></div><span class="d p">◆ +5,5 kg · PR</span></div>
+   <div class="panel kpi"><div class="lbl">Series</div><div class="v"><b>22</b><s>22</s></div><span class="d m">= igual</span></div>
+   <div class="panel kpi"><div class="lbl">Duración</div><div class="v"><b>58:12</b><s>1:06:40</s></div><span class="d g">▼ −8:28</span></div>
+   <div class="panel kpi"><div class="lbl">Descanso medio</div><div class="v"><b>2:04</b><s>2:31</s></div><span class="d g">▼ −27 s</span></div>
+  </div>
+  <div class="panel ins"><i data-i="trophy" style="color:var(--pur);font-size:18px"></i><b>Veredicto</b><span>Más carga en 4 de 5 ejercicios en menos tiempo. El remo se quedó igual: prueba +2,5 kg el jueves.</span></div>
+  <div class="tbl">
+   <div class="panel ex"><h5><span class="sect" style="background:var(--pur)"></span>Press banca<small>barra · 4 series</small></h5>
+    <div class="srow h"><span>#</span><span>Hoy</span><span>04 oct</span><span style="text-align:right">Δ</span></div>
+    <div class="srow"><span class="n">1</span><span>85 × 6</span><span class="old">80 × 6</span><span class="dl g">+5 kg</span></div>
+    <div class="srow"><span class="n">2</span><span>85 × 6</span><span class="old">80 × 6</span><span class="dl g">+5 kg</span></div>
+    <div class="srow"><span class="n">3</span><span>85 × 6</span><span class="old">80 × 5</span><span class="dl p">PR</span></div>
+    <div class="srow"><span class="n">4</span><span>85 × 5</span><span class="old">80 × 5</span><span class="dl g">+5 kg</span></div>
+    <div class="bar"><div style="position:absolute;left:0;top:0;bottom:0;width:86%;background:var(--accent);border-radius:2px"></div><div style="position:absolute;left:0;top:0;bottom:0;width:78%;border-right:2px solid #fff"></div></div>
+   </div>
+   <div class="panel ex"><h5><span class="sect" style="background:var(--grn)"></span>Press inclinado mancuernas<small>2×</small></h5>
+    <div class="srow h"><span>#</span><span>Hoy</span><span>04 oct</span><span style="text-align:right">Δ</span></div>
+    <div class="srow"><span class="n">1</span><span>30 × 10</span><span class="old">28 × 10</span><span class="dl g">+2 kg</span></div>
+    <div class="srow"><span class="n">2</span><span>30 × 9</span><span class="old">28 × 10</span><span class="dl g">+2 kg</span></div>
+    <div class="srow"><span class="n">3</span><span>30 × 8</span><span class="old">28 × 9</span><span class="dl g">+2 kg</span></div>
+    <div class="bar"><div style="position:absolute;left:0;top:0;bottom:0;width:72%;background:var(--accent);border-radius:2px"></div><div style="position:absolute;left:0;top:0;bottom:0;width:68%;border-right:2px solid #fff"></div></div>
+   </div>
+   <div class="panel ex"><h5><span class="sect" style="background:#7a7b80"></span>Remo con barra<small>4 series</small></h5>
+    <div class="srow h"><span>#</span><span>Hoy</span><span>04 oct</span><span style="text-align:right">Δ</span></div>
+    <div class="srow"><span class="n">1</span><span>80 × 8</span><span class="old">80 × 8</span><span class="dl m">=</span></div>
+    <div class="srow"><span class="n">2</span><span>80 × 8</span><span class="old">80 × 8</span><span class="dl m">=</span></div>
+    <div class="srow"><span class="n">3</span><span>80 × 7</span><span class="old">80 × 8</span><span class="dl r">−1 rep</span></div>
+   </div>
+   <div class="panel ex"><h5><span class="sect" style="background:var(--grn)"></span>Dominadas<small>lastre</small></h5>
+    <div class="srow h"><span>#</span><span>Hoy</span><span>04 oct</span><span style="text-align:right">Δ</span></div>
+    <div class="srow"><span class="n">1</span><span>+10 × 8</span><span class="old">+5 × 8</span><span class="dl g">+5 kg</span></div>
+    <div class="srow"><span class="n">2</span><span>+10 × 7</span><span class="old">+5 × 8</span><span class="dl g">+5 kg</span></div>
+    <div class="srow"><span class="n">3</span><span>+10 × 6</span><span class="old">+5 × 7</span><span class="dl g">+5 kg</span></div>
+   </div>
+  </div>
+  <div class="panel" style="padding:12px 14px">
+   <div class="row sp"><span class="lbl">Ritmo de la sesión · ejercicio y descanso</span><span class="lbl">0 · 15 · 30 · 45 · 60 min</span></div>
+   <div style="display:grid;grid-template-columns:60px 1fr;gap:8px 10px;align-items:center;margin-top:10px;font:600 10.5px 'Roboto Mono'">
+    <span>Hoy</span><div style="display:flex;gap:2px;height:14px;width:87%"><i style="flex:16;background:var(--pur);border-radius:2px"></i><i style="flex:12;background:var(--grn);border-radius:2px"></i><i style="flex:15;background:#55565b;border-radius:2px"></i><i style="flex:11;background:var(--grn);border-radius:2px"></i><i style="flex:4;background:#2c2c30;border-radius:2px"></i></div>
+    <span class="m">04 oct</span><div style="display:flex;gap:2px;height:14px;width:100%"><i style="flex:19;background:#3a3a3f;border-radius:2px"></i><i style="flex:14;background:#3a3a3f;border-radius:2px"></i><i style="flex:16;background:#3a3a3f;border-radius:2px"></i><i style="flex:13;background:#3a3a3f;border-radius:2px"></i><i style="flex:5;background:#2c2c30;border-radius:2px"></i></div>
+   </div>
+  </div>
+ </div>
+</div></div><div class="cap">Galaxy Z Fold · desplegado</div></div>
+</div>
+<script src="v4a-icons.js"></script><script>icons(1.8)</script></body></html>

@@ -1,0 +1,65 @@
+%%HEAD%%
+<style>
+html{background:#09090a}
+.img{height:250px;border-radius:14px;position:relative;overflow:hidden;background:radial-gradient(circle at 70% 30%,#3a0a08,#141416 70%);box-shadow:inset 0 0 0 1px #2a2a2e}
+.img svg{position:absolute;inset:0;width:100%;height:100%}
+.img .tag{position:absolute;left:12px;top:12px}
+.img .src{position:absolute;right:10px;bottom:8px;font:500 8.5px 'Roboto Mono';color:#77787c}
+.big{font:900 italic 30px/1.02 'Titillium Web';text-transform:uppercase;letter-spacing:-.3px;margin:14px 0 6px}
+.load{display:flex;align-items:baseline;gap:10px}
+.load b{font:700 34px/1 'Roboto Mono'}
+.load span{font:600 13px 'Roboto Mono';color:var(--muted)}
+.bar{display:flex;align-items:center;justify-content:center;height:70px;margin-top:4px}
+.pin{display:flex;gap:10px;align-items:center;padding:11px 13px;margin-top:10px;background:linear-gradient(100deg,#2a2500,#141416 65%);box-shadow:inset 0 0 0 1px #4d4400}
+.cnt{display:flex;align-items:center;gap:14px;margin-top:12px}
+.ring{position:relative;width:74px;height:74px;flex-shrink:0}
+.ring svg{width:100%;height:100%}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:700 17px 'Roboto Mono'}
+</style></head><body><div class="sheet">
+<aside class="meta"><div class="num">Propuesta 09</div><h1>Siguiente ejercicio</h1>
+<p class="lead">Una pantalla de transición entre ejercicios para preparar la estación sin buscar nada: la imagen del ejercicio, el peso con los discos por lado, la nota fija (altura del asiento, topes del rack) y una cuenta atrás de preparación. Igual en el reloj y en el móvil.</p>
+<h4>Pantalla</h4><ul><li><b>Entreno en curso</b> › al terminar la última serie de un ejercicio (móvil y reloj)</li></ul>
+<h4>Reutiliza</h4><ul><li>Imágenes de ExerciseDB / wger con atribución</li><li>Calculadora de discos con la barra del gimnasio activo</li><li>Nota fija por ejercicio y descanso entre ejercicios</li></ul>
+<h4>Interacción</h4><ul><li>«Empezar ya» corta la preparación</li><li>«Cambiar» propone alternativas si la máquina está ocupada</li><li>En el reloj, el bisel ajusta el peso antes de empezar</li></ul></aside>
+<div class="dev"><div class="phone"><div class="scr">%%SB%%
+<div class="pad">
+ <div style="display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px"><div><div class="lbl">Siguiente · ejercicio 3 de 6</div><div style="font:600 11px 'Roboto Mono';color:#cfcfd2;margin-top:5px">Torso A · 32:14</div></div><div class="ib"><i data-i="x"></i></div></div>
+ <div class="img"><span class="chip on tag">PREPARACIÓN</span><svg viewBox="0 0 330 250" id="sil"></svg><span class="src">imagen: wger.de · CC BY-SA</span></div>
+ <div class="big">Sentadilla con barra</div>
+ <div class="load"><b>100</b><span>kg</span><span style="color:#cfcfd2">· 3 × 5</span><span style="color:var(--grn);margin-left:auto">▲ +2,5</span></div>
+ <div class="bar"><svg viewBox="0 0 330 70" width="330" height="70" id="pl"></svg></div>
+ <div style="text-align:center;font:600 10.5px 'Roboto Mono';color:var(--muted)">POR LADO · 25 + 10 + 5 · barra 20 kg</div>
+ <div class="panel pin"><i data-i="pin" style="color:#FFD400;font-size:18px"></i><div style="flex:1;font:600 13px/1.35 'Titillium Web'">Rack en altura 7 · topes de seguridad en 4</div></div>
+ <div class="cnt"><div class="ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="32" fill="none" stroke="#26262a" stroke-width="5"/><path id="rg" fill="none" stroke="#FFD400" stroke-width="5" stroke-linecap="round"/></svg><b>0:42</b></div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px"><div class="btng">Cambiar</div><div class="btnr" style="font-size:14px">Empezar ya</div></div></div>
+</div>
+</div></div><div class="cap">Móvil · pantalla completa</div></div>
+<div class="watches" style="padding-top:20px">
+ <div class="dev"><div class="watch" style="zoom:1.3"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1"></svg>
+   <div class="wc"><div class="wl" style="color:#FFD400">Siguiente</div><div style="font:900 italic 14px/1.05 'Titillium Web';text-transform:uppercase;margin:5px 0 4px;max-width:130px">Sentadilla con barra</div>
+   <div style="font:700 24px/1 'Roboto Mono'">100<small style="font-size:10px;color:#8a8b8f"> kg ×5</small></div>
+   <div style="font:600 8.5px 'Roboto Mono';color:#cfcfd2;margin-top:6px;display:flex;gap:4px;align-items:center"><i data-i="pin" style="color:#FFD400"></i>Rack 7 · topes 4</div>
+   <div style="font:700 15px 'Roboto Mono';color:#FFD400;margin-top:6px">0:42</div></div>
+  </div></div><div class="cap" style="margin-top:22px">Reloj · preparación</div></div>
+ <div class="dev"><div class="watch" style="zoom:1.3"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w2"></svg>
+   <div class="wc" style="justify-content:flex-start;padding-top:34px"><div class="wl">Discos por lado</div>
+   <svg viewBox="0 0 150 60" width="150" height="60" id="pl2" style="margin-top:8px"></svg>
+   <div style="font:700 12px 'Roboto Mono';margin-top:4px">25 · 10 · 5</div>
+   <div style="font:500 8.5px 'Roboto Mono';color:#8a8b8f;margin-top:3px">BISEL ±2,5 kg</div></div>
+   <div class="edge" style="background:#FFD400;color:#141100">Empezar</div>
+  </div></div><div class="cap" style="margin-top:22px">Reloj · discos</div></div>
+</div>
+</div>
+<script>
+icons();
+document.getElementById('rg').setAttribute('d',arc(37,37,32,0,360*0.7));
+/* silueta de sentadilla (trazos redondeados) */
+document.getElementById('sil').innerHTML='<path d="M60 222 H290" stroke="#2a2a2e" stroke-width="2"/><circle cx="152" cy="82" r="30" fill="#E10600"/><circle cx="152" cy="82" r="19" fill="#3B82F6"/><circle cx="152" cy="82" r="5" fill="#141416"/><g stroke="#f4f4f2" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M164 86 L128 142"/><path d="M128 142 L192 150 L178 212 L202 214"/><path d="M166 88 L192 104 L176 86"/></g><circle cx="182" cy="62" r="15" fill="#f4f4f2"/>';
+function plates(id,w,h,list){const cols={25:'#E10600',20:'#3B82F6',15:'#FFD400',10:'#00D26A',5:'#E6E8EB',2.5:'#6B7280'};const cy=h/2;let s='<rect x="0" y="'+(cy-3)+'" width="'+w+'" height="6" rx="2" fill="#55565b"/><rect x="'+(w*0.18)+'" y="'+(cy-11)+'" width="7" height="22" rx="2" fill="#77787c"/>';let x=w*0.18+11;list.forEach(p=>{const ph=h*(0.35+0.65*p/25);const pw=p>=10?12:8;s+='<rect x="'+x+'" y="'+(cy-ph/2)+'" width="'+pw+'" height="'+ph+'" rx="2.5" fill="'+cols[p]+'"/>';x+=pw+3});document.getElementById(id).innerHTML=s}
+plates('pl',330,70,[25,10,5]);plates('pl2',150,60,[25,10,5]);
+ticks(document.getElementById('w1'),{n:60,r:93,len:3,major:5,mlen:7,color:'#2a2a2e',mcolor:'#55565b',w:1,mw:1.6});
+document.getElementById('w1').insertAdjacentHTML('beforeend','<path d="'+arc(96,96,88,0,252)+'" fill="none" stroke="#FFD400" stroke-width="4" stroke-linecap="round"/>');
+ticks(document.getElementById('w2'),{n:60,r:93,len:3,major:15,mlen:8,color:'#2a2a2e',mcolor:'#FFD400',w:1,mw:2});
+</script></body></html>

@@ -1,0 +1,93 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="v4a-frame.css"><link rel="stylesheet" href="v4a.css">
+<style>
+html,body{width:1440px}
+.vf{position:absolute;inset:0;background:radial-gradient(420px 360px at 50% 42%,#2a2a2e,#0d0d0f 75%)}
+.vf svg{position:absolute;left:0;top:0;width:100%;height:100%}
+.grid3{position:absolute;inset:0;background:linear-gradient(90deg,transparent 33.2%,rgba(255,255,255,.07) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.07) 66.6%,transparent 66.8%),linear-gradient(transparent 33.2%,rgba(255,255,255,.07) 33.3%,transparent 33.5%,transparent 66.5%,rgba(255,255,255,.07) 66.6%,transparent 66.8%)}
+.ov{position:absolute;left:16px;right:16px}
+.recp{display:inline-flex;gap:7px;align-items:center;height:28px;padding:0 11px;border-radius:7px;background:rgba(225,6,0,.9);color:#fff;font:700 12px 'Roboto Mono'}
+.glass{background:rgba(12,12,14,.78);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);border-radius:12px}
+.reps{display:flex;gap:5px}
+.reps i{flex:1;height:30px;border-radius:5px;background:rgba(255,255,255,.08);display:grid;place-items:center;font:700 11px 'Roboto Mono';font-style:normal;color:#77787d}
+.reps i.d{background:var(--grn);color:#00210f}.reps i.c{background:var(--accent);color:#fff}
+.shut{width:74px;height:74px;border-radius:50%;box-shadow:0 0 0 4px #fff;display:grid;place-items:center}
+.shut b{width:30px;height:30px;border-radius:7px;background:var(--accent)}
+.vid{position:relative;height:250px;border-radius:12px;overflow:hidden;background:radial-gradient(300px 220px at 50% 45%,#2a2a2e,#0d0d0f 75%);box-shadow:inset 0 0 0 1px #2a2a2e}
+.vid .half{position:absolute;top:0;bottom:0;width:50%;overflow:hidden}
+.vid .half svg{position:absolute;top:0;left:0;height:100%;width:100%}
+.vid .tag{position:absolute;top:8px;font:700 9.5px 'Roboto Mono';letter-spacing:1px;padding:4px 6px;border-radius:5px}
+.scrub{margin-top:10px;position:relative;height:42px}
+.scrub .track{position:absolute;left:0;right:0;top:18px;height:6px;border-radius:3px;background:#222226}
+.scrub .fill{position:absolute;left:0;top:18px;height:6px;width:46%;border-radius:3px;background:var(--accent)}
+.scrub .head{position:absolute;left:46%;top:10px;width:4px;height:22px;margin-left:-2px;border-radius:2px;background:#fff}
+.scrub .mk{position:absolute;top:0;font:700 9px 'Roboto Mono';color:var(--muted);transform:translateX(-50%)}
+.scrub .mk:after{content:"";display:block;width:2px;height:8px;margin:3px auto 0;background:#55565b}
+.spd{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-top:4px}
+.spd div{text-align:center;padding:7px 0;border-radius:8px;background:#141416;box-shadow:inset 0 0 0 1px #26262a}
+.spd b{display:block;font:700 12px 'Roboto Mono'}.spd span{font:600 8.5px 'Roboto Mono';color:var(--muted)}
+.ctl{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:10px}
+.ctl .pill{height:30px}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Propuesta 04 · Móvil</div>
+ <h1>Técnica en vídeo</h1>
+ <p class="lead">Graba la serie con la cámara apoyada en el banco y revísala a cámara lenta junto a sus datos. Cada repetición queda marcada con su velocidad de barra, y puedes ponerla al lado del vídeo de hace un mes para ver si bajas igual.</p>
+ <h4>Detalles</h4>
+ <ul>
+  <li><b>Pantalla:</b> botón de cámara en la fila de la serie (y en el modo foco); el vídeo se guarda unido a esa serie.</li>
+  <li><b>Reutiliza:</b> series (kg × reps, RPE), velocidad de la barra y reps del acelerómetro del reloj, y las notas de técnica con vídeo que ya existen.</li>
+  <li><b>Privacidad:</b> los vídeos solo en el móvil, con bloqueo por huella como las fotos de progreso; nunca se suben.</li>
+  <li><b>Interacción:</b> 1×, 0,5× y 0,25×; saltar de repetición en repetición; comparar lado a lado.</li>
+ </ul>
+</aside>
+<div class="dev"><div class="phone"><div class="scr">
+ <div class="vf"><svg viewBox="0 0 342 752" id="fig1"></svg><div class="grid3"></div></div>
+ <div class="cam"></div><div class="sb" style="color:#fff"><span class="mono">18:42</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="ov" style="top:52px;display:flex;justify-content:space-between;align-items:center"><span class="recp"><i data-i="rec" style="font-size:10px"></i>REC 00:21</span><span class="pill" style="background:rgba(12,12,14,.78)">1080p · 60 fps</span></div>
+ <div class="ov glass" style="top:96px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center"><div><div class="lbl">Serie 3 de 4 · Press banca</div><div style="font:700 22px 'Roboto Mono';margin-top:4px">85 kg × 6</div></div><div style="text-align:right"><div class="lbl">Rep actual</div><div style="font:900 italic 34px/1 'Titillium Web';color:var(--accent)">4</div></div></div>
+ <div class="ov" style="bottom:150px"><div class="lbl" style="color:#cfd0d3;margin-bottom:6px">Repeticiones · velocidad del reloj</div><div class="reps"><i class="d">1</i><i class="d">2</i><i class="d">3</i><i class="c">4</i><i>5</i><i>6</i></div></div>
+ <div class="ov" style="bottom:40px;display:flex;justify-content:space-between;align-items:center">
+  <div class="ib" style="background:rgba(12,12,14,.78)"><i data-i="swap"></i></div>
+  <div class="shut"><b></b></div>
+  <div class="ib" style="background:rgba(12,12,14,.78)"><i data-i="lock"></i></div>
+ </div>
+</div></div><div class="cap">Grabando la serie</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div><div class="sb"><span class="mono">18:44</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="row sp" style="margin:6px 0 10px"><div class="ib"><i data-i="back"></i></div><div style="text-align:center"><div class="lbl">Serie 3 · 85 kg × 6 · RPE 8,5</div><div class="ttl" style="font-size:19px">Press banca</div></div><div class="ib"><i data-i="more"></i></div></div>
+  <div class="vid">
+   <div class="half" style="left:0"><svg viewBox="0 0 342 600" preserveAspectRatio="xMidYMid meet" id="fig2"></svg></div>
+   <div class="half" style="right:0;border-left:2px solid #0b0b0c"><svg viewBox="0 0 342 600" preserveAspectRatio="xMidYMid meet" id="fig3" style="opacity:.7"></svg></div>
+   <span class="tag" style="left:8px;background:var(--accent);color:#fff">HOY · REP 4</span>
+   <span class="tag" style="right:8px;background:#2a2a2e;color:#cfd0d3">04 OCT · 80 KG</span>
+   <span class="tag" style="left:50%;bottom:8px;top:auto;transform:translateX(-50%);background:rgba(12,12,14,.8);color:var(--yel)">0,25×</span>
+  </div>
+  <div class="scrub"><div class="track"></div><div class="fill"></div><div class="head"></div>
+   <span class="mk" style="left:8%">1</span><span class="mk" style="left:22%">2</span><span class="mk" style="left:35%">3</span><span class="mk" style="left:48%;color:var(--accent)">4</span><span class="mk" style="left:63%">5</span><span class="mk" style="left:80%">6</span></div>
+  <div class="ctl"><span class="pill">1×</span><span class="pill">0,5×</span><span class="pill on">0,25×</span><div class="ib"><i data-i="play"></i></div><span class="pill on" style="background:#1a1a1d;color:var(--ink);box-shadow:inset 0 0 0 1px var(--accent);white-space:nowrap"><i data-i="swap"></i>A | B</span></div>
+  <div class="lbl" style="margin:14px 2px 6px;display:flex;justify-content:space-between"><span>Velocidad media por rep (m/s)</span><span class="r">−18 % rep 6</span></div>
+  <div class="spd"><div><b class="g">0,62</b><span>R1</span></div><div><b class="g">0,60</b><span>R2</span></div><div><b>0,55</b><span>R3</span></div><div style="box-shadow:inset 0 0 0 1.5px var(--accent)"><b>0,52</b><span>R4</span></div><div><b class="y">0,47</b><span>R5</span></div><div><b class="r">0,41</b><span>R6</span></div></div>
+  <div class="panel" style="padding:10px 12px;margin-top:10px;display:flex;gap:10px;align-items:center"><i data-i="note" style="font-size:18px;color:var(--yel)"></i><span style="font:500 12.5px/1.4 'Titillium Web';color:#d8d9dc;flex:1">Codos algo más abiertos que el 04 oct en la rep 4. Añadir a notas de técnica.</span><span class="pill on" style="height:26px">Guardar</span></div>
+ </div>
+</div></div><div class="cap">Revisando a cámara lenta</div></div>
+</div>
+<script src="v4a-icons.js"></script><script>icons(1.8);
+function bench(id,W,H,barY,tint){const s=document.getElementById(id);const cx=W/2;let h='';
+h+='<rect x="'+(cx-150)+'" y="'+(H*0.62)+'" width="300" height="20" rx="6" fill="#26262a"/>';
+h+='<rect x="'+(cx-12)+'" y="'+(H*0.62+20)+'" width="24" height="'+(H*0.2)+'" fill="#1c1c1f"/>';
+h+='<ellipse cx="'+(cx+118)+'" cy="'+(H*0.6)+'" rx="26" ry="22" fill="#3a3a40"/>';
+h+='<path d="M'+(cx-120)+' '+(H*0.6)+' Q'+cx+' '+(H*0.55)+' '+(cx+95)+' '+(H*0.6)+'" stroke="#44454b" stroke-width="40" fill="none" stroke-linecap="round"/>';
+h+='<path d="M'+(cx+60)+' '+(H*0.58)+' L'+(cx+40)+' '+(barY+8)+'" stroke="#55565c" stroke-width="16" stroke-linecap="round"/>';
+h+='<path d="M'+(cx-50)+' '+(H*0.58)+' L'+(cx-40)+' '+(barY+8)+'" stroke="#55565c" stroke-width="16" stroke-linecap="round"/>';
+h+='<line x1="'+(cx-165)+'" x2="'+(cx+165)+'" y1="'+barY+'" y2="'+barY+'" stroke="#b8b9bd" stroke-width="7" stroke-linecap="round"/>';
+[[-160,60],[-148,52],[148,52],[160,60]].forEach(([dx,hh])=>h+='<rect x="'+(cx+dx-6)+'" y="'+(barY-hh/2)+'" width="12" height="'+hh+'" rx="2" fill="'+(Math.abs(dx)>155?'#2F6BFF':'#E10600')+'"/>');
+h+='<path d="M'+(cx+150)+' '+(barY-90)+' C'+(cx+170)+' '+(barY-40)+' '+(cx+170)+' '+(barY+40)+' '+(cx+150)+' '+(barY+80)+'" stroke="'+tint+'" stroke-width="2.5" fill="none" stroke-dasharray="5 4"/>';
+h+='<circle cx="'+(cx+165)+'" cy="'+barY+'" r="6" fill="'+tint+'"/>';
+s.innerHTML='<g transform="translate('+(W/2)+' '+barY+') scale(0.82) translate('+(-W/2)+' '+(-barY)+')">'+h+'</g>'}
+bench('fig1',342,752,330,'#FFD400');bench('fig2',342,600,300,'#E10600');bench('fig3',342,600,312,'#8A8B8F');
+</script></body></html>

@@ -1,0 +1,87 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,700;1,900&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="v4a-frame.css"><link rel="stylesheet" href="v4a.css">
+<style>
+html,body{width:1440px}
+.top{display:flex;align-items:center;gap:10px;margin:6px 0 10px}
+.seg{display:flex;gap:6px;margin-bottom:10px}
+.radar{padding:10px 8px 6px;text-align:center}
+.ratio{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ratio .panel{padding:10px 12px}.ratio b{display:block;font:700 22px 'Roboto Mono';margin-top:6px}
+.meter{height:8px;border-radius:4px;background:#222226;margin-top:8px;position:relative;overflow:hidden}
+.sug{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #1f1f22}
+.sug:first-of-type{border-top:none}
+.sug .ico{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;background:#1c1c1f;color:var(--grn);font-size:16px;flex-shrink:0}
+.sug .t{flex:1;min-width:0}.sug b{display:block;font:700 13.5px 'Titillium Web'}.sug span{font:500 10.5px 'Roboto Mono';color:var(--muted)}
+.pt{display:grid;grid-template-columns:96px 1fr 44px;gap:8px;align-items:center;padding:6px 0;font:600 12px 'Titillium Web'}
+.pt .b{height:8px;border-radius:4px;background:#222226;position:relative}
+.pt .b i{position:absolute;left:0;top:0;bottom:0;border-radius:4px}
+.pt .b u{position:absolute;top:-3px;bottom:-3px;width:2px;background:#fff;opacity:.6}
+.pt b{font:700 11px 'Roboto Mono';text-align:right}
+.wk{display:flex;align-items:flex-end;gap:8px;height:120px;padding:18px 4px 0}
+.wk div{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font:600 9px 'Roboto Mono';color:var(--muted)}
+.wk div i{width:100%;border-radius:4px 4px 1px 1px;display:block}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Propuesta 05 · Móvil</div>
+ <h1>Equilibrio de patrones</h1>
+ <p class="lead">Además de músculos, los movimientos: empujes y tirones horizontales y verticales, sentadilla, bisagra y core en las últimas 4 semanas. Ves de un vistazo si empujas mucho más de lo que tiras y qué ejercicio añadir para compensar.</p>
+ <h4>Detalles</h4>
+ <ul>
+  <li><b>Pantalla:</b> Perfil › Progreso, junto al mapa muscular; aviso en Inicio cuando la proporción se descompensa.</li>
+  <li><b>Reutiliza:</b> series efectivas por ejercicio (WorkoutStats), músculo principal y secundarios; cada ejercicio de la biblioteca recibe su patrón.</li>
+  <li><b>Objetivo:</b> empuje:tirón cerca de 1:1 y bisagra ≥ 70 % de sentadilla; editable.</li>
+  <li><b>Interacción:</b> tocar un patrón abre su evolución; «Añadir» mete el ejercicio sugerido en la próxima rutina que lo encaje.</li>
+ </ul>
+</aside>
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div><div class="sb"><span class="mono">18:42</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="top"><div class="ib"><i data-i="back"></i></div><div style="flex:1"><div class="lbl">Progreso · últimas 4 semanas</div><div class="ttl">Equilibrio</div></div><div class="ib"><i data-i="bal"></i></div></div>
+  <div class="seg"><span class="pill">Músculos</span><span class="pill on">Patrones</span><span class="pill">4 sem</span><span class="pill">12 sem</span></div>
+  <div class="panel cf radar"><svg id="rad" viewBox="0 0 300 250" style="width:100%;height:236px"></svg>
+   <div class="row" style="justify-content:center;gap:14px;font:600 9.5px 'Roboto Mono';color:var(--muted)"><span><i style="display:inline-block;width:10px;height:3px;background:var(--accent);vertical-align:2px"></i> Tú</span><span><i style="display:inline-block;width:10px;height:0;border-top:2px dashed #8A8B8F;vertical-align:2px"></i> Objetivo</span></div></div>
+  <div class="ratio">
+   <div class="panel"><div class="lbl">Empuje : tirón</div><b class="y">1,6 : 1</b><div class="meter"><i style="position:absolute;left:0;top:0;bottom:0;width:62%;background:var(--accent)"></i><i style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#fff"></i></div><span class="sub">objetivo 1 : 1</span></div>
+   <div class="panel"><div class="lbl">Bisagra : sentad.</div><b class="g">0,8 : 1</b><div class="meter"><i style="position:absolute;left:0;top:0;bottom:0;width:44%;background:var(--grn)"></i><i style="position:absolute;left:41%;top:0;bottom:0;width:2px;background:#fff"></i></div><span class="sub">en su punto ≥ 0,7</span></div>
+  </div>
+  <div class="lbl" style="margin:12px 2px 4px">Para equilibrar</div>
+  <div class="panel" style="padding:2px 12px">
+   <div class="sug"><span class="ico"><i data-i="plus"></i></span><div class="t"><b>Remo con barra · 3×10</b><span>tirón H · +6 series</span></div><span class="pill on" style="height:26px">Añadir</span></div>
+   <div class="sug"><span class="ico"><i data-i="plus"></i></span><div class="t"><b>Face pull · 3×15</b><span>tirón + hombro posterior</span></div><span class="pill" style="height:26px">Añadir</span></div>
+  </div>
+ </div>
+</div></div><div class="cap">Radar de patrones</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div><div class="sb"><span class="mono">18:42</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="top"><div class="ib"><i data-i="back"></i></div><div style="flex:1"><div class="lbl">Patrón</div><div class="ttl" style="margin-top:3px">Tirón horizontal</div></div><span class="pill" style="color:var(--yel)">BAJO</span></div>
+  <div class="panel" style="padding:12px">
+   <div class="row sp"><span class="lbl">Series por semana</span><span class="lbl">objetivo 10–14</span></div>
+   <div class="wk" id="wk"></div>
+  </div>
+  <div class="lbl" style="margin:12px 2px 6px">Todos los patrones · series / 4 sem</div>
+  <div class="panel" style="padding:6px 12px" id="pts"></div>
+  <div class="lbl" style="margin:12px 2px 6px">Lo que suma a este patrón</div>
+  <div class="panel" style="padding:2px 12px">
+   <div class="sug"><span class="ico" style="color:var(--accent)"><i data-i="dumb"></i></span><div class="t"><b>Remo en polea baja</b><span>12 series · Torso B</span></div><b class="mono" style="font-size:12px">40 %</b></div>
+   <div class="sug"><span class="ico" style="color:var(--accent)"><i data-i="dumb"></i></span><div class="t"><b>Remo con mancuerna</b><span>9 series · Full Body</span></div><b class="mono" style="font-size:12px">30 %</b></div>
+  </div>
+ </div>
+</div></div><div class="cap">Al tocar un patrón</div></div>
+</div>
+<script src="v4a-icons.js"></script><script>icons(1.8);
+(function(){const ax=['Empuje H','Empuje V','Tirón H','Tirón V','Bisagra','Sentadilla','Core'];const me=[1,.82,.48,.62,.7,.86,.55],tg=[.8,.7,.8,.7,.7,.8,.6];
+const cx=150,cy=128,R=92,n=ax.length;const P=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return[cx+Math.cos(a)*R*r,cy+Math.sin(a)*R*r]};let h='';
+[.25,.5,.75,1].forEach(k=>h+='<polygon points="'+ax.map((_,i)=>P(i,k).join(',')).join(' ')+'" fill="none" stroke="#26262a"/>');
+ax.forEach((_,i)=>{const[x,y]=P(i,1);h+='<line x1="'+cx+'" y1="'+cy+'" x2="'+x+'" y2="'+y+'" stroke="#222226"/>'});
+h+='<polygon points="'+tg.map((v,i)=>P(i,v).join(',')).join(' ')+'" fill="none" stroke="#8A8B8F" stroke-width="1.6" stroke-dasharray="5 4"/>';
+h+='<polygon points="'+me.map((v,i)=>P(i,v).join(',')).join(' ')+'" fill="rgba(225,6,0,.22)" stroke="#E10600" stroke-width="2.4" stroke-linejoin="round"/>';
+me.forEach((v,i)=>{const[x,y]=P(i,v);const low=v<tg[i]-.1;h+='<circle cx="'+x+'" cy="'+y+'" r="4" fill="'+(low?'#FFD400':'#E10600')+'" stroke="#0b0b0c" stroke-width="1.5"/>'});
+ax.forEach((t,i)=>{const[x,y]=P(i,1.2);const low=me[i]<tg[i]-.1;h+='<text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-family="Roboto Mono" font-weight="600" font-size="10" fill="'+(low?'#FFD400':'#cfd0d3')+'">'+t+'</text>'});
+document.getElementById('rad').innerHTML=h;
+const wk=[['S42',6],['S43',8],['S44',5],['S45',7]];document.getElementById('wk').innerHTML=wk.map(([l,v])=>'<div><span style="color:var(--ink);font-size:10px">'+v+'</span><i style="height:'+(v*8)+'px;background:'+(v<10?'#FFD400':'#00D26A')+'"></i>'+l+'</div>').join('')+'<div style="position:relative"><span style="visibility:hidden;font-size:10px">0</span><i style="height:80px;background:repeating-linear-gradient(45deg,#26262a 0 4px,#1a1a1d 4px 8px)"></i>S46</div>';
+const pts=[['Empuje H',44,'#E10600'],['Empuje V',36,'#E10600'],['Sentadilla',38,'#00D26A'],['Bisagra',31,'#00D26A'],['Tirón V',27,'#8A8B8F'],['Core',22,'#8A8B8F'],['Tirón H',26,'#FFD400']];
+document.getElementById('pts').innerHTML=pts.map(([t,v,c])=>'<div class="pt"><span>'+t+'</span><span class="b"><i style="width:'+(v/48*100)+'%;background:'+c+'"></i><u style="left:'+(40/48*100)+'%"></u></span><b>'+v+'</b></div>').join('');
+})();</script></body></html>

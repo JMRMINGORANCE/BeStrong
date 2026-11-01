@@ -1,0 +1,107 @@
+%%HEAD%%
+<style>
+html{background:#09090a}
+.meta{width:300px}
+.fold{width:1240px;height:740px;border-radius:36px;padding:10px;background:#0b0b0c;box-shadow:0 0 0 1.5px #3a3a3e,0 40px 80px -20px rgba(0,0,0,.55)}
+.fold .scr{border-radius:28px;display:grid;grid-template-columns:62px 400px 1fr}
+.rail{background:#0e0e10;border-right:1px solid #1f1f23;display:flex;flex-direction:column;align-items:center;gap:26px;padding-top:34px;color:#66676b;font-size:21px}
+.rail .on{color:var(--accent)}
+.lib{border-right:1px solid #1f1f23;padding:20px 16px;background:#0d0d0e;overflow:hidden}
+.srch{display:flex;align-items:center;gap:10px;height:40px;border-radius:10px;background:#141416;box-shadow:inset 0 0 0 1px #2a2a2e;padding:0 12px;color:#e6e6e8;font:500 13px 'Titillium Web'}
+.fl{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.li{display:grid;grid-template-columns:40px 1fr 30px;gap:11px;align-items:center;padding:8px 6px;border-radius:10px}
+.li+.li{border-top:1px solid #1d1d20}
+.th{width:40px;height:40px;border-radius:9px;display:grid;place-items:center;font-size:19px;color:#d0d0d0;background:#1c1c1f;box-shadow:inset 0 0 0 1px #333338}
+.li b{display:block;font:700 13.5px/1.15 'Titillium Web'}.li span{font:500 10px 'Roboto Mono';color:var(--muted)}
+.add{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:#1c1c1f;box-shadow:inset 0 0 0 1px #333338;font-size:16px;color:#fff}
+.li.in .add{background:#0b3b22;color:var(--grn);box-shadow:none}
+.li.drag{background:#1d1d20;box-shadow:inset 0 0 0 1px #3a3a3e}
+.rt{padding:20px 22px;display:grid;grid-template-columns:1fr 250px;gap:18px;overflow:hidden}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 14px}
+.stats .panel{padding:10px 12px}
+.stats b{display:block;font:700 19px/1 'Roboto Mono';margin-top:7px}
+.stats small{font:600 10px 'Roboto Mono';color:var(--grn)}
+.card{display:grid;grid-template-columns:20px 40px 1fr auto;gap:11px;align-items:center;padding:10px 12px;margin-bottom:7px;border-radius:12px;background:#141416;box-shadow:inset 0 0 0 1px #2a2a2e}
+.card .g{color:#55565b;font-size:18px}
+.card b{display:block;font:700 14px/1.15 'Titillium Web'}.card span{font:500 10.5px 'Roboto Mono';color:var(--muted)}
+.card .sets{display:flex;gap:4px}
+.card .sets i{font:700 10.5px/1 'Roboto Mono';padding:6px 7px;border-radius:5px;background:#1c1c1f;color:#d6d6d8;font-style:normal}
+.ss{position:relative}
+.ss:before{content:"A";position:absolute;left:-14px;top:12px;font:700 9px 'Roboto Mono';color:var(--pur)}
+.lift{transform:rotate(-1.2deg) translate(18px,-4px);background:#1c1c1f;box-shadow:inset 0 0 0 1.5px var(--accent),0 24px 40px -12px rgba(0,0,0,.8),0 0 0 1px #000;position:relative;z-index:3}
+.drop{height:58px;border-radius:12px;border:1.5px dashed #E10600;background:rgba(225,6,0,.06);margin-bottom:7px;display:grid;place-items:center;font:600 10px 'Roboto Mono';color:#ff6a5f;letter-spacing:1px}
+.mb .r{display:grid;grid-template-columns:78px 1fr 30px;gap:8px;align-items:center;padding:6px 0;font:600 12.5px 'Titillium Web'}
+.mb i{display:block;height:7px;border-radius:4px;background:#26262a;position:relative;overflow:hidden}
+.mb i:after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--w);background:var(--c)}
+.mb span{font:700 11px 'Roboto Mono';text-align:right}
+.chg{font:700 9px 'Roboto Mono';color:var(--grn);margin-left:3px}
+</style></head><body><div class="sheet" style="gap:34px">
+<aside class="meta"><div class="num">Propuesta 10</div><h1>Editor en tablero</h1>
+<p class="lead">En el Fold desplegado, editar una rutina como un tablero: la biblioteca a la izquierda y la rutina a la derecha como tarjetas que se arrastran. La duración estimada, los músculos y las series por músculo se recalculan al momento con cada cambio.</p>
+<h4>Pantalla</h4><ul><li><b>Editor de rutinas</b> › diseño de dos paneles con la pantalla interior abierta</li></ul>
+<h4>Reutiliza</h4><ul><li>Biblioteca con filtros por músculo y equipo, sin tildes</li><li>Duración estimada y músculos de la rutina</li><li>Superseries, tempo, descanso y nota por ejercicio</li></ul>
+<h4>Interacción</h4><ul><li>Arrastra de la biblioteca a la rutina, o reordena</li><li>Suelta una tarjeta sobre otra para crear superserie</li><li>Las barras avisan del músculo que se pasa o se queda corto</li></ul></aside>
+<div class="dev"><div class="fold"><div class="scr">
+<div class="rail"><i data-i="home"></i><i data-i="hist"></i><i data-i="dumb" class="on"></i><i data-i="chart"></i><i data-i="user"></i></div>
+<div class="lib">
+ <div class="lbl" style="margin-bottom:8px">Biblioteca · 99 ejercicios</div>
+ <div class="srch"><i data-i="search" style="font-size:16px;color:#8a8b8f"></i>remo</div>
+ <div class="fl"><span class="chip on">Espalda</span><span class="chip">Pecho</span><span class="chip">Hombros</span><span class="chip">Barra</span><span class="chip">Polea</span></div>
+ <div class="li in"><div class="th"><i data-i="dumb"></i></div><div><b>Remo con barra</b><span>Espalda · barra · en la rutina</span></div><div class="add"><i data-i="check"></i></div></div>
+ <div class="li drag" style="opacity:.45"><div class="th"><i data-i="dumb"></i></div><div><b>Remo en polea baja</b><span>Espalda · polea</span></div><div class="add"><i data-i="plus"></i></div></div>
+ <div class="li"><div class="th"><i data-i="dumb"></i></div><div><b>Remo con mancuerna</b><span>Espalda · mancuernas · 1 brazo</span></div><div class="add"><i data-i="plus"></i></div></div>
+ <div class="li"><div class="th"><i data-i="dumb"></i></div><div><b>Remo en máquina</b><span>Espalda · máquina</span></div><div class="add"><i data-i="plus"></i></div></div>
+ <div class="li"><div class="th"><i data-i="dumb"></i></div><div><b>Remo invertido</b><span>Espalda · peso corporal</span></div><div class="add"><i data-i="plus"></i></div></div>
+ <div class="li"><div class="th"><i data-i="dumb"></i></div><div><b>Remo Pendlay</b><span>Espalda · barra</span></div><div class="add"><i data-i="plus"></i></div></div>
+ <div class="li"><div class="th"><i data-i="dumb"></i></div><div><b>Face pull</b><span>Hombros · polea</span></div><div class="add"><i data-i="plus"></i></div></div>
+ <div class="li"><div class="th"><i data-i="dumb"></i></div><div><b>Jalón al pecho</b><span>Espalda · polea</span></div><div class="add"><i data-i="plus"></i></div></div>
+</div>
+<div class="rt">
+ <div>
+  <div class="hdr" style="margin-top:0"><div><div class="lbl">Editando rutina</div><h2>Torso A</h2></div><div style="display:flex;gap:8px"><span class="chip">Deshacer</span><span class="chip on">Guardar</span></div></div>
+  <div class="stats">
+   <div class="panel"><div class="lbl">Duración</div><b>62 min</b><small>+7 min</small></div>
+   <div class="panel"><div class="lbl">Series</div><b>21</b><small>+3</small></div>
+   <div class="panel"><div class="lbl">Ejercicios</div><b>6</b><small>+1</small></div>
+  </div>
+  <div class="card"><i data-i="grip" class="g"></i><div class="th"><i data-i="dumb"></i></div><div><b>Press banca con barra</b><span>Descanso 2:30 · tempo 3-1-1-0</span></div><div class="sets"><i>4×6</i><i>80 kg</i></div></div>
+  <div class="card ss"><i data-i="grip" class="g"></i><div class="th"><i data-i="dumb"></i></div><div><b>Remo con barra</b><span style="color:#c48cff">Superserie A1</span></div><div class="sets"><i>4×8</i><i>70 kg</i></div></div>
+  <div class="card ss"><i data-i="grip" class="g"></i><div class="th"><i data-i="dumb"></i></div><div><b>Press inclinado mancuernas</b><span style="color:#c48cff">Superserie A2</span></div><div class="sets"><i>3×10</i><i>28 kg</i></div></div>
+  <div class="drop">SOLTAR AQUÍ · POSICIÓN 4</div>
+  <div class="card lift"><i data-i="grip" class="g" style="color:#ff6a5f"></i><div class="th"><i data-i="dumb"></i></div><div><b>Remo en polea baja</b><span>Nuevo · 3 series por defecto</span></div><div class="sets"><i>3×12</i><i>—</i></div></div>
+  <div class="card"><i data-i="grip" class="g"></i><div class="th"><i data-i="dumb"></i></div><div><b>Elevaciones laterales</b><span>Descanso 1:00</span></div><div class="sets"><i>3×15</i><i>8 kg</i></div></div>
+  <div class="card"><i data-i="grip" class="g"></i><div class="th"><i data-i="dumb"></i></div><div><b>Fondos en paralelas</b><span>Descanso 1:30 · al fallo</span></div><div class="sets"><i>3×12</i><i>PC</i></div></div>
+ </div>
+ <div>
+  <div class="panel" style="padding:14px 14px 10px">
+   <div class="lbl" style="margin-bottom:8px">Músculos trabajados</div>
+   <svg viewBox="0 0 222 150" width="222" height="150" id="body"></svg>
+  </div>
+  <div class="panel mb" style="padding:12px 14px;margin-top:10px">
+   <div class="lbl" style="margin-bottom:4px">Series por músculo · sesión</div>
+   <div class="r"><b style="font-weight:600">Espalda</b><i style="--w:72%;--c:#00D26A"></i><span>7<em class="chg">+3</em></span></div>
+   <div class="r"><b style="font-weight:600">Pecho</b><i style="--w:70%;--c:#00D26A"></i><span>7</span></div>
+   <div class="r"><b style="font-weight:600">Hombros</b><i style="--w:55%;--c:#00D26A"></i><span>5,5</span></div>
+   <div class="r"><b style="font-weight:600">Tríceps</b><i style="--w:45%;--c:#FFD400"></i><span>4,5</span></div>
+   <div class="r"><b style="font-weight:600">Bíceps</b><i style="--w:30%;--c:#FFD400"></i><span>3<em class="chg">+1,5</em></span></div>
+  </div>
+  <div class="panel" style="padding:11px 13px;margin-top:10px;display:flex;gap:10px;align-items:center;background:linear-gradient(100deg,#00261a,#141416 70%);box-shadow:inset 0 0 0 1px #0c4a30">
+   <i data-i="check" style="color:var(--grn);font-size:18px"></i><div style="font:400 12px/1.35 'Titillium Web';color:#d6d6d8">Empuje y tirón equilibrados: <b style="color:#fff">12 / 10</b> series</div>
+  </div>
+ </div>
+</div>
+</div></div><div class="cap">Fold desplegado · arrastrar «Remo en polea baja» a la rutina</div></div>
+</div>
+<script>
+icons();
+/* siluetas frontal y trasera muy esquemáticas con zonas coloreadas */
+function fig(ox,zones){let s='';const n='#26262a';const c=k=>zones[k]||n;
+s+='<circle cx="'+(ox+30)+'" cy="12" r="9" fill="'+n+'"/>';
+s+='<rect x="'+(ox+18)+'" y="24" width="24" height="16" rx="4" fill="'+c('top')+'"/>';
+s+='<ellipse cx="'+(ox+12)+'" cy="30" rx="6" ry="8" fill="'+c('sh')+'"/><ellipse cx="'+(ox+48)+'" cy="30" rx="6" ry="8" fill="'+c('sh')+'"/>';
+s+='<ellipse cx="'+(ox+9)+'" cy="50" rx="5" ry="11" fill="'+c('arm')+'"/><ellipse cx="'+(ox+51)+'" cy="50" rx="5" ry="11" fill="'+c('arm')+'"/>';
+s+='<rect x="'+(ox+20)+'" y="42" width="20" height="30" rx="4" fill="'+c('mid')+'"/>';
+s+='<rect x="'+(ox+19)+'" y="76" width="10" height="34" rx="4" fill="'+n+'"/><rect x="'+(ox+31)+'" y="76" width="10" height="34" rx="4" fill="'+n+'"/>';
+s+='<rect x="'+(ox+20)+'" y="113" width="8" height="28" rx="3" fill="'+n+'"/><rect x="'+(ox+32)+'" y="113" width="8" height="28" rx="3" fill="'+n+'"/>';return s}
+document.getElementById('body').innerHTML=fig(36,{top:'#00D26A',sh:'#00D26A',arm:'#FFD400',mid:'#2b2b30'})+fig(126,{top:'#00D26A',sh:'#00D26A',arm:'#FFD400',mid:'#00D26A'})+'<text x="66" y="149" fill="#77787c" font-family="Roboto Mono" font-size="8" text-anchor="middle">FRENTE</text><text x="156" y="149" fill="#77787c" font-family="Roboto Mono" font-size="8" text-anchor="middle">ESPALDA</text>';
+</script></body></html>

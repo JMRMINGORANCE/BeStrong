@@ -1,0 +1,90 @@
+%%HEAD%%
+<style>
+.srch{display:flex;align-items:center;gap:10px;height:42px;border-radius:10px;background:#141416;box-shadow:inset 0 0 0 1px #2a2a2e;padding:0 12px;color:#8a8b8f;font:500 13px 'Titillium Web'}
+.tags{display:flex;gap:6px;margin:10px 0 12px;overflow:hidden}
+.day{font:700 9.5px/1 'Roboto Mono';letter-spacing:1.4px;color:var(--muted);text-transform:uppercase;margin:12px 0 7px;display:flex;align-items:center;gap:8px}
+.day:after{content:"";flex:1;height:1px;background:#222226}
+.ent{padding:12px 13px 11px 16px}
+.ent:before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:2px;background:var(--c,#E10600)}
+.ent .t{display:flex;justify-content:space-between;align-items:baseline}
+.ent .t b{font:900 italic 15.5px/1.1 'Titillium Web';text-transform:uppercase;letter-spacing:.1px}
+.ent .t span{font:500 10px 'Roboto Mono';color:var(--muted)}
+.ent p{font:400 13px/1.42 'Titillium Web';color:#d6d6d8;margin:6px 0 8px}
+.rt{display:flex;gap:12px;font:600 10px 'Roboto Mono';color:#a9aaae;align-items:center}
+.rt .dots{display:inline-flex;gap:2px;margin-left:4px}
+.rt .dots i{width:5px;height:9px;border-radius:1px;background:#2c2c30;display:block}
+.tg{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.tg span{font:600 10px/1 'Roboto Mono';padding:5px 7px;border-radius:5px;background:#1c1c1f;color:#d0d0d3}
+.tg span.r{background:#3a0400;color:#ff7a70}.tg span.g{background:#0b3b22;color:#38e08a}.tg span.y{background:#3a3000;color:#ffdc3a}
+.ph{height:84px;border-radius:9px;margin-top:9px;background:linear-gradient(135deg,#2b2b30,#151517);position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:8px;font:600 9.5px 'Roboto Mono';color:#bbb}
+.ph:before{content:"";position:absolute;right:-10px;top:-20px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#5a5a62,transparent 65%);opacity:.5}
+.fab{position:absolute;right:16px;bottom:82px;width:56px;height:56px;border-radius:14px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:26px;box-shadow:0 12px 26px -8px rgba(225,6,0,.8)}
+/* detalle */
+.sl{display:grid;grid-template-columns:96px 1fr 26px;gap:10px;align-items:center;padding:8px 0}
+.sl b{font:600 13px 'Titillium Web'}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.seg i{height:16px;border-radius:3px;background:#222226;display:block}
+.sl span{font:700 13px 'Roboto Mono';text-align:right}
+.ta{min-height:96px;border-radius:10px;background:#101012;box-shadow:inset 0 0 0 1px #2a2a2e;padding:11px 12px;font:400 13.5px/1.45 'Titillium Web';color:#e6e6e8}
+.ta u{text-decoration:none;color:#ff6a5f;font-weight:600}
+.addt{display:flex;flex-wrap:wrap;gap:6px}
+.addt span{font:600 10.5px/1 'Roboto Mono';padding:7px 9px;border-radius:6px;background:#18181b;box-shadow:inset 0 0 0 1px #2e2e33;color:#cfcfd2}
+.addt span.on{background:#fff;color:#0b0b0c;box-shadow:none}
+</style></head><body><div class="sheet">
+<aside class="meta"><div class="num">Propuesta 07</div><h1>Diario de entreno</h1>
+<p class="lead">Un feed cronológico con lo que no cabe en las cifras: la nota de cada sesión, cómo te sentiste (energía, molestias, motivación), etiquetas como #dormí-mal o #nuevo-gimnasio y una foto opcional. Con búsqueda y filtros para encontrar patrones: «¿cuándo me duele el hombro?».</p>
+<h4>Pantalla</h4><ul><li><b>Historial</b> › nueva pestaña «Diario» junto al calendario</li></ul>
+<h4>Reutiliza</h4><ul><li>Notas del entreno y valoración de la sesión (energía, molestias, motivación)</li><li>Fotos locales protegidas con huella</li><li>Búsqueda del historial sin tildes</li></ul>
+<h4>Interacción</h4><ul><li>Filtra por etiqueta o por valoración baja</li><li>Escribe #etiqueta en la nota y se crea sola</li><li>Toca una entrada para abrir la sesión completa</li></ul></aside>
+<div class="dev"><div class="phone"><div class="scr">%%SB%%
+<div class="pad">
+ <div class="hdr"><div><div class="lbl">Historial · 142 entradas</div><h2>Diario</h2></div><div class="ib"><i data-i="filter"></i></div></div>
+ <div class="srch"><i data-i="search" style="font-size:17px"></i>Buscar en notas y etiquetas</div>
+ <div class="tags"><span class="chip on">Todo</span><span class="chip"># dormí-mal</span><span class="chip"># hombro</span><span class="chip"># PR</span></div>
+ <div class="day">Hoy · miércoles 2 dic</div>
+ <div class="panel ent" style="--c:#E10600">
+  <div class="t"><b>Peso muerto 5/3/1</b><span>18:42 · 58 min</span></div>
+  <p>Última serie a 160 × 6, la barra subía rápida. Agarre mixto sin problema.</p>
+  <div class="rt"><span>ENERGÍA<span class="dots" data-v="4"></span></span><span>MOLESTIAS<span class="dots" data-v="1"></span></span><span>MOTIV.<span class="dots" data-v="5"></span></span></div>
+  <div class="tg"><span class="r"># PR</span><span># nuevo-gimnasio</span></div>
+ </div>
+ <div class="day">Lunes 30 nov</div>
+ <div class="panel ent" style="--c:#FFD400">
+  <div class="t"><b>Press militar 5/3/1</b><span>07:10 · 49 min</span></div>
+  <p>Hombro derecho cargado en el calentamiento; bajé a 50 kg en las BBB.</p>
+  <div class="rt"><span>ENERGÍA<span class="dots" data-v="2"></span></span><span>MOLESTIAS<span class="dots" data-v="3"></span></span><span>MOTIV.<span class="dots" data-v="3"></span></span></div>
+  <div class="tg"><span class="y"># hombro</span><span class="y"># dormí-mal</span></div>
+  <div class="ph"><i data-i="camera" style="font-size:13px;margin-right:5px"></i>1 foto · bloqueada</div>
+ </div>
+</div>
+<div class="fab"><i data-i="plus" data-w="2.4"></i></div>
+<div class="nav"><div><i data-i="home"></i>Inicio</div><div class="on"><i data-i="hist"></i>Historial</div><div><i data-i="dumb"></i>Ejercicios</div><div><i data-i="chart"></i>Progreso</div><div><i data-i="user"></i>Perfil</div></div>
+</div></div><div class="cap">Feed del diario</div></div>
+<div class="dev"><div class="phone"><div class="scr">%%SB%%
+<div class="pad">
+ <div style="display:flex;align-items:center;gap:10px;margin:8px 0 12px"><div class="ib"><i data-i="back"></i></div><div style="flex:1"><div class="lbl">Miércoles 2 dic · 18:42</div><div style="font:900 italic 20px/1.1 'Titillium Web';text-transform:uppercase;margin-top:4px">Peso muerto 5/3/1</div></div></div>
+ <div class="panel" style="padding:12px 14px">
+  <div class="lbl" style="margin-bottom:6px">Cómo te sentiste</div>
+  <div class="sl"><b>Energía</b><div class="seg" data-v="4" data-c="#00D26A"></div><span>4</span></div>
+  <div class="sl"><b>Molestias</b><div class="seg" data-v="1" data-c="#FFD400"></div><span>1</span></div>
+  <div class="sl"><b>Motivación</b><div class="seg" data-v="5" data-c="#00D26A"></div><span>5</span></div>
+ </div>
+ <div class="lbl" style="margin:14px 0 8px">Nota</div>
+ <div class="ta">Última serie a 160 × 6, la barra subía rápida. Agarre mixto sin problema. <u>#PR</u> <u>#nuevo-gimnasio</u><span style="display:inline-block;width:2px;height:16px;background:var(--accent);vertical-align:-3px;margin-left:2px"></span></div>
+ <div class="lbl" style="margin:14px 0 8px">Etiquetas sugeridas</div>
+ <div class="addt"><span class="on"># PR</span><span class="on"># nuevo-gimnasio</span><span># dormí-mal</span><span># hombro</span><span># en-ayunas</span><span># con-pareja</span><span>+ nueva</span></div>
+ <div class="panel" style="padding:11px 13px;margin-top:14px;display:flex;align-items:center;gap:12px">
+  <div class="ib" style="color:#ffdc3a"><i data-i="bolt"></i></div>
+  <div style="flex:1;font:400 12.5px/1.4 'Titillium Web';color:#cfcfd2">Las sesiones con <b style="color:#fff">#dormí-mal</b> rinden un <b style="color:#ff6a5f">−7 %</b> de volumen de media (11 sesiones)</div>
+ </div>
+ <div style="display:grid;grid-template-columns:52px 1fr;gap:8px;position:absolute;left:16px;right:16px;bottom:24px">
+  <div class="btng"><i data-i="camera" style="font-size:19px"></i></div><div class="btnr">Guardar entrada</div>
+ </div>
+</div>
+</div></div><div class="cap">Entrada de la sesión</div></div>
+</div>
+<script>
+icons();
+document.querySelectorAll('.dots').forEach(d=>{const v=+d.dataset.v;for(let i=0;i<5;i++){const e=document.createElement('i');if(i<v)e.style.background=i<v&&d.parentElement.textContent.startsWith('MOLESTIAS')?(v>=3?'#FFD400':'#8a8b8f'):(v<=2?'#FFD400':'#00D26A');d.appendChild(e)}});
+document.querySelectorAll('.seg').forEach(d=>{const v=+d.dataset.v;for(let i=0;i<5;i++){const e=document.createElement('i');if(i<v)e.style.background=d.dataset.c;d.appendChild(e)}});
+</script></body></html>
