@@ -1,16 +1,10 @@
 package com.bestrong.mobile.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -18,22 +12,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bestrong.designsystem.BeStrongPalette as P
-import com.bestrong.mobile.data.Accent
 import com.bestrong.mobile.data.AppFont
 import com.bestrong.mobile.data.Appearance
-import com.bestrong.mobile.data.ThemeMode
 import com.bestrong.mobile.shared.R
-
-/** Color semilla de cada acento (el modelo [Accent] vive en la capa de datos, sin Compose). */
-private val Accent.seed: Color get() = Color(seedArgb)
 
 /**
  * Colores de estado (bien / regular / mal). En modo daltónico se usa la paleta Okabe-Ito
@@ -84,85 +71,6 @@ val LocalAppearance = staticCompositionLocalOf { Appearance() }
 val statusColors: StatusColors
     @Composable @ReadOnlyComposable
     get() = LocalStatusColors.current
-
-/**
- * Oscuro de marca: fondo negro azulado con superficies escalonadas (las tarjetas flotan sin bordes), el acento
- * vivo y un secundario ámbar para los degradados.
- */
-private fun brandDark(accent: Accent): ColorScheme {
-    val orange = accent == Accent.ORANGE
-    val primary = if (orange) Color(0xFFFF8A4C) else lerp(accent.seed, Color.White, 0.3f)
-    return darkColorScheme(
-        primary = primary,
-        onPrimary = if (orange) Color(0xFF2A0E00) else lerp(accent.seed, Color.Black, 0.75f),
-        primaryContainer = if (orange) Color(0xFF5C2408) else lerp(accent.seed, Color.Black, 0.55f),
-        onPrimaryContainer = if (orange) Color(0xFFFFDBCA) else lerp(accent.seed, Color.White, 0.82f),
-        secondary = P.Amber,
-        onSecondary = Color(0xFF2B1A00),
-        // El chip o botón segmentado elegido, en el color de acento: se ve de un vistazo (antes, marrón apagado)
-        secondaryContainer = primary,
-        onSecondaryContainer = if (orange) Color(0xFF2A0E00) else lerp(accent.seed, Color.Black, 0.75f),
-        tertiary = P.Success,
-        onTertiary = Color(0xFF00391A),
-        tertiaryContainer = P.SuccessContainerDark,
-        onTertiaryContainer = Color(0xFFC8F0D2),
-        background = P.Background,
-        onBackground = Color(0xFFEDEFF3),
-        surface = P.Background,
-        onSurface = Color(0xFFEDEFF3),
-        surfaceVariant = P.SurfaceHigh,
-        onSurfaceVariant = P.OnSurfaceVariantDark,
-        surfaceContainerLowest = P.SurfaceLowest,
-        surfaceContainerLow = P.SurfaceLow,
-        surfaceContainer = P.SurfaceMid,
-        surfaceContainerHigh = P.SurfaceHigh,
-        surfaceContainerHighest = P.SurfaceHighest,
-        outline = P.OutlineDark,
-        outlineVariant = Color(0xFF2A2F38),
-        error = Color(0xFFFF7A7E),
-    )
-}
-
-/** Claro de marca: fondo gris muy claro, tarjetas blancas y el mismo acento con más fuerza. */
-private fun brandLight(accent: Accent): ColorScheme {
-    val orange = accent == Accent.ORANGE
-    val primary = if (orange) Color(0xFFE85A0C) else lerp(accent.seed, Color.Black, 0.12f)
-    return lightColorScheme(
-        primary = primary,
-        onPrimary = Color.White,
-        primaryContainer = if (orange) P.OrangeContainerLight else lerp(accent.seed, Color.White, 0.8f),
-        onPrimaryContainer = if (orange) P.OnOrangeContainerLight else lerp(accent.seed, Color.Black, 0.75f),
-        secondary = P.AmberDark,
-        onSecondary = Color.White,
-        // El chip o botón segmentado elegido, en el color de acento
-        secondaryContainer = primary,
-        onSecondaryContainer = Color.White,
-        tertiary = P.SuccessDark,
-        tertiaryContainer = P.SuccessContainerLight,
-        background = P.LightBackground,
-        onBackground = Color(0xFF1B1C1F),
-        surface = P.LightBackground,
-        onSurface = Color(0xFF1B1C1F),
-        surfaceVariant = P.LightSurfaceHigh,
-        onSurfaceVariant = Color(0xFF55595F),
-        surfaceContainerLowest = Color.White,
-        surfaceContainerLow = P.LightSurfaceLow,
-        surfaceContainer = P.LightSurfaceMid,
-        surfaceContainerHigh = P.LightSurfaceHigh,
-        surfaceContainerHighest = P.LightSurfaceHighest,
-        outline = Color(0xFFB4B8BF),
-        outlineVariant = Color(0xFFDDE0E5),
-    )
-}
-
-/** Esquinas generosas: tarjetas de 24 dp, diálogos de 32 y chips/botones redondeados. */
-private val BeStrongShapes = androidx.compose.material3.Shapes(
-    extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
-    small = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
-    medium = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-    large = androidx.compose.foundation.shape.RoundedCornerShape(24.dp),
-    extraLarge = androidx.compose.foundation.shape.RoundedCornerShape(32.dp),
-)
 
 /**
  * Tipografía con carácter: títulos muy gruesos y apretados (como un marcador deportivo), cuerpo cómodo y etiquetas
@@ -247,19 +155,9 @@ private fun Typography.withFont(family: FontFamily?): Typography {
 /** Colores de marca (o el acento elegido), con modo AMOLED, alto contraste y letra accesible. Paleta en :designsystem. */
 @Composable
 fun BeStrongTheme(appearance: Appearance = Appearance(), content: @Composable () -> Unit) {
-    val dark = when (appearance.mode) {
-        ThemeMode.SYSTEM -> isSystemInDarkTheme()
-        ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-    }
-    val context = LocalContext.current
-    var scheme = if (appearance.accent == Accent.DYNAMIC && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-    } else if (dark) {
-        brandDark(appearance.accent)
-    } else {
-        brandLight(appearance.accent)
-    }
+    // El estilo elegido (Carbono o Titanio Blanco) trae su paleta, oscura o clara
+    val dark = appearance.style.dark
+    var scheme = styleScheme(appearance.style)
     if (dark && appearance.amoled) scheme = scheme.amoled()
     if (appearance.highContrast) scheme = scheme.highContrast(dark)
     val family = when (appearance.font) {
@@ -276,8 +174,9 @@ fun BeStrongTheme(appearance: Appearance = Appearance(), content: @Composable ()
         // Fondo y superficie transparentes: el fondo de marca de [ScreenBackdrop] se ve detrás de todo
         MaterialTheme(
             colorScheme = scheme.copy(background = Color.Transparent, surface = Color.Transparent),
-            typography = beStrongTypography().withFont(family),
-            shapes = BeStrongShapes,
+            // La letra accesible (si se eligió) manda sobre la del estilo
+            typography = beStrongTypography().withDisplayFont(if (family == null) styleDisplayFont(appearance.style) else null).withFont(family),
+            shapes = styleShapes(appearance.style),
         ) {
             ScreenBackdrop { content() }
         }

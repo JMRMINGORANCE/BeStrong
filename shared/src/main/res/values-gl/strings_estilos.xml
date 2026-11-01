@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos visuales elegibles: Carbono y Titanio Blanco -->
+<resources>
+    <string name="style_title">Estilo</string>
+    <string name="style_footer">Cambia as cores, a letra dos títulos e as esquinas no móbil e o acento no reloxo.</string>
+    <string name="style_onb_title">Escolle o teu estilo</string>
+    <string name="style_onb_body">Así se verán a app e o reloxo. Toca un para probalo: podes cambialo cando queiras en Axustes → Aparencia.</string>
+    <string name="style_carbono">Carbono</string>
+    <string name="style_carbono_desc">Escuro: negro mate e vermello racing, como a telemetría da F1.</string>
+    <string name="style_titanio_blanco">Titanio Branco</string>
+    <string name="style_titanio_blanco_desc">Claro: titanio con laranxa internacional.</string>
+</resources>

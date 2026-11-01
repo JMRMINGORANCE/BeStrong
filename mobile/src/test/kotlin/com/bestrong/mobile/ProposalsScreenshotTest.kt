@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -86,6 +87,10 @@ class ProposalsScreenshotTest {
         compose.onAllNodesWithText("Terminar").fetchSemanticsNodes().takeIf { it.size > 1 }?.let { compose.onAllNodesWithText("Terminar")[1].performClick(); settle() }
         settle(30)
         captureScreenRoboImage("build/outputs/roborazzi/p4_summary.png")
+        // «Listo» está al final del resumen: hay que bajar hasta él
+        compose.mainClock.autoAdvance = true
+        compose.onNodeWithText("Listo").performScrollTo()
+        compose.mainClock.autoAdvance = false
         compose.onNodeWithText("Listo").performClick()
         settle()
         // Al terminar se abre el historial: de vuelta a Inicio

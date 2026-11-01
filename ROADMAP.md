@@ -463,3 +463,8 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Mapa muscular con silueta frontal y trasera coloreada por series (toca un músculo para ver su detalle y un consejo)
 - [x] Resumen de fin de entreno a pantalla completa: trofeo, cifras, récords destacados, comparación con la última vez y confeti con récord
 - [x] Fold desplegado: «centro de mando» con las series a la izquierda y descanso, pulso del reloj, discos y 1RM a la derecha
+
+## Fase 55 — Estilos visuales a elegir ✅
+- [x] Dos estilos: Carbono (oscuro, negro mate y rojo racing) y Titanio Blanco (claro, titanio y naranja), con su paleta, letra de títulos y esquinas
+- [x] Selector con miniaturas en Ajustes → Apariencia y al empezar (tras los permisos)
+- [x] El reloj toma el acento del estilo elegido en el móvil (fondo negro en los dos, por la batería)

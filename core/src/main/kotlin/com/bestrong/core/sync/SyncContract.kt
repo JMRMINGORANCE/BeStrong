@@ -158,6 +158,8 @@ data class SharedSettings(
     /** Mejores marcas de todo el historial (el reloj solo tiene el reciente): 1RM estimado y peso máximo. */
     val bestOneRepMaxKg: Map<String, Double> = emptyMap(),
     val heaviestKg: Map<String, Double> = emptyMap(),
+    /** Estilo visual elegido en el móvil (nombre de VisualStyle): el reloj usa su acento. */
+    val visualStyle: String = "CARBONO",
     /** Descanso máximo tras una serie de calentamiento (s). */
     val warmupRestSeconds: Int = 60,
     /** Ejercicios ocultos en la biblioteca del móvil: el selector del reloj tampoco los ofrece. */

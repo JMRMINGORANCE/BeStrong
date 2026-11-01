@@ -22,9 +22,7 @@ import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Brightness2
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Contrast
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -446,35 +444,28 @@ private fun AppearancePage(vm: ProfileViewModel, onBack: () -> Unit) {
     val a = settings.appearance
     fun setA(block: (Appearance) -> Appearance) = vm.updateSettings { it.copy(appearance = block(it.appearance)) }
     SettingsPage(stringResource(R.string.appearance), onBack) {
+        // Estilo visual de toda la app y del reloj: miniaturas para comparar
         item {
-            SettingsGroup(stringResource(R.string.sg_theme)) {
-                SettingsChoice(
-                    stringResource(R.string.theme_mode),
-                    ThemeMode.entries.map { it to stringResource(it.labelRes()) },
-                    a.mode,
-                    { m -> setA { it.copy(mode = m) } },
-                    icon = Icons.Default.DarkMode,
-                    tint = SettingsTint.Purple,
-                )
-                SettingsDivider()
-                val accents = Accent.entries.filter { it != Accent.DYNAMIC || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }
-                SettingsChoice(
-                    stringResource(R.string.accent),
-                    accents.map { it to stringResource(it.labelRes()) },
-                    a.accent,
-                    { c -> setA { it.copy(accent = c) } },
-                    icon = Icons.Default.ColorLens,
-                    tint = SettingsTint.Orange,
-                )
-                SettingsDivider()
-                SettingsSwitchRow(
-                    stringResource(R.string.amoled),
-                    a.amoled,
-                    { v -> setA { it.copy(amoled = v) } },
-                    summary = stringResource(R.string.amoled_body),
-                    icon = Icons.Default.Brightness2,
-                    tint = SettingsTint.Slate,
-                )
+            SettingsGroup(stringResource(R.string.style_title), footer = stringResource(R.string.style_footer)) {
+                androidx.compose.foundation.layout.BoxWithConstraints(Modifier.padding(12.dp)) {
+                    val columns = (maxWidth / com.bestrong.mobile.ui.components.STYLE_CARD_MIN_WIDTH).toInt().coerceIn(2, 3)
+                    com.bestrong.mobile.ui.components.StyleGrid(a.style, { st -> setA { it.copy(style = st) } }, columns = columns)
+                }
+            }
+        }
+        // Negro puro solo tiene sentido en el estilo oscuro (con el claro el grupo quedaría vacío)
+        if (a.style.dark) {
+            item {
+                SettingsGroup(stringResource(R.string.sg_theme)) {
+                    SettingsSwitchRow(
+                        stringResource(R.string.amoled),
+                        a.amoled,
+                        { v -> setA { it.copy(amoled = v) } },
+                        summary = stringResource(R.string.amoled_body),
+                        icon = Icons.Default.Brightness2,
+                        tint = SettingsTint.Slate,
+                    )
+                }
             }
         }
         item {

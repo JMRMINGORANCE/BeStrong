@@ -242,6 +242,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             highContrast = prefs.getBoolean("high_contrast", false),
             colorblind = prefs.getBoolean("colorblind", false),
             font = enumOr("font", AppFont.SYSTEM),
+            style = enumOr("visual_style", VisualStyle.CARBONO),
         ),
         restVibration = enumOr("rest_vibration", VibrationStyle.TRIPLE),
         bodyUnit = prefs.getString("body_unit", null)?.let { runCatching { WeightUnit.valueOf(it) }.getOrNull() },
@@ -332,6 +333,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBoolean("high_contrast", s.appearance.highContrast)
             putBoolean("colorblind", s.appearance.colorblind)
             putString("font", s.appearance.font.name)
+            putString("visual_style", s.appearance.style.name)
             putString("rest_vibration", s.restVibration.name)
             putGoals(s)
             putInt("weekly_sets_target", s.weeklySetsTarget)

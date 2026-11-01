@@ -134,7 +134,10 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
 
     // Tras la bienvenida del primer arranque, los permisos (notificaciones y Health Connect) en una pantalla
     var askPermissions by rememberSaveable { mutableStateOf(false) }
-    if (askPermissions) OnboardingPermissionsDialog(hiltViewModel<ProfileViewModel>(), onDone = { askPermissions = false })
+    // …y después, elegir el estilo visual (se ve al momento; se cambia luego en Ajustes → Apariencia)
+    var askStyle by rememberSaveable { mutableStateOf(false) }
+    if (askPermissions) OnboardingPermissionsDialog(hiltViewModel<ProfileViewModel>(), onDone = { askPermissions = false; askStyle = true })
+    if (askStyle) com.bestrong.mobile.ui.profile.OnboardingStyleDialog(hiltViewModel<ProfileViewModel>(), onDone = { askStyle = false })
 
     // Tutorial la primera vez; novedades una vez tras cada actualización
     if (!isRobolectric) {

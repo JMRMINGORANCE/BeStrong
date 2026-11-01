@@ -179,6 +179,7 @@ class AppSync @Inject constructor(
                 vibrateOnRestEnd = s.vibrateOnRestEnd,
                 bestOneRepMaxKg = best1rm,
                 heaviestKg = heaviest,
+                visualStyle = s.appearance.style.name,
             )
         }.distinctUntilChanged()
             .collect { watchSync.pushSettings(it) }

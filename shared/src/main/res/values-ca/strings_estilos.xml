@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos visuales elegibles: Carbono y Titanio Blanco -->
+<resources>
+    <string name="style_title">Estil</string>
+    <string name="style_footer">Canvia els colors, la lletra dels títols i les cantonades al mòbil i l\'accent al rellotge.</string>
+    <string name="style_onb_title">Tria el teu estil</string>
+    <string name="style_onb_body">Així es veuran l\'app i el rellotge. Toca\'n un per provar-lo: el pots canviar quan vulguis a Ajustos → Aparença.</string>
+    <string name="style_carbono">Carboni</string>
+    <string name="style_carbono_desc">Fosc: negre mat i vermell racing, com la telemetria de la F1.</string>
+    <string name="style_titanio_blanco">Titani Blanc</string>
+    <string name="style_titanio_blanco_desc">Clar: titani amb taronja internacional.</string>
+</resources>
