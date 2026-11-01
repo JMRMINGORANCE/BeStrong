@@ -1,0 +1,169 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame-b.css">
+<style>
+:root{--sheet:#9d9b96;--bg:#C9C6C0;--ink:#121212;--muted:#4f4d49;--accent:#FFC400;--display:'Big Shoulders Display';--body:'Archivo';--mono:'DM Mono';--rule:#6f6d69;--metaAccent:#121212;--swBg:#d6d3cd}
+.noise{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+body{background-color:#a8a6a1}
+.meta h1{font-weight:900;font-size:72px;letter-spacing:0;text-transform:uppercase;line-height:.9}
+.meta .num{background:#121212;color:#FFC400;display:inline-block;padding:6px 8px}
+.scr{background-color:#CBC8C2}
+.mono{font-family:'DM Mono'}
+.lbl{font:500 9.5px/1 'DM Mono';letter-spacing:1.2px;text-transform:uppercase;color:#4f4d49}
+.pad{padding:4px 16px}
+.hdr{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0 12px}
+.hdr h2{font:800 34px/.9 'Big Shoulders Display';text-transform:uppercase;margin-top:6px}
+.zone{font:800 13px/1 'Big Shoulders Display';background:#121212;color:#C9C6C0;padding:6px 8px;letter-spacing:1px}
+.slab{background:#121212;color:#E9E6E0;padding:14px 14px 12px;position:relative}
+.haz{height:10px;background:repeating-linear-gradient(-45deg,#FFC400 0 10px,#121212 10px 20px)}
+.slab .k{display:flex;justify-content:space-between;align-items:center}
+.slab .k span{font:500 9.5px 'DM Mono';letter-spacing:1.2px;color:#FFC400}
+.slab h3{font:900 44px/.86 'Big Shoulders Display';text-transform:uppercase;margin:10px 0 10px;color:#fff}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #3a3a3a;border-bottom:1px solid #3a3a3a;margin-bottom:8px}
+.grid3 div{padding:8px 0 8px 8px}.grid3 div+div{border-left:1px solid #3a3a3a}
+.grid3 b{display:block;font:800 24px/1 'Big Shoulders Display';margin-top:5px;color:#fff}
+.grid3 .lbl{color:#9a978f}
+.ex{display:flex;justify-content:space-between;font:500 12.5px 'Archivo';padding:5px 0;color:#d9d6cf;border-bottom:1px dashed #333}
+.ex b{font:500 12px 'DM Mono';color:#FFC400}
+.go{display:flex;gap:6px;margin-top:12px}
+.go .b{flex:1;height:48px;background:#FFC400;color:#121212;font:900 20px/48px 'Big Shoulders Display';letter-spacing:1px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px}
+.go .w{width:48px;height:48px;border:1.5px solid #FFC400;color:#FFC400;display:grid;place-items:center;font-size:20px}
+.row2{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-top:8px}
+.box{border:1.5px solid #121212;padding:10px 12px;background:rgba(255,255,255,.12)}
+.box b{display:block;font:800 30px/1 'Big Shoulders Display';margin-top:6px}
+.box b small{font-size:14px;font-weight:700}
+.wk{display:flex;gap:4px;margin-top:8px}
+.wk i{flex:1;height:22px;border:1.5px solid #121212;font:800 12px/19px 'Big Shoulders Display';text-align:center;font-style:normal}
+.wk i.d{background:#121212;color:#FFC400}
+.nav{position:absolute;left:0;right:0;bottom:0;height:66px;display:flex;background:#121212}
+.nav div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:700 11px 'Big Shoulders Display';letter-spacing:1.2px;text-transform:uppercase;color:#8d8a84}
+.nav div i{font-size:20px}.nav .on{color:#121212;background:#FFC400}
+/* entreno */
+.wtop{display:flex;align-items:stretch;gap:6px;margin:8px 0 10px}
+.ib{width:40px;border:1.5px solid #121212;display:grid;place-items:center;font-size:18px}
+.wtop .t{flex:1;background:#121212;color:#fff;padding:6px 10px}
+.wtop .t b{display:block;font:800 22px/1 'Big Shoulders Display';text-transform:uppercase}
+.wtop .t span{font:500 10px 'DM Mono';color:#FFC400}
+.fin{border:1.5px solid #121212;padding:0 12px;font:800 15px/40px 'Big Shoulders Display';text-transform:uppercase;letter-spacing:.5px}
+.rest{background:#FFC400;color:#121212;padding:10px 12px;display:flex;align-items:center;gap:12px}
+.rest b{font:900 46px/.9 'Big Shoulders Display'}
+.rest .nx{flex:1;font:600 12px 'Archivo'}.rest .nx span{display:block;font:500 9.5px 'DM Mono';letter-spacing:1px;margin-bottom:3px}
+.rest .s{background:#121212;color:#FFC400;font:800 15px/1 'Big Shoulders Display';padding:10px 12px;text-transform:uppercase}
+.card{border:1.5px solid #121212;margin-top:10px;background:rgba(255,255,255,.1)}
+.card .h{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1.5px solid #121212}
+.card .h b{font:800 21px/1 'Big Shoulders Display';text-transform:uppercase}
+.card .h span{font:500 9.5px 'DM Mono';color:#4f4d49}
+.sr{display:grid;grid-template-columns:30px 1fr 1fr 1fr 40px;align-items:center;border-bottom:1px solid rgba(18,18,18,.25)}
+.sr>*{padding:8px 6px;font:500 13px 'DM Mono'}
+.sr.th>*{font-size:9px;letter-spacing:1px;color:#4f4d49;padding:6px}
+.sr .n{font:800 17px 'Big Shoulders Display';text-align:center}
+.sr .v{font:800 22px/1 'Big Shoulders Display'}
+.sr .pv{color:#5f5d58;font-size:11.5px}
+.ck{width:24px;height:24px;border:1.5px solid #121212;display:grid;place-items:center;color:transparent;font-size:15px}
+.sr.d .ck{background:#121212;color:#FFC400}
+.sr.c{background:#121212;color:#fff}.sr.c .pv{color:#9a978f}.sr.c .ck{border-color:#FFC400}
+.sr.c .n{color:#FFC400}
+.mini{display:flex;justify-content:space-between;align-items:center;border:1.5px solid #121212;margin-top:8px;padding:10px}
+.mini b{font:800 18px 'Big Shoulders Display';text-transform:uppercase}.mini span{font:500 10px 'DM Mono'}
+/* reloj */
+.disp{background:#0d0d0d}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.wl{font:500 8px/1 'DM Mono';letter-spacing:1.2px;color:#9a978f;text-transform:uppercase}
+.wbig{font:900 58px/.85 'Big Shoulders Display';color:#fff}
+</style></head><body class="noise">
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 18 · Móvil + reloj</div>
+ <h1>Hormigón</h1>
+ <p class="lead" style="color:#2b2a28">El gimnasio industrial, sobrio: hormigón con textura sutil, negro y un único amarillo de seguridad reservado a lo importante. Tipografía de rotulación condensada, rejillas y señalética: cada serie se lee como un cartel de zona.</p>
+ <h4 style="color:#2b2a28">Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:#C9C6C0"></b><span><em>Hormigón</em>#C9C6C0</span></div>
+  <div class="sw"><b style="background:#8E8C87"></b><span><em>Encofrado</em>#8E8C87</span></div>
+  <div class="sw"><b style="background:#121212"></b><span><em>Negro</em>#121212</span></div>
+  <div class="sw"><b style="background:#FFC400"></b><span><em>Seguridad</em>#FFC400</span></div>
+  <div class="sw"><b style="background:repeating-linear-gradient(-45deg,#FFC400 0 8px,#121212 8px 16px)"></b><span><em>Peligro</em>solo en descanso</span></div>
+  <div class="sw"><b style="background:#E9E6E0"></b><span><em>Tiza</em>#E9E6E0</span></div>
+ </div>
+ <h4 style="color:#2b2a28">Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font-family:'Big Shoulders Display';font-weight:900;text-transform:uppercase">Día de press</span><small>Big Shoulders</small></div>
+  <div><span class="s" style="font-family:'DM Mono';font-size:24px">ZONA 02 · 82.5</span><small>DM Mono</small></div>
+ </div>
+ <h4 style="color:#2b2a28">Claves</h4>
+ <ul style="color:#2b2a28"><li>Amarillo solo para acción y para la serie en curso.</li><li>Franja de peligro únicamente en el descanso.</li><li>Sin sombras ni degradados: bordes y bloques.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr noise"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="hdr"><div><div class="lbl">Dom 01 Nov · Sem 45</div><h2>Buenas noches,<br>Juan</h2></div><div class="zone">ZONA 02</div></div>
+  <div style="height:4px;background:#FFC400"></div>
+  <div class="slab">
+   <div class="k"><span>HOY TOCA · 5/3/1 · S2</span><i data-i="more" style="color:#9a978f;font-size:18px"></i></div>
+   <h3>Día de<br>Press</h3>
+   <div class="grid3"><div><span class="lbl">Ejerc.</span><b>05</b></div><div><span class="lbl">Min</span><b>55</b></div><div><span class="lbl">Ton.</span><b>9.8</b></div></div>
+   <div class="ex"><span>Press militar 3×3</span><b>47.5/52.5/57.5+</b></div>
+   <div class="ex"><span>Press militar BBB 5×10</span><b>32.5 KG</b></div>
+   <div class="ex" style="border:0"><span>Dominadas 5×10</span><b>PC</b></div>
+   <div class="go"><div class="b"><i data-i="play"></i>Empezar</div><div class="w"><i data-i="watch"></i></div></div>
+  </div>
+  <div class="row2">
+   <div class="box"><span class="lbl">Semana</span><b>3<small>/4</small></b><div class="wk"><i class="d">L</i><i>M</i><i class="d">X</i><i>J</i><i class="d">V</i><i>S</i><i>D</i></div></div>
+   <div class="box"><span class="lbl">Racha</span><b>12<small> SEM</small></b><span class="lbl" style="display:block;margin-top:8px">18.4 t · +8 %</span></div>
+  </div>
+ </div>
+ <div class="nav"><div class="on"><i data-i="dumb"></i>Entrenar</div><div><i data-i="hist"></i>Historial</div><div><i data-i="chart"></i>Progreso</div><div><i data-i="user"></i>Perfil</div></div>
+</div></div><div class="cap" style="color:#2b2a28">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr noise"><div class="cam"></div>
+ <div class="sb"><span class="mono">21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="wtop"><div class="ib"><i data-i="back"></i></div><div class="t"><b>Torso A</b><span>38:20 · 07/16 SERIES</span></div><div class="fin">Fin</div></div>
+  <div class="haz"></div>
+  <div class="rest"><div><span class="lbl" style="color:#121212;display:block;margin-bottom:4px">Descanso</span><b>1:34</b></div><div class="nx"><span>SIGUIENTE</span>Remo con barra<br>90 kg × 8</div><div class="s">Saltar</div></div>
+  <div class="card">
+   <div class="h"><b>Press banca</b><span>BARRA · AGARRE 1.5×</span></div>
+   <div class="sr th"><span>SET</span><span>ANTERIOR</span><span>KG</span><span>REPS</span><span></span></div>
+   <div class="sr d"><span class="n">C</span><span class="pv">40×10</span><span class="v">40</span><span class="v">10</span><span><div class="ck"><i data-i="check" data-w="3"></i></div></span></div>
+   <div class="sr d"><span class="n">1</span><span class="pv">80×8</span><span class="v">82.5</span><span class="v">8</span><span><div class="ck"><i data-i="check" data-w="3"></i></div></span></div>
+   <div class="sr d"><span class="n">2</span><span class="pv">80×8</span><span class="v">82.5</span><span class="v">8</span><span><div class="ck"><i data-i="check" data-w="3"></i></div></span></div>
+   <div class="sr c" style="border:0"><span class="n">3</span><span class="pv">80×7</span><span class="v">82.5</span><span class="v">8</span><span><div class="ck"></div></span></div>
+  </div>
+  <div class="mini"><b>Remo con barra</b><span>0/3 · A2</span></div>
+  <div class="mini"><b>Fondos en paralelas</b><span>0/3</span></div>
+  <div style="margin-top:14px;display:flex;gap:3px">
+   <i style="flex:7;height:14px;background:#121212"></i><i style="flex:9;height:14px;border:1.5px solid #121212"></i></div>
+  <div style="display:flex;justify-content:space-between;margin-top:6px"><span class="lbl">Progreso</span><span class="lbl" style="color:#121212">07 / 16</span></div>
+ </div>
+</div></div><div class="cap" style="color:#2b2a28">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q" style="background:linear-gradient(90deg,#d9a600,#ffd23f,#c99a00)"></div>
+  <div class="disp"><svg class="wf" viewBox="0 0 192 192" id="w1" style="position:absolute;inset:0"></svg>
+   <div class="wc"><div class="wl">Press banca · 3/4</div><div class="wbig" style="margin-top:6px">82.5</div><div style="font:800 22px/1 'Big Shoulders Display';color:#FFC400;margin-top:2px">KG × 8</div>
+    <div style="font:500 10px 'DM Mono';color:#fff;margin-top:7px;display:flex;gap:4px;align-items:center"><i data-i="heart" style="color:#FFC400"></i>128 LPM</div></div></div>
+ </div><div class="cap" style="color:#2b2a28">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q" style="background:linear-gradient(90deg,#d9a600,#ffd23f,#c99a00)"></div>
+  <div class="disp" style="background:#FFC400"><svg class="wf" viewBox="0 0 192 192" id="w2" style="position:absolute;inset:0"></svg>
+   <div class="wc"><div class="wl" style="color:#121212">Descanso</div><div class="wbig" style="color:#121212;font-size:64px;margin-top:4px">1:34</div>
+    <div style="font:700 10.5px 'Archivo';color:#121212;margin-top:6px">Remo · 90 × 8</div>
+    <div style="margin-top:8px;font:800 12px/1 'Big Shoulders Display';letter-spacing:1px;background:#121212;color:#FFC400;padding:6px 12px">SALTAR</div></div></div>
+ </div><div class="cap" style="color:#2b2a28">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q" style="background:linear-gradient(90deg,#d9a600,#ffd23f,#c99a00)"></div>
+  <div class="disp"><div class="wc"><div class="wl">Semana 45</div><div class="wbig" style="font-size:48px;margin-top:6px">3/4</div>
+   <div style="display:flex;gap:3px;margin-top:8px"><i style="width:12px;height:12px;background:#FFC400"></i><i style="width:12px;height:12px;border:1.5px solid #555"></i><i style="width:12px;height:12px;background:#FFC400"></i><i style="width:12px;height:12px;border:1.5px solid #555"></i><i style="width:12px;height:12px;background:#FFC400"></i><i style="width:12px;height:12px;border:1.5px solid #555"></i><i style="width:12px;height:12px;border:1.5px solid #555"></i></div>
+   <div style="margin-top:10px;font:900 14px/1 'Big Shoulders Display';letter-spacing:1px;background:#FFC400;color:#121212;padding:7px 16px">ENTRENAR</div></div></div>
+ </div><div class="cap" style="color:#2b2a28">Tile</div></div>
+</div>
+</div>
+<script src="icons-b.js"></script>
+<script>
+icons(2);
+// bisel: rejilla de 16 series en segmentos
+function seg(id,n,done,cur,col,bg){const s=document.getElementById(id);let h='';for(let i=0;i<n;i++){const a0=i*360/n+2,a1=(i+1)*360/n-2;const c=i<done?col:(i===cur?'#fff':bg);h+=`<path d="${arc(96,96,88,a0,a1)}" stroke="${c}" stroke-width="7" fill="none"/>`}s.innerHTML=h}
+seg('w1',16,7,7,'#FFC400','#333');
+(function(){const s=document.getElementById('w2');let h='';for(let i=0;i<60;i++){const a=(i*6-90)*Math.PI/180,on=i<38;h+=`<line x1="${96+Math.cos(a)*92}" y1="${96+Math.sin(a)*92}" x2="${96+Math.cos(a)*(i%5?84:78)}" y2="${96+Math.sin(a)*(i%5?84:78)}" stroke="#121212" stroke-width="${on?2.4:1}" opacity="${on?1:.35}"/>`}s.innerHTML=h})();
+</script>
+</body></html>

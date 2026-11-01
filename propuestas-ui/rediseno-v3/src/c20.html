@@ -1,0 +1,142 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,300..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="frame-b.css">
+<style>
+:root{--sheet:#F1EEE8;--bg:#F1EEE8;--ink:#111111;--muted:#6b6862;--accent:#FF4D2E;--display:'Anybody';--body:'Inter';--mono:'Inter';--rule:#cfcac1;--swBg:#fff;--c1:#FF4D2E;--c2:#2445FF;--c3:#14B8A6;--c4:#FFB800}
+body{background:#E6E2DA}
+.A{font-family:'Anybody'}
+.meta h1{font-family:'Anybody';font-variation-settings:"wdth" 120;font-weight:900;font-size:50px;letter-spacing:-1px;line-height:.9}
+.meta .num{font-family:'Inter';font-weight:700}
+.scr{background:#F1EEE8}
+.lbl{font:600 10px/1 'Inter';letter-spacing:.4px;color:#6b6862}
+.pad{padding:2px 18px}
+.top{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px}
+.huge{font-family:'Anybody';font-weight:900;line-height:.82;letter-spacing:-2px}
+.blk{padding:10px 18px 12px;color:#fff;display:flex;justify-content:space-between;align-items:flex-end}
+.blk .n{font:600 12px/1.3 'Inter'}
+.blk .n b{display:block;font-family:'Anybody';font-variation-settings:"wdth" 110;font-weight:800;font-size:17px;letter-spacing:-.3px}
+.blk .v{font-family:'Anybody';font-variation-settings:"wdth" 70;font-weight:900;font-size:46px;line-height:.85;letter-spacing:-1px;text-align:right}
+.blk .v small{font-size:15px;font-variation-settings:"wdth" 100;font-weight:700;margin-left:2px}
+.go{display:flex;align-items:center;justify-content:space-between;margin:12px 18px 0;padding:12px 0;border-top:3px solid #111;border-bottom:3px solid #111}
+.go b{font-family:'Anybody';font-variation-settings:"wdth" 140;font-weight:900;font-size:26px;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+.go span{display:flex;align-items:center;gap:6px;font:700 12px 'Inter'}
+.stat{display:flex;margin:12px 18px 0}
+.stat div{flex:1}
+.stat b{display:block;font-family:'Anybody';font-variation-settings:"wdth" 60;font-weight:900;font-size:52px;line-height:.85;letter-spacing:-1px}
+.stat b small{font-size:18px;font-variation-settings:"wdth" 100}
+.nav{position:absolute;left:0;right:0;bottom:0;height:62px;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #d6d1c8;background:#F1EEE8}
+.nav div{font-family:'Anybody';font-variation-settings:"wdth" 95;font-weight:800;font-size:13px;color:#a29e96;letter-spacing:-.2px}
+.nav .on{color:#111;text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;text-decoration-color:var(--c1)}
+/* entreno */
+.wt{display:flex;justify-content:space-between;align-items:center;margin:4px 0 6px}
+.wt b{font-family:'Anybody';font-variation-settings:"wdth" 130;font-weight:900;font-size:22px}
+.wt span{font:600 11px 'Inter';color:#6b6862}
+.fin{font:700 12px 'Inter';padding:9px 14px;background:#111;color:#F1EEE8;border-radius:22px}
+.restline{display:flex;align-items:baseline;gap:10px;padding:6px 18px 8px;border-bottom:3px solid #111}
+.restline b{font-family:'Anybody';font-variation-settings:"wdth" 60;font-weight:900;font-size:54px;line-height:.85}
+.restline span{font:600 11.5px/1.35 'Inter';flex:1}
+.restline em{font:700 12px 'Inter';font-style:normal;text-decoration:underline;text-underline-offset:4px}
+.cur{background:var(--c1);color:#111;padding:12px 18px 14px}
+.cur .h{display:flex;justify-content:space-between;font:700 12px 'Inter'}
+.cur .big{display:flex;align-items:flex-end;gap:8px;margin-top:6px}
+.cur .big b{font-family:'Anybody';font-variation-settings:"wdth" 55;font-weight:900;font-size:112px;line-height:.78;letter-spacing:-3px}
+.cur .big span{font-family:'Anybody';font-variation-settings:"wdth" 90;font-weight:900;font-size:44px;line-height:.9}
+.cur .big small{font:700 13px 'Inter';display:block;margin-bottom:4px}
+.sets{display:flex;gap:14px;margin-top:12px;border-top:2px solid #111;padding-top:8px}
+.sets div{font-family:'Anybody';font-variation-settings:"wdth" 70;font-weight:800;font-size:20px;line-height:1}
+.sets div small{display:block;font:600 9.5px 'Inter';margin-top:3px}
+.sets .d{text-decoration:line-through;text-decoration-thickness:2px;opacity:.55}
+.sets .c{border-bottom:3px solid #111}
+.pmn{display:flex;gap:8px;margin-top:12px}
+.pmn div{flex:1;height:44px;border-radius:22px;border:2.5px solid #111;display:flex;align-items:center;justify-content:center;font:800 14px 'Inter';gap:6px}
+.pmn .k{background:#111;color:var(--c1);flex:1.4}
+/* reloj */
+.disp{background:#000}
+.wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+</style></head><body>
+<div class="sheet">
+<aside class="meta">
+ <div class="num">Concepto 20 · Móvil + reloj</div>
+ <h1>Tipo&shy;gráfico</h1>
+ <p class="lead">Sin tarjetas ni marcos: la tipografía variable es la interfaz. El ancho de las letras se ajusta para que cada número llene su sitio y cada ejercicio tiene su color de bloque plano, el mismo en el móvil, el historial y el reloj. Mucho ritmo, mucho contraste.</p>
+ <h4>Paleta</h4>
+ <div class="pal">
+  <div class="sw"><b style="background:#F1EEE8"></b><span><em>Papel</em>#F1EEE8</span></div>
+  <div class="sw"><b style="background:#111"></b><span><em>Tinta</em>#111111</span></div>
+  <div class="sw"><b style="background:#FF4D2E"></b><span><em>Empuje</em>#FF4D2E</span></div>
+  <div class="sw"><b style="background:#2445FF"></b><span><em>Tirón</em>#2445FF</span></div>
+  <div class="sw"><b style="background:#14B8A6"></b><span><em>Pierna</em>#14B8A6</span></div>
+  <div class="sw"><b style="background:#FFB800"></b><span><em>Core</em>#FFB800</span></div>
+ </div>
+ <h4>Tipografía</h4>
+ <div class="ty">
+  <div><span class="s" style="font-family:'Anybody';font-variation-settings:'wdth' 150;font-weight:900">PRESS</span><small>Anybody · wdth 150</small></div>
+  <div><span class="s" style="font-family:'Anybody';font-variation-settings:'wdth' 55;font-weight:900;font-size:40px;line-height:1">82.5</span><small>Anybody · wdth 55</small></div>
+ </div>
+ <h4>Claves</h4>
+ <ul><li>El color lo da el patrón de movimiento, no el estado.</li><li>Hecho = tachado; ahora = subrayado grueso.</li><li>En el reloj solo hay números, al máximo tamaño.</li></ul>
+</aside>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span>21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad">
+  <div class="top"><span class="lbl">Domingo 1 de noviembre</span><span class="lbl">Hola, Juan</span></div>
+  <div class="lbl" style="margin-top:12px;color:#111">Hoy toca · 5/3/1 semana 2</div>
+  <div class="huge" id="fit" style="font-size:96px;font-variation-settings:'wdth' 125;margin-top:6px;white-space:nowrap">PRESS</div>
+  <div class="lbl" style="margin:8px 0 12px">5 ejercicios · 55 min · 9,8 t</div>
+ </div>
+ <div class="blk" style="background:var(--c1);color:#111"><div class="n"><b>Press militar</b>3 × 3 · última 5+</div><div class="v">57.5<small>kg</small></div></div>
+ <div class="blk" style="background:#FF8A6E;color:#111"><div class="n"><b>Press militar BBB</b>5 × 10</div><div class="v">32.5<small>kg</small></div></div>
+ <div class="blk" style="background:var(--c2)"><div class="n"><b>Dominadas</b>5 × 10</div><div class="v">PC</div></div>
+ <div class="go"><b><i data-i="play"></i>EMPEZAR</b><span><i data-i="watch"></i>En el reloj</span></div>
+ <div class="stat"><div><span class="lbl">Semana</span><b>3<small>/4</small></b></div><div><span class="lbl">Racha</span><b>12<small> sem</small></b></div><div><span class="lbl">Volumen</span><b>18.4<small> t</small></b></div></div>
+ <div style="display:flex;gap:4px;margin:14px 18px 0"><div style="flex:1;text-align:center"><div style="height:26px;background:#FF4D2E"></div><div style="font:700 10px Inter;margin-top:4px;color:#111">L</div></div><div style="flex:1;text-align:center"><div style="height:26px;background:#d9d4ca"></div><div style="font:700 10px Inter;margin-top:4px;color:#a29e96">M</div></div><div style="flex:1;text-align:center"><div style="height:26px;background:#2445FF"></div><div style="font:700 10px Inter;margin-top:4px;color:#111">X</div></div><div style="flex:1;text-align:center"><div style="height:26px;background:#d9d4ca"></div><div style="font:700 10px Inter;margin-top:4px;color:#a29e96">J</div></div><div style="flex:1;text-align:center"><div style="height:26px;background:#14B8A6"></div><div style="font:700 10px Inter;margin-top:4px;color:#111">V</div></div><div style="flex:1;text-align:center"><div style="height:26px;background:#d9d4ca"></div><div style="font:700 10px Inter;margin-top:4px;color:#a29e96">S</div></div><div style="flex:1;text-align:center"><div style="height:26px;background:#d9d4ca"></div><div style="font:700 10px Inter;margin-top:4px;color:#a29e96">D</div></div></div>
+ <div class="nav"><div class="on">Entrenar</div><div>Historial</div><div>Progreso</div><div>Perfil</div></div>
+</div></div><div class="cap">Inicio · Hoy toca</div></div>
+
+<div class="dev"><div class="phone"><div class="scr"><div class="cam"></div>
+ <div class="sb"><span>21:24</span><span class="r"><i data-i="sig"></i><i data-i="wifi"></i><i data-i="bat"></i></span></div>
+ <div class="pad"><div class="wt"><div><b>TORSO A</b><br><span>38:20 · 7 de 16 series</span></div><span class="fin">Terminar</span></div></div>
+ <div class="restline"><b>1:34</b><span>de descanso<br>luego Remo · 90 × 8</span><em>Saltar</em></div>
+ <div class="cur">
+  <div class="h"><span>Press banca con barra</span><span>Serie 3 de 4</span></div>
+  <div class="big"><b>82.5</b><div><small>kg</small><span>×8</span></div></div>
+  <div style="font:600 11.5px 'Inter';margin-top:8px">Anterior 80 × 7 · +2,5 kg</div>
+  <div class="sets"><div class="d">40×10<small>Calent.</small></div><div class="d">82.5×8<small>Serie 1</small></div><div class="d">82.5×8<small>Serie 2</small></div><div class="c">82.5×8<small>Ahora</small></div></div>
+  <div class="pmn"><div>− kg</div><div>+ kg</div><div class="k"><i data-i="check" data-w="3"></i>HECHA</div></div>
+ </div>
+ <div class="blk" style="background:var(--c2)"><div class="n"><b>Remo con barra</b>3 × 8 · superserie</div><div class="v">90<small>kg</small></div></div>
+ <div class="blk" style="background:#FF8A6E;color:#111"><div class="n"><b>Fondos en paralelas</b>3 × 12</div><div class="v">PC</div></div>
+ <div class="blk" style="background:var(--c4);color:#111"><div class="n"><b>Plancha</b>3 × 45 s</div><div class="v">45<small>s</small></div></div>
+ <div style="display:flex;justify-content:space-between;padding:14px 18px 0;font:700 11px Inter"><span>Progreso</span><span>7 / 16</span></div><div style="margin:6px 18px 0;height:6px;background:#d9d4ca"><div style="width:44%;height:100%;background:#111"></div></div>
+</div></div><div class="cap">Entreno en curso</div></div>
+
+<div class="watches">
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp" style="background:#FF4D2E;color:#111"><div class="wc">
+   <div style="font:700 9px 'Inter'">PRESS BANCA · 3/4</div>
+   <div style="font-family:'Anybody';font-variation-settings:'wdth' 55;font-weight:900;font-size:92px;line-height:.8;letter-spacing:-3px;margin-top:4px">82.5</div>
+   <div style="font-family:'Anybody';font-variation-settings:'wdth' 90;font-weight:900;font-size:30px;line-height:.9">×8</div>
+   <div style="font:700 9.5px 'Inter';margin-top:4px">♥ 128</div></div></div>
+ </div><div class="cap">Reloj · Serie</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp"><div class="wc">
+   <div style="font-family:'Anybody';font-variation-settings:'wdth' 50;font-weight:900;font-size:118px;line-height:.78;letter-spacing:-4px;color:#F1EEE8">1:34</div>
+   <div style="font:700 10px 'Inter';margin-top:6px;color:#2445FF;background:#F1EEE8;padding:3px 8px;border-radius:9px">Remo · 90 × 8</div></div></div>
+ </div><div class="cap">Reloj · Descanso</div></div>
+ <div class="dev"><div class="watch"><div class="case"></div><div class="btn a"></div><div class="btn b"></div><div class="btn q"></div>
+  <div class="disp" style="background:#F1EEE8;color:#111"><div class="wc">
+   <div style="font:700 9px 'Inter';margin-bottom:6px">ESTA SEMANA</div>
+   <div style="font-family:'Anybody';font-variation-settings:'wdth' 60;font-weight:900;font-size:100px;line-height:.8;letter-spacing:-3px">3<span style="color:#FF4D2E">/4</span></div>
+   <div style="font:800 11px 'Inter';margin-top:6px;border-bottom:3px solid #FF4D2E">ENTRENAR</div></div></div>
+ </div><div class="cap">Tile</div></div>
+</div>
+</div>
+<script src="icons-b.js"></script>
+<script>icons(2.2);
+document.fonts.ready.then(()=>{const e=document.getElementById('fit');e.style.display='inline-block';const w=e.parentElement.clientWidth-36;let f=110;e.style.fontSize=f+'px';while(e.getBoundingClientRect().width>w&&f>40){f-=1;e.style.fontSize=f+'px'}});
+// el corazón del reloj como icono
+document.querySelectorAll('.wc div').forEach(d=>{if(d.textContent.trim()==='♥ 128'){d.innerHTML='<i data-i="heart"></i> 128';}});icons(2.2);
+</script>
+</body></html>
