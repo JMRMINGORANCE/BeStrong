@@ -754,7 +754,7 @@ private fun ExerciseCard(
     if (substituting) SubstituteDialog(vm, we.id) { substituting = false }
     var showInfo by remember { mutableStateOf(false) }
     var showPlates by remember { mutableStateOf(false) }
-    val recordVideo = rememberSetVideoRecorder(vm, we)
+    val recordVideo = rememberSetVideoRecorder(we)
     // Arrastrar para reordenar: pulsación larga en el nombre y mover arriba/abajo
     var dragY by remember { mutableFloatStateOf(0f) }
     var cardHeight by remember { mutableIntStateOf(1) }

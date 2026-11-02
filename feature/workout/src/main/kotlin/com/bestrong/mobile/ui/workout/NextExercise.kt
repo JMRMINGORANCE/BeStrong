@@ -126,9 +126,7 @@ internal fun NextExercisePanel(
             }
         }
         // Discos por lado (barra) y la nota fija (asiento, agarre…): lo que se prepara antes de empezar
-        if (we.exercise.tracking == TrackingType.WEIGHT_REPS && set.weightKg > 0 &&
-            (we.exercise.equipment == Equipment.BARBELL || we.exercise.equipment == Equipment.SMITH)
-        ) {
+        if (loadsBar(we.exercise, set)) {
             val bar = barKg?.let { unit.fromKg(it) } ?: PlateCalculator.defaultBar(unit)
             val load = PlateCalculator.calculate(unit.fromKg(set.weightKg), unit, bar)
             if (load.perSide.isNotEmpty()) {
@@ -158,4 +156,10 @@ internal fun NextExercisePanel(
             Text(stringResource(R.string.next_exercise_start), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
     }
+}
+
+/** Serie con peso en barra (o multipower): se enseñan los discos por lado. */
+private fun loadsBar(exercise: com.bestrong.core.model.Exercise, set: com.bestrong.core.model.WorkoutSet): Boolean {
+    val barbell = exercise.equipment == com.bestrong.core.model.Equipment.BARBELL || exercise.equipment == com.bestrong.core.model.Equipment.SMITH
+    return barbell && exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS && set.weightKg > 0
 }

@@ -7,21 +7,36 @@
     <ID>CyclomaticComplexMethod:ActiveWorkoutScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ActiveWorkoutScreen( vm: ActiveWorkoutViewModel, onAddExercises: () -&gt; Unit, onBack: () -&gt; Unit, onFinished: () -&gt; Unit, /** Tras descartar: a Inicio, donde se ofrece deshacerlo. */ onDiscarded: () -&gt; Unit = onFinished, )</ID>
     <ID>CyclomaticComplexMethod:AppearanceCard.kt$@Composable fun AppearanceCard(settings: UserSettings, onUpdate: ((UserSettings) -&gt; UserSettings) -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:BeStrongApp.kt$@Composable fun BeStrongApp(launchRequest: StateFlow&lt;LaunchRequest?&gt;, onLaunchHandled: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:CelebrationSummary.kt$@Composable private fun DetailsCard(summary: FinishedSummary, dumbbellTotal: Boolean)</ID>
+    <ID>CyclomaticComplexMethod:CommandCenter.kt$@Composable internal fun UpcomingLoadCards( w: Workout, vm: ActiveWorkoutViewModel, bests: Map&lt;String, Pair&lt;Double, Double&gt;&gt;, barKgFor: (String) -&gt; Double?, modifier: Modifier = Modifier, )</ID>
     <ID>CyclomaticComplexMethod:Csv.kt$Csv$fun parse(text: String, delimiter: Char = detectDelimiter(text)): List&lt;List&lt;String&gt;&gt;</ID>
+    <ID>CyclomaticComplexMethod:CycleTimelineCard.kt$@Composable private fun IntensityGrid(t: CycleTimeline, current: CycleWeek, exerciseName: (String) -&gt; String)</ID>
     <ID>CyclomaticComplexMethod:EditPastWorkout.kt$@Composable fun EditPastSetDialog( set: WorkoutSet, tracking: TrackingType, onSave: (WorkoutSet) -&gt; Unit, onDelete: () -&gt; Unit, onDismiss: () -&gt; Unit, /** 2 con «suma de las dos mancuernas»: se ve y se escribe el total del par, y se guarda el de una. */ weightFactor: Int = 1, )</ID>
     <ID>CyclomaticComplexMethod:ExerciseDetailScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (() -&gt; Unit)?, onDeleted: () -&gt; Unit = { onBack?.invoke() })</ID>
+    <ID>CyclomaticComplexMethod:ExerciseTimeline.kt$ExerciseTimeline$fun milestones(history: List&lt;Workout&gt;, exerciseId: String): List&lt;Milestone&gt;</ID>
+    <ID>CyclomaticComplexMethod:ExerciseTimelineSection.kt$@Composable private fun value(m: Milestone, exercise: Exercise, factor: Int): String?</ID>
+    <ID>CyclomaticComplexMethod:FocusMode.kt$@Composable internal fun FocusSetView( w: Workout, previous: (String) -&gt; List&lt;WorkoutSet&gt;, vm: ActiveWorkoutViewModel, dumbbellTotal: Boolean, barKgFor: (String) -&gt; Double?, pinnedNote: (String) -&gt; String?, onFinish: () -&gt; Unit, onShowList: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
     <ID>CyclomaticComplexMethod:GymProfiles.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun GymEditorDialog(gym: GymProfile, canDelete: Boolean, onSave: (GymProfile) -&gt; Unit, onDelete: () -&gt; Unit, onDismiss: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:HistoryScreen.kt$@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class) @Composable fun HistoryScreen( vm: HistoryViewModel, onWorkoutStarted: () -&gt; Unit, onGoTrain: () -&gt; Unit = {}, /** Entreno a abrir al llegar (desde la búsqueda universal); [onWorkoutOpened] avisa de que ya se abrió. */ openWorkoutId: String? = null, onWorkoutOpened: () -&gt; Unit = {}, )</ID>
     <ID>CyclomaticComplexMethod:HistoryScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -&gt; Unit)?, onWorkoutStarted: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:HomeDashboard.kt$@Composable private fun MusclesThisWeek(muscles: Map&lt;MuscleGroup, Double&gt;, target: Int, lagging: List&lt;Pair&lt;MuscleGroup, Double&gt;&gt;, onOpenMuscle: (MuscleGroup) -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:HomeScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun HomeScreen( vm: HomeViewModel, onOpenWorkout: () -&gt; Unit, onEditRoutine: (String?) -&gt; Unit, onOpenPlanning: () -&gt; Unit = {}, /** Abre la biblioteca filtrada por ese músculo. */ onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -&gt; Unit = {}, /** Abre la ficha del ejercicio (su progreso). */ onOpenExercise: (String) -&gt; Unit = {}, /** Búsqueda universal (lupa del saludo). */ onOpenSearch: () -&gt; Unit = {}, )</ID>
     <ID>CyclomaticComplexMethod:Labels.kt$@Composable @ReadOnlyComposable fun MuscleGroup.label(): String</ID>
     <ID>CyclomaticComplexMethod:Labels.kt$@StringRes fun MuscleGroup.labelRes(): Int</ID>
+    <ID>CyclomaticComplexMethod:MenuScreens.kt$@Composable fun SummaryScreen(session: WorkoutSession, onDone: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:MonthlyReport.kt$MonthlyReport$private fun draw(c: Canvas, context: Context, month: YearMonth, s: PeriodSummary, trainedDays: Set&lt;LocalDate&gt;, unit: WeightUnit)</ID>
+    <ID>CyclomaticComplexMethod:PatternBalanceCard.kt$@Composable private fun Radar(b: PatternBalance, modifier: Modifier)</ID>
     <ID>CyclomaticComplexMethod:PlanningScreen.kt$@Composable private fun CalendarCard(vm: PlanningViewModel, ui: PlanningUi)</ID>
+    <ID>CyclomaticComplexMethod:ProfileScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ProfileScreen( vm: ProfileViewModel, onOpenMeasurements: () -&gt; Unit, onOpenExercise: (String) -&gt; Unit, onGoTrain: () -&gt; Unit = {}, /** Página de Ajustes a abrir al llegar (nombre de la página, desde la búsqueda universal). */ openSettingsPage: String? = null, onSettingsPageOpened: () -&gt; Unit = {}, )</ID>
     <ID>CyclomaticComplexMethod:ProfileScreen.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -&gt; Unit, onOpenExercise: (String) -&gt; Unit, onGoTrain: () -&gt; Unit = {})</ID>
     <ID>CyclomaticComplexMethod:RepCounter.kt$RepCounter$override fun onSensorChanged(event: SensorEvent)</ID>
+    <ID>CyclomaticComplexMethod:RoutineEditorScreen.kt$@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) @Composable fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -&gt; Unit, onClose: () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:SetRow.kt$@Composable fun SetRow( index: Int, set: WorkoutSet, previous: WorkoutSet?, tracking: TrackingType, /** Medida del ritmo del cardio (min/km, /500 m, km/h). */ pace: com.bestrong.core.util.PaceStyle = com.bestrong.core.util.PaceStyle.PER_KM, onWeightKg: (Double) -&gt; Unit, onReps: (Int) -&gt; Unit, onDuration: (Int) -&gt; Unit, onToggle: () -&gt; Unit, unilateral: Boolean = false, onRepsRight: (Int) -&gt; Unit = {}, onDistance: (Double) -&gt; Unit = {}, /** Cardio: arranca el cronómetro (se para al marcar la serie). */ onStartTimer: () -&gt; Unit = {}, onNote: (String) -&gt; Unit = {}, onAssisted: (Boolean) -&gt; Unit = {}, /** Series pendientes posteriores del mismo tipo a las que se puede copiar esta (0 = no se ofrece). */ followingCount: Int = 0, onCopyFollowing: () -&gt; Unit = {}, onDuplicate: () -&gt; Unit = {}, onStepWeight: (Int) -&gt; Unit = {}, onStepReps: (Int) -&gt; Unit = {}, /** 2 = se muestra y escribe el total de las dos mancuernas (se guarda por mancuerna). */ weightFactor: Int = 1, /** Salto de peso de los botones ± (el propio del ejercicio); null = el de la unidad. */ stepKg: Double? = null, /** Serie hecha que supera tu mejor marca (1RM estimado o peso máximo). */ isRecord: Boolean = false, onType: (SetType) -&gt; Unit, onRpe: (Double?) -&gt; Unit, onDelete: () -&gt; Unit, )</ID>
     <ID>CyclomaticComplexMethod:SetRow.kt$@Composable private fun NumberField( value: String, description: String, modifier: Modifier, decimal: Boolean = false, signed: Boolean = false, syncKey: Int = 0, onFocus: (Boolean) -&gt; Unit = {}, /** Último campo de la fila: «Hecho» cierra el teclado (si no, «Siguiente» lo dejaba tapando la pantalla). */ last: Boolean = false, onChange: (String) -&gt; Unit, )</ID>
+    <ID>CyclomaticComplexMethod:SetVideosSection.kt$@Composable fun SetVideosSection(vm: ExercisesViewModel, exercise: Exercise)</ID>
     <ID>CyclomaticComplexMethod:Theme.kt$@Composable fun BeStrongTheme(appearance: Appearance = Appearance(), content: @Composable () -&gt; Unit)</ID>
     <ID>CyclomaticComplexMethod:TimerScreens.kt$@OptIn(ExperimentalMaterial3Api::class) @Composable fun IntervalTimerScreen(plan: IntervalPlan, onBack: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:UniversalSearch.kt$@OptIn(ExperimentalLayoutApi::class) @Composable fun UniversalSearchScreen( vm: HomeViewModel, onBack: () -&gt; Unit, onOpenWorkout: () -&gt; Unit, onEditRoutine: (String) -&gt; Unit, onOpenExercise: (String) -&gt; Unit, onOpenPastWorkout: (String) -&gt; Unit, onOpenSettings: (String) -&gt; Unit, )</ID>
     <ID>CyclomaticComplexMethod:VoiceSetParser.kt$VoiceSetParser$fun parse(text: String): SpokenSet</ID>
     <ID>CyclomaticComplexMethod:VoiceSetParser.kt$VoiceSetParser$private fun tokenize(text: String): List&lt;Tok&gt;</ID>
     <ID>CyclomaticComplexMethod:WatchSyncService.kt$WatchSyncService$private suspend fun handle(event: DataEvent)</ID>
@@ -33,6 +48,7 @@
     <ID>ForEachOnRange:AdvancedStatsCards.kt$0..2</ID>
     <ID>ForEachOnRange:PlanningScreen.kt$2..6</ID>
     <ID>ForEachOnRange:SessionRating.kt$1..5</ID>
+    <ID>LargeClass:ActiveWorkoutViewModel.kt$ActiveWorkoutViewModel : ViewModel</ID>
     <ID>LongMethod:MonthlyReport.kt$MonthlyReport$private fun draw(c: Canvas, context: Context, month: YearMonth, s: PeriodSummary, trainedDays: Set&lt;LocalDate&gt;, unit: WeightUnit)</ID>
     <ID>LongMethod:WorkoutCsv.kt$WorkoutCsv$fun import( text: String, known: List&lt;Exercise&gt;, zone: ZoneId = ZoneId.systemDefault(), strongUnit: WeightUnit = WeightUnit.KG, ): ImportResult</ID>
     <ID>LongMethod:WorkoutShareCard.kt$WorkoutShareCard$fun render(context: Context, w: Workout, records: List&lt;PersonalRecord&gt;, unit: WeightUnit, weightFactor: (com.bestrong.core.model.Exercise) -&gt; Int = { 1 }): Bitmap</ID>
@@ -40,6 +56,7 @@
     <ID>LongParameterList:HomeViewModel.kt$HomeViewModel$( private val repo: BeStrongRepository, private val actions: WorkoutActions, private val watchSync: WatchSync, private val settingsStore: SettingsStore, private val watchPush: WatchPush, private val planning: PlanningStore, private val healthReader: HealthConnectReader, private val intakeStore: IntakeStore, @ApplicationContext private val context: Context, private val savedState: androidx.lifecycle.SavedStateHandle, )</ID>
     <ID>LoopWithTooManyJumpStatements:VoiceSetParser.kt$VoiceSetParser$while</ID>
     <ID>MatchingDeclarationName:Charts.kt$ChartPoint</ID>
+    <ID>MatchingDeclarationName:Theme.kt$StatusColors</ID>
     <ID>MatchingDeclarationName:TimerScreens.kt$IntervalRoute</ID>
     <ID>MatchingDeclarationName:Units.kt$WeightUnit</ID>
     <ID>MatchingDeclarationName:Vibration.kt$VibrationStyle</ID>
@@ -53,12 +70,16 @@
     <ID>ReturnCount:BarVelocity.kt$BarVelocity$fun velocityLoss(velocities: List&lt;Double&gt;): Double</ID>
     <ID>ReturnCount:CardioSession.kt$CardioSession$fun finish()</ID>
     <ID>ReturnCount:ExerciseService.kt$ExerciseService$override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int</ID>
+    <ID>ReturnCount:ExerciseTimeline.kt$ExerciseTimeline$private fun isDeload(sessions: List&lt;Pair&lt;Workout, WorkoutExercise&gt;&gt;, i: Int): Boolean</ID>
     <ID>ReturnCount:GymProfile.kt$GymProfile$fun nearestBarbell(targetKg: Double): Double</ID>
+    <ID>ReturnCount:NextExercise.kt$internal fun nextExerciseAfterRest(w: Workout, rest: RestState?): Pair&lt;Int, WorkoutSet&gt;?</ID>
     <ID>ReturnCount:NextTime.kt$NextTime$fun suggest(we: WorkoutExercise, stepKg: Double): NextTimeSuggestion?</ID>
     <ID>ReturnCount:OneRepMax.kt$OneRepMax$fun estimate(weightKg: Double, reps: Int, formula: Formula): Double</ID>
     <ID>ReturnCount:Periodization.kt$Periodization$internal fun linearWeight(exerciseId: String, s: LoadScheme.Linear, active: ActiveProgram, done: List&lt;Workout&gt;): Double</ID>
     <ID>ReturnCount:Planning.kt$Calisthenics$fun next(exerciseId: String, history: List&lt;Workout&gt;): String?</ID>
+    <ID>ReturnCount:PlanningViewModel.kt$PlanningViewModel$private fun cycleTimeline( s: com.bestrong.mobile.data.PlanningState, active: com.bestrong.core.training.ActiveProgram?, history: List&lt;com.bestrong.core.model.Workout&gt;, routines: List&lt;Routine&gt;, today: LocalDate, ): Pair&lt;com.bestrong.core.training.CycleTimeline?, String?&gt;</ID>
     <ID>ReturnCount:ProfileViewModel.kt$ProfileViewModel$private fun challenge(history: List&lt;com.bestrong.core.model.Workout&gt;, unit: com.bestrong.core.util.WeightUnit): Triple&lt;String, Double, Long&gt;?</ID>
+    <ID>ReturnCount:RestScreen.kt$internal fun nextExerciseTransition(w: Workout): Pair&lt;WorkoutExercise, WorkoutSet&gt;?</ID>
     <ID>ReturnCount:Strength.kt$Strength$fun predictDate(points: List&lt;Pair&lt;Long, Double&gt;&gt;, target: Double, nowEpochMs: Long = System.currentTimeMillis()): Long?</ID>
     <ID>ReturnCount:Strength.kt$Strength$fun standing(exerciseId: String, oneRepMaxKg: Double, bodyWeightKg: Double, sex: Sex): StrengthStanding?</ID>
     <ID>ReturnCount:Tempo.kt$Tempo.Companion$fun parse(text: String?): Tempo?</ID>

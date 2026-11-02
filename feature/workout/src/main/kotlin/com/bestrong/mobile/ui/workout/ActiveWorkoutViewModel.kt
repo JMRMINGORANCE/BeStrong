@@ -87,20 +87,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     @ApplicationContext private val appContext: Context,
     private val savedState: SavedStateHandle,
     private val media: ExerciseMediaStore,
-    private val setVideos: com.bestrong.mobile.data.SetVideoStore,
 ) : ViewModel() {
-
-    /** Archivo donde la cámara deja el vídeo de una serie (propuesta 04: técnica en vídeo). */
-    fun newSetVideoFile(exerciseId: String): java.io.File = setVideos.newFile(exerciseId)
-
-    /** Guarda el vídeo recién grabado con los datos de la serie (o lo borra si se canceló). */
-    fun saveSetVideo(file: java.io.File, ok: Boolean, set: WorkoutSet, setNumber: Int) = viewModelScope.launch {
-        if (!ok) {
-            setVideos.discard(file)
-            return@launch
-        }
-        setVideos.commit(file, com.bestrong.mobile.data.SetVideoMeta(System.currentTimeMillis(), set.weightKg, set.reps, set.rpe, setNumber))
-    }
 
     /** Modo pareja: true = se está viendo y editando el entreno de la otra persona (sobrevive a la muerte del proceso). */
     // (y lo sabe WorkoutActions: las teclas de volumen marcan la serie de quien se ve)

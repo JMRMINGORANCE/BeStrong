@@ -187,9 +187,7 @@ private fun NextExerciseContent(we: WorkoutExercise, set: WorkoutSet, remaining:
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
         )
-        if (we.exercise.tracking == TrackingType.WEIGHT_REPS && set.weightKg > 0 &&
-            (we.exercise.equipment == Equipment.BARBELL || we.exercise.equipment == Equipment.SMITH)
-        ) {
+        if (loadsBar(we.exercise, set)) {
             val load = PlateCalculator.calculate(unit.fromKg(set.weightKg), unit, unit.fromKg(settings.barKgFor(we.exercise.id)))
             if (load.perSide.isNotEmpty()) {
                 Text(
@@ -210,4 +208,10 @@ private fun NextExerciseContent(we: WorkoutExercise, set: WorkoutSet, remaining:
             TextButton(onClick = { session.adjustRest(15) }, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_rest_plus))) { Text("+15") }
         }
     }
+}
+
+/** Serie con peso en barra (o multipower): se enseñan los discos por lado. */
+private fun loadsBar(exercise: com.bestrong.core.model.Exercise, set: com.bestrong.core.model.WorkoutSet): Boolean {
+    val barbell = exercise.equipment == com.bestrong.core.model.Equipment.BARBELL || exercise.equipment == com.bestrong.core.model.Equipment.SMITH
+    return barbell && exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS && set.weightKg > 0
 }

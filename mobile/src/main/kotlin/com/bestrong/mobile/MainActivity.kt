@@ -188,27 +188,31 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         // Al volver desde Recientes Android repite el intent original: no se vuelve a empezar ni importar nada
-        if (intent != null && intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
-        val data = intent?.data
-        if (intent?.action == Intent.ACTION_VIEW && data?.scheme == RoutineLink.SCHEME && data.host == RoutineLink.HOST) {
-            launchRequest.value = LaunchRequest.ImportRoutine(data.toString())
-            return
-        }
-        if (intent?.action == Intent.ACTION_VIEW && data?.scheme == RoutineLink.SCHEME && data.host == com.bestrong.core.sync.SyncContract.DEEP_LINK_WORKOUT_HOST) {
-            data.lastPathSegment?.takeIf { it.isNotBlank() }?.let { launchRequest.value = LaunchRequest.OpenPastWorkout(it) }
-            return
-        }
-        launchRequest.value = when (intent?.action) {
-            ACTION_OPEN_WORKOUT -> LaunchRequest.OpenWorkout
-            ACTION_START_EMPTY -> LaunchRequest.StartEmpty
-            ACTION_START_ROUTINE -> intent.getStringExtra(EXTRA_ROUTINE_ID)?.let {
-                // Desde el botón «Empezar» del recordatorio: el aviso ya no hace falta
-                com.bestrong.mobile.notify.Notifier.cancelReminder(this)
-                LaunchRequest.StartRoutine(it)
-            }
-            AppIntents.ACTION_OPEN_MUSCLE -> intent.getStringExtra(AppIntents.EXTRA_MUSCLE)?.let { LaunchRequest.OpenMuscle(it) }
+        if (intent == null || intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
+        launchRequest.value = deepLinkRequest(intent) ?: actionRequest(intent) ?: launchRequest.value
+    }
+
+    /** Enlaces bestrong://: rutina compartida (routine?d=…) o entreno abierto desde el reloj (workout/<id>). */
+    private fun deepLinkRequest(intent: Intent): LaunchRequest? {
+        val data = intent.data?.takeIf { intent.action == Intent.ACTION_VIEW && it.scheme == RoutineLink.SCHEME }
+        return when (data?.host) {
+            RoutineLink.HOST -> LaunchRequest.ImportRoutine(data.toString())
+            com.bestrong.core.sync.SyncContract.DEEP_LINK_WORKOUT_HOST -> data.lastPathSegment?.takeIf { it.isNotBlank() }?.let { LaunchRequest.OpenPastWorkout(it) }
             else -> null
-        } ?: launchRequest.value
+        }
+    }
+
+    /** Acciones de notificaciones, widget y accesos directos. */
+    private fun actionRequest(intent: Intent): LaunchRequest? = when (intent.action) {
+        ACTION_OPEN_WORKOUT -> LaunchRequest.OpenWorkout
+        ACTION_START_EMPTY -> LaunchRequest.StartEmpty
+        ACTION_START_ROUTINE -> intent.getStringExtra(EXTRA_ROUTINE_ID)?.let {
+            // Desde el botón «Empezar» del recordatorio: el aviso ya no hace falta
+            com.bestrong.mobile.notify.Notifier.cancelReminder(this)
+            LaunchRequest.StartRoutine(it)
+        }
+        AppIntents.ACTION_OPEN_MUSCLE -> intent.getStringExtra(AppIntents.EXTRA_MUSCLE)?.let { LaunchRequest.OpenMuscle(it) }
+        else -> null
     }
 
     companion object {
