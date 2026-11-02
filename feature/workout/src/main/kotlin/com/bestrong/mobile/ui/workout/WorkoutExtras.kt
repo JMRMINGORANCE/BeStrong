@@ -3,28 +3,23 @@ package com.bestrong.mobile.ui.workout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -45,53 +40,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bestrong.core.model.Workout
-import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.workout.RestTimerController
 import kotlinx.coroutines.delay
-
-/**
- * Modo una mano (pantalla exterior del Fold): completar la siguiente serie y terminar,
- * abajo y en grande, al alcance del pulgar.
- */
-@Composable
-fun OneHandedBar(w: Workout, vm: ActiveWorkoutViewModel, onFinish: () -> Unit) {
-    val next = WorkoutEditor.upcomingSet(w)
-    // Color explícito: la superficie del tema es transparente (deja ver el fondo de la app)
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer, tonalElevation = 3.dp) {
-        Row(
-            Modifier.fillMaxWidth().navigationBarsPadding().padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (next != null) {
-                val (index, set) = next
-                val we = w.exercises[index]
-                val setNumber = we.sets.indexOfFirst { it.id == set.id } + 1
-                Button(
-                    onClick = { vm.toggleSet(we.id, set.id) },
-                    modifier = Modifier.weight(1f).heightIn(min = 56.dp),
-                ) {
-                    Icon(Icons.Default.Check, null)
-                    Text(
-                        stringResource(R.string.one_hand_complete, we.exercise.displayName(), setNumber),
-                        Modifier.padding(start = 8.dp),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-            }
-            OutlinedButton(onClick = onFinish, modifier = Modifier.heightIn(min = 56.dp)) { Text(stringResource(R.string.workout_finish)) }
-        }
-    }
-}
 
 /** Aviso de entreno en pausa (el cronómetro no avanza). */
 @Composable

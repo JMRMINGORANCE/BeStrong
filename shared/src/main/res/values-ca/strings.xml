@@ -8,13 +8,6 @@
     <string name="about_subtitle">Versió, crèdits, llicències i suport</string>
     <string name="about_title">Quant a BeStrong</string>
     <string name="about_version">Versió %1$s (%2$d)</string>
-    <string name="accent">Color d’accent</string>
-    <string name="accent_blue">Blau</string>
-    <string name="accent_dynamic">Del fons de pantalla</string>
-    <string name="accent_green">Verd</string>
-    <string name="accent_orange">Taronja</string>
-    <string name="accent_pink">Rosa</string>
-    <string name="accent_purple">Lila</string>
     <string name="ach_bench_bw">Press de banca amb el teu pes corporal</string>
     <string name="ach_deadlift_2bw">Pes mort amb 2 × el teu pes</string>
     <string name="ach_first_workout">Primer entrenament</string>
@@ -451,9 +444,8 @@
         <item quantity="other">🏆 %1$d rècords nous</item>
     </plurals>
     <string name="notif_weekly_title">La teva setmana a BeStrong</string>
-    <string name="one_hand_complete">%1$s · sèrie %2$d</string>
-    <string name="one_handed">Mode una mà</string>
-    <string name="one_handed_body">A la pantalla exterior del Fold, «completar sèrie» i «acabar» van a baix, a l’abast del polze.</string>
+    <string name="one_handed">Començar en mode focus</string>
+    <string name="one_handed_body">En començar un entrenament amb el mòbil plegat es veu una sèrie a pantalla completa, amb botons grans a l\'abast del polze. Es canvia a la llista amb el botó de dalt.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Opcions</string>
     <string name="partner_history">Mostrar els de %1$s</string>
@@ -738,10 +730,6 @@
     <string name="tempo_help">Segons de baixada-pausa-pujada-pausa, p. ex. 3-1-1-0 (X = explosiu). El rellotge et guia amb vibracions.</string>
     <string name="tempo_invalid">Format: 3-1-1 o 3-1-1-0 (de 0 a 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s sota tensió per sèrie</string>
-    <string name="theme_dark">Fosc</string>
-    <string name="theme_light">Clar</string>
-    <string name="theme_mode">Tema</string>
-    <string name="theme_system">Sistema</string>
     <string name="timer_amrap">AMRAP %1$d min</string>
     <string name="timer_circuit">Circuit (mode classe)</string>
     <string name="timer_circuit_default">Burpees, Esquats, Flexions, Planxa, Gambades</string>
@@ -815,12 +803,7 @@
     <string name="watch_sync">Sincronitzar amb Galaxy Watch</string>
     <string name="watch_sync_body">Envia rutines i historial al rellotge ara</string>
     <string name="week_adherence">Constància de les últimes setmanes: %1$d %%</string>
-    <plurals name="week_records">
-        <item quantity="one">%1$d rècord aquesta setmana</item>
-        <item quantity="other">%1$d rècords aquesta setmana</item>
-    </plurals>
     <string name="week_sessions">%1$d de %2$d sessions</string>
-    <string name="week_summary">Resum de la setmana</string>
     <plurals name="n_workouts_count">
         <item quantity="one">%1$d entrenament</item>
         <item quantity="other">%1$d entrenaments</item>
@@ -829,8 +812,6 @@
         <item quantity="one">%1$d sèrie</item>
         <item quantity="other">%1$d sèries</item>
     </plurals>
-    <string name="week_effective_suffix">(%1$s efectives)</string>
-    <string name="week_vs_last">%1$s de volum respecte a la setmana passada</string>
     <string name="weekly_volume">Volum setmanal (%1$s)</string>
     <string name="weight_unit">Unitat de pes</string>
     <string name="whats_new">Novetats</string>
@@ -1343,10 +1324,6 @@
     <string name="history_empty_action">Començar a entrenar</string>
     <string name="builder_weekdays_hint">Toca els dies que entrenaràs (de 2 a 6): les rutines aniran al teu calendari.</string>
     <string name="exercise_how_title">Com es fa</string>
-    <plurals name="week_streak">
-        <item quantity="one">🔥 %1$d setmana</item>
-        <item quantity="other">🔥 %1$d setmanes</item>
-    </plurals>
     <string name="day_planned">planificat</string>
     <string name="day_today">avui</string>
     <string name="rating_scale">1 = poc · 5 = molt</string>

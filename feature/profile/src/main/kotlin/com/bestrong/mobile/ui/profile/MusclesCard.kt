@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.shared.R
@@ -50,7 +51,15 @@ fun MusclesCard(stats: ProfileStats, advanced: AdvancedStats, target: Int, onTar
                     onClick = { tab = i },
                     shape = SegmentedButtonDefaults.itemShape(i, tabs.size),
                     icon = {},
-                    label = { Text(t, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium) },
+                    // Poco sitio en el móvil plegado: la etiqueta encoge antes de cortarse («Recuper…»)
+                    label = {
+                        androidx.compose.foundation.text.BasicText(
+                            t,
+                            style = MaterialTheme.typography.labelMedium.copy(color = androidx.compose.material3.LocalContentColor.current),
+                            maxLines = 1,
+                            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 9.sp, maxFontSize = MaterialTheme.typography.labelMedium.fontSize),
+                        )
+                    },
                 )
             }
         }

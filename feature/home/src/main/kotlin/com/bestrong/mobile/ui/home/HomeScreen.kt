@@ -187,7 +187,7 @@ fun HomeScreen(
                     onEmpty = { vm.startEmpty(onOpenWorkout) },
                     repeatName = history.firstOrNull { it.isFinished }?.name,
                     onRepeat = { vm.repeatLast(onOpenWorkout) },
-                    onWatch = { vm.startOnWatch(null) },
+                    onWatch = { vm.startOnWatch(null); Unit }.takeIf { active != null || (today == null && suggested == null) },
                     onPrograms = { showPrograms = true },
                     onPlan = onOpenPlanning,
                 )
@@ -287,7 +287,7 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, rest: com.best
  * repetir el último entreno.
  */
 @Composable
-private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: () -> Unit, onPrograms: () -> Unit, onPlan: () -> Unit) {
+private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: (() -> Unit)?, onPrograms: () -> Unit, onPlan: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // Con letra grande no caben cuatro en fila sin partir palabras: 2 × 2 con el texto al lado del icono
         val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
@@ -295,9 +295,10 @@ private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatNam
         val watch = stringResource(R.string.home_on_watch)
         val programs = stringResource(R.string.home_programs)
         val plan = stringResource(R.string.planning_open)
-        val actions = listOf(
+        // «En el reloj» solo si arriba no hay ya una tarjeta con su propio botón de reloj
+        val actions = listOfNotNull(
             Triple(Icons.Default.Add, empty, onEmpty),
-            Triple(Icons.Default.Watch, watch, onWatch),
+            onWatch?.let { Triple(Icons.Default.Watch, watch, it) },
             Triple(Icons.Default.Star, programs, onPrograms),
             Triple(Icons.Default.CalendarMonth, plan, onPlan),
         )
@@ -314,7 +315,7 @@ private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatNam
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
                 val tile = Modifier.fillMaxHeight()
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, empty, onEmpty, tile.weight(1.5f), filled = highlightEmpty)
-                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, watch, onWatch, tile.weight(1f))
+                onWatch?.let { com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, watch, it, tile.weight(1f)) }
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Star, programs, onPrograms, tile.weight(1f))
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.CalendarMonth, plan, onPlan, tile.weight(1f))
             }

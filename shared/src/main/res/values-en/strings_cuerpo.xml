@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mapa corporal de músculos -->
+<resources>
+    <string name="rd_body_map_desc">Body map with this week\'s sets per muscle. Tap a muscle to see its details.</string>
+    <string name="rd_body_front">FRONT</string>
+    <string name="rd_body_back">BACK</string>
+    <string name="rd_body_high">Above the recommended range: consider dropping a set this week.</string>
+    <string name="rd_body_optimal">Right on target: keep it up.</string>
+    <string name="rd_body_low_with">%1$s sets left to reach your minimum. Try %2$s.</string>
+    <string name="rd_body_low">%1$s sets left to reach your minimum.</string>
+</resources>

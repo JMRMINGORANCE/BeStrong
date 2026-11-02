@@ -6,7 +6,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.bestrong.mobile.data.Appearance
-import com.bestrong.mobile.data.ThemeMode
 import com.bestrong.mobile.ui.help.TutorialDialog
 import com.bestrong.mobile.ui.theme.BeStrongTheme
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
@@ -30,7 +29,7 @@ class OnboardingScreenshotTest {
     fun onboarding_pages() {
         var done = false
         compose.setContent {
-            BeStrongTheme(Appearance(mode = ThemeMode.DARK)) { TutorialDialog(onDone = { done = true }) }
+            BeStrongTheme(Appearance(style = com.bestrong.mobile.data.VisualStyle.CARBONO)) { TutorialDialog(onDone = { done = true }) }
         }
         compose.waitForIdle()
         captureScreenRoboImage("build/outputs/roborazzi/onboarding_1.png")

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Entreno: modo foco, centro de mando del Fold y resumen final -->
+<resources>
+    <string name="rd_focus_mode">Mode focus</string>
+    <string name="rd_focus_show_list">Veure la llista</string>
+    <string name="rd_focus_position">Exercici %1$d de %2$d · Sèrie %3$d de %4$d</string>
+    <string name="rd_focus_rest">Descans %1$s</string>
+    <string name="rd_reps">reps</string>
+    <string name="rd_focus_use_list">Aquest tipus de sèrie es registra a la llista.</string>
+    <string name="rd_focus_done">Sèrie feta</string>
+    <string name="rd_focus_undo">Desmarcar la sèrie</string>
+    <string name="rd_focus_plates">Discos per costat: %1$s</string>
+    <string name="rd_focus_swipe">Llisca als costats per canviar de sèrie</string>
+    <string name="rd_focus_less">Menys %1$s</string>
+    <string name="rd_focus_more">Més %1$s</string>
+    <string name="rd_focus_copy_previous">Copiar en aquesta sèrie</string>
+    <string name="rd_focus_previous">Anterior</string>
+    <string name="rd_focus_open_set">Obrir la sèrie %1$d</string>
+    <string name="rd_focus_next">Següent</string>
+    <string name="rd_focus_all_done">Tot fet!</string>
+    <string name="rd_focus_all_done_body">Has completat totes les sèries. Acaba l\'entrenament per veure el resum.</string>
+    <string name="rd_hr_rising">pujant</string>
+    <string name="rd_hr_falling">baixant</string>
+    <string name="rd_hr_steady">estable</string>
+    <string name="rd_hr_chart">Pols durant l\'entrenament, entre %1$d i %2$d ppm</string>
+    <string name="rd_plates_title">Discos per costat</string>
+    <string name="rd_plates_empty">Només la barra</string>
+    <string name="rd_e1rm_title">1RM estimat</string>
+    <string name="rd_summary_title_records">Entrenament brutal!</string>
+    <string name="rd_summary_avg_hr">pols mitjà</string>
+    <string name="rd_summary_last_time">L\'última vegada</string>
+    <plurals name="rd_pr_if_reps">
+        <item quantity="one">Rècord si fas %1$d rep!</item>
+        <item quantity="other">Rècord si fas %1$d reps!</item>
+    </plurals>
+    <plurals name="rd_summary_records">
+        <item quantity="one">%1$d rècord nou</item>
+        <item quantity="other">%1$d rècords nous</item>
+    </plurals>
+</resources>

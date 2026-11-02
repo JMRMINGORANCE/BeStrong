@@ -8,13 +8,6 @@
     <string name="about_subtitle">Versión, créditos, licencias y apoyo</string>
     <string name="about_title">Acerca de BeStrong</string>
     <string name="about_version">Versión %1$s (%2$d)</string>
-    <string name="accent">Color de acento</string>
-    <string name="accent_blue">Azul</string>
-    <string name="accent_dynamic">Del fondo de pantalla</string>
-    <string name="accent_green">Verde</string>
-    <string name="accent_orange">Naranja</string>
-    <string name="accent_pink">Rosa</string>
-    <string name="accent_purple">Morado</string>
     <string name="ach_bench_bw">Banca con tu peso corporal</string>
     <string name="ach_deadlift_2bw">Peso muerto con 2 × tu peso</string>
     <string name="ach_first_workout">Primer entreno</string>
@@ -451,9 +444,8 @@
         <item quantity="other">🏆 %1$d récords nuevos</item>
     </plurals>
     <string name="notif_weekly_title">Tu semana en BeStrong</string>
-    <string name="one_hand_complete">%1$s · serie %2$d</string>
-    <string name="one_handed">Modo una mano</string>
-    <string name="one_handed_body">En la pantalla exterior del Fold, «completar serie» y «terminar» van abajo, al alcance del pulgar.</string>
+    <string name="one_handed">Empezar en modo foco</string>
+    <string name="one_handed_body">Al empezar un entreno en el móvil plegado se ve una serie a pantalla completa, con botones grandes al alcance del pulgar. Se cambia a la lista con el botón de arriba.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Opciones</string>
     <string name="partner_history">Mostrar los de %1$s</string>
@@ -738,10 +730,6 @@
     <string name="tempo_help">Segundos de bajada-pausa-subida-pausa, p. ej. 3-1-1-0 (X = explosivo). El reloj te guía con vibraciones.</string>
     <string name="tempo_invalid">Formato: 3-1-1 o 3-1-1-0 (0 a 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s bajo tensión por serie</string>
-    <string name="theme_dark">Oscuro</string>
-    <string name="theme_light">Claro</string>
-    <string name="theme_mode">Tema</string>
-    <string name="theme_system">Sistema</string>
     <string name="timer_amrap">AMRAP %1$d min</string>
     <string name="timer_circuit">Circuito (modo clase)</string>
     <string name="timer_circuit_default">Burpees, Sentadillas, Flexiones, Plancha, Zancadas</string>
@@ -815,12 +803,7 @@
     <string name="watch_sync">Sincronizar con Galaxy Watch</string>
     <string name="watch_sync_body">Envía rutinas e historial al reloj ahora</string>
     <string name="week_adherence">Constancia de las últimas semanas: %1$d %%</string>
-    <plurals name="week_records">
-        <item quantity="one">%1$d récord esta semana</item>
-        <item quantity="other">%1$d récords esta semana</item>
-    </plurals>
     <string name="week_sessions">%1$d de %2$d sesiones</string>
-    <string name="week_summary">Resumen de la semana</string>
     <plurals name="n_workouts_count">
         <item quantity="one">%1$d entreno</item>
         <item quantity="other">%1$d entrenos</item>
@@ -829,8 +812,6 @@
         <item quantity="one">%1$d serie</item>
         <item quantity="other">%1$d series</item>
     </plurals>
-    <string name="week_effective_suffix">(%1$s efectivas)</string>
-    <string name="week_vs_last">%1$s de volumen frente a la semana pasada</string>
     <string name="weekly_volume">Volumen semanal (%1$s)</string>
     <string name="weight_unit">Unidad de peso</string>
     <string name="whats_new">Novedades</string>
@@ -1343,10 +1324,6 @@
     <string name="history_empty_action">Empezar a entrenar</string>
     <string name="builder_weekdays_hint">Toca los días que entrenarás (de 2 a 6): las rutinas irán a tu calendario.</string>
     <string name="exercise_how_title">Cómo se hace</string>
-    <plurals name="week_streak">
-        <item quantity="one">🔥 %1$d semana</item>
-        <item quantity="other">🔥 %1$d semanas</item>
-    </plurals>
     <string name="day_planned">planificado</string>
     <string name="day_today">hoy</string>
     <string name="rating_scale">1 = poco · 5 = mucho</string>

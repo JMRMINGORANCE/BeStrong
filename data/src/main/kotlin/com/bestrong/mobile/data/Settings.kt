@@ -51,7 +51,8 @@ data class UserSettings(
     /** Objetivo de entrenamiento (de la bienvenida): el programa a medida empieza con él. */
     val trainingGoal: com.bestrong.core.training.Goal = com.bestrong.core.training.Goal.HYPERTROPHY,
     /** Botones principales abajo en la pantalla exterior del Fold (uso con una mano). */
-    val oneHanded: Boolean = false,
+    /** Abrir el entreno en modo foco (una serie a pantalla completa). Usa la clave del antiguo «modo una mano». */
+    val focusByDefault: Boolean = false,
     /** Perfiles de gimnasio con su material; el activo condiciona pesos, discos y alternativas. */
     val gyms: List<GymProfile> = listOf(GymProfile.gym(), GymProfile.home()),
     val activeGymId: String? = null,
@@ -222,7 +223,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         pendingBuilder = prefs.getBoolean("pending_builder", false),
         trainingGoal = runCatching { com.bestrong.core.training.Goal.valueOf(prefs.getString("training_goal", null) ?: "HYPERTROPHY") }
             .getOrDefault(com.bestrong.core.training.Goal.HYPERTROPHY),
-        oneHanded = prefs.getBoolean("one_handed", false),
+        focusByDefault = prefs.getBoolean("one_handed", false),
         gyms = readGyms(),
         activeGymId = prefs.getString("active_gym", null),
         favoriteExercises = prefs.getStringSet("favorites", emptySet()).orEmpty().toSet(),
@@ -239,8 +240,6 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         partnerHistoryName = prefs.getString("partner_history_name", null),
         sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
         appearance = Appearance(
-            mode = enumOr("theme_mode", ThemeMode.SYSTEM),
-            accent = enumOr("accent", Accent.ORANGE),
             amoled = prefs.getBoolean("amoled", false),
             highContrast = prefs.getBoolean("high_contrast", false),
             colorblind = prefs.getBoolean("colorblind", false),
@@ -315,7 +314,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("weekly_goal", s.weeklyGoal)
             putString("training_goal", s.trainingGoal.name)
             putBoolean("pending_builder", s.pendingBuilder)
-            putBoolean("one_handed", s.oneHanded)
+            putBoolean("one_handed", s.focusByDefault)
             putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))
             putString("active_gym", s.activeGymId)
             putStringSet("favorites", s.favoriteExercises)
@@ -331,8 +330,6 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("height_cm", s.heightCm ?: 0)
             putString("partner_name", s.partnerName)
             putString("partner_history_name", s.partnerHistoryName)
-            putString("theme_mode", s.appearance.mode.name)
-            putString("accent", s.appearance.accent.name)
             putBoolean("amoled", s.appearance.amoled)
             putBoolean("high_contrast", s.appearance.highContrast)
             putBoolean("colorblind", s.appearance.colorblind)

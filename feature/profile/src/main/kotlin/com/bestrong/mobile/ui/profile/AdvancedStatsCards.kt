@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,7 +40,6 @@ import com.bestrong.core.stats.OneRepMax
 import com.bestrong.core.stats.Scores
 import com.bestrong.core.stats.Sex
 import com.bestrong.core.stats.StrengthLevel
-import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.BarChart
 import com.bestrong.mobile.ui.components.ChartPoint
@@ -50,8 +48,6 @@ import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
-import com.bestrong.mobile.ui.theme.statusColors
-import kotlin.math.abs
 
 @Composable
 private fun levelLabel(level: StrengthLevel?): String = stringResource(
@@ -97,33 +93,6 @@ fun StrengthLevelsCard(stats: AdvancedStats, sex: Sex, onSex: (Sex) -> Unit) {
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun WeekSummaryCard(stats: AdvancedStats) {
-    val unit = LocalWeightUnit.current
-    val w = stats.week ?: return
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            SectionHeader(stringResource(R.string.week_summary))
-            // Cada cifra con su plural («1 entreno», «1 serie»): con una sola frase salía «1 entrenos · … · 1 series»
-            Text(
-                listOf(
-                    pluralStringResource(R.plurals.n_workouts_count, w.workouts, w.workouts),
-                    unit.formatVolume(w.volume),
-                    pluralStringResource(R.plurals.n_sets_count, w.sets, w.sets) + " " + stringResource(R.string.week_effective_suffix, formatWeight(stats.weekEffectiveSets)),
-                ).joinToString(" · "),
-            )
-            w.volumeChange?.let { c ->
-                Text(
-                    stringResource(R.string.week_vs_last, (if (c >= 0) "+" else "−") + "${(abs(c) * 100).toInt()} %"),
-                    color = if (c >= 0) statusColors.good else MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-            if (w.records.isNotEmpty()) Text(pluralStringResource(R.plurals.week_records, w.records.size, w.records.size), style = MaterialTheme.typography.bodySmall)
         }
     }
 }

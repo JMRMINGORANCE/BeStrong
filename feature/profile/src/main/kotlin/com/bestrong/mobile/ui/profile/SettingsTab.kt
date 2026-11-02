@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Brightness2
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
@@ -35,7 +36,6 @@ import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.PanTool
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RecordVoiceOver
@@ -74,10 +74,8 @@ import com.bestrong.core.training.GymProfile
 import com.bestrong.core.util.VibrationStyle
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.AppIntents
-import com.bestrong.mobile.data.Accent
 import com.bestrong.mobile.data.AppFont
 import com.bestrong.mobile.data.Appearance
-import com.bestrong.mobile.data.ThemeMode
 import com.bestrong.mobile.security.BiometricLock
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.SettingsChoice
@@ -337,10 +335,10 @@ private fun DuringPage(vm: ProfileViewModel, onBack: () -> Unit) {
                 SettingsDivider()
                 SettingsSwitchRow(
                     stringResource(R.string.one_handed),
-                    settings.oneHanded,
-                    { v -> update { it.copy(oneHanded = v) } },
+                    settings.focusByDefault,
+                    { v -> update { it.copy(focusByDefault = v) } },
                     summary = stringResource(R.string.one_handed_body),
-                    icon = Icons.Default.PanTool,
+                    icon = Icons.Default.CenterFocusStrong,
                     tint = SettingsTint.Orange,
                 )
                 SettingsDivider()
@@ -798,21 +796,6 @@ private fun VibrationStyle.labelRes() = when (this) {
     VibrationStyle.LONG -> R.string.vib_long
     VibrationStyle.HEARTBEAT -> R.string.vib_heartbeat
     VibrationStyle.STRONG -> R.string.vib_strong
-}
-
-private fun ThemeMode.labelRes() = when (this) {
-    ThemeMode.SYSTEM -> R.string.theme_system
-    ThemeMode.LIGHT -> R.string.theme_light
-    ThemeMode.DARK -> R.string.theme_dark
-}
-
-private fun Accent.labelRes() = when (this) {
-    Accent.ORANGE -> R.string.accent_orange
-    Accent.BLUE -> R.string.accent_blue
-    Accent.GREEN -> R.string.accent_green
-    Accent.PURPLE -> R.string.accent_purple
-    Accent.PINK -> R.string.accent_pink
-    Accent.DYNAMIC -> R.string.accent_dynamic
 }
 
 private fun AppFont.labelRes() = when (this) {

@@ -292,6 +292,8 @@ private fun VolumeComparison(summary: FinishedSummary) {
         Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)
         Bar(stringResource(R.string.day_today), unit.formatVolume(today), (today / max).toFloat(), com.bestrong.mobile.ui.components.brandGradient())
         Bar(stringResource(R.string.rd_summary_last_time), unit.formatVolume(before), (before / max).toFloat(), androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceContainerHighest))
+        // Y cada ejercicio, en el mismo apartado (antes salía otro «Frente a la última vez» más abajo)
+        SummaryComparisons(summary, withTitle = false)
     }
 }
 
@@ -312,11 +314,8 @@ private fun DetailsCard(summary: FinishedSummary, dumbbellTotal: Boolean) {
     val w = summary.workout
     val unit = LocalWeightUnit.current
     com.bestrong.mobile.ui.components.Panel(contentPadding = 16.dp) {
-        Text(
-            pluralStringResource(R.plurals.history_sets_done, w.completedSetCount, w.completedSetCount) + " · " +
-                pluralStringResource(R.plurals.exercise_count, w.exercises.size, w.exercises.size),
-            fontWeight = FontWeight.Bold,
-        )
+        // Las series ya van en las cifras de arriba: aquí solo cuántos ejercicios
+        Text(pluralStringResource(R.plurals.exercise_count, w.exercises.size, w.exercises.size), fontWeight = FontWeight.Bold)
         w.avgHeartRate?.let { Text(stringResource(R.string.summary_hr, it, w.maxHeartRate?.toString() ?: "--"), style = MaterialTheme.typography.bodySmall) }
         remember(w) { com.bestrong.core.stats.RestStats.summary(w) }?.let { r ->
             Text(
@@ -326,7 +325,8 @@ private fun DetailsCard(summary: FinishedSummary, dumbbellTotal: Boolean) {
             )
         }
         com.bestrong.mobile.ui.components.WorkoutMuscleChips(w)
-        SummaryComparisons(summary)
+        // Si no hubo barras de volumen (ejercicios sin peso), las comparaciones van aquí
+        if (comparedVolume(summary) <= 0 || comparedVolume(summary) - summary.comparisons.sumOf { it.volumeDelta } <= 0) SummaryComparisons(summary)
         RpeVsTargetLines(w)
         summary.imbalances.forEach { (id, ratio) ->
             Text(

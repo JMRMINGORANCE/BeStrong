@@ -8,13 +8,6 @@
     <string name="about_subtitle">Versión, créditos, licenzas e apoio</string>
     <string name="about_title">Acerca de BeStrong</string>
     <string name="about_version">Versión %1$s (%2$d)</string>
-    <string name="accent">Cor de acento</string>
-    <string name="accent_blue">Azul</string>
-    <string name="accent_dynamic">Do fondo de pantalla</string>
-    <string name="accent_green">Verde</string>
-    <string name="accent_orange">Laranxa</string>
-    <string name="accent_pink">Rosa</string>
-    <string name="accent_purple">Morado</string>
     <string name="ach_bench_bw">Press de banco co teu peso corporal</string>
     <string name="ach_deadlift_2bw">Peso morto con 2 × o teu peso</string>
     <string name="ach_first_workout">Primeiro adestramento</string>
@@ -451,9 +444,8 @@
         <item quantity="other">🏆 %1$d récords novos</item>
     </plurals>
     <string name="notif_weekly_title">A túa semana en BeStrong</string>
-    <string name="one_hand_complete">%1$s · serie %2$d</string>
-    <string name="one_handed">Modo unha man</string>
-    <string name="one_handed_body">Na pantalla exterior do Fold, «completar serie» e «rematar» van abaixo, ao alcance do polgar.</string>
+    <string name="one_handed">Comezar en modo foco</string>
+    <string name="one_handed_body">Ao comezar un adestramento co móbil pregado vese unha serie a pantalla completa, con botóns grandes ao alcance do polgar. Cámbiase á lista co botón de arriba.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Opcións</string>
     <string name="partner_history">Amosar os de %1$s</string>
@@ -738,10 +730,6 @@
     <string name="tempo_help">Segundos de baixada-pausa-subida-pausa, p. ex. 3-1-1-0 (X = explosivo). O reloxo guíate con vibracións.</string>
     <string name="tempo_invalid">Formato: 3-1-1 ou 3-1-1-0 (0 a 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s baixo tensión por serie</string>
-    <string name="theme_dark">Escuro</string>
-    <string name="theme_light">Claro</string>
-    <string name="theme_mode">Tema</string>
-    <string name="theme_system">Sistema</string>
     <string name="timer_amrap">AMRAP %1$d min</string>
     <string name="timer_circuit">Circuíto (modo clase)</string>
     <string name="timer_circuit_default">Burpees, Agachamentos, Flexións, Prancha, Zancadas</string>
@@ -815,12 +803,7 @@
     <string name="watch_sync">Sincronizar co Galaxy Watch</string>
     <string name="watch_sync_body">Envía rutinas e historial ao reloxo agora</string>
     <string name="week_adherence">Constancia das últimas semanas: %1$d %%</string>
-    <plurals name="week_records">
-        <item quantity="one">%1$d récord esta semana</item>
-        <item quantity="other">%1$d récords esta semana</item>
-    </plurals>
     <string name="week_sessions">%1$d de %2$d sesións</string>
-    <string name="week_summary">Resumo da semana</string>
     <plurals name="n_workouts_count">
         <item quantity="one">%1$d adestramento</item>
         <item quantity="other">%1$d adestramentos</item>
@@ -829,8 +812,6 @@
         <item quantity="one">%1$d serie</item>
         <item quantity="other">%1$d series</item>
     </plurals>
-    <string name="week_effective_suffix">(%1$s efectivas)</string>
-    <string name="week_vs_last">%1$s de volume fronte á semana pasada</string>
     <string name="weekly_volume">Volume semanal (%1$s)</string>
     <string name="weight_unit">Unidade de peso</string>
     <string name="whats_new">Novidades</string>
@@ -1343,10 +1324,6 @@
     <string name="history_empty_action">Comezar a adestrar</string>
     <string name="builder_weekdays_hint">Toca os días que adestrarás (de 2 a 6): as rutinas irán ao teu calendario.</string>
     <string name="exercise_how_title">Como se fai</string>
-    <plurals name="week_streak">
-        <item quantity="one">🔥 %1$d semana</item>
-        <item quantity="other">🔥 %1$d semanas</item>
-    </plurals>
     <string name="day_planned">planificado</string>
     <string name="day_today">hoxe</string>
     <string name="rating_scale">1 = pouco · 5 = moito</string>

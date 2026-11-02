@@ -468,3 +468,12 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Dos estilos: Carbono (oscuro, negro mate y rojo racing) y Titanio Blanco (claro, titanio y naranja), con su paleta, letra de títulos y esquinas
 - [x] Selector con miniaturas en Ajustes → Apariencia y al empezar (tras los permisos)
 - [x] El reloj toma el acento del estilo elegido en el móvil (fondo negro en los dos, por la batería)
+
+## Fase 56 — Diez interfaces nuevas y limpieza ✅
+- [x] Búsqueda universal, comparador de sesiones y diario con etiquetas
+- [x] Historia del ejercicio, vídeos de técnica y equilibrio de patrones
+- [x] Periodización visual, editor en tablero (Fold), siguiente ejercicio y resumen con anillos en el reloj
+- [x] Limpieza: músculos en una tarjeta, sin racha ni «En el reloj» repetidos, modo foco en lugar de «una mano»,
+      resumen semanal solo en Inicio, resumen final sin datos repetidos, copia semanal solo JSON, sin el tema antiguo
+      y sin las imágenes de propuestas en el repositorio
+- [ ] «Abrir en el móvil» desde el resumen del reloj (necesita la librería de interacciones remotas de Wear)

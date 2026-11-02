@@ -185,7 +185,6 @@ fun ProfileScreen(
                     // Músculos: semana (silueta), 30 días, tendencia y recuperación en una sola tarjeta
                     item { MusclesCard(stats, advanced, settings.weeklySetsTarget) { n -> vm.updateSettings { it.copy(weeklySetsTarget = n) } } }
                     stats.year?.let { y -> item { YearInReviewCard(y) } }
-                    item { WeekSummaryCard(advanced) }
                     item { TrainingLoadCard(advanced) }
                     if (advanced.dayParts.size >= 2) item { DayPartCard(advanced.dayParts) }
                     if (advanced.weekdays.size >= 2) item { WeekdayCard(advanced.weekdays) }

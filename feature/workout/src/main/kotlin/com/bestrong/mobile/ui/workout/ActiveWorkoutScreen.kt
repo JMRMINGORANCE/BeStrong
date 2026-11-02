@@ -169,7 +169,7 @@ fun ActiveWorkoutScreen(
     var renaming by rememberSaveable { mutableStateOf(false) }
     var editingNotes by rememberSaveable { mutableStateOf(false) }
     // Modo foco (propuesta 1): una serie a pantalla completa en vez de la tabla
-    var focusMode by rememberSaveable { mutableStateOf(false) }
+    var focusMode by rememberSaveable { mutableStateOf(settings.focusByDefault) }
     val pinnedNotes by vm.pinnedNotes.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -274,7 +274,6 @@ fun ActiveWorkoutScreen(
             }
         }
     }
-    val oneHanded = settings.oneHanded && widthClass == WindowWidthSizeClass.COMPACT && posture != FoldPosture.TABLETOP
 
     val listContent: @Composable (Modifier) -> Unit = { m ->
         ExerciseList(w, previous, suggestions, vm, onAddExercises, listState, m)
@@ -318,10 +317,8 @@ fun ActiveWorkoutScreen(
                         }
                     }
                     // Botón compacto: con el relleno por defecto el nombre del entreno se cortaba
-                    if (!oneHanded) {
-                        Button(onClick = { confirmFinish = true }, contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)) {
-                            Text(stringResource(R.string.workout_finish), maxLines = 1)
-                        }
+                    Button(onClick = { confirmFinish = true }, contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)) {
+                        Text(stringResource(R.string.workout_finish), maxLines = 1)
                     }
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.more_options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
@@ -356,8 +353,6 @@ fun ActiveWorkoutScreen(
                         }
                     }
                 }
-                // Modo una mano: lo importante abajo, al alcance del pulgar
-                if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
             }
         },
     ) { padding ->
@@ -1198,12 +1193,12 @@ internal fun RpeVsTargetLines(w: com.bestrong.core.model.Workout) {
 
 /** «Frente a la última vez»: volumen con peso, reps sin peso y tiempo en los de tiempo (como el historial y el reloj). */
 @Composable
-internal fun SummaryComparisons(summary: FinishedSummary) {
+internal fun SummaryComparisons(summary: FinishedSummary, withTitle: Boolean = true) {
     val unit = LocalWeightUnit.current
     val kinds = summary.workout.exercises.associate { it.exercise.id to com.bestrong.core.util.ComparisonKind.of(it.exercise.tracking) }
     val shown = summary.comparisons.filter { kinds[it.exerciseId] != com.bestrong.core.util.ComparisonKind.NONE }
     if (shown.isEmpty()) return
-    Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)
+    if (withTitle) Text(stringResource(R.string.summary_vs_last), fontWeight = FontWeight.Bold)
     shown.take(5).forEach { c ->
         val (up, text) = when (kinds[c.exerciseId]) {
             com.bestrong.core.util.ComparisonKind.REPS -> (c.repsDelta > 0) to stringResource(R.string.history_vs_previous_reps_short, com.bestrong.core.util.signedCount(c.repsDelta))
