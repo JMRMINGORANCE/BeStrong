@@ -89,7 +89,13 @@ class ExercisesViewModel @Inject constructor(
     private val settingsStore: SettingsStore,
     private val planning: PlanningStore,
     private val actions: com.bestrong.mobile.WorkoutActions,
+    private val setVideos: com.bestrong.mobile.data.SetVideoStore,
 ) : ViewModel() {
+
+    /** Vídeos de técnica de las series grabadas en el entreno (propuesta 04). */
+    val setVideoVersion: StateFlow<Int> = setVideos.version
+    fun setVideos(exerciseId: String): List<com.bestrong.mobile.data.SetVideo> = setVideos.videos(exerciseId)
+    fun deleteSetVideo(video: com.bestrong.mobile.data.SetVideo) = setVideos.delete(video)
 
     val favorites: StateFlow<Set<String>> = settingsStore.settings.map { it.favoriteExercises }
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.favoriteExercises)

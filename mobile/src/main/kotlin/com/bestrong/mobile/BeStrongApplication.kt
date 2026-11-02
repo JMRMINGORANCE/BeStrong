@@ -180,6 +180,7 @@ class AppSync @Inject constructor(
                 bestOneRepMaxKg = best1rm,
                 heaviestKg = heaviest,
                 visualStyle = s.appearance.style.name,
+                nextExerciseCard = s.nextExerciseCard,
             )
         }.distinctUntilChanged()
             .collect { watchSync.pushSettings(it) }

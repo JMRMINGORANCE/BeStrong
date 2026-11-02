@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Técnica en vídeo y «Siguiente ejercicio» -->
+<resources>
+    <string name="set_video_record">Satz auf Video aufnehmen</string>
+    <string name="set_video_no_camera">Keine Kamera-App zum Aufnehmen vorhanden</string>
+    <string name="set_video_saved">Video in den Übungsdetails gespeichert</string>
+    <string name="set_video_section">Technikvideos</string>
+    <string name="set_video_compare">Vergleichen</string>
+    <string name="set_video_compare_hint">Wähle zwei Videos, um sie gleichzeitig zu sehen</string>
+    <string name="set_video_pick">Zum Vergleichen wählen</string>
+    <string name="set_video_play">Video abspielen</string>
+    <string name="set_video_delete">Video löschen</string>
+    <string name="set_video_set_n">Satz %1$d</string>
+    <string name="set_video_replay">Wiederholen</string>
+    <string name="next_exercise_title">Nächste Übung</string>
+    <string name="next_exercise_plates">Scheiben pro Seite: %1$s</string>
+    <string name="next_exercise_change">Ändern</string>
+    <string name="next_exercise_start">Jetzt starten</string>
+    <string name="next_exercise_setting">Karte „Nächste Übung“</string>
+    <string name="next_exercise_setting_body">In der Pause vor dem Übungswechsel: Gewicht, Scheiben und Notiz der nächsten Übung</string>
+</resources>

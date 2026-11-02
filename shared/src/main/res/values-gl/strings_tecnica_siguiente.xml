@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Técnica en vídeo y «Siguiente ejercicio» -->
+<resources>
+    <string name="set_video_record">Gravar a serie en vídeo</string>
+    <string name="set_video_no_camera">Non hai ningunha app de cámara para gravar</string>
+    <string name="set_video_saved">Vídeo gardado na ficha do exercicio</string>
+    <string name="set_video_section">Vídeos de técnica</string>
+    <string name="set_video_compare">Comparar</string>
+    <string name="set_video_compare_hint">Escolle dous vídeos para velos á vez</string>
+    <string name="set_video_pick">Escoller para comparar</string>
+    <string name="set_video_play">Ver o vídeo</string>
+    <string name="set_video_delete">Borrar o vídeo</string>
+    <string name="set_video_set_n">Serie %1$d</string>
+    <string name="set_video_replay">Repetir</string>
+    <string name="next_exercise_title">Seguinte exercicio</string>
+    <string name="next_exercise_plates">Discos por lado: %1$s</string>
+    <string name="next_exercise_change">Cambiar</string>
+    <string name="next_exercise_start">Comezar xa</string>
+    <string name="next_exercise_setting">Tarxeta «Seguinte exercicio»</string>
+    <string name="next_exercise_setting_body">No descanso antes de cambiar de exercicio: peso, discos e nota fixa do seguinte</string>
+</resources>

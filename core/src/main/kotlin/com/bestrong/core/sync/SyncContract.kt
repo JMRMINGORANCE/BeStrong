@@ -160,6 +160,8 @@ data class SharedSettings(
     val heaviestKg: Map<String, Double> = emptyMap(),
     /** Estilo visual elegido en el móvil (nombre de VisualStyle): el reloj usa su acento. */
     val visualStyle: String = "CARBONO",
+    /** Tarjeta «Siguiente ejercicio» en el descanso antes de cambiar de ejercicio (se elige en el móvil). */
+    val nextExerciseCard: Boolean = true,
     /** Descanso máximo tras una serie de calentamiento (s). */
     val warmupRestSeconds: Int = 60,
     /** Ejercicios ocultos en la biblioteca del móvil: el selector del reloj tampoco los ofrece. */
