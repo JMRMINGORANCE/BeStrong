@@ -6,4 +6,7 @@
     <string name="next_exercise_start">Start now</string>
     <string name="next_time_title">Next time</string>
     <string name="summary_rings_desc">%1$d of %2$d sets, %3$s, %4$s</string>
+    <string name="open_on_phone">On phone</string>
+    <string name="open_on_phone_dialog">Continue on phone</string>
+    <string name="open_on_phone_failed">No phone connected</string>
 </resources>

@@ -88,6 +88,7 @@ dependencies {
     implementation(libs.wear.protolayout)
     implementation(libs.wear.protolayout.material)
     implementation(libs.wear.ongoing)
+    implementation(libs.wear.remote.interactions)
     implementation(libs.wear.ambient)
     implementation(libs.wear.complications.data.source.ktx)
     implementation(libs.health.services)

@@ -45,6 +45,9 @@ sealed interface LaunchRequest {
 
     /** Rutina compartida por enlace o QR. */
     data class ImportRoutine(val link: String) : LaunchRequest
+
+    /** Un entreno terminado en el Historial (desde el resumen del reloj). */
+    data class OpenPastWorkout(val workoutId: String) : LaunchRequest
 }
 
 @AndroidEntryPoint
@@ -189,6 +192,10 @@ class MainActivity : ComponentActivity() {
         val data = intent?.data
         if (intent?.action == Intent.ACTION_VIEW && data?.scheme == RoutineLink.SCHEME && data.host == RoutineLink.HOST) {
             launchRequest.value = LaunchRequest.ImportRoutine(data.toString())
+            return
+        }
+        if (intent?.action == Intent.ACTION_VIEW && data?.scheme == RoutineLink.SCHEME && data.host == com.bestrong.core.sync.SyncContract.DEEP_LINK_WORKOUT_HOST) {
+            data.lastPathSegment?.takeIf { it.isNotBlank() }?.let { launchRequest.value = LaunchRequest.OpenPastWorkout(it) }
             return
         }
         launchRequest.value = when (intent?.action) {

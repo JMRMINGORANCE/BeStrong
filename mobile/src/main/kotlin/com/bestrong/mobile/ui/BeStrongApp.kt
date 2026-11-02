@@ -190,6 +190,10 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             is LaunchRequest.StartRoutine -> home.startRoutineById(r.routineId, openWorkout)
             is LaunchRequest.ImportRoutine -> home.importRoutineLink(r.link)
             is LaunchRequest.OpenMuscle -> nav.openMuscle(r.muscle)
+            is LaunchRequest.OpenPastWorkout -> {
+                nav.navigateTopLevel(TopLevel.HISTORY.route)
+                nav.currentBackStackEntry?.savedStateHandle?.set(KEY_OPEN_WORKOUT, r.workoutId)
+            }
             null -> return@LaunchedEffect
         }
         onLaunchHandled()

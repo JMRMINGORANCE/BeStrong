@@ -6,4 +6,7 @@
     <string name="next_exercise_start">Començar ja</string>
     <string name="next_time_title">La propera vegada</string>
     <string name="summary_rings_desc">%1$d de %2$d sèries, %3$s, %4$s</string>
+    <string name="open_on_phone">Al mòbil</string>
+    <string name="open_on_phone_dialog">Continua al mòbil</string>
+    <string name="open_on_phone_failed">No hi ha cap mòbil connectat</string>
 </resources>

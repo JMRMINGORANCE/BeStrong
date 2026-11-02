@@ -476,4 +476,4 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] Limpieza: músculos en una tarjeta, sin racha ni «En el reloj» repetidos, modo foco en lugar de «una mano»,
       resumen semanal solo en Inicio, resumen final sin datos repetidos, copia semanal solo JSON, sin el tema antiguo
       y sin las imágenes de propuestas en el repositorio
-- [ ] «Abrir en el móvil» desde el resumen del reloj (necesita la librería de interacciones remotas de Wear)
+- [x] «En el móvil» desde el resumen del reloj: abre ese entreno en el Historial del móvil (bestrong://workout/<id>)

@@ -42,6 +42,9 @@ object SyncContract {
     /** Deep link que abre el reloj desde el móvil (RemoteActivityHelper). */
     const val DEEP_LINK_SCHEME = "bestrong"
     const val DEEP_LINK_HOST = "start"
+
+    /** bestrong://workout/<id>: el reloj abre ese entreno en el Historial del móvil. */
+    const val DEEP_LINK_WORKOUT_HOST = "workout"
     const val DEEP_LINK_PARAM_ROUTINE = "routine"
 
     // coerceInputValues: un valor de enum nuevo (de una versión más reciente del otro lado) usa el de por defecto en vez de romper
