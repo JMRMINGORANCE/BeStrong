@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inicio: «Hoy toca» y panel de la semana -->
+<resources>
+    <string name="rd_home_streak">Racha</string>
+    <string name="rd_home_vs_last_week">%1$d %% vs semana pasada</string>
+    <string name="rd_home_week_volume">Volumen semanal</string>
+    <string name="rd_home_muscles_title">Músculos esta semana</string>
+    <string name="rd_home_muscles_target">series · mínimo %1$d</string>
+    <string name="rd_home_muscle_open">Ver ejercicios de este músculo</string>
+    <string name="rd_home_start_watch">Empezar en el reloj</string>
+    <plurals name="rd_home_streak_weeks">
+        <item quantity="one">%1$d semana seguida</item>
+        <item quantity="other">%1$d semanas seguidas</item>
+    </plurals>
+</resources>

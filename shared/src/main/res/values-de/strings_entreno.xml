@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Entreno: modo foco, centro de mando del Fold y resumen final -->
+<resources>
+    <string name="rd_focus_mode">Fokusmodus</string>
+    <string name="rd_focus_show_list">Liste anzeigen</string>
+    <string name="rd_focus_position">Übung %1$d von %2$d · Satz %3$d von %4$d</string>
+    <string name="rd_focus_rest">Pause %1$s</string>
+    <string name="rd_reps">Wdh.</string>
+    <string name="rd_focus_use_list">Diese Satzart wird in der Liste erfasst.</string>
+    <string name="rd_focus_done">Satz erledigt</string>
+    <string name="rd_focus_undo">Satz zurücknehmen</string>
+    <string name="rd_focus_plates">Scheiben pro Seite: %1$s</string>
+    <string name="rd_focus_swipe">Seitlich wischen, um den Satz zu wechseln</string>
+    <string name="rd_focus_less">Weniger %1$s</string>
+    <string name="rd_focus_more">Mehr %1$s</string>
+    <string name="rd_focus_copy_previous">In diesen Satz kopieren</string>
+    <string name="rd_focus_previous">Vorher</string>
+    <string name="rd_focus_open_set">Satz %1$d öffnen</string>
+    <string name="rd_focus_next">Als Nächstes</string>
+    <string name="rd_focus_all_done">Alles erledigt!</string>
+    <string name="rd_focus_all_done_body">Du hast alle Sätze geschafft. Beende das Training, um die Zusammenfassung zu sehen.</string>
+    <string name="rd_hr_rising">steigend</string>
+    <string name="rd_hr_falling">fallend</string>
+    <string name="rd_hr_steady">stabil</string>
+    <string name="rd_hr_chart">Puls während des Trainings, zwischen %1$d und %2$d bpm</string>
+    <string name="rd_plates_title">Scheiben pro Seite</string>
+    <string name="rd_plates_empty">Nur die Stange</string>
+    <string name="rd_e1rm_title">Geschätztes 1RM</string>
+    <string name="rd_summary_title_records">Starkes Training!</string>
+    <string name="rd_summary_avg_hr">Ø Puls</string>
+    <string name="rd_summary_last_time">Letztes Mal</string>
+    <plurals name="rd_pr_if_reps">
+        <item quantity="one">Rekord bei %1$d Wdh.!</item>
+        <item quantity="other">Rekord bei %1$d Wdh.!</item>
+    </plurals>
+    <plurals name="rd_summary_records">
+        <item quantity="one">%1$d neuer Rekord</item>
+        <item quantity="other">%1$d neue Rekorde</item>
+    </plurals>
+</resources>

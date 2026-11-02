@@ -22,9 +22,8 @@ import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Brightness2
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.Contrast
-import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -37,13 +36,13 @@ import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.PanTool
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.ScreenLockPortrait
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.TableRows
@@ -75,10 +74,8 @@ import com.bestrong.core.training.GymProfile
 import com.bestrong.core.util.VibrationStyle
 import com.bestrong.core.util.WeightUnit
 import com.bestrong.mobile.AppIntents
-import com.bestrong.mobile.data.Accent
 import com.bestrong.mobile.data.AppFont
 import com.bestrong.mobile.data.Appearance
-import com.bestrong.mobile.data.ThemeMode
 import com.bestrong.mobile.security.BiometricLock
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.SettingsChoice
@@ -100,9 +97,14 @@ private enum class SettingsPageId { BODY, TRAINING, DURING, UNITS, APPEARANCE, N
  * pantalla. Lo que antes era una lista larguísima ahora se encuentra de un vistazo.
  */
 @Composable
-fun SettingsTab(vm: ProfileViewModel, onOpenCommunity: () -> Unit, modifier: Modifier = Modifier) {
+fun SettingsTab(vm: ProfileViewModel, onOpenCommunity: () -> Unit, modifier: Modifier = Modifier, openPage: String? = null, onPageOpened: () -> Unit = {}) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf<SettingsPageId?>(null) }
+    // Desde la búsqueda universal: directo a esa página
+    androidx.compose.runtime.LaunchedEffect(openPage) {
+        openPage?.let { name -> SettingsPageId.entries.firstOrNull { it.name == name }?.let { page = it } }
+        if (openPage != null) onPageOpened()
+    }
     var showHelp by rememberSaveable { mutableStateOf(false) }
     var showTutorial by rememberSaveable { mutableStateOf(false) }
     var showAbout by rememberSaveable { mutableStateOf(false) }
@@ -305,6 +307,15 @@ private fun DuringPage(vm: ProfileViewModel, onBack: () -> Unit) {
                 SettingsDivider()
                 SettingsSwitchRow(stringResource(R.string.vibrate_rest), settings.vibrateOnRestEnd, { v -> update { it.copy(vibrateOnRestEnd = v) } }, icon = Icons.Default.Vibration, tint = SettingsTint.Purple)
                 SettingsDivider()
+                SettingsSwitchRow(
+                    stringResource(R.string.next_exercise_setting),
+                    settings.nextExerciseCard,
+                    { v -> update { it.copy(nextExerciseCard = v) } },
+                    summary = stringResource(R.string.next_exercise_setting_body),
+                    icon = Icons.Default.SkipNext,
+                    tint = SettingsTint.Orange,
+                )
+                SettingsDivider()
                 SettingsChoice(
                     stringResource(R.string.rest_vibration),
                     VibrationStyle.entries.map { it to stringResource(it.labelRes()) },
@@ -324,10 +335,10 @@ private fun DuringPage(vm: ProfileViewModel, onBack: () -> Unit) {
                 SettingsDivider()
                 SettingsSwitchRow(
                     stringResource(R.string.one_handed),
-                    settings.oneHanded,
-                    { v -> update { it.copy(oneHanded = v) } },
+                    settings.focusByDefault,
+                    { v -> update { it.copy(focusByDefault = v) } },
                     summary = stringResource(R.string.one_handed_body),
-                    icon = Icons.Default.PanTool,
+                    icon = Icons.Default.CenterFocusStrong,
                     tint = SettingsTint.Orange,
                 )
                 SettingsDivider()
@@ -446,35 +457,28 @@ private fun AppearancePage(vm: ProfileViewModel, onBack: () -> Unit) {
     val a = settings.appearance
     fun setA(block: (Appearance) -> Appearance) = vm.updateSettings { it.copy(appearance = block(it.appearance)) }
     SettingsPage(stringResource(R.string.appearance), onBack) {
+        // Estilo visual de toda la app y del reloj: miniaturas para comparar
         item {
-            SettingsGroup(stringResource(R.string.sg_theme)) {
-                SettingsChoice(
-                    stringResource(R.string.theme_mode),
-                    ThemeMode.entries.map { it to stringResource(it.labelRes()) },
-                    a.mode,
-                    { m -> setA { it.copy(mode = m) } },
-                    icon = Icons.Default.DarkMode,
-                    tint = SettingsTint.Purple,
-                )
-                SettingsDivider()
-                val accents = Accent.entries.filter { it != Accent.DYNAMIC || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S }
-                SettingsChoice(
-                    stringResource(R.string.accent),
-                    accents.map { it to stringResource(it.labelRes()) },
-                    a.accent,
-                    { c -> setA { it.copy(accent = c) } },
-                    icon = Icons.Default.ColorLens,
-                    tint = SettingsTint.Orange,
-                )
-                SettingsDivider()
-                SettingsSwitchRow(
-                    stringResource(R.string.amoled),
-                    a.amoled,
-                    { v -> setA { it.copy(amoled = v) } },
-                    summary = stringResource(R.string.amoled_body),
-                    icon = Icons.Default.Brightness2,
-                    tint = SettingsTint.Slate,
-                )
+            SettingsGroup(stringResource(R.string.style_title), footer = stringResource(R.string.style_footer)) {
+                androidx.compose.foundation.layout.BoxWithConstraints(Modifier.padding(12.dp)) {
+                    val columns = (maxWidth / com.bestrong.mobile.ui.components.STYLE_CARD_MIN_WIDTH).toInt().coerceIn(2, 3)
+                    com.bestrong.mobile.ui.components.StyleGrid(a.style, { st -> setA { it.copy(style = st) } }, columns = columns)
+                }
+            }
+        }
+        // Negro puro solo tiene sentido en el estilo oscuro (con el claro el grupo quedaría vacío)
+        if (a.style.dark) {
+            item {
+                SettingsGroup(stringResource(R.string.sg_theme)) {
+                    SettingsSwitchRow(
+                        stringResource(R.string.amoled),
+                        a.amoled,
+                        { v -> setA { it.copy(amoled = v) } },
+                        summary = stringResource(R.string.amoled_body),
+                        icon = Icons.Default.Brightness2,
+                        tint = SettingsTint.Slate,
+                    )
+                }
             }
         }
         item {
@@ -792,21 +796,6 @@ private fun VibrationStyle.labelRes() = when (this) {
     VibrationStyle.LONG -> R.string.vib_long
     VibrationStyle.HEARTBEAT -> R.string.vib_heartbeat
     VibrationStyle.STRONG -> R.string.vib_strong
-}
-
-private fun ThemeMode.labelRes() = when (this) {
-    ThemeMode.SYSTEM -> R.string.theme_system
-    ThemeMode.LIGHT -> R.string.theme_light
-    ThemeMode.DARK -> R.string.theme_dark
-}
-
-private fun Accent.labelRes() = when (this) {
-    Accent.ORANGE -> R.string.accent_orange
-    Accent.BLUE -> R.string.accent_blue
-    Accent.GREEN -> R.string.accent_green
-    Accent.PURPLE -> R.string.accent_purple
-    Accent.PINK -> R.string.accent_pink
-    Accent.DYNAMIC -> R.string.accent_dynamic
 }
 
 private fun AppFont.labelRes() = when (this) {

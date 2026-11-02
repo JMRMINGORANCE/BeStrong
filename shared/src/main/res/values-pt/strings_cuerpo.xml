@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mapa corporal de músculos -->
+<resources>
+    <string name="rd_body_map_desc">Mapa do corpo com as séries da semana por músculo. Toca num músculo para ver o detalhe.</string>
+    <string name="rd_body_front">FRENTE</string>
+    <string name="rd_body_back">TRÁS</string>
+    <string name="rd_body_high">Acima do recomendado: considera tirar uma série esta semana.</string>
+    <string name="rd_body_optimal">No ponto: continua assim.</string>
+    <string name="rd_body_low_with">Faltam %1$s séries para o teu mínimo. Experimenta %2$s.</string>
+    <string name="rd_body_low">Faltam %1$s séries para o teu mínimo.</string>
+</resources>

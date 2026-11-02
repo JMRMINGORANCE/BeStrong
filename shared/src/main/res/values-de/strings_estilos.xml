@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos visuales elegibles: Carbono y Titanio Blanco -->
+<resources>
+    <string name="style_title">Stil</string>
+    <string name="style_footer">Ändert Farben, Überschriftenschrift und Ecken auf dem Handy und den Akzent auf der Uhr.</string>
+    <string name="style_onb_title">Wähle deinen Stil</string>
+    <string name="style_onb_body">So sehen App und Uhr aus. Tippe einen an, um ihn auszuprobieren – du kannst ihn jederzeit unter Einstellungen → Darstellung ändern.</string>
+    <string name="style_carbono">Carbon</string>
+    <string name="style_carbono_desc">Dunkel: Mattschwarz und Rennrot, wie F1-Telemetrie.</string>
+    <string name="style_titanio_blanco">Titan Weiß</string>
+    <string name="style_titanio_blanco_desc">Hell: Titan mit internationalem Orange.</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mapa corporal de músculos -->
+<resources>
+    <string name="rd_body_map_desc">Körperkarte mit den Sätzen dieser Woche pro Muskel. Tippe auf einen Muskel für Details.</string>
+    <string name="rd_body_front">VORNE</string>
+    <string name="rd_body_back">HINTEN</string>
+    <string name="rd_body_high">Über der Empfehlung: lass diese Woche vielleicht einen Satz weg.</string>
+    <string name="rd_body_optimal">Genau richtig: weiter so.</string>
+    <string name="rd_body_low_with">Noch %1$s Sätze bis zu deinem Minimum. Probier %2$s.</string>
+    <string name="rd_body_low">Noch %1$s Sätze bis zu deinem Minimum.</string>
+</resources>

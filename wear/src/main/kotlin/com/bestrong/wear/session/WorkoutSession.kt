@@ -64,6 +64,8 @@ data class Summary(
     val workout: Workout,
     val records: List<PersonalRecord>,
     val comparisons: List<WorkoutStats.ExerciseComparison> = emptyList(),
+    /** «La próxima vez»: subir, mantener o bajar la carga de cada ejercicio (doble progresión). */
+    val nextTime: List<com.bestrong.core.training.NextTimeSuggestion> = emptyList(),
 )
 
 /** Velocidad de la última serie medida con el acelerómetro y RIR estimado. */
@@ -266,7 +268,10 @@ class WorkoutSession @Inject constructor(
         val records = WorkoutStats.newRecordsIn(finished, store.history.value + finished)
         val comparisons = WorkoutStats.compareWithPrevious(finished, store.history.value)
         store.addLocalWorkout(finished)
-        _summary.value = Summary(finished, records, comparisons)
+        val s = store.settings.value
+        val nextTime = com.bestrong.core.training.NextTime.forWorkout(finished) { id -> s.exerciseIncrementKg[id] ?: s.unit.stepKg() }
+            .distinctBy { it.exerciseId }
+        _summary.value = Summary(finished, records, comparisons, nextTime)
         if (records.isNotEmpty()) context.haptic(Haptics.RECORD)
         scope.launch { phoneSync.sendFinishedWorkout(finished) }
     }

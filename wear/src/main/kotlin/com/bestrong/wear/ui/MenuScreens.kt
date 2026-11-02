@@ -27,6 +27,7 @@ import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.ScreenScaffold
 import androidx.wear.compose.material3.SwitchButton
 import androidx.wear.compose.material3.Text
+import androidx.wear.compose.material3.openOnPhoneDialogCurvedText
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.model.Exercise
 import com.bestrong.core.model.MuscleGroup
@@ -38,6 +39,7 @@ import com.bestrong.wear.R
 import com.bestrong.wear.WearContainer
 import com.bestrong.wear.session.StemAction
 import com.bestrong.wear.session.WorkoutSession
+import kotlinx.coroutines.launch
 
 @Composable
 fun MenuScreen(
@@ -258,12 +260,34 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
     val s = summary ?: return
     val w = s.workout
     val listState = rememberScalingLazyListState()
+    // «En el móvil»: abre este entreno en el Historial del móvil (con la animación estándar de Wear)
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var openedOnPhone by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(false) }
     ScreenScaffold(
         scrollState = listState,
         edgeButton = { EdgeButton(onClick = onDone) { Text(stringResource(R.string.done)) } },
     ) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
             item { ListHeader { Text(stringResource(R.string.completed), color = Brand) } }
+            // Anillos de series, volumen y duración (propuesta 08)
+            item { SummaryRings(s) }
+            item {
+                androidx.wear.compose.material3.FilledTonalButton(
+                    onClick = {
+                        scope.launch {
+                            if (com.bestrong.wear.data.PhoneLink.openWorkout(context, w.id)) {
+                                openedOnPhone = true
+                            } else {
+                                android.widget.Toast.makeText(context, R.string.open_on_phone_failed, android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    icon = { androidx.wear.compose.material3.Icon(androidx.compose.ui.res.painterResource(R.drawable.ic_phone), null) },
+                    label = { Text(stringResource(R.string.open_on_phone)) },
+                )
+            }
             item { Text(w.name, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center) }
             item { Text(stringResource(R.string.summary_duration, formatDuration(w.durationSeconds()))) }
             item { Text(pluralStringResource(R.plurals.summary_volume, w.completedSetCount, unit.formatVolume(w.totalVolume), w.completedSetCount)) }
@@ -302,9 +326,35 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                     )
                 }
             }
+            // «La próxima vez»: el peso que toca subir (o mantener) en cada ejercicio
+            if (s.nextTime.isNotEmpty()) {
+                item { ListHeader { Text(stringResource(R.string.next_time_title)) } }
+                items(s.nextTime.take(5)) { n ->
+                    val name = ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName
+                    val arrow = when {
+                        n.direction > 0 -> "▲"
+                        n.direction < 0 -> "▼"
+                        else -> "="
+                    }
+                    val factor = w.exercises.firstOrNull { it.exercise.id == n.exerciseId }?.exercise?.let { session.settings.value.weightFactor(it) } ?: 1
+                    Text(
+                        "$arrow $name · ${unit.format(n.weightKg * factor, withUnit = true)} × ${n.reps}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (n.direction > 0) Done else MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
             item { Text(stringResource(R.string.syncs_with_phone), style = MaterialTheme.typography.labelSmall) }
         }
     }
+    val phoneText = stringResource(R.string.open_on_phone_dialog)
+    val phoneStyle = androidx.wear.compose.material3.OpenOnPhoneDialogDefaults.curvedTextStyle
+    androidx.wear.compose.material3.OpenOnPhoneDialog(
+        visible = openedOnPhone,
+        onDismissRequest = { openedOnPhone = false },
+        curvedText = { openOnPhoneDialogCurvedText(phoneText, phoneStyle) },
+    ) { androidx.wear.compose.material3.OpenOnPhoneDialogDefaults.Icon() }
 }
 
 /** Correcciones: quitar una serie pendiente, el RPE de la última serie y deshacer la última marcada. */

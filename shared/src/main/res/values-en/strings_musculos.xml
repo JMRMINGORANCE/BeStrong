@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Historia del ejercicio, equilibrio de patrones y tarjeta de músculos -->
+<resources>
+    <string name="tl_title">History</string>
+    <string name="tl_first">First time</string>
+    <string name="tl_record_1rm">Estimated 1RM record</string>
+    <string name="tl_record_weight">Weight record</string>
+    <string name="tl_record_reps">Rep record</string>
+    <string name="tl_round">First time with %1$s</string>
+    <string name="tl_gym">First time at %1$s</string>
+    <string name="tl_comeback">Back after %1$d days</string>
+    <string name="tl_deload">Deload session</string>
+    <string name="tl_prev">before %1$s</string>
+    <string name="tl_reps">%1$d reps</string>
+    <string name="tl_show_all">Show all (%1$d)</string>
+    <string name="tl_show_less">Show less</string>
+    <string name="tl_open_day">Show that day\'s sets</string>
+    <string name="tl_pinned">Pinned note: %1$s</string>
+    <string name="tl_injury">Loads a zone marked as injured: %1$s</string>
+    <string name="pt_title">Movement balance</string>
+    <string name="pt_body">Working sets per movement pattern over the last 4 weeks.</string>
+    <string name="pt_empty">Train for a few weeks to see your balance.</string>
+    <string name="pt_push_h">Horizontal push</string>
+    <string name="pt_push_v">Vertical push</string>
+    <string name="pt_pull_h">Horizontal pull</string>
+    <string name="pt_pull_v">Vertical pull</string>
+    <string name="pt_squat">Squat</string>
+    <string name="pt_hinge">Hip hinge</string>
+    <string name="pt_core">Core</string>
+    <string name="pt_push_h_short">Push H</string>
+    <string name="pt_push_v_short">Push V</string>
+    <string name="pt_pull_h_short">Pull H</string>
+    <string name="pt_pull_v_short">Pull V</string>
+    <string name="pt_hinge_short">Hinge</string>
+    <string name="pt_push_pull">Push : pull</string>
+    <string name="pt_hinge_squat">Hinge : squat</string>
+    <string name="pt_suggest_title">To balance it</string>
+    <string name="pt_try">Try: %1$s</string>
+    <string name="mu_title">Muscles</string>
+    <string name="mu_tab_week">Week</string>
+    <string name="mu_tab_30d">30 days</string>
+    <string name="mu_tab_trend">Trend</string>
+    <string name="mu_tab_recovery">Recovery</string>
+    <string name="mu_lagging_tag">falling behind</string>
+</resources>

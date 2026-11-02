@@ -21,10 +21,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -73,7 +73,7 @@ import java.time.format.TextStyle
 
 /** «Hoy toca»: la sesión del programa activo con sus cargas. */
 @Composable
-fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () -> Unit) {
+fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () -> Unit, onStartWatch: (() -> Unit)? = null) {
     val unit = LocalWeightUnit.current
     var menu by remember { mutableStateOf(false) }
     com.bestrong.mobile.ui.components.HeroCard {
@@ -87,7 +87,12 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
                     } else {
                         stringResource(R.string.today_session_n, session.completedSessions + 1)
                     }
-                    Text(label, style = MaterialTheme.typography.bodySmall)
+                    // Cuánto dura más o menos, para decidir de un vistazo
+                    val minutes = remember(session.routine) { (com.bestrong.core.session.WorkoutEditor.estimatedRemainingSeconds(session.routine.toWorkout(0)) + 59) / 60 }
+                    Text(
+                        listOfNotNull(label, stringResource(R.string.routine_estimated, minutes).takeIf { minutes > 0 }).joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
                 Box {
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.options)) }
@@ -125,7 +130,7 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
             (session.routine.exercises.size - TODAY_SHOWN).takeIf { it > 0 }?.let { n ->
                 Text(androidx.compose.ui.res.pluralStringResource(R.plurals.share_more_exercises, n, n), style = MaterialTheme.typography.labelMedium, modifier = Modifier.alpha(0.8f))
             }
-            HeroButton(onClick = onStart, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+            StartRow(onStart, onStartWatch, Modifier.padding(top = 8.dp)) {
                 Icon(Icons.Default.PlayArrow, null)
                 Text(stringResource(R.string.today_start), Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold)
             }
@@ -135,7 +140,7 @@ fun TodayCard(session: ProgramSession, onStart: () -> Unit, onStopProgram: () ->
 
 /** Sin programa: sugerencia de la rutina que toca (la que lleva más tiempo sin hacerse). */
 @Composable
-fun SuggestedRoutineCard(routine: Routine, onStart: () -> Unit) {
+fun SuggestedRoutineCard(routine: Routine, onStart: () -> Unit, onStartWatch: (() -> Unit)? = null) {
     com.bestrong.mobile.ui.components.HeroCard {
         Text(stringResource(R.string.today_suggested), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
         Text(routine.displayName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -149,9 +154,27 @@ fun SuggestedRoutineCard(routine: Routine, onStart: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
         )
         com.bestrong.mobile.ui.components.ExerciseThumbStrip(routine.exercises.map { it.exercise }, 44.dp, modifier = Modifier.padding(vertical = 6.dp))
-        HeroButton(onClick = onStart, modifier = Modifier.fillMaxWidth()) {
+        StartRow(onStart, onStartWatch) {
             Icon(Icons.Default.PlayArrow, null)
             Text(stringResource(R.string.routine_start), Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
+/** «Empezar» a lo ancho y, al lado, empezar en el reloj (propuesta 2). */
+@Composable
+private fun StartRow(onStart: () -> Unit, onStartWatch: (() -> Unit)?, modifier: Modifier = Modifier, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
+    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        HeroButton(onClick = onStart, modifier = Modifier.weight(1f), content = content)
+        onStartWatch?.let { watch ->
+            androidx.compose.material3.FilledIconButton(
+                onClick = watch,
+                modifier = Modifier.size(52.dp),
+                colors = androidx.compose.material3.IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.35f),
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+            ) { Icon(Icons.Default.Watch, stringResource(R.string.rd_home_start_watch)) }
         }
     }
 }
@@ -199,13 +222,7 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
                     Text(stringResource(R.string.week_adherence, (it * 100).toInt()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            // Racha de semanas seguidas, como motivación
-            if (week.streak >= 2) {
-                com.bestrong.mobile.ui.components.MetaPill(
-                    androidx.compose.ui.res.pluralStringResource(R.plurals.week_streak, week.streak, week.streak),
-                    Modifier.padding(end = 8.dp),
-                )
-            }
+            // La racha va en su tarjeta, debajo (panel de la semana): aquí se repetía
             if (canChangeGoal) Icon(Icons.Default.Edit, stringResource(R.string.week_goal_title), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
@@ -382,36 +399,6 @@ fun StaleRoutineCard(vm: HomeViewModel) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 androidx.compose.material3.TextButton(onClick = { tips.onDismiss("stale:${routine.id}") }) { Text(stringResource(R.string.stale_keep)) }
                 androidx.compose.material3.TextButton(onClick = { vm.setArchived(routine, true) }) { Text(stringResource(R.string.routine_archive)) }
-            }
-        }
-    }
-}
-
-/** «Esta semana vas corto de: Espalda 4 de 10 series». */
-@Composable
-fun LaggingMusclesCard(vm: HomeViewModel, onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {}) {
-    val lagging by vm.laggingMuscles.collectAsStateWithLifecycle()
-    if (lagging.isEmpty()) return
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(vertical = 12.dp)) {
-            Text(stringResource(R.string.lagging_muscles_title), fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
-            // Cada músculo abre la biblioteca con sus ejercicios
-            lagging.forEach { (muscle, sets) ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = stringResource(R.string.lagging_muscle_open)) { onOpenMuscle(muscle) }
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), vm.weeklySetsTarget),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                }
             }
         }
     }

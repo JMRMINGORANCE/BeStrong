@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Propuesta #2: permisos tras la bienvenida del primer arranque -->
+<!-- Bienvenida: permisos tras el primer arranque -->
 <resources>
     <string name="onb_perm_title">Ativa o que quiseres usar</string>
     <string name="onb_perm_body">Tudo é opcional: o BeStrong funciona igual sem isto. Com as notificações avisa-te no fim do descanso; com o Health Connect partilha os teus treinos com outras apps de saúde.</string>

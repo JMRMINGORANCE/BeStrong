@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Entreno: modo foco, centro de mando del Fold y resumen final -->
+<resources>
+    <string name="rd_focus_mode">Modo foco</string>
+    <string name="rd_focus_show_list">Ver lista</string>
+    <string name="rd_focus_position">Exercício %1$d de %2$d · Série %3$d de %4$d</string>
+    <string name="rd_focus_rest">Descanso %1$s</string>
+    <string name="rd_reps">reps</string>
+    <string name="rd_focus_use_list">Este tipo de série regista-se na lista.</string>
+    <string name="rd_focus_done">Série feita</string>
+    <string name="rd_focus_undo">Desmarcar série</string>
+    <string name="rd_focus_plates">Discos por lado: %1$s</string>
+    <string name="rd_focus_swipe">Desliza para os lados para mudar de série</string>
+    <string name="rd_focus_less">Menos %1$s</string>
+    <string name="rd_focus_more">Mais %1$s</string>
+    <string name="rd_focus_copy_previous">Copiar para esta série</string>
+    <string name="rd_focus_previous">Anterior</string>
+    <string name="rd_focus_open_set">Abrir a série %1$d</string>
+    <string name="rd_focus_next">Seguinte</string>
+    <string name="rd_focus_all_done">Tudo feito!</string>
+    <string name="rd_focus_all_done_body">Completaste todas as séries. Termina o treino para ver o resumo.</string>
+    <string name="rd_hr_rising">a subir</string>
+    <string name="rd_hr_falling">a descer</string>
+    <string name="rd_hr_steady">estável</string>
+    <string name="rd_hr_chart">Pulsação durante o treino, entre %1$d e %2$d bpm</string>
+    <string name="rd_plates_title">Discos por lado</string>
+    <string name="rd_plates_empty">Só a barra</string>
+    <string name="rd_e1rm_title">1RM estimado</string>
+    <string name="rd_summary_title_records">Treino brutal!</string>
+    <string name="rd_summary_avg_hr">pulsação média</string>
+    <string name="rd_summary_last_time">Última vez</string>
+    <plurals name="rd_pr_if_reps">
+        <item quantity="one">Recorde se fizeres %1$d rep!</item>
+        <item quantity="other">Recorde se fizeres %1$d reps!</item>
+    </plurals>
+    <plurals name="rd_summary_records">
+        <item quantity="one">%1$d recorde novo</item>
+        <item quantity="other">%1$d recordes novos</item>
+    </plurals>
+</resources>

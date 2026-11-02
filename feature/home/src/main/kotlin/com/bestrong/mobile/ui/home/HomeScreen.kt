@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.Watch
@@ -99,6 +100,8 @@ fun HomeScreen(
     onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {},
     /** Abre la ficha del ejercicio (su progreso). */
     onOpenExercise: (String) -> Unit = {},
+    /** Búsqueda universal (lupa del saludo). */
+    onOpenSearch: () -> Unit = {},
 ) {
     val routines by vm.routines.collectAsStateWithLifecycle()
     // Al volver a Inicio (p. ej. a la mañana siguiente) proteína, agua y disposición son las de hoy
@@ -159,13 +162,20 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             // 1. Saludo; 2. lo que toca ahora; 3. accesos rápidos; 4. la semana; 5. rutinas; 6. el resto
-            item(span = full) { Greeting { GymChip(vm) } }
+            item(span = full) {
+                Greeting {
+                    GymChip(vm)
+                    androidx.compose.material3.FilledTonalIconButton(onClick = onOpenSearch) {
+                        Icon(Icons.Default.Search, stringResource(R.string.srch_open))
+                    }
+                }
+            }
             active?.let { w -> item(span = full) { ActiveWorkoutHero(w, vm.rest.collectAsStateWithLifecycle().value, onOpenWorkout) } }
             if (active == null) {
                 today?.let { s ->
-                    item(span = full) { TodayCard(s, onStart = { vm.startProgramSession(s, onOpenWorkout) }, onStopProgram = vm::stopProgram) }
+                    item(span = full) { TodayCard(s, onStart = { vm.startProgramSession(s, onOpenWorkout) }, onStopProgram = vm::stopProgram, onStartWatch = { vm.startOnWatch(s.routine) }) }
                 } ?: suggested?.let { r ->
-                    item(span = full) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }) }
+                    item(span = full) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }, onStartWatch = { vm.startOnWatch(r) }) }
                 }
             }
             // Una sesión planificada que se pasó, con «hacerla hoy»: arriba, no debajo de todas las rutinas
@@ -177,12 +187,14 @@ fun HomeScreen(
                     onEmpty = { vm.startEmpty(onOpenWorkout) },
                     repeatName = history.firstOrNull { it.isFinished }?.name,
                     onRepeat = { vm.repeatLast(onOpenWorkout) },
-                    onWatch = { vm.startOnWatch(null) },
+                    onWatch = { vm.startOnWatch(null); Unit }.takeIf { active != null || (today == null && suggested == null) },
                     onPrograms = { showPrograms = true },
                     onPlan = onOpenPlanning,
                 )
             }
             item(span = full) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) }
+            // Racha, volumen y músculos de la semana de un vistazo (propuesta 2)
+            item(span = full) { WeekDashboard(week, history, vm.weeklySetsTarget, vm.laggingMuscles.collectAsStateWithLifecycle().value, onOpenMuscle) }
             item(span = full) {
                 Column {
                     SectionHeader(stringResource(R.string.home_my_routines, routines.count { !it.archived }), large = true) {
@@ -228,7 +240,6 @@ fun HomeScreen(
                     YearAgoCard(vm, onOpenExercise)
                     CardioWeekCard(vm)
                     StaleRoutineCard(vm)
-                    LaggingMusclesCard(vm, onOpenMuscle)
                     ReadinessCard(vm)
                     IntakeCard(vm)
                     TipCard("home_reorder", R.string.tip_home)
@@ -276,7 +287,7 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, rest: com.best
  * repetir el último entreno.
  */
 @Composable
-private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: () -> Unit, onPrograms: () -> Unit, onPlan: () -> Unit) {
+private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: (() -> Unit)?, onPrograms: () -> Unit, onPlan: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // Con letra grande no caben cuatro en fila sin partir palabras: 2 × 2 con el texto al lado del icono
         val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
@@ -284,9 +295,10 @@ private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatNam
         val watch = stringResource(R.string.home_on_watch)
         val programs = stringResource(R.string.home_programs)
         val plan = stringResource(R.string.planning_open)
-        val actions = listOf(
+        // «En el reloj» solo si arriba no hay ya una tarjeta con su propio botón de reloj
+        val actions = listOfNotNull(
             Triple(Icons.Default.Add, empty, onEmpty),
-            Triple(Icons.Default.Watch, watch, onWatch),
+            onWatch?.let { Triple(Icons.Default.Watch, watch, it) },
             Triple(Icons.Default.Star, programs, onPrograms),
             Triple(Icons.Default.CalendarMonth, plan, onPlan),
         )
@@ -303,7 +315,7 @@ private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatNam
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
                 val tile = Modifier.fillMaxHeight()
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, empty, onEmpty, tile.weight(1.5f), filled = highlightEmpty)
-                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, watch, onWatch, tile.weight(1f))
+                onWatch?.let { com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, watch, it, tile.weight(1f)) }
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Star, programs, onPrograms, tile.weight(1f))
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.CalendarMonth, plan, onPlan, tile.weight(1f))
             }

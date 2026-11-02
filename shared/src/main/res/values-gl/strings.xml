@@ -8,13 +8,6 @@
     <string name="about_subtitle">Versión, créditos, licenzas e apoio</string>
     <string name="about_title">Acerca de BeStrong</string>
     <string name="about_version">Versión %1$s (%2$d)</string>
-    <string name="accent">Cor de acento</string>
-    <string name="accent_blue">Azul</string>
-    <string name="accent_dynamic">Do fondo de pantalla</string>
-    <string name="accent_green">Verde</string>
-    <string name="accent_orange">Laranxa</string>
-    <string name="accent_pink">Rosa</string>
-    <string name="accent_purple">Morado</string>
     <string name="ach_bench_bw">Press de banco co teu peso corporal</string>
     <string name="ach_deadlift_2bw">Peso morto con 2 × o teu peso</string>
     <string name="ach_first_workout">Primeiro adestramento</string>
@@ -70,15 +63,9 @@
     <string name="appearance">Aparencia e accesibilidade</string>
     <string name="auto_backup">Copia de seguranza semanal</string>
     <string name="auto_backup_last">Última copia: %1$s</string>
-    <string name="auto_backup_off">Escolle un cartafol (p. ex. Google Drive) para gardar CSV + JSON cada semana. Van sen cifrar: para unha copia con contrasinal usa «Copia cifrada con contrasinal».</string>
+    <string name="auto_backup_off">Escolle un cartafol (p. ex. Google Drive) para gardar unha copia (JSON) cada semana. Vai sen cifrar: para unha copia con contrasinal usa «Copia cifrada con contrasinal».</string>
     <string name="auto_backup_on">Activada. Primeira copia en curso.</string>
     <string name="backup_started">Copia de seguranza en curso…</string>
-    <string name="balance_leg_warning">Descompensado: a perna está moi por detrás (ou por diante) do torso.</string>
-    <string name="balance_ok">Ben equilibrado.</string>
-    <string name="balance_push_pull">Empuxe %1$s · Tirón %2$s series</string>
-    <string name="balance_push_warning">Descompensado: equilibra empuxe e tirón para coidar os ombros.</string>
-    <string name="balance_title">Equilibrio (4 semanas)</string>
-    <string name="balance_upper_lower">Torso %1$s · Perna %2$s series</string>
     <string name="best_1rm">Mellores 1RM estimados</string>
     <string name="body_unit">Unidade do peso corporal</string>
     <string name="body_unit_same">Igual que as cargas</string>
@@ -398,10 +385,8 @@
     <string name="muscle_glutes">Glúteos</string>
     <string name="muscle_hamstrings">Isquios</string>
     <string name="muscle_map_body">Series efectivas por músculo. Recomendado: %1$d–%2$d por semana.</string>
-    <string name="muscle_map_title">Mapa muscular da semana</string>
     <string name="muscle_never">nunca</string>
     <string name="muscle_quadriceps">Cuádriceps</string>
-    <string name="muscle_recovery">Recuperación muscular</string>
     <string name="muscle_shoulders">Ombros</string>
     <string name="muscle_sore">cargado</string>
     <string name="muscle_today">hoxe</string>
@@ -459,9 +444,8 @@
         <item quantity="other">🏆 %1$d récords novos</item>
     </plurals>
     <string name="notif_weekly_title">A túa semana en BeStrong</string>
-    <string name="one_hand_complete">%1$s · serie %2$d</string>
-    <string name="one_handed">Modo unha man</string>
-    <string name="one_handed_body">Na pantalla exterior do Fold, «completar serie» e «rematar» van abaixo, ao alcance do polgar.</string>
+    <string name="one_handed">Comezar en modo foco</string>
+    <string name="one_handed_body">Ao comezar un adestramento co móbil pregado vese unha serie a pantalla completa, con botóns grandes ao alcance do polgar. Cámbiase á lista co botón de arriba.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Opcións</string>
     <string name="partner_history">Amosar os de %1$s</string>
@@ -575,8 +559,6 @@
     <string name="record_line">%1$s: %2$s %3$s</string>
     <string name="record_most_reps">Máis repeticións</string>
     <string name="record_set_volume">Mellor volume nunha serie</string>
-    <string name="record_timeline">Liña de tempo de récords</string>
-    <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
     <string name="relative_strength">Forza relativa: %1$s</string>
     <string name="relative_strength_hint">1RM estimado dividido polo teu peso corporal</string>
     <string name="reminders">Recordatorios</string>
@@ -676,7 +658,6 @@
     <string name="set_type_warmup">Quecemento</string>
     <string name="set_weight_in">Peso en %1$s</string>
     <string name="set_weight_signed">Lastre (+) ou asistencia (−) en %1$s</string>
-    <string name="sets_per_muscle">Series por músculo (30 días)</string>
     <string name="sets_times_exercise">%1$d × %2$s</string>
     <string name="settings">Axustes</string>
     <string name="settings_during">Durante o adestramento</string>
@@ -749,10 +730,6 @@
     <string name="tempo_help">Segundos de baixada-pausa-subida-pausa, p. ex. 3-1-1-0 (X = explosivo). O reloxo guíate con vibracións.</string>
     <string name="tempo_invalid">Formato: 3-1-1 ou 3-1-1-0 (0 a 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s baixo tensión por serie</string>
-    <string name="theme_dark">Escuro</string>
-    <string name="theme_light">Claro</string>
-    <string name="theme_mode">Tema</string>
-    <string name="theme_system">Sistema</string>
     <string name="timer_amrap">AMRAP %1$d min</string>
     <string name="timer_circuit">Circuíto (modo clase)</string>
     <string name="timer_circuit_default">Burpees, Agachamentos, Flexións, Prancha, Zancadas</string>
@@ -826,12 +803,7 @@
     <string name="watch_sync">Sincronizar co Galaxy Watch</string>
     <string name="watch_sync_body">Envía rutinas e historial ao reloxo agora</string>
     <string name="week_adherence">Constancia das últimas semanas: %1$d %%</string>
-    <plurals name="week_records">
-        <item quantity="one">%1$d récord esta semana</item>
-        <item quantity="other">%1$d récords esta semana</item>
-    </plurals>
     <string name="week_sessions">%1$d de %2$d sesións</string>
-    <string name="week_summary">Resumo da semana</string>
     <plurals name="n_workouts_count">
         <item quantity="one">%1$d adestramento</item>
         <item quantity="other">%1$d adestramentos</item>
@@ -840,8 +812,6 @@
         <item quantity="one">%1$d serie</item>
         <item quantity="other">%1$d series</item>
     </plurals>
-    <string name="week_effective_suffix">(%1$s efectivas)</string>
-    <string name="week_vs_last">%1$s de volume fronte á semana pasada</string>
     <string name="weekly_volume">Volume semanal (%1$s)</string>
     <string name="weight_unit">Unidade de peso</string>
     <string name="whats_new">Novidades</string>
@@ -980,7 +950,6 @@
     <string name="hc_grant_more">Conceder permisos</string>
     <string name="dumbbells_nearest">Mancuernas máis próximas no teu ximnasio: %1$s</string>
     <string name="previous_set_note">A última vez: ✎ %1$s</string>
-    <string name="muscle_trend">Series por músculo (8 semanas)</string>
     <string name="muscle_trend_hint">Series efectivas por semana (secundarios á metade). Recomendado: %1$d–%2$d.</string>
     <string name="stat_average_workout">Adestramento medio: %1$s · %2$d series · %3$s</string>
     <plurals name="weekly_goal_reached">
@@ -1005,8 +974,6 @@
     <string name="set_duplicate">Duplicar serie</string>
     <string name="complete_remaining">Marcar as que faltan como feitas (%1$d)</string>
     <string name="rest_real_exercise">Descanso real %1$s · previsto %2$s</string>
-    <string name="lagging_muscles_title">Esta semana vas curto de</string>
-    <string name="lagging_muscle_line">%1$s: %2$s de %3$d series</string>
     <string name="deadline_title">A que hora tes que rematar?</string>
     <string name="deadline_over">Pasaríaste %1$d min da hora límite (%2$s): salta ou acurta algún exercicio</string>
     <string name="deadline_ok">Hora límite %1$s: vas a tempo</string>
@@ -1016,7 +983,6 @@
     <string name="deadline_fit">Axustar á miña hora límite</string>
     <string name="undo_trimmed_sets">Quitáronse series do final para chegar a tempo</string>
     <string name="rest_use_real">Usar %1$s na rutina</string>
-    <string name="lagging_muscle_open">ver exercicios</string>
     <string name="notif_progress_eta">%1$d/%2$d series · ≈ %3$d min, fin %4$s</string>
     <string name="rest_use_real_done">Rutina actualizada: descanso de %1$s</string>
     <plurals name="record_hint">
@@ -1358,10 +1324,6 @@
     <string name="history_empty_action">Comezar a adestrar</string>
     <string name="builder_weekdays_hint">Toca os días que adestrarás (de 2 a 6): as rutinas irán ao teu calendario.</string>
     <string name="exercise_how_title">Como se fai</string>
-    <plurals name="week_streak">
-        <item quantity="one">🔥 %1$d semana</item>
-        <item quantity="other">🔥 %1$d semanas</item>
-    </plurals>
     <string name="day_planned">planificado</string>
     <string name="day_today">hoxe</string>
     <string name="rating_scale">1 = pouco · 5 = moito</string>

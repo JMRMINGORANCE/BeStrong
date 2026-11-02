@@ -164,6 +164,8 @@ data class Workout(
      * con el reloj no vuelven, salvo que el otro lado tenga trabajo hecho que quien borró no conocía.
      */
     val deletedIds: Map<String, Set<String>> = emptyMap(),
+    /** Etiquetas del diario («dormí-mal», «nuevo-gimnasio»): sin «#», en minúsculas. Los JSON antiguos no la traen (vacía). */
+    val tags: List<String> = emptyList(),
 ) {
     /** Calorías calculadas (pulso o MET), no medidas directamente por el reloj. */
     val caloriesEstimated: Boolean get() = caloriesSource != null && caloriesSource != CaloriesSource.WATCH

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mapa corporal de músculos -->
+<resources>
+    <string name="rd_body_map_desc">Carte du corps avec les séries de la semaine par muscle. Touchez un muscle pour voir le détail.</string>
+    <string name="rd_body_front">FACE</string>
+    <string name="rd_body_back">DOS</string>
+    <string name="rd_body_high">Au-dessus de la recommandation : envisagez de retirer une série cette semaine.</string>
+    <string name="rd_body_optimal">Pile dans la cible : continuez.</string>
+    <string name="rd_body_low_with">Il manque %1$s séries pour votre minimum. Essayez %2$s.</string>
+    <string name="rd_body_low">Il manque %1$s séries pour votre minimum.</string>
+</resources>

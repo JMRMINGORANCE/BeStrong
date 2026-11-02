@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Técnica en vídeo y «Siguiente ejercicio» -->
+<resources>
+    <string name="set_video_record">Grabar la serie en vídeo</string>
+    <string name="set_video_no_camera">No hay ninguna app de cámara para grabar</string>
+    <string name="set_video_saved">Vídeo guardado en la ficha del ejercicio</string>
+    <string name="set_video_section">Vídeos de técnica</string>
+    <string name="set_video_compare">Comparar</string>
+    <string name="set_video_compare_hint">Elige dos vídeos para verlos a la vez</string>
+    <string name="set_video_pick">Elegir para comparar</string>
+    <string name="set_video_play">Ver el vídeo</string>
+    <string name="set_video_delete">Borrar vídeo</string>
+    <string name="set_video_set_n">Serie %1$d</string>
+    <string name="set_video_replay">Repetir</string>
+    <string name="next_exercise_title">Siguiente ejercicio</string>
+    <string name="next_exercise_plates">Discos por lado: %1$s</string>
+    <string name="next_exercise_change">Cambiar</string>
+    <string name="next_exercise_start">Empezar ya</string>
+    <string name="next_exercise_setting">Tarjeta «Siguiente ejercicio»</string>
+    <string name="next_exercise_setting_body">En el descanso antes de cambiar de ejercicio: peso, discos y nota fija del siguiente</string>
+</resources>

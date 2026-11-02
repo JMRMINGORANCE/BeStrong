@@ -10,7 +10,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.bestrong.core.io.Backup
-import com.bestrong.core.io.WorkoutCsv
 import com.bestrong.mobile.di.WorkerEntryPoint
 import dagger.hilt.android.EntryPointAccessors
 import java.time.LocalDate
@@ -20,7 +19,8 @@ import kotlinx.coroutines.sync.withLock
 
 /**
  * Copia de seguridad semanal en la carpeta que elija el usuario (Drive, almacenamiento local…):
- * un CSV compatible con Hevy/Strong y un JSON completo de rutinas e historial.
+ * un JSON completo de rutinas e historial (el que se restaura). El CSV para hojas de cálculo u otras apps se exporta
+ * a mano desde Ajustes; antes se guardaba también aquí y no servía para restaurar.
  * Además, Android Auto Backup guarda la base de datos en la cuenta de Google (ver backup_rules.xml).
  */
 class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
@@ -59,7 +59,6 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
             // (solo en un móvil que aún no ha copiado nada: si no, borrar entrenos y copiar dejaba la copia sin actualizar)
             if (settingsStore.settings.value.lastBackupEpochMs == 0L && sameDayHistorySize(tree, "$PREFIX$date.json") > data.history.size) return@runCatching
             // Prefijo propio: la rotación nunca toca las exportaciones manuales («bestrong-fecha.csv»)
-            write(tree, "$PREFIX$date.csv", "text/csv", WorkoutCsv.export(data.history).toByteArray())
             write(tree, "$PREFIX$date.json", "application/json", Backup.encode(data).toByteArray())
             settingsStore.update { it.copy(lastBackupEpochMs = System.currentTimeMillis(), backupFailNotified = false) }
             // Sin rotación, cada semana se acumulan varios MB en la carpeta (Drive) para siempre
@@ -123,8 +122,9 @@ class AutoBackupWorker(context: Context, params: WorkerParameters) : CoroutineWo
         // Lista con repetidos (Drive deja dos archivos con el mismo nombre): cuentan todos para las [KEEP]
         childList(applicationContext, tree).filter { BACKUP_NAME.matches(it.first) }
             .groupBy { it.first.substringAfterLast('.') }
-            .values.forEach { files ->
-                files.sortedByDescending { it.first }.drop(KEEP).forEach { DocumentsContract.deleteDocument(resolver, it.second) }
+            .forEach { (ext, files) ->
+                // Los CSV automáticos de versiones anteriores ya no se generan: se borran todos
+                files.sortedByDescending { it.first }.drop(if (ext == "csv") 0 else KEEP).forEach { DocumentsContract.deleteDocument(resolver, it.second) }
             }
     }
 

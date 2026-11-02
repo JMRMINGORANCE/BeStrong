@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Historia del ejercicio, equilibrio de patrones y tarjeta de músculos -->
+<resources>
+    <string name="tl_title">Historia</string>
+    <string name="tl_first">Primeira vez</string>
+    <string name="tl_record_1rm">Récord de 1RM estimado</string>
+    <string name="tl_record_weight">Récord de peso</string>
+    <string name="tl_record_reps">Récord de repeticións</string>
+    <string name="tl_round">Primeira vez con %1$s</string>
+    <string name="tl_gym">Primeira vez en %1$s</string>
+    <string name="tl_comeback">Volta tras %1$d días</string>
+    <string name="tl_deload">Sesión de descarga</string>
+    <string name="tl_prev">antes %1$s</string>
+    <string name="tl_reps">%1$d reps</string>
+    <string name="tl_show_all">Ver todos (%1$d)</string>
+    <string name="tl_show_less">Ver menos</string>
+    <string name="tl_open_day">Ver as series dese día</string>
+    <string name="tl_pinned">Nota fixa: %1$s</string>
+    <string name="tl_injury">Carga unha zona marcada como lesionada: %1$s</string>
+    <string name="pt_title">Equilibrio de patróns</string>
+    <string name="pt_body">Series de traballo por patrón de movemento nas últimas 4 semanas.</string>
+    <string name="pt_empty">Adestra unhas semanas para ver o teu equilibrio.</string>
+    <string name="pt_push_h">Empuxe horizontal</string>
+    <string name="pt_push_v">Empuxe vertical</string>
+    <string name="pt_pull_h">Tirón horizontal</string>
+    <string name="pt_pull_v">Tirón vertical</string>
+    <string name="pt_squat">Agachamento</string>
+    <string name="pt_hinge">Bisagra de cadeira</string>
+    <string name="pt_core">Core</string>
+    <string name="pt_push_h_short">Empuxe H</string>
+    <string name="pt_push_v_short">Empuxe V</string>
+    <string name="pt_pull_h_short">Tirón H</string>
+    <string name="pt_pull_v_short">Tirón V</string>
+    <string name="pt_hinge_short">Bisagra</string>
+    <string name="pt_push_pull">Empuxe : tirón</string>
+    <string name="pt_hinge_squat">Bisagra : agachamento</string>
+    <string name="pt_suggest_title">Para equilibrar</string>
+    <string name="pt_try">Proba: %1$s</string>
+    <string name="mu_title">Músculos</string>
+    <string name="mu_tab_week">Semana</string>
+    <string name="mu_tab_30d">30 días</string>
+    <string name="mu_tab_trend">Tendencia</string>
+    <string name="mu_tab_recovery">Recuperación</string>
+    <string name="mu_lagging_tag">vai atrasado</string>
+</resources>

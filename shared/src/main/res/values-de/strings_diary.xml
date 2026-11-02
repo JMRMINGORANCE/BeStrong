@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Diario de entreno (etiquetas) -->
+<resources>
+    <string name="diary_list">Liste</string>
+    <string name="diary_journal">Tagebuch</string>
+    <string name="diary_tags">Tags</string>
+    <string name="diary_add_tag">Tag hinzufügen</string>
+    <string name="diary_tag_hint">z. B. schlecht geschlafen</string>
+    <string name="diary_edit_tags">Tags bearbeiten</string>
+    <string name="diary_remove_tag">#%1$s entfernen</string>
+    <string name="diary_filter_tag">Nach #%1$s filtern</string>
+    <string name="diary_default_tags">schlecht-geschlafen,gutes-gefühl,neues-gym,beschwerden,in-eile</string>
+    <string name="diary_effect_less">Mit #%1$s leistest du %2$d %% weniger</string>
+    <string name="diary_effect_more">Mit #%1$s leistest du %2$d %% mehr</string>
+    <string name="diary_effect_same">Mit #%1$s leistest du gleich viel</string>
+    <string name="diary_effect_none">Noch zu wenige Einheiten mit #%1$s für eine Aussage</string>
+    <string name="diary_effect_body">Volumen im Vergleich zum Schnitt derselben Routine</string>
+    <string name="diary_no_note">Keine Notiz</string>
+    <string name="diary_empty">Noch keine Einträge: füge nach dem Training eine Notiz, eine Bewertung oder Tags hinzu.</string>
+    <string name="diary_view">Verlaufsansicht</string>
+</resources>

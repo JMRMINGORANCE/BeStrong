@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Periodización visual (Planificación) -->
+<resources>
+    <string name="cycle_phase_accumulation">Accumulation</string>
+    <string name="cycle_phase_intensification">Intensification</string>
+    <string name="cycle_phase_deload">Deload</string>
+    <string name="cycle_overline_program">Program · cycle %1$d</string>
+    <string name="cycle_overline_meso">Mesocycle · cycle %1$d</string>
+    <string name="cycle_meso_title">Your mesocycle</string>
+    <string name="cycle_today">Today</string>
+    <string name="cycle_week_desc">Week %1$d, %2$s: %3$d of %4$d sets</string>
+    <string name="cycle_week_short">W%1$d</string>
+    <string name="cycle_week_of">Week %1$d of %2$d</string>
+    <string name="cycle_load_title">Weekly load</string>
+    <string name="cycle_sets_of">%1$d / %2$d sets</string>
+    <string name="cycle_vs_plan">%1$d %% vs plan</string>
+    <string name="cycle_planned">Planned</string>
+    <string name="cycle_done">Done</string>
+    <string name="cycle_deload_now">This week is a deload</string>
+    <string name="cycle_deload_detail">W%1$d · from %2$s · lighter loads</string>
+    <string name="cycle_intensity_title">Intensity by exercise · relative to training max</string>
+    <string name="cycle_row_fixed">Fixed</string>
+    <string name="cycle_row_main">Main</string>
+    <string name="cycle_no_plan">Put routines on the weekly calendar to see the planned load here.</string>
+    <plurals name="cycle_deload_in">
+        <item quantity="one">Deload in %1$d week</item>
+        <item quantity="other">Deload in %1$d weeks</item>
+    </plurals>
+</resources>

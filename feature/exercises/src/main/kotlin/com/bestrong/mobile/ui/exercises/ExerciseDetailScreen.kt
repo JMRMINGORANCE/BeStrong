@@ -123,6 +123,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
         )
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item { ExerciseMediaSection(vm, s.exercise) { ExerciseAbout(s.exercise) } }
+            // Vídeos de las series grabadas en el entreno (solo si hay alguno)
+            item { SetVideosSection(vm, s.exercise) }
             if (com.bestrong.core.stats.ExerciseGoals.supports(s.exercise.tracking)) item { ExerciseGoalCard(vm, s) }
             if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RepRangeCard(vm, s.exercise.id) }
             if (s.variants.size > 1) {
@@ -199,6 +201,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             }
             if (s.rpeTrend.size >= RPE_MIN_SESSIONS) item { RpeTrendCard(s.rpeTrend) }
             if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { PlateauHint(vm, exerciseId, s.progress) }
+            // Historia del ejercicio: hitos en una línea de tiempo (propuesta 03)
+            item { ExerciseTimelineSection(vm, s.exercise, f) }
             item { SectionHeader(stringResource(R.string.personal_records)) }
             item {
                 com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {

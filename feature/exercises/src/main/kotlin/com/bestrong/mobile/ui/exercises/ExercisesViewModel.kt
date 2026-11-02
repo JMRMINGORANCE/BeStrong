@@ -89,7 +89,13 @@ class ExercisesViewModel @Inject constructor(
     private val settingsStore: SettingsStore,
     private val planning: PlanningStore,
     private val actions: com.bestrong.mobile.WorkoutActions,
+    private val setVideos: com.bestrong.mobile.data.SetVideoStore,
 ) : ViewModel() {
+
+    /** Vídeos de técnica de las series grabadas en el entreno (propuesta 04). */
+    val setVideoVersion: StateFlow<Int> = setVideos.version
+    fun setVideos(exerciseId: String): List<com.bestrong.mobile.data.SetVideo> = setVideos.videos(exerciseId)
+    fun deleteSetVideo(video: com.bestrong.mobile.data.SetVideo) = setVideos.delete(video)
 
     val favorites: StateFlow<Set<String>> = settingsStore.settings.map { it.favoriteExercises }
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.favoriteExercises)
@@ -101,6 +107,13 @@ class ExercisesViewModel @Inject constructor(
     // --- Imagen de wger y notas de técnica (foto/vídeo) -------------------------------------
 
     val mediaVersion: StateFlow<Int> = media.version
+
+    /** Historial completo (línea de tiempo de la ficha: hitos y series de cada día). */
+    val history: StateFlow<List<Workout>> = repo.history
+
+    /** Zonas lesionadas marcadas en Planificación (aviso en la línea de tiempo). */
+    val injuries: StateFlow<Set<com.bestrong.core.training.InjuryZone>> = planning.state.map { it.injuries }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
     fun image(exerciseId: String): ExerciseImage? = media.images[exerciseId]
     fun mediaItems(exerciseId: String): List<MediaItem> = media.items(exerciseId)
     fun note(exerciseId: String): String = media.note(exerciseId)

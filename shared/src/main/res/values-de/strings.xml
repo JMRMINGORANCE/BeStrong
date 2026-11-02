@@ -8,13 +8,6 @@
     <string name="about_subtitle">Version, Credits, Lizenzen und Support</string>
     <string name="about_title">Über BeStrong</string>
     <string name="about_version">Version %1$s (%2$d)</string>
-    <string name="accent">Akzentfarbe</string>
-    <string name="accent_blue">Blau</string>
-    <string name="accent_dynamic">Vom Hintergrundbild</string>
-    <string name="accent_green">Grün</string>
-    <string name="accent_orange">Orange</string>
-    <string name="accent_pink">Rosa</string>
-    <string name="accent_purple">Lila</string>
     <string name="ach_bench_bw">Körpergewicht bankdrücken</string>
     <string name="ach_deadlift_2bw">Kreuzheben mit 2 × Körpergewicht</string>
     <string name="ach_first_workout">Erstes Training</string>
@@ -70,15 +63,9 @@
     <string name="appearance">Darstellung und Barrierefreiheit</string>
     <string name="auto_backup">Wöchentliches Backup</string>
     <string name="auto_backup_last">Letztes Backup: %1$s</string>
-    <string name="auto_backup_off">Wähle einen Ordner (z. B. Google Drive), um wöchentlich CSV + JSON zu speichern. Sie sind unverschlüsselt: für eine Kopie mit Passwort nutze „Passwortgeschütztes Backup“.</string>
+    <string name="auto_backup_off">Wähle einen Ordner (z. B. Google Drive), um wöchentlich eine Kopie (JSON) zu speichern. Sie ist unverschlüsselt: für eine Kopie mit Passwort nutze „Passwortgeschütztes Backup“.</string>
     <string name="auto_backup_on">Aktiv. Erstes Backup läuft.</string>
     <string name="backup_started">Backup läuft …</string>
-    <string name="balance_leg_warning">Unausgewogen: Beine liegen weit hinter (oder vor) dem Oberkörper.</string>
-    <string name="balance_ok">Gut ausgewogen.</string>
-    <string name="balance_push_pull">Drücken %1$s · Ziehen %2$s Sätze</string>
-    <string name="balance_push_warning">Unausgewogen: Gleiche Drücken und Ziehen aus, um deine Schultern zu schützen.</string>
-    <string name="balance_title">Balance (4 Wochen)</string>
-    <string name="balance_upper_lower">Oberkörper %1$s · Unterkörper %2$s Sätze</string>
     <string name="best_1rm">Beste geschätzte 1RMs</string>
     <string name="body_unit">Einheit für Körpergewicht</string>
     <string name="body_unit_same">Wie bei Übungen</string>
@@ -398,10 +385,8 @@
     <string name="muscle_glutes">Gesäß</string>
     <string name="muscle_hamstrings">Beinbeuger</string>
     <string name="muscle_map_body">Effektive Sätze pro Muskel. Empfohlen: %1$d–%2$d pro Woche.</string>
-    <string name="muscle_map_title">Muskelkarte dieser Woche</string>
     <string name="muscle_never">nie</string>
     <string name="muscle_quadriceps">Quadrizeps</string>
-    <string name="muscle_recovery">Muskelerholung</string>
     <string name="muscle_shoulders">Schultern</string>
     <string name="muscle_sore">ermüdet</string>
     <string name="muscle_today">heute</string>
@@ -459,9 +444,8 @@
         <item quantity="other">🏆 %1$d neue Rekorde</item>
     </plurals>
     <string name="notif_weekly_title">Deine Woche in BeStrong</string>
-    <string name="one_hand_complete">%1$s · Satz %2$d</string>
-    <string name="one_handed">Einhandmodus</string>
-    <string name="one_handed_body">Auf dem Außendisplay des Fold rücken „Satz abschließen“ und „Beenden“ nach unten, in Daumenreichweite.</string>
+    <string name="one_handed">Im Fokusmodus starten</string>
+    <string name="one_handed_body">Beim Trainingsstart auf dem zugeklappten Handy füllt ein Satz den Bildschirm, mit großen Tasten in Daumenreichweite. Mit der Taste oben wechselst du zur Liste.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Optionen</string>
     <string name="partner_history">Von %1$s anzeigen</string>
@@ -575,8 +559,6 @@
     <string name="record_line">%1$s: %2$s %3$s</string>
     <string name="record_most_reps">Meiste Wdh.</string>
     <string name="record_set_volume">Bestes Satzvolumen</string>
-    <string name="record_timeline">Rekord-Zeitleiste</string>
-    <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
     <string name="relative_strength">Relative Kraft: %1$s</string>
     <string name="relative_strength_hint">Geschätztes 1RM geteilt durch dein Körpergewicht</string>
     <string name="reminders">Erinnerungen</string>
@@ -676,7 +658,6 @@
     <string name="set_type_warmup">Aufwärmen</string>
     <string name="set_weight_in">Gewicht in %1$s</string>
     <string name="set_weight_signed">Zusatzgewicht (+) oder Unterstützung (−) in %1$s</string>
-    <string name="sets_per_muscle">Sätze pro Muskel (30 Tage)</string>
     <string name="sets_times_exercise">%1$d × %2$s</string>
     <string name="settings">Einstellungen</string>
     <string name="settings_during">Während des Trainings</string>
@@ -749,10 +730,6 @@
     <string name="tempo_help">Sekunden für Ablassen-Pause-Heben-Pause, z. B. 3-1-1-0 (X = explosiv). Die Uhr führt dich per Vibration.</string>
     <string name="tempo_invalid">Format: 3-1-1 oder 3-1-1-0 (0 bis 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s unter Spannung pro Satz</string>
-    <string name="theme_dark">Dunkel</string>
-    <string name="theme_light">Hell</string>
-    <string name="theme_mode">Design</string>
-    <string name="theme_system">System</string>
     <string name="timer_amrap">AMRAP %1$d min</string>
     <string name="timer_circuit">Zirkel (Kursmodus)</string>
     <string name="timer_circuit_default">Burpees, Kniebeugen, Liegestütze, Plank, Ausfallschritte</string>
@@ -826,12 +803,7 @@
     <string name="watch_sync">Mit Galaxy Watch synchronisieren</string>
     <string name="watch_sync_body">Routinen und Verlauf jetzt an die Uhr senden</string>
     <string name="week_adherence">Konstanz der letzten Wochen: %1$d%%</string>
-    <plurals name="week_records">
-        <item quantity="one">%1$d Rekord diese Woche</item>
-        <item quantity="other">%1$d Rekorde diese Woche</item>
-    </plurals>
     <string name="week_sessions">%1$d von %2$d Einheiten</string>
-    <string name="week_summary">Wochenübersicht</string>
     <plurals name="n_workouts_count">
         <item quantity="one">%1$d Training</item>
         <item quantity="other">%1$d Trainings</item>
@@ -840,8 +812,6 @@
         <item quantity="one">%1$d Satz</item>
         <item quantity="other">%1$d Sätze</item>
     </plurals>
-    <string name="week_effective_suffix">(%1$s effektiv)</string>
-    <string name="week_vs_last">%1$s Volumen ggü. Vorwoche</string>
     <string name="weekly_volume">Wochenvolumen (%1$s)</string>
     <string name="weight_unit">Gewichtseinheit</string>
     <string name="whats_new">Neuigkeiten</string>
@@ -980,7 +950,6 @@
     <string name="hc_grant_more">Berechtigungen erteilen</string>
     <string name="dumbbells_nearest">Nächste Kurzhanteln in deinem Studio: %1$s</string>
     <string name="previous_set_note">Letztes Mal: ✎ %1$s</string>
-    <string name="muscle_trend">Sätze pro Muskel (8 Wochen)</string>
     <string name="muscle_trend_hint">Effektive Sätze pro Woche (Nebenmuskeln halb). Empfohlen: %1$d–%2$d.</string>
     <string name="stat_average_workout">Durchschnittliches Training: %1$s · %2$d Sätze · %3$s</string>
     <plurals name="weekly_goal_reached">
@@ -1005,8 +974,6 @@
     <string name="set_duplicate">Satz duplizieren</string>
     <string name="complete_remaining">Restliche Sätze als erledigt markieren (%1$d)</string>
     <string name="rest_real_exercise">Pause tatsächlich %1$s · geplant %2$s</string>
-    <string name="lagging_muscles_title">Diese Woche fehlt dir noch</string>
-    <string name="lagging_muscle_line">%1$s: %2$s von %3$d Sätzen</string>
     <string name="deadline_title">Wann musst du fertig sein?</string>
     <string name="deadline_over">Du würdest dein Limit (%2$s) um %1$d Min. überschreiten: lass eine Übung weg oder kürze sie</string>
     <string name="deadline_ok">Limit %1$s: du liegst gut in der Zeit</string>
@@ -1016,7 +983,6 @@
     <string name="deadline_fit">An mein Zeitlimit anpassen</string>
     <string name="undo_trimmed_sets">Sätze am Ende entfernt, um rechtzeitig fertig zu sein</string>
     <string name="rest_use_real">%1$s in Routine übernehmen</string>
-    <string name="lagging_muscle_open">Übungen ansehen</string>
     <string name="notif_progress_eta">%1$d/%2$d Sätze · ≈ %3$d Min., Ende %4$s</string>
     <string name="rest_use_real_done">Routine aktualisiert: %1$s Pause</string>
     <plurals name="record_hint">
@@ -1358,10 +1324,6 @@
     <string name="history_empty_action">Training starten</string>
     <string name="builder_weekdays_hint">Tippe auf deine Trainingstage (2 bis 6): die Routinen kommen in deinen Kalender.</string>
     <string name="exercise_how_title">So geht’s</string>
-    <plurals name="week_streak">
-        <item quantity="one">🔥 %1$d Woche</item>
-        <item quantity="other">🔥 %1$d Wochen</item>
-    </plurals>
     <string name="day_planned">geplant</string>
     <string name="day_today">heute</string>
     <string name="rating_scale">1 = wenig · 5 = viel</string>

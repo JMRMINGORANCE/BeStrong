@@ -34,8 +34,15 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
 - **Compartir entreno como imagen** (tarjeta 4:5 con cifras, ejercicios y récords) desde el resumen o el historial.
 - **Recordatorios** los días elegidos a la hora elegida (solo si ese día no has entrenado; sugiere la rutina que toca).
 - **Notificación de récords** cuando terminas un entreno en el reloj.
-- **Copias de seguridad**: semanal (CSV + JSON) en la carpeta que elijas (p. ej. Google Drive), **restaurar** desde el JSON
+- **Copias de seguridad**: semanal (JSON) en la carpeta que elijas (p. ej. Google Drive), **restaurar** desde el JSON
   (añade lo que falte, no borra nada) y Android Auto Backup de la base de datos.
+- **Búsqueda universal** (lupa en Inicio): rutinas, ejercicios, entrenos pasados (también por `#etiqueta`) y páginas de Ajustes, con acciones directas.
+- **Comparar dos entrenos** serie a serie y **diario** de sesiones con etiquetas y cuánto rindes con cada una.
+- **Ficha de ejercicio con su historia** (récords, primeras veces, cambios de gimnasio, descargas) y **vídeos de técnica** grabados en el entreno (solo en el móvil, a cámara lenta y para comparar).
+- **Músculos** en una sola tarjeta (semana con silueta, 30 días, tendencia y recuperación) y **equilibrio de patrones** de movimiento en radar.
+- **Periodización visual** del ciclo y **editor de rutinas en tablero** en el Fold desplegado.
+- **Modo foco** en el entreno, **siguiente ejercicio** con discos y cuenta atrás (móvil y reloj) y resumen final a pantalla completa (anillos en el reloj).
+- **Dos estilos visuales a elegir**: Carbono (oscuro, rojo racing) y Titanio Blanco (claro, naranja internacional): colores, letra de títulos y esquinas; el reloj toma el acento. Letras de Google Fonts (Titillium Web, Inter Tight) con licencia SIL OFL.
 - **Perfil**: racha semanal, volumen semanal, entrenos por semana, series por músculo (30 días), mejores 1RM.
 - **Medidas corporales** (peso, % grasa, cintura, pecho, brazo, muslo) con gráfica de peso.
 - **Health Connect** (opcional): cada entreno se guarda como sesión de pesas → aparece en **Samsung Health**.

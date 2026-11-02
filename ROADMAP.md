@@ -456,3 +456,24 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
 - [x] «Ahora no» en el aviso de estancamiento
 - [x] Cuenta atrás 3-2-1 con vibración antes de acabar el descanso
 - [x] Calentamiento guiado con pausa y atrás; repetir la semana planificada 1, 2, 4 u 8 semanas
+
+## Fase 54 — Propuestas de interfaz ✅
+- [x] Modo foco en el entreno: una serie a pantalla completa, números grandes, botón «Serie hecha» y deslizar para cambiar de serie
+- [x] Inicio: «Hoy toca» con duración y botón para empezar en el reloj; racha, volumen semanal y músculos de la semana
+- [x] Mapa muscular con silueta frontal y trasera coloreada por series (toca un músculo para ver su detalle y un consejo)
+- [x] Resumen de fin de entreno a pantalla completa: trofeo, cifras, récords destacados, comparación con la última vez y confeti con récord
+- [x] Fold desplegado: «centro de mando» con las series a la izquierda y descanso, pulso del reloj, discos y 1RM a la derecha
+
+## Fase 55 — Estilos visuales a elegir ✅
+- [x] Dos estilos: Carbono (oscuro, negro mate y rojo racing) y Titanio Blanco (claro, titanio y naranja), con su paleta, letra de títulos y esquinas
+- [x] Selector con miniaturas en Ajustes → Apariencia y al empezar (tras los permisos)
+- [x] El reloj toma el acento del estilo elegido en el móvil (fondo negro en los dos, por la batería)
+
+## Fase 56 — Diez interfaces nuevas y limpieza ✅
+- [x] Búsqueda universal, comparador de sesiones y diario con etiquetas
+- [x] Historia del ejercicio, vídeos de técnica y equilibrio de patrones
+- [x] Periodización visual, editor en tablero (Fold), siguiente ejercicio y resumen con anillos en el reloj
+- [x] Limpieza: músculos en una tarjeta, sin racha ni «En el reloj» repetidos, modo foco en lugar de «una mano»,
+      resumen semanal solo en Inicio, resumen final sin datos repetidos, copia semanal solo JSON, sin el tema antiguo
+      y sin las imágenes de propuestas en el repositorio
+- [x] «En el móvil» desde el resumen del reloj: abre ese entreno en el Historial del móvil (bestrong://workout/<id>)

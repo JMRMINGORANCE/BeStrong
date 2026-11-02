@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resumen en la muñeca y «Siguiente ejercicio» en el reloj -->
+<resources>
+    <string name="next_exercise_title">Als Nächstes</string>
+    <string name="next_exercise_plates">Pro Seite: %1$s</string>
+    <string name="next_exercise_start">Jetzt starten</string>
+    <string name="next_time_title">Nächstes Mal</string>
+    <string name="summary_rings_desc">%1$d von %2$d Sätzen, %3$s, %4$s</string>
+    <string name="open_on_phone">Auf dem Handy</string>
+    <string name="open_on_phone_dialog">Weiter auf dem Handy</string>
+    <string name="open_on_phone_failed">Kein Handy verbunden</string>
+</resources>

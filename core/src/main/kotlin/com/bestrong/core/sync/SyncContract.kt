@@ -42,6 +42,9 @@ object SyncContract {
     /** Deep link que abre el reloj desde el móvil (RemoteActivityHelper). */
     const val DEEP_LINK_SCHEME = "bestrong"
     const val DEEP_LINK_HOST = "start"
+
+    /** bestrong://workout/<id>: el reloj abre ese entreno en el Historial del móvil. */
+    const val DEEP_LINK_WORKOUT_HOST = "workout"
     const val DEEP_LINK_PARAM_ROUTINE = "routine"
 
     // coerceInputValues: un valor de enum nuevo (de una versión más reciente del otro lado) usa el de por defecto en vez de romper
@@ -158,6 +161,10 @@ data class SharedSettings(
     /** Mejores marcas de todo el historial (el reloj solo tiene el reciente): 1RM estimado y peso máximo. */
     val bestOneRepMaxKg: Map<String, Double> = emptyMap(),
     val heaviestKg: Map<String, Double> = emptyMap(),
+    /** Estilo visual elegido en el móvil (nombre de VisualStyle): el reloj usa su acento. */
+    val visualStyle: String = "CARBONO",
+    /** Tarjeta «Siguiente ejercicio» en el descanso antes de cambiar de ejercicio (se elige en el móvil). */
+    val nextExerciseCard: Boolean = true,
     /** Descanso máximo tras una serie de calentamiento (s). */
     val warmupRestSeconds: Int = 60,
     /** Ejercicios ocultos en la biblioteca del móvil: el selector del reloj tampoco los ofrece. */

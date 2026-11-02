@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos visuales elegibles: Carbono y Titanio Blanco -->
+<resources>
+    <string name="style_title">Estilo</string>
+    <string name="style_footer">Muda as cores, a letra dos títulos e os cantos no telemóvel e o destaque no relógio.</string>
+    <string name="style_onb_title">Escolhe o teu estilo</string>
+    <string name="style_onb_body">É assim que a app e o relógio vão ficar. Toca num para experimentar: podes mudá-lo quando quiseres em Definições → Aparência.</string>
+    <string name="style_carbono">Carbono</string>
+    <string name="style_carbono_desc">Escuro: preto mate e vermelho racing, como a telemetria da F1.</string>
+    <string name="style_titanio_blanco">Titânio Branco</string>
+    <string name="style_titanio_blanco_desc">Claro: titânio com laranja internacional.</string>
+</resources>

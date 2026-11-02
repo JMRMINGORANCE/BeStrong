@@ -77,6 +77,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="bestrong" android:host="routine" />
             </intent-filter>
+            <!-- Entreno abierto desde el reloj («En el móvil» del resumen): bestrong://workout/<id> -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="bestrong" android:host="workout" />
+            </intent-filter>
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />

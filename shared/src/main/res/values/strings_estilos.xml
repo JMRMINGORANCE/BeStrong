@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos visuales elegibles: Carbono y Titanio Blanco -->
+<resources>
+    <string name="style_title">Estilo</string>
+    <string name="style_footer">Cambia colores, letra de los títulos y esquinas en el móvil y el acento en el reloj.</string>
+    <string name="style_onb_title">Elige tu estilo</string>
+    <string name="style_onb_body">Así se verán la app y el reloj. Toca uno para probarlo: puedes cambiarlo cuando quieras en Ajustes → Apariencia.</string>
+    <string name="style_carbono">Carbono</string>
+    <string name="style_carbono_desc">Oscuro: negro mate y rojo racing, como la telemetría de F1.</string>
+    <string name="style_titanio_blanco">Titanio Blanco</string>
+    <string name="style_titanio_blanco_desc">Claro: titanio con naranja internacional.</string>
+</resources>

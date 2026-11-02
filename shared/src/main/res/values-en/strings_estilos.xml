@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos visuales elegibles: Carbono y Titanio Blanco -->
+<resources>
+    <string name="style_title">Style</string>
+    <string name="style_footer">Changes colours, heading font and corners on the phone and the accent on the watch.</string>
+    <string name="style_onb_title">Choose your style</string>
+    <string name="style_onb_body">This is how the app and the watch will look. Tap one to try it: you can change it any time in Settings → Appearance.</string>
+    <string name="style_carbono">Carbon</string>
+    <string name="style_carbono_desc">Dark: matte black and racing red, like F1 telemetry.</string>
+    <string name="style_titanio_blanco">White Titanium</string>
+    <string name="style_titanio_blanco_desc">Light: titanium with international orange.</string>
+</resources>

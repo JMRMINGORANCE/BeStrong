@@ -1,13 +1,16 @@
 package com.bestrong.mobile.ui.routines
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragIndicator
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -53,6 +58,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
@@ -77,6 +85,10 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
     // Leído aquí para que el título y el botón de borrar cambien si el borrador pasa a ser rutina nueva
     val isNew by vm.isNewState.collectAsStateWithLifecycle()
     CloseIfMissing(vm, onClose)
+    // Fold desplegado: tablero con la biblioteca a la izquierda y la rutina a la derecha
+    val wide = androidx.compose.material3.adaptive.currentWindowAdaptiveInfo().windowSizeClass.windowWidthSizeClass != androidx.window.core.layout.WindowWidthSizeClass.COMPACT
+    val board = remember { BoardState() }
+    val library by vm.library.collectAsStateWithLifecycle()
     var confirmLeave by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     var confirmDelete by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     var restFor by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
@@ -120,86 +132,118 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
         },
         // Siempre a mano, aunque la rutina sea larga
         bottomBar = {
-            Button(
-                onClick = onAddExercises,
-                modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp).height(52.dp),
-            ) {
-                Icon(Icons.Default.Add, null)
-                Text(stringResource(R.string.add_exercises), Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold)
+            // En el tablero la biblioteca ya está a la vista
+            if (!wide) {
+                Button(
+                    onClick = onAddExercises,
+                    modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp).height(52.dp),
+                ) {
+                    Icon(Icons.Default.Add, null)
+                    Text(stringResource(R.string.add_exercises), Modifier.padding(start = 8.dp), fontWeight = FontWeight.Bold)
+                }
             }
         },
     ) { padding ->
         var moreOptions by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
         // El teclado también cuenta como borde (con barra inferior, el Scaffold no lo suma): así las series de
         // abajo pueden subir por encima de él
-        LazyColumn(
-            Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            // En el Fold desplegado, el editor no se estira de lado a lado
-            val content = Modifier.widthIn(max = 720.dp).fillMaxWidth().padding(horizontal = 16.dp)
-            item {
-                Column(content, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedTextField(
-                        routine.name,
-                        vm::rename,
-                        label = { Text(stringResource(R.string.routine_name)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences),
-                        textStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    OutlinedTextField(
-                        routine.notes,
-                        vm::setNotes,
-                        label = { Text(stringResource(R.string.notes)) },
-                        keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    // Lo que se toca poco (emoji, carpeta, gimnasio y los ajustes para toda la rutina), plegado
-                    val moreState = stringResource(if (moreOptions) R.string.folder_expanded else R.string.folder_collapsed)
-                    com.bestrong.mobile.ui.components.Panel(
-                        onClick = { moreOptions = !moreOptions },
-                        contentPadding = 14.dp,
-                        modifier = Modifier.semantics { stateDescription = moreState },
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Tune, null, tint = MaterialTheme.colorScheme.primary)
-                            Text(stringResource(R.string.routine_more_options), Modifier.weight(1f).padding(start = 12.dp), fontWeight = FontWeight.Bold)
-                            Icon(if (moreOptions) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, null)
+        val editor: @Composable (Modifier) -> Unit = { listModifier ->
+            LazyColumn(
+                listModifier,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                // En el Fold desplegado, el editor no se estira de lado a lado
+                val content = Modifier.widthIn(max = 720.dp).fillMaxWidth().padding(horizontal = 16.dp)
+                // Tablero: las cifras y los músculos arriba, que cambian al momento al añadir o quitar
+                if (wide) {
+                    item {
+                        Column(content.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            BoardSummary(routine, Modifier.fillMaxWidth())
+                            RoutineMusclesCard(routine, Modifier.fillMaxWidth())
                         }
                     }
-                    if (moreOptions) {
-                        EmojiPicker(routine.emoji, vm::setEmoji)
-                        FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
-                        RoutineGymRow(vm, routine)
-                        RoutineRangeRow(vm, routine)
-                        RoutineRpeRow(vm, routine)
-                        RoutineTempoRow(vm, routine)
+                }
+                item {
+                    Column(content, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedTextField(
+                            routine.name,
+                            vm::rename,
+                            label = { Text(stringResource(R.string.routine_name)) },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences),
+                            textStyle = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        OutlinedTextField(
+                            routine.notes,
+                            vm::setNotes,
+                            label = { Text(stringResource(R.string.notes)) },
+                            keyboardOptions = KeyboardOptions(capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Sentences),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        // Lo que se toca poco (emoji, carpeta, gimnasio y los ajustes para toda la rutina), plegado
+                        val moreState = stringResource(if (moreOptions) R.string.folder_expanded else R.string.folder_collapsed)
+                        com.bestrong.mobile.ui.components.Panel(
+                            onClick = { moreOptions = !moreOptions },
+                            contentPadding = 14.dp,
+                            modifier = Modifier.semantics { stateDescription = moreState },
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Tune, null, tint = MaterialTheme.colorScheme.primary)
+                                Text(stringResource(R.string.routine_more_options), Modifier.weight(1f).padding(start = 12.dp), fontWeight = FontWeight.Bold)
+                                Icon(if (moreOptions) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, null)
+                            }
+                        }
+                        if (moreOptions) {
+                            EmojiPicker(routine.emoji, vm::setEmoji)
+                            FolderField(routine.folder.orEmpty(), vm.folders, vm::setFolder)
+                            RoutineGymRow(vm, routine)
+                            RoutineRangeRow(vm, routine)
+                            RoutineRpeRow(vm, routine)
+                            RoutineTempoRow(vm, routine)
+                        }
+                        if (routine.exercises.isNotEmpty()) {
+                            com.bestrong.mobile.ui.components.SectionHeader(
+                                androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, routine.exercises.size, routine.exercises.size),
+                                large = true,
+                            )
+                        }
                     }
-                    if (routine.exercises.isNotEmpty()) {
-                        com.bestrong.mobile.ui.components.SectionHeader(
-                            androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, routine.exercises.size, routine.exercises.size),
-                            large = true,
+                }
+                if (routine.exercises.isEmpty()) {
+                    item {
+                        com.bestrong.mobile.ui.components.EmptyState(
+                            Icons.Default.FitnessCenter,
+                            stringResource(R.string.routine_empty_title),
+                            stringResource(R.string.routine_empty_body),
+                            Modifier.heightIn(min = 360.dp),
                         )
                     }
                 }
+                itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
+                    RoutineExerciseCard(vm, routine, index, re, content, tempoVersion, reorderable = wide) { restFor = it }
+                }
+                if (routine.exercises.isNotEmpty() && !wide) item { RoutineMusclesCard(routine, content) }
             }
-            if (routine.exercises.isEmpty()) {
-                item {
-                    com.bestrong.mobile.ui.components.EmptyState(
-                        Icons.Default.FitnessCenter,
-                        stringResource(R.string.routine_empty_title),
-                        stringResource(R.string.routine_empty_body),
-                        Modifier.heightIn(min = 360.dp),
+        }
+        if (wide) {
+            var rootOffset by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
+            androidx.compose.foundation.layout.Box(
+                Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize()
+                    .onGloballyPositioned { rootOffset = it.positionInRoot() },
+            ) {
+                androidx.compose.foundation.layout.Row(Modifier.fillMaxSize()) {
+                    BoardLibrary(library, routine, board, onAdd = { vm.addExercises(listOf(it)) }, Modifier.weight(0.4f).fillMaxHeight())
+                    editor(
+                        Modifier.weight(0.6f).fillMaxHeight().boardDropZone(board)
+                            .then(if (board.overDrop) Modifier.border(2.dp, MaterialTheme.colorScheme.primary) else Modifier),
                     )
                 }
+                BoardDragGhost(board, rootOffset)
             }
-            itemsIndexed(routine.exercises, key = { _, re -> re.id }) { index, re ->
-                RoutineExerciseCard(vm, routine, index, re, content, tempoVersion) { restFor = it }
-            }
-            if (routine.exercises.isNotEmpty()) item { RoutineMusclesCard(routine, content) }
+        } else {
+            editor(Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize())
         }
     }
 }
@@ -449,12 +493,15 @@ private fun RoutineExerciseCard(
     re: com.bestrong.core.model.RoutineExercise,
     content: Modifier,
     tempoVersion: Int,
+    reorderable: Boolean = false,
     onEditRest: (String) -> Unit,
 ) {
     var extras by androidx.compose.runtime.saveable.rememberSaveable(re.id, tempoVersion) { mutableStateOf(re.notes.isNotBlank() || !re.tempo.isNullOrBlank() || re.targetRpe != null) }
     com.bestrong.mobile.ui.components.Panel(content, contentPadding = 0.dp) {
         Column(Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                // Tablero: asa para reordenar arrastrando (subir y bajar siguen en el menú, también para TalkBack)
+                if (reorderable) ReorderHandle(vm, re, index, routine.exercises.size)
                 com.bestrong.mobile.ui.components.ExerciseThumb(re.exercise, 48.dp, Modifier.padding(end = 12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(re.exercise.displayName(), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold)
@@ -547,3 +594,36 @@ private fun RoutineSetRow(vm: RoutineEditorViewModel, re: com.bestrong.core.mode
         IconButton(onClick = { vm.removeSet(re.id, i) }) { Icon(Icons.Default.Close, stringResource(R.string.remove_set), tint = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
 }
+
+/**
+ * Asa para reordenar en el tablero: al arrastrar arriba o abajo más de media tarjeta, el ejercicio cambia de sitio
+ * (con su superserie). Sin semántica propia: para TalkBack están «Subir» y «Bajar» en el menú del ejercicio.
+ */
+@Composable
+private fun ReorderHandle(vm: RoutineEditorViewModel, re: com.bestrong.core.model.RoutineExercise, index: Int, count: Int) {
+    val currentIndex by androidx.compose.runtime.rememberUpdatedState(index)
+    val currentCount by androidx.compose.runtime.rememberUpdatedState(count)
+    val step = with(androidx.compose.ui.platform.LocalDensity.current) { REORDER_STEP.toPx() }
+    Icon(
+        Icons.Default.DragIndicator,
+        null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(end = 8.dp).size(28.dp).pointerInput(re.id) {
+            var acc = 0f
+            detectVerticalDragGestures(onDragEnd = { acc = 0f }, onDragCancel = { acc = 0f }) { change, dy ->
+                change.consume()
+                acc += dy
+                if (acc > step && currentIndex < currentCount - 1) {
+                    vm.moveExercise(currentIndex, currentIndex + 1)
+                    acc -= step
+                } else if (acc < -step && currentIndex > 0) {
+                    vm.moveExercise(currentIndex, currentIndex - 1)
+                    acc += step
+                }
+            }
+        },
+    )
+}
+
+/** Cuánto hay que arrastrar el asa para pasar un ejercicio. */
+private val REORDER_STEP = 72.dp

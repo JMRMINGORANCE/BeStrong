@@ -334,6 +334,9 @@ class HomeViewModel @Inject constructor(
     val active: StateFlow<Workout?> = repo.activeWorkout
     val history: StateFlow<List<Workout>> = repo.history
 
+    /** Biblioteca y ejercicios propios (búsqueda universal). */
+    val exercises: StateFlow<List<com.bestrong.core.model.Exercise>> = repo.exercises
+
     /** El último entreno de cada rutina (una pasada por el historial, no una por tarjeta). */
     val lastByRoutine: StateFlow<Map<String, Workout>> = repo.history
         .map { h -> buildMap { h.forEach { w -> w.routineId?.let { if (it !in this) put(it, w) } } } }

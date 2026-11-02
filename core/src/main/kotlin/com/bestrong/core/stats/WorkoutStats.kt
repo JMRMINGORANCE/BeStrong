@@ -244,7 +244,7 @@ object WorkoutStats {
     fun searchText(w: Workout, nameOf: (com.bestrong.core.model.Exercise) -> String = { it.name }): String =
         plainText(
             (
-                listOf(w.name, w.notes, w.gymName.orEmpty(), w.athlete.orEmpty()) +
+                listOf(w.name, w.notes, w.gymName.orEmpty(), w.athlete.orEmpty()) + w.tags.map { "#$it" } +
                     w.exercises.flatMap { we -> listOf(nameOf(we.exercise), we.notes) + we.sets.map { it.note } }
                 )
                 .filter { it.isNotEmpty() }.joinToString("\n"),
@@ -258,7 +258,7 @@ object WorkoutStats {
         if (q.isEmpty()) return history
         return history.filter { w ->
             w.name.plain().contains(q) || w.notes.plain().contains(q) || w.gymName?.plain()?.contains(q) == true ||
-                w.athlete?.plain()?.contains(q) == true ||
+                w.athlete?.plain()?.contains(q) == true || w.tags.any { "#$it".plain().contains(q) } ||
                 w.exercises.any { we -> nameOf(we.exercise).plain().contains(q) || we.notes.plain().contains(q) || we.sets.any { it.note.plain().contains(q) } }
         }
     }

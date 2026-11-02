@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Estilos visuales elegibles: Carbono y Titanio Blanco -->
+<resources>
+    <string name="style_title">Style</string>
+    <string name="style_footer">Change les couleurs, la police des titres et les coins sur le téléphone, et l\'accent sur la montre.</string>
+    <string name="style_onb_title">Choisissez votre style</string>
+    <string name="style_onb_body">Voici l\'allure de l\'app et de la montre. Touchez-en un pour l\'essayer : vous pourrez le changer dans Réglages → Apparence.</string>
+    <string name="style_carbono">Carbone</string>
+    <string name="style_carbono_desc">Sombre : noir mat et rouge racing, comme la télémétrie de F1.</string>
+    <string name="style_titanio_blanco">Titane Blanc</string>
+    <string name="style_titanio_blanco_desc">Clair : titane et orange international.</string>
+</resources>
