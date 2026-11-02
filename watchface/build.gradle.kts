@@ -11,7 +11,7 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "com.bestrong.watchface"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         // Las esferas WFF deben ir en un paquete propio: <app>.watchfacepush o similar

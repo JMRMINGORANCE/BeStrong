@@ -138,7 +138,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                     askPermissions = true
                 },
                 // En EE. UU. (y Liberia, Myanmar) se entrena en libras: la opción marcada de partida
-                unit = if (java.util.Locale.getDefault().country in POUND_COUNTRIES) com.bestrong.core.util.WeightUnit.LB else settings.unit,
+                unit = if (androidx.compose.ui.platform.LocalConfiguration.current.locales[0].country in POUND_COUNTRIES) com.bestrong.core.util.WeightUnit.LB else settings.unit,
                 weeklyGoal = settings.weeklyGoal,
                 onSetup = { unit, goal, home, training ->
                     appVm.update { s ->

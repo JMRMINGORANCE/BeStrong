@@ -2,12 +2,11 @@
 // paleta de marca, colores de estado y espaciados. Sin dependencias de Material.
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
 }
 
 android {
     namespace = "com.bestrong.designsystem"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig { minSdk = 30 }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

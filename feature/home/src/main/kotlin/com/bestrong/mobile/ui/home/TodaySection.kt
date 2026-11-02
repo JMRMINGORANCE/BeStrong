@@ -626,7 +626,7 @@ private fun CardioNudgeSwitch(vm: HomeViewModel) {
     }
     // Qué día (por la tarde) llega el aviso
     if (on) {
-        val locale = java.util.Locale.getDefault()
+        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
         // Abreviados («lun», «Mon»): con una letra se repiten (M, T, S); bajan de línea si no caben
         androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             java.time.DayOfWeek.entries.forEach { d ->

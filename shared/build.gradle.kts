@@ -3,7 +3,6 @@
 // con «api» para que cada módulo de función tenga las mismas dependencias.
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -11,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.bestrong.mobile.shared"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig { minSdk = 30 }
     buildFeatures { compose = true }
     compileOptions {
