@@ -34,7 +34,7 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
 - **Compartir entreno como imagen** (tarjeta 4:5 con cifras, ejercicios y récords) desde el resumen o el historial.
 - **Recordatorios** los días elegidos a la hora elegida (solo si ese día no has entrenado; sugiere la rutina que toca).
 - **Notificación de récords** cuando terminas un entreno en el reloj.
-- **Copias de seguridad**: semanal (CSV + JSON) en la carpeta que elijas (p. ej. Google Drive), **restaurar** desde el JSON
+- **Copias de seguridad**: semanal (JSON) en la carpeta que elijas (p. ej. Google Drive), **restaurar** desde el JSON
   (añade lo que falte, no borra nada) y Android Auto Backup de la base de datos.
 - **Dos estilos visuales a elegir**: Carbono (oscuro, rojo racing) y Titanio Blanco (claro, naranja internacional): colores, letra de títulos y esquinas; el reloj toma el acento. Letras de Google Fonts (Titillium Web, Inter Tight) con licencia SIL OFL.
 - **Perfil**: racha semanal, volumen semanal, entrenos por semana, series por músculo (30 días), mejores 1RM.
