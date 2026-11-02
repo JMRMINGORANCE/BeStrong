@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Diario de entreno (etiquetas) -->
+<resources>
+    <string name="diary_list">List</string>
+    <string name="diary_journal">Journal</string>
+    <string name="diary_tags">Tags</string>
+    <string name="diary_add_tag">Add tag</string>
+    <string name="diary_tag_hint">e.g. slept badly</string>
+    <string name="diary_edit_tags">Edit tags</string>
+    <string name="diary_remove_tag">Remove #%1$s</string>
+    <string name="diary_filter_tag">Filter by #%1$s</string>
+    <string name="diary_default_tags">slept-badly,felt-great,new-gym,sore,in-a-hurry</string>
+    <string name="diary_effect_less">With #%1$s you perform %2$d%% worse</string>
+    <string name="diary_effect_more">With #%1$s you perform %2$d%% better</string>
+    <string name="diary_effect_same">With #%1$s you perform about the same</string>
+    <string name="diary_effect_none">Not enough sessions with #%1$s yet to tell</string>
+    <string name="diary_effect_body">Volume compared with the average for the same routine</string>
+    <string name="diary_no_note">No note</string>
+    <string name="diary_empty">No journal entries yet: add a note, a rating or tags when you finish a workout.</string>
+    <string name="diary_view">History view</string>
+</resources>

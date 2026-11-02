@@ -98,9 +98,14 @@ private enum class SettingsPageId { BODY, TRAINING, DURING, UNITS, APPEARANCE, N
  * pantalla. Lo que antes era una lista larguísima ahora se encuentra de un vistazo.
  */
 @Composable
-fun SettingsTab(vm: ProfileViewModel, onOpenCommunity: () -> Unit, modifier: Modifier = Modifier) {
+fun SettingsTab(vm: ProfileViewModel, onOpenCommunity: () -> Unit, modifier: Modifier = Modifier, openPage: String? = null, onPageOpened: () -> Unit = {}) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf<SettingsPageId?>(null) }
+    // Desde la búsqueda universal: directo a esa página
+    androidx.compose.runtime.LaunchedEffect(openPage) {
+        openPage?.let { name -> SettingsPageId.entries.firstOrNull { it.name == name }?.let { page = it } }
+        if (openPage != null) onPageOpened()
+    }
     var showHelp by rememberSaveable { mutableStateOf(false) }
     var showTutorial by rememberSaveable { mutableStateOf(false) }
     var showAbout by rememberSaveable { mutableStateOf(false) }

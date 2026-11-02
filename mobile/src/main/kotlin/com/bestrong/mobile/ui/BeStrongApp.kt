@@ -100,6 +100,7 @@ private object Routes {
     const val PROGRAM_EDITOR = "program_editor?id={id}"
     const val TIMER = "timer/{plan}"
     const val GUIDED = "guided/{warmup}/{focus}"
+    const val SEARCH = "search"
     fun programEditor(id: String?) = if (id == null) "program_editor" else "program_editor?id=$id"
     fun timer(plan: String) = "timer/$plan"
     fun guided(warmup: Boolean, focus: String) = "guided/$warmup/$focus"
@@ -280,13 +281,40 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             onOpenPlanning = { nav.navigate(Routes.PLANNING) { launchSingleTop = true } },
                             onOpenMuscle = { muscle -> nav.openMuscle(muscle.name) },
                             onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
+                            onOpenSearch = { nav.navigate(Routes.SEARCH) { launchSingleTop = true } },
                         )
                     }
-                    composable(TopLevel.HISTORY.route) {
+                    composable(TopLevel.HISTORY.route) { historyEntry ->
+                        // Desde la búsqueda: abre ese entreno
+                        val openId by historyEntry.savedStateHandle.getStateFlow<String?>(KEY_OPEN_WORKOUT, null).collectAsStateWithLifecycle()
                         HistoryScreen(
                             hiltViewModel<HistoryViewModel>(),
                             onWorkoutStarted = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
                             onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
+                            openWorkoutId = openId,
+                            onWorkoutOpened = { historyEntry.savedStateHandle[KEY_OPEN_WORKOUT] = null },
+                        )
+                    }
+                    composable(Routes.SEARCH) {
+                        com.bestrong.mobile.ui.home.UniversalSearchScreen(
+                            vm = home,
+                            onBack = { nav.popBackStack() },
+                            onOpenWorkout = {
+                                nav.popBackStack(Routes.SEARCH, inclusive = true)
+                                nav.navigate(Routes.WORKOUT) { launchSingleTop = true }
+                            },
+                            onEditRoutine = { nav.navigate(Routes.routine(it)) { launchSingleTop = true } },
+                            onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
+                            onOpenPastWorkout = { id ->
+                                nav.popBackStack(Routes.SEARCH, inclusive = true)
+                                nav.navigateTopLevel(TopLevel.HISTORY.route)
+                                nav.currentBackStackEntry?.savedStateHandle?.set(KEY_OPEN_WORKOUT, id)
+                            },
+                            onOpenSettings = { page ->
+                                nav.popBackStack(Routes.SEARCH, inclusive = true)
+                                nav.navigateTopLevel(TopLevel.PROFILE.route)
+                                nav.currentBackStackEntry?.savedStateHandle?.set(KEY_OPEN_SETTINGS, page)
+                            },
                         )
                     }
                     composable(TopLevel.EXERCISES.route) { entry ->
@@ -299,8 +327,11 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                         }
                         ExerciseLibraryScreen(exercisesVm)
                     }
-                    composable(TopLevel.PROFILE.route) {
+                    composable(TopLevel.PROFILE.route) { profileEntry ->
+                        val openPage by profileEntry.savedStateHandle.getStateFlow<String?>(KEY_OPEN_SETTINGS, null).collectAsStateWithLifecycle()
                         ProfileScreen(
+                            openSettingsPage = openPage,
+                            onSettingsPageOpened = { profileEntry.savedStateHandle[KEY_OPEN_SETTINGS] = null },
                             vm = hiltViewModel<ProfileViewModel>(),
                             onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) { launchSingleTop = true } },
                             onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
@@ -405,6 +436,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
 }
 
 private const val KEY_MUSCLE_FILTER = "muscle_filter"
+private const val KEY_OPEN_WORKOUT = "open_workout"
+private const val KEY_OPEN_SETTINGS = "open_settings"
 
 /** Biblioteca filtrada por ese músculo (nombre del enum), desde Inicio o el widget. */
 private fun NavHostController.openMuscle(muscle: String) {

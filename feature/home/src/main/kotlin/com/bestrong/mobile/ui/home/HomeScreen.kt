@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Replay
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.Watch
@@ -99,6 +100,8 @@ fun HomeScreen(
     onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {},
     /** Abre la ficha del ejercicio (su progreso). */
     onOpenExercise: (String) -> Unit = {},
+    /** Búsqueda universal (lupa del saludo). */
+    onOpenSearch: () -> Unit = {},
 ) {
     val routines by vm.routines.collectAsStateWithLifecycle()
     // Al volver a Inicio (p. ej. a la mañana siguiente) proteína, agua y disposición son las de hoy
@@ -159,7 +162,14 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             // 1. Saludo; 2. lo que toca ahora; 3. accesos rápidos; 4. la semana; 5. rutinas; 6. el resto
-            item(span = full) { Greeting { GymChip(vm) } }
+            item(span = full) {
+                Greeting {
+                    GymChip(vm)
+                    androidx.compose.material3.FilledTonalIconButton(onClick = onOpenSearch) {
+                        Icon(Icons.Default.Search, stringResource(R.string.srch_open))
+                    }
+                }
+            }
             active?.let { w -> item(span = full) { ActiveWorkoutHero(w, vm.rest.collectAsStateWithLifecycle().value, onOpenWorkout) } }
             if (active == null) {
                 today?.let { s ->

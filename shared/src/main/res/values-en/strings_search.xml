@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Búsqueda universal -->
+<resources>
+    <string name="srch_open">Search BeStrong</string>
+    <string name="srch_hint">Routines, exercises, workouts, settings…</string>
+    <string name="srch_all">All</string>
+    <string name="srch_routines">Routines</string>
+    <string name="srch_exercises">Exercises</string>
+    <string name="srch_workouts">Workouts</string>
+    <string name="srch_settings">Settings</string>
+    <string name="srch_suggested">Suggested actions</string>
+    <string name="srch_start">Start %1$s</string>
+    <string name="srch_today_badge">Today</string>
+    <string name="srch_suggested_badge">Suggested</string>
+    <string name="srch_repeat">Repeat %1$s</string>
+    <string name="srch_recent">Recent</string>
+    <string name="srch_clear_recent">Clear recent</string>
+    <string name="srch_try">Try searching</string>
+    <string name="srch_no_results">Nothing matches “%1$s”</string>
+    <string name="srch_clear">Clear search</string>
+    <string name="srch_exercise_open">Details</string>
+    <string name="srch_start_short">Start</string>
+    <string name="srch_note">note: %1$s</string>
+    <string name="srch_settings_path">Profile › Settings › %1$s</string>
+    <string name="srch_records_of">%1$s records</string>
+    <string name="srch_best_1rm">1RM %1$s</string>
+</resources>

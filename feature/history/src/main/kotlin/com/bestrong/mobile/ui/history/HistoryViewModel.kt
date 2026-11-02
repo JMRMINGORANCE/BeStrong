@@ -95,6 +95,22 @@ class HistoryViewModel @Inject constructor(
             .mapNotNull { (id, _) -> byId[id]?.let { id to it.name } }.take(MAX_ROUTINE_CHIPS)
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Etiqueta del diario elegida (null = todas). */
+    val tagFilter = MutableStateFlow<String?>(null)
+
+    /** Etiquetas usadas con cuántas veces, de la más frecuente a la menos (fila del diario). */
+    val tagCounts: StateFlow<List<Pair<String, Int>>> = viewed.map { com.bestrong.core.stats.Journal.tagCounts(it) }
+        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    /** Cuánto rindes con [tag] frente a sin ella (null si hay pocas sesiones); ver [com.bestrong.core.stats.Journal.tagEffect]. */
+    suspend fun tagEffect(tag: String): Double? = withContext(Dispatchers.Default) { com.bestrong.core.stats.Journal.tagEffect(history.value, tag) }
+
+    /** La sesión con la que comparar [workout] por defecto y las demás que se pueden elegir. */
+    suspend fun comparePartners(workout: Workout): Pair<Workout?, List<Workout>> = withContext(Dispatchers.Default) {
+        val same = if (workout.athlete != null) repo.partnerHistory.value.filter { it.athlete == workout.athlete } else history.value
+        com.bestrong.core.stats.SessionCompare.defaultPartner(workout, same) to com.bestrong.core.stats.SessionCompare.candidates(workout, same)
+    }
+
     /** Gimnasios que aparecen en el historial (el filtro solo sale con dos o más). */
     val gymNames: StateFlow<List<String>> = viewed.map { list ->
         // Los gimnasios de los entrenos que se ven (con la pareja, también los suyos)
@@ -121,11 +137,11 @@ class HistoryViewModel @Inject constructor(
     val filtered: StateFlow<List<Workout>> = combine(
         repo.history,
         repo.partnerHistory,
-        combine(query.debounce { if (it.isEmpty()) 0L else 150L }, combine(gymFilter, routineFilter) { g, r -> g to r }, onlyPartner) { q, g, op -> Triple(q, g, op) },
+        combine(query.debounce { if (it.isEmpty()) 0L else 150L }, combine(gymFilter, routineFilter, tagFilter) { g, r, t -> Triple(g, r, t) }, onlyPartner) { q, g, op -> Triple(q, g, op) },
         showPartner,
         selectedDay,
     ) { h, p, (q, filters, op), sp, day ->
-        val (gym, routineId) = filters
+        val (gym, routineId, tag) = filters
         // Buscando su nombre salen sus entrenos aunque no se estén enseñando los de la pareja
         // (sin tildes, como el resto de la búsqueda: «ines» encuentra a «Inés»)
         val partnerSearched = q.isNotBlank() && p.any { WorkoutStats.plainText(it.athlete.orEmpty()).contains(WorkoutStats.plainText(q.trim())) }
@@ -135,7 +151,8 @@ class HistoryViewModel @Inject constructor(
             else -> h
         }
         val byGym = if (gym == null) mine else mine.filter { it.gymName == gym }
-        val all = if (routineId == null) byGym else byGym.filter { it.routineId == routineId }
+        val byRoutine = if (routineId == null) byGym else byGym.filter { it.routineId == routineId }
+        val all = if (tag == null) byRoutine else byRoutine.filter { tag in it.tags }
         val zone = ZoneId.systemDefault()
         val ofDay = if (day == null) all else all.filter { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == day }
         val plainQ = WorkoutStats.plainText(q.trim())
@@ -288,6 +305,7 @@ class HistoryViewModel @Inject constructor(
         query.value = ""
         gymFilter.value = null
         routineFilter.value = null
+        tagFilter.value = null
         selectedDay.value = null
         onlyPartner.value = false
     }

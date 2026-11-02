@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comparador de sesiones -->
+<resources>
+    <string name="cmp_action">Compare</string>
+    <string name="cmp_title">Compare sessions</string>
+    <string name="cmp_pick">Compare with…</string>
+    <string name="cmp_change">Change the other session</string>
+    <string name="cmp_this">This session</string>
+    <string name="cmp_none">There is no other session to compare with.</string>
+    <string name="cmp_best1rm">Best 1RM</string>
+    <string name="cmp_rest">Average rest</string>
+    <string name="cmp_set_n">Set %1$d</string>
+    <string name="cmp_missing">—</string>
+    <string name="cmp_only_this">Only in this session</string>
+    <string name="cmp_only_other">Only on %1$s</string>
+    <string name="cmp_verdict_up">More volume than on %1$s: %2$s</string>
+    <string name="cmp_verdict_down">Less volume than on %1$s: %2$s</string>
+    <string name="cmp_same_routine">same routine</string>
+    <string name="cmp_shared">%1$d exercises in common</string>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Diario de entreno (etiquetas) -->
+<resources>
+    <string name="diary_list">Lista</string>
+    <string name="diary_journal">Diario</string>
+    <string name="diary_tags">Etiquetas</string>
+    <string name="diary_add_tag">Engadir etiqueta</string>
+    <string name="diary_tag_hint">p. ex. durmín mal</string>
+    <string name="diary_edit_tags">Editar etiquetas</string>
+    <string name="diary_remove_tag">Quitar #%1$s</string>
+    <string name="diary_filter_tag">Filtrar por #%1$s</string>
+    <string name="diary_default_tags">durmín-mal,boas-sensacións,novo-ximnasio,molestias,con-présa</string>
+    <string name="diary_effect_less">Con #%1$s rendes un %2$d %% menos</string>
+    <string name="diary_effect_more">Con #%1$s rendes un %2$d %% máis</string>
+    <string name="diary_effect_same">Con #%1$s rendes igual</string>
+    <string name="diary_effect_none">Aínda hai poucas sesións con #%1$s para tirar conclusións</string>
+    <string name="diary_effect_body">Volume fronte á media da mesma rutina</string>
+    <string name="diary_no_note">Sen nota</string>
+    <string name="diary_empty">Aínda non hai entradas no diario: engade unha nota, unha valoración ou etiquetas ao rematar un adestramento.</string>
+    <string name="diary_view">Vista do historial</string>
+</resources>
