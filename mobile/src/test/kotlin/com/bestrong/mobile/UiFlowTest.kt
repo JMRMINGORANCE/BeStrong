@@ -3,7 +3,6 @@ package com.bestrong.mobile
 import android.os.Looper
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -218,20 +217,6 @@ class UiFlowTest {
         settle()
         shot("step_bar_folded")
         assertEquals(3, compose.onAllNodes(hasContentDescription("Peso en kg") and hasText("5")).fetchSemanticsNodes().size)
-    }
-
-    @Test
-    @Config(qualifiers = "es-w884dp-h1104dp-xhdpi")
-    fun planning_unfolded() {
-        compose.mainClock.autoAdvance = false
-        settle()
-        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Planificar"))
-        compose.onNodeWithText("Planificar").performClick()
-        settle()
-        assertNotNull(compose.onNodeWithText("Calendario de la semana").fetchSemanticsNode())
-        compose.onNodeWithText("Generar").performClick()
-        settle()
-        shot("planning_unfolded")
     }
 
     /** Sin rutinas el botón de programas queda bajo la ilustración: se desplaza con el reloj en marcha. */

@@ -324,13 +324,13 @@ class ExerciseService : LifecycleService() {
     }
 
     /**
-     * ¿Sigue en marcha nuestro ejercicio (la app se reinició a mitad del entreno)? Es el uso
-     * documentado de Health Services; la versión alfa marca la constante como restringida.
+     * ¿Sigue en marcha nuestro ejercicio (la app se reinició a mitad del entreno)? Es el uso documentado de Health
+     * Services, pero la librería marca la constante como restringida y lint no la reconoce dentro de su propio IntDef.
      */
-    @SuppressLint("RestrictedApi")
-    private suspend fun ownsExerciseInProgress(): Boolean =
-        runCatching { exerciseClient.getCurrentExerciseInfo().exerciseTrackedStatus }.getOrNull() ==
-            ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS
+    @SuppressLint("RestrictedApi", "WrongConstant")
+    private suspend fun ownsExerciseInProgress(): Boolean = runCatching {
+        exerciseClient.getCurrentExerciseInfo().exerciseTrackedStatus == ExerciseTrackedStatus.OWNED_EXERCISE_IN_PROGRESS
+    }.getOrDefault(false)
 
     /** La pausa del entreno (desde el móvil o el reloj) también pausa pulso y calorías. */
     private suspend fun followPause() {

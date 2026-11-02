@@ -95,7 +95,6 @@ fun HomeScreen(
     vm: HomeViewModel,
     onOpenWorkout: () -> Unit,
     onEditRoutine: (String?) -> Unit,
-    onOpenPlanning: () -> Unit = {},
     /** Abre la biblioteca filtrada por ese músculo. */
     onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {},
     /** Abre la ficha del ejercicio (su progreso). */
@@ -189,7 +188,6 @@ fun HomeScreen(
                     onRepeat = { vm.repeatLast(onOpenWorkout) },
                     onWatch = { vm.startOnWatch(null); Unit }.takeIf { active != null || (today == null && suggested == null) },
                     onPrograms = { showPrograms = true },
-                    onPlan = onOpenPlanning,
                 )
             }
             item(span = full) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) }
@@ -287,20 +285,18 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, rest: com.best
  * repetir el último entreno.
  */
 @Composable
-private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: (() -> Unit)?, onPrograms: () -> Unit, onPlan: () -> Unit) {
+private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: (() -> Unit)?, onPrograms: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // Con letra grande no caben cuatro en fila sin partir palabras: 2 × 2 con el texto al lado del icono
         val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
         val empty = stringResource(R.string.home_empty_workout)
         val watch = stringResource(R.string.home_on_watch)
         val programs = stringResource(R.string.home_programs)
-        val plan = stringResource(R.string.planning_open)
         // «En el reloj» solo si arriba no hay ya una tarjeta con su propio botón de reloj
         val actions = listOfNotNull(
             Triple(Icons.Default.Add, empty, onEmpty),
             onWatch?.let { Triple(Icons.Default.Watch, watch, it) },
             Triple(Icons.Default.Star, programs, onPrograms),
-            Triple(Icons.Default.CalendarMonth, plan, onPlan),
         )
         if (scale > LARGE_FONT) {
             // Muy grande: uno por fila; grande: 2 × 2
@@ -317,7 +313,6 @@ private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatNam
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, empty, onEmpty, tile.weight(1.5f), filled = highlightEmpty)
                 onWatch?.let { com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, watch, it, tile.weight(1f)) }
                 com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Star, programs, onPrograms, tile.weight(1f))
-                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.CalendarMonth, plan, onPlan, tile.weight(1f))
             }
         }
         repeatName?.let { name ->

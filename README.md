@@ -40,7 +40,7 @@ App de entrenamiento de fuerza **estilo Hevy** para **Android + Wear OS**, optim
 - **Comparar dos entrenos** serie a serie y **diario** de sesiones con etiquetas y cuánto rindes con cada una.
 - **Ficha de ejercicio con su historia** (récords, primeras veces, cambios de gimnasio, descargas) y **vídeos de técnica** grabados en el entreno (solo en el móvil, a cámara lenta y para comparar).
 - **Músculos** en una sola tarjeta (semana con silueta, 30 días, tendencia y recuperación) y **equilibrio de patrones** de movimiento en radar.
-- **Periodización visual** del ciclo y **editor de rutinas en tablero** en el Fold desplegado.
+- **Editor de rutinas en tablero** en el Fold desplegado.
 - **Modo foco** en el entreno, **siguiente ejercicio** con discos y cuenta atrás (móvil y reloj) y resumen final a pantalla completa (anillos en el reloj).
 - **Dos estilos visuales a elegir**: Carbono (oscuro, rojo racing) y Titanio Blanco (claro, naranja internacional): colores, letra de títulos y esquinas; el reloj toma el acento. Letras de Google Fonts (Titillium Web, Inter Tight) con licencia SIL OFL.
 - **Perfil**: racha semanal, volumen semanal, entrenos por semana, series por músculo (30 días), mejores 1RM.

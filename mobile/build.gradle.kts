@@ -89,7 +89,6 @@ dependencies {
     implementation(project(":feature:history"))
     implementation(project(":feature:exercises"))
     implementation(project(":feature:home"))
-    implementation(project(":feature:planning"))
     implementation(project(":feature:profile"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
