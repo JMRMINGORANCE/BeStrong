@@ -9,4 +9,4 @@ rootProject.name = "BeStrong"
 include(":core", ":designsystem", ":data", ":shared", ":mobile", ":wear", ":watchface", ":baselineprofile")
 
 // Pantallas del móvil por función
-include(":feature:workout", ":feature:routines", ":feature:history", ":feature:exercises", ":feature:home", ":feature:planning", ":feature:profile")
+include(":feature:workout", ":feature:routines", ":feature:history", ":feature:exercises", ":feature:home", ":feature:profile")

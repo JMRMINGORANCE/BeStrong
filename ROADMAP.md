@@ -477,3 +477,8 @@ Fuera de esta hoja (se harán aparte): Firebase (cuenta, nube, social, Crashlyti
       resumen semanal solo en Inicio, resumen final sin datos repetidos, copia semanal solo JSON, sin el tema antiguo
       y sin las imágenes de propuestas en el repositorio
 - [x] «En el móvil» desde el resumen del reloj: abre ese entreno en el Historial del móvil (bestrong://workout/<id>)
+
+## Fase 57 — Menos pantallas ✅
+- [x] Fuera la pantalla Planificar (y lo que solo se abría desde ella: generador, programas a medida, temporizadores,
+      sesiones guiadas, periodización visual y lesiones); se mantiene lo que usan Inicio, el reloj y los recordatorios
+- [x] Dependencias al día dentro de AGP 8 y GitHub Actions en Node 24

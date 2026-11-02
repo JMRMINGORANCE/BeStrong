@@ -1110,7 +1110,7 @@ private fun ExerciseCard(
         val pending = we.sets.firstOrNull { !it.completed }
         PlateCalculatorDialog(
             initialKg = target,
-            gym = vm.settings.value.gymFor(we.exercise.id),
+            gym = vm.settings.collectAsStateWithLifecycle().value.gymFor(we.exercise.id),
             onApply = pending?.let { set -> { kg: Double -> vm.updateSet(we.id, set.id, weightKg = kg) } },
             onDismiss = { showPlates = false },
         )
