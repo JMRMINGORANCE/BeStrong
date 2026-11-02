@@ -97,7 +97,14 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain: () -> Unit = {}) {
+fun HistoryScreen(
+    vm: HistoryViewModel,
+    onWorkoutStarted: () -> Unit,
+    onGoTrain: () -> Unit = {},
+    /** Entreno a abrir al llegar (desde la búsqueda universal); [onWorkoutOpened] avisa de que ya se abrió. */
+    openWorkoutId: String? = null,
+    onWorkoutOpened: () -> Unit = {},
+) {
     val history by vm.history.collectAsStateWithLifecycle()
     val recordCounts by vm.recordCounts.collectAsStateWithLifecycle()
     val days by vm.trainingDays.collectAsStateWithLifecycle()
@@ -124,6 +131,14 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
     EditUndoSnackbars(vm, snackbar, undoLabel)
 
     CopiedSnackbar(vm, snackbar) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
+    LaunchedEffect(openWorkoutId) {
+        openWorkoutId?.let { id ->
+            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id)
+            onWorkoutOpened()
+        }
+    }
+    // Lista de tarjetas o diario (nota, valoración y etiquetas de cada sesión)
+    var journal by rememberSaveable { mutableStateOf(false) }
 
     var logging by remember { mutableStateOf(false) }
     // Día tocado en el calendario (sin entreno): el diálogo empieza en él
@@ -189,9 +204,12 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
                                 item { com.bestrong.mobile.ui.components.Panel { YearHeatmap(heatmap) } }
                             }
                             item { com.bestrong.mobile.ui.components.SectionHeader(stringResource(R.string.history_workouts), large = true) }
+                            item { HistoryViewToggle(journal) { journal = it } }
                             item { com.bestrong.mobile.ui.components.SearchPill(query, { vm.query.value = it }, stringResource(R.string.history_search)) }
                             item { GymFilterRow(vm) }
                             item { RoutineFilterRow(vm) }
+                            item { TagFilterRow(vm) }
+                            if (journal && filtered.isEmpty()) item { Text(stringResource(R.string.diary_empty), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                             if (partnerWorkouts.isNotEmpty()) {
                                 item { AthleteFilterRow(vm, partnerWorkouts.first().athlete.orEmpty()) }
                             }
@@ -211,6 +229,10 @@ fun HistoryScreen(vm: HistoryViewModel, onWorkoutStarted: () -> Unit, onGoTrain:
                             byMonth.forEach { (month, monthWorkouts) ->
                                 item(key = "m-$month") { MonthHeader(month, monthWorkouts.size) }
                                 items(monthWorkouts, key = { it.id }) { w ->
+                                    if (journal) {
+                                        DiaryEntry(w, onOpen = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } }, onTag = { vm.tagFilter.value = it })
+                                        return@items
+                                    }
                                     val records = recordCounts.getOrDefault(w.id, 0)
                                     // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
                                     val dragText = workoutText(w)
@@ -313,6 +335,25 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
         mutableStateOf(null)
     }
     var copying by rememberSaveable { mutableStateOf(false) }
+    // Comparar con otra sesión (propuesta 02) y editar las etiquetas del diario (propuesta 07)
+    var comparing by rememberSaveable { mutableStateOf(false) }
+    if (comparing) CompareSessionsDialog(w, vm) { comparing = false }
+    var editingTags by rememberSaveable { mutableStateOf(false) }
+    if (editingTags) {
+        val counts by vm.tagCounts.collectAsStateWithLifecycle()
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { editingTags = false },
+            title = { Text(stringResource(R.string.diary_edit_tags)) },
+            text = {
+                com.bestrong.mobile.ui.components.TagEditor(
+                    w.tags,
+                    counts.map { it.first } + com.bestrong.mobile.ui.components.defaultTagSuggestions(),
+                    { t -> vm.editWorkout(w) { it.copy(tags = t) } },
+                )
+            },
+            confirmButton = { TextButton(onClick = { editingTags = false }) { Text(stringResource(R.string.action_done)) } },
+        )
+    }
     if (copying) {
         CopyToDayDialog(
             durationMin = w.durationSeconds() / 60,
@@ -371,6 +412,8 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                     IconButton(onClick = { menu = true }) { Icon(Icons.Default.MoreVert, stringResource(R.string.options)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.history_edit_info)) }, onClick = { menu = false; editInfo = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.cmp_action)) }, onClick = { menu = false; comparing = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.diary_edit_tags)) }, onClick = { menu = false; editingTags = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.repeat_workout)) }, onClick = { menu = false; vm.repeat(w, onWorkoutStarted) })
                         DropdownMenuItem(text = { Text(stringResource(R.string.copy_to_day)) }, onClick = { menu = false; copying = true })
                         DropdownMenuItem(
@@ -438,6 +481,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
             item { com.bestrong.mobile.ui.components.WorkoutMuscleChips(w) }
             item { WorkoutGymLine(w, vm) }
             if (w.notes.isNotBlank()) item { Text(w.notes) }
+            if (w.tags.isNotEmpty()) item { com.bestrong.mobile.ui.components.TagChips(w.tags) { editingTags = true } }
             items(w.exercises, key = { it.id }) { we ->
                 com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
                     Column(Modifier.padding(12.dp)) {

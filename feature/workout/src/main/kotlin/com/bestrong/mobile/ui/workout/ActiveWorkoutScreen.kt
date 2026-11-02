@@ -189,6 +189,8 @@ fun ActiveWorkoutScreen(
                 }
             },
             onRate = vm::rateWorkout,
+            onTags = vm::setWorkoutTags,
+            tagSuggestions = vm.tagSuggestions.collectAsStateWithLifecycle().value,
             summary = s,
             onSaveRoutine = { vm.saveSummaryAsRoutine(); vm.dismissSummary(); onFinished() },
             onUpdateRoutine = { vm.updateRoutineFromSummary(); vm.dismissSummary(); onFinished() },

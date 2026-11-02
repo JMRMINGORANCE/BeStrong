@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Búsqueda universal -->
+<resources>
+    <string name="srch_open">Cerca a BeStrong</string>
+    <string name="srch_hint">Rutines, exercicis, entrenaments, ajustos…</string>
+    <string name="srch_all">Tot</string>
+    <string name="srch_routines">Rutines</string>
+    <string name="srch_exercises">Exercicis</string>
+    <string name="srch_workouts">Entrenaments</string>
+    <string name="srch_settings">Ajustos</string>
+    <string name="srch_suggested">Accions suggerides</string>
+    <string name="srch_start">Començar %1$s</string>
+    <string name="srch_today_badge">Avui toca</string>
+    <string name="srch_suggested_badge">Suggerida</string>
+    <string name="srch_repeat">Repetir %1$s</string>
+    <string name="srch_recent">Recents</string>
+    <string name="srch_clear_recent">Esborrar recents</string>
+    <string name="srch_try">Prova de cercar</string>
+    <string name="srch_no_results">Res no coincideix amb «%1$s»</string>
+    <string name="srch_clear">Esborrar la cerca</string>
+    <string name="srch_exercise_open">Fitxa</string>
+    <string name="srch_start_short">Començar</string>
+    <string name="srch_note">nota: %1$s</string>
+    <string name="srch_settings_path">Perfil › Ajustos › %1$s</string>
+    <string name="srch_records_of">Rècords de %1$s</string>
+    <string name="srch_best_1rm">1RM %1$s</string>
+</resources>

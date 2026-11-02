@@ -89,6 +89,9 @@ fun WorkoutSummaryDialog(
     onUpdateRoutine: () -> Unit = {},
     onShareText: () -> Unit = {},
     dumbbellTotal: Boolean = false,
+    /** Etiquetas del diario («dormí-mal»…); vacío si no se usan. */
+    onTags: ((List<String>) -> Unit)? = null,
+    tagSuggestions: List<String> = emptyList(),
 ) {
     val w = summary.workout
     val unit = LocalWeightUnit.current
@@ -140,6 +143,13 @@ fun WorkoutSummaryDialog(
                 DetailsCard(summary, dumbbellTotal)
                 if (w.notes.isNotBlank()) Text(w.notes, style = MaterialTheme.typography.bodySmall, fontStyle = FontStyle.Italic)
                 Column(Modifier.fillMaxWidth()) { SessionRatingPicker(onRate) }
+                // Etiquetas para el diario (Historial → Diario)
+                onTags?.let { set ->
+                    com.bestrong.mobile.ui.components.Panel(contentPadding = 16.dp) {
+                        Text(stringResource(R.string.diary_tags), fontWeight = FontWeight.Bold)
+                        com.bestrong.mobile.ui.components.TagEditor(w.tags, tagSuggestions + com.bestrong.mobile.ui.components.defaultTagSuggestions(), set)
+                    }
+                }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     when {
                         w.routineId == null -> FilledTonalButton(onClick = onSaveRoutine, modifier = Modifier.weight(1f).heightIn(min = 52.dp)) {

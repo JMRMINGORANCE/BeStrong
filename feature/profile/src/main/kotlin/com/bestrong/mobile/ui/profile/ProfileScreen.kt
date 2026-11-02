@@ -65,7 +65,15 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenExercise: (String) -> Unit, onGoTrain: () -> Unit = {}) {
+fun ProfileScreen(
+    vm: ProfileViewModel,
+    onOpenMeasurements: () -> Unit,
+    onOpenExercise: (String) -> Unit,
+    onGoTrain: () -> Unit = {},
+    /** Página de Ajustes a abrir al llegar (nombre de la página, desde la búsqueda universal). */
+    openSettingsPage: String? = null,
+    onSettingsPageOpened: () -> Unit = {},
+) {
     val unit = LocalWeightUnit.current
     val stats by vm.stats.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
@@ -90,6 +98,8 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
 
     var tab by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
+    // Desde la búsqueda: a la pestaña Ajustes (la página la abre [SettingsTab])
+    LaunchedEffect(openSettingsPage) { if (openSettingsPage != null) tab = 1 }
     Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 340.dp),
@@ -259,7 +269,7 @@ fun ProfileScreen(vm: ProfileViewModel, onOpenMeasurements: () -> Unit, onOpenEx
             } else {
                 // Ajustes: un menú por apartados; cada uno abre su pantalla
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    SettingsTab(vm, onOpenCommunity = { tab = 2 }, modifier = Modifier.widthIn(max = 720.dp))
+                    SettingsTab(vm, onOpenCommunity = { tab = 2 }, modifier = Modifier.widthIn(max = 720.dp), openPage = openSettingsPage, onPageOpened = onSettingsPageOpened)
                 }
             }
         }

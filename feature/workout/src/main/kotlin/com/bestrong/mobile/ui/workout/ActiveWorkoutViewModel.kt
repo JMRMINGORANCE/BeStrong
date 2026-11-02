@@ -845,6 +845,18 @@ class ActiveWorkoutViewModel @Inject constructor(
         viewModelScope.launch { repo.updateWorkout(rated.id) { it.copy(rating = rating) } }
     }
 
+    /** Etiquetas del diario puestas en el resumen final (sobre lo guardado, como la valoración). */
+    fun setWorkoutTags(tags: List<String>) {
+        val s = _summary.value ?: return
+        val tagged = s.workout.copy(tags = tags)
+        _summary.value = s.copy(workout = tagged)
+        viewModelScope.launch { repo.updateWorkout(tagged.id) { it.copy(tags = tags) } }
+    }
+
+    /** Etiquetas ya usadas, de la más frecuente a la menos (sugerencias del resumen). */
+    val tagSuggestions: StateFlow<List<String>> = repo.history.map { h -> com.bestrong.core.stats.Journal.tagCounts(h).map { it.first } }
+        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     fun skipExercise(weId: String) = edit { WorkoutEditor.skipExercise(it, weId) }
 
     fun dismissSummary() {

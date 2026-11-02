@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Comparador de sesiones -->
+<resources>
+    <string name="cmp_action">Vergleichen</string>
+    <string name="cmp_title">Einheiten vergleichen</string>
+    <string name="cmp_pick">Vergleichen mit…</string>
+    <string name="cmp_change">Andere Einheit wählen</string>
+    <string name="cmp_this">Diese Einheit</string>
+    <string name="cmp_none">Keine andere Einheit zum Vergleichen.</string>
+    <string name="cmp_best1rm">Bestes 1RM</string>
+    <string name="cmp_rest">Ø Pause</string>
+    <string name="cmp_set_n">Satz %1$d</string>
+    <string name="cmp_missing">—</string>
+    <string name="cmp_only_this">Nur in dieser Einheit</string>
+    <string name="cmp_only_other">Nur am %1$s</string>
+    <string name="cmp_verdict_up">Mehr Volumen als am %1$s: %2$s</string>
+    <string name="cmp_verdict_down">Weniger Volumen als am %1$s: %2$s</string>
+    <string name="cmp_same_routine">gleiche Routine</string>
+    <string name="cmp_shared">%1$d gemeinsame Übungen</string>
+</resources>
