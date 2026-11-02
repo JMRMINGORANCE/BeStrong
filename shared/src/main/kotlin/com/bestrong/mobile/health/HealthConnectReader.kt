@@ -3,7 +3,6 @@ package com.bestrong.mobile.health
 import android.content.Context
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.HealthConnectFeatures
-import androidx.health.connect.client.feature.ExperimentalFeatureAvailabilityApi
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -52,7 +51,6 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
         )
     }
 
-    @OptIn(ExperimentalFeatureAvailabilityApi::class)
     private fun historyAvailable(): Boolean = runCatching {
         available() && client.features.getFeatureStatus(HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
     }.getOrDefault(false)

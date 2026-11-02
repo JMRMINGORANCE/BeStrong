@@ -104,7 +104,7 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
      * (reenvío del reloj, reintento), Health Connect lo sustituye en lugar de duplicarlo.
      */
     private fun meta(workout: Workout, suffix: String) =
-        Metadata(clientRecordId = "${workout.id}-$suffix", clientRecordVersion = System.currentTimeMillis())
+        Metadata.unknownRecordingMethod("${workout.id}-$suffix", System.currentTimeMillis())
 
     suspend fun export(workout: Workout) {
         val granted = granted()
@@ -175,10 +175,10 @@ class HealthConnectExporter @Inject constructor(@ApplicationContext private val 
         val records = listOfNotNull<Record>(
             // El que vino de Health Connect ya está allí con su origen (la báscula)
             m.weightKg?.takeIf { weightPermission in granted && !m.weightFromHealth && it in 1.0..1000.0 }?.let {
-                WeightRecord(time, null, Mass.kilograms(it), Metadata(clientRecordId = "${m.id}-weight", clientRecordVersion = System.currentTimeMillis()))
+                WeightRecord(time, null, Mass.kilograms(it), Metadata.unknownRecordingMethod("${m.id}-weight", System.currentTimeMillis()))
             },
             m.bodyFatPct?.takeIf { bodyFatPermission in granted && it in 1.0..100.0 }?.let {
-                BodyFatRecord(time, null, Percentage(it), Metadata(clientRecordId = "${m.id}-fat", clientRecordVersion = System.currentTimeMillis()))
+                BodyFatRecord(time, null, Percentage(it), Metadata.unknownRecordingMethod("${m.id}-fat", System.currentTimeMillis()))
             },
         )
         if (records.isNotEmpty()) client.insertRecords(records)
