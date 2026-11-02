@@ -101,8 +101,9 @@ class ProposalsScreenshotTest {
         shot("p2_home_week")
         compose.onAllNodesWithText("Perfil")[0].performClick()
         settle()
-        scrollTo("Mapa muscular de la semana")
-        assertNotNull(compose.onNodeWithText("Mapa muscular de la semana").fetchSemanticsNode())
+        // La tarjeta «Músculos» abre en la pestaña «Semana» (silueta y lista)
+        scrollTo("Músculos")
+        assertNotNull(compose.onNodeWithText("Músculos").fetchSemanticsNode())
         shot("p3_body_map")
     }
 

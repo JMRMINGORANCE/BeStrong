@@ -44,7 +44,6 @@ import com.bestrong.core.stats.VolumeStatus
 import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.data.UserSettings
 import com.bestrong.mobile.shared.R
-import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.theme.statusColors
 import java.time.DayOfWeek
@@ -77,15 +76,14 @@ internal fun VolumeStatus.label(): String = when (this) {
 )
 
 /**
- * Mapa muscular de la semana: series efectivas por músculo frente a la recomendación
+ * Pestaña «Semana» de la tarjeta de músculos: silueta y series efectivas por músculo frente a la recomendación
  * de 10–20 series semanales. El estado se indica con color **y** texto (accesible).
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun WeeklyMuscleMap(weekly: Map<MuscleGroup, Double>, target: Int = MuscleTargets.MIN_WEEKLY_SETS.toInt(), onTarget: (Int) -> Unit = {}) {
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SectionHeader(stringResource(R.string.muscle_map_title))
+fun WeeklyMuscleContent(weekly: Map<MuscleGroup, Double>, target: Int = MuscleTargets.MIN_WEEKLY_SETS.toInt(), onTarget: (Int) -> Unit = {}) {
+    run {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
                 stringResource(R.string.muscle_map_body, target, MuscleTargets.MAX_WEEKLY_SETS.toInt()),
                 style = MaterialTheme.typography.bodySmall,

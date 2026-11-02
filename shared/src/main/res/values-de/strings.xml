@@ -73,12 +73,6 @@
     <string name="auto_backup_off">Wähle einen Ordner (z. B. Google Drive), um wöchentlich CSV + JSON zu speichern. Sie sind unverschlüsselt: für eine Kopie mit Passwort nutze „Passwortgeschütztes Backup“.</string>
     <string name="auto_backup_on">Aktiv. Erstes Backup läuft.</string>
     <string name="backup_started">Backup läuft …</string>
-    <string name="balance_leg_warning">Unausgewogen: Beine liegen weit hinter (oder vor) dem Oberkörper.</string>
-    <string name="balance_ok">Gut ausgewogen.</string>
-    <string name="balance_push_pull">Drücken %1$s · Ziehen %2$s Sätze</string>
-    <string name="balance_push_warning">Unausgewogen: Gleiche Drücken und Ziehen aus, um deine Schultern zu schützen.</string>
-    <string name="balance_title">Balance (4 Wochen)</string>
-    <string name="balance_upper_lower">Oberkörper %1$s · Unterkörper %2$s Sätze</string>
     <string name="best_1rm">Beste geschätzte 1RMs</string>
     <string name="body_unit">Einheit für Körpergewicht</string>
     <string name="body_unit_same">Wie bei Übungen</string>
@@ -398,10 +392,8 @@
     <string name="muscle_glutes">Gesäß</string>
     <string name="muscle_hamstrings">Beinbeuger</string>
     <string name="muscle_map_body">Effektive Sätze pro Muskel. Empfohlen: %1$d–%2$d pro Woche.</string>
-    <string name="muscle_map_title">Muskelkarte dieser Woche</string>
     <string name="muscle_never">nie</string>
     <string name="muscle_quadriceps">Quadrizeps</string>
-    <string name="muscle_recovery">Muskelerholung</string>
     <string name="muscle_shoulders">Schultern</string>
     <string name="muscle_sore">ermüdet</string>
     <string name="muscle_today">heute</string>
@@ -575,8 +567,6 @@
     <string name="record_line">%1$s: %2$s %3$s</string>
     <string name="record_most_reps">Meiste Wdh.</string>
     <string name="record_set_volume">Bestes Satzvolumen</string>
-    <string name="record_timeline">Rekord-Zeitleiste</string>
-    <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
     <string name="relative_strength">Relative Kraft: %1$s</string>
     <string name="relative_strength_hint">Geschätztes 1RM geteilt durch dein Körpergewicht</string>
     <string name="reminders">Erinnerungen</string>
@@ -676,7 +666,6 @@
     <string name="set_type_warmup">Aufwärmen</string>
     <string name="set_weight_in">Gewicht in %1$s</string>
     <string name="set_weight_signed">Zusatzgewicht (+) oder Unterstützung (−) in %1$s</string>
-    <string name="sets_per_muscle">Sätze pro Muskel (30 Tage)</string>
     <string name="sets_times_exercise">%1$d × %2$s</string>
     <string name="settings">Einstellungen</string>
     <string name="settings_during">Während des Trainings</string>
@@ -980,7 +969,6 @@
     <string name="hc_grant_more">Berechtigungen erteilen</string>
     <string name="dumbbells_nearest">Nächste Kurzhanteln in deinem Studio: %1$s</string>
     <string name="previous_set_note">Letztes Mal: ✎ %1$s</string>
-    <string name="muscle_trend">Sätze pro Muskel (8 Wochen)</string>
     <string name="muscle_trend_hint">Effektive Sätze pro Woche (Nebenmuskeln halb). Empfohlen: %1$d–%2$d.</string>
     <string name="stat_average_workout">Durchschnittliches Training: %1$s · %2$d Sätze · %3$s</string>
     <plurals name="weekly_goal_reached">
@@ -1005,8 +993,6 @@
     <string name="set_duplicate">Satz duplizieren</string>
     <string name="complete_remaining">Restliche Sätze als erledigt markieren (%1$d)</string>
     <string name="rest_real_exercise">Pause tatsächlich %1$s · geplant %2$s</string>
-    <string name="lagging_muscles_title">Diese Woche fehlt dir noch</string>
-    <string name="lagging_muscle_line">%1$s: %2$s von %3$d Sätzen</string>
     <string name="deadline_title">Wann musst du fertig sein?</string>
     <string name="deadline_over">Du würdest dein Limit (%2$s) um %1$d Min. überschreiten: lass eine Übung weg oder kürze sie</string>
     <string name="deadline_ok">Limit %1$s: du liegst gut in der Zeit</string>
@@ -1016,7 +1002,6 @@
     <string name="deadline_fit">An mein Zeitlimit anpassen</string>
     <string name="undo_trimmed_sets">Sätze am Ende entfernt, um rechtzeitig fertig zu sein</string>
     <string name="rest_use_real">%1$s in Routine übernehmen</string>
-    <string name="lagging_muscle_open">Übungen ansehen</string>
     <string name="notif_progress_eta">%1$d/%2$d Sätze · ≈ %3$d Min., Ende %4$s</string>
     <string name="rest_use_real_done">Routine aktualisiert: %1$s Pause</string>
     <plurals name="record_hint">

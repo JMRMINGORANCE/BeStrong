@@ -73,12 +73,6 @@
     <string name="auto_backup_off">Escolle un cartafol (p. ex. Google Drive) para gardar CSV + JSON cada semana. Van sen cifrar: para unha copia con contrasinal usa «Copia cifrada con contrasinal».</string>
     <string name="auto_backup_on">Activada. Primeira copia en curso.</string>
     <string name="backup_started">Copia de seguranza en curso…</string>
-    <string name="balance_leg_warning">Descompensado: a perna está moi por detrás (ou por diante) do torso.</string>
-    <string name="balance_ok">Ben equilibrado.</string>
-    <string name="balance_push_pull">Empuxe %1$s · Tirón %2$s series</string>
-    <string name="balance_push_warning">Descompensado: equilibra empuxe e tirón para coidar os ombros.</string>
-    <string name="balance_title">Equilibrio (4 semanas)</string>
-    <string name="balance_upper_lower">Torso %1$s · Perna %2$s series</string>
     <string name="best_1rm">Mellores 1RM estimados</string>
     <string name="body_unit">Unidade do peso corporal</string>
     <string name="body_unit_same">Igual que as cargas</string>
@@ -398,10 +392,8 @@
     <string name="muscle_glutes">Glúteos</string>
     <string name="muscle_hamstrings">Isquios</string>
     <string name="muscle_map_body">Series efectivas por músculo. Recomendado: %1$d–%2$d por semana.</string>
-    <string name="muscle_map_title">Mapa muscular da semana</string>
     <string name="muscle_never">nunca</string>
     <string name="muscle_quadriceps">Cuádriceps</string>
-    <string name="muscle_recovery">Recuperación muscular</string>
     <string name="muscle_shoulders">Ombros</string>
     <string name="muscle_sore">cargado</string>
     <string name="muscle_today">hoxe</string>
@@ -575,8 +567,6 @@
     <string name="record_line">%1$s: %2$s %3$s</string>
     <string name="record_most_reps">Máis repeticións</string>
     <string name="record_set_volume">Mellor volume nunha serie</string>
-    <string name="record_timeline">Liña de tempo de récords</string>
-    <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
     <string name="relative_strength">Forza relativa: %1$s</string>
     <string name="relative_strength_hint">1RM estimado dividido polo teu peso corporal</string>
     <string name="reminders">Recordatorios</string>
@@ -676,7 +666,6 @@
     <string name="set_type_warmup">Quecemento</string>
     <string name="set_weight_in">Peso en %1$s</string>
     <string name="set_weight_signed">Lastre (+) ou asistencia (−) en %1$s</string>
-    <string name="sets_per_muscle">Series por músculo (30 días)</string>
     <string name="sets_times_exercise">%1$d × %2$s</string>
     <string name="settings">Axustes</string>
     <string name="settings_during">Durante o adestramento</string>
@@ -980,7 +969,6 @@
     <string name="hc_grant_more">Conceder permisos</string>
     <string name="dumbbells_nearest">Mancuernas máis próximas no teu ximnasio: %1$s</string>
     <string name="previous_set_note">A última vez: ✎ %1$s</string>
-    <string name="muscle_trend">Series por músculo (8 semanas)</string>
     <string name="muscle_trend_hint">Series efectivas por semana (secundarios á metade). Recomendado: %1$d–%2$d.</string>
     <string name="stat_average_workout">Adestramento medio: %1$s · %2$d series · %3$s</string>
     <plurals name="weekly_goal_reached">
@@ -1005,8 +993,6 @@
     <string name="set_duplicate">Duplicar serie</string>
     <string name="complete_remaining">Marcar as que faltan como feitas (%1$d)</string>
     <string name="rest_real_exercise">Descanso real %1$s · previsto %2$s</string>
-    <string name="lagging_muscles_title">Esta semana vas curto de</string>
-    <string name="lagging_muscle_line">%1$s: %2$s de %3$d series</string>
     <string name="deadline_title">A que hora tes que rematar?</string>
     <string name="deadline_over">Pasaríaste %1$d min da hora límite (%2$s): salta ou acurta algún exercicio</string>
     <string name="deadline_ok">Hora límite %1$s: vas a tempo</string>
@@ -1016,7 +1002,6 @@
     <string name="deadline_fit">Axustar á miña hora límite</string>
     <string name="undo_trimmed_sets">Quitáronse series do final para chegar a tempo</string>
     <string name="rest_use_real">Usar %1$s na rutina</string>
-    <string name="lagging_muscle_open">ver exercicios</string>
     <string name="notif_progress_eta">%1$d/%2$d series · ≈ %3$d min, fin %4$s</string>
     <string name="rest_use_real_done">Rutina actualizada: descanso de %1$s</string>
     <plurals name="record_hint">

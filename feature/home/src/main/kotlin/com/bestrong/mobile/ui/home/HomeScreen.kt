@@ -184,7 +184,7 @@ fun HomeScreen(
             }
             item(span = full) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) }
             // Racha, volumen y músculos de la semana de un vistazo (propuesta 2)
-            item(span = full) { WeekDashboard(week, history, vm.weeklySetsTarget, onOpenMuscle) }
+            item(span = full) { WeekDashboard(week, history, vm.weeklySetsTarget, vm.laggingMuscles.collectAsStateWithLifecycle().value, onOpenMuscle) }
             item(span = full) {
                 Column {
                     SectionHeader(stringResource(R.string.home_my_routines, routines.count { !it.archived }), large = true) {
@@ -230,7 +230,6 @@ fun HomeScreen(
                     YearAgoCard(vm, onOpenExercise)
                     CardioWeekCard(vm)
                     StaleRoutineCard(vm)
-                    LaggingMusclesCard(vm, onOpenMuscle)
                     ReadinessCard(vm)
                     IntakeCard(vm)
                     TipCard("home_reorder", R.string.tip_home)
