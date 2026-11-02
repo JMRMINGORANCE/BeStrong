@@ -13,7 +13,6 @@ import com.bestrong.core.io.Xlsx
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.stats.Achievement
-import com.bestrong.core.stats.Balance
 import com.bestrong.core.stats.PeriodSummary
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
@@ -85,11 +84,12 @@ data class AdvancedStats(
     val weekdays: List<Triple<java.time.DayOfWeek, Int, Double>> = emptyList(),
     val bodyWeightKg: Double? = null,
     val standings: List<StrengthStanding> = emptyList(),
-    val balance: Balance = Balance(0.0, 0.0, 0.0, 0.0),
+    /** Series por patrón de movimiento (4 semanas) y ejercicios para los que van cortos. */
+    val patterns: com.bestrong.core.stats.PatternBalance = com.bestrong.core.stats.PatternBalance(emptyMap()),
+    val patternSuggestions: Map<com.bestrong.core.stats.MovementPattern, List<com.bestrong.core.model.Exercise>> = emptyMap(),
     val week: PeriodSummary? = null,
     val weekEffectiveSets: Double = 0.0,
     val achievements: List<Achievement> = emptyList(),
-    val timeline: List<PersonalRecord> = emptyList(),
     val daysSince: Map<MuscleGroup, Int?> = emptyMap(),
     val soreness: Map<MuscleGroup, Double> = emptyMap(),
     /** Reto con fecha estimada: (ejercicio, 1RM objetivo, fecha). */
@@ -170,14 +170,15 @@ class ProfileViewModel @Inject constructor(
         val now = System.currentTimeMillis()
         val bw = measures.sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg }
         val weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(zone).toInstant().toEpochMilli()
+        val patterns = com.bestrong.core.stats.MovementPatterns.balance(history, now)
         AdvancedStats(
             bodyWeightKg = bw,
             standings = bw?.let { Strength.standings(history, it, sex) }.orEmpty(),
-            balance = Strength.balance(history, now),
+            patterns = patterns,
+            patternSuggestions = patterns.lagging().associateWith { com.bestrong.core.stats.MovementPatterns.suggestions(it, history) },
             week = Strength.weekSummary(history, today, zone, System.currentTimeMillis()),
             weekEffectiveSets = history.filter { it.isFinished && it.startedAtEpochMs >= weekStart }.sumOf { Strength.effectiveSets(it) },
             achievements = Strength.achievements(history, today, zone, bw),
-            timeline = Strength.recordTimeline(history, setOf(RecordType.BEST_ONE_REP_MAX)).takeLast(12).reversed(),
             daysSince = Strength.daysSinceTrained(history, today, zone),
             soreness = Strength.soreness(history, now),
             challenge = challenge(history, unit),

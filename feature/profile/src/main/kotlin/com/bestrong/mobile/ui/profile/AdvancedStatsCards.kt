@@ -48,7 +48,6 @@ import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.displayName
-import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
 import com.bestrong.mobile.ui.theme.statusColors
@@ -97,23 +96,6 @@ fun StrengthLevelsCard(stats: AdvancedStats, sex: Sex, onSex: (Sex) -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-fun BalanceCard(stats: AdvancedStats) {
-    val b = stats.balance
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            SectionHeader(stringResource(R.string.balance_title))
-            Text(stringResource(R.string.balance_push_pull, formatWeight(b.push), formatWeight(b.pull)))
-            Text(stringResource(R.string.balance_upper_lower, formatWeight(b.upper), formatWeight(b.lower)))
-            if (b.pushPullImbalanced) Text(stringResource(R.string.balance_push_warning), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-            if (b.upperLowerImbalanced) Text(stringResource(R.string.balance_leg_warning), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
-            if (!b.pushPullImbalanced && !b.upperLowerImbalanced && b.upper + b.lower > 0) {
-                Text(stringResource(R.string.balance_ok), color = statusColors.good, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
@@ -169,30 +151,15 @@ fun AchievementsCard(stats: AdvancedStats) {
     }
 }
 
-@Composable
-fun RecordTimelineCard(stats: AdvancedStats) {
-    if (stats.timeline.isEmpty()) return
-    val unit = LocalWeightUnit.current
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            SectionHeader(stringResource(R.string.record_timeline))
-            stats.timeline.forEach { r ->
-                Text(
-                    stringResource(R.string.record_timeline_line, formatShortDate(r.dateEpochMs), r.exerciseLabel(), unit.format(r.value * com.bestrong.mobile.ui.components.pairFactor(r.exerciseId), withUnit = true)),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun MuscleRecoveryCard(stats: AdvancedStats) {
-    if (stats.daysSince.values.all { it == null }) return
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            SectionHeader(stringResource(R.string.muscle_recovery))
+fun MuscleRecoveryContent(stats: AdvancedStats) {
+    if (stats.daysSince.values.all { it == null }) {
+        Text(stringResource(R.string.no_data_yet), style = MaterialTheme.typography.bodySmall)
+        return
+    }
+    run {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 stats.daysSince.forEach { (m, days) ->
                     val sore = stats.soreness[m] ?: 0.0
@@ -371,13 +338,15 @@ fun TrainingLoadCard(stats: AdvancedStats) {
 /** Series por semana de un músculo (8 semanas) frente a la recomendación de 10–20. */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun MuscleTrendCard(trend: Map<com.bestrong.core.model.MuscleGroup, List<Pair<java.time.LocalDate, Double>>>, target: Int = com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()) {
-    if (trend.isEmpty()) return
+fun MuscleTrendContent(trend: Map<com.bestrong.core.model.MuscleGroup, List<Pair<java.time.LocalDate, Double>>>, target: Int = com.bestrong.core.stats.MuscleTargets.MIN_WEEKLY_SETS.toInt()) {
+    if (trend.isEmpty()) {
+        Text(stringResource(R.string.no_data_yet), style = MaterialTheme.typography.bodySmall)
+        return
+    }
     var selected by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(trend.keys.first()) }
     val weeks = trend[selected] ?: trend.values.first()
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            SectionHeader(stringResource(R.string.muscle_trend))
+    run {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 trend.keys.forEach { m ->
                     androidx.compose.material3.FilterChip(selected = m == selected, onClick = { selected = m }, label = { Text(m.label()) })

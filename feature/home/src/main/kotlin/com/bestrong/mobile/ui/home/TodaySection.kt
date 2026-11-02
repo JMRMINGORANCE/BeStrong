@@ -21,7 +21,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
@@ -406,36 +405,6 @@ fun StaleRoutineCard(vm: HomeViewModel) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 androidx.compose.material3.TextButton(onClick = { tips.onDismiss("stale:${routine.id}") }) { Text(stringResource(R.string.stale_keep)) }
                 androidx.compose.material3.TextButton(onClick = { vm.setArchived(routine, true) }) { Text(stringResource(R.string.routine_archive)) }
-            }
-        }
-    }
-}
-
-/** «Esta semana vas corto de: Espalda 4 de 10 series». */
-@Composable
-fun LaggingMusclesCard(vm: HomeViewModel, onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {}) {
-    val lagging by vm.laggingMuscles.collectAsStateWithLifecycle()
-    if (lagging.isEmpty()) return
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(vertical = 12.dp)) {
-            Text(stringResource(R.string.lagging_muscles_title), fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 16.dp))
-            // Cada músculo abre la biblioteca con sus ejercicios
-            lagging.forEach { (muscle, sets) ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .clickable(role = androidx.compose.ui.semantics.Role.Button, onClickLabel = stringResource(R.string.lagging_muscle_open)) { onOpenMuscle(muscle) }
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(
-                        stringResource(R.string.lagging_muscle_line, muscle.label(), "%.1f".format(sets).removeSuffix(",0").removeSuffix(".0"), vm.weeklySetsTarget),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                }
             }
         }
     }

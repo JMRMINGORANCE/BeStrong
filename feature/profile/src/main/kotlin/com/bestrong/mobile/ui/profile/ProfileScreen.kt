@@ -24,7 +24,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -183,34 +182,16 @@ fun ProfileScreen(
                             }
                         }
                     }
-                    item {
-                        com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                SectionHeader(stringResource(R.string.sets_per_muscle))
-                                if (stats.muscles30d.isEmpty()) Text(stringResource(R.string.no_data_yet))
-                                val max = stats.muscles30d.values.maxOrNull() ?: 1.0
-                                stats.muscles30d.forEach { (m, sets) ->
-                                    Row {
-                                        Text(m.label(), Modifier.weight(0.4f), style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                                        LinearProgressIndicator(progress = { (sets / max).toFloat() }, modifier = Modifier.weight(0.45f).padding(top = 8.dp))
-                                        Text(formatWeight(sets), Modifier.weight(0.15f).padding(start = 8.dp), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    item { WeeklyMuscleMap(stats.weeklyMuscles, settings.weeklySetsTarget) { n -> vm.updateSettings { it.copy(weeklySetsTarget = n) } } }
-                    item { MuscleTrendCard(stats.muscleTrend, settings.weeklySetsTarget) }
+                    // Músculos: semana (silueta), 30 días, tendencia y recuperación en una sola tarjeta
+                    item { MusclesCard(stats, advanced, settings.weeklySetsTarget) { n -> vm.updateSettings { it.copy(weeklySetsTarget = n) } } }
                     stats.year?.let { y -> item { YearInReviewCard(y) } }
                     item { WeekSummaryCard(advanced) }
                     item { TrainingLoadCard(advanced) }
                     if (advanced.dayParts.size >= 2) item { DayPartCard(advanced.dayParts) }
                     if (advanced.weekdays.size >= 2) item { WeekdayCard(advanced.weekdays) }
                     item { StrengthLevelsCard(advanced, settings.sex) { sex -> vm.updateSettings { it.copy(sex = sex) } } }
-                    item { BalanceCard(advanced) }
-                    item { MuscleRecoveryCard(advanced) }
+                    item { PatternBalanceCard(advanced) }
                     item { AchievementsCard(advanced) }
-                    item { RecordTimelineCard(advanced) }
                 }
                 item {
                     ToolsCard(

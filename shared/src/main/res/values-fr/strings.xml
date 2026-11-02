@@ -73,12 +73,6 @@
     <string name="auto_backup_off">Choisis un dossier (ex. Google Drive) pour y enregistrer une copie (JSON) chaque semaine. Elle n\'est pas chiffrée : pour une copie protégée par mot de passe, utilise « Sauvegarde protégée par mot de passe ».</string>
     <string name="auto_backup_on">Activée. Première sauvegarde en cours.</string>
     <string name="backup_started">Sauvegarde en cours…</string>
-    <string name="balance_leg_warning">Déséquilibré : les jambes sont très en retard (ou en avance) sur le haut du corps.</string>
-    <string name="balance_ok">Bien équilibré.</string>
-    <string name="balance_push_pull">Poussée %1$s · Tirage %2$s séries</string>
-    <string name="balance_push_warning">Déséquilibré : équilibre poussée et tirage pour protéger tes épaules.</string>
-    <string name="balance_title">Équilibre (4 semaines)</string>
-    <string name="balance_upper_lower">Haut du corps %1$s · Jambes %2$s séries</string>
     <string name="best_1rm">Meilleurs 1RM estimés</string>
     <string name="body_unit">Unité du poids corporel</string>
     <string name="body_unit_same">Comme les charges</string>
@@ -398,10 +392,8 @@
     <string name="muscle_glutes">Fessiers</string>
     <string name="muscle_hamstrings">Ischio-jambiers</string>
     <string name="muscle_map_body">Séries effectives par muscle. Recommandé : %1$d–%2$d par semaine.</string>
-    <string name="muscle_map_title">Carte musculaire de la semaine</string>
     <string name="muscle_never">jamais</string>
     <string name="muscle_quadriceps">Quadriceps</string>
-    <string name="muscle_recovery">Récupération musculaire</string>
     <string name="muscle_shoulders">Épaules</string>
     <string name="muscle_sore">fatigué</string>
     <string name="muscle_today">aujourd’hui</string>
@@ -575,8 +567,6 @@
     <string name="record_line">%1$s : %2$s %3$s</string>
     <string name="record_most_reps">Plus de répétitions</string>
     <string name="record_set_volume">Meilleur volume par série</string>
-    <string name="record_timeline">Chronologie des records</string>
-    <string name="record_timeline_line">%1$s · %2$s : %3$s</string>
     <string name="relative_strength">Force relative : %1$s</string>
     <string name="relative_strength_hint">1RM estimé divisé par ton poids corporel</string>
     <string name="reminders">Rappels</string>
@@ -676,7 +666,6 @@
     <string name="set_type_warmup">Échauffement</string>
     <string name="set_weight_in">Poids en %1$s</string>
     <string name="set_weight_signed">Lest (+) ou assistance (−) en %1$s</string>
-    <string name="sets_per_muscle">Séries par muscle (30 jours)</string>
     <string name="sets_times_exercise">%1$d × %2$s</string>
     <string name="settings">Réglages</string>
     <string name="settings_during">Pendant l\'entraînement</string>
@@ -980,7 +969,6 @@
     <string name="hc_grant_more">Accorder les autorisations</string>
     <string name="dumbbells_nearest">Haltères les plus proches dans ta salle : %1$s</string>
     <string name="previous_set_note">La dernière fois : ✎ %1$s</string>
-    <string name="muscle_trend">Séries par muscle (8 semaines)</string>
     <string name="muscle_trend_hint">Séries efficaces par semaine (secondaires pour moitié). Recommandé : %1$d–%2$d.</string>
     <string name="stat_average_workout">Séance moyenne : %1$s · %2$d séries · %3$s</string>
     <plurals name="weekly_goal_reached">
@@ -1005,8 +993,6 @@
     <string name="set_duplicate">Dupliquer la série</string>
     <string name="complete_remaining">Marquer les séries restantes comme faites (%1$d)</string>
     <string name="rest_real_exercise">Repos réel %1$s · prévu %2$s</string>
-    <string name="lagging_muscles_title">Cette semaine, il te manque</string>
-    <string name="lagging_muscle_line">%1$s : %2$s sur %3$d séries</string>
     <string name="deadline_title">À quelle heure dois-tu finir ?</string>
     <string name="deadline_over">Tu dépasserais ton heure limite de %1$d min (%2$s) : saute ou raccourcis un exercice</string>
     <string name="deadline_ok">Heure limite %1$s : tu es dans les temps</string>
@@ -1016,7 +1002,6 @@
     <string name="deadline_fit">Ajuster à mon heure limite</string>
     <string name="undo_trimmed_sets">Séries de fin retirées pour finir à l\'heure</string>
     <string name="rest_use_real">Utiliser %1$s dans la routine</string>
-    <string name="lagging_muscle_open">voir les exercices</string>
     <string name="notif_progress_eta">%1$d/%2$d séries · ≈ %3$d min, fin %4$s</string>
     <string name="rest_use_real_done">Routine mise à jour : repos de %1$s</string>
     <plurals name="record_hint">

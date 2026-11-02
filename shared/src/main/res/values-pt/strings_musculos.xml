@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Historia del ejercicio, equilibrio de patrones y tarjeta de músculos -->
+<resources>
+    <string name="tl_title">Histórico</string>
+    <string name="tl_first">Primeira vez</string>
+    <string name="tl_record_1rm">Recorde de 1RM estimado</string>
+    <string name="tl_record_weight">Recorde de peso</string>
+    <string name="tl_record_reps">Recorde de repetições</string>
+    <string name="tl_round">Primeira vez com %1$s</string>
+    <string name="tl_gym">Primeira vez em %1$s</string>
+    <string name="tl_comeback">Regresso após %1$d dias</string>
+    <string name="tl_deload">Sessão de descarga</string>
+    <string name="tl_prev">antes %1$s</string>
+    <string name="tl_reps">%1$d reps</string>
+    <string name="tl_show_all">Ver todos (%1$d)</string>
+    <string name="tl_show_less">Ver menos</string>
+    <string name="tl_open_day">Ver as séries desse dia</string>
+    <string name="tl_pinned">Nota fixa: %1$s</string>
+    <string name="tl_injury">Carrega uma zona marcada como lesionada: %1$s</string>
+    <string name="pt_title">Equilíbrio de padrões</string>
+    <string name="pt_body">Séries de trabalho por padrão de movimento nas últimas 4 semanas.</string>
+    <string name="pt_empty">Treina umas semanas para ver o teu equilíbrio.</string>
+    <string name="pt_push_h">Empurrar horizontal</string>
+    <string name="pt_push_v">Empurrar vertical</string>
+    <string name="pt_pull_h">Puxar horizontal</string>
+    <string name="pt_pull_v">Puxar vertical</string>
+    <string name="pt_squat">Agachamento</string>
+    <string name="pt_hinge">Dobradiça da anca</string>
+    <string name="pt_core">Core</string>
+    <string name="pt_push_h_short">Empurrar H</string>
+    <string name="pt_push_v_short">Empurrar V</string>
+    <string name="pt_pull_h_short">Puxar H</string>
+    <string name="pt_pull_v_short">Puxar V</string>
+    <string name="pt_hinge_short">Dobradiça</string>
+    <string name="pt_push_pull">Empurrar : puxar</string>
+    <string name="pt_hinge_squat">Dobradiça : agachamento</string>
+    <string name="pt_suggest_title">Para equilibrar</string>
+    <string name="pt_try">Experimenta: %1$s</string>
+    <string name="mu_title">Músculos</string>
+    <string name="mu_tab_week">Semana</string>
+    <string name="mu_tab_30d">30 dias</string>
+    <string name="mu_tab_trend">Tendência</string>
+    <string name="mu_tab_recovery">Recuperação</string>
+    <string name="mu_lagging_tag">está atrasado</string>
+</resources>

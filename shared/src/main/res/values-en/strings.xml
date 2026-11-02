@@ -73,12 +73,6 @@
     <string name="auto_backup_off">Pick a folder (e.g. Google Drive) to save a copy (JSON) every week. It is not encrypted: for a password-protected copy use “Password-protected backup”.</string>
     <string name="auto_backup_on">On. First backup in progress.</string>
     <string name="backup_started">Backing up…</string>
-    <string name="balance_leg_warning">Imbalanced: legs are far behind (or ahead of) upper body.</string>
-    <string name="balance_ok">Well balanced.</string>
-    <string name="balance_push_pull">Push %1$s · Pull %2$s sets</string>
-    <string name="balance_push_warning">Imbalanced: balance push and pull to protect your shoulders.</string>
-    <string name="balance_title">Balance (4 weeks)</string>
-    <string name="balance_upper_lower">Upper %1$s · Lower %2$s sets</string>
     <string name="best_1rm">Best estimated 1RMs</string>
     <string name="body_unit">Body weight unit</string>
     <string name="body_unit_same">Same as lifts</string>
@@ -398,10 +392,8 @@
     <string name="muscle_glutes">Glutes</string>
     <string name="muscle_hamstrings">Hamstrings</string>
     <string name="muscle_map_body">Effective sets per muscle. Recommended: %1$d–%2$d per week.</string>
-    <string name="muscle_map_title">This week\'s muscle map</string>
     <string name="muscle_never">never</string>
     <string name="muscle_quadriceps">Quads</string>
-    <string name="muscle_recovery">Muscle recovery</string>
     <string name="muscle_shoulders">Shoulders</string>
     <string name="muscle_sore">fatigued</string>
     <string name="muscle_today">today</string>
@@ -575,8 +567,6 @@
     <string name="record_line">%1$s: %2$s %3$s</string>
     <string name="record_most_reps">Most reps</string>
     <string name="record_set_volume">Best set volume</string>
-    <string name="record_timeline">Records timeline</string>
-    <string name="record_timeline_line">%1$s · %2$s: %3$s</string>
     <string name="relative_strength">Relative strength: %1$s</string>
     <string name="relative_strength_hint">Estimated 1RM divided by your body weight</string>
     <string name="reminders">Reminders</string>
@@ -676,7 +666,6 @@
     <string name="set_type_warmup">Warm-up</string>
     <string name="set_weight_in">Weight in %1$s</string>
     <string name="set_weight_signed">Added weight (+) or assistance (−) in %1$s</string>
-    <string name="sets_per_muscle">Sets per muscle (30 days)</string>
     <string name="sets_times_exercise">%1$d × %2$s</string>
     <string name="settings">Settings</string>
     <string name="settings_during">During the workout</string>
@@ -980,7 +969,6 @@
     <string name="hc_grant_more">Grant permissions</string>
     <string name="dumbbells_nearest">Closest dumbbells in your gym: %1$s</string>
     <string name="previous_set_note">Last time: ✎ %1$s</string>
-    <string name="muscle_trend">Sets per muscle (8 weeks)</string>
     <string name="muscle_trend_hint">Effective sets per week (secondary muscles count half). Recommended: %1$d–%2$d.</string>
     <string name="stat_average_workout">Average workout: %1$s · %2$d sets · %3$s</string>
     <plurals name="weekly_goal_reached">
@@ -1005,8 +993,6 @@
     <string name="set_duplicate">Duplicate set</string>
     <string name="complete_remaining">Mark remaining sets as done (%1$d)</string>
     <string name="rest_real_exercise">Actual rest %1$s · planned %2$s</string>
-    <string name="lagging_muscles_title">This week you\'re behind on</string>
-    <string name="lagging_muscle_line">%1$s: %2$s of %3$d sets</string>
     <string name="deadline_title">When do you need to finish?</string>
     <string name="deadline_over">You\'d go %1$d min past your limit (%2$s): skip or shorten an exercise</string>
     <string name="deadline_ok">Limit %1$s: you\'re on time</string>
@@ -1016,7 +1002,6 @@
     <string name="deadline_fit">Fit to my time limit</string>
     <string name="undo_trimmed_sets">Removed sets at the end to finish on time</string>
     <string name="rest_use_real">Use %1$s in routine</string>
-    <string name="lagging_muscle_open">see exercises</string>
     <string name="notif_progress_eta">%1$d/%2$d sets · ≈ %3$d min, done %4$s</string>
     <string name="rest_use_real_done">Routine updated: %1$s rest</string>
     <plurals name="record_hint">

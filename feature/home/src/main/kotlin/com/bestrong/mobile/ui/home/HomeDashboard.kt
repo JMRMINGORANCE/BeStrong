@@ -50,7 +50,13 @@ import java.time.temporal.TemporalAdjusters
  * estado. Va debajo de «Hoy toca» y de la tira de días.
  */
 @Composable
-fun WeekDashboard(week: WeekProgress, history: List<Workout>, setsTarget: Int, onOpenMuscle: (MuscleGroup) -> Unit) {
+fun WeekDashboard(
+    week: WeekProgress,
+    history: List<Workout>,
+    setsTarget: Int,
+    lagging: List<Pair<MuscleGroup, Double>> = emptyList(),
+    onOpenMuscle: (MuscleGroup) -> Unit,
+) {
     val zone = remember { ZoneId.systemDefault() }
     val today = LocalDate.now(zone)
     val (thisWeek, lastWeek) = remember(history, today) { weekVolumes(history, today, zone) }
@@ -79,17 +85,22 @@ fun WeekDashboard(week: WeekProgress, history: List<Workout>, setsTarget: Int, o
                 }
             }
         }
-        MusclesThisWeek(muscles, setsTarget, onOpenMuscle)
+        MusclesThisWeek(muscles, setsTarget, lagging, onOpenMuscle)
     }
 }
 
-/** Los músculos con más series de la semana y, si quedan, los que aún van cortos. */
+/**
+ * Los músculos con más series de la semana y, debajo, los que van por detrás de lo habitual (de jueves en adelante,
+ * [WorkoutStats.laggingMuscles]) resaltados: es la única tarjeta de músculos de Inicio. Tocar uno abre sus ejercicios.
+ */
 @Composable
-private fun MusclesThisWeek(muscles: Map<MuscleGroup, Double>, target: Int, onOpenMuscle: (MuscleGroup) -> Unit) {
-    if (muscles.isEmpty()) return
-    val shown = muscles.filterKeys { it != MuscleGroup.FULL_BODY && it != MuscleGroup.CARDIO }
-        .entries.sortedByDescending { it.value }.take(MUSCLES_SHOWN)
-    val max = maxOf(MuscleTargets.MAX_WEEKLY_SETS, shown.maxOfOrNull { it.value } ?: 0.0)
+private fun MusclesThisWeek(muscles: Map<MuscleGroup, Double>, target: Int, lagging: List<Pair<MuscleGroup, Double>>, onOpenMuscle: (MuscleGroup) -> Unit) {
+    if (muscles.isEmpty() && lagging.isEmpty()) return
+    val laggingSet = lagging.map { it.first }.toSet()
+    val top = muscles.filterKeys { it != MuscleGroup.FULL_BODY && it != MuscleGroup.CARDIO && it !in laggingSet }
+        .entries.sortedByDescending { it.value }.take(MUSCLES_SHOWN).map { it.key to it.value }
+    val shown = top + lagging
+    val max = maxOf(MuscleTargets.MAX_WEEKLY_SETS, shown.maxOfOrNull { it.second } ?: 0.0)
     Panel(contentPadding = 16.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.rd_home_muscles_title), fontWeight = FontWeight.ExtraBold, modifier = Modifier.weight(1f))
@@ -105,7 +116,8 @@ private fun MusclesThisWeek(muscles: Map<MuscleGroup, Double>, target: Int, onOp
                 VolumeStatus.HIGH -> statusColors.badMark
                 VolumeStatus.NONE -> ""
             }
-            val setsText = stringResource(R.string.n_sets_value, formatWeight(sets))
+            val behind = m in laggingSet
+            val setsText = stringResource(R.string.n_sets_value, formatWeight(sets)) + if (behind) ", " + stringResource(R.string.mu_lagging_tag) else ""
             Row(
                 Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
                     .clickable(onClickLabel = stringResource(R.string.rd_home_muscle_open)) { onOpenMuscle(m) }
@@ -113,7 +125,10 @@ private fun MusclesThisWeek(muscles: Map<MuscleGroup, Double>, target: Int, onOp
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(name, Modifier.width(96.dp), style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Column(Modifier.width(96.dp)) {
+                    Text(name, style = MaterialTheme.typography.bodyMedium, maxLines = 1, overflow = TextOverflow.Ellipsis, color = if (behind) statusColors.warn else MaterialTheme.colorScheme.onSurface, fontWeight = if (behind) FontWeight.Bold else null)
+                    if (behind) Text(stringResource(R.string.mu_lagging_tag), style = MaterialTheme.typography.labelSmall, color = statusColors.warn, maxLines = 1)
+                }
                 Box(Modifier.weight(1f).height(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
                     Box(Modifier.fillMaxWidth((sets / max).toFloat().coerceIn(0.03f, 1f)).fillMaxHeight().clip(CircleShape).background(color))
                 }

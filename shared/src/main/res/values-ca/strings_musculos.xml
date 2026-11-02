@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Historia del ejercicio, equilibrio de patrones y tarjeta de músculos -->
+<resources>
+    <string name="tl_title">Història</string>
+    <string name="tl_first">Primera vegada</string>
+    <string name="tl_record_1rm">Rècord d\'1RM estimat</string>
+    <string name="tl_record_weight">Rècord de pes</string>
+    <string name="tl_record_reps">Rècord de repeticions</string>
+    <string name="tl_round">Primera vegada amb %1$s</string>
+    <string name="tl_gym">Primera vegada a %1$s</string>
+    <string name="tl_comeback">Tornada després de %1$d dies</string>
+    <string name="tl_deload">Sessió de descàrrega</string>
+    <string name="tl_prev">abans %1$s</string>
+    <string name="tl_reps">%1$d reps</string>
+    <string name="tl_show_all">Veure-ho tot (%1$d)</string>
+    <string name="tl_show_less">Veure\'n menys</string>
+    <string name="tl_open_day">Veure les sèries d\'aquell dia</string>
+    <string name="tl_pinned">Nota fixa: %1$s</string>
+    <string name="tl_injury">Carrega una zona marcada com a lesionada: %1$s</string>
+    <string name="pt_title">Equilibri de patrons</string>
+    <string name="pt_body">Sèries de treball per patró de moviment en les últimes 4 setmanes.</string>
+    <string name="pt_empty">Entrena unes setmanes per veure el teu equilibri.</string>
+    <string name="pt_push_h">Empenta horitzontal</string>
+    <string name="pt_push_v">Empenta vertical</string>
+    <string name="pt_pull_h">Estirada horitzontal</string>
+    <string name="pt_pull_v">Estirada vertical</string>
+    <string name="pt_squat">Esquat</string>
+    <string name="pt_hinge">Frontissa de maluc</string>
+    <string name="pt_core">Core</string>
+    <string name="pt_push_h_short">Empenta H</string>
+    <string name="pt_push_v_short">Empenta V</string>
+    <string name="pt_pull_h_short">Estirada H</string>
+    <string name="pt_pull_v_short">Estirada V</string>
+    <string name="pt_hinge_short">Frontissa</string>
+    <string name="pt_push_pull">Empenta : estirada</string>
+    <string name="pt_hinge_squat">Frontissa : esquat</string>
+    <string name="pt_suggest_title">Per equilibrar</string>
+    <string name="pt_try">Prova: %1$s</string>
+    <string name="mu_title">Músculs</string>
+    <string name="mu_tab_week">Setmana</string>
+    <string name="mu_tab_30d">30 dies</string>
+    <string name="mu_tab_trend">Tendència</string>
+    <string name="mu_tab_recovery">Recuperació</string>
+    <string name="mu_lagging_tag">va endarrerit</string>
+</resources>

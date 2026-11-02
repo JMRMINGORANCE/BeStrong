@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Historia del ejercicio, equilibrio de patrones y tarjeta de músculos -->
+<resources>
+    <string name="tl_title">Historique</string>
+    <string name="tl_first">Première fois</string>
+    <string name="tl_record_1rm">Record de 1RM estimé</string>
+    <string name="tl_record_weight">Record de charge</string>
+    <string name="tl_record_reps">Record de répétitions</string>
+    <string name="tl_round">Première fois avec %1$s</string>
+    <string name="tl_gym">Première fois à %1$s</string>
+    <string name="tl_comeback">Retour après %1$d jours</string>
+    <string name="tl_deload">Séance de décharge</string>
+    <string name="tl_prev">avant %1$s</string>
+    <string name="tl_reps">%1$d rép.</string>
+    <string name="tl_show_all">Tout voir (%1$d)</string>
+    <string name="tl_show_less">Voir moins</string>
+    <string name="tl_open_day">Voir les séries de ce jour</string>
+    <string name="tl_pinned">Note épinglée : %1$s</string>
+    <string name="tl_injury">Sollicite une zone marquée comme blessée : %1$s</string>
+    <string name="pt_title">Équilibre des mouvements</string>
+    <string name="pt_body">Séries de travail par schéma de mouvement sur les 4 dernières semaines.</string>
+    <string name="pt_empty">Entraînez-vous quelques semaines pour voir votre équilibre.</string>
+    <string name="pt_push_h">Poussée horizontale</string>
+    <string name="pt_push_v">Poussée verticale</string>
+    <string name="pt_pull_h">Tirage horizontal</string>
+    <string name="pt_pull_v">Tirage vertical</string>
+    <string name="pt_squat">Squat</string>
+    <string name="pt_hinge">Charnière de hanche</string>
+    <string name="pt_core">Gainage</string>
+    <string name="pt_push_h_short">Poussée H</string>
+    <string name="pt_push_v_short">Poussée V</string>
+    <string name="pt_pull_h_short">Tirage H</string>
+    <string name="pt_pull_v_short">Tirage V</string>
+    <string name="pt_hinge_short">Charnière</string>
+    <string name="pt_push_pull">Poussée : tirage</string>
+    <string name="pt_hinge_squat">Charnière : squat</string>
+    <string name="pt_suggest_title">Pour équilibrer</string>
+    <string name="pt_try">Essayez : %1$s</string>
+    <string name="mu_title">Muscles</string>
+    <string name="mu_tab_week">Semaine</string>
+    <string name="mu_tab_30d">30 jours</string>
+    <string name="mu_tab_trend">Tendance</string>
+    <string name="mu_tab_recovery">Récupération</string>
+    <string name="mu_lagging_tag">en retard</string>
+</resources>
