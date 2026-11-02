@@ -171,6 +171,11 @@ class RoutineEditorViewModel @Inject constructor(
     fun setEmoji(emoji: String?) = _routine.update { it.copy(emoji = emoji) }
     fun setFolder(folder: String) = _routine.update { it.copy(folder = folder.trim().ifEmpty { null }) }
 
+    /** Biblioteca para el editor en tablero (Fold desplegado): integrada y propia, sin los ejercicios ocultos. */
+    val library: StateFlow<List<com.bestrong.core.model.Exercise>> =
+        kotlinx.coroutines.flow.combine(repo.exercises, settingsStore.settings) { all, s -> all.filterNot { it.id in s.hiddenExercises } }
+            .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5_000), repo.exercises.value)
+
     /** Carpetas que ya existen, para elegirlas sin volver a escribirlas. */
     val folders: List<String> get() = repo.routines.value.mapNotNull { it.folder?.takeIf(String::isNotBlank) }.distinct().sorted()
 

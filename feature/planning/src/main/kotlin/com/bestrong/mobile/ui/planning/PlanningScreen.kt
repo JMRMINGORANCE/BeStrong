@@ -117,6 +117,8 @@ fun PlanningScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            // Periodización visual: el ciclo en curso (programa con semanas o mesociclo), lo primero
+            ui.timeline?.let { t -> item(span = { GridItemSpan(maxLineSpan) }) { CycleTimelineCard(t, ui.timelineProgram, vm::exerciseName) } }
             item(span = { GridItemSpan(maxLineSpan) }) { CalendarCard(vm, ui) }
             item { FatigueCard(vm, ui) }
             item { GeneratorCard(vm) }

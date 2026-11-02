@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Editor de rutinas en tablero (Fold desplegado) -->
+<resources>
+    <string name="board_library">Library</string>
+    <string name="board_search">Search exercise</string>
+    <string name="board_hint">%1$d exercises · tap + or long-press and drag into the routine</string>
+    <string name="board_add">Add %1$s</string>
+    <string name="board_exercises">Exercises</string>
+    <string name="board_sets">Sets</string>
+    <string name="board_minutes">Duration</string>
+</resources>

@@ -60,6 +60,10 @@ data class PlanningUi(
     val oneRepMaxes: Map<String, Double> = emptyMap(),
     val routines: List<Routine> = emptyList(),
     val weekStart: LocalDate = PlanningStore.monday(LocalDate.now()),
+    /** Ciclo en curso (programa con semanas o mesociclo) como línea temporal; null si no hay ninguno. */
+    val timeline: com.bestrong.core.training.CycleTimeline? = null,
+    /** Nombre del programa del ciclo (o null si es un mesociclo). */
+    val timelineProgram: String? = null,
 )
 
 @HiltViewModel
@@ -84,7 +88,7 @@ class PlanningViewModel @Inject constructor(
         }
     }.distinctUntilChanged()
 
-    val ui: StateFlow<PlanningUi> = combine(store.state, repo.history, repo.routines, dayTick) { s, history, routines, today ->
+    val ui: StateFlow<PlanningUi> = combine(store.state, repo.history, repo.routines, dayTick, repo.activeProgram) { s, history, routines, today, active ->
         val calis = Calisthenics.chains.map { (name, chain) ->
             // Nivel más alto de la cadena que ya se ha hecho
             val done = chain.lastOrNull { id -> history.any { w -> w.exercises.any { it.exercise.id == id && it.completedSets.isNotEmpty() } } }
@@ -100,8 +104,39 @@ class PlanningViewModel @Inject constructor(
             oneRepMaxes = Strength.bestOneRepMax(history).filterKeys { it in Strength.STANDARD_LIFTS },
             routines = routines,
             weekStart = PlanningStore.monday(today),
-        )
+        ).let { base ->
+            val (timeline, programName) = cycleTimeline(s, active, history, routines, today)
+            base.copy(timeline = timeline, timelineProgram = programName)
+        }
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlanningUi())
+
+    /**
+     * Línea temporal del ciclo: la del programa activo si tiene semanas (5/3/1) y, si no, la del mesociclo.
+     * En el mesociclo, lo planificado es la suma de series de las rutinas puestas en el calendario de cada semana.
+     */
+    private fun cycleTimeline(
+        s: com.bestrong.mobile.data.PlanningState,
+        active: com.bestrong.core.training.ActiveProgram?,
+        history: List<com.bestrong.core.model.Workout>,
+        routines: List<Routine>,
+        today: LocalDate,
+    ): Pair<com.bestrong.core.training.CycleTimeline?, String?> {
+        val zone = ZoneId.systemDefault()
+        val lang = context.uiLanguage()
+        active?.let { a ->
+            val session = com.bestrong.core.training.Periodization.nextSession(a, history, lang, s.customPrograms)
+            if (session != null) {
+                com.bestrong.core.training.CycleTimelines.forProgram(session.program, session.week, session.cycle, today, history, zone)
+                    ?.let { return it to session.program.name(lang) }
+            }
+        }
+        val m = s.mesocycle ?: return null to null
+        val byId = routines.associateBy { it.id }
+        val t = com.bestrong.core.training.CycleTimelines.forMesocycle(m, today, history, zone) { monday ->
+            s.planFor(monday).days.values.sumOf { id -> byId[id]?.exercises?.sumOf { it.sets.size } ?: 0 }
+        }
+        return t to null
+    }
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
     val messages: SharedFlow<String> = _messages
