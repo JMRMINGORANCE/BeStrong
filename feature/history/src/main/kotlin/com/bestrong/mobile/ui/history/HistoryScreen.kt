@@ -291,7 +291,7 @@ private fun WorkoutCard(w: Workout, records: Int, modifier: Modifier = Modifier)
             ) {
                 Text("${date.dayOfMonth}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onPrimaryContainer)
                 Text(
-                    date.month.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.getDefault()).uppercase(),
+                    date.month.getDisplayName(java.time.format.TextStyle.SHORT, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
@@ -396,6 +396,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
         }
     }
     val context = LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(w.name, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis) },
@@ -421,7 +422,7 @@ private fun WorkoutDetail(w: Workout, vm: HistoryViewModel, onBack: (() -> Unit)
                             onClick = {
                                 menu = false
                                 vm.saveAsRoutine(w)
-                                android.widget.Toast.makeText(context, context.getString(R.string.saved_as_routine), android.widget.Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(context, resources.getString(R.string.saved_as_routine), android.widget.Toast.LENGTH_SHORT).show()
                             },
                         )
                         DropdownMenuItem(
@@ -797,8 +798,8 @@ private fun EditUndoSnackbars(vm: HistoryViewModel, snackbar: SnackbarHostState,
 /** Cabecera de mes en la lista: «Octubre 2026 · 12 entrenos». */
 @Composable
 private fun MonthHeader(month: java.time.YearMonth, count: Int) {
-    val name = month.format(java.time.format.DateTimeFormatter.ofPattern("LLLL yyyy", java.util.Locale.getDefault()))
-        .replaceFirstChar { it.titlecase(java.util.Locale.getDefault()) }
+    val name = month.format(java.time.format.DateTimeFormatter.ofPattern("LLLL yyyy", androidx.compose.ui.platform.LocalConfiguration.current.locales[0]))
+        .replaceFirstChar { it.titlecase(androidx.compose.ui.platform.LocalConfiguration.current.locales[0]) }
     Text(
         name + " · " + pluralStringResource(R.plurals.n_workouts_count, count, count),
         style = MaterialTheme.typography.titleSmall,

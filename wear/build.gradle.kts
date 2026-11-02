@@ -2,7 +2,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -16,7 +15,7 @@ val keystoreProps = Properties().apply {
 
 android {
     namespace = "com.bestrong.wear"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         // Mismo applicationId que el móvil: requisito de la Wearable Data Layer

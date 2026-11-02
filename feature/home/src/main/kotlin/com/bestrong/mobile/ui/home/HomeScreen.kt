@@ -635,7 +635,7 @@ private fun Greeting(actions: @Composable androidx.compose.foundation.layout.Row
         in 12..19 -> R.string.greeting_afternoon
         else -> R.string.greeting_evening
     }
-    val date = java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM", java.util.Locale.getDefault()).format(now)
+    val date = java.time.format.DateTimeFormatter.ofPattern("EEEE d MMMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).format(now)
     com.bestrong.mobile.ui.components.ScreenTitle(stringResource(greeting), overline = date, actions = actions)
 }
 

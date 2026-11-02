@@ -165,7 +165,7 @@ fun ProfileScreen(
                                 SectionHeader(stringResource(R.string.weekly_volume, unit.label))
                                 WeekVsAverage(stats.weeks, { it.volume }) { unit.formatVolume(it) }
                                 // «3 oct» y no «3/10» (que en EE. UU. es 10 de marzo)
-                                val f = DateTimeFormatter.ofPattern("d MMM", java.util.Locale.getDefault())
+                                val f = DateTimeFormatter.ofPattern("d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
                                 // TalkBack lee el volumen como se ve («27.216 lb»), no «27216,5»
                                 BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), unit.fromKg(it.volume)) }, describe = { "${it.label}: ${unit.formatVolume(unit.toKg(it.value))}" })
                             }
@@ -177,7 +177,7 @@ fun ProfileScreen(
                                 SectionHeader(stringResource(R.string.workouts_per_week))
                                 WeekVsAverage(stats.weeks, { it.workouts.toDouble() }) { formatWeight(it) }
                                 // «3 oct» y no «3/10» (que en EE. UU. es 10 de marzo)
-                                val f = DateTimeFormatter.ofPattern("d MMM", java.util.Locale.getDefault())
+                                val f = DateTimeFormatter.ofPattern("d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
                                 BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), it.workouts.toDouble()) })
                             }
                         }

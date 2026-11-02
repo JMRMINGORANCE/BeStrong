@@ -110,11 +110,12 @@ fun RoutineEditorScreen(vm: RoutineEditorViewModel, onAddExercises: () -> Unit, 
     )
     val snackbar = remember { androidx.compose.material3.SnackbarHostState() }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     androidx.compose.runtime.LaunchedEffect(vm) {
         vm.removed.collect { message ->
             // Uno nuevo sustituye al anterior (solo se puede deshacer el último)
             snackbar.currentSnackbarData?.dismiss()
-            val result = snackbar.showSnackbar(context.getString(message), context.getString(R.string.action_undo), duration = androidx.compose.material3.SnackbarDuration.Short)
+            val result = snackbar.showSnackbar(resources.getString(message), resources.getString(R.string.action_undo), duration = androidx.compose.material3.SnackbarDuration.Short)
             if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) vm.undoRemove()
         }
     }

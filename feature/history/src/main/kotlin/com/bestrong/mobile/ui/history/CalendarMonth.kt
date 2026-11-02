@@ -54,7 +54,7 @@ fun CalendarMonth(
 ) {
     var monthOffset by rememberSaveable { mutableStateOf(0L) }
     val month = YearMonth.now().plusMonths(monthOffset)
-    val locale = Locale.getDefault()
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     val today = LocalDate.now()
     val count = trainingDays.count { YearMonth.from(it) == month }
 

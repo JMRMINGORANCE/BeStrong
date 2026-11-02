@@ -218,13 +218,14 @@ private fun MeasurementItem(m: BodyMeasurement, delta: Double?, unit: WeightUnit
 @Composable
 private fun ImportMeasurementsButton(vm: ProfileViewModel) {
     val context = androidx.compose.ui.platform.LocalContext.current
+    val resources = androidx.compose.ui.platform.LocalResources.current
     val failed = stringResource(R.string.import_failed)
     val launcher = androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         uri?.let {
             vm.importMeasurementsCsv(it) { n ->
                 val text = n?.let { (added, completed, skipped) ->
-                    context.getString(R.string.import_measurements_summary, added, completed) +
-                        if (skipped > 0) " · " + context.getString(R.string.import_measurements_skipped, skipped) else ""
+                    resources.getString(R.string.import_measurements_summary, added, completed) +
+                        if (skipped > 0) " · " + resources.getString(R.string.import_measurements_skipped, skipped) else ""
                 } ?: failed
                 android.widget.Toast.makeText(context, text, android.widget.Toast.LENGTH_SHORT).show()
             }

@@ -2,7 +2,6 @@
 // Separada de la interfaz para que las pantallas no dependan de la base de datos directamente.
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -10,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.bestrong.data"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig { minSdk = 30 }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
