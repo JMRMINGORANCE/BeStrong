@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Técnica en vídeo y «Siguiente ejercicio» -->
+<resources>
+    <string name="set_video_record">Filmer la série</string>
+    <string name="set_video_no_camera">Aucune app d\'appareil photo pour filmer</string>
+    <string name="set_video_saved">Vidéo enregistrée dans la fiche de l\'exercice</string>
+    <string name="set_video_section">Vidéos de technique</string>
+    <string name="set_video_compare">Comparer</string>
+    <string name="set_video_compare_hint">Choisissez deux vidéos pour les voir ensemble</string>
+    <string name="set_video_pick">Choisir pour comparer</string>
+    <string name="set_video_play">Lire la vidéo</string>
+    <string name="set_video_delete">Supprimer la vidéo</string>
+    <string name="set_video_set_n">Série %1$d</string>
+    <string name="set_video_replay">Rejouer</string>
+    <string name="next_exercise_title">Exercice suivant</string>
+    <string name="next_exercise_plates">Disques par côté : %1$s</string>
+    <string name="next_exercise_change">Changer</string>
+    <string name="next_exercise_start">Commencer</string>
+    <string name="next_exercise_setting">Carte « Exercice suivant »</string>
+    <string name="next_exercise_setting_body">Pendant le repos avant de changer d\'exercice : charge, disques et note épinglée du suivant</string>
+</resources>

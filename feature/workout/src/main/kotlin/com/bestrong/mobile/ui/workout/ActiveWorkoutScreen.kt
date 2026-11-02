@@ -346,7 +346,15 @@ fun ActiveWorkoutScreen(
                     exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
                 ) {
                     // La siguiente serie solo si el descanso es de quien se ve (el de la pareja no lleva la tuya)
-                    shownRest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal).takeIf { _ -> it.workoutId == null || it.workoutId == w.id }) }
+                    shownRest?.let { r ->
+                        // Antes de cambiar de ejercicio, la tarjeta «Siguiente ejercicio» (propuesta 09) en vez de la barra
+                        val nextExercise = nextExerciseAfterRest(w, r).takeIf { settings.nextExerciseCard }
+                        if (nextExercise != null) {
+                            NextExercisePanel(w, nextExercise, r, vm, pinnedNotes[w.exercises[nextExercise.first].exercise.id], settings.exerciseBarKg[w.exercises[nextExercise.first].exercise.id], dumbbellTotal)
+                        } else {
+                            RestTimerBar(r, vm::adjustRest, vm::skipRest, next = nextSetLabel(w, dumbbellTotal).takeIf { _ -> r.workoutId == null || r.workoutId == w.id })
+                        }
+                    }
                 }
                 // Modo una mano: lo importante abajo, al alcance del pulgar
                 if (oneHanded) OneHandedBar(w, vm, onFinish = { confirmFinish = true })
@@ -751,6 +759,7 @@ private fun ExerciseCard(
     if (substituting) SubstituteDialog(vm, we.id) { substituting = false }
     var showInfo by remember { mutableStateOf(false) }
     var showPlates by remember { mutableStateOf(false) }
+    val recordVideo = rememberSetVideoRecorder(vm, we)
     // Arrastrar para reordenar: pulsación larga en el nombre y mover arriba/abajo
     var dragY by remember { mutableFloatStateOf(0f) }
     var cardHeight by remember { mutableIntStateOf(1) }
@@ -829,6 +838,7 @@ private fun ExerciseCard(
                         }
                         DropdownMenuItem(text = { Text(stringResource(R.string.tempo)) }, onClick = { menu = false; editTempo = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.exercise_history)) }, onClick = { menu = false; showHistory = true })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.set_video_record)) }, onClick = { menu = false; recordVideo() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.substitute_title)) }, onClick = { menu = false; substituting = true })
                         val completable = WorkoutEditor.completableCount(we)
                         if (completable > 0) DropdownMenuItem(text = { Text(stringResource(R.string.complete_remaining, completable)) }, onClick = { menu = false; vm.completeRemaining(we.id) })

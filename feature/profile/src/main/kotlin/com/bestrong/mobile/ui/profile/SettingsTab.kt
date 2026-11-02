@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.ScreenLockPortrait
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.TableRows
@@ -307,6 +308,15 @@ private fun DuringPage(vm: ProfileViewModel, onBack: () -> Unit) {
                 SettingsSwitchRow(stringResource(R.string.rest_countdown), settings.restCountdown, { v -> update { it.copy(restCountdown = v) } }, icon = Icons.Default.Timer, tint = SettingsTint.Green)
                 SettingsDivider()
                 SettingsSwitchRow(stringResource(R.string.vibrate_rest), settings.vibrateOnRestEnd, { v -> update { it.copy(vibrateOnRestEnd = v) } }, icon = Icons.Default.Vibration, tint = SettingsTint.Purple)
+                SettingsDivider()
+                SettingsSwitchRow(
+                    stringResource(R.string.next_exercise_setting),
+                    settings.nextExerciseCard,
+                    { v -> update { it.copy(nextExerciseCard = v) } },
+                    summary = stringResource(R.string.next_exercise_setting_body),
+                    icon = Icons.Default.SkipNext,
+                    tint = SettingsTint.Orange,
+                )
                 SettingsDivider()
                 SettingsChoice(
                     stringResource(R.string.rest_vibration),

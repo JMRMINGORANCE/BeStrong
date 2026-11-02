@@ -25,6 +25,8 @@ data class UserSettings(
     val defaultRestSeconds: Int = 120,
     val healthConnectExport: Boolean = false,
     val vibrateOnRestEnd: Boolean = true,
+    /** Tarjeta «Siguiente ejercicio» en el descanso antes de cambiar de ejercicio (móvil y reloj). */
+    val nextExerciseCard: Boolean = true,
     val keepScreenOn: Boolean = true,
     val unit: WeightUnit = WeightUnit.KG,
     /** Rellenar pesos con la sugerencia de sobrecarga progresiva al empezar. */
@@ -209,6 +211,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         defaultRestSeconds = prefs.getInt("rest", 120),
         healthConnectExport = prefs.getBoolean("hc", false),
         vibrateOnRestEnd = prefs.getBoolean("vibrate", true),
+        nextExerciseCard = prefs.getBoolean("next_exercise_card", true),
         keepScreenOn = prefs.getBoolean("screen_on", true),
         unit = runCatching { WeightUnit.valueOf(prefs.getString("unit", null) ?: "KG") }.getOrDefault(WeightUnit.KG),
         progressionEnabled = prefs.getBoolean("progression", true),
@@ -301,6 +304,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("rest", s.defaultRestSeconds)
             putBoolean("hc", s.healthConnectExport)
             putBoolean("vibrate", s.vibrateOnRestEnd)
+            putBoolean("next_exercise_card", s.nextExerciseCard)
             putBoolean("screen_on", s.keepScreenOn)
             putString("unit", s.unit.name)
             putBoolean("progression", s.progressionEnabled)

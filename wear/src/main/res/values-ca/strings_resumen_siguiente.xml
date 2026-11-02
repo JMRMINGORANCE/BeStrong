@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resumen en la muñeca y «Siguiente ejercicio» en el reloj -->
+<resources>
+    <string name="next_exercise_title">Següent</string>
+    <string name="next_exercise_plates">Per costat: %1$s</string>
+    <string name="next_exercise_start">Començar ja</string>
+    <string name="next_time_title">La propera vegada</string>
+    <string name="summary_rings_desc">%1$d de %2$d sèries, %3$s, %4$s</string>
+</resources>

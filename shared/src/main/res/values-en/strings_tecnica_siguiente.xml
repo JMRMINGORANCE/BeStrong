@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Técnica en vídeo y «Siguiente ejercicio» -->
+<resources>
+    <string name="set_video_record">Record the set on video</string>
+    <string name="set_video_no_camera">No camera app available to record</string>
+    <string name="set_video_saved">Video saved in the exercise details</string>
+    <string name="set_video_section">Technique videos</string>
+    <string name="set_video_compare">Compare</string>
+    <string name="set_video_compare_hint">Pick two videos to watch them together</string>
+    <string name="set_video_pick">Pick to compare</string>
+    <string name="set_video_play">Play video</string>
+    <string name="set_video_delete">Delete video</string>
+    <string name="set_video_set_n">Set %1$d</string>
+    <string name="set_video_replay">Replay</string>
+    <string name="next_exercise_title">Next exercise</string>
+    <string name="next_exercise_plates">Plates per side: %1$s</string>
+    <string name="next_exercise_change">Change</string>
+    <string name="next_exercise_start">Start now</string>
+    <string name="next_exercise_setting">“Next exercise” card</string>
+    <string name="next_exercise_setting_body">During the rest before switching exercise: weight, plates and pinned note of the next one</string>
+</resources>

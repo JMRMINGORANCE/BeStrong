@@ -264,6 +264,8 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
     ) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
             item { ListHeader { Text(stringResource(R.string.completed), color = Brand) } }
+            // Anillos de series, volumen y duración (propuesta 08)
+            item { SummaryRings(s) }
             item { Text(w.name, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center) }
             item { Text(stringResource(R.string.summary_duration, formatDuration(w.durationSeconds()))) }
             item { Text(pluralStringResource(R.plurals.summary_volume, w.completedSetCount, unit.formatVolume(w.totalVolume), w.completedSetCount)) }
@@ -298,6 +300,25 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                     Text(
                         "${recordName(pr)}: ${pr.type.formatValue(pr.value, unit)}",
                         style = MaterialTheme.typography.labelSmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+            // «La próxima vez»: el peso que toca subir (o mantener) en cada ejercicio
+            if (s.nextTime.isNotEmpty()) {
+                item { ListHeader { Text(stringResource(R.string.next_time_title)) } }
+                items(s.nextTime.take(5)) { n ->
+                    val name = ExerciseLibrary.byId(n.exerciseId)?.displayName() ?: n.exerciseName
+                    val arrow = when {
+                        n.direction > 0 -> "▲"
+                        n.direction < 0 -> "▼"
+                        else -> "="
+                    }
+                    val factor = w.exercises.firstOrNull { it.exercise.id == n.exerciseId }?.exercise?.let { session.settings.value.weightFactor(it) } ?: 1
+                    Text(
+                        "$arrow $name · ${unit.format(n.weightKg * factor, withUnit = true)} × ${n.reps}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (n.direction > 0) Done else MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                     )
                 }
