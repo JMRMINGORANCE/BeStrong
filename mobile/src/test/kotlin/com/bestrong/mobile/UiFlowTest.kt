@@ -178,6 +178,9 @@ class UiFlowTest {
     @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun pause_substitute_undo() {
         startEmptyWorkoutWithBench()
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        compose.onNodeWithContentDescription("Ver lista").performClick()
+        settle()
         // Pausa: el cronómetro se detiene y aparece el aviso
         compose.onNodeWithContentDescription("Pausar entreno").performClick()
         settle()
@@ -208,6 +211,9 @@ class UiFlowTest {
     @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun step_bar_autofills_following_sets() {
         startEmptyWorkoutWithBench()
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        compose.onNodeWithContentDescription("Ver lista").performClick()
+        settle()
         // Al tocar el peso aparece la barra ±; sumar en la primera serie rellena las siguientes
         compose.onAllNodes(hasContentDescription("Peso en kg"))[0].performClick()
         settle()

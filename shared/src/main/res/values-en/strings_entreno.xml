@@ -37,4 +37,25 @@
         <item quantity="one">%1$d new record</item>
         <item quantity="other">%1$d new records</item>
     </plurals>
+    <string name="enf_wo_set_of">Set %1$d of %2$d</string>
+    <string name="enf_wo_record_with">PR with %1$d</string>
+    <string name="enf_wo_record_hit">★ PR</string>
+    <string name="enf_wo_done">Done</string>
+    <string name="enf_wo_all_sets">All sets</string>
+    <string name="enf_wo_rest">Rest</string>
+    <string name="enf_wo_rest_of">of %1$s</string>
+    <string name="enf_wo_set_done">Set %1$d done · %2$s</string>
+    <string name="enf_wo_next_line">%1$s · set %2$d of %3$d</string>
+    <string name="enf_wo_auto_next">The next set starts by itself when this ends</string>
+    <string name="enf_wo_skip">Skip</string>
+    <string name="enf_wo_rest_less">Remove 15 seconds of rest</string>
+    <string name="enf_wo_rest_more">Add 15 seconds of rest</string>
+    <string name="enf_wo_progress">Set %1$d of %2$d in the workout</string>
+    <string name="enf_wo_hr">Heart rate %1$d bpm</string>
+    <string name="enf_wo_finished">Workout done</string>
+    <string name="enf_wo_avg_hr">♥ %1$d average</string>
+    <string name="enf_wo_time">Time</string>
+    <string name="enf_wo_records">Records</string>
+    <string name="enf_wo_elapsed">Workout time %1$s</string>
+    <string name="enf_wo_undo">Unmark</string>
 </resources>

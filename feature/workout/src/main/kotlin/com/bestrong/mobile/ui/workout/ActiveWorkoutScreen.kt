@@ -161,8 +161,10 @@ fun ActiveWorkoutScreen(
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
     var renaming by rememberSaveable { mutableStateOf(false) }
     var editingNotes by rememberSaveable { mutableStateOf(false) }
-    // Modo foco (propuesta 1): una serie a pantalla completa en vez de la tabla
+    // Modo gimnasio («Enfoque»): una serie a pantalla completa en vez de la tabla (activado de serie)
     var focusMode by rememberSaveable { mutableStateOf(settings.focusByDefault) }
+    // Sin ejercicios no hay serie que enseñar: la lista (con «Añadir ejercicios») hasta que se añada alguno
+    val gymMode = focusMode && workout?.exercises?.isNotEmpty() == true
     val pinnedNotes by vm.pinnedNotes.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -324,7 +326,8 @@ fun ActiveWorkoutScreen(
                 var shownRest by remember { mutableStateOf(rest) }
                 if (rest != null) shownRest = rest
                 androidx.compose.animation.AnimatedVisibility(
-                    visible = rest != null && !expanded && posture != FoldPosture.TABLETOP,
+                    // En modo gimnasio el descanso ocupa la pantalla (el anillo), no hace falta la barra
+                    visible = rest != null && !expanded && posture != FoldPosture.TABLETOP && !gymMode,
                     enter = androidx.compose.animation.slideInVertically { it } + androidx.compose.animation.fadeIn(),
                     exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
                 ) {
@@ -379,18 +382,19 @@ fun ActiveWorkoutScreen(
             else -> Column(content) {
                 if (w.isPaused) PausedBanner(vm::togglePause)
                 RestOverrunBanner(restEndedAt, vm::dismissOverrun)
-                if (focusMode) {
-                    FocusSetView(
-                        w = w,
+                if (gymMode) {
+                    val bests by vm.bests.collectAsStateWithLifecycle()
+                    val inputs = GymInputs(
                         previous = previous,
-                        vm = vm,
                         dumbbellTotal = dumbbellTotal,
                         barKgFor = { settings.exerciseBarKg[it] },
                         pinnedNote = { pinnedNotes[it] },
-                        onFinish = { confirmFinish = true },
-                        onShowList = { focusMode = false },
-                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        bestOneRepMax = { id -> bests[id]?.first?.takeIf { it > 0 } },
+                        heartRate = liveMetrics?.heartRate,
                     )
+                    Box(Modifier.weight(1f).fillMaxWidth()) {
+                        GymRestOrSet(w, rest, vm, inputs, onFinish = { confirmFinish = true }, onShowList = { focusMode = false })
+                    }
                 } else {
                     StatsRow(w, liveMetrics, Modifier.padding(horizontal = 16.dp, vertical = 8.dp), eta)
                     listContent(Modifier.weight(1f))

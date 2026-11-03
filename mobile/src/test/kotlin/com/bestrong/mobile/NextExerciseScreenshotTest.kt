@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -60,6 +61,9 @@ class NextExerciseScreenshotTest {
         compose.onNodeWithText("Entrenamiento vacío").performClick()
         settle()
         add("press banca", "Press banca")
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        compose.onNodeWithContentDescription("Ver lista").performClick()
+        settle()
         compose.onAllNodes(hasSetTextAction())[0].performTextReplacement("80")
         settle()
         compose.mainClock.autoAdvance = true

@@ -56,6 +56,9 @@ class NewFeaturesUiTest {
     @Test
     fun dropSetAddsADropRow() {
         startEmptyWorkoutWithBench()
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        compose.onNodeWithContentDescription("Ver lista").performClick()
+        settle()
         val before = compose.onAllNodesWithText("D").fetchSemanticsNodes().size
         compose.onNodeWithContentDescription("Opciones de Press banca").performClick()
         settle(3)

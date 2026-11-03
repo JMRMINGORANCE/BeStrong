@@ -50,9 +50,11 @@ data class UserSettings(
     val pendingBuilder: Boolean = false,
     /** Objetivo de entrenamiento (de la bienvenida): el programa a medida empieza con él. */
     val trainingGoal: com.bestrong.core.training.Goal = com.bestrong.core.training.Goal.HYPERTROPHY,
-    /** Botones principales abajo en la pantalla exterior del Fold (uso con una mano). */
-    /** Abrir el entreno en modo foco (una serie a pantalla completa). Usa la clave del antiguo «modo una mano». */
-    val focusByDefault: Boolean = false,
+    /**
+     * Abrir el entreno en modo gimnasio (una serie a pantalla completa, «Enfoque»). Activado de serie: la clave es
+     * nueva para que también se active a quien tenía guardado el antiguo modo foco desactivado.
+     */
+    val focusByDefault: Boolean = true,
     /** Perfiles de gimnasio con su material; el activo condiciona pesos, discos y alternativas. */
     val gyms: List<GymProfile> = listOf(GymProfile.gym(), GymProfile.home()),
     val activeGymId: String? = null,
@@ -210,7 +212,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         pendingBuilder = prefs.getBoolean("pending_builder", false),
         trainingGoal = runCatching { com.bestrong.core.training.Goal.valueOf(prefs.getString("training_goal", null) ?: "HYPERTROPHY") }
             .getOrDefault(com.bestrong.core.training.Goal.HYPERTROPHY),
-        focusByDefault = prefs.getBoolean("one_handed", false),
+        focusByDefault = prefs.getBoolean("gym_mode", true),
         gyms = readGyms(),
         activeGymId = prefs.getString("active_gym", null),
         favoriteExercises = prefs.getStringSet("favorites", emptySet()).orEmpty().toSet(),
@@ -297,7 +299,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putInt("weekly_goal", s.weeklyGoal)
             putString("training_goal", s.trainingGoal.name)
             putBoolean("pending_builder", s.pendingBuilder)
-            putBoolean("one_handed", s.focusByDefault)
+            putBoolean("gym_mode", s.focusByDefault)
             putString("gyms", SyncContract.json.encodeToString(ListSerializer(GymProfile.serializer()), s.gyms))
             putString("active_gym", s.activeGymId)
             putStringSet("favorites", s.favoriteExercises)
