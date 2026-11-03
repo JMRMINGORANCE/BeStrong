@@ -37,4 +37,25 @@
         <item quantity="one">%1$d nouveau record</item>
         <item quantity="other">%1$d nouveaux records</item>
     </plurals>
+    <string name="enf_wo_set_of">Série %1$d sur %2$d</string>
+    <string name="enf_wo_record_with">record avec %1$d</string>
+    <string name="enf_wo_record_hit">★ record</string>
+    <string name="enf_wo_done">Faite</string>
+    <string name="enf_wo_all_sets">Toutes les séries</string>
+    <string name="enf_wo_rest">Repos</string>
+    <string name="enf_wo_rest_of">sur %1$s</string>
+    <string name="enf_wo_set_done">Série %1$d faite · %2$s</string>
+    <string name="enf_wo_next_line">%1$s · série %2$d sur %3$d</string>
+    <string name="enf_wo_auto_next">La série suivante démarre seule à la fin</string>
+    <string name="enf_wo_skip">Passer</string>
+    <string name="enf_wo_rest_less">Retirer 15 secondes de repos</string>
+    <string name="enf_wo_rest_more">Ajouter 15 secondes de repos</string>
+    <string name="enf_wo_progress">Série %1$d sur %2$d de la séance</string>
+    <string name="enf_wo_hr">Pouls %1$d bpm</string>
+    <string name="enf_wo_finished">Séance terminée</string>
+    <string name="enf_wo_avg_hr">♥ %1$d en moyenne</string>
+    <string name="enf_wo_time">Temps</string>
+    <string name="enf_wo_records">Records</string>
+    <string name="enf_wo_elapsed">Durée de la séance %1$s</string>
+    <string name="enf_wo_undo">Décocher</string>
 </resources>

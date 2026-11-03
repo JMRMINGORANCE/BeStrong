@@ -67,6 +67,9 @@ class SearchCompareDiaryScreenshotTest {
         settle(3)
         compose.onNode(hasText("Añadir 1"), useUnmergedTree = true).performClick()
         settle()
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        compose.onNodeWithContentDescription("Ver lista").performClick()
+        settle()
         compose.onAllNodes(hasSetTextAction())[0].performTextReplacement(kg)
         settle()
         compose.onAllNodesWithContentDescription("Completar serie", substring = true)[0].performClick()
@@ -83,7 +86,6 @@ class SearchCompareDiaryScreenshotTest {
             settle()
             summaryShot?.let { captureScreenRoboImage("build/outputs/roborazzi/$it.png") }
         }
-        auto { compose.onNodeWithText("Listo").performScrollTo() }
         compose.onNodeWithText("Listo").performClick()
         settle()
     }

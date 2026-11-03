@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -108,6 +109,9 @@ class UiScreensTest {
         compose.onNodeWithText("Entrenamiento vacío").performClick()
         settle()
         pickBench()
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        compose.onNodeWithContentDescription("Ver lista").performClick()
+        settle()
         compose.onAllNodesWithContentDescription("Completar serie", substring = true)[0].performClick()
         settle()
         compose.onAllNodesWithText("Terminar")[0].performClick()

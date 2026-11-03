@@ -11,7 +11,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
@@ -71,15 +70,13 @@ class WorkoutFlowScreenshotTest {
         settle()
     }
 
-    /** Propuestas 1, 4, 2 y 3: modo foco, resumen, Inicio con la semana y mapa corporal. */
+    /** Propuestas 1, 4, 2 y 3: modo gimnasio (el de serie), resumen, Inicio con la semana y mapa corporal. */
     @Test
     fun proposals_folded() {
         startWithBench()
-        compose.onNodeWithContentDescription("Modo foco").performClick()
-        settle()
         shot("p1_focus_mode")
         compose.onNodeWithContentDescription("Más kg").performClick()
-        compose.onNodeWithText("Serie hecha").performClick()
+        compose.onNodeWithText("Hecha").performClick()
         settle()
         shot("p1_focus_mode_next")
         compose.onAllNodesWithText("Terminar")[0].performClick()
@@ -87,10 +84,7 @@ class WorkoutFlowScreenshotTest {
         compose.onAllNodesWithText("Terminar").fetchSemanticsNodes().takeIf { it.size > 1 }?.let { compose.onAllNodesWithText("Terminar")[1].performClick(); settle() }
         settle(30)
         captureScreenRoboImage("build/outputs/roborazzi/p4_summary.png")
-        // «Listo» está al final del resumen: hay que bajar hasta él
-        compose.mainClock.autoAdvance = true
-        compose.onNodeWithText("Listo").performScrollTo()
-        compose.mainClock.autoAdvance = false
+        // «Listo» va fijo abajo del resumen, siempre a la vista
         compose.onNodeWithText("Listo").performClick()
         settle()
         // Al terminar se abre el historial: de vuelta a Inicio

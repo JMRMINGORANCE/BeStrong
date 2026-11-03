@@ -151,7 +151,7 @@ private fun Sparkline(values: List<Float>, color: Color, modifier: Modifier) {
 
 /** Un lado de la barra con los discos a escala (colores de competición). */
 @Composable
-private fun BarbellDrawing(perSide: List<Double>, modifier: Modifier) {
+internal fun BarbellDrawing(perSide: List<Double>, modifier: Modifier) {
     val barColor = MaterialTheme.colorScheme.outline
     Canvas(modifier) {
         val cy = size.height / 2
