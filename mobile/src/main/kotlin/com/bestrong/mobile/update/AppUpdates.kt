@@ -1,5 +1,6 @@
 package com.bestrong.mobile.update
 
+import android.app.Activity
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -23,6 +24,7 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -49,13 +51,26 @@ class AppUpdates(private val activity: ComponentActivity) : DefaultLifecycleObse
     private val manager: AppUpdateManager? by lazy { runCatching { AppUpdateManagerFactory.create(activity.applicationContext) }.getOrNull() }
     private val prefs by lazy { activity.getSharedPreferences(UpdateCheckWorker.PREFS, Context.MODE_PRIVATE) }
     private val launcher: ActivityResultLauncher<IntentSenderRequest> =
-        activity.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {}
+        activity.registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result -> onFlowResult(result.resultCode) }
     private val _prompt = MutableStateFlow<UpdatePrompt>(UpdatePrompt.None)
     val prompt: StateFlow<UpdatePrompt> = _prompt
     private var info: AppUpdateInfo? = null
 
+    /** Versión que el usuario aceptó y que Play está descargando: no se vuelve a ofrecer mientras tanto. */
+    private var inFlightVersion: Int? = null
+    private var checkJob: Job? = null
+
     private val listener = InstallStateUpdatedListener { state ->
-        if (state.installStatus() == InstallStatus.DOWNLOADED) _prompt.value = UpdatePrompt.Downloaded
+        when (state.installStatus()) {
+            InstallStatus.DOWNLOADED -> _prompt.value = UpdatePrompt.Downloaded
+            // Falló o se canceló la descarga: se podrá volver a ofrecer en la próxima comprobación
+            InstallStatus.FAILED, InstallStatus.CANCELED -> inFlightVersion = null
+            InstallStatus.INSTALLED -> {
+                inFlightVersion = null
+                _prompt.value = UpdatePrompt.None
+            }
+            else -> Unit
+        }
     }
 
     init {
@@ -78,7 +93,9 @@ class AppUpdates(private val activity: ComponentActivity) : DefaultLifecycleObse
     override fun onResume(owner: LifecycleOwner) {
         // La app está abierta: la notificación de versión nueva ya no hace falta
         prefs.edit().putLong(UpdateCheckWorker.KEY_LAST_OPEN, System.currentTimeMillis()).apply()
-        activity.lifecycleScope.launch { check() }
+        // Una sola comprobación a la vez: volver a la app varias veces seguidas no apila diálogos
+        checkJob?.cancel()
+        checkJob = activity.lifecycleScope.launch { check() }
         // Y los avisos del equipo, sin esperar a la comprobación periódica
         runCatching { AnnouncementsWorker.checkNow(activity.applicationContext) }
     }
@@ -86,14 +103,30 @@ class AppUpdates(private val activity: ComponentActivity) : DefaultLifecycleObse
     private suspend fun check() {
         val current = runCatching { manager?.appUpdateInfo?.await() }.getOrNull() ?: return
         info = current
-        val now = System.currentTimeMillis()
-        _prompt.value = when {
-            current.installStatus() == InstallStatus.DOWNLOADED -> UpdatePrompt.Downloaded
-            current.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                current.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) &&
-                shouldAsk(current.availableVersionCode(), prefs.getInt(KEY_DISMISSED_VERSION, 0), prefs.getLong(KEY_DISMISSED_AT, 0), now) ->
-                UpdatePrompt.Available(current.availableVersionCode())
-            else -> UpdatePrompt.None
+        _prompt.value = decide(
+            availability = current.updateAvailability(),
+            installStatus = current.installStatus(),
+            flexibleAllowed = current.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE),
+            available = current.availableVersionCode(),
+            inFlightVersion = inFlightVersion,
+            dismissedVersion = prefs.getInt(KEY_DISMISSED_VERSION, 0),
+            dismissedAt = prefs.getLong(KEY_DISMISSED_AT, 0),
+            now = System.currentTimeMillis(),
+        )
+    }
+
+    /** Vuelta de la pantalla de Play: aceptada (empieza la descarga), cancelada o fallida. */
+    private fun onFlowResult(resultCode: Int) {
+        val version = inFlightVersion ?: return
+        when (resultCode) {
+            Activity.RESULT_OK -> Unit
+            // «No, gracias» en Play: como «Ahora no» (no se vuelve a preguntar en unos días)
+            Activity.RESULT_CANCELED -> {
+                inFlightVersion = null
+                later(version)
+            }
+            // Falló al empezar: se reintenta en la próxima comprobación
+            else -> inFlightVersion = null
         }
     }
 
@@ -101,7 +134,16 @@ class AppUpdates(private val activity: ComponentActivity) : DefaultLifecycleObse
     fun update() {
         val current = info ?: return
         _prompt.value = UpdatePrompt.None
-        runCatching { manager?.startUpdateFlowForResult(current, launcher, AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()) }
+        inFlightVersion = current.availableVersionCode()
+        // Un AppUpdateInfo solo sirve para un intento: se descarta y, si Play no abre su pantalla, se vuelve a preguntar
+        info = null
+        val started = runCatching { manager?.startUpdateFlowForResult(current, launcher, AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()) == true }
+            .getOrDefault(false)
+        if (!started) {
+            inFlightVersion = null
+            checkJob?.cancel()
+            checkJob = activity.lifecycleScope.launch { check() }
+        }
     }
 
     /** «Ahora no»: no se vuelve a preguntar por esta versión hasta dentro de unos días. */
@@ -113,7 +155,12 @@ class AppUpdates(private val activity: ComponentActivity) : DefaultLifecycleObse
     /** «Reiniciar»: instala la versión descargada y vuelve a abrir la app. */
     fun restart() {
         _prompt.value = UpdatePrompt.None
-        runCatching { manager?.completeUpdate() }
+        // Si Play ya no la tiene lista (se borró la descarga), se vuelve a comprobar en vez de quedarse sin nada
+        checkJob?.cancel()
+        checkJob = activity.lifecycleScope.launch {
+            val ok = runCatching { manager?.completeUpdate()?.await() }.isSuccess && manager != null
+            if (!ok) check()
+        }
     }
 
     /** Tras «Más tarde» con la descarga lista: se vuelve a ofrecer la próxima vez que se abra la app. */
@@ -129,6 +176,32 @@ class AppUpdates(private val activity: ComponentActivity) : DefaultLifecycleObse
         /** Se pregunta salvo que esta misma versión se haya rechazado hace menos de 3 días. */
         fun shouldAsk(available: Int, dismissedVersion: Int, dismissedAt: Long, now: Long): Boolean =
             available != dismissedVersion || now - dismissedAt >= ASK_AGAIN_MS
+
+        /**
+         * Qué enseñar con lo que dice Play: «Reiniciar» si ya está descargada; nada mientras se descarga o instala (si no,
+         * al volver de la pantalla de Play salía otra vez «Actualizar»); «Actualizar» si hay una nueva y no se rechazó hace poco.
+         */
+        @Suppress("LongParameterList")
+        fun decide(
+            availability: Int,
+            installStatus: Int,
+            flexibleAllowed: Boolean,
+            available: Int,
+            inFlightVersion: Int?,
+            dismissedVersion: Int,
+            dismissedAt: Long,
+            now: Long,
+        ): UpdatePrompt = when {
+            installStatus == InstallStatus.DOWNLOADED -> UpdatePrompt.Downloaded
+            installStatus in IN_PROGRESS -> UpdatePrompt.None
+            availability == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS -> UpdatePrompt.None
+            inFlightVersion == available -> UpdatePrompt.None
+            availability == UpdateAvailability.UPDATE_AVAILABLE && flexibleAllowed && shouldAsk(available, dismissedVersion, dismissedAt, now) ->
+                UpdatePrompt.Available(available)
+            else -> UpdatePrompt.None
+        }
+
+        private val IN_PROGRESS = setOf(InstallStatus.PENDING, InstallStatus.DOWNLOADING, InstallStatus.INSTALLING)
     }
 }
 
