@@ -1150,4 +1150,14 @@
     <string name="deload_label">descarga</string>
     <string name="achievement_unlocked">Logro conseguido: %1$s</string>
     <string name="records_milestones">Marcas e fitos</string>
+    <string name="enf_home_start">Comezar</string>
+    <string name="enf_home_routines">Rutinas</string>
+    <string name="enf_home_search">Buscar</string>
+    <string name="enf_home_week">Semana</string>
+    <string name="enf_home_days_ago">hai %1$d d</string>
+    <string name="enf_home_streak_volume">%1$d sem. seguidas · %2$s</string>
+    <string name="enf_home_done_today">%1$s feito</string>
+    <string name="enf_home_next">Seguinte: %1$s</string>
+    <string name="enf_home_last_time">última vez %1$s</string>
+    <string name="enf_home_in_progress">En curso</string>
 </resources>

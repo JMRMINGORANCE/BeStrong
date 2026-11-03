@@ -1150,4 +1150,14 @@
     <string name="deload_label">Deload</string>
     <string name="achievement_unlocked">Erfolg freigeschaltet: %1$s</string>
     <string name="records_milestones">Rekorde und Meilensteine</string>
+    <string name="enf_home_start">Starten</string>
+    <string name="enf_home_routines">Routinen</string>
+    <string name="enf_home_search">Suchen</string>
+    <string name="enf_home_week">Woche</string>
+    <string name="enf_home_days_ago">vor %1$d T.</string>
+    <string name="enf_home_streak_volume">%1$d Wo. in Folge · %2$s</string>
+    <string name="enf_home_done_today">%1$s erledigt</string>
+    <string name="enf_home_next">Als Nächstes: %1$s</string>
+    <string name="enf_home_last_time">zuletzt %1$s</string>
+    <string name="enf_home_in_progress">Läuft</string>
 </resources>
