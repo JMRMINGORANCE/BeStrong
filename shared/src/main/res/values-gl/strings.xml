@@ -1150,4 +1150,26 @@
     <string name="deload_label">descarga</string>
     <string name="achievement_unlocked">Logro conseguido: %1$s</string>
     <string name="records_milestones">Marcas e fitos</string>
+    <string name="enf_prog_history">Historial</string>
+    <string name="enf_prog_body">Corpo</string>
+    <string name="enf_prog_strength">Forza</string>
+    <string name="enf_prog_all_measures">Todas as medidas</string>
+    <string name="enf_prog_latest">Últimas medidas</string>
+    <string name="enf_you_weight">Peso</string>
+    <string name="enf_you_fat">Graxa</string>
+    <string name="enf_you_waist">Cintura</string>
+    <string name="enf_you_streak">%1$d sem. seguidas · %2$d adestramentos</string>
+    <string name="enf_you_records_sub">As túas mellores marcas e fitos</string>
+    <string name="enf_you_measures_sub">Peso e perímetros</string>
+    <string name="enf_you_settings_sub">Adestramento, aparencia, datos e conexións</string>
+    <string name="enf_lib_kicker">Exercicios e rutinas</string>
+    <string name="enf_lib_routines">Rutinas</string>
+    <string name="enf_lib_exercises">Exercicios</string>
+    <string name="enf_lib_no_routines">Aínda non tes rutinas. Crea a primeira e aparecerá aquí.</string>
+    <string name="enf_lib_new_routine">Nova rutina</string>
+    <string name="enf_lib_history">Historia</string>
+    <string name="enf_lib_technique">Técnica</string>
+    <string name="enf_lib_records">Récords</string>
+    <string name="enf_lib_e1rm">1RM estimado</string>
+    <string name="enf_lib_no_folder">Sen cartafol</string>
 </resources>
