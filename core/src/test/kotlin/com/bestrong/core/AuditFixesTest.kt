@@ -13,13 +13,11 @@ import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.OneRepMax
 import com.bestrong.core.stats.OneRepMax.Formula
 import com.bestrong.core.stats.Strength
-import com.bestrong.core.training.Mesocycle
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.SuggestionKind
 import java.time.LocalDate
 import java.time.ZoneId
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -88,13 +86,6 @@ class AuditFixesTest {
 
     @Test fun landerIsNeverNegative() {
         assertTrue(OneRepMax.estimate(50.0, 40, Formula.LANDER) >= 0.0)
-    }
-
-    @Test fun mesocycleBeforeStartIsWeekOne() {
-        val start = LocalDate.of(2026, 11, 2)
-        val m = Mesocycle(start.toEpochDay())
-        assertEquals(1, m.weekOf(start.minusDays(10)))
-        assertNotEquals(true, m.isDeloadWeek(start.minusDays(10)))
     }
 }
 

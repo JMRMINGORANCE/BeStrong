@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.TrendingDown
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -48,8 +47,6 @@ import com.bestrong.core.model.TrackingType
 import com.bestrong.core.stats.ExerciseTimeline
 import com.bestrong.core.stats.Milestone
 import com.bestrong.core.stats.MilestoneKind
-import com.bestrong.core.training.Injuries
-import com.bestrong.core.training.InjuryZone
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
@@ -60,26 +57,21 @@ import com.bestrong.mobile.ui.workout.describeSet
 /**
  * «Historia» del ejercicio (bajo la gráfica de progreso de la ficha): una línea de tiempo con los hitos (primera vez, récords,
  * pesos redondos, cambios de gimnasio, vueltas tras un parón y descargas). Tocar un hito enseña las series de ese día.
- * Arriba, la nota fija y el aviso si el ejercicio carga una zona marcada como lesionada.
+ * Arriba, la nota fija.
  */
 @Composable
 internal fun ExerciseTimelineSection(vm: ExercisesViewModel, exercise: Exercise, weightFactor: Int) {
     val history by vm.history.collectAsStateWithLifecycle()
-    val injuries by vm.injuries.collectAsStateWithLifecycle()
     val milestones = remember(history, exercise.id) { ExerciseTimeline.milestones(history, exercise.id) }
     if (milestones.isEmpty()) return
     val unit = LocalWeightUnit.current
     var showAll by rememberSaveable(exercise.id) { mutableStateOf(false) }
     var open by rememberSaveable(exercise.id) { mutableStateOf<String?>(null) }
     val note = remember(exercise.id, vm.mediaVersion.collectAsStateWithLifecycle().value) { vm.note(exercise.id) }
-    val conflicts = remember(exercise, injuries) { Injuries.conflicts(exercise, injuries) }
 
     com.bestrong.mobile.ui.components.Panel(contentPadding = 16.dp) {
         SectionHeader(stringResource(R.string.tl_title))
         if (note.isNotBlank()) Banner(Icons.Default.PushPin, stringResource(R.string.tl_pinned, note), MaterialTheme.colorScheme.onSurfaceVariant)
-        if (conflicts.isNotEmpty()) {
-            Banner(Icons.Default.Warning, stringResource(R.string.tl_injury, conflicts.map { zoneLabel(it) }.joinToString()), MaterialTheme.colorScheme.error)
-        }
         val shown = if (showAll) milestones else milestones.take(SHOWN)
         Column {
             shown.forEachIndexed { i, m ->
@@ -196,19 +188,6 @@ private fun value(m: Milestone, exercise: Exercise, factor: Int): String? {
         else -> null
     }
 }
-
-@Composable
-private fun zoneLabel(z: InjuryZone): String = stringResource(
-    when (z) {
-        InjuryZone.SHOULDER -> R.string.zone_shoulder
-        InjuryZone.ELBOW -> R.string.zone_elbow
-        InjuryZone.WRIST -> R.string.zone_wrist
-        InjuryZone.LOWER_BACK -> R.string.zone_lower_back
-        InjuryZone.KNEE -> R.string.zone_knee
-        InjuryZone.HIP -> R.string.zone_hip
-        InjuryZone.NECK -> R.string.zone_neck
-    },
-)
 
 /** Hitos a la vista antes de «Ver todos». */
 private const val SHOWN = 6

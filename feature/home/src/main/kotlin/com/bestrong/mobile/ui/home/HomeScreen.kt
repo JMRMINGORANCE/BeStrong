@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,7 +34,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Repeat
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Today
@@ -87,7 +85,6 @@ import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.formatTime
 import com.bestrong.mobile.ui.components.rememberNow
 import com.bestrong.mobile.ui.components.spokenAs
-import com.bestrong.mobile.ui.help.TipCard
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -95,28 +92,16 @@ fun HomeScreen(
     vm: HomeViewModel,
     onOpenWorkout: () -> Unit,
     onEditRoutine: (String?) -> Unit,
-    /** Abre la biblioteca filtrada por ese músculo. */
-    onOpenMuscle: (com.bestrong.core.model.MuscleGroup) -> Unit = {},
-    /** Abre la ficha del ejercicio (su progreso). */
-    onOpenExercise: (String) -> Unit = {},
     /** Búsqueda universal (lupa del saludo). */
     onOpenSearch: () -> Unit = {},
 ) {
     val routines by vm.routines.collectAsStateWithLifecycle()
-    // Al volver a Inicio (p. ej. a la mañana siguiente) proteína, agua y disposición son las de hoy
-    androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
-        vm.refreshReadiness()
-        onPauseOrDispose { }
-    }
     val active by vm.active.collectAsStateWithLifecycle()
-    val history by vm.history.collectAsStateWithLifecycle()
     val lastByRoutine by vm.lastByRoutine.collectAsStateWithLifecycle()
     val gymNames by vm.gymNames.collectAsStateWithLifecycle()
     val today by vm.today.collectAsStateWithLifecycle()
-    val missed by vm.missedSession.collectAsStateWithLifecycle()
     val suggested by vm.suggestedRoutine.collectAsStateWithLifecycle()
     val week by vm.week.collectAsStateWithLifecycle()
-    val plannedDays by vm.plannedDays.collectAsStateWithLifecycle()
     // Se guarda el id (no el programa) para que la preparación sobreviva al giro
     var setupProgramId by rememberSaveable { mutableStateOf<String?>(null) }
     val snackbar = remember { SnackbarHostState() }
@@ -160,7 +145,7 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // 1. Saludo; 2. lo que toca ahora; 3. accesos rápidos; 4. la semana; 5. rutinas; 6. el resto
+            // Solo tres cosas: lo que toca hoy (con los accesos rápidos, discretos), la semana y las rutinas
             item(span = full) {
                 Greeting {
                     GymChip(vm)
@@ -177,22 +162,17 @@ fun HomeScreen(
                     item(span = full) { SuggestedRoutineCard(r, onStart = { vm.startRoutine(r, onOpenWorkout) }, onStartWatch = { vm.startOnWatch(r) }) }
                 }
             }
-            // Una sesión planificada que se pasó, con «hacerla hoy»: arriba, no debajo de todas las rutinas
-            missedSessionItem(noWorkout = active == null, missed = missed, vm = vm, onOpenWorkout = onOpenWorkout)
             item(span = full) {
                 QuickActions(
                     // Si arriba ya hay una tarjeta destacada (entreno abierto, lo que toca), el entreno libre no compite con ella
                     highlightEmpty = active == null && today == null && suggested == null,
                     onEmpty = { vm.startEmpty(onOpenWorkout) },
-                    repeatName = history.firstOrNull { it.isFinished }?.name,
-                    onRepeat = { vm.repeatLast(onOpenWorkout) },
                     onWatch = { vm.startOnWatch(null); Unit }.takeIf { active != null || (today == null && suggested == null) },
                     onPrograms = { showPrograms = true },
                 )
             }
-            item(span = full) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) }
-            // Racha, volumen y músculos de la semana de un vistazo (propuesta 2)
-            item(span = full) { WeekDashboard(week, history, vm.weeklySetsTarget, vm.laggingMuscles.collectAsStateWithLifecycle().value, onOpenMuscle) }
+            // La semana en una sola tarjeta: días, racha, volumen y cardio (los músculos están en Perfil)
+            item(span = full) { WeekStrip(week, canChangeGoal = today == null, onGoalChange = vm::setWeeklyGoal) { CardioWeekLine(vm) } }
             item(span = full) {
                 Column {
                     SectionHeader(stringResource(R.string.home_my_routines, routines.count { !it.archived }), large = true) {
@@ -218,7 +198,6 @@ fun HomeScreen(
                 val last = lastByRoutine[routine.id]
                 RoutineCard(
                     routine = routine,
-                    plannedDays = plannedDays[routine.id].orEmpty(),
                     lastDone = last?.let { formatDate(it.startedAtEpochMs) },
                     gymNames = gymNames,
                     onStart = { vm.startRoutine(routine, onOpenWorkout) },
@@ -230,18 +209,6 @@ fun HomeScreen(
                     onMoveDown = { vm.move(routine, 1); Unit }.takeIf { routineQuery.isBlank() },
                     onArchive = { vm.setArchived(routine, !routine.archived) },
                 )
-            }
-            // Avisos y datos del día, al final para no empujar lo principal
-            // En una sola columna: las tarjetas que no tienen nada que enseñar no dejan huecos en la rejilla
-            item(span = full) {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    YearAgoCard(vm, onOpenExercise)
-                    CardioWeekCard(vm)
-                    StaleRoutineCard(vm)
-                    ReadinessCard(vm)
-                    IntakeCard(vm)
-                    TipCard("home_reorder", R.string.tip_home)
-                }
             }
         }
     }
@@ -281,55 +248,27 @@ private fun ActiveWorkoutHero(w: com.bestrong.core.model.Workout, rest: com.best
 }
 
 /**
- * Los accesos de siempre en una fila de botones cuadrados (el entreno libre, destacado y más ancho) y, debajo,
- * repetir el último entreno.
+ * Accesos rápidos discretos en una fila de botones pequeños: entreno libre (destacado solo si no hay nada que hacer
+ * arriba), en el reloj y programas. Bajan de línea si no caben (letra grande).
  */
 @Composable
-private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, repeatName: String?, onRepeat: () -> Unit, onWatch: (() -> Unit)?, onPrograms: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        // Con letra grande no caben cuatro en fila sin partir palabras: 2 × 2 con el texto al lado del icono
-        val scale = androidx.compose.ui.platform.LocalDensity.current.fontScale
-        val empty = stringResource(R.string.home_empty_workout)
-        val watch = stringResource(R.string.home_on_watch)
-        val programs = stringResource(R.string.home_programs)
-        // «En el reloj» solo si arriba no hay ya una tarjeta con su propio botón de reloj
-        val actions = listOfNotNull(
-            Triple(Icons.Default.Add, empty, onEmpty),
-            onWatch?.let { Triple(Icons.Default.Watch, watch, it) },
-            Triple(Icons.Default.Star, programs, onPrograms),
-        )
-        if (scale > LARGE_FONT) {
-            // Muy grande: uno por fila; grande: 2 × 2
-            actions.chunked(if (scale > HUGE_FONT) 1 else 2).forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    row.forEach { (icon, label, onClick) ->
-                        com.bestrong.mobile.ui.components.QuickAction(icon, label, onClick, Modifier.weight(1f), filled = highlightEmpty && label == empty, horizontal = true)
-                    }
-                }
-            }
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Max)) {
-                val tile = Modifier.fillMaxHeight()
-                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Add, empty, onEmpty, tile.weight(1.5f), filled = highlightEmpty)
-                onWatch?.let { com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Watch, watch, it, tile.weight(1f)) }
-                com.bestrong.mobile.ui.components.QuickAction(Icons.Default.Star, programs, onPrograms, tile.weight(1f))
+private fun QuickActions(highlightEmpty: Boolean, onEmpty: () -> Unit, onWatch: (() -> Unit)?, onPrograms: () -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        val small = Modifier.heightIn(min = 48.dp)
+        val empty: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit = {
+            Icon(Icons.Default.Add, null, Modifier.size(18.dp))
+            Text(stringResource(R.string.home_empty_workout), Modifier.padding(start = 6.dp), fontWeight = FontWeight.Bold)
+        }
+        if (highlightEmpty) Button(onClick = onEmpty, modifier = small, content = empty) else androidx.compose.material3.FilledTonalButton(onClick = onEmpty, modifier = small, content = empty)
+        onWatch?.let { watch ->
+            OutlinedButton(onClick = watch, modifier = small) {
+                Icon(Icons.Default.Watch, null, Modifier.size(18.dp))
+                Text(stringResource(R.string.home_on_watch), Modifier.padding(start = 6.dp))
             }
         }
-        repeatName?.let { name ->
-            com.bestrong.mobile.ui.components.Panel(onClick = onRepeat, contentPadding = 14.dp) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Replay, null, tint = MaterialTheme.colorScheme.primary)
-                    Text(
-                        stringResource(R.string.home_repeat_last, name),
-                        Modifier.weight(1f).padding(start = 12.dp),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Icon(Icons.Default.PlayArrow, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
+        OutlinedButton(onClick = onPrograms, modifier = small) {
+            Icon(Icons.Default.Star, null, Modifier.size(18.dp))
+            Text(stringResource(R.string.home_programs), Modifier.padding(start = 6.dp))
         }
     }
 }
@@ -365,8 +304,6 @@ private fun NoRoutines(onPrograms: () -> Unit, onNew: () -> Unit) {
 private fun RoutineCard(
     routine: Routine,
     lastDone: String?,
-    /** Días de esta semana en que está planificada. */
-    plannedDays: List<java.time.DayOfWeek> = emptyList(),
     onStart: () -> Unit,
     onStartWatch: () -> Unit,
     onEdit: () -> Unit,
@@ -396,10 +333,6 @@ private fun RoutineCard(
                     com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.exercise_count, count, count))
                     if (minutes > 0) com.bestrong.mobile.ui.components.MetaPill(stringResource(R.string.routine_estimated, minutes))
                     gymName?.let { com.bestrong.mobile.ui.components.MetaPill("🏋️ $it", Modifier.spokenAs(it)) }
-                    if (plannedDays.isNotEmpty()) {
-                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
-                        com.bestrong.mobile.ui.components.MetaPill("📅 " + plannedDays.joinToString(" · ") { it.getDisplayName(java.time.format.TextStyle.SHORT, locale) })
-                    }
                 }
             }
             Box {
@@ -537,12 +470,6 @@ private fun LazyGridScope.routineItems(
     }
 }
 
-/** Escala de letra a partir de la cual los accesos rápidos van en 2 × 2. */
-private const val LARGE_FONT = 1.3f
-
-/** A partir de esta, uno por fila. */
-private const val HUGE_FONT = 1.6f
-
 /** Clave de la sección de rutinas archivadas (no puede coincidir con una carpeta: lleva un carácter de control). */
 private const val ARCHIVE_KEY = "\u0000archived"
 
@@ -673,8 +600,4 @@ private fun OpenBuilderAfterWelcome(vm: HomeViewModel, open: () -> Unit) {
             vm.clearPendingBuilder()
         }
     }
-}
-
-private fun androidx.compose.foundation.lazy.grid.LazyGridScope.missedSessionItem(noWorkout: Boolean, missed: Any?, vm: HomeViewModel, onOpenWorkout: () -> Unit) {
-    if (noWorkout && missed != null) item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) { MissedSessionCard(vm, onOpenWorkout) }
 }

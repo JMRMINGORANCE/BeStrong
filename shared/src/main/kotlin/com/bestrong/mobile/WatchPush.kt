@@ -6,7 +6,6 @@ import com.bestrong.core.model.Workout
 import com.bestrong.core.training.ActiveProgram
 import com.bestrong.core.training.Periodization
 import com.bestrong.mobile.data.BeStrongRepository
-import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.sync.WatchSync
 import com.bestrong.mobile.ui.components.appLanguage
@@ -21,13 +20,11 @@ class WatchPush @Inject constructor(
     @ApplicationContext private val context: Context,
     private val repository: BeStrongRepository,
     private val watchSync: WatchSync,
-    private val planning: PlanningStore,
 ) {
     fun routinesForWatch(routines: List<Routine>, program: ActiveProgram?, history: List<Workout>): List<Routine> {
-        // La misma que en Inicio (aligerada en semana de descarga)
-        val plan = planning.state.value
+        // La misma que en Inicio
         val today = program?.let {
-            Periodization.sessionWithDeload(it, history, context.appLanguage(), plan.customPrograms, context.programTexts(), plan.mesocycle, context.getString(R.string.deload_label))?.routine
+            Periodization.sessionWithDeload(it, history, context.appLanguage(), context.programTexts(), context.getString(R.string.deload_label))?.routine
         }
         return listOfNotNull(today) + routines
     }

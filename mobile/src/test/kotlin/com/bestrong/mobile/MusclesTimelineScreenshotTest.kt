@@ -126,11 +126,12 @@ class MusclesTimelineScreenshotTest {
     }
 
     @Test
-    fun home_single_muscles_card() {
+    fun home_single_week_card() {
+        // La semana de Inicio en una sola tarjeta: días, racha, volumen (los músculos están en Perfil)
         compose.mainClock.autoAdvance = false
         seed()
         settle(30)
-        scrollTo("Músculos esta semana")
-        shot("m_home_muscles")
+        scrollTo("Volumen semanal")
+        shot("m_home_week")
     }
 }

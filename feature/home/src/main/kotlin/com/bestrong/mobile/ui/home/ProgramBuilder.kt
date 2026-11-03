@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -58,8 +57,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -105,16 +102,13 @@ fun ProgramBuilderScreen(
     // Empieza con lo que se dijo en la bienvenida: objetivo, días y dónde se entrena
     val settings by vm.settings.collectAsStateWithLifecycle()
     var goal by rememberSaveable { mutableStateOf(settings.trainingGoal) }
-    var days by rememberSaveable { mutableIntStateOf(settings.weeklyGoal.coerceIn(1, 7)) }
+    var days by rememberSaveable { mutableIntStateOf(settings.weeklyGoal.coerceIn(DAY_OPTIONS.first(), DAY_OPTIONS.last())) }
     var kit by rememberSaveable { mutableStateOf(defaultKit(settings.activeGym.equipment)) }
     var minutes by rememberSaveable { mutableIntStateOf(60) }
     // Sin entrenos todavía (recién llegado), de partida el nivel principiante
     var level by rememberSaveable {
         mutableStateOf(if (vm.history.value.none { it.isFinished }) com.bestrong.core.training.Level.BEGINNER else com.bestrong.core.training.Level.INTERMEDIATE)
     }
-    // Qué días de la semana (1 = lunes), como texto para guardarlo al girar: «1,3,5»
-    var weekdaysText by rememberSaveable { mutableStateOf(com.bestrong.core.training.ProgramGenerator.defaultWeekdays(days).joinToString(",")) }
-    val weekdays = weekdaysText.split(',').mapNotNull { it.toIntOrNull() }
     val program = remember(goal, days, kit, minutes, level) { vm.buildProgram(days, goal, kit, minutes, level) }
     val lang = com.bestrong.mobile.ui.components.appLanguage()
     BackHandler(onBack = onDismiss)
@@ -127,7 +121,7 @@ fun ProgramBuilderScreen(
         },
         bottomBar = {
             Button(
-                onClick = { vm.addGenerated(program, goal, weekdays); onDismiss() },
+                onClick = { vm.addGenerated(program, goal); onDismiss() },
                 modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 12.dp).height(56.dp),
             ) {
                 Icon(Icons.Default.Check, null)
@@ -148,24 +142,13 @@ fun ProgramBuilderScreen(
             }
             item { SectionHeader(stringResource(R.string.builder_goal), large = true) }
             items(GOALS, key = { it.goal.name }) { g -> GoalCard(g, selected = goal == g.goal) { goal = g.goal } }
-            // Qué días: el número sale de los días elegidos (sin pedirlo dos veces)
+            // Cuántos días a la semana (sin calendario: las rutinas se hacen en orden, la que toca la propone Inicio)
             item {
                 SectionHeader(stringResource(R.string.builder_which_days), large = true) {
                     MetaPill(pluralStringResource(R.plurals.days_count, days, days))
                 }
             }
-            item {
-                Text(stringResource(R.string.builder_weekdays_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            item {
-                WeekdayPicker(weekdays) { d ->
-                    val next = if (d in weekdays) weekdays - d else (weekdays + d).sorted()
-                    if (next.size in 1..7) {
-                        weekdaysText = next.joinToString(",")
-                        days = next.size
-                    }
-                }
-            }
+            item { Segmented(DAY_OPTIONS.map { "$it" }, DAY_OPTIONS.indexOf(days)) { days = DAY_OPTIONS[it] } }
             item { SectionHeader(stringResource(R.string.builder_level), large = true) }
             item {
                 val levels = com.bestrong.core.training.Level.entries
@@ -328,28 +311,5 @@ private fun defaultKit(equipment: Set<com.bestrong.core.model.Equipment>): Kit =
     else -> Kit.BODYWEIGHT
 }
 
-/** Días de la semana (L–D) en píldoras: los elegidos, con el degradado. */
-@Composable
-private fun WeekdayPicker(selected: List<Int>, onToggle: (Int) -> Unit) {
-    val scheme = MaterialTheme.colorScheme
-    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        java.time.DayOfWeek.entries.forEach { d ->
-            val on = d.value in selected
-            Box(
-                Modifier.size(46.dp).clip(CircleShape)
-                    .background(if (on) brandGradient() else SolidColor(scheme.surfaceContainer))
-                    // Casilla (marcado / sin marcar), no «seleccionado»: se pueden elegir varios días
-                    .toggleable(value = on, role = Role.Checkbox) { onToggle(d.value) }
-                    .semantics { contentDescription = d.getDisplayName(java.time.format.TextStyle.FULL, locale) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    d.getDisplayName(java.time.format.TextStyle.NARROW, locale),
-                    fontWeight = FontWeight.Bold,
-                    color = if (on) scheme.onPrimary else scheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
+/** Días por semana que se pueden elegir para el programa a medida. */
+private val DAY_OPTIONS = (2..6).toList()

@@ -40,10 +40,8 @@ class ReminderWorker(context: Context, params: WorkerParameters) : CoroutineWork
         val history = repo.historyOnce()
         val trainedToday = history.any { Instant.ofEpochMilli(it.startedAtEpochMs).atZone(zone).toLocalDate() == today }
         if (trainedToday || repo.activeOnce() != null) return
-        // La planificada para hoy (como Inicio y el widget); si no, la que más tiempo lleva sin hacerse (sin archivadas)
-        val monday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-        val planned = deps.planning().state.value.planFor(monday).routineFor(today.dayOfWeek)
-        val next = com.bestrong.core.training.QuickRoutines.pick(repo.routinesOnce(), history, planned, today.atStartOfDay(zone).toInstant().toEpochMilli(), count = 1).firstOrNull()
+        // La que más tiempo lleva sin hacerse (sin archivadas), como el widget
+        val next = com.bestrong.core.training.QuickRoutines.pick(repo.routinesOnce(), history, count = 1).firstOrNull()
         Notifier.reminder(applicationContext, next?.name, next?.id)
     }
 

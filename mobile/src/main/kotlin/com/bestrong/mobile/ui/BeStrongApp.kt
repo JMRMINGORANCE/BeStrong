@@ -268,8 +268,6 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             onOpenWorkout = { nav.navigate(Routes.WORKOUT) { launchSingleTop = true } },
                             // Un doble toque no abre dos editores (el de debajo pisaría lo guardado en el de arriba)
                             onEditRoutine = { if (entry?.destination?.route == TopLevel.TRAIN.route) nav.navigate(Routes.routine(it)) { launchSingleTop = true } },
-                            onOpenMuscle = { muscle -> nav.openMuscle(muscle.name) },
-                            onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
                             onOpenSearch = { nav.navigate(Routes.SEARCH) { launchSingleTop = true } },
                         )
                     }

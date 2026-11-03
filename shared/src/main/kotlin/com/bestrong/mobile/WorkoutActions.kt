@@ -7,9 +7,7 @@ import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Progression
-import com.bestrong.core.training.ProgressionCap
 import com.bestrong.mobile.data.BeStrongRepository
-import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.health.HealthConnectExporter
 import com.bestrong.mobile.workout.RestTimerController
@@ -30,7 +28,6 @@ class WorkoutActions @Inject constructor(
     private val settings: SettingsStore,
     private val healthConnect: HealthConnectExporter,
     private val restTimer: RestTimerController,
-    private val planning: PlanningStore,
     private val energy: com.bestrong.mobile.health.EnergyCalculator,
 ) {
     /**
@@ -153,7 +150,7 @@ class WorkoutActions @Inject constructor(
 
     /**
      * «La próxima vez» del resumen al terminar: con la sobrecarga progresiva activada, lo mismo que se rellenará al
-     * empezar (rango de reps, sesiones fallidas, mancuernas del gimnasio, tope semanal); si no, la regla sencilla.
+     * empezar (rango de reps, sesiones fallidas, mancuernas del gimnasio); si no, la regla sencilla.
      */
     fun nextTimeAfter(finished: Workout, history: List<Workout>): List<com.bestrong.core.training.NextTimeSuggestion> {
         val s = settings.settings.value
@@ -188,8 +185,7 @@ class WorkoutActions @Inject constructor(
     }
 
     /**
-     * Ajusta unas series propuestas a lo que se puede montar en el gimnasio activo: tope de subida semanal
-     * (Planificación), barra/discos/mancuernas (con la barra del ejercicio) y, si tocaba subir y el redondeo
+     * Ajusta unas series propuestas a lo que se puede montar en el gimnasio activo: barra/discos/mancuernas (con la barra del ejercicio) y, si tocaba subir y el redondeo
      * deja el mismo peso, el siguiente que se pueda montar (si no, la subida se perdería). La asistencia
      * (peso negativo) se deja tal cual. Lo usan el relleno al empezar y la sugerencia del entreno.
      */
@@ -201,31 +197,19 @@ class WorkoutActions @Inject constructor(
         history: List<Workout> = repository.history.value,
     ): List<WorkoutSet> {
         val s = settings.settings.value
-        val cap = planning.state.value.weeklyCap
-        val lastWeekBest = cap?.let { ProgressionCap.lastWeekBest(ex.id, history, System.currentTimeMillis()) }
-        fun capped(kg: Double) = if (cap == null) kg else ProgressionCap.limitIn(s.unit, kg, lastWeekBest, cap, s.stepKgFor(ex.id))
         // En libras se redondea con los discos de libras (como la calculadora de discos)
         val gym = s.gymFor(ex.id)
         val raise = kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
         val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
         return sets.mapIndexed { i, set ->
             val prev = before.getOrNull(i)?.weightKg
-            // El tope frena la subida, nunca deja por debajo de lo que ya se hizo (70 kg el lunes no pasa a 62,5 el jueves)
-            val target = capped(set.weightKg).coerceAtLeast(minOf(set.weightKg, prev ?: 0.0))
+            val target = set.weightKg
             val rounded = if (target > 0) gym.nearestLoad(target, ex.equipment, s.unit) else target
-            // Subida perdida al redondear: el siguiente peso montable, si el tope semanal lo permite
+            // Subida perdida al redondear: el siguiente peso montable
             val lost = prev != null && prev > 0 && rounded <= prev + 1e-6
             val above = if (raise && lost) gym.loadAbove(prev!!, ex.equipment, s.unit) else null
-            set.copy(weightKg = above?.takeIf { it <= capped(it) + 1e-6 } ?: rounded)
+            set.copy(weightKg = above ?: rounded)
         }
-    }
-
-    /** Si el tope semanal de Planificación recorta alguna de estas series (para decirlo junto a la sugerencia). */
-    fun cappedByWeek(ex: com.bestrong.core.model.Exercise, sets: List<WorkoutSet>, history: List<Workout> = repository.history.value): Boolean {
-        val cap = planning.state.value.weeklyCap ?: return false
-        val lastWeekBest = ProgressionCap.lastWeekBest(ex.id, history, System.currentTimeMillis())
-        val step = settings.settings.value.stepKgFor(ex.id)
-        return sets.any { it.weightKg > ProgressionCap.limit(it.weightKg, lastWeekBest, cap, step) + 1e-6 }
     }
 
     /**

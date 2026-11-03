@@ -4,9 +4,6 @@
     <string name="rd_home_streak">Ratxa</string>
     <string name="rd_home_vs_last_week">%1$d %% vs la setmana passada</string>
     <string name="rd_home_week_volume">Volum setmanal</string>
-    <string name="rd_home_muscles_title">Músculs aquesta setmana</string>
-    <string name="rd_home_muscles_target">sèries · mínim %1$d</string>
-    <string name="rd_home_muscle_open">Veure exercicis d\'aquest múscul</string>
     <string name="rd_home_start_watch">Començar al rellotge</string>
     <plurals name="rd_home_streak_weeks">
         <item quantity="one">%1$d setmana seguida</item>
