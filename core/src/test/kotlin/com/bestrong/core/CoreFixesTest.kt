@@ -11,11 +11,6 @@ import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
 import com.bestrong.core.model.withEdited
 import com.bestrong.core.stats.Strength
-import com.bestrong.core.training.Goal
-import com.bestrong.core.training.Injuries
-import com.bestrong.core.training.InjuryZone
-import com.bestrong.core.training.Peaking
-import com.bestrong.core.training.ProgramGenerator
 import com.bestrong.core.training.Progression
 import com.bestrong.core.training.SuggestionKind
 import java.time.LocalDate
@@ -29,22 +24,6 @@ import org.junit.Test
 class CoreFixesTest {
     private val bench = ExerciseLibrary.byId("bench_press")!!
 
-    @Test fun generatedDaysNeverNearlyEmptyWithInjuries() {
-        val zones = listOf(setOf(InjuryZone.SHOULDER), setOf(InjuryZone.KNEE), InjuryZone.entries.toSet())
-        val equipment = listOf(Equipment.entries.toSet(), setOf(Equipment.BODYWEIGHT))
-        for (z in zones) {
-            for (eq in equipment) {
-                for (g in Goal.entries) {
-                    for (d in 2..6) {
-                        ProgramGenerator.build(d, g, eq, 60, allowed = { Injuries.isSafe(it, z) }).routines.forEach { r ->
-                            assertTrue("$z $g $d días ${r.name}: ${r.exercises.size}", r.exercises.size >= 2)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     @Test fun dropSetDoesNotBlockWeightIncrease() {
         val sets = listOf(
             WorkoutSet(weightKg = 100.0, reps = 8, completed = true, rpe = 8.0),
@@ -53,11 +32,6 @@ class CoreFixesTest {
         )
         val w = Workout(name = "a", startedAtEpochMs = 1000, finishedAtEpochMs = 2000, exercises = listOf(WorkoutExercise(exercise = bench, sets = sets)))
         assertEquals(SuggestionKind.INCREASE_WEIGHT, Progression.suggest(bench, listOf(w))?.kind)
-    }
-
-    @Test fun peakingCountsPartialWeek() {
-        assertEquals(2, Peaking.plan(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 14)).size)
-        assertEquals(12, Peaking.plan(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 1).plusDays(84)).size)
     }
 
     @Test fun monthComparesWithPreviousCalendarMonth() {
@@ -105,17 +79,6 @@ class CoreFixesTest {
     @Test fun strayQuoteInsideFieldIsLiteral() {
         assertEquals(listOf(listOf("a", "5\" bar", "c"), listOf("d", "e", "f")), Csv.parse("a,5\" bar,c\nd,e,f\n"))
         assertEquals(listOf(listOf("x", "a,b")), Csv.parse("x,\"a,b\"\n"))
-    }
-
-    @Test fun guidedStepsTranslatedToEveryAppLanguage() {
-        val steps = com.bestrong.core.training.BodyFocus.entries.flatMap {
-            com.bestrong.core.training.GuidedRoutines.warmup(it) + com.bestrong.core.training.GuidedRoutines.stretching(it)
-        }
-        for (lang in listOf("ca", "gl", "pt", "fr", "de")) {
-            steps.forEach { st -> assertTrue("${st.nameEs} sin traducir a $lang", st.name(lang) != st.nameEn || st.nameEn == st.nameEs || st.nameEs == "Cobra") }
-        }
-        assertEquals("Armkreisen", com.bestrong.core.training.GuidedStep("Círculos de brazos", "Arm circles", 30).name("de"))
-        assertEquals("Arm circles", com.bestrong.core.training.GuidedStep("Círculos de brazos", "Arm circles", 30).name("en"))
     }
 
     @Test fun programTextsTranslatedToEveryAppLanguage() {

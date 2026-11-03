@@ -16,7 +16,6 @@
     <string name="tl_show_less">Weniger anzeigen</string>
     <string name="tl_open_day">Sätze dieses Tages anzeigen</string>
     <string name="tl_pinned">Fixierte Notiz: %1$s</string>
-    <string name="tl_injury">Belastet eine als verletzt markierte Zone: %1$s</string>
     <string name="pt_title">Bewegungsbalance</string>
     <string name="pt_body">Arbeitssätze pro Bewegungsmuster in den letzten 4 Wochen.</string>
     <string name="pt_empty">Trainiere ein paar Wochen, um deine Balance zu sehen.</string>
@@ -41,5 +40,4 @@
     <string name="mu_tab_30d">30 Tage</string>
     <string name="mu_tab_trend">Trend</string>
     <string name="mu_tab_recovery">Erholung</string>
-    <string name="mu_lagging_tag">hinkt hinterher</string>
 </resources>

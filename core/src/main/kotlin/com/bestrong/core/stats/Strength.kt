@@ -11,21 +11,6 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 
-/** Nivel de fuerza de un levantamiento (1RM relativo al peso corporal). */
-enum class StrengthLevel { BEGINNER, NOVICE, INTERMEDIATE, ADVANCED, ELITE }
-
-data class StrengthStanding(
-    val exerciseId: String,
-    val oneRepMaxKg: Double,
-    val ratio: Double,
-    /** null si aún no llega a principiante. */
-    val level: StrengthLevel?,
-    /** 1RM necesario para el siguiente nivel (null en élite). */
-    val nextLevelKg: Double?,
-    /** Progreso hacia el siguiente nivel (0..1). */
-    val progress: Double,
-)
-
 data class Balance(val push: Double, val pull: Double, val upper: Double, val lower: Double) {
     /** Empuje/tirón: > 1,5 o < 0,67 se considera descompensado. */
     val pushPullRatio: Double get() = if (pull <= 0) (if (push > 0) Double.POSITIVE_INFINITY else 1.0) else push / pull
@@ -65,46 +50,14 @@ data class YearSummary(
     val biggestGains: List<Triple<com.bestrong.core.model.Exercise, Double, Double>>,
 )
 
-/** Estadísticas avanzadas (fase 3): niveles, equilibrio, logros, resúmenes y curvas. */
+/** Estadísticas avanzadas (fase 3): equilibrio, logros, resúmenes y curvas. */
 object Strength {
-    // Umbrales de 1RM / peso corporal para principiante, novato, intermedio, avanzado y élite
-    private val MALE = mapOf(
-        "squat" to listOf(0.75, 1.25, 1.5, 2.25, 2.75),
-        "bench_press" to listOf(0.5, 0.75, 1.25, 1.75, 2.0),
-        "deadlift" to listOf(1.0, 1.5, 2.0, 2.5, 3.0),
-        "overhead_press" to listOf(0.4, 0.55, 0.8, 1.1, 1.4),
-        "barbell_row" to listOf(0.5, 0.75, 1.0, 1.5, 1.75),
-    )
-    private val FEMALE = mapOf(
-        "squat" to listOf(0.5, 0.75, 1.25, 1.5, 2.0),
-        "bench_press" to listOf(0.25, 0.5, 0.75, 1.0, 1.5),
-        "deadlift" to listOf(0.5, 1.0, 1.25, 1.75, 2.5),
-        "overhead_press" to listOf(0.2, 0.35, 0.5, 0.75, 1.0),
-        "barbell_row" to listOf(0.25, 0.4, 0.65, 0.9, 1.2),
-    )
-
-    val STANDARD_LIFTS: List<String> get() = MALE.keys.toList()
-
-    fun standing(exerciseId: String, oneRepMaxKg: Double, bodyWeightKg: Double, sex: Sex): StrengthStanding? {
-        val thresholds = (if (sex == Sex.MALE) MALE else FEMALE)[exerciseId] ?: return null
-        if (bodyWeightKg <= 0) return null
-        val ratio = oneRepMaxKg / bodyWeightKg
-        val reached = thresholds.indexOfLast { ratio >= it }
-        val level = if (reached < 0) null else StrengthLevel.entries[reached]
-        val next = thresholds.getOrNull(reached + 1)
-        val prev = thresholds.getOrNull(reached) ?: 0.0
-        val progress = if (next == null) 1.0 else ((ratio - prev) / (next - prev)).coerceIn(0.0, 1.0)
-        return StrengthStanding(exerciseId, oneRepMaxKg, ratio, level, next?.let { it * bodyWeightKg }, progress)
-    }
+    /** Los cinco básicos con barra (el reto de Perfil sale del que más entrenas). */
+    val STANDARD_LIFTS: List<String> = listOf("squat", "bench_press", "deadlift", "overhead_press", "barbell_row")
 
     /** Mejor 1RM estimado por ejercicio en todo el historial. */
     fun bestOneRepMax(history: List<Workout>): Map<String, Double> =
         WorkoutStats.personalRecords(history).mapValues { (_, r) -> r[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0 }
-
-    fun standings(history: List<Workout>, bodyWeightKg: Double, sex: Sex): List<StrengthStanding> {
-        val best = bestOneRepMax(history)
-        return STANDARD_LIFTS.mapNotNull { id -> best[id]?.takeIf { it > 0 }?.let { standing(id, it, bodyWeightKg, sex) } }
-    }
 
     private val PUSH = setOf(MuscleGroup.CHEST, MuscleGroup.SHOULDERS, MuscleGroup.TRICEPS)
     private val PULL = setOf(MuscleGroup.BACK, MuscleGroup.BICEPS, MuscleGroup.TRAPS, MuscleGroup.FOREARMS)
@@ -128,21 +81,6 @@ object Strength {
             }
         }
         return Balance(push, pull, push + pull, lower)
-    }
-
-    /**
-     * Volumen efectivo: solo cuentan las series cercanas al fallo.
-     * RPE ≥ 7 (o sin anotar) = 1; RPE 6–7 = 0,5; RPE < 6 = 0. Los calentamientos no cuentan.
-     */
-    fun effectiveSets(workout: Workout): Double = workout.exercises.sumOf { we ->
-        we.completedSets.filter { it.type != SetType.WARMUP }.sumOf { s ->
-            val rpe = s.rpe
-            when {
-                rpe == null || rpe >= 7.0 -> 1.0
-                rpe >= 6.0 -> 0.5
-                else -> 0.0
-            }
-        }
     }
 
     /** Línea de tiempo de récords: cada vez que se mejoró una marca (del más antiguo al más reciente). */

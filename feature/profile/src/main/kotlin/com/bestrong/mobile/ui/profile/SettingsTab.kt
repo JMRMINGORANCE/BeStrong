@@ -27,34 +27,27 @@ import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MonitorWeight
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RecordVoiceOver
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.ScreenLockPortrait
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SkipNext
-import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.TableRows
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -63,7 +56,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -89,15 +81,18 @@ import com.bestrong.mobile.ui.components.SettingsTint
 import com.bestrong.mobile.ui.help.HelpDialog
 import com.bestrong.mobile.ui.help.TutorialDialog
 
-/** Las pantallas en que se dividen los Ajustes. */
-private enum class SettingsPageId { BODY, TRAINING, DURING, UNITS, APPEARANCE, NOTIFICATIONS, PERMISSIONS, HEALTH, PRIVACY, DATA }
+/**
+ * Las pantallas en que se dividen los Ajustes: cuatro apartados (entreno, apariencia, datos y conexiones) y uno
+ * aparte con lo que casi nadie toca. El nombre es el que usa la búsqueda universal para abrir cada una.
+ */
+private enum class SettingsPageId { TRAINING, APPEARANCE, DATA, CONNECTIONS, ADVANCED }
 
 /**
- * Pestaña Ajustes de Perfil: un menú corto por apartados (como los ajustes del sistema) y cada apartado en su propia
- * pantalla. Lo que antes era una lista larguísima ahora se encuentra de un vistazo.
+ * Pestaña Ajustes de Perfil: un menú corto (como los ajustes del sistema) y cada apartado en su propia pantalla.
+ * Lo raro va en «Avanzado» para que lo habitual se encuentre de un vistazo.
  */
 @Composable
-fun SettingsTab(vm: ProfileViewModel, onOpenCommunity: () -> Unit, modifier: Modifier = Modifier, openPage: String? = null, onPageOpened: () -> Unit = {}) {
+fun SettingsTab(vm: ProfileViewModel, modifier: Modifier = Modifier, openPage: String? = null, onPageOpened: () -> Unit = {}) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     var page by rememberSaveable { mutableStateOf<SettingsPageId?>(null) }
     // Desde la búsqueda universal: directo a esa página
@@ -126,40 +121,27 @@ fun SettingsTab(vm: ProfileViewModel, onOpenCommunity: () -> Unit, modifier: Mod
     }
 
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(22.dp)) {
-        CommunityBanner(onClick = onOpenCommunity)
-        SettingsGroup(stringResource(R.string.settings_group_training)) {
-            SettingsNavRow(stringResource(R.string.s_body_title), Icons.Default.Person, SettingsTint.Orange, { page = SettingsPageId.BODY }, bodySummary(settings))
-            SettingsDivider()
+        SettingsGroup(null) {
             SettingsNavRow(stringResource(R.string.s_training_title), Icons.Default.FitnessCenter, SettingsTint.Blue, { page = SettingsPageId.TRAINING }, stringResource(R.string.s_training_summary))
             SettingsDivider()
-            SettingsNavRow(stringResource(R.string.settings_during), Icons.Default.Timer, SettingsTint.Green, { page = SettingsPageId.DURING }, stringResource(R.string.s_during_summary))
-            SettingsDivider()
-            SettingsNavRow(stringResource(R.string.s_units_title), Icons.Default.Straighten, SettingsTint.Teal, { page = SettingsPageId.UNITS }, stringResource(R.string.s_units_summary, settings.unit.label))
-        }
-        SettingsGroup(stringResource(R.string.settings_group_app)) {
             SettingsNavRow(stringResource(R.string.appearance), Icons.Default.Palette, SettingsTint.Purple, { page = SettingsPageId.APPEARANCE }, stringResource(R.string.s_appearance_summary))
             SettingsDivider()
-            SettingsNavRow(stringResource(R.string.s_notif_title), Icons.Default.NotificationsActive, SettingsTint.Amber, { page = SettingsPageId.NOTIFICATIONS }, reminderSummary(settings))
+            SettingsNavRow(stringResource(R.string.s_data_title), Icons.Default.Backup, SettingsTint.Teal, { page = SettingsPageId.DATA }, stringResource(R.string.s_data_summary))
             SettingsDivider()
             SettingsNavRow(
                 stringResource(R.string.perm_title),
                 Icons.Default.Shield,
                 SettingsTint.Red,
-                { page = SettingsPageId.PERMISSIONS },
+                { page = SettingsPageId.CONNECTIONS },
                 summary = if (permissions.ready == permissions.total) stringResource(R.string.perm_all_ready) else stringResource(R.string.perm_ready, permissions.ready, permissions.total),
                 badge = permissions.essentialMissing.takeIf { it > 0 }?.toString(),
             )
-            SettingsDivider()
-            SettingsNavRow(stringResource(R.string.s_health_title), Icons.Default.HealthAndSafety, SettingsTint.Pink, { page = SettingsPageId.HEALTH }, stringResource(R.string.s_health_summary))
-            SettingsDivider()
-            SettingsNavRow(stringResource(R.string.s_privacy_title), Icons.Default.Lock, SettingsTint.Slate, { page = SettingsPageId.PRIVACY }, stringResource(R.string.s_privacy_summary))
-            SettingsDivider()
-            SettingsNavRow(stringResource(R.string.s_data_title), Icons.Default.Backup, SettingsTint.Blue, { page = SettingsPageId.DATA }, stringResource(R.string.s_data_summary))
+        }
+        SettingsGroup(null) {
+            SettingsNavRow(stringResource(R.string.s_advanced_title), Icons.Default.Tune, SettingsTint.Slate, { page = SettingsPageId.ADVANCED }, stringResource(R.string.s_advanced_summary))
         }
         SettingsGroup(stringResource(R.string.settings_help)) {
             SettingsNavRow(stringResource(R.string.help), Icons.AutoMirrored.Filled.HelpOutline, SettingsTint.Teal, { showHelp = true }, stringResource(R.string.help_body))
-            SettingsDivider()
-            SettingsNavRow(stringResource(R.string.community_tab), Icons.Default.Groups, SettingsTint.Orange, onOpenCommunity, stringResource(R.string.community_banner_title))
             SettingsDivider()
             SettingsNavRow(stringResource(R.string.about_title), Icons.Default.Info, SettingsTint.Slate, { showAbout = true }, stringResource(R.string.about_subtitle))
         }
@@ -171,58 +153,16 @@ fun SettingsTab(vm: ProfileViewModel, onOpenCommunity: () -> Unit, modifier: Mod
 /** La pantalla abierta de Ajustes. */
 @Composable
 private fun SettingsPageHost(page: SettingsPageId, vm: ProfileViewModel, permissions: PermissionsState, close: () -> Unit) {
-    val settings by vm.settings.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     when (page) {
-        SettingsPageId.BODY -> SettingsPage(stringResource(R.string.s_body_title), close, stringResource(R.string.body_data_body)) {
-            item { BodyDataCard(settings, vm::updateSettings) }
-        }
         SettingsPageId.TRAINING -> TrainingPage(vm, close)
-        SettingsPageId.DURING -> DuringPage(vm, close)
-        SettingsPageId.UNITS -> UnitsPage(vm, close)
         SettingsPageId.APPEARANCE -> AppearancePage(vm, close)
-        SettingsPageId.NOTIFICATIONS -> NotificationsPage(vm, permissions, close)
-        SettingsPageId.PERMISSIONS -> PermissionsPage(permissions, close)
-        SettingsPageId.HEALTH -> HealthPage(vm, permissions, close)
-        SettingsPageId.PRIVACY -> SettingsPage(stringResource(R.string.s_privacy_title), close) {
-            item {
-                SettingsGroup(null) {
-                    val unlockTitle = stringResource(R.string.progress_unlock_title)
-                    SettingsSwitchRow(
-                        stringResource(R.string.progress_lock_setting),
-                        settings.lockProgressPhotos,
-                        { v ->
-                            // Quitar el bloqueo pide la huella/PIN: si no, cualquiera con el móvil desbloqueado lo desactivaría
-                            if (v) {
-                                vm.updateSettings { it.copy(lockProgressPhotos = true) }
-                            } else {
-                                BiometricLock.authenticate(context, unlockTitle, onSuccess = { vm.updateSettings { it.copy(lockProgressPhotos = false) } })
-                            }
-                        },
-                        summary = stringResource(R.string.perm_lock_d),
-                        icon = Icons.Default.Lock,
-                        tint = SettingsTint.Slate,
-                    )
-                    SettingsDivider()
-                    SettingsNavRow(stringResource(R.string.privacy), Icons.Default.Policy, SettingsTint.Teal, { context.startActivity(AppIntents.privacy(context)) }, stringResource(R.string.privacy_body))
-                }
-            }
-        }
-        SettingsPageId.DATA -> DataPage(vm, close)
+        SettingsPageId.DATA -> DataPage(vm, permissions, close)
+        SettingsPageId.CONNECTIONS -> ConnectionsPage(vm, permissions, close)
+        SettingsPageId.ADVANCED -> AdvancedPage(vm, close)
     }
 }
 
-@Composable
-private fun bodySummary(s: com.bestrong.mobile.data.UserSettings): String {
-    val parts = listOfNotNull(
-        stringResource(if (s.sex == com.bestrong.core.stats.Sex.FEMALE) R.string.sex_female else R.string.sex_male),
-        s.birthYear?.toString(),
-        s.heightCm?.let { "$it cm" },
-    )
-    return if (s.birthYear == null && s.heightCm == null) stringResource(R.string.s_body_summary_empty) else parts.joinToString(" · ")
-}
-
-/** Progresión, calentamiento, gimnasios y compañero de entreno. */
+/** Tu cuerpo, progresión, unidad de peso, gimnasios y lo que pasa durante el entreno. */
 @Composable
 private fun TrainingPage(vm: ProfileViewModel, onBack: () -> Unit) {
     val settings by vm.settings.collectAsStateWithLifecycle()
@@ -241,6 +181,8 @@ private fun TrainingPage(vm: ProfileViewModel, onBack: () -> Unit) {
         )
     }
     SettingsPage(stringResource(R.string.s_training_title), onBack) {
+        // Ya lleva su título y su explicación
+        item { BodyDataCard(settings, vm::updateSettings) }
         item {
             SettingsGroup(stringResource(R.string.sg_progress)) {
                 SettingsSwitchRow(
@@ -253,167 +195,12 @@ private fun TrainingPage(vm: ProfileViewModel, onBack: () -> Unit) {
                 )
                 SettingsDivider()
                 SettingsChoice(
-                    stringResource(R.string.warmup_rest_setting),
-                    listOf(30, 45, 60, 90, 120).map { it to com.bestrong.core.util.formatDuration(it.toLong()) },
-                    settings.warmupRestSeconds,
-                    { v -> vm.updateSettings { it.copy(warmupRestSeconds = v) } },
-                    icon = Icons.Default.Timer,
-                    tint = SettingsTint.Amber,
-                )
-            }
-        }
-        item {
-            SettingsGroup(null) {
-                GymProfilesSection(
-                    settings = settings,
-                    onSelect = { id -> vm.updateSettings { s -> s.copy(gyms = s.gyms, activeGymId = id) } },
-                    onEdit = { editingGym = it },
-                    onAdd = { editingGym = GymProfile(name = "") },
-                )
-            }
-        }
-        item {
-            SettingsGroup(stringResource(R.string.partner_name)) {
-                var partner by remember(settings.partnerName) { mutableStateOf(settings.partnerName) }
-                // También al salir de la pantalla o al pasar la app a segundo plano (sin perder el foco)
-                DisposableEffect(Unit) { onDispose { vm.commitPartnerName() } }
-                androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_STOP) { vm.commitPartnerName() }
-                SettingsRow(stringResource(R.string.partner_name), icon = Icons.Default.Group, tint = SettingsTint.Blue, summary = stringResource(R.string.partner_name_body))
-                // El nombre se guarda con cada letra; su historial se renombra al terminar (Hecho o al salir del campo)
-                OutlinedTextField(
-                    partner,
-                    { partner = it.take(20); vm.setPartnerName(partner) },
-                    placeholder = { Text(stringResource(R.string.partner_name_body)) },
-                    singleLine = true,
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
-                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { vm.commitPartnerName() }),
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp).onFocusChanged { if (!it.isFocused) vm.commitPartnerName() },
-                )
-            }
-        }
-    }
-}
-
-/** Descanso, vibración, pantalla, botones y música durante el entreno. */
-@Composable
-private fun DuringPage(vm: ProfileViewModel, onBack: () -> Unit) {
-    val settings by vm.settings.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    fun update(block: (com.bestrong.mobile.data.UserSettings) -> com.bestrong.mobile.data.UserSettings) = vm.updateSettings(block)
-    SettingsPage(stringResource(R.string.settings_during), onBack) {
-        item {
-            SettingsGroup(stringResource(R.string.sg_rest)) {
-                SettingsSwitchRow(stringResource(R.string.rest_countdown), settings.restCountdown, { v -> update { it.copy(restCountdown = v) } }, icon = Icons.Default.Timer, tint = SettingsTint.Green)
-                SettingsDivider()
-                SettingsSwitchRow(stringResource(R.string.vibrate_rest), settings.vibrateOnRestEnd, { v -> update { it.copy(vibrateOnRestEnd = v) } }, icon = Icons.Default.Vibration, tint = SettingsTint.Purple)
-                SettingsDivider()
-                SettingsSwitchRow(
-                    stringResource(R.string.next_exercise_setting),
-                    settings.nextExerciseCard,
-                    { v -> update { it.copy(nextExerciseCard = v) } },
-                    summary = stringResource(R.string.next_exercise_setting_body),
-                    icon = Icons.Default.SkipNext,
-                    tint = SettingsTint.Orange,
-                )
-                SettingsDivider()
-                SettingsChoice(
-                    stringResource(R.string.rest_vibration),
-                    VibrationStyle.entries.map { it to stringResource(it.labelRes()) },
-                    settings.restVibration,
-                    { v ->
-                        update { it.copy(restVibration = v) }
-                        vibratePattern(context, v.pattern)
-                    },
-                    summary = stringResource(R.string.rest_vibration_body),
-                    extra = { TextButton(onClick = { vibratePattern(context, settings.restVibration.pattern) }) { Text(stringResource(R.string.vib_test)) } },
-                )
-            }
-        }
-        item {
-            SettingsGroup(stringResource(R.string.sg_screen)) {
-                SettingsSwitchRow(stringResource(R.string.keep_screen_on), settings.keepScreenOn, { v -> update { it.copy(keepScreenOn = v) } }, icon = Icons.Default.ScreenLockPortrait, tint = SettingsTint.Amber)
-                SettingsDivider()
-                SettingsSwitchRow(
-                    stringResource(R.string.one_handed),
-                    settings.focusByDefault,
-                    { v -> update { it.copy(focusByDefault = v) } },
-                    summary = stringResource(R.string.one_handed_body),
-                    icon = Icons.Default.CenterFocusStrong,
-                    tint = SettingsTint.Orange,
-                )
-                SettingsDivider()
-                SettingsSwitchRow(
-                    stringResource(R.string.volume_keys),
-                    settings.volumeKeys,
-                    { v -> update { it.copy(volumeKeys = v) } },
-                    summary = stringResource(R.string.volume_keys_body),
-                    icon = Icons.AutoMirrored.Filled.VolumeUp,
-                    tint = SettingsTint.Blue,
-                )
-            }
-        }
-        item {
-            SettingsGroup(stringResource(R.string.sg_media)) {
-                SettingsSwitchRow(
-                    stringResource(R.string.media_controls),
-                    settings.mediaControls,
-                    { v -> update { it.copy(mediaControls = v) } },
-                    summary = stringResource(R.string.media_controls_body),
-                    icon = Icons.Default.MusicNote,
-                    tint = SettingsTint.Pink,
-                )
-                if (settings.mediaControls) MusicAppChoice(settings.musicApp) { pkg -> update { it.copy(musicApp = pkg) } }
-                SettingsDivider()
-                SettingsSwitchRow(
-                    stringResource(R.string.voice_announcements),
-                    settings.voiceAnnouncements,
-                    { v -> update { it.copy(voiceAnnouncements = v) } },
-                    summary = stringResource(R.string.voice_announcements_body),
-                    icon = Icons.Default.RecordVoiceOver,
-                    tint = SettingsTint.Teal,
-                )
-            }
-        }
-    }
-}
-
-/** Qué app de música abre el botón del entreno (solo las instaladas). */
-@Composable
-private fun MusicAppChoice(selected: String?, onSelect: (String?) -> Unit) {
-    val context = LocalContext.current
-    val apps = remember { com.bestrong.mobile.share.MusicApps.installed(context) }
-    if (apps.isEmpty()) return
-    SettingsChoice(
-        stringResource(R.string.music_app),
-        listOf<Pair<String?, String>>(null to stringResource(R.string.music_app_auto)) + apps.map { it.packageName to it.label },
-        selected,
-        onSelect,
-    )
-}
-
-/** Unidades de peso, mancuernas y columnas de la tabla de series. */
-@Composable
-private fun UnitsPage(vm: ProfileViewModel, onBack: () -> Unit) {
-    val settings by vm.settings.collectAsStateWithLifecycle()
-    SettingsPage(stringResource(R.string.s_units_title), onBack) {
-        item {
-            SettingsGroup(stringResource(R.string.sg_weights)) {
-                SettingsChoice(
                     stringResource(R.string.weight_unit),
                     WeightUnit.entries.map { it to it.label },
                     settings.unit,
                     { u -> vm.updateSettings { it.copy(unit = u) } },
                     icon = Icons.Default.FitnessCenter,
                     tint = SettingsTint.Orange,
-                )
-                SettingsDivider()
-                SettingsChoice(
-                    stringResource(R.string.body_unit),
-                    listOf<Pair<WeightUnit?, String>>(null to stringResource(R.string.body_unit_same)) + WeightUnit.entries.map { it to it.label },
-                    settings.bodyUnit,
-                    { u -> vm.updateSettings { it.copy(bodyUnit = u) } },
-                    icon = Icons.Default.MonitorWeight,
-                    tint = SettingsTint.Teal,
                 )
                 SettingsDivider()
                 SettingsSwitchRow(
@@ -427,11 +214,104 @@ private fun UnitsPage(vm: ProfileViewModel, onBack: () -> Unit) {
             }
         }
         item {
+            SettingsGroup(null) {
+                GymProfilesSection(
+                    settings = settings,
+                    onSelect = { id -> vm.updateSettings { s -> s.copy(gyms = s.gyms, activeGymId = id) } },
+                    onEdit = { editingGym = it },
+                    onAdd = { editingGym = GymProfile(name = "") },
+                )
+            }
+        }
+        item { DuringGroup(settings, vm::updateSettings) }
+    }
+}
+
+/** Descanso, vibración, pantalla y voz durante el entreno (lo de siempre; lo fino, en Avanzado). */
+@Composable
+private fun DuringGroup(settings: com.bestrong.mobile.data.UserSettings, update: ((com.bestrong.mobile.data.UserSettings) -> com.bestrong.mobile.data.UserSettings) -> Unit) {
+    SettingsGroup(stringResource(R.string.settings_during)) {
+        SettingsSwitchRow(stringResource(R.string.rest_countdown), settings.restCountdown, { v -> update { it.copy(restCountdown = v) } }, icon = Icons.Default.Timer, tint = SettingsTint.Green)
+        SettingsDivider()
+        SettingsSwitchRow(stringResource(R.string.vibrate_rest), settings.vibrateOnRestEnd, { v -> update { it.copy(vibrateOnRestEnd = v) } }, icon = Icons.Default.Vibration, tint = SettingsTint.Purple)
+        SettingsDivider()
+        SettingsSwitchRow(
+            stringResource(R.string.next_exercise_setting),
+            settings.nextExerciseCard,
+            { v -> update { it.copy(nextExerciseCard = v) } },
+            summary = stringResource(R.string.next_exercise_setting_body),
+            icon = Icons.Default.SkipNext,
+            tint = SettingsTint.Orange,
+        )
+        SettingsDivider()
+        SettingsSwitchRow(stringResource(R.string.keep_screen_on), settings.keepScreenOn, { v -> update { it.copy(keepScreenOn = v) } }, icon = Icons.Default.ScreenLockPortrait, tint = SettingsTint.Amber)
+        SettingsDivider()
+        SettingsSwitchRow(
+            stringResource(R.string.one_handed),
+            settings.focusByDefault,
+            { v -> update { it.copy(focusByDefault = v) } },
+            summary = stringResource(R.string.one_handed_body),
+            icon = Icons.Default.CenterFocusStrong,
+            tint = SettingsTint.Orange,
+        )
+        SettingsDivider()
+        SettingsSwitchRow(
+            stringResource(R.string.voice_announcements),
+            settings.voiceAnnouncements,
+            { v -> update { it.copy(voiceAnnouncements = v) } },
+            summary = stringResource(R.string.voice_announcements_body),
+            icon = Icons.Default.RecordVoiceOver,
+            tint = SettingsTint.Teal,
+        )
+    }
+}
+
+/** Lo que casi nadie toca: calentamiento, patrón de vibración, botones de volumen, tabla de series, unidad del cuerpo y más datos. */
+@Composable
+private fun AdvancedPage(vm: ProfileViewModel, onBack: () -> Unit) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    fun update(block: (com.bestrong.mobile.data.UserSettings) -> com.bestrong.mobile.data.UserSettings) = vm.updateSettings(block)
+    SettingsPage(stringResource(R.string.s_advanced_title), onBack, stringResource(R.string.s_advanced_summary)) {
+        item {
+            SettingsGroup(stringResource(R.string.settings_during)) {
+                SettingsChoice(
+                    stringResource(R.string.warmup_rest_setting),
+                    listOf(30, 45, 60, 90, 120).map { it to com.bestrong.core.util.formatDuration(it.toLong()) },
+                    settings.warmupRestSeconds,
+                    { v -> update { it.copy(warmupRestSeconds = v) } },
+                    icon = Icons.Default.Timer,
+                    tint = SettingsTint.Amber,
+                )
+                SettingsDivider()
+                SettingsChoice(
+                    stringResource(R.string.rest_vibration),
+                    VibrationStyle.entries.map { it to stringResource(it.labelRes()) },
+                    settings.restVibration,
+                    { v ->
+                        update { it.copy(restVibration = v) }
+                        vibratePattern(context, v.pattern)
+                    },
+                    summary = stringResource(R.string.rest_vibration_body),
+                    extra = { TextButton(onClick = { vibratePattern(context, settings.restVibration.pattern) }) { Text(stringResource(R.string.vib_test)) } },
+                )
+                SettingsDivider()
+                SettingsSwitchRow(
+                    stringResource(R.string.volume_keys),
+                    settings.volumeKeys,
+                    { v -> update { it.copy(volumeKeys = v) } },
+                    summary = stringResource(R.string.volume_keys_body),
+                    icon = Icons.AutoMirrored.Filled.VolumeUp,
+                    tint = SettingsTint.Blue,
+                )
+            }
+        }
+        item {
             SettingsGroup(stringResource(R.string.sg_table)) {
                 SettingsSwitchRow(
                     stringResource(R.string.col_previous_setting),
                     settings.showPreviousColumn,
-                    { v -> vm.updateSettings { it.copy(showPreviousColumn = v) } },
+                    { v -> update { it.copy(showPreviousColumn = v) } },
                     summary = stringResource(R.string.col_previous_body),
                     icon = Icons.Default.TableRows,
                     tint = SettingsTint.Blue,
@@ -440,11 +320,28 @@ private fun UnitsPage(vm: ProfileViewModel, onBack: () -> Unit) {
                 SettingsSwitchRow(
                     stringResource(R.string.col_comparison_setting),
                     settings.showComparison,
-                    { v -> vm.updateSettings { it.copy(showComparison = v) } },
+                    { v -> update { it.copy(showComparison = v) } },
                     summary = stringResource(R.string.col_comparison_body),
                     icon = Icons.AutoMirrored.Filled.TrendingUp,
                     tint = SettingsTint.Green,
                 )
+            }
+        }
+        item {
+            SettingsGroup(stringResource(R.string.sg_weights)) {
+                SettingsChoice(
+                    stringResource(R.string.body_unit),
+                    listOf<Pair<WeightUnit?, String>>(null to stringResource(R.string.body_unit_same)) + WeightUnit.entries.map { it to it.label },
+                    settings.bodyUnit,
+                    { u -> update { it.copy(bodyUnit = u) } },
+                    icon = Icons.Default.MonitorWeight,
+                    tint = SettingsTint.Teal,
+                )
+            }
+        }
+        item {
+            SettingsGroup(stringResource(R.string.sg_more_data)) {
+                Column(Modifier.padding(vertical = 8.dp)) { DataToolsSection(vm) }
             }
         }
     }
@@ -514,102 +411,9 @@ private fun AppearancePage(vm: ProfileViewModel, onBack: () -> Unit) {
     }
 }
 
-/** Permiso de notificaciones y recordatorios de entreno. */
+/** Copias automáticas, restaurar, CSV, Health Connect, reloj y privacidad (Excel, copia cifrada y borrar, en Avanzado). */
 @Composable
-private fun NotificationsPage(vm: ProfileViewModel, permissions: PermissionsState, onBack: () -> Unit) {
-    val settings by vm.settings.collectAsStateWithLifecycle()
-    var showReminders by rememberSaveable { mutableStateOf(false) }
-    if (showReminders) {
-        RemindersDialog(
-            settings = settings,
-            onSave = { days, h, m ->
-                if (days.isNotEmpty() && !permissions.notifications) permissions.requestNotifications()
-                vm.updateSettings { it.copy(reminderDays = days, reminderHour = h, reminderMinute = m) }
-                showReminders = false
-            },
-            onDismiss = { showReminders = false },
-        )
-    }
-    SettingsPage(stringResource(R.string.s_notif_title), onBack) {
-        item {
-            SettingsGroup(null) {
-                PermissionRow(permissions.items.first { it.kind == PermissionKind.NOTIFICATIONS })
-            }
-        }
-        item {
-            SettingsGroup(stringResource(R.string.reminders)) {
-                SettingsNavRow(stringResource(R.string.reminders), Icons.Default.Alarm, SettingsTint.Amber, { showReminders = true }, reminderSummary(settings))
-            }
-        }
-    }
-}
-
-/** Exportación a Health Connect, lectura del peso y sincronización con el reloj. */
-@Composable
-private fun HealthPage(vm: ProfileViewModel, permissions: PermissionsState, onBack: () -> Unit) {
-    val settings by vm.settings.collectAsStateWithLifecycle()
-    val hcGranted by vm.healthConnectGranted.collectAsStateWithLifecycle()
-    val hcComplete by vm.healthConnectComplete.collectAsStateWithLifecycle()
-    SettingsPage(stringResource(R.string.s_health_title), onBack) {
-        item {
-            SettingsGroup(stringResource(R.string.sg_health_connect)) {
-                SettingsSwitchRow(
-                    stringResource(R.string.hc_export),
-                    settings.healthConnectExport && hcGranted,
-                    { on ->
-                        if (on && !hcGranted) {
-                            permissions.requestHealthWrite()
-                        } else {
-                            vm.updateSettings { it.copy(healthConnectExport = on) }
-                        }
-                    },
-                    summary = when {
-                        !vm.healthConnectAvailable -> stringResource(R.string.hc_unavailable)
-                        settings.healthConnectExport && !hcGranted -> stringResource(R.string.hc_missing_perms)
-                        settings.healthConnectExport && !hcComplete -> stringResource(R.string.hc_more_perms)
-                        else -> stringResource(R.string.hc_body)
-                    },
-                    icon = Icons.Default.HealthAndSafety,
-                    tint = SettingsTint.Pink,
-                    enabled = vm.healthConnectAvailable,
-                )
-                if (settings.healthConnectExport && hcGranted && !hcComplete) {
-                    TextButton(onClick = permissions.requestHealthWrite, modifier = Modifier.padding(start = 60.dp)) { Text(stringResource(R.string.hc_grant_more)) }
-                }
-                if (vm.healthConnectAvailable) {
-                    SettingsDivider()
-                    SettingsRow(
-                        stringResource(R.string.hc_import_weight),
-                        summary = stringResource(R.string.readiness_connect),
-                        icon = Icons.Default.FileDownload,
-                        tint = SettingsTint.Teal,
-                        onClick = permissions.requestHealthRead,
-                        // Los pesos de la báscula borrados aquí no vuelven al importar; con esto, sí
-                        trailing = { TextButton(onClick = vm::restoreIgnoredHealthWeights) { Text(stringResource(R.string.hc_restore_hidden)) } },
-                    )
-                }
-            }
-        }
-        item {
-            SettingsGroup(stringResource(R.string.sg_watch), footer = stringResource(R.string.perm_watch_note)) {
-                PermissionRow(permissions.items.first { it.kind == PermissionKind.WATCH })
-                SettingsDivider()
-                SettingsRow(
-                    stringResource(R.string.watch_sync),
-                    summary = stringResource(R.string.watch_sync_body),
-                    icon = Icons.Default.Sync,
-                    tint = SettingsTint.Blue,
-                    onClick = vm::syncWatchNow,
-                    trailing = { TextButton(onClick = vm::syncWatchNow) { Text(stringResource(R.string.action_sync)) } },
-                )
-            }
-        }
-    }
-}
-
-/** Copias automáticas, restaurar, CSV/Excel, copia cifrada y borrar datos. */
-@Composable
-private fun DataPage(vm: ProfileViewModel, onBack: () -> Unit) {
+private fun DataPage(vm: ProfileViewModel, permissions: PermissionsState, onBack: () -> Unit) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri -> uri?.let(vm::exportCsv) }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> uri?.let(vm::importCsv) }
@@ -669,8 +473,115 @@ private fun DataPage(vm: ProfileViewModel, onBack: () -> Unit) {
                     tint = SettingsTint.Purple,
                     onClick = { importLauncher.launch(arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream")) },
                 )
-                SettingsDivider(inset = false)
-                Column(Modifier.padding(vertical = 8.dp)) { DataToolsSection(vm) }
+            }
+        }
+        item { HealthConnectGroup(vm, settings, permissions) }
+        item {
+            SettingsGroup(stringResource(R.string.sg_watch)) {
+                SettingsRow(
+                    stringResource(R.string.watch_sync),
+                    summary = stringResource(R.string.watch_sync_body),
+                    icon = Icons.Default.Sync,
+                    tint = SettingsTint.Blue,
+                    onClick = vm::syncWatchNow,
+                    trailing = { TextButton(onClick = vm::syncWatchNow) { Text(stringResource(R.string.action_sync)) } },
+                )
+            }
+        }
+        item { PrivacyGroup(vm, settings) }
+    }
+}
+
+/** Exportar a Health Connect e importar de allí el peso. */
+@Composable
+private fun HealthConnectGroup(vm: ProfileViewModel, settings: com.bestrong.mobile.data.UserSettings, permissions: PermissionsState) {
+    val hcGranted by vm.healthConnectGranted.collectAsStateWithLifecycle()
+    val hcComplete by vm.healthConnectComplete.collectAsStateWithLifecycle()
+    SettingsGroup(stringResource(R.string.sg_health_connect)) {
+        SettingsSwitchRow(
+            stringResource(R.string.hc_export),
+            settings.healthConnectExport && hcGranted,
+            { on ->
+                if (on && !hcGranted) {
+                    permissions.requestHealthWrite()
+                } else {
+                    vm.updateSettings { it.copy(healthConnectExport = on) }
+                }
+            },
+            summary = when {
+                !vm.healthConnectAvailable -> stringResource(R.string.hc_unavailable)
+                settings.healthConnectExport && !hcGranted -> stringResource(R.string.hc_missing_perms)
+                settings.healthConnectExport && !hcComplete -> stringResource(R.string.hc_more_perms)
+                else -> stringResource(R.string.hc_body)
+            },
+            icon = Icons.Default.HealthAndSafety,
+            tint = SettingsTint.Pink,
+            enabled = vm.healthConnectAvailable,
+        )
+        if (settings.healthConnectExport && hcGranted && !hcComplete) {
+            TextButton(onClick = permissions.requestHealthWrite, modifier = Modifier.padding(start = 60.dp)) { Text(stringResource(R.string.hc_grant_more)) }
+        }
+        if (vm.healthConnectAvailable) {
+            SettingsDivider()
+            SettingsRow(
+                stringResource(R.string.hc_import_weight),
+                summary = stringResource(R.string.hc_import_weight_body),
+                icon = Icons.Default.FileDownload,
+                tint = SettingsTint.Teal,
+                onClick = permissions.requestHealthRead,
+                // Los pesos de la báscula borrados aquí no vuelven al importar; con esto, sí
+                trailing = { TextButton(onClick = vm::restoreIgnoredHealthWeights) { Text(stringResource(R.string.hc_restore_hidden)) } },
+            )
+        }
+    }
+}
+
+/** Bloqueo de las fotos de progreso y política de privacidad. */
+@Composable
+private fun PrivacyGroup(vm: ProfileViewModel, settings: com.bestrong.mobile.data.UserSettings) {
+    val context = LocalContext.current
+    val unlockTitle = stringResource(R.string.progress_unlock_title)
+    SettingsGroup(stringResource(R.string.s_privacy_title)) {
+        SettingsSwitchRow(
+            stringResource(R.string.progress_lock_setting),
+            settings.lockProgressPhotos,
+            { v ->
+                // Quitar el bloqueo pide la huella/PIN: si no, cualquiera con el móvil desbloqueado lo desactivaría
+                if (v) {
+                    vm.updateSettings { it.copy(lockProgressPhotos = true) }
+                } else {
+                    BiometricLock.authenticate(context, unlockTitle, onSuccess = { vm.updateSettings { it.copy(lockProgressPhotos = false) } })
+                }
+            },
+            summary = stringResource(R.string.perm_lock_d),
+            icon = Icons.Default.Lock,
+            tint = SettingsTint.Slate,
+        )
+        SettingsDivider()
+        SettingsNavRow(stringResource(R.string.privacy), Icons.Default.Policy, SettingsTint.Teal, { context.startActivity(AppIntents.privacy(context)) }, stringResource(R.string.privacy_body))
+    }
+}
+
+/** Permisos y conexiones (con «Activar todo») y los recordatorios de entreno. */
+@Composable
+private fun ConnectionsPage(vm: ProfileViewModel, permissions: PermissionsState, onBack: () -> Unit) {
+    val settings by vm.settings.collectAsStateWithLifecycle()
+    var showReminders by rememberSaveable { mutableStateOf(false) }
+    if (showReminders) {
+        RemindersDialog(
+            settings = settings,
+            onSave = { days, h, m ->
+                if (days.isNotEmpty() && !permissions.notifications) permissions.requestNotifications()
+                vm.updateSettings { it.copy(reminderDays = days, reminderHour = h, reminderMinute = m) }
+                showReminders = false
+            },
+            onDismiss = { showReminders = false },
+        )
+    }
+    PermissionsPage(permissions, onBack) {
+        item {
+            SettingsGroup(stringResource(R.string.s_notif_title)) {
+                SettingsNavRow(stringResource(R.string.reminders), Icons.Default.Alarm, SettingsTint.Amber, { showReminders = true }, reminderSummary(settings))
             }
         }
     }

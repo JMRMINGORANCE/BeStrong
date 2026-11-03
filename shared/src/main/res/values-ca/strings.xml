@@ -228,7 +228,6 @@
     <string name="hc_missing_perms">Falten permisos</string>
     <string name="hc_unavailable">Health Connect no està disponible en aquest dispositiu</string>
     <string name="heatmap_desc">Mapa de calor: %1$d entrenaments el %2$d</string>
-    <string name="heatmap_title">%1$d · %2$d entrenaments</string>
     <string name="help">Ajuda</string>
     <string name="help_body">Glossari, preguntes freqüents, tutorial i novetats</string>
     <string name="high_contrast">Alt contrast</string>
@@ -267,20 +266,12 @@
     <string name="include_variants">Incloure variants (%1$d)</string>
     <string name="include_variants_desc">Ajunta historial i rècords de: %1$s</string>
     <string name="injury_warning">⚠ Càrrega: %1$s</string>
-    <string name="intake_add_protein">+20 g proteïna</string>
-    <string name="intake_add_water">+250 ml aigua</string>
-    <string name="intake_protein">Proteïna: %1$d g de %2$s g</string>
-    <string name="intake_title">Proteïna i aigua</string>
-    <string name="intake_water">Aigua: %1$d ml</string>
     <string name="kcal_value">%1$d kcal</string>
     <string name="keep_screen_on">Mantenir la pantalla encesa en entrenar</string>
     <string name="last_weight">Últim pes: %1$s</string>
     <string name="level_advanced">Avançat</string>
     <string name="level_beginner">Principiant</string>
-    <string name="level_elite">Elit</string>
     <string name="level_intermediate">Intermedi</string>
-    <string name="level_none">Per sota de principiant</string>
-    <string name="level_novice">Novell</string>
     <string name="log_measurements">Registra el teu pes i mesures</string>
     <string name="logged_on_watch">Registrat al rellotge</string>
     <string name="m_arm">Braç %1$s cm</string>
@@ -292,15 +283,8 @@
     <string name="measure_chart">%1$s</string>
     <string name="measurements">Mesures corporals</string>
     <string name="media_add">Foto o vídeo</string>
-    <string name="media_controls">Controls de música a l’entrenament</string>
-    <string name="media_controls_body">Apple Music, Spotify, YouTube Music o qualsevol reproductor</string>
     <string name="media_delete">Esborrar</string>
-    <string name="media_next">Cançó següent</string>
-    <string name="media_open_app">Obre %1$s</string>
     <string name="media_open_photo">Obrir foto</string>
-    <string name="media_open_video">Reproduir vídeo</string>
-    <string name="media_play_pause">Reproduir o pausar la música</string>
-    <string name="media_previous">Cançó anterior</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Pes màx.</string>
     <string name="metric_reps">Reps</string>
@@ -337,8 +321,6 @@
     <string name="muscle_traps">Trapezi</string>
     <string name="muscle_triceps">Tríceps</string>
     <string name="muscles_worked">Músculs treballats</string>
-    <string name="music_app">App de música del botó</string>
-    <string name="music_app_auto">Automàtica</string>
     <plurals name="n_records">
         <item quantity="one">🏆 %1$d rècord</item>
         <item quantity="other">🏆 %1$d rècords</item>
@@ -392,11 +374,6 @@
     <string name="one_handed_body">En començar un entrenament amb el mòbil plegat es veu una sèrie a pantalla completa, amb botons grans a l\'abast del polze. Es canvia a la llista amb el botó de dalt.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Opcions</string>
-    <string name="partner_history">Mostrar els de %1$s</string>
-    <string name="partner_me">Jo</string>
-    <string name="partner_name">Mode parella</string>
-    <string name="partner_name_body">Nom de qui entrena amb tu (buit = desactivat)</string>
-    <string name="partner_saved">Entrenament de %1$s desat</string>
     <string name="password">Contrasenya</string>
     <string name="password_hint">Mínim 10 caràcters. Sense ella no es pot recuperar la còpia.</string>
     <string name="password_restore">Aquesta còpia està xifrada: escriu-ne la contrasenya</string>
@@ -470,12 +447,6 @@
     <string name="rating_motivation">Motivació</string>
     <string name="rating_pain">Molèsties</string>
     <string name="rating_title">Com t’has sentit?</string>
-    <string name="readiness_connect">Connecta Health Connect a Perfil per fer servir el son i el pols en repòs.</string>
-    <string name="readiness_detail">Son %1$s h · repòs %2$s ppm (mitjana %3$s)</string>
-    <string name="readiness_high">Molt bé: bon dia per apretar (+2,5 %)</string>
-    <string name="readiness_low">Baixa: abaixa la càrrega un 10 % o fes tècnica</string>
-    <string name="readiness_normal">Normal: entrena segons el previst</string>
-    <string name="readiness_title">Preparació d’avui</string>
     <string name="record_1rm">Millor 1RM estimat</string>
     <string name="record_heaviest">Pes màxim</string>
     <string name="record_line">%1$s: %2$s %3$s</string>
@@ -623,11 +594,6 @@
     <string name="step_weight">Ajustar pes</string>
     <string name="strength_curve">Corba de força</string>
     <string name="strength_curve_hint">Millor pes per a cada nombre de repeticions</string>
-    <string name="strength_levels">Nivells de força</string>
-    <string name="strength_levels_empty">Encara no hi ha marques en els bàsics.</string>
-    <string name="strength_levels_need_weight">Anota el teu pes corporal a Mesures per veure el teu nivell en esquat, press de banca, pes mort, press militar i rem.</string>
-    <string name="strength_next">Següent nivell: %1$s</string>
-    <string name="strength_ratio">%1$s × pes corporal</string>
     <string name="substitute_body">Mateix múscul. Si ja l’has fet, es fan servir els teus pesos; si no, es converteixen els actuals.</string>
     <string name="substitute_title">Canviar per un altre exercici</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -649,7 +615,6 @@
     <string name="tempo_help">Segons de baixada-pausa-pujada-pausa, p. ex. 3-1-1-0 (X = explosiu). El rellotge et guia amb vibracions.</string>
     <string name="tempo_invalid">Format: 3-1-1 o 3-1-1-0 (de 0 a 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s sota tensió per sèrie</string>
-    <string name="tip_home">Consell: mantén premut un exercici durant l’entrenament per reordenar-lo, i fes servir «Planificar» per generar rutines a la teva mida.</string>
     <string name="tip_swipe">Consell: llisca una sèrie cap a la dreta per completar-la i cap a l’esquerra per esborrar-la. Mantén premut el número per canviar el tipus o l’RPE.</string>
     <string name="today_cycle_week">Cicle %1$d · setmana %2$d de %3$d</string>
     <string name="today_session_n">Sessió %1$d</string>
@@ -660,9 +625,6 @@
     <string name="tool_monthly_report">Informe mensual</string>
     <string name="tool_scores">DOTS, Wilks i IPF GL</string>
     <string name="tools">Eines</string>
-    <string name="touch_lock">Bloquejar la pantalla tàctil</string>
-    <string name="touch_locked">Pantalla bloquejada</string>
-    <string name="touch_unlock_hint">Mantén premut per desbloquejar</string>
     <string name="track">Registrar</string>
     <string name="track_reps">Només reps</string>
     <string name="track_time">Temps</string>
@@ -676,7 +638,7 @@
     <string name="tut2_t">Rutines i programes</string>
     <string name="tut3_d">Toca ✓ o llisca la sèrie cap a la dreta per completar-la; el descans comença sol. Llisca cap a l’esquerra per esborrar-la.</string>
     <string name="tut3_t">Durant l’entrenament</string>
-    <string name="tut4_d">A Perfil veuràs rècords, músculs treballats, nivells de força i gràfiques. Si et perds, a Perfil → Ajuda tens el glossari.</string>
+    <string name="tut4_d">A Perfil veuràs rècords i assoliments, músculs treballats i gràfiques. Si et perds, a Perfil → Ajuda tens el glossari.</string>
     <string name="tut4_t">El teu progrés</string>
     <string name="tutorial_replay">Veure el tutorial</string>
     <string name="undo_exercise_deleted">Exercici tret</string>
@@ -753,13 +715,6 @@
     <string name="workout_resume">Reprendre</string>
     <string name="workouts_per_week">Entrenaments per setmana</string>
     <string name="wrong_password">Contrasenya incorrecta</string>
-    <string name="zone_elbow">Colze</string>
-    <string name="zone_hip">Maluc</string>
-    <string name="zone_knee">Genoll</string>
-    <string name="zone_lower_back">Lumbar</string>
-    <string name="zone_neck">Coll</string>
-    <string name="zone_shoulder">Espatlla</string>
-    <string name="zone_wrist">Canell</string>
     <string name="body_data">Dades per a les calories</string>
     <string name="body_data_body">Amb el teu any de naixement, alçada i sexe, les calories es calculen amb el teu metabolisme basal i el teu pols màxim. El pes s’agafa de les teves mesures; si deixes l’alçada buida es llegeix de Health Connect.</string>
     <string name="birth_year">Any de naixement</string>
@@ -838,7 +793,6 @@
     <string name="plates_add_per_side">Afegir per costat</string>
     <string name="plates_use_weight">Fer servir aquest pes</string>
     <string name="rep_max">%1$dRM %2$s</string>
-    <string name="home_repeat_last">Repetir «%1$s»</string>
     <string name="notif_weekly_load_high">⚠ Càrrega %1$s× la teva mitjana: valora una setmana més suau</string>
     <string name="weight_trend">Mitjana de 7 dies: %1$s</string>
     <string name="weight_trend_change">Mitjana de 7 dies: %1$s (%2$s respecte a la setmana anterior)</string>
@@ -859,9 +813,6 @@
     <string name="tool_share_week">Compartir la setmana (text per al teu entrenador)</string>
     <string name="share_week_title">Els meus entrenaments dels últims 7 dies (BeStrong)</string>
     <string name="share_week_empty">No hi ha entrenaments en els últims 7 dies</string>
-    <string name="body_weight_last">Pes: %1$s</string>
-    <string name="body_weight_none">Sense pes anotat</string>
-    <string name="body_weight_log">Anotar el pes d\'avui</string>
     <string name="set_copy_following">Copia a les següents (%1$d)</string>
     <string name="remaining_time_eta">≈ %1$d min per acabar · cap a les %2$s</string>
     <string name="rest_real_avg">Descans real mitjà: %1$s (previst %2$s)</string>
@@ -874,14 +825,7 @@
     <string name="set_duplicate">Duplica la sèrie</string>
     <string name="complete_remaining">Marca les que falten com a fetes (%1$d)</string>
     <string name="rest_real_exercise">Descans real %1$s · previst %2$s</string>
-    <string name="deadline_title">A quina hora has d\'acabar?</string>
-    <string name="deadline_over">Et passaries %1$d min de l\'hora límit (%2$s): salta o escurça algun exercici</string>
-    <string name="deadline_ok">Hora límit %1$s: vas a temps</string>
-    <string name="deadline_clear">Treu</string>
     <string name="undo_completed_sets">Sèries marcades com a fetes</string>
-    <string name="deadline_set_action">posar hora límit</string>
-    <string name="deadline_fit">Ajusta a la meva hora límit</string>
-    <string name="undo_trimmed_sets">S\'han tret sèries del final per arribar a temps</string>
     <string name="rest_use_real">Usa %1$s a la rutina</string>
     <string name="notif_progress_eta">%1$d/%2$d sèries · ≈ %3$d min, fi %4$s</string>
     <string name="rest_use_real_done">Rutina actualitzada: descans de %1$s</string>
@@ -947,8 +891,6 @@
     <string name="weight_goal_reached">🎯 Pes objectiu de %1$s assolit</string>
     <string name="weight_goal_left">Falten %1$s per a %2$s</string>
     <string name="weight_goal_eta">Falten %1$s per a %2$s · a aquest ritme, cap al %3$s</string>
-    <string name="stale_routine">No fas «%1$s» des de fa %2$d dies. L\'arxives? No s\'esborra res.</string>
-    <string name="stale_keep">Mantén</string>
     <string name="goal_field_reps">Repeticions en una sèrie</string>
     <string name="goal_field_seconds">Segons</string>
     <string name="goal_progress_now">La teva millor marca: %1$s de %2$s</string>
@@ -974,16 +916,8 @@
     <string name="notif_weigh_in_reply_hint">El teu pes, p. ex. 80,4</string>
     <string name="notif_weigh_in_saved">Pes desat</string>
     <string name="notif_weigh_in_invalid">No s\'ha entès el pes: respon només amb el número, p. ex. 80,4</string>
-    <string name="day_part_title">La teva millor hora</string>
-    <string name="day_part_best">Rendeixes millor en aquesta franja: %1$s</string>
-    <string name="day_part_line">%1$s: %2$d %% de la teva millor marca · %3$d entrenaments</string>
-    <string name="day_part_hint">Mitjana de les darreres 12 setmanes: 1RM estimat de cada exercici davant el teu millor del període.</string>
-    <string name="day_part_morning">matí</string>
-    <string name="day_part_afternoon">tarda</string>
-    <string name="day_part_evening">vespre</string>
     <string name="share_progress">Comparteix el progrés</string>
     <string name="share_progress_title">📏 El meu progrés corporal</string>
-    <string name="day_part_no_difference">Rendeixes semblant a qualsevol hora</string>
     <string name="rep_range_line">Rang %1$d–%2$d · %3$s → en arribar a %2$d a totes, +%4$s</string>
     <string name="notif_reminder_start">Comença</string>
     <string name="notif_reminder_snooze">D\'aquí a 1 h</string>
@@ -997,9 +931,6 @@
     <string name="body_range_high">alt: convé baixar-lo</string>
     <string name="weight_rate_fast_loss">⚠ Baixes més d\'un 1 % per setmana: a aquest ritme es perd múscul. Valora menjar una mica més.</string>
     <string name="weight_rate_fast_gain">⚠ Puges més d\'un 1 % per setmana: a aquest ritme es guanya sobretot greix. Valora menjar una mica menys.</string>
-    <string name="weekday_title">Els teus millors dies</string>
-    <string name="weekday_best">Rendeixes més el %1$s: bon dia per a les sessions dures</string>
-    <string name="weekday_no_difference">Rendeixes semblant qualsevol dia</string>
     <string name="body_comp_hint_female">Cintura/alçada per sota de 0,5 és el recomanat. FFMI: uns 15–17 és la mitjana en dones entrenades; 19+ és avançat.</string>
     <string name="cannot_go_lighter">Amb aquest pes no es pot baixar més</string>
     <string name="rep_range_all">Rang de repeticions per a tota la rutina</string>
@@ -1010,17 +941,11 @@
     <string name="weight_goal_pace_fast" formatted="false">És més de l\'1 % setmanal: valora donar-te més temps.</string>
     <string name="weight_goal_date_passed">La data (%1$s) ja ha passat: posa\'n una de nova.</string>
     <string name="gym_missing_equipment">⚠ A «%1$s» no hi ha material per a aquest exercici (%2$s)</string>
-    <string name="missed_session">Et vas saltar «%1$s» del %2$s.</string>
-    <string name="missed_today">Fes-la avui</string>
-    <string name="missed_tomorrow">Passa-la a demà</string>
-    <string name="missed_skip">Deixa-ho</string>
     <string name="notif_measure_title">Toca mesurar-se</string>
     <string name="notif_measure_text">Cintura, pit, braç i cuixa: un cop al mes n\'hi ha prou per veure la tendència.</string>
     <string name="measure_reminder">Recorda\'m mesurar-me el dia 1 de cada mes</string>
     <string name="rep_range_all_hint">S\'aplica a aquests exercicis a totes les teves rutines.</string>
     <string name="enter_weight_first">Posa primer el pes de la sèrie</string>
-    <string name="year_ago_title">📅 Fa un any</string>
-    <string name="year_ago_line">%1$s: %2$s → %3$s (%4$s %%)</string>
     <string name="gym_collars">Tancaments, els dos (%1$s)</string>
     <string name="target_rpe">RPE objectiu:</string>
     <string name="target_rpe_line">🎯 RPE objectiu %1$s a les sèries efectives</string>
@@ -1034,7 +959,6 @@
     <string name="target_rpe_hint">≈ %1$s per a %2$d reps</string>
     <string name="rpe_table_title">Càrregues per RPE</string>
     <string name="rpe_table_hint">Amb el teu 1RM estimat recent (%1$s): el pes per a cada nombre de reps segons el que et quedi a la recambra.</string>
-    <string name="prog_capped_suffix">" · limitat pel límit setmanal"</string>
     <string name="tempo_all">Tempo de tota la rutina</string>
     <string name="undo_rpe_loads">Pesos per RPE aplicats</string>
     <string name="history_vs_previous">Davant de la vegada anterior: %1$s de volum · 1RM %2$s</string>
@@ -1073,7 +997,6 @@
     <string name="cardio_total_month">Darrers 30 dies: %1$s</string>
     <string name="history_gym_unknown">Sense gimnàs</string>
     <string name="history_gym_change">On es va fer?</string>
-    <string name="partner_name_taken">«%1$s» ja té entrenaments a l’historial: tria un altre nom per no barrejar-los</string>
     <string name="cardio_week">Cardio aquesta setmana: %1$s km</string>
     <string name="cardio_week_goal">Cardio aquesta setmana: %1$s de %2$s km</string>
     <string name="cardio_goal_title">Objectiu de cardio per setmana</string>
@@ -1086,8 +1009,6 @@
     <string name="trash_open">Veure</string>
     <string name="trash_restored">Entrenament recuperat</string>
     <string name="cardio_week_goal_min">Cardio aquesta setmana: %1$d de %2$d min</string>
-    <string name="athlete_me">Jo</string>
-    <string name="athlete_both">Tots dos</string>
     <string name="trash_delete_forever">Esborrar per sempre</string>
     <string name="trash_empty">Buidar</string>
     <string name="trash_empty_confirm">Segur? Buidar</string>
@@ -1205,16 +1126,14 @@
     <string name="search_clear_filters">Treure filtres</string>
     <string name="search_create_named">Crear «%1$s»</string>
     <string name="history_empty_action">Començar a entrenar</string>
-    <string name="builder_weekdays_hint">Toca els dies que entrenaràs (de 2 a 6): les rutines aniran al teu calendari.</string>
     <string name="exercise_how_title">Com es fa</string>
-    <string name="day_planned">planificat</string>
     <string name="day_today">avui</string>
     <string name="rating_scale">1 = poc · 5 = molt</string>
     <string name="plates_below_bar">Menys que la barra (%1$s)</string>
     <string name="current_set_label">Ara toca</string>
     <string name="profile_empty_title">Aquí veuràs el teu progrés</string>
     <string name="profile_empty_body">Gràfiques, rècords i mapa muscular apareixen tan bon punt acabis el primer entrenament.</string>
-    <string name="builder_which_days">Quins dies entrenes?</string>
+    <string name="builder_which_days">Quants dies a la setmana?</string>
     <string name="workout_outline">Exercicis de l\'entrenament</string>
     <string name="routine_rest_apply_all">Aplica a tots els exercicis</string>
     <string name="workout_empty_title">Afegeix el teu primer exercici</string>
@@ -1223,7 +1142,8 @@
     <string name="picker_already_added">Ja afegit</string>
     <string name="gym_default_gym">Gimnàs</string>
     <string name="gym_default_home">Casa</string>
-    <string name="setup_sex">Sexe (per a calories i nivells de força)</string>
+    <string name="setup_sex">Sexe (per a calories i puntuacions de força)</string>
     <string name="deload_label">descàrrega</string>
     <string name="achievement_unlocked">Assoliment aconseguit: %1$s</string>
+    <string name="records_milestones">Rècords i fites</string>
 </resources>

@@ -41,29 +41,13 @@ class HistoryViewModel @Inject constructor(
     val history: StateFlow<List<Workout>> = repo.history
 
     /** Récords que batió cada entreno (el 🏆 de la lista), en una sola pasada cronológica. */
-    // Cada uno contra su propio historial: los entrenos de la pareja también llevan su 🏆 (como en su detalle)
-    val recordCounts: StateFlow<Map<String, Int>> = combine(repo.history, repo.partnerHistory) { h, p ->
-        (WorkoutStats.newRecordsInEach(h) { true } + p.groupBy { it.athlete }.values.flatMap { WorkoutStats.newRecordsInEach(it) { true }.entries }.associate { it.toPair() })
-            .mapValues { it.value.size }
-    }
+    val recordCounts: StateFlow<Map<String, Int>> = repo.history
+        .map { h -> WorkoutStats.newRecordsInEach(h) { true }.mapValues { it.value.size } }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    /** Modo pareja: mostrar también los entrenos de la otra persona. */
-    val showPartner = MutableStateFlow(false)
-
-    /** Solo los entrenos de la pareja (el chip «Pareja»; «Los dos» es [showPartner]). */
-    val onlyPartner = MutableStateFlow(false)
-
-    /** Los entrenos según el chip Yo / Pareja / Los dos (calendario, mapa de calor y gimnasios lo siguen). */
-    private val viewed: kotlinx.coroutines.flow.Flow<List<Workout>> = combine(repo.history, repo.partnerHistory, showPartner, onlyPartner) { h, p, sp, op ->
-        when {
-            // Sin entrenos de la pareja (p. ej. se borró el último) el chip ya no sale: vuelve a los tuyos
-            op && p.isNotEmpty() -> p
-            sp -> h + p
-            else -> h
-        }
-    }
+    /** Los entrenos que se ven (calendario, mapa de calor, gimnasios y etiquetas). */
+    private val viewed: kotlinx.coroutines.flow.Flow<List<Workout>> = repo.history
 
     val trainingDays: StateFlow<Set<LocalDate>> = viewed
         .map { WorkoutStats.trainingDays(it, ZoneId.systemDefault()) }
@@ -72,15 +56,8 @@ class HistoryViewModel @Inject constructor(
     /** Búsqueda por entreno, ejercicio o nota. */
     val query = MutableStateFlow("")
 
-    val partnerHistory: StateFlow<List<Workout>> = repo.partnerHistory
-
     /** Día elegido en el calendario (null = todos). */
     val selectedDay = MutableStateFlow<LocalDate?>(null)
-
-    init {
-        // Sin entrenos de la pareja el chip desaparece: «solo la pareja» no puede quedarse puesto
-        viewModelScope.launch { repo.partnerHistory.collect { if (it.isEmpty()) onlyPartner.value = false } }
-    }
 
     /** Gimnasio elegido (null = todos). */
     val gymFilter = MutableStateFlow<String?>(null)
@@ -107,13 +84,12 @@ class HistoryViewModel @Inject constructor(
 
     /** La sesión con la que comparar [workout] por defecto y las demás que se pueden elegir. */
     suspend fun comparePartners(workout: Workout): Pair<Workout?, List<Workout>> = withContext(Dispatchers.Default) {
-        val same = if (workout.athlete != null) repo.partnerHistory.value.filter { it.athlete == workout.athlete } else history.value
+        val same = history.value
         com.bestrong.core.stats.SessionCompare.defaultPartner(workout, same) to com.bestrong.core.stats.SessionCompare.candidates(workout, same)
     }
 
     /** Gimnasios que aparecen en el historial (el filtro solo sale con dos o más). */
     val gymNames: StateFlow<List<String>> = viewed.map { list ->
-        // Los gimnasios de los entrenos que se ven (con la pareja, también los suyos)
         list.mapNotNull { it.gymName }.distinct().sorted()
     }
         .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -136,21 +112,12 @@ class HistoryViewModel @Inject constructor(
 
     val filtered: StateFlow<List<Workout>> = combine(
         repo.history,
-        repo.partnerHistory,
-        combine(query.debounce { if (it.isEmpty()) 0L else 150L }, combine(gymFilter, routineFilter, tagFilter) { g, r, t -> Triple(g, r, t) }, onlyPartner) { q, g, op -> Triple(q, g, op) },
-        showPartner,
+        query.debounce { if (it.isEmpty()) 0L else 150L },
+        combine(gymFilter, routineFilter, tagFilter) { g, r, t -> Triple(g, r, t) },
         selectedDay,
-    ) { h, p, (q, filters, op), sp, day ->
+    ) { h, q, filters, day ->
         val (gym, routineId, tag) = filters
-        // Buscando su nombre salen sus entrenos aunque no se estén enseñando los de la pareja
-        // (sin tildes, como el resto de la búsqueda: «ines» encuentra a «Inés»)
-        val partnerSearched = q.isNotBlank() && p.any { WorkoutStats.plainText(it.athlete.orEmpty()).contains(WorkoutStats.plainText(q.trim())) }
-        val mine = when {
-            op && p.isNotEmpty() -> p.sortedByDescending { it.startedAtEpochMs }
-            sp || partnerSearched -> (h + p).sortedByDescending { it.startedAtEpochMs }
-            else -> h
-        }
-        val byGym = if (gym == null) mine else mine.filter { it.gymName == gym }
+        val byGym = if (gym == null) h else h.filter { it.gymName == gym }
         val byRoutine = if (routineId == null) byGym else byGym.filter { it.routineId == routineId }
         val all = if (tag == null) byRoutine else byRoutine.filter { tag in it.tags }
         val zone = ZoneId.systemDefault()
@@ -160,25 +127,29 @@ class HistoryViewModel @Inject constructor(
         // Empieza con el historial ya cargado (sin filtros es lo mismo): al abrir no parpadea «ningún entreno coincide»
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), repo.history.value)
 
-    /** Entrenos por día del año actual (mapa de calor). */
-    val heatmap: StateFlow<Map<LocalDate, Int>> = viewed
-        .map { WorkoutStats.dailyCounts(it, LocalDate.now().year, ZoneId.systemDefault()) }
-        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+    /** «Tu año»: en enero, el que acaba de terminar (si entrenaste); si no, el actual. Mapa de calor y resumen del mismo año. */
+    val year: StateFlow<YearView> = viewed
+        .map { h ->
+            val zone = ZoneId.systemDefault()
+            val today = LocalDate.now(zone)
+            val last = if (today.monthValue == 1) com.bestrong.core.stats.Strength.yearSummary(h, today.year - 1, zone) else null
+            val year = last?.year ?: today.year
+            YearView(year, WorkoutStats.dailyCounts(h, year, zone), last ?: com.bestrong.core.stats.Strength.yearSummary(h, year, zone))
+        }
+        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), YearView())
 
     /** Récords de ese entreno: recorre todo el historial, así que fuera del hilo principal. */
     suspend fun recordsIn(workout: Workout): List<PersonalRecord> =
         withContext(Dispatchers.Default) {
-            // Frente al historial de quien lo hizo (tus marcas no son las de tu pareja)
-            val same = if (workout.athlete != null) repo.partnerHistory.value.filter { it.athlete == workout.athlete } else history.value
+            val same = history.value
             WorkoutStats.newRecordsIn(workout, same)
         }
 
     /**
-     * Ejercicio a ejercicio, frente a la sesión anterior del mismo atleta (la tuya o la de tu pareja), por id de
-     * ejercicio. Fuera del hilo principal.
+     * Ejercicio a ejercicio, frente a la sesión anterior, por id de ejercicio. Fuera del hilo principal.
      */
     suspend fun comparisonsFor(workout: Workout): Map<String, WorkoutStats.ExerciseComparison> = withContext(Dispatchers.Default) {
-        val same = if (workout.athlete != null) repo.partnerHistory.value.filter { it.athlete == workout.athlete } else history.value
+        val same = history.value
         WorkoutStats.compareWithPrevious(workout, same).associateBy { it.exerciseId }
     }
 
@@ -191,7 +162,7 @@ class HistoryViewModel @Inject constructor(
 
     fun delete(id: String) {
         // A la papelera (30 días) además del «deshacer» del aviso
-        val workout = (repo.history.value + repo.partnerHistory.value).firstOrNull { it.id == id } ?: return
+        val workout = repo.history.value.firstOrNull { it.id == id } ?: return
         _deleted.value = workout
         deleteJob = viewModelScope.launch {
             repo.trashWorkout(workout)
@@ -300,14 +271,13 @@ class HistoryViewModel @Inject constructor(
      * Registra un entreno pasado a partir de una rutina: series completadas con los pesos de la
      * última vez (o los de la rutina). Devuelve el id para abrirlo y ajustar lo que haga falta.
      */
-    /** Quita todos los filtros del historial (búsqueda, gimnasio, día y «solo la pareja»). */
+    /** Quita todos los filtros del historial (búsqueda, gimnasio, rutina, etiqueta y día). */
     fun clearFilters() {
         query.value = ""
         gymFilter.value = null
         routineFilter.value = null
         tagFilter.value = null
         selectedDay.value = null
-        onlyPartner.value = false
     }
 
     /** Guarda en [uri] los entrenos de la lista tal como se ven (con sus filtros) en CSV; [onDone] dice si salió bien. */
@@ -320,27 +290,19 @@ class HistoryViewModel @Inject constructor(
         onDone(ok)
     }
 
-    /** Nombre de la pareja si hay entrenos suyos (para apuntar uno pasado a su nombre). */
     /** Mancuernas: el peso se ve y se escribe como el total del par (×2) si así está en Ajustes. */
     fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =
         if (exercise.equipment == com.bestrong.core.model.Equipment.DUMBBELL && settingsStore.settings.value.dumbbellTotal) 2 else 1
 
-    fun partnerName(): String? = settingsStore.settings.value.partnerAthlete.takeIf { repo.partnerHistory.value.isNotEmpty() }
-
-    fun logPast(routine: Routine, startMs: Long, endMs: Long, forPartner: Boolean, onLogged: (String) -> Unit) = viewModelScope.launch {
-        val athlete = partnerName().takeIf { forPartner }
-        // Pesos de la última sesión anterior a esa fecha de quien lo hizo (no la sugerencia de progresión de hoy)
-        val own = if (athlete != null) repo.partnerHistory.value.filter { it.athlete == athlete } else repo.historyOnce()
-        val before = own.filter { it.isFinished && it.startedAtEpochMs < startMs }
+    fun logPast(routine: Routine, startMs: Long, endMs: Long, onLogged: (String) -> Unit) = viewModelScope.launch {
+        // Pesos de la última sesión anterior a esa fecha (no la sugerencia de progresión de hoy)
+        val before = repo.historyOnce().filter { it.isFinished && it.startedAtEpochMs < startMs }
         // Cada bloque del mismo ejercicio con lo suyo (la descarga de 3×10 no hereda los 100 kg del 3×5)
         val w = routine.toWorkout(startMs, { id -> WorkoutStats.previousSets(id, before) }, previousBlock = { id, n -> WorkoutStats.previousBlock(id, n, before) })
         // Con su gimnasio (el de la rutina o el activo) y sus calorías, como un entreno terminado en directo
         val routineGym = settingsStore.settings.value.gyms.firstOrNull { it.id == routine.gymId }?.name
         val logged = w.copy(
             gymName = routineGym,
-            athlete = athlete,
-            // Como los de la pareja empezados en directo: «Ana · Pierna»
-            name = athlete?.let { "$it · ${w.name}" } ?: w.name,
             finishedAtEpochMs = endMs,
             updatedAtEpochMs = System.currentTimeMillis(),
             exercises = w.exercises.map { we -> we.copy(sets = we.sets.map { it.copy(completed = true, completedAtEpochMs = endMs) }) },
@@ -348,7 +310,7 @@ class HistoryViewModel @Inject constructor(
         val done = actions.withEnergy(actions.withGym(logged))
         repo.saveWorkout(done)
         // Como al copiarlo o editarlo: también a Health Connect
-        if (done.athlete == null) actions.exportToHealthConnectIfEnabled(done)
+        actions.exportToHealthConnectIfEnabled(done)
         onLogged(done.id)
     }
 

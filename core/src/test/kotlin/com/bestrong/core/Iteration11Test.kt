@@ -8,7 +8,6 @@ import com.bestrong.core.model.moveKeepingSupersets
 import com.bestrong.core.model.normalizedSupersets
 import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.training.ProgramTexts
-import com.bestrong.core.training.missedSessions
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -96,24 +95,6 @@ class Iteration12Test {
     }
 }
 
-class TrimToFitTest {
-    @Test fun removesPendingSetsFromTheEndUntilItFits() {
-        val curl = com.bestrong.core.library.ExerciseLibrary.byId("barbell_curl") ?: com.bestrong.core.library.ExerciseLibrary.all[5]
-        val main = WorkoutExercise(exercise = bench, restSeconds = 120, sets = List(3) { WorkoutSet(weightKg = 100.0, reps = 5) })
-        val acc = WorkoutExercise(exercise = curl, restSeconds = 60, sets = List(3) { WorkoutSet(weightKg = 20.0, reps = 10) })
-        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(main, acc))
-        val est = { x: Workout -> WorkoutEditor.estimatedRemainingSeconds(x, nowEpochMs = 0) }
-        // 6×40 + 2×120 + 120 (cambio) + 2×60 = 720; con 500 s debe caer el accesorio
-        val trimmed = WorkoutEditor.trimToFit(w, 500, est)
-        assertEquals(true, est(trimmed) <= 500)
-        assertEquals(3, trimmed.exercises[0].sets.size)
-        // Nunca quita la siguiente serie
-        val minimal = WorkoutEditor.trimToFit(w, 0, est)
-        assertEquals(1, minimal.exercises.size)
-        assertEquals(main.sets[0].id, minimal.exercises[0].sets.single().id)
-    }
-}
-
 class Iteration13Test {
     private val curl = com.bestrong.core.library.ExerciseLibrary.all[5]
 
@@ -135,18 +116,6 @@ class Iteration13Test {
         assertEquals(4, ids.size)
         assertEquals(listOf(a.sets[0].id, a.sets[1].id), ids.take(2))
         assertEquals(extra.id, ids[3])
-    }
-
-    @Test fun trimKeepsNextSetOfStartedExerciseAndClearsLoneSuperset() {
-        val e1 = WorkoutExercise(exercise = bench, restSeconds = 60, sets = listOf(WorkoutSet(reps = 5, completed = true), WorkoutSet(reps = 5)))
-        val e2 = WorkoutExercise(exercise = curl, restSeconds = 60, supersetId = "s", sets = listOf(WorkoutSet(reps = 5, completed = true), WorkoutSet(reps = 5), WorkoutSet(reps = 5)))
-        val e3 = WorkoutExercise(exercise = com.bestrong.core.library.ExerciseLibrary.all[7], restSeconds = 60, supersetId = "s", sets = listOf(WorkoutSet(reps = 5)))
-        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(e1, e2, e3))
-        val out = WorkoutEditor.trimToFit(w, 0) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = 0) }
-        // e3 desaparece; de e2 queda la hecha y la siguiente
-        assertEquals(2, out.exercises.size)
-        assertEquals(2, out.exercises[1].sets.size)
-        assertEquals(null, out.exercises[1].supersetId)
     }
 
     @Test fun bulkCompletedSetsAreNotRest() {
@@ -197,13 +166,6 @@ class Iteration14Test {
         val result = r.normalizedSupersets()
         // «a» quedó suelta (su pareja está lejos): deja de ser superserie; c-d siguen juntas; e sola, fuera
         assertEquals(listOf(null, null, "x", "x", null), result.exercises.map { it.supersetId })
-    }
-
-    @Test fun trimWithNothingToRemoveKeepsWorkoutIdentical() {
-        val lone = WorkoutExercise(exercise = bench, supersetId = "s", sets = listOf(WorkoutSet(reps = 5)))
-        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(lone))
-        val out = WorkoutEditor.trimToFit(w, 0) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = 0) }
-        assertEquals(w, out)
     }
 
     @Test fun coachReportShowsBothSides() {
@@ -375,22 +337,6 @@ class Iteration18Test {
     }
 }
 
-class TimeOfDayTest {
-    @Test fun eveningStrongerThanMorning() {
-        val zone = java.time.ZoneOffset.UTC
-        val base = java.time.LocalDate.of(2026, 3, 2)
-        fun at(day: Long, hour: Int, kg: Double, id: String) = finishedWorkout(id, base.plusDays(day), bench to listOf(done(kg, 5))).let { w ->
-            val start = base.plusDays(day).atTime(hour, 0).toInstant(zone).toEpochMilli()
-            w.copy(startedAtEpochMs = start, finishedAtEpochMs = start + 3_600_000)
-        }
-        val history = (0L until 3L).map { at(it * 2, 8, 90.0, "m$it") } + (0L until 3L).map { at(it * 2 + 1, 19, 100.0, "e$it") }
-        val now = base.plusDays(10).atStartOfDay(zone).toInstant().toEpochMilli()
-        val stats = com.bestrong.core.stats.TimeOfDay.stats(history, zone, now)
-        assertEquals(com.bestrong.core.stats.DayPart.EVENING, stats.first().part)
-        assertEquals(2, stats.size)
-    }
-}
-
 class Iteration19Test {
     @Test fun rangeStallDeloadsWhenRepsDoNotGrow() {
         val d = java.time.LocalDate.of(2026, 3, 2)
@@ -463,13 +409,6 @@ class AssistedDropTest {
 }
 
 class Iteration20ImprovementsTest {
-    @Test fun missedSessionsOnlyPastAndUntrained() {
-        val monday = java.time.LocalDate.of(2026, 3, 2)
-        val plan = com.bestrong.core.training.WeekPlan(mapOf(1 to "a", 2 to "b", 5 to "c"))
-        // Jueves: lunes entrenado, martes no, viernes aún no ha llegado
-        assertEquals(listOf(java.time.DayOfWeek.TUESDAY to "b"), plan.missedSessions(monday, monday.plusDays(3), setOf(monday)))
-    }
-
     @Test fun neededWeeklyRate() {
         val week = 7 * 86_400_000L
         assertEquals(0.5, com.bestrong.core.stats.BodyWeightGoal.neededWeeklyKg(2.0, 0, 4 * week)!!, 1e-9)
@@ -477,29 +416,9 @@ class Iteration20ImprovementsTest {
     }
 }
 
-class MissedLaterTest {
-    @Test fun doneLaterIsNotMissed() {
-        val monday = java.time.LocalDate.of(2026, 3, 2)
-        val plan = com.bestrong.core.training.WeekPlan(mapOf(3 to "push"))
-        // Planificada el miércoles, hecha el jueves; viernes: no se avisa
-        val out = plan.missedSessions(monday, monday.plusDays(4), setOf(monday.plusDays(3))) { id, since -> id == "push" && !monday.plusDays(3).isBefore(since) }
-        assertEquals(emptyList<Any>(), out)
-    }
-}
+class MissedLaterTest
 
-class YearAgoTest {
-    @Test fun comparesSameExerciseAYearApart() {
-        val today = java.time.LocalDate.of(2026, 3, 10)
-        val history = listOf(
-            finishedWorkout("old", today.minusYears(1).plusDays(2), bench to listOf(done(70.0, 8))),
-            finishedWorkout("new", today.minusDays(3), bench to listOf(done(85.0, 8))),
-        )
-        val c = com.bestrong.core.stats.YearAgo.compare(history, today, UTC).single()
-        assertEquals(70.0, c.thenWeightKg, 0.0)
-        assertEquals(85.0, c.nowWeightKg, 0.0)
-        assertEquals(true, c.change > 0.2)
-    }
-}
+class YearAgoTest
 
 class CollarTest {
     @Test fun collarsCountInLoads() {
@@ -566,17 +485,6 @@ class CollarTest {
     }
 
     @Test
-    fun weeklyCapInPoundsIsLoadable() {
-        val lb = com.bestrong.core.util.WeightUnit.LB
-        val best = lb.toKg(90.0)
-        val capped = com.bestrong.core.training.ProgressionCap.limitIn(lb, lb.toKg(95.0), best, 0.025, lb.stepKg())
-        // El tope (≈ 92 lb) se queda en el escalón siguiente de 5 lb: siempre se puede subir al menos uno
-        assertEquals(95.0, lb.fromKg(capped), 1e-6)
-        // Pero no más de uno: 100 lb sigue recortado a 95
-        assertEquals(95.0, lb.fromKg(com.bestrong.core.training.ProgressionCap.limitIn(lb, lb.toKg(100.0), best, 0.025, lb.stepKg())), 1e-6)
-    }
-
-    @Test
     fun rpeLoadInvertsEpley() {
         // 1 rep a RPE 10 = el 1RM; 5 reps a RPE 8 = una serie de 7 al fallo
         assertEquals(100.0, com.bestrong.core.stats.RpeLoad.weightFor(100.0, 1, 10.0), 1e-9)
@@ -639,16 +547,6 @@ class CollarTest {
         val keys = setOf("year_ago:2026-01-02", "year_ago:2026-10-01", "tip_plates", "year_ago:2026-10", "year_ago:2026-01", "missed:2026-01-05:2", "missed:2026-10-12:1")
         val kept = com.bestrong.core.util.DismissedTips.prune(keys, today)
         assertEquals(setOf("year_ago:2026-10-01", "tip_plates", "year_ago:2026-10", "missed:2026-10-12:1"), kept)
-    }
-
-    @Test
-    fun quickRoutinesPutTodaysPlanFirst() {
-        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
-        fun r(id: String) = com.bestrong.core.model.Routine(id = id, name = id, exercises = listOf(com.bestrong.core.model.RoutineExercise(exercise = ex)))
-        val done = Workout(name = "A", routineId = "a", startedAtEpochMs = 1_000, finishedAtEpochMs = 2_000)
-        val picked = com.bestrong.core.training.QuickRoutines.pick(listOf(r("a"), r("b"), r("c")), listOf(done), plannedTodayId = "c", todayStartEpochMs = 500)
-        // La de hoy primero; luego la que nunca se hizo antes que la hecha
-        assertEquals(listOf("c", "b"), picked.map { it.id })
     }
 
     @Test
@@ -966,5 +864,19 @@ class CollarTest {
         val gym = com.bestrong.core.training.GymProfile.home().copy(barKg = 20.0, collarKg = 0.0)
         val kg = gym.nearestBarbell(com.bestrong.core.util.WeightUnit.LB.toKg(137.0), com.bestrong.core.util.WeightUnit.LB)
         assertEquals(135.0, com.bestrong.core.util.WeightUnit.LB.fromKg(kg), 0.01)
+    }
+
+    @Test
+    fun quickRoutinesLongestUndoneFirst() {
+        val ex = com.bestrong.core.model.Exercise(id = "bp", name = "Press", primaryMuscle = com.bestrong.core.model.MuscleGroup.CHEST)
+        fun r(id: String, archived: Boolean = false) = com.bestrong.core.model.Routine(id = id, name = id, archived = archived, exercises = listOf(com.bestrong.core.model.RoutineExercise(exercise = ex)))
+        val done = listOf(
+            Workout(name = "A", routineId = "a", startedAtEpochMs = 1_000, finishedAtEpochMs = 2_000),
+            Workout(name = "C", routineId = "c", startedAtEpochMs = 5_000, finishedAtEpochMs = 6_000),
+        )
+        val picked = com.bestrong.core.training.QuickRoutines.pick(listOf(r("a"), r("b"), r("c"), r("d", archived = true)), done)
+        // La que nunca se hizo primero; luego la que lleva más tiempo sin hacerse (sin archivadas)
+        assertEquals(listOf("b", "a"), picked.map { it.id })
+        assertEquals(listOf("b"), com.bestrong.core.training.QuickRoutines.pick(listOf(r("a"), r("b")), done, count = 1).map { it.id })
     }
 }

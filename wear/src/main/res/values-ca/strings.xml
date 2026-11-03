@@ -15,9 +15,7 @@
     <string name="app_name">BeStrong</string>
     <string name="back_to">‹ %1$s</string>
     <string name="calibrate">Calibrar comptador</string>
-    <string name="calibrate_done">Llindar: %1$s</string>
     <string name="calibrate_finish">Acabar</string>
-    <string name="calibrate_hint">Fes 3–5 repeticions normals i prem Acabar</string>
     <string name="cardio">Cardio amb GPS</string>
     <string name="cardio_cycling">Bici</string>
     <string name="cardio_distance">%1$s km</string>
@@ -41,7 +39,6 @@
     <string name="complication_today_none">Lliure</string>
     <string name="continue_">Continuar</string>
     <string name="count_reps">Comptar reps (beta)</string>
-    <string name="counted_reps">Comptades: %1$d reps (beta)</string>
     <string name="create_routine">Crear rutina</string>
     <string name="create_routines_on_phone">Crea rutines al mòbil i apareixeran aquí</string>
     <string name="current_suffix"> · actual</string>
@@ -192,4 +189,18 @@
     <string name="copy_previous">Fer servir el de l\'última vegada</string>
     <string name="unit_reps">reps</string>
     <string name="cardio_needs_sensors">Dona permís de pols i activitat física per mesurar la distància</string>
+    <string name="calibrate_ready">Agafa la barra o les manuelles i col·loca\'t</string>
+    <string name="calibrate_go">Fes %1$d repeticions normals</string>
+    <string name="calibrate_ok">Fet: sensibilitat %1$s (%2$d reps vistes)</string>
+    <string name="calibrate_retry_hint">No s\'han notat bé les repeticions. Fes-les una mica més marcades i torna-hi.</string>
+    <string name="calibrate_retry">Repetir</string>
+    <string name="sensitivity_high">alta</string>
+    <string name="sensitivity_medium">mitjana</string>
+    <string name="sensitivity_low">baixa</string>
+    <string name="counted_reps_conf">Comptades: %1$d · %2$s</string>
+    <string name="rep_conf_high">fiable</string>
+    <string name="rep_conf_medium">revisa-ho</string>
+    <string name="rep_conf_low">dubtós</string>
+    <string name="count_minus">Una repetició menys</string>
+    <string name="count_plus">Una repetició més</string>
 </resources>

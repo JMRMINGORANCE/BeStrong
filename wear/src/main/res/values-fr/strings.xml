@@ -15,9 +15,7 @@
     <string name="app_name">BeStrong</string>
     <string name="back_to">‹ %1$s</string>
     <string name="calibrate">Calibrer le compteur</string>
-    <string name="calibrate_done">Seuil : %1$s</string>
     <string name="calibrate_finish">OK</string>
-    <string name="calibrate_hint">Fais 3–5 rép. normales puis touche OK</string>
     <string name="cardio">Cardio GPS</string>
     <string name="cardio_cycling">Vélo</string>
     <string name="cardio_distance">%1$s km</string>
@@ -41,7 +39,6 @@
     <string name="complication_today_none">Libre</string>
     <string name="continue_">Continuer</string>
     <string name="count_reps">Compter les rép. (bêta)</string>
-    <string name="counted_reps">Comptées : %1$d rép. (bêta)</string>
     <string name="create_routine">Créer une routine</string>
     <string name="create_routines_on_phone">Crée des routines sur ton téléphone, elles apparaîtront ici</string>
     <string name="current_suffix"> · en cours</string>
@@ -192,4 +189,18 @@
     <string name="copy_previous">Reprendre la dernière fois</string>
     <string name="unit_reps">rép.</string>
     <string name="cardio_needs_sensors">Autorisez la fréquence cardiaque et l\'activité physique pour mesurer la distance</string>
+    <string name="calibrate_ready">Prends la barre ou les haltères et mets-toi en place</string>
+    <string name="calibrate_go">Fais %1$d répétitions normales</string>
+    <string name="calibrate_ok">C\'est fait : sensibilité %1$s (%2$d rép. vues)</string>
+    <string name="calibrate_retry_hint">Les répétitions n\'étaient pas nettes. Marque-les un peu plus et recommence.</string>
+    <string name="calibrate_retry">Recommencer</string>
+    <string name="sensitivity_high">élevée</string>
+    <string name="sensitivity_medium">moyenne</string>
+    <string name="sensitivity_low">faible</string>
+    <string name="counted_reps_conf">Comptées : %1$d · %2$s</string>
+    <string name="rep_conf_high">fiable</string>
+    <string name="rep_conf_medium">à vérifier</string>
+    <string name="rep_conf_low">douteux</string>
+    <string name="count_minus">Une répétition de moins</string>
+    <string name="count_plus">Une répétition de plus</string>
 </resources>

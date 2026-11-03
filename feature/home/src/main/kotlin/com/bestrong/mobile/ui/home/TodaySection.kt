@@ -29,7 +29,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -51,6 +50,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -68,6 +68,7 @@ import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.displayName
 import com.bestrong.mobile.ui.components.label
+import com.bestrong.mobile.ui.components.spokenAs
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 
@@ -194,9 +195,12 @@ fun HeroButton(onClick: () -> Unit, modifier: Modifier = Modifier, content: @Com
     )
 }
 
-/** Semana: anillo con las sesiones frente al objetivo y los días entrenados (L–D); tocarla cambia el objetivo. */
+/**
+ * La semana en una sola tarjeta: anillo con las sesiones frente al objetivo (tocarla lo cambia), los días entrenados
+ * (L–D), la racha y el volumen frente a la semana pasada y, si hay cardio o un objetivo de cardio, su línea.
+ */
 @Composable
-fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) -> Unit) {
+fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) -> Unit, cardio: @Composable () -> Unit = {}) {
     val locale = LocalConfiguration.current.locales[0]
     var editing by remember { mutableStateOf(false) }
     com.bestrong.mobile.ui.components.Panel(onClick = if (canChangeGoal) ({ editing = true }) else null, onClickLabel = stringResource(R.string.week_goal_title)) {
@@ -222,14 +226,43 @@ fun WeekStrip(week: WeekProgress, canChangeGoal: Boolean, onGoalChange: (Int) ->
                     Text(stringResource(R.string.week_adherence, (it * 100).toInt()), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            // La racha va en su tarjeta, debajo (panel de la semana): aquí se repetía
             if (canChangeGoal) Icon(Icons.Default.Edit, stringResource(R.string.week_goal_title), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             DayOfWeek.entries.forEach { d -> DayCircle(d, week, locale) }
         }
+        WeekStats(week)
+        cardio()
     }
     if (editing) WeekGoalDialog(week.goal, onPick = { onGoalChange(it); editing = false }) { editing = false }
+}
+
+/** Racha de semanas y volumen de la semana (con la diferencia frente a la pasada), lado a lado. */
+@Composable
+private fun WeekStats(week: WeekProgress) {
+    val unit = LocalWeightUnit.current
+    val streakText = androidx.compose.ui.res.pluralStringResource(R.plurals.rd_home_streak_weeks, week.streak, week.streak)
+    val volumeLabel = stringResource(R.string.rd_home_week_volume)
+    val volume = unit.formatVolume(week.volumeKg)
+    val delta = if (week.lastWeekVolumeKg > 0) (week.volumeKg - week.lastWeekVolumeKg) / week.lastWeekVolumeKg else null
+    val colors = com.bestrong.mobile.ui.theme.statusColors
+    val deltaText = delta?.let { d ->
+        (if (d >= 0) colors.goodMark.ifEmpty { "▲ " } else colors.badMark.ifEmpty { "▼ " }) +
+            stringResource(R.string.rd_home_vs_last_week, kotlin.math.abs(d * 100).toInt())
+    }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.weight(1f).semantics(mergeDescendants = true) { contentDescription = streakText }) {
+            Text(stringResource(R.string.rd_home_streak), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("🔥 ${week.streak}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+        }
+        Column(Modifier.weight(1f).semantics(mergeDescendants = true) { contentDescription = listOfNotNull(volumeLabel, volume, deltaText).joinToString(", ") }) {
+            Text(volumeLabel, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(volume, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, maxLines = 1)
+            deltaText?.let {
+                Text(it, style = MaterialTheme.typography.labelSmall, color = if ((delta ?: 0.0) >= 0) colors.good else MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
 }
 
 /** Objetivo de sesiones por semana: de 1 a 7. */
@@ -313,198 +346,13 @@ fun ProgramSetupScreen(program: PeriodizedProgram, suggested: (String) -> Double
     }
 }
 
-/**
- * «Hace un año: Press banca 70×8 → 85×8 (+21 %)»; tocar una línea abre la ficha del ejercicio (su progreso
- * del año). Se puede descartar (vuelve a los 30 días).
- */
-@Composable
-fun YearAgoCard(vm: HomeViewModel, onOpenExercise: (String) -> Unit = {}) {
-    val items by vm.yearAgo.collectAsStateWithLifecycle()
-    val tips = com.bestrong.mobile.ui.help.LocalTips.current
-    val unit = com.bestrong.mobile.ui.components.LocalWeightUnit.current
-    // Descartada, no vuelve en 30 días: la ventana de ±7 días repite las mismas comparaciones muchos días seguidos
-    val today = java.time.LocalDate.now()
-    val tipId = "year_ago:$today"
-    if (items.isEmpty() || yearAgoDismissedRecently(tips.dismissed, today)) return
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.year_ago_title), fontWeight = FontWeight.Bold)
-            items.forEach { c ->
-                val pct = kotlin.math.round(c.change * 100).toInt()
-                val f = com.bestrong.mobile.ui.components.pairFactor(c.exercise)
-                Text(
-                    stringResource(
-                        R.string.year_ago_line,
-                        c.exercise.displayName(),
-                        unit.format(c.thenWeightKg * f) + "×" + c.thenReps,
-                        unit.format(c.nowWeightKg * f) + "×" + c.nowReps + " " + unit.label,
-                        (if (pct >= 0) "+" else "") + pct,
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth().clickable(onClickLabel = c.exercise.displayName()) { onOpenExercise(c.exercise.id) }.padding(vertical = 4.dp),
-                )
-            }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                androidx.compose.material3.TextButton(onClick = { tips.onDismiss(tipId) }) { Text(stringResource(R.string.got_it)) }
-            }
-        }
-    }
-}
-
-/** Días que la tarjeta «Hace un año» no vuelve tras descartarla. */
-private const val YEAR_AGO_SNOOZE_DAYS = 30L
-
-/** Si se descartó «Hace un año» (clave «year_ago:fecha») en los últimos [YEAR_AGO_SNOOZE_DAYS] días. */
-private fun yearAgoDismissedRecently(dismissed: Set<String>, today: java.time.LocalDate): Boolean = dismissed.any { key ->
-    // «year_ago:2026-10-14»; las de la versión anterior eran por mes («year_ago:2026-10»): cuentan desde el día 1
-    val date = key.removePrefix("year_ago:").takeIf { it != key }?.let {
-        runCatching { java.time.LocalDate.parse(it) }.getOrNull() ?: runCatching { java.time.YearMonth.parse(it).atDay(1) }.getOrNull()
-    }
-    date != null && !date.isBefore(today.minusDays(YEAR_AGO_SNOOZE_DAYS))
-}
-
-/** «Te saltaste «Push» del martes»: hacerla hoy, pasarla a mañana o dejarlo estar. */
-@Composable
-fun MissedSessionCard(vm: HomeViewModel, onOpenWorkout: () -> Unit) {
-    val missed by vm.missedSession.collectAsStateWithLifecycle()
-    val tips = com.bestrong.mobile.ui.help.LocalTips.current
-    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
-    val (day, routine, canMove) = missed ?: return
-    // Una vez atendida (hecha hoy o descartada) no vuelve a salir esa semana
-    val tipId = "missed:" + java.time.LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)) + ":" + day.value
-    if (tipId in tips.dismissed) return
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.missed_session, routine.displayName, day.getDisplayName(java.time.format.TextStyle.FULL, locale)), style = MaterialTheme.typography.bodyMedium)
-            androidx.compose.foundation.layout.FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                androidx.compose.material3.TextButton(onClick = { tips.onDismiss(tipId) }) { Text(stringResource(R.string.missed_skip)) }
-                if (canMove) {
-                    androidx.compose.material3.TextButton(onClick = { vm.moveMissedToTomorrow(day) }) { Text(stringResource(R.string.missed_tomorrow)) }
-                }
-                androidx.compose.material3.TextButton(onClick = { tips.onDismiss(tipId); vm.startRoutine(routine, onOpenWorkout) }) { Text(stringResource(R.string.missed_today)) }
-            }
-        }
-    }
-}
-
-/** «No haces «Pierna B» desde hace 75 días. ¿Archivarla?»: una a una, y se puede descartar. */
-@Composable
-fun StaleRoutineCard(vm: HomeViewModel) {
-    val stale by vm.staleRoutines.collectAsStateWithLifecycle()
-    val tips = com.bestrong.mobile.ui.help.LocalTips.current
-    val (routine, days) = stale.firstOrNull { "stale:${it.first.id}" !in tips.dismissed } ?: return
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.stale_routine, routine.displayName, days), style = MaterialTheme.typography.bodyMedium)
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                androidx.compose.material3.TextButton(onClick = { tips.onDismiss("stale:${routine.id}") }) { Text(stringResource(R.string.stale_keep)) }
-                androidx.compose.material3.TextButton(onClick = { vm.setArchived(routine, true) }) { Text(stringResource(R.string.routine_archive)) }
-            }
-        }
-    }
-}
-
-/** Cómo llegas hoy: sueño y pulso en reposo (Health Connect) y la última valoración. */
-@Composable
-fun ReadinessCard(vm: HomeViewModel) {
-    val r by vm.readiness.collectAsStateWithLifecycle()
-    val connected by vm.healthConnected.collectAsStateWithLifecycle()
-    val report = r ?: return
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.readiness_title), Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                Text("${report.score}", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.primary)
-            }
-            LinearProgressIndicator(progress = { report.score / 100f }, modifier = Modifier.fillMaxWidth())
-            Text(
-                stringResource(
-                    when (report.level) {
-                        com.bestrong.core.training.ReadinessReport.Level.HIGH -> R.string.readiness_high
-                        com.bestrong.core.training.ReadinessReport.Level.NORMAL -> R.string.readiness_normal
-                        com.bestrong.core.training.ReadinessReport.Level.LOW -> R.string.readiness_low
-                    },
-                ),
-                style = MaterialTheme.typography.bodySmall,
-            )
-            if (connected) {
-                Text(
-                    stringResource(R.string.readiness_detail, report.sleepHours?.let { "%.1f".format(it) } ?: "--", report.restingHr?.toString() ?: "--", report.baselineRestingHr?.toString() ?: "--"),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            } else {
-                Text(stringResource(R.string.readiness_connect), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-    }
-}
-
-/** Proteína del día (objetivo según tu peso) y agua, con botones rápidos. */
-@Composable
-fun IntakeCard(vm: HomeViewModel) {
-    val intake by vm.intake.collectAsStateWithLifecycle()
-    val bw by vm.bodyWeightKg.collectAsStateWithLifecycle()
-    val range = bw?.takeIf { it > 0 }?.let { com.bestrong.core.training.Nutrition.proteinRangeGrams(it) }?.takeIf { it.first > 0 }
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(stringResource(R.string.intake_title), fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.intake_protein, intake.proteinG, range?.let { "${it.first}–${it.last}" } ?: "?"))
-            range?.let { LinearProgressIndicator(progress = { (intake.proteinG.toFloat() / it.first).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
-            Text(stringResource(R.string.intake_water, intake.waterMl))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Mitad y mitad: en francés («+20 g de protéines») el segundo no queda aplastado
-                FilledTonalButton(onClick = { vm.addIntake(proteinG = 20) }, Modifier.weight(1f)) { Text(stringResource(R.string.intake_add_protein), textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
-                FilledTonalButton(onClick = { vm.addIntake(waterMl = 250) }, Modifier.weight(1f)) { Text(stringResource(R.string.intake_add_water), textAlign = androidx.compose.ui.text.style.TextAlign.Center) }
-            }
-            BodyWeightQuickEntry(bw) { vm.logBodyWeight(it) }
-        }
-    }
-}
-
-/** Último peso corporal y botón para apuntar el de hoy sin ir a Medidas. */
-@Composable
-private fun BodyWeightQuickEntry(lastKg: Double?, onSave: (Double) -> Unit) {
-    val unit = com.bestrong.mobile.ui.components.LocalBodyUnit.current
-    var editing by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            lastKg?.let { stringResource(R.string.body_weight_last, unit.format(it, withUnit = true)) } ?: stringResource(R.string.body_weight_none),
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier.weight(1f),
-        )
-        androidx.compose.material3.TextButton(onClick = { editing = true }) { Text(stringResource(R.string.body_weight_log)) }
-    }
-    if (editing) {
-        var text by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(lastKg?.let { unit.format(it) }.orEmpty()) }
-        val kg = unit.parseToKg(text)?.takeIf { it in 20.0..400.0 }
-        androidx.compose.material3.AlertDialog(
-            onDismissRequest = { editing = false },
-            title = { Text(stringResource(R.string.body_weight_log)) },
-            text = {
-                androidx.compose.material3.OutlinedTextField(
-                    text,
-                    { text = it.filter { c -> c.isDigit() || c == ',' || c == '.' }.take(6) },
-                    label = { Text(unit.label) },
-                    singleLine = true,
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal),
-                )
-            },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = { kg?.let(onSave); editing = false }, enabled = kg != null) { Text(stringResource(R.string.action_save)) }
-            },
-            dismissButton = { androidx.compose.material3.TextButton(onClick = { editing = false }) { Text(stringResource(R.string.action_cancel)) } },
-        )
-    }
-}
-
 /** Objetivos de km de cardio por semana que se pueden elegir. */
 private val CARDIO_GOALS_KM = listOf(5.0, 10.0, 20.0, 30.0, 50.0)
 
 /** Objetivos en minutos por semana: la mitad, lo recomendado por la OMS (150) y el doble. */
 private val CARDIO_GOALS_MIN = listOf(75, 150, 300)
 
-/** «12,3 de 20 km» o «95 de 150 min» con su barra, o lo hecho si no hay objetivo. */
+/** «12,3 de 20 km» o «95 de 150 min» con su barra (o lo hecho si no hay objetivo) y lo que falta al día. */
 @Composable
 private fun CardioWeekProgress(week: HomeViewModel.CardioWeek) {
     val km = week.meters / 1000
@@ -516,11 +364,13 @@ private fun CardioWeekProgress(week: HomeViewModel.CardioWeek) {
         goalKm != null -> stringResource(R.string.cardio_week_goal, com.bestrong.core.util.formatKmLike(km, goalKm), com.bestrong.core.util.formatGoalKm(goalKm)) to (km / goalKm).toFloat()
         else -> stringResource(R.string.cardio_week, "%.1f".format(km)) to null
     }
-    Text(text, fontWeight = FontWeight.Bold)
-    progress?.let { p -> androidx.compose.material3.LinearProgressIndicator(progress = { p.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
-    if (week.seconds > 0 && goalMin == null) Text(com.bestrong.core.util.formatDuration(week.seconds), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    if (week.streak >= 2) Text(stringResource(R.string.cardio_streak, week.streak), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
-    cardioPace(week)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    Text("🏃 $text", Modifier.spokenAs(text), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+    progress?.let { p -> LinearProgressIndicator(progress = { p.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
+    val extra = listOfNotNull(
+        stringResource(R.string.cardio_streak, week.streak).takeIf { week.streak >= 2 },
+        cardioPace(week),
+    )
+    if (extra.isNotEmpty()) Text(extra.joinToString(" · "), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 /** «Faltan 4,3 km · 2,2 km al día» hasta el domingo (hoy incluido); null sin objetivo o ya cumplido. */
@@ -563,21 +413,24 @@ private fun CustomCardioGoal(vm: HomeViewModel, current: HomeViewModel.CardioWee
 }
 
 /**
- * «Cardio esta semana: 12,3 / 20 km» (solo si hay cardio esta semana o un objetivo puesto); tocarla deja poner o
- * quitar el objetivo.
+ * Línea de cardio de la tarjeta de la semana: «12,3 / 20 km» (solo si hay cardio esta semana o un objetivo puesto);
+ * tocarla deja poner o quitar el objetivo y el aviso.
  */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
-fun CardioWeekCard(vm: HomeViewModel) {
+fun CardioWeekLine(vm: HomeViewModel) {
     val week by vm.cardioWeek.collectAsStateWithLifecycle()
     if (!week.worthShowing) return
     var editing by remember { mutableStateOf(false) }
     // Con objetivo llega el aviso de cardio: sin permiso de notificaciones no llegaría nunca
     val askNotifications = com.bestrong.mobile.ui.components.rememberNotificationPermission()
-    com.bestrong.mobile.ui.components.Panel(onClick = { editing = true }, contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            CardioWeekProgress(week)
-        }
+    Column(
+        Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
+            .clickable(onClickLabel = stringResource(R.string.cardio_goal_title)) { editing = true }
+            .padding(vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        CardioWeekProgress(week)
     }
     if (editing) {
         androidx.compose.material3.AlertDialog(
@@ -640,19 +493,12 @@ private fun CardioNudgeSwitch(vm: HomeViewModel) {
     }
 }
 
-/** Un día de la semana: relleno si se entrenó, con aro si es hoy o tiene algo planificado. */
+/** Un día de la semana: relleno si se entrenó, con aro si es hoy. */
 @Composable
 private fun DayCircle(d: DayOfWeek, week: WeekProgress, locale: java.util.Locale) {
     val done = d in week.trainedDays
-    val planned = d in week.plannedDays && !done
     val name = d.getDisplayName(TextStyle.FULL, locale)
-    val state = stringResource(
-        when {
-            done -> R.string.day_trained
-            planned -> R.string.day_planned
-            else -> R.string.day_not_trained
-        },
-    )
+    val state = stringResource(if (done) R.string.day_trained else R.string.day_not_trained)
     val todayLabel = stringResource(R.string.day_today)
     Box(
         contentAlignment = Alignment.Center,
@@ -662,14 +508,7 @@ private fun DayCircle(d: DayOfWeek, week: WeekProgress, locale: java.util.Locale
                 if (done) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surfaceContainerHighest),
                 CircleShape,
             )
-            .then(
-                when {
-                    d == week.today -> Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    // Planificado y aún sin hacer: un aro más suave
-                    planned -> Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.8f), CircleShape)
-                    else -> Modifier
-                },
-            )
+            .then(if (d == week.today) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, CircleShape) else Modifier)
             // «Hoy» también en voz alta: a la vista solo lo distingue el grosor del aro
             .semantics { contentDescription = "$name: $state" + if (d == week.today) ", $todayLabel" else "" },
     ) {

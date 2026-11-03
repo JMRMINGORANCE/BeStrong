@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Comunidad: pestaña de Perfil, aviso de Ajustes y pantalla de la bienvenida -->
+<!-- Comunidad: fila y pantalla de Perfil (ideas y avisos) y pantalla de la bienvenida -->
 <resources>
     <string name="community_tab">Comunidade</string>
     <string name="community_title">Feita em comunidade</string>
@@ -9,14 +9,15 @@
     <string name="community_step2">As sugestões são revistas todos os dias. Se faltar algo, perguntamos-te aqui mesmo.</string>
     <string name="community_step3">As boas ideias são programadas e chegam numa próxima versão.</string>
     <string name="community_step4">Acompanha a tua em «As minhas sugestões».</string>
-    <string name="community_banner_title">Tens uma ideia de melhoria?</string>
-    <string name="community_banner_body">A BeStrong é feita por todos. Sugere-a num minuto.</string>
     <string name="tut_community_t">Feita em comunidade</string>
     <string name="tut_community_d">A BeStrong nasceu no Forocoches e são vocês que a melhoram. Em Perfil › Comunidade sugeres uma ideia num minuto, sem contas, e as boas chegam nas próximas versões.</string>
     <!-- Novedades de esta versión (sustituye a whats_new_body) -->
     <string name="whats_new_latest">• Novo design mais limpo, em claro e em escuro
 • Definições organizadas por temas, cada um no seu ecrã
 • Novo ecrã «Permissões e ligações»: ativa tudo com um toque
-• Separador Comunidade: sugere melhorias e acompanha as respostas
+• Comunidade no Perfil: sugere melhorias, acompanha as respostas e lê os avisos da equipa
 • Cronómetro de cardio e troca de exercício a partir do relógio</string>
+    <string name="community_row_body">Ideias para melhorar a app e avisos da equipa</string>
+    <string name="community_announcements">Avisos da equipa</string>
+    <string name="community_announcements_empty">Ainda não há avisos. Quando a equipa publicar um, vais receber uma notificação e vê-lo aqui.</string>
 </resources>

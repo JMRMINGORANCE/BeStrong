@@ -1,5 +1,8 @@
 package com.bestrong.mobile.update
 
+import com.google.android.play.core.install.model.InstallStatus
+import com.google.android.play.core.install.model.UpdateAvailability
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -22,5 +25,34 @@ class AppUpdatesTest {
         // Abierta hace poco: ya ha visto el diálogo
         assertFalse(UpdateCheckWorker.shouldNotify(available = 120, notifiedVersion = 0, lastOpen = now - day, now = now))
         assertFalse(UpdateCheckWorker.shouldNotify(available = 120, notifiedVersion = 120, lastOpen = now - 3 * day, now = now))
+    }
+
+    private fun decide(
+        availability: Int = UpdateAvailability.UPDATE_AVAILABLE,
+        status: Int = InstallStatus.UNKNOWN,
+        inFlight: Int? = null,
+        dismissedVersion: Int = 0,
+    ) = AppUpdates.decide(availability, status, flexibleAllowed = true, available = 120, inFlightVersion = inFlight, dismissedVersion = dismissedVersion, dismissedAt = now, now = now)
+
+    @Test fun offersOnceAndNotAgainWhileDownloading() {
+        assertEquals(UpdatePrompt.Available(120), decide())
+        // Al volver de la pantalla de Play la descarga sigue «disponible»: no se repite el diálogo
+        assertEquals(UpdatePrompt.None, decide(inFlight = 120))
+        assertEquals(UpdatePrompt.None, decide(status = InstallStatus.DOWNLOADING))
+        assertEquals(UpdatePrompt.None, decide(status = InstallStatus.PENDING))
+        assertEquals(UpdatePrompt.None, decide(status = InstallStatus.INSTALLING))
+        assertEquals(UpdatePrompt.None, decide(availability = UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS))
+    }
+
+    @Test fun downloadedAlwaysOffersRestart() {
+        assertEquals(UpdatePrompt.Downloaded, decide(status = InstallStatus.DOWNLOADED, inFlight = 120))
+        assertEquals(UpdatePrompt.Downloaded, decide(status = InstallStatus.DOWNLOADED, dismissedVersion = 120))
+    }
+
+    @Test fun failedOrCancelledCanBeOfferedAgain() {
+        // Tras un fallo (sin descarga en curso) se vuelve a ofrecer; si la rechazó hace poco, no
+        assertEquals(UpdatePrompt.Available(120), decide(status = InstallStatus.FAILED))
+        assertEquals(UpdatePrompt.None, decide(status = InstallStatus.CANCELED, dismissedVersion = 120))
+        assertEquals(UpdatePrompt.None, decide(availability = UpdateAvailability.UPDATE_NOT_AVAILABLE))
     }
 }

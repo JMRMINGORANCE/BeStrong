@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Ajustes por apartados y pantalla de Permisos y conexiones -->
 <resources>
-    <string name="settings_group_training">O teu treino</string>
-    <string name="settings_group_app">A app</string>
     <string name="s_body_title">Tu e o teu corpo</string>
-    <string name="s_body_summary_empty">Sexo, ano de nascimento e altura para as calorias</string>
     <string name="s_training_title">Treino</string>
-    <string name="s_training_summary">Progressão, aquecimento, ginásios e parceiro</string>
-    <string name="s_during_summary">Descanso, vibração, ecrã, música e voz</string>
-    <string name="s_units_title">Unidades e tabela de séries</string>
-    <string name="s_units_summary">%1$s · colunas da tabela</string>
+    <string name="s_training_summary">O teu corpo, progressão, ginásios e descanso</string>
+    <string name="s_during_summary">Descanso, vibração, ecrã e voz</string>
     <string name="s_appearance_summary">Tema, cor, contraste e letra</string>
     <string name="s_notif_title">Notificações e lembretes</string>
     <string name="s_health_title">Health Connect e relógio</string>
@@ -17,11 +12,8 @@
     <string name="s_privacy_title">Privacidade e segurança</string>
     <string name="s_privacy_summary">Bloqueio de fotos e política de privacidade</string>
     <string name="s_data_title">Dados e cópias de segurança</string>
-    <string name="s_data_summary">Cópias automáticas, exportar e importar</string>
+    <string name="s_data_summary">Cópias, CSV, Health Connect, relógio e privacidade</string>
     <string name="sg_progress">Progressão</string>
-    <string name="sg_rest">Descanso</string>
-    <string name="sg_screen">Ecrã e controlos</string>
-    <string name="sg_media">Música e voz</string>
     <string name="sg_weights">Pesos</string>
     <string name="sg_table">Tabela de séries</string>
     <string name="sg_theme">Tema e cor</string>
@@ -61,4 +53,8 @@
     <string name="perm_backup_d">Uma cópia semanal de todos os teus dados na pasta que escolheres.</string>
     <string name="perm_watch_note">No relógio, a BeStrong pede os sensores, a atividade física e a localização na primeira vez que começas um treino nele.</string>
     <string name="hc_enable_in_settings">Ativa aqui as permissões do BeStrong (o Health Connect deixa de perguntar após duas recusas)</string>
+    <string name="s_advanced_title">Avançado</string>
+    <string name="s_advanced_summary">Aquecimento, vibração, botões de volume, tabela de séries, Excel e apagar dados</string>
+    <string name="sg_more_data">Mais formatos e eliminação</string>
+    <string name="hc_import_weight_body">Traz para Medidas corporais o peso da tua balança ou do Samsung Health, sem duplicar dias.</string>
 </resources>

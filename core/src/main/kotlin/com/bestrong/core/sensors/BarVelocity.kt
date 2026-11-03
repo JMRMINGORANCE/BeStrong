@@ -39,8 +39,10 @@ object BarVelocity {
      * <10 % → 4+, 10–20 % → 3, 20–30 % → 2, 30–40 % → 1, ≥40 % → 0.
      */
     fun estimatedRir(velocities: List<Double>): Int? {
-        if (velocities.size < 2) return null
-        val loss = velocityLoss(velocities)
+        // Una lectura imposible (reloj golpeado, deriva) no decide el RIR
+        val valid = velocities.filter { it in PLAUSIBLE_MIN..PLAUSIBLE_MAX }
+        if (valid.size < 2) return null
+        val loss = velocityLoss(valid)
         return when {
             loss < 0.10 -> 4
             loss < 0.20 -> 3
@@ -49,6 +51,10 @@ object BarVelocity {
             else -> 0
         }
     }
+
+    /** Velocidades medias creíbles para una repetición con carga (m/s). */
+    const val PLAUSIBLE_MIN = 0.05
+    const val PLAUSIBLE_MAX = 2.5
 
     /** RPE equivalente (10 − RIR). */
     fun rpeFromRir(rir: Int): Double = (10 - rir).coerceIn(6, 10).toDouble()

@@ -85,20 +85,23 @@ import com.bestrong.mobile.ui.components.uiLanguage
 /** Qué se enseña: todo o una sola clase de resultado. */
 private enum class SearchScope { ALL, ROUTINES, EXERCISES, WORKOUTS, SETTINGS }
 
-/** Una página de Ajustes buscable: su nombre y su resumen (las palabras con que se encuentra). */
-private data class SettingEntry(val page: String, val title: Int, val summary: Int)
+/**
+ * Algo buscable de Ajustes: la página que abre (el nombre de su `SettingsPageId`), cómo se llama esa página
+ * y el título y resumen de lo buscado (las palabras con que se encuentra).
+ */
+private data class SettingEntry(val page: String, val pageTitle: Int, val title: Int, val summary: Int)
 
 private val SETTINGS = listOf(
-    SettingEntry("BODY", R.string.s_body_title, R.string.body_data_body),
-    SettingEntry("TRAINING", R.string.s_training_title, R.string.s_training_summary),
-    SettingEntry("DURING", R.string.settings_during, R.string.s_during_summary),
-    SettingEntry("UNITS", R.string.s_units_title, R.string.s_units_title),
-    SettingEntry("APPEARANCE", R.string.appearance, R.string.style_footer),
-    SettingEntry("NOTIFICATIONS", R.string.s_notif_title, R.string.reminders),
-    SettingEntry("PERMISSIONS", R.string.perm_title, R.string.perm_title),
-    SettingEntry("HEALTH", R.string.s_health_title, R.string.s_health_summary),
-    SettingEntry("PRIVACY", R.string.s_privacy_title, R.string.s_privacy_summary),
-    SettingEntry("DATA", R.string.s_data_title, R.string.s_data_summary),
+    SettingEntry("TRAINING", R.string.s_training_title, R.string.s_training_title, R.string.s_training_summary),
+    SettingEntry("TRAINING", R.string.s_training_title, R.string.s_body_title, R.string.body_data_body),
+    SettingEntry("TRAINING", R.string.s_training_title, R.string.settings_during, R.string.s_during_summary),
+    SettingEntry("APPEARANCE", R.string.appearance, R.string.appearance, R.string.style_footer),
+    SettingEntry("DATA", R.string.s_data_title, R.string.s_data_title, R.string.s_data_summary),
+    SettingEntry("DATA", R.string.s_data_title, R.string.s_health_title, R.string.s_health_summary),
+    SettingEntry("DATA", R.string.s_data_title, R.string.s_privacy_title, R.string.s_privacy_summary),
+    SettingEntry("CONNECTIONS", R.string.perm_title, R.string.perm_title, R.string.perm_subtitle),
+    SettingEntry("CONNECTIONS", R.string.perm_title, R.string.s_notif_title, R.string.reminders),
+    SettingEntry("ADVANCED", R.string.s_advanced_title, R.string.s_advanced_title, R.string.s_advanced_summary),
 )
 
 /** Búsquedas recientes (mientras la app sigue abierta; no se guardan en disco). */
@@ -253,8 +256,8 @@ fun UniversalSearchScreen(
             }
             if ((all || scope == SearchScope.SETTINGS) && foundSettings.isNotEmpty()) {
                 item { SectionLabel(stringResource(R.string.srch_settings), count = foundSettings.size) }
-                items(foundSettings, key = { "s-${it.page}" }) { s ->
-                    ResultRow(Icons.Default.Settings, stringResource(s.title), stringResource(R.string.srch_settings_path, stringResource(s.title)), onClick = tracked { onOpenSettings(s.page) })
+                items(foundSettings, key = { "s-${it.page}-${it.title}" }) { s ->
+                    ResultRow(Icons.Default.Settings, stringResource(s.title), stringResource(R.string.srch_settings_path, stringResource(s.pageTitle)), onClick = tracked { onOpenSettings(s.page) })
                 }
             }
         }

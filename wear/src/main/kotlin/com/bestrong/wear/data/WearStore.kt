@@ -185,9 +185,7 @@ class WearStore @Inject constructor(@ApplicationContext context: Context) {
         val startOfToday = today.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
         val doneToday = _history.value.filter { it.startedAtEpochMs >= startOfToday }.mapNotNull { it.routineId }.toSet()
         program.firstOrNull { it.id !in doneToday }?.let { return it }
-        val monday = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY)).toEpochDay()
-        val planned = _settings.value.weekPlans[monday]?.get(today.dayOfWeek.value)
-        return com.bestrong.core.training.QuickRoutines.pick(routines, _history.value, planned, startOfToday, 1).firstOrNull()
+        return com.bestrong.core.training.QuickRoutines.pick(routines, _history.value, 1).firstOrNull()
     }
 
     /** Rutina creada en el reloj: se guarda aquí y se envía al móvil. */

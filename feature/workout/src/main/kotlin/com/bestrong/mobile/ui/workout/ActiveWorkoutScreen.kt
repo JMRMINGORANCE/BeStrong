@@ -155,15 +155,8 @@ fun ActiveWorkoutScreen(
     val restEndedAt by vm.restEndedAt.collectAsStateWithLifecycle()
     val summary by vm.summary.collectAsStateWithLifecycle()
     val settings by vm.settings.collectAsStateWithLifecycle()
-    val deadline by vm.deadline.collectAsStateWithLifecycle()
     val suggestions by vm.suggestions.collectAsStateWithLifecycle()
     val metrics by vm.watchMetrics.collectAsStateWithLifecycle()
-    // Volumen = serie de la pareja solo mientras su entreno está a la vista (al salir de esta pantalla, la tuya)
-    val partnerShown by vm.partnerMode.collectAsStateWithLifecycle()
-    androidx.compose.runtime.DisposableEffect(partnerShown) {
-        vm.onScreen(true)
-        onDispose { vm.onScreen(false) }
-    }
     var confirmFinish by rememberSaveable { mutableStateOf(false) }
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
     var renaming by rememberSaveable { mutableStateOf(false) }
@@ -219,7 +212,6 @@ fun ActiveWorkoutScreen(
     val undoExercise = stringResource(R.string.undo_exercise_deleted)
     val undoCopy = stringResource(R.string.undo_copied_sets)
     val undoComplete = stringResource(R.string.undo_completed_sets)
-    val undoTrim = stringResource(R.string.undo_trimmed_sets)
     val undoRpeLoad = stringResource(R.string.undo_rpe_loads)
     val undoGym = stringResource(R.string.undo_gym_loads)
     val goalMsg = stringResource(R.string.goal_reached_live)
@@ -244,7 +236,6 @@ fun ActiveWorkoutScreen(
                         ActiveWorkoutViewModel.UndoKind.EXERCISE -> undoExercise
                         ActiveWorkoutViewModel.UndoKind.COPY -> undoCopy
                         ActiveWorkoutViewModel.UndoKind.COMPLETE -> undoComplete
-                        ActiveWorkoutViewModel.UndoKind.TRIM -> undoTrim
                         ActiveWorkoutViewModel.UndoKind.RPE_LOAD -> undoRpeLoad
                         ActiveWorkoutViewModel.UndoKind.GYM -> undoGym
                     }
@@ -278,10 +269,6 @@ fun ActiveWorkoutScreen(
     val listContent: @Composable (Modifier) -> Unit = { m ->
         ExerciseList(w, previous, suggestions, vm, onAddExercises, listState, m)
     }
-
-    // Bloqueo de toques (bolsillo, sudor): solo se quita con una pulsación larga
-    var touchLocked by rememberSaveable { mutableStateOf(false) }
-    if (touchLocked) TouchLockOverlay { touchLocked = false }
 
     Scaffold(
         topBar = {
@@ -324,7 +311,6 @@ fun ActiveWorkoutScreen(
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.action_rename)) }, onClick = { menu = false; renaming = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.workout_notes)) }, onClick = { menu = false; editingNotes = true })
-                        DropdownMenuItem(text = { Text(stringResource(R.string.touch_lock)) }, onClick = { menu = false; touchLocked = true })
                         DropdownMenuItem(text = { Text(stringResource(R.string.gym_switch_title)) }, onClick = { menu = false; openGyms() })
                         DropdownMenuItem(text = { Text(stringResource(R.string.workout_discard)) }, onClick = { menu = false; confirmDiscard = true })
                     }
@@ -342,7 +328,6 @@ fun ActiveWorkoutScreen(
                     enter = androidx.compose.animation.slideInVertically { it } + androidx.compose.animation.fadeIn(),
                     exit = androidx.compose.animation.slideOutVertically { it } + androidx.compose.animation.fadeOut(),
                 ) {
-                    // La siguiente serie solo si el descanso es de quien se ve (el de la pareja no lleva la tuya)
                     shownRest?.let { r ->
                         // Antes de cambiar de ejercicio, la tarjeta «Siguiente ejercicio» (propuesta 09) en vez de la barra
                         val nextExercise = nextExerciseAfterRest(w, r).takeIf { settings.nextExerciseCard }
@@ -358,7 +343,7 @@ fun ActiveWorkoutScreen(
     ) { padding ->
         // Con el teclado abierto la lista se encoge y deja a la vista la serie que se escribe (la app va de borde a borde)
         val content = Modifier.padding(padding).consumeWindowInsets(padding).imePadding().fillMaxSize()
-        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds, deadline, vm::setDeadline, vm::fitToDeadline)
+        val eta = EtaInputs(rest?.endsAtEpochMs, settings.warmupRestSeconds)
         when {
             posture == FoldPosture.TABLETOP -> Column(content) {
                 // En pausa también se avisa en modo mesa y desplegado (antes solo plegado)
@@ -385,19 +370,15 @@ fun ActiveWorkoutScreen(
                 ) {
                     if (w.isPaused) PausedBanner(vm::togglePause)
                     rest?.let { RestTimerBar(it, vm::adjustRest, vm::skipRest, large = true, next = nextSetLabel(w, dumbbellTotal).takeIf { _ -> it.workoutId == null || it.workoutId == w.id }) }
-                    if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                     RestOverrunBanner(restEndedAt, vm::dismissOverrun)
                     HeartRateCard(w.id, liveMetrics)
                     UpcomingLoadCards(w, vm, bests, barKgFor = { settings.exerciseBarKg[it] })
-                    if (settings.mediaControls) MediaControls(settings.musicApp)
                     SummaryPanel(w, previous, liveMetrics, eta = eta, dumbbellTotal = dumbbellTotal)
                 }
             }
             else -> Column(content) {
-                if (settings.partnerName.isNotBlank()) PartnerSwitch(vm, settings.partnerName)
                 if (w.isPaused) PausedBanner(vm::togglePause)
                 RestOverrunBanner(restEndedAt, vm::dismissOverrun)
-                if (settings.mediaControls) MediaControls(settings.musicApp)
                 if (focusMode) {
                     FocusSetView(
                         w = w,
@@ -443,7 +424,7 @@ fun ActiveWorkoutScreen(
                     }
                 }
             },
-            confirmButton = { Button(onClick = { confirmFinish = false; val partner = vm.partnerMode.value; vm.finish(); if (nothingDone && !partner) onFinished() }) { Text(stringResource(R.string.workout_finish)) } },
+            confirmButton = { Button(onClick = { confirmFinish = false; vm.finish(); if (nothingDone) onFinished() }) { Text(stringResource(R.string.workout_finish)) } },
             dismissButton = { TextButton(onClick = { confirmFinish = false }) { Text(stringResource(R.string.action_keep_going)) } },
         )
     }
@@ -452,7 +433,7 @@ fun ActiveWorkoutScreen(
             onDismissRequest = { confirmDiscard = false },
             title = { Text(stringResource(R.string.workout_discard_q)) },
             text = { Text(stringResource(R.string.workout_discard_body)) },
-            confirmButton = { Button(onClick = { confirmDiscard = false; val partner = vm.partnerMode.value; vm.discard(); if (!partner) onDiscarded() }) { Text(stringResource(R.string.action_discard)) } },
+            confirmButton = { Button(onClick = { confirmDiscard = false; vm.discard(); onDiscarded() }) { Text(stringResource(R.string.action_discard)) } },
             dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
@@ -571,15 +552,7 @@ private fun StatsRow(w: Workout, metrics: LiveMetrics?, modifier: Modifier = Mod
         }
         // Tiempo aproximado para terminar (series pendientes + descansos) y a qué hora
         val remaining = WorkoutEditor.estimatedRemainingSeconds(w, nowEpochMs = now, warmupRestSeconds = eta.warmupRestSeconds, restEndsAtEpochMs = eta.restEndsAtEpochMs)
-        if (remaining > 0) {
-            // «Ajustar» solo si de verdad hay algo que recortar
-            val deadline = eta.deadlineEpochMs
-            val canFit = deadline != null && now + remaining * 1000L > deadline &&
-                WorkoutEditor.trimToFit(w, ((deadline - now) / 1000).toInt().coerceAtLeast(0)) {
-                    WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = now, warmupRestSeconds = eta.warmupRestSeconds, restEndsAtEpochMs = eta.restEndsAtEpochMs)
-                } != w
-            RemainingTimeLine(remaining, now, eta, canFit)
-        }
+        if (remaining > 0) RemainingTimeLine(remaining, now)
     }
 }
 

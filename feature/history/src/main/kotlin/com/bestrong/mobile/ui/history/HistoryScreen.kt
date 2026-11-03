@@ -110,10 +110,7 @@ fun HistoryScreen(
     val days by vm.trainingDays.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
     val filtered by vm.filtered.collectAsStateWithLifecycle()
-    val heatmap by vm.heatmap.collectAsStateWithLifecycle()
-    val partnerWorkouts by vm.partnerHistory.collectAsStateWithLifecycle()
-    val showPartner by vm.showPartner.collectAsStateWithLifecycle()
-    val onlyPartner by vm.onlyPartner.collectAsStateWithLifecycle()
+    val year by vm.year.collectAsStateWithLifecycle()
     val selectedDay by vm.selectedDay.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val view = LocalView.current
@@ -147,14 +144,12 @@ fun HistoryScreen(
         val routines by vm.routines.collectAsStateWithLifecycle()
         LogPastWorkoutDialog(
             routines = routines,
-            onLog = { r, start, end, forPartner ->
+            onLog = { r, start, end ->
                 logging = false
-                vm.logPast(r, start, end, forPartner) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
+                vm.logPast(r, start, end) { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } }
             },
             onDismiss = { logging = false },
             startEpochMs = logStart,
-            partner = vm.partnerName(),
-            forPartnerInitially = onlyPartner,
         )
     }
 
@@ -175,7 +170,7 @@ fun HistoryScreen(
                                 logging = true
                             }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
                         }
-                        if (history.isEmpty() && partnerWorkouts.isEmpty()) {
+                        if (history.isEmpty()) {
                             EmptyState(
                                 Icons.Default.History,
                                 stringResource(R.string.history_empty_title),
@@ -193,15 +188,14 @@ fun HistoryScreen(
                                             days,
                                             Modifier,
                                             selectedDay,
-                                            // Con «Pareja» un día vacío puede ser uno tuyo entrenado: ahí no se apunta nada
                                             onEmptyDay = { day: java.time.LocalDate ->
                                                 logStart = pastWorkoutStart(day)
                                                 logging = true
-                                            }.takeUnless { onlyPartner },
+                                            },
                                         ) { vm.selectedDay.value = it }
                                     }
                                 }
-                                item { com.bestrong.mobile.ui.components.Panel { YearHeatmap(heatmap) } }
+                                item { com.bestrong.mobile.ui.components.Panel { YearSection(year) } }
                             }
                             item { com.bestrong.mobile.ui.components.SectionHeader(stringResource(R.string.history_workouts), large = true) }
                             item { HistoryViewToggle(journal) { journal = it } }
@@ -210,9 +204,6 @@ fun HistoryScreen(
                             item { RoutineFilterRow(vm) }
                             item { TagFilterRow(vm) }
                             if (journal && filtered.isEmpty()) item { Text(stringResource(R.string.diary_empty), color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                            if (partnerWorkouts.isNotEmpty()) {
-                                item { AthleteFilterRow(vm, partnerWorkouts.first().athlete.orEmpty()) }
-                            }
                             selectedDay?.let { day ->
                                 item {
                                     // Filtro por el día tocado en el calendario; tocar el chip lo quita
@@ -256,8 +247,7 @@ fun HistoryScreen(
             detailPane = {
                 AnimatedPane {
                     val id = (navigator.currentDestination?.contentKey as? String)
-                    // También los de la pareja (con el chip Pareja o Los dos)
-                    val w = history.firstOrNull { it.id == id } ?: partnerWorkouts.firstOrNull { it.id == id }
+                    val w = history.firstOrNull { it.id == id }
                     if (w == null) {
                         EmptyState(Icons.Default.FitnessCenter, stringResource(R.string.history_pick_title), stringResource(R.string.history_pick_body))
                     } else {
@@ -698,18 +688,6 @@ private fun WorkoutGymLine(w: Workout, vm: HistoryViewModel) {
             },
             confirmButton = { TextButton(onClick = { picking = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
-    }
-}
-
-/** De quién se ven los entrenos: los tuyos, los de tu pareja o los de los dos. */
-@Composable
-private fun AthleteFilterRow(vm: HistoryViewModel, partner: String) {
-    val both by vm.showPartner.collectAsStateWithLifecycle()
-    val onlyPartner by vm.onlyPartner.collectAsStateWithLifecycle()
-    androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        FilterChip(selected = !both && !onlyPartner, onClick = { vm.showPartner.value = false; vm.onlyPartner.value = false }, label = { Text(stringResource(R.string.athlete_me)) })
-        FilterChip(selected = onlyPartner, onClick = { vm.showPartner.value = false; vm.onlyPartner.value = true }, label = { Text(partner) })
-        FilterChip(selected = both && !onlyPartner, onClick = { vm.showPartner.value = true; vm.onlyPartner.value = false }, label = { Text(stringResource(R.string.athlete_both)) })
     }
 }
 

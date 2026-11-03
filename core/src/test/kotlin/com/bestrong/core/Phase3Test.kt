@@ -10,7 +10,6 @@ import com.bestrong.core.stats.OneRepMax
 import com.bestrong.core.stats.Scores
 import com.bestrong.core.stats.Sex
 import com.bestrong.core.stats.Strength
-import com.bestrong.core.stats.StrengthLevel
 import java.time.LocalDate
 import java.time.ZoneOffset
 import org.junit.Assert.assertEquals
@@ -48,23 +47,12 @@ class Phase3Test {
         assertEquals(Triple(182.5, 192.5, 202.5), Scores.attempts(200.0))
     }
 
-    @Test fun strengthLevels() {
-        val s = Strength.standing("bench_press", 100.0, 80.0, Sex.MALE)!!
-        assertEquals(StrengthLevel.INTERMEDIATE, s.level)
-        assertEquals(140.0, s.nextLevelKg!!, 0.001)
-        assertNull(Strength.standing("bench_press", 30.0, 80.0, Sex.MALE)!!.level)
-        assertNull(Strength.standing("lateral_raise_unknown", 30.0, 80.0, Sex.MALE))
-    }
-
-    @Test fun balanceEffectiveVolumeAndTimeline() {
+    @Test fun balanceAndTimeline() {
         val now = 100 * day
         val history = listOf(w(now - day, "bench_press", 80.0, sets = 12), w(now - 2 * day, "barbell_row", 60.0, sets = 4), w(now - 3 * day, "squat", 100.0, sets = 4))
         val b = Strength.balance(history, now)
         assertTrue(b.pushPullImbalanced)
         assertEquals(16.0, b.upper, 0.0)
-        val easy = w(0, "bench_press", 50.0, rpe = 5.0)
-        assertEquals(0.0, Strength.effectiveSets(easy), 0.0)
-        assertEquals(3.0, Strength.effectiveSets(w(0, "bench_press", 50.0)), 0.0)
         val timeline = Strength.recordTimeline(listOf(w(0, "bench_press", 60.0), w(day, "bench_press", 70.0), w(2 * day, "bench_press", 65.0)))
         assertTrue(timeline.isNotEmpty())
         assertTrue(timeline.all { it.dateEpochMs >= day && it.dateEpochMs < 2 * day })

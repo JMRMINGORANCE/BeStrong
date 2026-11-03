@@ -39,9 +39,12 @@ class AnnouncementsWorker(context: Context, params: WorkerParameters) : Coroutin
 
     override suspend fun doWork(): Result {
         // Sin conexión o sin respuesta del script: se prueba en la siguiente vuelta
-        val list = runCatching { fetch() }.getOrNull().orEmpty()
+        val fetched = runCatching { fetch() }.getOrNull()
+        val list = fetched.orEmpty()
         val prefs = applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
         prefs.edit().putLong(KEY_LAST_CHECK, System.currentTimeMillis()).apply()
+        // La lista vale también para Perfil › Comunidad, que la enseña sin pedir nada a la red
+        if (fetched != null) prefs.edit().putString(KEY_CACHE, toJson(fetched)).apply()
         pick(list, prefs.getInt(KEY_SEEN, 0))?.let { next ->
             notify(applicationContext, next)
             prefs.edit().putInt(KEY_SEEN, list.maxOf { it.id }).apply()
@@ -84,6 +87,7 @@ class AnnouncementsWorker(context: Context, params: WorkerParameters) : Coroutin
         private const val PREFS = "announcements"
         private const val KEY_SEEN = "seen"
         private const val KEY_LAST_CHECK = "last_check"
+        private const val KEY_CACHE = "cache"
         private const val NAME_NOW = "announcements-now"
         private const val MIN_GAP_MS = 30 * 60 * 1000L
         private const val CHANNEL = "announcements"
@@ -110,6 +114,23 @@ class AnnouncementsWorker(context: Context, params: WorkerParameters) : Coroutin
                 .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
                 .build()
             WorkManager.getInstance(context).enqueueUniqueWork(NAME_NOW, ExistingWorkPolicy.KEEP, request)
+        }
+
+        /** Los últimos avisos que se trajeron (el más reciente primero); vacío si nunca hubo conexión. */
+        fun cached(context: Context): List<Announcement> {
+            val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_CACHE, null) ?: return emptyList()
+            return runCatching { fromJson(raw) }.getOrDefault(emptyList()).sortedByDescending { it.id }
+        }
+
+        fun toJson(list: List<Announcement>): String = org.json.JSONArray(
+            list.map { JSONObject().put("id", it.id).put("title", it.title).put("text", it.text) },
+        ).toString()
+
+        fun fromJson(raw: String): List<Announcement> {
+            val array = org.json.JSONArray(raw)
+            return (0 until array.length()).mapNotNull { i ->
+                array.optJSONObject(i)?.let { Announcement(it.optInt("id"), it.optString("title"), it.optString("text")) }
+            }
         }
 
         /** El aviso más reciente que aún no se ha enseñado (uno solo, aunque haya varios nuevos). */

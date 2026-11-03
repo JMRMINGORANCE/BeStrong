@@ -8,15 +8,9 @@ import com.bestrong.core.io.WrongPasswordException
 import com.bestrong.core.io.Xlsx
 import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.library.Programs
-import com.bestrong.core.model.SessionRating
 import com.bestrong.core.model.Workout
 import com.bestrong.core.model.WorkoutExercise
 import com.bestrong.core.model.WorkoutSet
-import com.bestrong.core.training.IntervalPlan
-import com.bestrong.core.training.IntervalTimer
-import com.bestrong.core.training.Nutrition
-import com.bestrong.core.training.Readiness
-import com.bestrong.core.training.ReadinessReport
 import java.io.ByteArrayInputStream
 import java.time.ZoneOffset
 import java.util.zip.ZipInputStream
@@ -28,17 +22,6 @@ import org.junit.Assert.fail
 import org.junit.Test
 
 class Phase6Test {
-    @Test fun readinessAndNutrition() {
-        val good = Readiness.score(8.0, 55, 56, SessionRating(energy = 5, pain = 1))
-        assertEquals(ReadinessReport.Level.HIGH, good.level)
-        val bad = Readiness.score(4.5, 68, 56, SessionRating(energy = 1, pain = 4))
-        assertEquals(ReadinessReport.Level.LOW, bad.level)
-        assertEquals(0.9, Readiness.loadFactor(bad), 0.0)
-        assertEquals(70, Readiness.score(null, null, null).score)
-        assertEquals(128..176, Nutrition.proteinRangeGrams(80.0))
-        assertEquals(750, Nutrition.waterDuringWorkoutMl(90))
-    }
-
     @Test fun encryptedBackupRoundTrip() {
         val enc = EncryptedBackup.encrypt("{\"hola\":1}", "secreto".toCharArray())
         assertTrue(EncryptedBackup.isEncrypted(enc))
@@ -103,24 +86,6 @@ class Phase6Test {
         assertEquals(1, j.skippedRows)
     }
 
-    @Test fun routineLinkAndCircuit() {
-        val routine = Programs.all.first().toRoutines("es").first()
-        val link = RoutineLink.encode(routine)
-        assertTrue(link.startsWith("bestrong://routine?d="))
-        assertTrue("Enlace demasiado largo para un QR: ${link.length}", link.length < 2_000)
-        val back = RoutineLink.decode(link)
-        assertNotNull(back)
-        assertEquals(routine.exercises.map { it.exercise.id }, back!!.exercises.map { it.exercise.id })
-        assertFalse(back.id == routine.id)
-        assertEquals(null, RoutineLink.decode("bestrong://routine?d=%%%"))
-
-        val circuit = IntervalPlan.Circuit(listOf("Burpees", "Sentadillas", "Plancha"), 40, 20, 2)
-        assertEquals(6 * 40 + 5 * 20, IntervalTimer.totalSeconds(circuit))
-        val (phase, _) = IntervalTimer.at(circuit, 65)!!
-        assertEquals(1, phase.station)
-        assertTrue(phase.work)
-    }
-
     @Test fun icsCalendar() {
         val ics = com.bestrong.core.io.Ics.generate(
             listOf(com.bestrong.core.io.CalendarEvent(java.time.LocalDate.of(2026, 10, 12), "Torso, fuerza", 60)),
@@ -131,5 +96,17 @@ class Phase6Test {
         assertTrue(ics.contains("DTSTART:20261012T160000Z"))
         assertTrue(ics.contains("DTEND:20261012T170000Z"))
         assertTrue(ics.contains("SUMMARY:Torso\\, fuerza"))
+    }
+
+    @Test fun routineLink() {
+        val routine = Programs.all.first().toRoutines("es").first()
+        val link = RoutineLink.encode(routine)
+        assertTrue(link.startsWith("bestrong://routine?d="))
+        assertTrue("Enlace demasiado largo para un QR: ${link.length}", link.length < 2_000)
+        val back = RoutineLink.decode(link)
+        assertNotNull(back)
+        assertEquals(routine.exercises.map { it.exercise.id }, back!!.exercises.map { it.exercise.id })
+        assertFalse(back.id == routine.id)
+        assertEquals(null, RoutineLink.decode("bestrong://routine?d=%%%"))
     }
 }

@@ -5,22 +5,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -39,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.bestrong.mobile.shared.R
 
 /**
- * Pestaña «Comunidad» de Perfil: BeStrong se hace con las ideas de quien la usa (nació en Forocoches).
+ * Contenido de «Comunidad» (Perfil): BeStrong se hace con las ideas de quien la usa (nació en Forocoches).
  * Explica cómo aportar y lleva al buzón de propuestas.
  */
 @Composable
@@ -105,29 +108,65 @@ private fun Step(icon: ImageVector, text: Int) {
     }
 }
 
-/** Aviso bien visible arriba de Ajustes: lleva a la pestaña Comunidad. */
+/**
+ * Pantalla «Comunidad» (desde la fila de Perfil): cómo aportar, el buzón de ideas y los avisos del equipo.
+ * Los avisos son los últimos que trajo [AnnouncementsWorker][com.bestrong.mobile.notify.AnnouncementsWorker]:
+ * abrirla no pide nada a la red.
+ */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun CommunityBanner(onClick: () -> Unit, modifier: Modifier = Modifier) {
-    // Tarjeta neutra con un borde fino del acento: destaca sin ser un bloque de color
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)),
-    ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Box(
-                Modifier.size(44.dp).clip(CircleShape).background(com.bestrong.mobile.ui.components.brandGradient()),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Default.Lightbulb, null, tint = MaterialTheme.colorScheme.onPrimary)
+fun CommunityDialog(onPropose: () -> Unit, onMine: () -> Unit, onDismiss: () -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val announcements = androidx.compose.runtime.remember { com.bestrong.mobile.notify.AnnouncementsWorker.cached(context) }
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
+        // Fondo opaco: el tema deja transparente el de Scaffold y se veía la pantalla de detrás
+        com.bestrong.mobile.ui.theme.ScreenBackdrop(MaterialTheme.colorScheme.primary) {
+            androidx.compose.material3.Scaffold(
+                topBar = {
+                    androidx.compose.material3.TopAppBar(
+                        title = { Text(stringResource(R.string.community_tab)) },
+                        navigationIcon = {
+                            androidx.compose.material3.IconButton(onClick = onDismiss) {
+                                Icon(Icons.Default.Close, stringResource(R.string.action_close))
+                            }
+                        },
+                    )
+                },
+            ) { padding ->
+                Box(Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
+                    Column(Modifier.widthIn(max = 720.dp).padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        CommunitySection(onPropose, onMine)
+                        AnnouncementsPanel(announcements)
+                    }
+                }
             }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(stringResource(R.string.community_banner_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(stringResource(R.string.community_banner_body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** Avisos del equipo, el más reciente primero; sin ninguno, se explica dónde llegarán. */
+@Composable
+private fun AnnouncementsPanel(list: List<com.bestrong.mobile.notify.Announcement>) {
+    com.bestrong.mobile.ui.components.Panel {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(Icons.Default.Campaign, null, tint = MaterialTheme.colorScheme.primary)
+                Text(
+                    stringResource(R.string.community_announcements),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.semantics { heading() },
+                )
             }
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.primary)
+            if (list.isEmpty()) {
+                Text(stringResource(R.string.community_announcements_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            list.forEach { a ->
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(a.title.ifEmpty { stringResource(R.string.notif_announcement_title) }, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Text(a.text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
     }
 }

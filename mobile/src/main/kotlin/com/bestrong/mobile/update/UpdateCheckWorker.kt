@@ -20,6 +20,7 @@ import androidx.work.WorkerParameters
 import com.bestrong.mobile.AppIntents
 import com.bestrong.mobile.shared.R
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.tasks.await
@@ -33,17 +34,27 @@ class UpdateCheckWorker(context: Context, params: WorkerParameters) : CoroutineW
     override suspend fun doWork(): Result {
         val info = runCatching { AppUpdateManagerFactory.create(applicationContext).appUpdateInfo.await() }.getOrNull()
         val prefs = applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (info != null && info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
-            val version = info.availableVersionCode()
-            val notify = shouldNotify(version, prefs.getInt(KEY_NOTIFIED_VERSION, 0), prefs.getLong(KEY_LAST_OPEN, 0), System.currentTimeMillis())
-            if (notify && notify(applicationContext)) prefs.edit().putInt(KEY_NOTIFIED_VERSION, version).apply()
+        if (info == null) return Result.success()
+        val version = info.availableVersionCode()
+        val lastOpen = prefs.getLong(KEY_LAST_OPEN, 0)
+        val now = System.currentTimeMillis()
+        when {
+            // Descargada pero sin instalar (se aceptó y se cerró la app): «Lista para instalar», una vez por versión
+            info.installStatus() == InstallStatus.DOWNLOADED ->
+                if (shouldNotify(version, prefs.getInt(KEY_NOTIFIED_READY, 0), lastOpen, now) && notify(applicationContext, ready = true)) {
+                    prefs.edit().putInt(KEY_NOTIFIED_READY, version).apply()
+                }
+            info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE ->
+                if (shouldNotify(version, prefs.getInt(KEY_NOTIFIED_VERSION, 0), lastOpen, now) && notify(applicationContext, ready = false)) {
+                    prefs.edit().putInt(KEY_NOTIFIED_VERSION, version).apply()
+                }
         }
         return Result.success()
     }
 
     /** Al tocarla se abre la app, que enseña el diálogo para actualizar. */
     @Suppress("MissingPermission")
-    private fun notify(context: Context): Boolean {
+    private fun notify(context: Context, ready: Boolean): Boolean {
         // El mismo canal que los avisos del equipo («Avisos de BeStrong», ver AnnouncementsWorker)
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel(CHANNEL, context.getString(R.string.notif_channel_announcements), NotificationManager.IMPORTANCE_DEFAULT),
@@ -57,8 +68,8 @@ class UpdateCheckWorker(context: Context, params: WorkerParameters) : CoroutineW
         )
         val n = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_dumbbell)
-            .setContentTitle(context.getString(R.string.update_available_title))
-            .setContentText(context.getString(R.string.update_notification_text))
+            .setContentTitle(context.getString(if (ready) R.string.update_ready_title else R.string.update_available_title))
+            .setContentText(context.getString(if (ready) R.string.update_ready_text else R.string.update_notification_text))
             .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
             .setAutoCancel(true)
             .setContentIntent(open)
@@ -71,6 +82,7 @@ class UpdateCheckWorker(context: Context, params: WorkerParameters) : CoroutineW
         const val PREFS = "app_updates"
         const val KEY_LAST_OPEN = "last_open"
         private const val KEY_NOTIFIED_VERSION = "notified_version"
+        private const val KEY_NOTIFIED_READY = "notified_ready"
         private const val NAME = "update-check"
         private const val CHANNEL = "announcements"
         private const val NOTIFICATION_ID = 28

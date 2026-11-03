@@ -13,11 +13,9 @@ import com.bestrong.core.io.Xlsx
 import com.bestrong.core.model.BodyMeasurement
 import com.bestrong.core.model.MuscleGroup
 import com.bestrong.core.stats.Achievement
-import com.bestrong.core.stats.PeriodSummary
 import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.Strength
-import com.bestrong.core.stats.StrengthStanding
 import com.bestrong.core.stats.TrainingLoad
 import com.bestrong.core.stats.WeekBucket
 import com.bestrong.core.stats.WorkoutStats
@@ -36,11 +34,9 @@ import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.ZoneId
-import java.time.temporal.TemporalAdjusters
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -72,23 +68,14 @@ data class ProfileStats(
     val totalSets: Int = 0,
     /** Series por músculo de las últimas 8 semanas (el más trabajado primero). */
     val muscleTrend: Map<MuscleGroup, List<Pair<java.time.LocalDate, Double>>> = emptyMap(),
-    /** Tu año (el actual; en enero, el anterior, que es el que tiene sentido resumir). */
-    val year: com.bestrong.core.stats.YearSummary? = null,
 )
 
-/** Estadísticas de la fase 3 (niveles, equilibrio, logros, recuperación…). */
+/** Estadísticas de la fase 3 (equilibrio, logros, recuperación…). */
 data class AdvancedStats(
-    /** Rendimiento por franja del día (mañana, tarde, noche), la mejor primero. */
-    val dayParts: List<com.bestrong.core.stats.DayPartStat> = emptyList(),
-    /** Rendimiento por día de la semana (el mejor primero). */
-    val weekdays: List<Triple<java.time.DayOfWeek, Int, Double>> = emptyList(),
     val bodyWeightKg: Double? = null,
-    val standings: List<StrengthStanding> = emptyList(),
     /** Series por patrón de movimiento (4 semanas) y ejercicios para los que van cortos. */
     val patterns: com.bestrong.core.stats.PatternBalance = com.bestrong.core.stats.PatternBalance(emptyMap()),
     val patternSuggestions: Map<com.bestrong.core.stats.MovementPattern, List<com.bestrong.core.model.Exercise>> = emptyMap(),
-    val week: PeriodSummary? = null,
-    val weekEffectiveSets: Double = 0.0,
     val achievements: List<Achievement> = emptyList(),
     val daysSince: Map<MuscleGroup, Int?> = emptyMap(),
     val soreness: Map<MuscleGroup, Double> = emptyMap(),
@@ -157,34 +144,25 @@ class ProfileViewModel @Inject constructor(
                 .take(8),
             weeklyMuscles = WorkoutStats.weeklySetsPerMuscle(history, today, zone),
             muscleTrend = WorkoutStats.muscleTrend(history, today, zone),
-            // En enero se resume el año que acaba de terminar (si entrenaste); si no, el actual
-            year = (if (today.monthValue == 1) Strength.yearSummary(history, today.year - 1, zone) else null)
-                ?: Strength.yearSummary(history, today.year, zone),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ProfileStats())
 
-    // Solo el sexo de los ajustes: cambiar el tema o las unidades no rehace estos cálculos (son caros con mucho historial)
-    val advanced: StateFlow<AdvancedStats> = combine(repo.history, repo.measurements, settingsStore.settings.map { it.sex to it.unit }.distinctUntilChanged()) { history, measures, (sex, unit) ->
+    // Solo la unidad de los ajustes (para el reto): cambiar el tema no rehace estos cálculos (son caros con mucho historial)
+    val advanced: StateFlow<AdvancedStats> = combine(repo.history, repo.measurements, settingsStore.settings.map { it.unit }.distinctUntilChanged()) { history, measures, unit ->
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val now = System.currentTimeMillis()
         val bw = measures.sortedByDescending { it.dateEpochMs }.firstNotNullOfOrNull { it.weightKg }
-        val weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(zone).toInstant().toEpochMilli()
         val patterns = com.bestrong.core.stats.MovementPatterns.balance(history, now)
         AdvancedStats(
             bodyWeightKg = bw,
-            standings = bw?.let { Strength.standings(history, it, sex) }.orEmpty(),
             patterns = patterns,
             patternSuggestions = patterns.lagging().associateWith { com.bestrong.core.stats.MovementPatterns.suggestions(it, history) },
-            week = Strength.weekSummary(history, today, zone, System.currentTimeMillis()),
-            weekEffectiveSets = history.filter { it.isFinished && it.startedAtEpochMs >= weekStart }.sumOf { Strength.effectiveSets(it) },
             achievements = Strength.achievements(history, today, zone, bw),
             daysSince = Strength.daysSinceTrained(history, today, zone),
             soreness = Strength.soreness(history, now),
             challenge = challenge(history, unit),
             load = TrainingLoad.weekly(history, today, zone),
-            dayParts = com.bestrong.core.stats.TimeOfDay.stats(history, zone, System.currentTimeMillis()),
-            weekdays = com.bestrong.core.stats.TimeOfDay.byWeekday(history, zone, System.currentTimeMillis()),
         )
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AdvancedStats())
 
@@ -682,56 +660,6 @@ class ProfileViewModel @Inject constructor(
             repo.rewriteHistory({ it.gymName == oldName }) { it.copy(gymName = updated.name) }
         }
         return true
-    }
-
-    /**
-     * Cambia el nombre de la pareja y, con él, el de sus entrenos (pasados y el que está en curso): su historial
-     * va por el nombre, y sin esto dejaría de usarse para sus pesos y marcas.
-     */
-    fun setPartnerName(name: String) {
-        // El nombre de su historial queda fijado (si no lo estaba) hasta confirmar el nuevo en commitPartnerName
-        settingsStore.update { it.copy(partnerName = name.trim(), partnerHistoryName = it.partnerAthlete) }
-    }
-
-    /** El último renombrado de historial en marcha: se espera antes de comprobar si un nombre está cogido. */
-    private var lastRewrite: kotlinx.coroutines.Job? = null
-
-    init {
-        // Un nombre escrito y no confirmado (la app se cerró a medias): se confirma al volver
-        commitPartnerName()
-    }
-
-    /**
-     * Al terminar de escribir (Hecho o al salir del campo): sus entrenos pasan al nombre nuevo. El nombre se guarda
-     * con cada letra (si la app se cierra no se pierde); el historial, solo aquí. Un nombre que ya tiene otra
-     * persona en el historial se rechaza: mezclaría los dos para siempre.
-     */
-    fun commitPartnerName() {
-        val s = settings.value
-        val old = s.partnerHistoryName
-        val new = s.partnerName
-        // Sin edición pendiente, o vacío (se queda el de su historial hasta que se escriba uno): nada que confirmar
-        if (old == null || new.isBlank()) return
-        if (new == old) {
-            settingsStore.update { it.copy(partnerHistoryName = null) }
-        } else {
-            renamePartnerHistory(old, new)
-        }
-    }
-
-    private fun renamePartnerHistory(old: String, new: String) {
-        viewModelScope.launch {
-            lastRewrite?.join()
-            if (old.isNotBlank() && repo.historyOnce(includePartner = true).any { it.athlete == new }) {
-                settingsStore.update { it.copy(partnerName = old, partnerHistoryName = null) }
-                _messages.tryEmit(context.getString(R.string.partner_name_taken, new))
-                return@launch
-            }
-            if (old.isNotBlank()) lastRewrite = repo.rewriteHistory({ it.athlete == old }) { it.copy(athlete = new) }
-            // Su entreno en curso, también si se empezó sin nombre
-            repo.updatePartnerActive { w -> if (w.athlete == old || w.athlete.isNullOrBlank()) w.copy(athlete = new) else w }
-            settingsStore.update { if (it.partnerName == new) it.copy(partnerHistoryName = null) else it }
-        }
     }
 
     /** Entrenos borrados en los últimos 30 días. */

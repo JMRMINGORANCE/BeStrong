@@ -311,35 +311,6 @@ object WorkoutEditor {
     fun completableCount(we: WorkoutExercise): Int = we.sets.count { !it.completed && (it.isRunning || it.hasTarget) }
 
     /**
-     * «Ajustar a mi hora límite»: quita series pendientes desde el final del entreno (los accesorios
-     * suelen ir al final), la última de cada vez, hasta que la estimación quepa en [budgetSeconds].
-     * Nunca toca la siguiente serie por hacer ni un cronómetro en marcha; los ejercicios que se quedan
-     * sin series se quitan. Si ni así cabe, quita lo que puede.
-     */
-    fun trimToFit(workout: Workout, budgetSeconds: Int, estimate: (Workout) -> Int): Workout {
-        var w = workout
-        // La siguiente serie del entreno y la siguiente de cada ejercicio ya empezado (estás en él)
-        val keep = setOfNotNull(nextPendingSet(workout)?.second?.id) +
-            workout.exercises.filter { we -> we.sets.any { it.completed } }.mapNotNull { we -> we.sets.firstOrNull { !it.completed }?.id }
-        while (estimate(w) > budgetSeconds) {
-            val target = w.exercises.indices.reversed().firstNotNullOfOrNull { i ->
-                w.exercises[i].sets.lastOrNull { !it.completed && !it.isRunning && it.id !in keep }?.let { i to it.id }
-            } ?: break
-            val (i, setId) = target
-            val we = w.exercises[i]
-            val sets = we.sets.filterNot { it.id == setId }
-            // Lo recortado queda como borrado: la fusión con el reloj no lo devuelve
-            val gone = if (sets.isEmpty()) we.id to we.sets.filter { it.completed }.map { it.id }.toSet() else setId to emptySet()
-            w = w.copy(
-                exercises = if (sets.isEmpty()) w.exercises.filterIndexed { j, _ -> j != i } else w.exercises.map { if (it.id == we.id) it.copy(sets = sets) else it },
-                deletedIds = w.deletedIds + gone,
-            )
-        }
-        // Si no se pudo quitar nada, el entreno sale tal cual (sin «arreglos» que harían creer que se recortó)
-        return if (w === workout) workout else dropLoneSupersets(w)
-    }
-
-    /**
      * Series de descarga («back-off»): [count] series al [BACK_OFF_FACTOR] de la serie más pesada (las
      * mismas reps), redondeadas al salto del ejercicio, tras la última serie efectiva.
      */

@@ -7,9 +7,7 @@ import com.bestrong.core.session.WorkoutEditor
 import com.bestrong.core.stats.WorkoutStats
 import com.bestrong.core.sync.LiveMetrics
 import com.bestrong.core.training.Progression
-import com.bestrong.core.training.ProgressionCap
 import com.bestrong.mobile.data.BeStrongRepository
-import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.health.HealthConnectExporter
 import com.bestrong.mobile.workout.RestTimerController
@@ -30,7 +28,6 @@ class WorkoutActions @Inject constructor(
     private val settings: SettingsStore,
     private val healthConnect: HealthConnectExporter,
     private val restTimer: RestTimerController,
-    private val planning: PlanningStore,
     private val energy: com.bestrong.mobile.health.EnergyCalculator,
 ) {
     /**
@@ -41,36 +38,20 @@ class WorkoutActions @Inject constructor(
         energy.complete(workout, watchKcal = workout.calories?.takeIf { workout.caloriesSource == com.bestrong.core.model.CaloriesSource.WATCH })
 
     /**
-     * Termina el entreno de la pareja, si hay uno abierto, guardando lo que hizo (aparte: no cuenta para tus
-     * récords). Al terminar o descartar el tuyo: sin esto quedaría huérfano, sin forma de volver a él.
+     * Ya no hay modo pareja: si quedó abierto un entreno de la pareja de una versión anterior, se guarda terminado
+     * (aparte, sin contar para tus estadísticas) para no perder lo que hizo. Se llama una vez al arrancar.
      */
-    suspend fun closePartner(withGym: Boolean = true): Workout? {
-        val current = repository.takePartnerActive() ?: return null
-        // Su descanso se acaba con su entreno (el tuyo, si lo hay, sigue)
+    suspend fun closeLegacyPartnerWorkout() {
+        val current = repository.takeLegacyPartnerActive() ?: return
         restTimer.skipFor(current.id)
-        val finished = WorkoutEditor.finish(current, System.currentTimeMillis()).let { if (withGym) withGym(it) else it }
+        val finished = WorkoutEditor.finish(current, System.currentTimeMillis())
         if (finished.exercises.isNotEmpty()) repository.saveWorkout(finished)
-        return current
-    }
-
-    /** El entreno de la pareja tal como estaba al descartar el tuyo: «Deshacer» lo devuelve a medias, no terminado. */
-    private var partnerAtDiscard: Workout? = null
-
-    /** Al descartar tu entreno: se cierra el de la pareja, pero se recuerda por si se deshace. */
-    suspend fun closePartnerOnDiscard() {
-        partnerAtDiscard = closePartner()
     }
 
     /** Serie marcada en el reloj: el descanso del móvil pasa a ser el suyo (si no, el de la serie anterior avisa a destiempo). */
     fun followRemoteRest(before: Workout?, after: Workout) {
         val left = com.bestrong.core.session.RestSync.remainingAfterRemote(before, after, System.currentTimeMillis(), settings.settings.value.warmupRestSeconds) ?: return
         if (left > 0) restTimer.start(left, after.id) else restTimer.skipFor(after.id)
-    }
-
-    /** Descarta el entreno de la pareja, con su descanso. */
-    suspend fun discardPartner() {
-        restTimer.skipFor(repository.partnerWorkout.value?.id)
-        repository.setPartnerActive(null)
     }
 
     /** El entreno en texto (series y RPE), para mandarlo al entrenador o a un grupo. */
@@ -126,14 +107,11 @@ class WorkoutActions @Inject constructor(
         runCatching { com.bestrong.core.sync.SyncContract.decodeHealth(raw.encodeToByteArray()) }.getOrNull()?.let { mergeWatchHealth(it) }
     }
 
-    /** Se está viendo el entreno de la pareja (lo marca la pantalla del entreno; lo leen las teclas de volumen). */
-    val partnerOnScreen = MutableStateFlow(false)
-
     /**
      * Completa la siguiente serie pendiente y arranca su descanso (botón de la notificación,
      * botones de volumen). Devuelve false si no queda ninguna.
      */
-    suspend fun completeNextSet(visible: Boolean = false): Boolean {
+    suspend fun completeNextSet(): Boolean {
         // La serie se elige dentro de updateActive, sobre el último estado guardado: dos toques
         // seguidos (o un cambio del reloj) completan series distintas y nunca desmarcan una hecha
         // (upcomingSet solo devuelve series sin completar). La que toca de verdad: en superseries o con ejercicios
@@ -141,9 +119,7 @@ class WorkoutActions @Inject constructor(
         val next: (Workout) -> Workout = { w ->
             WorkoutEditor.upcomingSet(w)?.let { (index, set) -> WorkoutEditor.toggleSetCompleted(w, w.exercises[index].id, set.id) } ?: w
         }
-        // [visible]: la del que está en pantalla (teclas de volumen con el entreno de la pareja a la vista)
-        val partner = visible && partnerOnScreen.value && repository.partnerWorkout.value != null
-        val (before, updated) = (if (partner) repository.updatePartnerActive(next) else repository.updateActive(next)) ?: return false
+        val (before, updated) = repository.updateActive(next) ?: return false
         return WorkoutEditor.upcomingSet(before)?.let { (index, _) ->
             val (_, rest) = WorkoutEditor.afterSetCompleted(updated, index, settings.settings.value.warmupRestSeconds)
             if (rest > 0) restTimer.start(rest, updated.id) else restTimer.skipFor(updated.id)
@@ -152,11 +128,10 @@ class WorkoutActions @Inject constructor(
 
     /**
      * Series con las que rellenar un ejercicio al empezar: sugerencia de sobrecarga progresiva
-     * si está activada; si no, lo que se hizo la última vez. Con [athlete], con el historial de la pareja.
+     * si está activada; si no, lo que se hizo la última vez.
      */
-    fun prefillLookup(athlete: String? = null): (String) -> List<WorkoutSet> {
-        // La pareja con su propio historial (sus pesos, no los tuyos)
-        val history = if (athlete != null) repository.partnerHistory.value.filter { it.athlete == athlete } else repository.history.value
+    fun prefillLookup(): (String) -> List<WorkoutSet> {
+        val history = repository.history.value
         val s = settings.settings.value
         // Con varios gimnasios, lo último hecho en este (en el del hotel las mancuernas no son las de siempre)
         val gymName = s.activeGym.name.takeIf { s.gyms.size > 1 }
@@ -175,7 +150,7 @@ class WorkoutActions @Inject constructor(
 
     /**
      * «La próxima vez» del resumen al terminar: con la sobrecarga progresiva activada, lo mismo que se rellenará al
-     * empezar (rango de reps, sesiones fallidas, mancuernas del gimnasio, tope semanal); si no, la regla sencilla.
+     * empezar (rango de reps, sesiones fallidas, mancuernas del gimnasio); si no, la regla sencilla.
      */
     fun nextTimeAfter(finished: Workout, history: List<Workout>): List<com.bestrong.core.training.NextTimeSuggestion> {
         val s = settings.settings.value
@@ -210,8 +185,7 @@ class WorkoutActions @Inject constructor(
     }
 
     /**
-     * Ajusta unas series propuestas a lo que se puede montar en el gimnasio activo: tope de subida semanal
-     * (Planificación), barra/discos/mancuernas (con la barra del ejercicio) y, si tocaba subir y el redondeo
+     * Ajusta unas series propuestas a lo que se puede montar en el gimnasio activo: barra/discos/mancuernas (con la barra del ejercicio) y, si tocaba subir y el redondeo
      * deja el mismo peso, el siguiente que se pueda montar (si no, la subida se perdería). La asistencia
      * (peso negativo) se deja tal cual. Lo usan el relleno al empezar y la sugerencia del entreno.
      */
@@ -223,31 +197,19 @@ class WorkoutActions @Inject constructor(
         history: List<Workout> = repository.history.value,
     ): List<WorkoutSet> {
         val s = settings.settings.value
-        val cap = planning.state.value.weeklyCap
-        val lastWeekBest = cap?.let { ProgressionCap.lastWeekBest(ex.id, history, System.currentTimeMillis()) }
-        fun capped(kg: Double) = if (cap == null) kg else ProgressionCap.limitIn(s.unit, kg, lastWeekBest, cap, s.stepKgFor(ex.id))
         // En libras se redondea con los discos de libras (como la calculadora de discos)
         val gym = s.gymFor(ex.id)
         val raise = kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
         val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
         return sets.mapIndexed { i, set ->
             val prev = before.getOrNull(i)?.weightKg
-            // El tope frena la subida, nunca deja por debajo de lo que ya se hizo (70 kg el lunes no pasa a 62,5 el jueves)
-            val target = capped(set.weightKg).coerceAtLeast(minOf(set.weightKg, prev ?: 0.0))
+            val target = set.weightKg
             val rounded = if (target > 0) gym.nearestLoad(target, ex.equipment, s.unit) else target
-            // Subida perdida al redondear: el siguiente peso montable, si el tope semanal lo permite
+            // Subida perdida al redondear: el siguiente peso montable
             val lost = prev != null && prev > 0 && rounded <= prev + 1e-6
             val above = if (raise && lost) gym.loadAbove(prev!!, ex.equipment, s.unit) else null
-            set.copy(weightKg = above?.takeIf { it <= capped(it) + 1e-6 } ?: rounded)
+            set.copy(weightKg = above ?: rounded)
         }
-    }
-
-    /** Si el tope semanal de Planificación recorta alguna de estas series (para decirlo junto a la sugerencia). */
-    fun cappedByWeek(ex: com.bestrong.core.model.Exercise, sets: List<WorkoutSet>, history: List<Workout> = repository.history.value): Boolean {
-        val cap = planning.state.value.weeklyCap ?: return false
-        val lastWeekBest = ProgressionCap.lastWeekBest(ex.id, history, System.currentTimeMillis())
-        val step = settings.settings.value.stepKgFor(ex.id)
-        return sets.any { it.weightKg > ProgressionCap.limit(it.weightKg, lastWeekBest, cap, step) + 1e-6 }
     }
 
     /**
@@ -292,15 +254,8 @@ class WorkoutActions @Inject constructor(
     suspend fun restoreDiscarded(): Boolean {
         if (!repository.restoreDiscarded()) return false
         repository.restoredRestEnd?.let { (end, total) ->
-            // Con su dueño: lo que haga la pareja (pausar, desmarcar) no corta tu descanso
             restTimer.restore(end, total, repository.activeOnce()?.id)
         }
-        // El de la pareja vuelve a estar en curso (y deja de estar en el historial como terminado a medias)
-        partnerAtDiscard?.let { p ->
-            repository.deleteWorkout(p.id)
-            repository.setPartnerActive(p)
-        }
-        partnerAtDiscard = null
         return true
     }
 

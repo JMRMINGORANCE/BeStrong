@@ -46,4 +46,9 @@ class AnnouncementsTest {
         assertEquals(500, text.length)
         assertEquals("Hola a", text.take(6))
     }
+
+    @Test fun cacheRoundTripsForTheCommunityScreen() {
+        val list = AnnouncementsWorker.parse(json, "es")
+        assertEquals(list, AnnouncementsWorker.fromJson(AnnouncementsWorker.toJson(list)))
+    }
 }

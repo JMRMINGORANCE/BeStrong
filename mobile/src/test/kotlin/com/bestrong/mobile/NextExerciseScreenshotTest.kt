@@ -77,7 +77,7 @@ class NextExerciseScreenshotTest {
 
     @Test
     fun technique_videos() {
-        // Dos vídeos ya grabados del press banca (con sus datos)
+        // Sección «Técnica»: dos vídeos ya grabados del press banca (con sus datos) junto a la nota y lo propio
         val ctx = compose.activity
         val dir = File(ctx.filesDir, "media/bench_press/sets").apply { mkdirs() }
         listOf("a" to (1_761_000_000_000L to 85.0), "b" to (1_758_000_000_000L to 80.0)).forEachIndexed { i, (id, data) ->
@@ -93,7 +93,7 @@ class NextExerciseScreenshotTest {
         compose.onNodeWithText("Press banca").performClick()
         settle()
         compose.mainClock.autoAdvance = true
-        compose.onAllNodes(hasScrollToNodeAction())[0].performScrollToNode(hasText("Vídeos de técnica"))
+        compose.onAllNodes(hasScrollToNodeAction())[0].performScrollToNode(hasText("85 kg", substring = true))
         compose.mainClock.autoAdvance = false
         settle()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/p04_technique_videos.png")

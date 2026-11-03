@@ -202,7 +202,7 @@ private fun GrantState.toStatus() = when (this) {
 
 /** «Permisos y conexiones»: el estado de todo de un vistazo y un botón para activarlo. */
 @Composable
-internal fun PermissionsPage(permissions: PermissionsState, onBack: () -> Unit) {
+internal fun PermissionsPage(permissions: PermissionsState, onBack: () -> Unit, extra: androidx.compose.foundation.lazy.LazyListScope.() -> Unit = {}) {
     SettingsPage(stringResource(R.string.perm_title), onBack, stringResource(R.string.perm_subtitle)) {
         item { PermissionsSummary(permissions) }
         item {
@@ -213,6 +213,7 @@ internal fun PermissionsPage(permissions: PermissionsState, onBack: () -> Unit) 
                 }
             }
         }
+        extra()
     }
 }
 

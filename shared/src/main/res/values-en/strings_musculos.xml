@@ -16,7 +16,6 @@
     <string name="tl_show_less">Show less</string>
     <string name="tl_open_day">Show that day\'s sets</string>
     <string name="tl_pinned">Pinned note: %1$s</string>
-    <string name="tl_injury">Loads a zone marked as injured: %1$s</string>
     <string name="pt_title">Movement balance</string>
     <string name="pt_body">Working sets per movement pattern over the last 4 weeks.</string>
     <string name="pt_empty">Train for a few weeks to see your balance.</string>
@@ -41,5 +40,4 @@
     <string name="mu_tab_30d">30 days</string>
     <string name="mu_tab_trend">Trend</string>
     <string name="mu_tab_recovery">Recovery</string>
-    <string name="mu_lagging_tag">falling behind</string>
 </resources>

@@ -16,7 +16,6 @@ import com.bestrong.core.stats.PersonalRecord
 import com.bestrong.core.stats.RecordType
 import com.bestrong.core.stats.Strength
 import com.bestrong.core.stats.WorkoutStats
-import com.bestrong.core.training.Injuries
 import com.bestrong.core.training.Periodization
 import com.bestrong.core.training.ProgramTexts
 import com.bestrong.core.training.Progression
@@ -26,7 +25,6 @@ import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.ExerciseImage
 import com.bestrong.mobile.data.ExerciseMediaStore
 import com.bestrong.mobile.data.MediaItem
-import com.bestrong.mobile.data.PlanningStore
 import com.bestrong.mobile.data.SettingsStore
 import com.bestrong.mobile.ui.components.displayName
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -87,7 +85,6 @@ class ExercisesViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val media: ExerciseMediaStore,
     private val settingsStore: SettingsStore,
-    private val planning: PlanningStore,
     private val actions: com.bestrong.mobile.WorkoutActions,
     private val setVideos: com.bestrong.mobile.data.SetVideoStore,
 ) : ViewModel() {
@@ -111,9 +108,6 @@ class ExercisesViewModel @Inject constructor(
     /** Historial completo (línea de tiempo de la ficha: hitos y series de cada día). */
     val history: StateFlow<List<Workout>> = repo.history
 
-    /** Zonas lesionadas marcadas en Planificación (aviso en la línea de tiempo). */
-    val injuries: StateFlow<Set<com.bestrong.core.training.InjuryZone>> = planning.state.map { it.injuries }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
     fun image(exerciseId: String): ExerciseImage? = media.images[exerciseId]
     fun mediaItems(exerciseId: String): List<MediaItem> = media.items(exerciseId)
     fun note(exerciseId: String): String = media.note(exerciseId)
@@ -207,14 +201,11 @@ class ExercisesViewModel @Inject constructor(
     /** Lo pone el selector de ejercicios (cada pantalla tiene su ViewModel): ordena con los favoritos arriba. */
     @Volatile var favoritesFirst = false
 
-    val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, marks, planning.state) { all, f, history, (favs, hiddenIds), plan ->
+    val results: StateFlow<List<Exercise>> = combine(repo.exercises, filter, repo.history, marks) { all, f, history, (favs, hiddenIds) ->
         val found = ExerciseLibrary.search(all, f.query, f.muscle, f.equipment) { it.displayName(context) }
             .filter { !f.favoritesOnly || it.id in favs }
             // Ocultos: fuera de la lista, pero si los buscas por nombre aparecen (si no, parecería que no existen)
             .filter { if (f.showHidden) it.id in hiddenIds else it.id !in hiddenIds || f.query.isNotBlank() }
-            // Lesiones marcadas en Planificación: fuera los ejercicios que cargan esas zonas
-            // (como los ocultos, buscados por nombre sí salen: si no, ni se podía ver su historial)
-            .filter { f.query.isNotBlank() || Injuries.isSafe(it, plan.injuries) }
             .filter { !f.noEquipment || it.equipment == Equipment.BODYWEIGHT || it.equipment == Equipment.BAND }
         when {
             f.sort == ExerciseSort.NAME -> {
@@ -257,7 +248,7 @@ class ExercisesViewModel @Inject constructor(
         result
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
 
-    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings, repo.routines, planning.state) { all, fullHistory, settings, routines, _ ->
+    fun detail(exerciseId: String, includeVariants: Boolean = false): StateFlow<ExerciseDetailState?> = combine(repo.exercises, repo.history, settingsStore.settings, repo.routines) { all, fullHistory, settings, routines ->
         // Un ejercicio propio borrado (o llegado en una rutina compartida) sigue en el historial: se ve con lo guardado allí
         val ex = all.firstOrNull { it.id == exerciseId }
             ?: fullHistory.firstNotNullOfOrNull { w -> w.exercises.firstOrNull { it.exercise.id == exerciseId }?.exercise }
@@ -281,11 +272,11 @@ class ExercisesViewModel @Inject constructor(
             // Solo el propio ejercicio (no las variantes), como en el entreno
             recentOneRepMax = com.bestrong.core.stats.RpeLoad.recentOneRepMax(exerciseId, fullHistory, System.currentTimeMillis()),
             recentSessions = history.filter { w -> w.exercises.any { it.exercise.id == exerciseId } }.take(20),
-            // Como en el entreno: ajustada al gimnasio y al tope semanal (con su aviso)
+            // Como en el entreno: ajustada al gimnasio
             // (con varios gimnasios, con lo hecho en el activo, igual que el relleno al empezar)
             nextTarget = WorkoutStats.atGym(fullHistory, settings.activeGym.name.takeIf { settings.gyms.size > 1 }, ex.id).let { base ->
                 Progression.suggest(ex, base, settings.stepKgFor(ex.id), repRange = settings.repRangeFor(ex.id))?.let { sug ->
-                    sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, WorkoutStats.previousSets(ex.id, base), fullHistory), cappedByWeek = actions.cappedByWeek(ex, sug.sets, fullHistory))
+                    sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, WorkoutStats.previousSets(ex.id, base), fullHistory))
                 }
             },
             sessionNotes = sessionNotes(exerciseId, history, routines),

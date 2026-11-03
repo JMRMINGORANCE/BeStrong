@@ -228,7 +228,6 @@
     <string name="hc_missing_perms">Missing permissions</string>
     <string name="hc_unavailable">Health Connect isn\'t available on this device</string>
     <string name="heatmap_desc">Heatmap: %1$d workouts in %2$d</string>
-    <string name="heatmap_title">%1$d · %2$d workouts</string>
     <string name="help">Help</string>
     <string name="help_body">Glossary, FAQ, tutorial and what’s new</string>
     <string name="high_contrast">High contrast</string>
@@ -267,20 +266,12 @@
     <string name="include_variants">Include variants (%1$d)</string>
     <string name="include_variants_desc">Combines history and records of: %1$s</string>
     <string name="injury_warning">⚠ Loads: %1$s</string>
-    <string name="intake_add_protein">+20 g protein</string>
-    <string name="intake_add_water">+250 ml water</string>
-    <string name="intake_protein">Protein: %1$d g of %2$s g</string>
-    <string name="intake_title">Protein and water</string>
-    <string name="intake_water">Water: %1$d ml</string>
     <string name="kcal_value">%1$d kcal</string>
     <string name="keep_screen_on">Keep screen on while training</string>
     <string name="last_weight">Last weight: %1$s</string>
     <string name="level_advanced">Advanced</string>
     <string name="level_beginner">Beginner</string>
-    <string name="level_elite">Elite</string>
     <string name="level_intermediate">Intermediate</string>
-    <string name="level_none">Below beginner</string>
-    <string name="level_novice">Novice</string>
     <string name="log_measurements">Log your weight and measurements</string>
     <string name="logged_on_watch">Logged on the watch</string>
     <string name="m_arm">Arm %1$s cm</string>
@@ -292,15 +283,8 @@
     <string name="measure_chart">%1$s</string>
     <string name="measurements">Body measurements</string>
     <string name="media_add">Photo or video</string>
-    <string name="media_controls">Music controls during workouts</string>
-    <string name="media_controls_body">Apple Music, Spotify, YouTube Music or any player</string>
     <string name="media_delete">Delete</string>
-    <string name="media_next">Next track</string>
-    <string name="media_open_app">Open %1$s</string>
     <string name="media_open_photo">Open photo</string>
-    <string name="media_open_video">Play video</string>
-    <string name="media_play_pause">Play or pause music</string>
-    <string name="media_previous">Previous track</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Max weight</string>
     <string name="metric_reps">Reps</string>
@@ -337,8 +321,6 @@
     <string name="muscle_traps">Traps</string>
     <string name="muscle_triceps">Triceps</string>
     <string name="muscles_worked">Muscles worked</string>
-    <string name="music_app">Music app for the button</string>
-    <string name="music_app_auto">Automatic</string>
     <plurals name="n_records">
         <item quantity="one">🏆 %1$d record</item>
         <item quantity="other">🏆 %1$d records</item>
@@ -392,11 +374,6 @@
     <string name="one_handed_body">When a workout starts on the folded phone, one set fills the screen with big buttons within thumb reach. Switch to the list with the button at the top.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Options</string>
-    <string name="partner_history">Show %1$s’s</string>
-    <string name="partner_me">Me</string>
-    <string name="partner_name">Partner mode</string>
-    <string name="partner_name_body">Name of the person training with you (empty = off)</string>
-    <string name="partner_saved">%1$s’s workout saved</string>
     <string name="password">Password</string>
     <string name="password_hint">At least 10 characters. Without it the backup can’t be recovered.</string>
     <string name="password_restore">This backup is encrypted: enter its password</string>
@@ -470,12 +447,6 @@
     <string name="rating_motivation">Motivation</string>
     <string name="rating_pain">Discomfort</string>
     <string name="rating_title">How did you feel?</string>
-    <string name="readiness_connect">Connect Health Connect in Profile to use sleep and resting heart rate.</string>
-    <string name="readiness_detail">Sleep %1$s h · resting %2$s bpm (avg %3$s)</string>
-    <string name="readiness_high">Great: a good day to push (+2.5%)</string>
-    <string name="readiness_low">Low: drop the load 10% or do technique work</string>
-    <string name="readiness_normal">Normal: train as planned</string>
-    <string name="readiness_title">Today’s readiness</string>
     <string name="record_1rm">Best estimated 1RM</string>
     <string name="record_heaviest">Heaviest weight</string>
     <string name="record_line">%1$s: %2$s %3$s</string>
@@ -623,11 +594,6 @@
     <string name="step_weight">Adjust weight</string>
     <string name="strength_curve">Strength curve</string>
     <string name="strength_curve_hint">Best weight for each rep count</string>
-    <string name="strength_levels">Strength levels</string>
-    <string name="strength_levels_empty">No marks on the main lifts yet.</string>
-    <string name="strength_levels_need_weight">Log your body weight in Measurements to see your level in squat, bench, deadlift, overhead press and row.</string>
-    <string name="strength_next">Next level: %1$s</string>
-    <string name="strength_ratio">%1$s × body weight</string>
     <string name="substitute_body">Same muscle. If you have done it before your weights are used; otherwise the current ones are converted.</string>
     <string name="substitute_title">Swap exercise</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -649,7 +615,6 @@
     <string name="tempo_help">Seconds of lowering-pause-lifting-pause, e.g. 3-1-1-0 (X = explosive). The watch guides you with vibrations.</string>
     <string name="tempo_invalid">Format: 3-1-1 or 3-1-1-0 (0 to 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s under tension per set</string>
-    <string name="tip_home">Tip: long-press an exercise during a workout to reorder it, and use “Plan” to generate routines for you.</string>
     <string name="tip_swipe">Tip: swipe a set right to complete it and left to delete it. Long-press the number to change type or RPE.</string>
     <string name="today_cycle_week">Cycle %1$d · week %2$d of %3$d</string>
     <string name="today_session_n">Session %1$d</string>
@@ -660,9 +625,6 @@
     <string name="tool_monthly_report">Monthly report</string>
     <string name="tool_scores">DOTS, Wilks and IPF GL</string>
     <string name="tools">Tools</string>
-    <string name="touch_lock">Lock the touch screen</string>
-    <string name="touch_locked">Screen locked</string>
-    <string name="touch_unlock_hint">Long-press to unlock</string>
     <string name="track">Track</string>
     <string name="track_reps">Reps only</string>
     <string name="track_time">Time</string>
@@ -676,7 +638,7 @@
     <string name="tut2_t">Routines and programs</string>
     <string name="tut3_d">Tap ✓ or swipe a set right to complete it; rest starts automatically. Swipe left to delete it.</string>
     <string name="tut3_t">During the workout</string>
-    <string name="tut4_d">Profile shows records, muscles worked, strength levels and charts. If you get lost, Profile → Help has a glossary.</string>
+    <string name="tut4_d">Profile shows records and achievements, muscles worked and charts. If you get lost, Profile → Help has a glossary.</string>
     <string name="tut4_t">Your progress</string>
     <string name="tutorial_replay">Show the tutorial</string>
     <string name="undo_exercise_deleted">Exercise removed</string>
@@ -753,13 +715,6 @@
     <string name="workout_resume">Resume</string>
     <string name="workouts_per_week">Workouts per week</string>
     <string name="wrong_password">Wrong password</string>
-    <string name="zone_elbow">Elbow</string>
-    <string name="zone_hip">Hip</string>
-    <string name="zone_knee">Knee</string>
-    <string name="zone_lower_back">Lower back</string>
-    <string name="zone_neck">Neck</string>
-    <string name="zone_shoulder">Shoulder</string>
-    <string name="zone_wrist">Wrist</string>
     <string name="body_data">Data for calories</string>
     <string name="body_data_body">With your birth year, height and sex, calories are calculated from your own basal metabolism and maximum heart rate. Weight comes from your measurements; if you leave height empty it is read from Health Connect.</string>
     <string name="birth_year">Birth year</string>
@@ -838,7 +793,6 @@
     <string name="plates_add_per_side">Add per side</string>
     <string name="plates_use_weight">Use this weight</string>
     <string name="rep_max">%1$dRM %2$s</string>
-    <string name="home_repeat_last">Repeat “%1$s”</string>
     <string name="notif_weekly_load_high">⚠ Load %1$s× your average: consider an easier week</string>
     <string name="weight_trend">7-day average: %1$s</string>
     <string name="weight_trend_change">7-day average: %1$s (%2$s vs the previous week)</string>
@@ -859,9 +813,6 @@
     <string name="tool_share_week">Share the week (text for your coach)</string>
     <string name="share_week_title">My workouts from the last 7 days (BeStrong)</string>
     <string name="share_week_empty">No workouts in the last 7 days</string>
-    <string name="body_weight_last">Weight: %1$s</string>
-    <string name="body_weight_none">No weight logged</string>
-    <string name="body_weight_log">Log today\'s weight</string>
     <string name="set_copy_following">Copy to next sets (%1$d)</string>
     <string name="remaining_time_eta">≈ %1$d min left · done around %2$s</string>
     <string name="rest_real_avg">Average actual rest: %1$s (planned %2$s)</string>
@@ -874,14 +825,7 @@
     <string name="set_duplicate">Duplicate set</string>
     <string name="complete_remaining">Mark remaining sets as done (%1$d)</string>
     <string name="rest_real_exercise">Actual rest %1$s · planned %2$s</string>
-    <string name="deadline_title">When do you need to finish?</string>
-    <string name="deadline_over">You\'d go %1$d min past your limit (%2$s): skip or shorten an exercise</string>
-    <string name="deadline_ok">Limit %1$s: you\'re on time</string>
-    <string name="deadline_clear">Remove</string>
     <string name="undo_completed_sets">Sets marked as done</string>
-    <string name="deadline_set_action">set time limit</string>
-    <string name="deadline_fit">Fit to my time limit</string>
-    <string name="undo_trimmed_sets">Removed sets at the end to finish on time</string>
     <string name="rest_use_real">Use %1$s in routine</string>
     <string name="notif_progress_eta">%1$d/%2$d sets · ≈ %3$d min, done %4$s</string>
     <string name="rest_use_real_done">Routine updated: %1$s rest</string>
@@ -947,8 +891,6 @@
     <string name="weight_goal_reached">🎯 Target weight of %1$s reached</string>
     <string name="weight_goal_left">%1$s to go to %2$s</string>
     <string name="weight_goal_eta">%1$s to go to %2$s · at this pace, around %3$s</string>
-    <string name="stale_routine">You haven\'t done “%1$s” in %2$d days. Archive it? Nothing is deleted.</string>
-    <string name="stale_keep">Keep</string>
     <string name="goal_field_reps">Reps in one set</string>
     <string name="goal_field_seconds">Seconds</string>
     <string name="goal_progress_now">Your best: %1$s of %2$s</string>
@@ -974,16 +916,8 @@
     <string name="notif_weigh_in_reply_hint">Your weight, e.g. 80.4</string>
     <string name="notif_weigh_in_saved">Weight saved</string>
     <string name="notif_weigh_in_invalid">Couldn\'t read that weight: reply with just the number, e.g. 80.4</string>
-    <string name="day_part_title">Your best time</string>
-    <string name="day_part_best">You perform best in the %1$s</string>
-    <string name="day_part_line">%1$s: %2$d%% of your best · %3$d workouts</string>
-    <string name="day_part_hint">Last 12 weeks: each exercise\'s estimated 1RM against your best in that period.</string>
-    <string name="day_part_morning">morning</string>
-    <string name="day_part_afternoon">afternoon</string>
-    <string name="day_part_evening">evening</string>
     <string name="share_progress">Share progress</string>
     <string name="share_progress_title">📏 My body progress</string>
-    <string name="day_part_no_difference">You perform about the same at any time</string>
     <string name="rep_range_line">Range %1$d–%2$d · %3$s → at %2$d on every set, +%4$s</string>
     <string name="notif_reminder_start">Start</string>
     <string name="notif_reminder_snooze">In 1 h</string>
@@ -997,9 +931,6 @@
     <string name="body_range_high">high: worth bringing down</string>
     <string name="weight_rate_fast_loss">⚠ You\'re losing over 1% per week: at this pace you lose muscle. Consider eating a bit more.</string>
     <string name="weight_rate_fast_gain">⚠ You\'re gaining over 1% per week: at this pace it\'s mostly fat. Consider eating a bit less.</string>
-    <string name="weekday_title">Your best days</string>
-    <string name="weekday_best">You\'re strongest on %1$s: a good day for hard sessions</string>
-    <string name="weekday_no_difference">You perform about the same on any day</string>
     <string name="body_comp_hint_female">Waist-to-height under 0.5 is recommended. FFMI: around 15–17 is typical for trained women; 19+ is advanced.</string>
     <string name="cannot_go_lighter">Can\'t go any lighter from this weight</string>
     <string name="rep_range_all">Rep range for the whole routine</string>
@@ -1010,17 +941,11 @@
     <string name="weight_goal_pace_fast" formatted="false">That\'s over 1% a week: consider giving yourself more time.</string>
     <string name="weight_goal_date_passed">The date (%1$s) has passed: set a new one.</string>
     <string name="gym_missing_equipment">⚠ “%1$s” lacks the equipment for this exercise (%2$s)</string>
-    <string name="missed_session">You missed “%1$s” on %2$s.</string>
-    <string name="missed_today">Do it today</string>
-    <string name="missed_tomorrow">Move to tomorrow</string>
-    <string name="missed_skip">Skip it</string>
     <string name="notif_measure_title">Time to measure</string>
     <string name="notif_measure_text">Waist, chest, arm and thigh: once a month is enough to see the trend.</string>
     <string name="measure_reminder">Remind me to measure on the 1st of each month</string>
     <string name="rep_range_all_hint">Applies to these exercises in all your routines.</string>
     <string name="enter_weight_first">Enter the set\'s weight first</string>
-    <string name="year_ago_title">📅 A year ago</string>
-    <string name="year_ago_line">%1$s: %2$s → %3$s (%4$s%%)</string>
     <string name="gym_collars">Collars, both (%1$s)</string>
     <string name="target_rpe">Target RPE:</string>
     <string name="target_rpe_line">🎯 Target RPE %1$s on working sets</string>
@@ -1034,7 +959,6 @@
     <string name="target_rpe_hint">≈ %1$s for %2$d reps</string>
     <string name="rpe_table_title">Loads by RPE</string>
     <string name="rpe_table_hint">From your recent estimated 1RM (%1$s): the weight for each rep count by how many reps you leave in the tank.</string>
-    <string name="prog_capped_suffix">" · limited by the weekly cap"</string>
     <string name="tempo_all">Tempo for the whole routine</string>
     <string name="undo_rpe_loads">RPE loads applied</string>
     <string name="history_vs_previous">Vs. last time: %1$s volume · 1RM %2$s</string>
@@ -1073,7 +997,6 @@
     <string name="cardio_total_month">Last 30 days: %1$s</string>
     <string name="history_gym_unknown">No gym</string>
     <string name="history_gym_change">Where was it done?</string>
-    <string name="partner_name_taken">“%1$s” already has workouts in the history: choose another name so they don’t get mixed</string>
     <string name="cardio_week">Cardio this week: %1$s km</string>
     <string name="cardio_week_goal">Cardio this week: %1$s of %2$s km</string>
     <string name="cardio_goal_title">Weekly cardio goal</string>
@@ -1086,8 +1009,6 @@
     <string name="trash_open">View</string>
     <string name="trash_restored">Workout restored</string>
     <string name="cardio_week_goal_min">Cardio this week: %1$d of %2$d min</string>
-    <string name="athlete_me">Me</string>
-    <string name="athlete_both">Both</string>
     <string name="trash_delete_forever">Delete forever</string>
     <string name="trash_empty">Empty</string>
     <string name="trash_empty_confirm">Sure? Empty</string>
@@ -1205,16 +1126,14 @@
     <string name="search_clear_filters">Clear filters</string>
     <string name="search_create_named">Create “%1$s”</string>
     <string name="history_empty_action">Start training</string>
-    <string name="builder_weekdays_hint">Tap the days you will train (2 to 6): the routines go to your calendar.</string>
     <string name="exercise_how_title">How to do it</string>
-    <string name="day_planned">planned</string>
     <string name="day_today">today</string>
     <string name="rating_scale">1 = low · 5 = high</string>
     <string name="plates_below_bar">Less than the bar (%1$s)</string>
     <string name="current_set_label">Up now</string>
     <string name="profile_empty_title">Your progress will show here</string>
     <string name="profile_empty_body">Charts, records and the muscle map appear as soon as you finish your first workout.</string>
-    <string name="builder_which_days">Which days will you train?</string>
+    <string name="builder_which_days">How many days a week?</string>
     <string name="workout_outline">Workout exercises</string>
     <string name="routine_rest_apply_all">Apply to all exercises</string>
     <string name="workout_empty_title">Add your first exercise</string>
@@ -1223,7 +1142,8 @@
     <string name="picker_already_added">Already added</string>
     <string name="gym_default_gym">Gym</string>
     <string name="gym_default_home">Home</string>
-    <string name="setup_sex">Sex (for calories and strength levels)</string>
+    <string name="setup_sex">Sex (for calories and strength scores)</string>
     <string name="deload_label">deload</string>
     <string name="achievement_unlocked">Achievement unlocked: %1$s</string>
+    <string name="records_milestones">Records and milestones</string>
 </resources>

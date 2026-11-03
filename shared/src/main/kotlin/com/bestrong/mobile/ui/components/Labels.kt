@@ -103,9 +103,9 @@ fun com.bestrong.core.stats.PersonalRecord.exerciseLabel(): String = ExerciseLib
 
 fun com.bestrong.core.stats.PersonalRecord.exerciseLabel(context: Context): String = ExerciseLibrary.byId(exerciseId)?.displayName(context) ?: exerciseName
 
-/** Por qué se propone esto; con « · limitado por el tope semanal» si Planificación recortó la subida. */
+/** Por qué se propone esto. */
 @Composable @ReadOnlyComposable
-fun ProgressionSuggestion.reasonText(): String = kindText() + if (cappedByWeek) stringResource(R.string.prog_capped_suffix) else ""
+fun ProgressionSuggestion.reasonText(): String = kindText()
 
 @Composable @ReadOnlyComposable
 private fun ProgressionSuggestion.kindText(): String = when (kind) {

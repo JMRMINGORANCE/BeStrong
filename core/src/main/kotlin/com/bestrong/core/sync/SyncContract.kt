@@ -185,12 +185,8 @@ data class SharedSettings(
     /** Objetivo semanal de cardio elegido en el móvil (km o minutos), para la complicación del reloj. */
     val weeklyCardioKm: Double? = null,
     val weeklyCardioMin: Int? = null,
-    /** Subida máxima semanal de Planificación (0,05 = 5 %); null = sin tope. */
-    val weeklyCap: Double? = null,
     /** Mancuernas apuntadas como total del par (elegido en el móvil): el reloj muestra y entiende el mismo peso. */
     val dumbbellTotal: Boolean = false,
-    /** Planificación de esta semana y la siguiente (lunes en epochDay → día 1-7 → rutina): «hoy toca» del reloj. */
-    val weekPlans: Map<Long, Map<Int, String>> = emptyMap(),
 ) {
     /** 2 con [dumbbellTotal] en un ejercicio con mancuernas; si no, 1 (el peso se guarda siempre por mancuerna). */
     fun weightFactor(exercise: com.bestrong.core.model.Exercise): Int =
@@ -225,23 +221,18 @@ data class SharedSettings(
         exercise: com.bestrong.core.model.Exercise,
         suggestion: com.bestrong.core.training.ProgressionSuggestion,
         previous: List<com.bestrong.core.model.WorkoutSet>,
-        /** Mejor peso de los últimos 7 días, para el tope semanal (el reloj tiene el historial reciente). */
-        lastWeekBestKg: Double? = null,
     ): List<com.bestrong.core.model.WorkoutSet> {
-        val cap = weeklyCap
-        fun capped(kg: Double) = if (cap == null) kg else com.bestrong.core.training.ProgressionCap.limitIn(unit, kg, lastWeekBestKg, cap, stepKgFor(exercise.id))
-        val gym = gymFor(exercise.id) ?: return suggestion.sets.map { it.copy(weightKg = capped(it.weightKg)) }
+        val gym = gymFor(exercise.id) ?: return suggestion.sets
         val raise = suggestion.kind == com.bestrong.core.training.SuggestionKind.INCREASE_WEIGHT
         val before = previous.filter { it.type != com.bestrong.core.model.SetType.WARMUP }
         return suggestion.sets.mapIndexed { i, set ->
             val prev = before.getOrNull(i)?.weightKg
-            // El tope frena la subida, nunca deja por debajo de lo que ya se hizo
-            val target = capped(set.weightKg).coerceAtLeast(minOf(set.weightKg, prev ?: 0.0))
+            val target = set.weightKg
             // En libras también, con los discos de libras (los mismos que enseña la calculadora)
             val rounded = if (target > 0) gym.nearestLoad(target, exercise.equipment, unit) else target
             val lost = raise && prev != null && prev > 0 && rounded <= prev + 1e-6
-            // La subida que no se pierde al redondear, si el tope semanal la permite
-            val above = if (lost) gym.loadAbove(prev!!, exercise.equipment, unit).takeIf { it <= capped(it) + 1e-6 } else null
+            // La subida que no se pierde al redondear
+            val above = if (lost) gym.loadAbove(prev!!, exercise.equipment, unit) else null
             set.copy(weightKg = above ?: rounded)
         }
     }
