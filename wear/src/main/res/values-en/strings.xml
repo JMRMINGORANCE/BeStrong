@@ -15,9 +15,7 @@
     <string name="app_name">BeStrong</string>
     <string name="back_to">‹ %1$s</string>
     <string name="calibrate">Calibrate counter</string>
-    <string name="calibrate_done">Threshold: %1$s</string>
     <string name="calibrate_finish">Done</string>
-    <string name="calibrate_hint">Do 3–5 normal reps and tap Done</string>
     <string name="cardio">GPS cardio</string>
     <string name="cardio_cycling">Ride</string>
     <string name="cardio_distance">%1$s km</string>
@@ -41,7 +39,6 @@
     <string name="complication_today_none">Free</string>
     <string name="continue_">Continue</string>
     <string name="count_reps">Count reps (beta)</string>
-    <string name="counted_reps">Counted: %1$d reps (beta)</string>
     <string name="create_routine">Create routine</string>
     <string name="create_routines_on_phone">Create routines on your phone and they\'ll show up here</string>
     <string name="current_suffix"> · current</string>
@@ -192,4 +189,18 @@
     <string name="copy_previous">Use last time\'s</string>
     <string name="unit_reps">reps</string>
     <string name="cardio_needs_sensors">Allow heart rate and physical activity to measure distance</string>
+    <string name="calibrate_ready">Grab the bar or dumbbells and get set</string>
+    <string name="calibrate_go">Do %1$d normal reps</string>
+    <string name="calibrate_ok">Done: %1$s sensitivity (%2$d reps seen)</string>
+    <string name="calibrate_retry_hint">The reps weren\'t clear. Make them a bit more marked and try again.</string>
+    <string name="calibrate_retry">Try again</string>
+    <string name="sensitivity_high">high</string>
+    <string name="sensitivity_medium">medium</string>
+    <string name="sensitivity_low">low</string>
+    <string name="counted_reps_conf">Counted: %1$d · %2$s</string>
+    <string name="rep_conf_high">reliable</string>
+    <string name="rep_conf_medium">check it</string>
+    <string name="rep_conf_low">unsure</string>
+    <string name="count_minus">One rep fewer</string>
+    <string name="count_plus">One rep more</string>
 </resources>

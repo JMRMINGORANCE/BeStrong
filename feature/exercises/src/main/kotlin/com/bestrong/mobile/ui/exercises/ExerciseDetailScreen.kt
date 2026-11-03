@@ -123,8 +123,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
         )
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             item { ExerciseMediaSection(vm, s.exercise) { ExerciseAbout(s.exercise) } }
-            // Vídeos de las series grabadas en el entreno (solo si hay alguno)
-            item { SetVideosSection(vm, s.exercise) }
+            // Técnica: nota fija, fotos y vídeos (los de las series del entreno y los propios), en un solo sitio
+            item { TechniqueSection(vm, s.exercise) }
             if (com.bestrong.core.stats.ExerciseGoals.supports(s.exercise.tracking)) item { ExerciseGoalCard(vm, s) }
             if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RepRangeCard(vm, s.exercise.id) }
             if (s.variants.size > 1) {

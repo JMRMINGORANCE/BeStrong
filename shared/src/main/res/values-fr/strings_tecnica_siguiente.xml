@@ -4,7 +4,6 @@
     <string name="set_video_record">Filmer la série</string>
     <string name="set_video_no_camera">Aucune app d\'appareil photo pour filmer</string>
     <string name="set_video_saved">Vidéo enregistrée dans la fiche de l\'exercice</string>
-    <string name="set_video_section">Vidéos de technique</string>
     <string name="set_video_compare">Comparer</string>
     <string name="set_video_compare_hint">Choisissez deux vidéos pour les voir ensemble</string>
     <string name="set_video_pick">Choisir pour comparer</string>
@@ -18,4 +17,8 @@
     <string name="next_exercise_start">Commencer</string>
     <string name="next_exercise_setting">Carte « Exercice suivant »</string>
     <string name="next_exercise_setting_body">Pendant le repos avant de changer d\'exercice : charge, disques et note épinglée du suivant</string>
+    <string name="technique_title">Technique</string>
+    <string name="technique_note_label">Note épinglée (visible pendant la séance et sur la montre)</string>
+    <string name="technique_own_video">Votre vidéo</string>
+    <string name="technique_set_video">Série filmée</string>
 </resources>

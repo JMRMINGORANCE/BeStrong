@@ -289,7 +289,6 @@
     <string name="media_add">Photo or video</string>
     <string name="media_delete">Delete</string>
     <string name="media_open_photo">Open photo</string>
-    <string name="media_open_video">Play video</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Max weight</string>
     <string name="metric_reps">Reps</string>

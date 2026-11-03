@@ -77,6 +77,7 @@ fun WorkoutScreen(
     // Marcas del móvil: si llegan nuevas, la pista «N reps = récord» se recalcula
     val records by session.recordsVersion.collectAsStateWithLifecycle(initialValue = Unit to Unit)
     val countedReps by session.repCounter.reps.collectAsStateWithLifecycle()
+    val repConfidence by session.repCounter.confidence.collectAsStateWithLifecycle()
     val sharedSettings = session.settings.collectAsStateWithLifecycle().value
     val pinnedNotes = sharedSettings.pinnedNotes
     val velocity by session.velocityInfo.collectAsStateWithLifecycle()
@@ -228,7 +229,7 @@ fun WorkoutScreen(
                     }
                 }
                 if (repCounting) {
-                    Text(stringResource(R.string.counted_reps, countedReps), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                    CountedRepsLine(countedReps, repConfidence, onAdjust = session::adjustCountedReps)
                     velocity?.let { v ->
                         Text(
                             stringResource(R.string.velocity_info, "%.2f".format(v.lastVelocity), v.rir?.toString() ?: "?"),
@@ -340,4 +341,42 @@ private fun CardioStopwatch(startedAtEpochMs: Long, pausedAt: Long?) {
 private fun ElapsedText(w: com.bestrong.core.model.Workout) {
     val now = rememberVisibleNow(1_000)
     Text(formatDuration(w.durationSeconds(now)), style = MaterialTheme.typography.labelSmall)
+}
+
+/**
+ * «Contadas: 8 · fiable» con «−» y «+» para corregir de un toque antes de marcar la serie (lo que se guarda es este
+ * número). La confianza dice si conviene revisarlo.
+ */
+@Composable
+internal fun CountedRepsLine(reps: Int, confidence: com.bestrong.core.sensors.RepConfidence, onAdjust: (Int) -> Unit) {
+    val conf = stringResource(
+        when (confidence) {
+            com.bestrong.core.sensors.RepConfidence.HIGH -> R.string.rep_conf_high
+            com.bestrong.core.sensors.RepConfidence.MEDIUM -> R.string.rep_conf_medium
+            com.bestrong.core.sensors.RepConfidence.LOW -> R.string.rep_conf_low
+        },
+    )
+    val color = when (confidence) {
+        com.bestrong.core.sensors.RepConfidence.HIGH -> Done
+        com.bestrong.core.sensors.RepConfidence.MEDIUM -> MaterialTheme.colorScheme.secondary
+        com.bestrong.core.sensors.RepConfidence.LOW -> MaterialTheme.colorScheme.error
+    }
+    androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+        CountStep("−", stringResource(R.string.count_minus)) { onAdjust(-1) }
+        Text(stringResource(R.string.counted_reps_conf, reps, conf), style = MaterialTheme.typography.labelSmall, color = color)
+        CountStep("+", stringResource(R.string.count_plus)) { onAdjust(1) }
+    }
+}
+
+/** Botón pequeño de texto (48 dp de zona táctil) para corregir el recuento. */
+@Composable
+private fun CountStep(symbol: String, description: String, onClick: () -> Unit) {
+    androidx.compose.foundation.layout.Box(
+        Modifier.size(36.dp)
+            .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+            .semantics { contentDescription = description },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(symbol, style = MaterialTheme.typography.titleMedium, color = Brand)
+    }
 }
