@@ -228,7 +228,6 @@
     <string name="hc_missing_perms">Falten permisos</string>
     <string name="hc_unavailable">Health Connect no està disponible en aquest dispositiu</string>
     <string name="heatmap_desc">Mapa de calor: %1$d entrenaments el %2$d</string>
-    <string name="heatmap_title">%1$d · %2$d entrenaments</string>
     <string name="help">Ajuda</string>
     <string name="help_body">Glossari, preguntes freqüents, tutorial i novetats</string>
     <string name="high_contrast">Alt contrast</string>
@@ -272,10 +271,7 @@
     <string name="last_weight">Últim pes: %1$s</string>
     <string name="level_advanced">Avançat</string>
     <string name="level_beginner">Principiant</string>
-    <string name="level_elite">Elit</string>
     <string name="level_intermediate">Intermedi</string>
-    <string name="level_none">Per sota de principiant</string>
-    <string name="level_novice">Novell</string>
     <string name="log_measurements">Registra el teu pes i mesures</string>
     <string name="logged_on_watch">Registrat al rellotge</string>
     <string name="m_arm">Braç %1$s cm</string>
@@ -451,7 +447,6 @@
     <string name="rating_motivation">Motivació</string>
     <string name="rating_pain">Molèsties</string>
     <string name="rating_title">Com t’has sentit?</string>
-    <string name="readiness_connect">Connecta Health Connect a Perfil per fer servir el son i el pols en repòs.</string>
     <string name="record_1rm">Millor 1RM estimat</string>
     <string name="record_heaviest">Pes màxim</string>
     <string name="record_line">%1$s: %2$s %3$s</string>
@@ -599,11 +594,6 @@
     <string name="step_weight">Ajustar pes</string>
     <string name="strength_curve">Corba de força</string>
     <string name="strength_curve_hint">Millor pes per a cada nombre de repeticions</string>
-    <string name="strength_levels">Nivells de força</string>
-    <string name="strength_levels_empty">Encara no hi ha marques en els bàsics.</string>
-    <string name="strength_levels_need_weight">Anota el teu pes corporal a Mesures per veure el teu nivell en esquat, press de banca, pes mort, press militar i rem.</string>
-    <string name="strength_next">Següent nivell: %1$s</string>
-    <string name="strength_ratio">%1$s × pes corporal</string>
     <string name="substitute_body">Mateix múscul. Si ja l’has fet, es fan servir els teus pesos; si no, es converteixen els actuals.</string>
     <string name="substitute_title">Canviar per un altre exercici</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -648,7 +638,7 @@
     <string name="tut2_t">Rutines i programes</string>
     <string name="tut3_d">Toca ✓ o llisca la sèrie cap a la dreta per completar-la; el descans comença sol. Llisca cap a l’esquerra per esborrar-la.</string>
     <string name="tut3_t">Durant l’entrenament</string>
-    <string name="tut4_d">A Perfil veuràs rècords, músculs treballats, nivells de força i gràfiques. Si et perds, a Perfil → Ajuda tens el glossari.</string>
+    <string name="tut4_d">A Perfil veuràs rècords i assoliments, músculs treballats i gràfiques. Si et perds, a Perfil → Ajuda tens el glossari.</string>
     <string name="tut4_t">El teu progrés</string>
     <string name="tutorial_replay">Veure el tutorial</string>
     <string name="undo_exercise_deleted">Exercici tret</string>
@@ -926,16 +916,8 @@
     <string name="notif_weigh_in_reply_hint">El teu pes, p. ex. 80,4</string>
     <string name="notif_weigh_in_saved">Pes desat</string>
     <string name="notif_weigh_in_invalid">No s\'ha entès el pes: respon només amb el número, p. ex. 80,4</string>
-    <string name="day_part_title">La teva millor hora</string>
-    <string name="day_part_best">Rendeixes millor en aquesta franja: %1$s</string>
-    <string name="day_part_line">%1$s: %2$d %% de la teva millor marca · %3$d entrenaments</string>
-    <string name="day_part_hint">Mitjana de les darreres 12 setmanes: 1RM estimat de cada exercici davant el teu millor del període.</string>
-    <string name="day_part_morning">matí</string>
-    <string name="day_part_afternoon">tarda</string>
-    <string name="day_part_evening">vespre</string>
     <string name="share_progress">Comparteix el progrés</string>
     <string name="share_progress_title">📏 El meu progrés corporal</string>
-    <string name="day_part_no_difference">Rendeixes semblant a qualsevol hora</string>
     <string name="rep_range_line">Rang %1$d–%2$d · %3$s → en arribar a %2$d a totes, +%4$s</string>
     <string name="notif_reminder_start">Comença</string>
     <string name="notif_reminder_snooze">D\'aquí a 1 h</string>
@@ -949,9 +931,6 @@
     <string name="body_range_high">alt: convé baixar-lo</string>
     <string name="weight_rate_fast_loss">⚠ Baixes més d\'un 1 % per setmana: a aquest ritme es perd múscul. Valora menjar una mica més.</string>
     <string name="weight_rate_fast_gain">⚠ Puges més d\'un 1 % per setmana: a aquest ritme es guanya sobretot greix. Valora menjar una mica menys.</string>
-    <string name="weekday_title">Els teus millors dies</string>
-    <string name="weekday_best">Rendeixes més el %1$s: bon dia per a les sessions dures</string>
-    <string name="weekday_no_difference">Rendeixes semblant qualsevol dia</string>
     <string name="body_comp_hint_female">Cintura/alçada per sota de 0,5 és el recomanat. FFMI: uns 15–17 és la mitjana en dones entrenades; 19+ és avançat.</string>
     <string name="cannot_go_lighter">Amb aquest pes no es pot baixar més</string>
     <string name="rep_range_all">Rang de repeticions per a tota la rutina</string>
@@ -1163,7 +1142,8 @@
     <string name="picker_already_added">Ja afegit</string>
     <string name="gym_default_gym">Gimnàs</string>
     <string name="gym_default_home">Casa</string>
-    <string name="setup_sex">Sexe (per a calories i nivells de força)</string>
+    <string name="setup_sex">Sexe (per a calories i puntuacions de força)</string>
     <string name="deload_label">descàrrega</string>
     <string name="achievement_unlocked">Assoliment aconseguit: %1$s</string>
+    <string name="records_milestones">Rècords i fites</string>
 </resources>

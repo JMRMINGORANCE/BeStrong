@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -29,7 +28,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +37,6 @@ import com.bestrong.core.library.ExerciseLibrary
 import com.bestrong.core.stats.OneRepMax
 import com.bestrong.core.stats.Scores
 import com.bestrong.core.stats.Sex
-import com.bestrong.core.stats.StrengthLevel
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.BarChart
 import com.bestrong.mobile.ui.components.ChartPoint
@@ -50,75 +47,7 @@ import com.bestrong.mobile.ui.components.formatShortDate
 import com.bestrong.mobile.ui.components.label
 
 @Composable
-private fun levelLabel(level: StrengthLevel?): String = stringResource(
-    when (level) {
-        null -> R.string.level_none
-        StrengthLevel.BEGINNER -> R.string.level_beginner
-        StrengthLevel.NOVICE -> R.string.level_novice
-        StrengthLevel.INTERMEDIATE -> R.string.level_intermediate
-        StrengthLevel.ADVANCED -> R.string.level_advanced
-        StrengthLevel.ELITE -> R.string.level_elite
-    },
-)
-
-@Composable
-private fun liftName(id: String): String = ExerciseLibrary.byId(id)?.displayName() ?: id
-
-@Composable
-fun StrengthLevelsCard(stats: AdvancedStats, sex: Sex, onSex: (Sex) -> Unit) {
-    val unit = LocalWeightUnit.current
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            SectionHeader(stringResource(R.string.strength_levels))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(selected = sex == Sex.MALE, onClick = { onSex(Sex.MALE) }, label = { Text(stringResource(R.string.sex_male)) })
-                FilterChip(selected = sex == Sex.FEMALE, onClick = { onSex(Sex.FEMALE) }, label = { Text(stringResource(R.string.sex_female)) })
-            }
-            when {
-                stats.bodyWeightKg == null -> Text(stringResource(R.string.strength_levels_need_weight), style = MaterialTheme.typography.bodySmall)
-                stats.standings.isEmpty() -> Text(stringResource(R.string.strength_levels_empty), style = MaterialTheme.typography.bodySmall)
-            }
-            stats.standings.forEach { s ->
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(liftName(s.exerciseId), Modifier.weight(1f), fontWeight = FontWeight.SemiBold)
-                        Text(levelLabel(s.level), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                    }
-                    LinearProgressIndicator(progress = { s.progress.toFloat() }, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp))
-                    Text(
-                        stringResource(R.string.strength_ratio, "%.2f".format(s.ratio)) +
-                            (s.nextLevelKg?.let { " · " + stringResource(R.string.strength_next, unit.format(it, withUnit = true)) } ?: ""),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun AchievementsCard(stats: AdvancedStats) {
-    val unit = LocalWeightUnit.current
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            val unlocked = stats.achievements.count { it.unlocked }
-            SectionHeader(stringResource(R.string.achievements) + " · " + stringResource(R.string.achievements_count, unlocked, stats.achievements.size))
-            stats.challenge?.let { (lift, target, eta) ->
-                Text(stringResource(R.string.challenge_eta, unit.format(target, withUnit = true), liftName(lift), formatShortDate(eta)), fontWeight = FontWeight.SemiBold)
-            }
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                // Primero los conseguidos; luego los más cercanos
-                stats.achievements.sortedWith(compareByDescending<com.bestrong.core.stats.Achievement> { it.unlocked }.thenByDescending { it.progress }).forEach { a ->
-                    val name = com.bestrong.mobile.ui.components.achievementLabelRes(a.id)?.let { stringResource(it) } ?: a.id
-                    // Etiqueta, no botón (tocarla no hacía nada); el % con el formato del idioma («45 %» / «45%»)
-                    com.bestrong.mobile.ui.components.MetaPill(if (a.unlocked) "🏆 $name" else "$name · ${java.text.NumberFormat.getPercentInstance().apply { roundingMode = java.math.RoundingMode.FLOOR }.format(a.progress)}")
-                }
-            }
-        }
-    }
-}
+internal fun liftName(id: String): String = ExerciseLibrary.byId(id)?.displayName() ?: id
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -341,58 +270,4 @@ private fun MuscleZoneLine(weeks: List<Pair<java.time.LocalDate, Double>>, targe
         com.bestrong.core.stats.VolumeStatus.HIGH -> stringResource(R.string.muscle_zone_high, value, target, max) to MaterialTheme.colorScheme.error
     }
     Text(text, style = MaterialTheme.typography.bodyMedium, color = color)
-}
-
-/** «Rindes mejor por la tarde»: % medio de tu mejor 1RM estimado según la hora a la que entrenas. */
-@Composable
-fun DayPartCard(parts: List<com.bestrong.core.stats.DayPartStat>) {
-    val best = parts.first()
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            SectionHeader(stringResource(R.string.day_part_title))
-            // Solo hay «mejor hora» si la diferencia se nota (3 puntos); si no, da igual cuándo entrenes
-            val clear = best.relativeStrength - parts[1].relativeStrength >= CLEAR_DIFFERENCE
-            Text(if (clear) stringResource(R.string.day_part_best, best.part.label()) else stringResource(R.string.day_part_no_difference), fontWeight = FontWeight.SemiBold)
-            parts.forEach { p ->
-                Text(
-                    stringResource(R.string.day_part_line, p.part.label().replaceFirstChar { it.uppercase() }, (p.relativeStrength * 100).toInt(), p.sessions),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-            Text(stringResource(R.string.day_part_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-@Composable
-private fun com.bestrong.core.stats.DayPart.label(): String = stringResource(
-    when (this) {
-        com.bestrong.core.stats.DayPart.MORNING -> R.string.day_part_morning
-        com.bestrong.core.stats.DayPart.AFTERNOON -> R.string.day_part_afternoon
-        com.bestrong.core.stats.DayPart.EVENING -> R.string.day_part_evening
-    },
-)
-
-/** Diferencia mínima (fracción de tu mejor marca) para decir que una franja es mejor. */
-private const val CLEAR_DIFFERENCE = 0.03
-
-/** «Tus mejores días»: % medio de tu mejor marca según el día de la semana (útil para colocar las sesiones duras). */
-@Composable
-fun WeekdayCard(days: List<Triple<java.time.DayOfWeek, Int, Double>>) {
-    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
-    val best = days.first()
-    val clear = best.third - days[1].third >= CLEAR_DIFFERENCE
-    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            SectionHeader(stringResource(R.string.weekday_title))
-            val bestName = best.first.getDisplayName(java.time.format.TextStyle.FULL, locale)
-            Text(if (clear) stringResource(R.string.weekday_best, bestName) else stringResource(R.string.weekday_no_difference), fontWeight = FontWeight.SemiBold)
-            days.forEach { (day, n, rel) ->
-                Text(
-                    stringResource(R.string.day_part_line, day.getDisplayName(java.time.format.TextStyle.FULL, locale).replaceFirstChar { it.uppercase() }, (rel * 100).toInt(), n),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
-    }
 }

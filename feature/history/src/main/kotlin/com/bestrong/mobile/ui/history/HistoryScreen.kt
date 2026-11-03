@@ -110,7 +110,7 @@ fun HistoryScreen(
     val days by vm.trainingDays.collectAsStateWithLifecycle()
     val query by vm.query.collectAsStateWithLifecycle()
     val filtered by vm.filtered.collectAsStateWithLifecycle()
-    val heatmap by vm.heatmap.collectAsStateWithLifecycle()
+    val year by vm.year.collectAsStateWithLifecycle()
     val selectedDay by vm.selectedDay.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     val view = LocalView.current
@@ -195,7 +195,7 @@ fun HistoryScreen(
                                         ) { vm.selectedDay.value = it }
                                     }
                                 }
-                                item { com.bestrong.mobile.ui.components.Panel { YearHeatmap(heatmap) } }
+                                item { com.bestrong.mobile.ui.components.Panel { YearSection(year) } }
                             }
                             item { com.bestrong.mobile.ui.components.SectionHeader(stringResource(R.string.history_workouts), large = true) }
                             item { HistoryViewToggle(journal) { journal = it } }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Comunidad: pestaña de Perfil, aviso de Ajustes y pantalla de la bienvenida -->
+<!-- Comunidad: fila y pantalla de Perfil (ideas y avisos) y pantalla de la bienvenida -->
 <resources>
     <string name="community_tab">Community</string>
     <string name="community_title">Built by the community</string>
@@ -9,14 +9,15 @@
     <string name="community_step2">Suggestions are reviewed every day. If something is missing, we ask you right here.</string>
     <string name="community_step3">Good ideas get built and arrive in an upcoming version.</string>
     <string name="community_step4">Follow how yours is going in “My suggestions”.</string>
-    <string name="community_banner_title">Got an idea for an improvement?</string>
-    <string name="community_banner_body">We build BeStrong together. Suggest it in a minute.</string>
     <string name="tut_community_t">Built by the community</string>
     <string name="tut_community_d">BeStrong was born on Forocoches and you make it better. In Profile › Community you can suggest an idea in a minute, no account needed, and the good ones arrive in upcoming versions.</string>
     <!-- Novedades de esta versión (sustituye a whats_new_body) -->
     <string name="whats_new_latest">• New, cleaner design in light and dark
 • Settings grouped by topic, each on its own screen
 • New “Permissions and connections” screen: turn everything on in one tap
-• Community tab: suggest improvements and follow the replies
+• Community in Profile: suggest improvements, follow the replies and read news from the team
 • Cardio timer and exercise switching from the watch</string>
+    <string name="community_row_body">Ideas to improve the app and news from the team</string>
+    <string name="community_announcements">News from the team</string>
+    <string name="community_announcements_empty">No news yet. When the team posts something, you\'ll get a notification and see it here.</string>
 </resources>

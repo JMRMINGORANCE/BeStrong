@@ -1,7 +1,6 @@
 package com.bestrong.mobile.ui.profile
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -20,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,7 +57,6 @@ import com.bestrong.mobile.ui.components.ChartPoint
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.StatTile
-import com.bestrong.mobile.ui.components.exerciseLabel
 import com.bestrong.mobile.ui.components.formatDate
 import com.bestrong.mobile.ui.components.label
 import java.time.format.DateTimeFormatter
@@ -86,8 +85,10 @@ fun ProfileScreen(
     if (showScores) ScoresDialog(advanced.bodyWeightKg, settings.sex) { showScores = false }
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
-    // Buzón de ideas abierto en «Proponer» (0) o «Mis propuestas» (1); -1, cerrado
+    // Comunidad (ideas y avisos) y, encima, el buzón abierto en «Proponer» (0) o «Mis propuestas» (1); -1, cerrado
+    var showCommunity by rememberSaveable { mutableStateOf(false) }
     var proposalsTab by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(-1) }
+    if (showCommunity) CommunityDialog(onPropose = { proposalsTab = 0 }, onMine = { proposalsTab = 1 }) { showCommunity = false }
     if (proposalsTab >= 0) ProposalsDialog(initialTab = proposalsTab) { proposalsTab = -1 }
     // Cada vez que se vuelve a la pantalla (p. ej. tras cambiar permisos en Health Connect)
     androidx.lifecycle.compose.LifecycleResumeEffect(Unit) {
@@ -107,7 +108,7 @@ fun ProfileScreen(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // Tres pestañas: el progreso (lo que se mira a menudo), los ajustes (lo que se toca de vez en cuando) y la comunidad
+            // Dos pestañas: el progreso (lo que se mira a menudo) y los ajustes (lo que se toca de vez en cuando)
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     com.bestrong.mobile.ui.components.ScreenTitle(
@@ -184,13 +185,10 @@ fun ProfileScreen(
                     }
                     // Músculos: semana (silueta), 30 días, tendencia y recuperación en una sola tarjeta
                     item { MusclesCard(stats, advanced, settings.weeklySetsTarget) { n -> vm.updateSettings { it.copy(weeklySetsTarget = n) } } }
-                    stats.year?.let { y -> item { YearInReviewCard(y) } }
                     item { TrainingLoadCard(advanced) }
-                    if (advanced.dayParts.size >= 2) item { DayPartCard(advanced.dayParts) }
-                    if (advanced.weekdays.size >= 2) item { WeekdayCard(advanced.weekdays) }
-                    item { StrengthLevelsCard(advanced, settings.sex) { sex -> vm.updateSettings { it.copy(sex = sex) } } }
                     item { PatternBalanceCard(advanced) }
-                    item { AchievementsCard(advanced) }
+                    // Récords e hitos: reto, mejor marca por ejercicio y logros en una sola tarjeta
+                    item { RecordsCard(stats.topOneRepMax, advanced, vm::exerciseOf, onOpenExercise) }
                 }
                 item {
                     ToolsCard(
@@ -206,27 +204,6 @@ fun ProfileScreen(
                         },
                     )
                 }
-                if (stats.totalWorkouts > 0) {
-                    item {
-                        com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                            Column(Modifier.padding(16.dp)) {
-                                SectionHeader(stringResource(R.string.best_1rm))
-                                if (stats.topOneRepMax.isEmpty()) Text(stringResource(R.string.complete_sets_for_records))
-                                stats.topOneRepMax.forEach { pr ->
-                                    // Con mancuernas como total del par, el mismo número que en el detalle del ejercicio
-                                    // (también los propios, que no están en la biblioteca)
-                                    val equipment = (vm.exerciseOf(pr.exerciseId) ?: com.bestrong.core.library.ExerciseLibrary.byId(pr.exerciseId))?.equipment
-                                    val pair = if (settings.dumbbellTotal && equipment == com.bestrong.core.model.Equipment.DUMBBELL) 2 else 1
-                                    ListItem(
-                                        headlineContent = { Text(pr.exerciseLabel()) },
-                                        trailingContent = { Text(unit.format(pr.value * pair, withUnit = true), fontWeight = FontWeight.Bold) },
-                                        modifier = Modifier.clickable { onOpenExercise(pr.exerciseId) },
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
                 item {
                     Card(onClick = onOpenMeasurements) {
                         ListItem(
@@ -241,15 +218,21 @@ fun ProfileScreen(
                         )
                     }
                 }
-            } else if (tab == 2) {
-                // Comunidad: la app se hace con las ideas de quien la usa
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    CommunitySection(onPropose = { proposalsTab = 0 }, onMine = { proposalsTab = 1 }, modifier = Modifier.widthIn(max = 720.dp))
+                // Comunidad: buzón de ideas y avisos del equipo, en su propia pantalla
+                item {
+                    Card(onClick = { showCommunity = true }) {
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.community_tab)) },
+                            supportingContent = { Text(stringResource(R.string.community_row_body)) },
+                            leadingContent = { Icon(Icons.Default.Groups, null, tint = MaterialTheme.colorScheme.primary) },
+                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
+                        )
+                    }
                 }
             } else {
                 // Ajustes: un menú por apartados; cada uno abre su pantalla
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    SettingsTab(vm, onOpenCommunity = { tab = 2 }, modifier = Modifier.widthIn(max = 720.dp), openPage = openSettingsPage, onPageOpened = onSettingsPageOpened)
+                    SettingsTab(vm, modifier = Modifier.widthIn(max = 720.dp), openPage = openSettingsPage, onPageOpened = onSettingsPageOpened)
                 }
             }
         }
@@ -298,10 +281,10 @@ internal fun AutoBackupPicker(vm: ProfileViewModel) {
     )
 }
 
-/** Selector de las pestañas de Perfil (progreso, ajustes y comunidad), en píldora: la elegida, rellena con el degradado de marca. */
+/** Selector de las pestañas de Perfil (progreso y ajustes), en píldora: la elegida, rellena con el degradado de marca. */
 @Composable
 private fun ProfileTabs(selected: Int, onSelect: (Int) -> Unit) {
-    val labels = listOf(stringResource(R.string.profile_progress), stringResource(R.string.settings), stringResource(R.string.community_tab))
+    val labels = listOf(stringResource(R.string.profile_progress), stringResource(R.string.settings))
     Row(
         Modifier.fillMaxWidth().then(Modifier.clip(androidx.compose.foundation.shape.CircleShape)).background(MaterialTheme.colorScheme.surfaceContainer).padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),

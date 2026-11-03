@@ -79,7 +79,6 @@
     <ID>ReturnCount:ProfileViewModel.kt$ProfileViewModel$private fun challenge(history: List&lt;com.bestrong.core.model.Workout&gt;, unit: com.bestrong.core.util.WeightUnit): Triple&lt;String, Double, Long&gt;?</ID>
     <ID>ReturnCount:RestScreen.kt$internal fun nextExerciseTransition(w: Workout): Pair&lt;WorkoutExercise, WorkoutSet&gt;?</ID>
     <ID>ReturnCount:Strength.kt$Strength$fun predictDate(points: List&lt;Pair&lt;Long, Double&gt;&gt;, target: Double, nowEpochMs: Long = System.currentTimeMillis()): Long?</ID>
-    <ID>ReturnCount:Strength.kt$Strength$fun standing(exerciseId: String, oneRepMaxKg: Double, bodyWeightKg: Double, sex: Sex): StrengthStanding?</ID>
     <ID>ReturnCount:Tempo.kt$Tempo.Companion$fun parse(text: String?): Tempo?</ID>
     <ID>ReturnCount:WorkoutActions.kt$WorkoutActions$suspend fun completeNextSet(): Boolean</ID>
     <ID>ReturnCount:WorkoutCsv.kt$WorkoutCsv$private fun parseClock(s: String): Int</ID>

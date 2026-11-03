@@ -104,6 +104,15 @@ class MusclesTimelineScreenshotTest {
         scrollTo("Bisagra : sentadilla")
         assertNotNull(compose.onNodeWithText("Equilibrio de patrones").fetchSemanticsNode())
         shot("m_profile_patterns")
+        // Récords e hitos: reto, mejor 1RM por ejercicio y logros en una tarjeta
+        scrollTo("Récords e hitos")
+        assertNotNull(compose.onNodeWithText("Mejores 1RM estimados").fetchSemanticsNode())
+        shot("m_profile_records")
+        // Historial: el mapa de calor y el resumen del año, en un solo bloque
+        compose.onAllNodesWithText("Historial")[0].performClick()
+        settle(30)
+        scrollTo("Compartir como texto", substring = true)
+        shot("m_history_year")
     }
 
     @Test

@@ -228,7 +228,6 @@
     <string name="hc_missing_perms">Autorisations manquantes</string>
     <string name="hc_unavailable">Health Connect n’est pas disponible sur cet appareil</string>
     <string name="heatmap_desc">Carte de chaleur : %1$d entraînements en %2$d</string>
-    <string name="heatmap_title">%1$d · %2$d entraînements</string>
     <string name="help">Aide</string>
     <string name="help_body">Glossaire, FAQ, tutoriel et nouveautés</string>
     <string name="high_contrast">Contraste élevé</string>
@@ -272,10 +271,7 @@
     <string name="last_weight">Dernier poids : %1$s</string>
     <string name="level_advanced">Avancé</string>
     <string name="level_beginner">Débutant</string>
-    <string name="level_elite">Élite</string>
     <string name="level_intermediate">Intermédiaire</string>
-    <string name="level_none">Sous débutant</string>
-    <string name="level_novice">Novice</string>
     <string name="log_measurements">Enregistre ton poids et tes mensurations</string>
     <string name="logged_on_watch">Enregistré sur la montre</string>
     <string name="m_arm">Bras %1$s cm</string>
@@ -451,7 +447,6 @@
     <string name="rating_motivation">Motivation</string>
     <string name="rating_pain">Gêne</string>
     <string name="rating_title">Comment tu t’es senti ?</string>
-    <string name="readiness_connect">Connecte Health Connect dans Profil pour utiliser le sommeil et la fréquence cardiaque au repos.</string>
     <string name="record_1rm">Meilleur 1RM estimé</string>
     <string name="record_heaviest">Charge la plus lourde</string>
     <string name="record_line">%1$s : %2$s %3$s</string>
@@ -599,11 +594,6 @@
     <string name="step_weight">Ajuster le poids</string>
     <string name="strength_curve">Courbe de force</string>
     <string name="strength_curve_hint">Meilleur poids pour chaque nombre de répétitions</string>
-    <string name="strength_levels">Niveaux de force</string>
-    <string name="strength_levels_empty">Pas encore de performances sur les mouvements de base.</string>
-    <string name="strength_levels_need_weight">Note ton poids corporel dans Mensurations pour voir ton niveau au squat, développé couché, soulevé de terre, développé militaire et rowing.</string>
-    <string name="strength_next">Niveau suivant : %1$s</string>
-    <string name="strength_ratio">%1$s × poids corporel</string>
     <string name="substitute_body">Même muscle. Si tu l’as déjà fait, tes charges sont utilisées ; sinon, les actuelles sont converties.</string>
     <string name="substitute_title">Remplacer l’exercice</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -648,7 +638,7 @@
     <string name="tut2_t">Routines et programmes</string>
     <string name="tut3_d">Touche ✓ ou fais glisser la série vers la droite pour la valider ; le repos démarre tout seul. Glisse vers la gauche pour la supprimer.</string>
     <string name="tut3_t">Pendant l’entraînement</string>
-    <string name="tut4_d">Dans Profil, tu verras records, muscles sollicités, niveaux de force et graphiques. Si tu es perdu, Profil → Aide contient le glossaire.</string>
+    <string name="tut4_d">Dans Profil, tu verras records et succès, muscles sollicités et graphiques. Si tu es perdu, Profil → Aide contient le glossaire.</string>
     <string name="tut4_t">Ta progression</string>
     <string name="tutorial_replay">Voir le tutoriel</string>
     <string name="undo_exercise_deleted">Exercice retiré</string>
@@ -926,16 +916,8 @@
     <string name="notif_weigh_in_reply_hint">Ton poids, ex. 80,4</string>
     <string name="notif_weigh_in_saved">Poids enregistré</string>
     <string name="notif_weigh_in_invalid">Poids non reconnu : réponds avec le nombre seul, ex. 80,4</string>
-    <string name="day_part_title">Ton meilleur moment</string>
-    <string name="day_part_best">Ton meilleur moment : %1$s</string>
-    <string name="day_part_line">%1$s : %2$d %% de ton meilleur · %3$d séances</string>
-    <string name="day_part_hint">Moyenne des 12 dernières semaines : 1RM estimé de chaque exercice face à ton meilleur sur la période.</string>
-    <string name="day_part_morning">matin</string>
-    <string name="day_part_afternoon">après-midi</string>
-    <string name="day_part_evening">soir</string>
     <string name="share_progress">Partager la progression</string>
     <string name="share_progress_title">📏 Ma progression corporelle</string>
-    <string name="day_part_no_difference">Tes performances sont proches à toute heure</string>
     <string name="rep_range_line">Fourchette %1$d–%2$d · %3$s → à %2$d sur toutes, +%4$s</string>
     <string name="notif_reminder_start">Commencer</string>
     <string name="notif_reminder_snooze">Dans 1 h</string>
@@ -949,9 +931,6 @@
     <string name="body_range_high">élevé : à faire baisser</string>
     <string name="weight_rate_fast_loss">⚠ Tu perds plus de 1 % par semaine : à ce rythme, on perd du muscle. Envisage de manger un peu plus.</string>
     <string name="weight_rate_fast_gain">⚠ Tu prends plus de 1 % par semaine : à ce rythme, c\'est surtout du gras. Envisage de manger un peu moins.</string>
-    <string name="weekday_title">Tes meilleurs jours</string>
-    <string name="weekday_best">Ton jour le plus fort : %1$s, idéal pour les séances dures</string>
-    <string name="weekday_no_difference">Tes performances sont proches quel que soit le jour</string>
     <string name="body_comp_hint_female">Un rapport taille/hauteur inférieur à 0,5 est recommandé. FFMI : environ 15–17 est la moyenne chez les femmes entraînées ; 19+ est avancé.</string>
     <string name="cannot_go_lighter">Impossible d\'alléger davantage avec ce poids</string>
     <string name="rep_range_all">Fourchette de répétitions pour toute la routine</string>
@@ -1163,7 +1142,8 @@
     <string name="picker_already_added">Déjà ajouté</string>
     <string name="gym_default_gym">Salle</string>
     <string name="gym_default_home">Maison</string>
-    <string name="setup_sex">Sexe (pour les calories et niveaux de force)</string>
+    <string name="setup_sex">Sexe (pour les calories et scores de force)</string>
     <string name="deload_label">décharge</string>
     <string name="achievement_unlocked">Succès débloqué : %1$s</string>
+    <string name="records_milestones">Records et étapes</string>
 </resources>

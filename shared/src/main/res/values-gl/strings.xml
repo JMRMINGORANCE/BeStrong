@@ -228,7 +228,6 @@
     <string name="hc_missing_perms">Faltan permisos</string>
     <string name="hc_unavailable">Health Connect non está dispoñible neste dispositivo</string>
     <string name="heatmap_desc">Mapa de calor: %1$d adestramentos en %2$d</string>
-    <string name="heatmap_title">%1$d · %2$d adestramentos</string>
     <string name="help">Axuda</string>
     <string name="help_body">Glosario, preguntas frecuentes, titorial e novidades</string>
     <string name="high_contrast">Alto contraste</string>
@@ -272,10 +271,7 @@
     <string name="last_weight">Último peso: %1$s</string>
     <string name="level_advanced">Avanzado</string>
     <string name="level_beginner">Principiante</string>
-    <string name="level_elite">Elite</string>
     <string name="level_intermediate">Intermedio</string>
-    <string name="level_none">Por debaixo de principiante</string>
-    <string name="level_novice">Novato</string>
     <string name="log_measurements">Rexistra o teu peso e medidas</string>
     <string name="logged_on_watch">Rexistrado no reloxo</string>
     <string name="m_arm">Brazo %1$s cm</string>
@@ -451,7 +447,6 @@
     <string name="rating_motivation">Motivación</string>
     <string name="rating_pain">Molestias</string>
     <string name="rating_title">Como te sentiches?</string>
-    <string name="readiness_connect">Conecta Health Connect en Perfil para usar o sono e o pulso en repouso.</string>
     <string name="record_1rm">Mellor 1RM estimado</string>
     <string name="record_heaviest">Peso máximo</string>
     <string name="record_line">%1$s: %2$s %3$s</string>
@@ -599,11 +594,6 @@
     <string name="step_weight">Axustar peso</string>
     <string name="strength_curve">Curva de forza</string>
     <string name="strength_curve_hint">Mellor peso para cada número de repeticións</string>
-    <string name="strength_levels">Niveis de forza</string>
-    <string name="strength_levels_empty">Aínda non hai marcas nos básicos.</string>
-    <string name="strength_levels_need_weight">Anota o teu peso corporal en Medidas para ver o teu nivel en agachamento, press de banco, peso morto, press militar e remo.</string>
-    <string name="strength_next">Seguinte nivel: %1$s</string>
-    <string name="strength_ratio">%1$s × peso corporal</string>
     <string name="substitute_body">Mesmo músculo. Se xa o fixeches, úsanse os teus pesos; se non, convértense os actuais.</string>
     <string name="substitute_title">Cambiar por outro exercicio</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -648,7 +638,7 @@
     <string name="tut2_t">Rutinas e programas</string>
     <string name="tut3_d">Toca ✓ ou despraza a serie á dereita para completala; o descanso comeza só. Despraza á esquerda para borrala.</string>
     <string name="tut3_t">Durante o adestramento</string>
-    <string name="tut4_d">En Perfil verás récords, músculos traballados, niveis de forza e gráficas. Se te perdes, en Perfil → Axuda tes o glosario.</string>
+    <string name="tut4_d">En Perfil verás marcas e logros, músculos traballados e gráficas. Se te perdes, en Perfil → Axuda tes o glosario.</string>
     <string name="tut4_t">O teu progreso</string>
     <string name="tutorial_replay">Ver o titorial</string>
     <string name="undo_exercise_deleted">Exercicio quitado</string>
@@ -926,16 +916,8 @@
     <string name="notif_weigh_in_reply_hint">O teu peso, p. ex. 80,4</string>
     <string name="notif_weigh_in_saved">Peso gardado</string>
     <string name="notif_weigh_in_invalid">Non se entendeu o peso: responde só co número, p. ex. 80,4</string>
-    <string name="day_part_title">A túa mellor hora</string>
-    <string name="day_part_best">Rendes mellor pola %1$s</string>
-    <string name="day_part_line">%1$s: %2$d %% da túa mellor marca · %3$d adestramentos</string>
-    <string name="day_part_hint">Media das últimas 12 semanas: 1RM estimado de cada exercicio fronte ao teu mellor do período.</string>
-    <string name="day_part_morning">mañá</string>
-    <string name="day_part_afternoon">tarde</string>
-    <string name="day_part_evening">noite</string>
     <string name="share_progress">Compartir progreso</string>
     <string name="share_progress_title">📏 O meu progreso corporal</string>
-    <string name="day_part_no_difference">Rendes parecido a calquera hora</string>
     <string name="rep_range_line">Rango %1$d–%2$d · %3$s → ao chegar a %2$d en todas, +%4$s</string>
     <string name="notif_reminder_start">Comezar</string>
     <string name="notif_reminder_snooze">Dentro de 1 h</string>
@@ -949,9 +931,6 @@
     <string name="body_range_high">alto: convén baixalo</string>
     <string name="weight_rate_fast_loss">⚠ Baixas máis dun 1 % por semana: a este ritmo pérdese músculo. Valora comer algo máis.</string>
     <string name="weight_rate_fast_gain">⚠ Subes máis dun 1 % por semana: a este ritmo gáñase sobre todo graxa. Valora comer algo menos.</string>
-    <string name="weekday_title">Os teus mellores días</string>
-    <string name="weekday_best">Rendes máis o %1$s: bo día para as sesións duras</string>
-    <string name="weekday_no_difference">Rendes parecido calquera día</string>
     <string name="body_comp_hint_female">Cintura/altura por debaixo de 0,5 é o recomendado. FFMI: uns 15–17 é a media en mulleres adestradas; 19+ é avanzado.</string>
     <string name="cannot_go_lighter">Con este peso non se pode baixar máis</string>
     <string name="rep_range_all">Rango de repeticións para toda a rutina</string>
@@ -1163,7 +1142,8 @@
     <string name="picker_already_added">Xa engadido</string>
     <string name="gym_default_gym">Ximnasio</string>
     <string name="gym_default_home">Casa</string>
-    <string name="setup_sex">Sexo (para calorías e niveis de forza)</string>
+    <string name="setup_sex">Sexo (para calorías e puntuacións de forza)</string>
     <string name="deload_label">descarga</string>
     <string name="achievement_unlocked">Logro conseguido: %1$s</string>
+    <string name="records_milestones">Marcas e fitos</string>
 </resources>

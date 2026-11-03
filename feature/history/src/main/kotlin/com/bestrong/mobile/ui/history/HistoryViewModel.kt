@@ -127,10 +127,16 @@ class HistoryViewModel @Inject constructor(
         // Empieza con el historial ya cargado (sin filtros es lo mismo): al abrir no parpadea «ningún entreno coincide»
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), repo.history.value)
 
-    /** Entrenos por día del año actual (mapa de calor). */
-    val heatmap: StateFlow<Map<LocalDate, Int>> = viewed
-        .map { WorkoutStats.dailyCounts(it, LocalDate.now().year, ZoneId.systemDefault()) }
-        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+    /** «Tu año»: en enero, el que acaba de terminar (si entrenaste); si no, el actual. Mapa de calor y resumen del mismo año. */
+    val year: StateFlow<YearView> = viewed
+        .map { h ->
+            val zone = ZoneId.systemDefault()
+            val today = LocalDate.now(zone)
+            val last = if (today.monthValue == 1) com.bestrong.core.stats.Strength.yearSummary(h, today.year - 1, zone) else null
+            val year = last?.year ?: today.year
+            YearView(year, WorkoutStats.dailyCounts(h, year, zone), last ?: com.bestrong.core.stats.Strength.yearSummary(h, year, zone))
+        }
+        .flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), YearView())
 
     /** Récords de ese entreno: recorre todo el historial, así que fuera del hilo principal. */
     suspend fun recordsIn(workout: Workout): List<PersonalRecord> =

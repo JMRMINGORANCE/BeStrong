@@ -228,7 +228,6 @@
     <string name="hc_missing_perms">Missing permissions</string>
     <string name="hc_unavailable">Health Connect isn\'t available on this device</string>
     <string name="heatmap_desc">Heatmap: %1$d workouts in %2$d</string>
-    <string name="heatmap_title">%1$d · %2$d workouts</string>
     <string name="help">Help</string>
     <string name="help_body">Glossary, FAQ, tutorial and what’s new</string>
     <string name="high_contrast">High contrast</string>
@@ -272,10 +271,7 @@
     <string name="last_weight">Last weight: %1$s</string>
     <string name="level_advanced">Advanced</string>
     <string name="level_beginner">Beginner</string>
-    <string name="level_elite">Elite</string>
     <string name="level_intermediate">Intermediate</string>
-    <string name="level_none">Below beginner</string>
-    <string name="level_novice">Novice</string>
     <string name="log_measurements">Log your weight and measurements</string>
     <string name="logged_on_watch">Logged on the watch</string>
     <string name="m_arm">Arm %1$s cm</string>
@@ -451,7 +447,6 @@
     <string name="rating_motivation">Motivation</string>
     <string name="rating_pain">Discomfort</string>
     <string name="rating_title">How did you feel?</string>
-    <string name="readiness_connect">Connect Health Connect in Profile to use sleep and resting heart rate.</string>
     <string name="record_1rm">Best estimated 1RM</string>
     <string name="record_heaviest">Heaviest weight</string>
     <string name="record_line">%1$s: %2$s %3$s</string>
@@ -599,11 +594,6 @@
     <string name="step_weight">Adjust weight</string>
     <string name="strength_curve">Strength curve</string>
     <string name="strength_curve_hint">Best weight for each rep count</string>
-    <string name="strength_levels">Strength levels</string>
-    <string name="strength_levels_empty">No marks on the main lifts yet.</string>
-    <string name="strength_levels_need_weight">Log your body weight in Measurements to see your level in squat, bench, deadlift, overhead press and row.</string>
-    <string name="strength_next">Next level: %1$s</string>
-    <string name="strength_ratio">%1$s × body weight</string>
     <string name="substitute_body">Same muscle. If you have done it before your weights are used; otherwise the current ones are converted.</string>
     <string name="substitute_title">Swap exercise</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -648,7 +638,7 @@
     <string name="tut2_t">Routines and programs</string>
     <string name="tut3_d">Tap ✓ or swipe a set right to complete it; rest starts automatically. Swipe left to delete it.</string>
     <string name="tut3_t">During the workout</string>
-    <string name="tut4_d">Profile shows records, muscles worked, strength levels and charts. If you get lost, Profile → Help has a glossary.</string>
+    <string name="tut4_d">Profile shows records and achievements, muscles worked and charts. If you get lost, Profile → Help has a glossary.</string>
     <string name="tut4_t">Your progress</string>
     <string name="tutorial_replay">Show the tutorial</string>
     <string name="undo_exercise_deleted">Exercise removed</string>
@@ -926,16 +916,8 @@
     <string name="notif_weigh_in_reply_hint">Your weight, e.g. 80.4</string>
     <string name="notif_weigh_in_saved">Weight saved</string>
     <string name="notif_weigh_in_invalid">Couldn\'t read that weight: reply with just the number, e.g. 80.4</string>
-    <string name="day_part_title">Your best time</string>
-    <string name="day_part_best">You perform best in the %1$s</string>
-    <string name="day_part_line">%1$s: %2$d%% of your best · %3$d workouts</string>
-    <string name="day_part_hint">Last 12 weeks: each exercise\'s estimated 1RM against your best in that period.</string>
-    <string name="day_part_morning">morning</string>
-    <string name="day_part_afternoon">afternoon</string>
-    <string name="day_part_evening">evening</string>
     <string name="share_progress">Share progress</string>
     <string name="share_progress_title">📏 My body progress</string>
-    <string name="day_part_no_difference">You perform about the same at any time</string>
     <string name="rep_range_line">Range %1$d–%2$d · %3$s → at %2$d on every set, +%4$s</string>
     <string name="notif_reminder_start">Start</string>
     <string name="notif_reminder_snooze">In 1 h</string>
@@ -949,9 +931,6 @@
     <string name="body_range_high">high: worth bringing down</string>
     <string name="weight_rate_fast_loss">⚠ You\'re losing over 1% per week: at this pace you lose muscle. Consider eating a bit more.</string>
     <string name="weight_rate_fast_gain">⚠ You\'re gaining over 1% per week: at this pace it\'s mostly fat. Consider eating a bit less.</string>
-    <string name="weekday_title">Your best days</string>
-    <string name="weekday_best">You\'re strongest on %1$s: a good day for hard sessions</string>
-    <string name="weekday_no_difference">You perform about the same on any day</string>
     <string name="body_comp_hint_female">Waist-to-height under 0.5 is recommended. FFMI: around 15–17 is typical for trained women; 19+ is advanced.</string>
     <string name="cannot_go_lighter">Can\'t go any lighter from this weight</string>
     <string name="rep_range_all">Rep range for the whole routine</string>
@@ -1163,7 +1142,8 @@
     <string name="picker_already_added">Already added</string>
     <string name="gym_default_gym">Gym</string>
     <string name="gym_default_home">Home</string>
-    <string name="setup_sex">Sex (for calories and strength levels)</string>
+    <string name="setup_sex">Sex (for calories and strength scores)</string>
     <string name="deload_label">deload</string>
     <string name="achievement_unlocked">Achievement unlocked: %1$s</string>
+    <string name="records_milestones">Records and milestones</string>
 </resources>

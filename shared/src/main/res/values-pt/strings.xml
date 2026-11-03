@@ -228,7 +228,6 @@
     <string name="hc_missing_perms">Faltam permissões</string>
     <string name="hc_unavailable">O Health Connect não está disponível neste dispositivo</string>
     <string name="heatmap_desc">Mapa de calor: %1$d treinos em %2$d</string>
-    <string name="heatmap_title">%1$d · %2$d treinos</string>
     <string name="help">Ajuda</string>
     <string name="help_body">Glossário, perguntas frequentes, tutorial e novidades</string>
     <string name="high_contrast">Alto contraste</string>
@@ -272,10 +271,7 @@
     <string name="last_weight">Último peso: %1$s</string>
     <string name="level_advanced">Avançado</string>
     <string name="level_beginner">Iniciante</string>
-    <string name="level_elite">Elite</string>
     <string name="level_intermediate">Intermédio</string>
-    <string name="level_none">Abaixo de iniciante</string>
-    <string name="level_novice">Novato</string>
     <string name="log_measurements">Regista o teu peso e medidas</string>
     <string name="logged_on_watch">Registado no relógio</string>
     <string name="m_arm">Braço %1$s cm</string>
@@ -451,7 +447,6 @@
     <string name="rating_motivation">Motivação</string>
     <string name="rating_pain">Desconforto</string>
     <string name="rating_title">Como te sentiste?</string>
-    <string name="readiness_connect">Liga o Health Connect no Perfil para usar o sono e a frequência cardíaca em repouso.</string>
     <string name="record_1rm">Melhor 1RM estimado</string>
     <string name="record_heaviest">Peso máximo</string>
     <string name="record_line">%1$s: %2$s %3$s</string>
@@ -599,11 +594,6 @@
     <string name="step_weight">Ajustar peso</string>
     <string name="strength_curve">Curva de força</string>
     <string name="strength_curve_hint">Melhor peso para cada número de repetições</string>
-    <string name="strength_levels">Níveis de força</string>
-    <string name="strength_levels_empty">Ainda sem marcas nos exercícios principais.</string>
-    <string name="strength_levels_need_weight">Regista o teu peso corporal em Medidas para veres o teu nível em agachamento, supino, peso morto, press militar e remada.</string>
-    <string name="strength_next">Próximo nível: %1$s</string>
-    <string name="strength_ratio">%1$s × peso corporal</string>
     <string name="substitute_body">Mesmo músculo. Se já o fizeste, usamos os teus pesos; caso contrário, os atuais são convertidos.</string>
     <string name="substitute_title">Trocar exercício</string>
     <string name="suggestion_applied">%1$s %2$s · %3$s ✓</string>
@@ -648,7 +638,7 @@
     <string name="tut2_t">Rotinas e programas</string>
     <string name="tut3_d">Toca em ✓ ou desliza a série para a direita para a concluíres; o descanso começa sozinho. Desliza para a esquerda para a apagares.</string>
     <string name="tut3_t">Durante o treino</string>
-    <string name="tut4_d">No Perfil vês recordes, músculos trabalhados, níveis de força e gráficos. Se te perderes, em Perfil → Ajuda tens o glossário.</string>
+    <string name="tut4_d">No Perfil vês recordes e conquistas, músculos trabalhados e gráficos. Se te perderes, em Perfil → Ajuda tens o glossário.</string>
     <string name="tut4_t">O teu progresso</string>
     <string name="tutorial_replay">Ver o tutorial</string>
     <string name="undo_exercise_deleted">Exercício removido</string>
@@ -926,16 +916,8 @@
     <string name="notif_weigh_in_reply_hint">O teu peso, p. ex. 80,4</string>
     <string name="notif_weigh_in_saved">Peso guardado</string>
     <string name="notif_weigh_in_invalid">Não se percebeu o peso: responde só com o número, p. ex. 80,4</string>
-    <string name="day_part_title">A tua melhor hora</string>
-    <string name="day_part_best">Rendes melhor durante a %1$s</string>
-    <string name="day_part_line">%1$s: %2$d %% da tua melhor marca · %3$d treinos</string>
-    <string name="day_part_hint">Média das últimas 12 semanas: 1RM estimado de cada exercício face ao teu melhor do período.</string>
-    <string name="day_part_morning">manhã</string>
-    <string name="day_part_afternoon">tarde</string>
-    <string name="day_part_evening">noite</string>
     <string name="share_progress">Partilhar progresso</string>
     <string name="share_progress_title">📏 O meu progresso corporal</string>
-    <string name="day_part_no_difference">Rendes de forma parecida a qualquer hora</string>
     <string name="rep_range_line">Intervalo %1$d–%2$d · %3$s → ao chegar a %2$d em todas, +%4$s</string>
     <string name="notif_reminder_start">Começar</string>
     <string name="notif_reminder_snooze">Daqui a 1 h</string>
@@ -949,9 +931,6 @@
     <string name="body_range_high">alto: convém baixá-lo</string>
     <string name="weight_rate_fast_loss">⚠ Estás a perder mais de 1 % por semana: a este ritmo perde-se músculo. Pondera comer um pouco mais.</string>
     <string name="weight_rate_fast_gain">⚠ Estás a ganhar mais de 1 % por semana: a este ritmo ganha-se sobretudo gordura. Pondera comer um pouco menos.</string>
-    <string name="weekday_title">Os teus melhores dias</string>
-    <string name="weekday_best">O teu dia mais forte: %1$s, bom para as sessões duras</string>
-    <string name="weekday_no_difference">Rendes de forma parecida em qualquer dia</string>
     <string name="body_comp_hint_female">Cintura/altura abaixo de 0,5 é o recomendado. FFMI: cerca de 15–17 é a média em mulheres treinadas; 19+ é avançado.</string>
     <string name="cannot_go_lighter">Com este peso não dá para baixar mais</string>
     <string name="rep_range_all">Intervalo de repetições para toda a rotina</string>
@@ -1163,7 +1142,8 @@
     <string name="picker_already_added">Já adicionado</string>
     <string name="gym_default_gym">Ginásio</string>
     <string name="gym_default_home">Casa</string>
-    <string name="setup_sex">Sexo (para calorias e níveis de força)</string>
+    <string name="setup_sex">Sexo (para calorias e pontuações de força)</string>
     <string name="deload_label">descarga</string>
     <string name="achievement_unlocked">Conquista desbloqueada: %1$s</string>
+    <string name="records_milestones">Recordes e marcos</string>
 </resources>

@@ -94,7 +94,8 @@ class SearchCompareDiaryScreenshotTest {
         settle()
         workout("60", tag = "dormí mal", summaryShot = "scd_summary_tags")
         workout("62,5")
-        // Historial → Diario, y filtrado por la etiqueta
+        // Historial → Diario (bajo el calendario y «Tu año»), y filtrado por la etiqueta
+        auto { compose.onAllNodes(hasScrollToNodeAction())[0].performScrollToNode(hasText("Diario")) }
         compose.onNodeWithText("Diario").performClick()
         settle()
         auto { compose.onAllNodes(hasScrollToNodeAction())[0].performScrollToNode(hasText("Sin nota")) }
