@@ -6,6 +6,9 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.bestrong.core.sensors.BarVelocity
+import com.bestrong.core.sensors.RepCalibration
+import com.bestrong.core.sensors.RepConfidence
+import com.bestrong.core.sensors.RepDetector
 import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,18 +17,22 @@ import kotlinx.coroutines.flow.asStateFlow
 /**
  * Contador de repeticiones con el acelerómetro del reloj (beta).
  *
- * Separa la gravedad con un filtro paso bajo y proyecta la aceleración lineal sobre la vertical.
- * En cada repetición hay un pico positivo en el punto bajo (frenar la bajada + empezar a subir):
- * se cuenta un pico cuando supera el umbral, con histéresis y un intervalo mínimo.
- * Además estima la velocidad media de cada repetición (para el RIR por pérdida de velocidad)
- * y se puede calibrar con unas repeticiones de prueba.
+ * Separa la gravedad con un filtro paso bajo, proyecta la aceleración lineal sobre la vertical y la suaviza; la
+ * decisión de qué es una repetición (arranque, golpes, rebotes, picos desproporcionados, confianza) está en
+ * [RepDetector], en el núcleo, probada con señales sintéticas. Además estima la velocidad media de cada repetición
+ * (para el RIR por pérdida de velocidad) y se puede calibrar con unas repeticiones de prueba.
  */
-class RepCounter(context: Context, initialThreshold: Float = DEFAULT_THRESHOLD) : SensorEventListener {
+class RepCounter(context: Context, initialThreshold: Float = RepDetector.DEFAULT_THRESHOLD) : SensorEventListener {
     private val sensorManager = context.getSystemService(SensorManager::class.java)
     private val accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    private val detector = RepDetector(initialThreshold)
 
     private val _reps = MutableStateFlow(0)
     val reps: StateFlow<Int> = _reps.asStateFlow()
+
+    /** Qué fiable es el recuento de la serie actual. */
+    private val _confidence = MutableStateFlow(RepConfidence.LOW)
+    val confidence: StateFlow<RepConfidence> = _confidence.asStateFlow()
 
     /** Velocidad media (m/s) de cada repetición de la serie actual. */
     private val _velocities = MutableStateFlow<List<Double>>(emptyList())
@@ -35,8 +42,7 @@ class RepCounter(context: Context, initialThreshold: Float = DEFAULT_THRESHOLD) 
     private val _calibrating = MutableStateFlow(false)
     val calibrating: StateFlow<Boolean> = _calibrating.asStateFlow()
 
-    var threshold: Float = initialThreshold
-        private set
+    val threshold: Float get() = detector.threshold
 
     val isAvailable: Boolean get() = accelerometer != null
     private var running = false
@@ -44,14 +50,10 @@ class RepCounter(context: Context, initialThreshold: Float = DEFAULT_THRESHOLD) 
     private val gravity = FloatArray(3)
     private var gravityReady = false
     private var smoothed = 0f
-    private var armed = true
-    private var lastRepAt = 0L
     private var lastSampleNs = 0L
     private val repSamples = ArrayList<Float>(256)
     private var dtSum = 0.0
     private var dtCount = 0
-    private val calibrationPeaks = mutableListOf<Float>()
-    private var currentPeak = 0f
 
     fun start() {
         if (running || accelerometer == null) return
@@ -67,27 +69,34 @@ class RepCounter(context: Context, initialThreshold: Float = DEFAULT_THRESHOLD) 
     }
 
     fun reset() {
-        _reps.value = 0
-        _velocities.value = emptyList()
-        armed = true
+        detector.reset(nowMs())
         smoothed = 0f
-        lastRepAt = 0L
         repSamples.clear()
+        _velocities.value = emptyList()
+        publish()
     }
 
-    /** Empieza la calibración: haz 3–5 repeticiones normales y llama a [finishCalibration]. */
+    /** Corrige el recuento de un toque (+1 / −1) antes de guardar la serie. */
+    fun adjust(delta: Int) {
+        detector.adjust(delta)
+        publish()
+    }
+
+    /** Empieza la calibración: unas repeticiones normales y luego [finishCalibration]. */
     fun startCalibration() {
-        calibrationPeaks.clear()
         _calibrating.value = true
         start()
+        detector.startCalibration(nowMs())
+        repSamples.clear()
+        publish()
     }
 
-    /** Termina la calibración y devuelve el nuevo umbral. */
-    fun finishCalibration(): Float {
+    /** Termina la calibración: el umbral nuevo (o el de antes si no se vieron bien las reps) y cuántas se vieron. */
+    fun finishCalibration(): RepCalibration {
         _calibrating.value = false
-        threshold = BarVelocity.calibratedThreshold(calibrationPeaks, threshold)
+        val result = detector.finishCalibration()
         reset()
-        return threshold
+        return result
     }
 
     override fun onSensorChanged(event: SensorEvent) {
@@ -110,40 +119,35 @@ class RepCounter(context: Context, initialThreshold: Float = DEFAULT_THRESHOLD) 
         for (i in 0..2) vertical += (a[i] - gravity[i]) * (gravity[i] / gNorm)
         smoothed = SMOOTH_ALPHA * vertical + (1 - SMOOTH_ALPHA) * smoothed
         if (repSamples.size < MAX_SAMPLES) repSamples += vertical
-        if (smoothed > currentPeak) currentPeak = smoothed
-
-        // Durante la calibración el umbral es bajo para ver todos los picos
-        val limit = if (_calibrating.value) CALIBRATION_THRESHOLD else threshold
-        val now = event.timestamp / 1_000_000
-        if (armed && smoothed > limit && now - lastRepAt > MIN_INTERVAL_MS) {
-            onRep(now)
-        } else if (!armed && smoothed < RESET_THRESHOLD) {
-            armed = true
-            if (_calibrating.value && currentPeak > 0f) calibrationPeaks += currentPeak
-            currentPeak = 0f
-        }
+        val before = detector.count
+        val accepted = detector.onSample(nowMs(), smoothed)
+        if (accepted) onRep()
+        if (detector.count != before || accepted) publish()
     }
 
-    private fun onRep(now: Long) {
-        _reps.value += 1
-        lastRepAt = now
-        armed = false
-        // Velocidad de la repetición que acaba de terminar (muestras desde la anterior)
-        val dt = if (dtCount > 0) (dtSum / dtCount).toFloat() else 0.02f
+    /** Velocidad de la repetición que acaba de terminar (muestras desde la anterior). */
+    private fun onRep() {
+        val dt = if (dtCount > 0) (dtSum / dtCount).toFloat() else DEFAULT_DT
         val v = BarVelocity.meanConcentricVelocity(repSamples, dt)
-        if (v > 0 && _reps.value > 1) _velocities.value = _velocities.value + v
+        // La primera rep incluye la colocación: su velocidad no es comparable
+        if (v > 0 && detector.reps.size > 1) _velocities.value = _velocities.value + v
         repSamples.clear()
+    }
+
+    private fun publish() {
+        _reps.value = detector.count
+        _confidence.value = detector.confidence()
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
+    private fun nowMs() = android.os.SystemClock.elapsedRealtime()
+
     companion object {
-        const val DEFAULT_THRESHOLD = 1.2f
+        const val DEFAULT_THRESHOLD = RepDetector.DEFAULT_THRESHOLD
         private const val GRAVITY_ALPHA = 0.9f
         private const val SMOOTH_ALPHA = 0.3f
-        private const val CALIBRATION_THRESHOLD = 0.5f
-        private const val RESET_THRESHOLD = 0.3f
-        private const val MIN_INTERVAL_MS = 800L
         private const val MAX_SAMPLES = 1_000
+        private const val DEFAULT_DT = 0.02f
     }
 }

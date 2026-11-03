@@ -298,7 +298,6 @@
     <string name="media_next">Nächster Titel</string>
     <string name="media_open_app">%1$s öffnen</string>
     <string name="media_open_photo">Foto öffnen</string>
-    <string name="media_open_video">Video abspielen</string>
     <string name="media_play_pause">Musik abspielen oder pausieren</string>
     <string name="media_previous">Vorheriger Titel</string>
     <string name="metric_1rm">1RM</string>

@@ -4,7 +4,6 @@
     <string name="set_video_record">Gravar a serie en vídeo</string>
     <string name="set_video_no_camera">Non hai ningunha app de cámara para gravar</string>
     <string name="set_video_saved">Vídeo gardado na ficha do exercicio</string>
-    <string name="set_video_section">Vídeos de técnica</string>
     <string name="set_video_compare">Comparar</string>
     <string name="set_video_compare_hint">Escolle dous vídeos para velos á vez</string>
     <string name="set_video_pick">Escoller para comparar</string>
@@ -18,4 +17,8 @@
     <string name="next_exercise_start">Comezar xa</string>
     <string name="next_exercise_setting">Tarxeta «Seguinte exercicio»</string>
     <string name="next_exercise_setting_body">No descanso antes de cambiar de exercicio: peso, discos e nota fixa do seguinte</string>
+    <string name="technique_title">Técnica</string>
+    <string name="technique_note_label">Nota fixa (vese no adestramento e no reloxo)</string>
+    <string name="technique_own_video">Vídeo propio</string>
+    <string name="technique_set_video">Serie gravada</string>
 </resources>

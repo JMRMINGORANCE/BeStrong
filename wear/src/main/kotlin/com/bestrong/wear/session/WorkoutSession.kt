@@ -785,12 +785,16 @@ class WorkoutSession @Inject constructor(
 
     fun startCalibration() = repCounter.startCalibration()
 
-    fun finishCalibration(): Float {
-        val t = repCounter.finishCalibration()
-        store.repThreshold = t
+    /** Termina la calibración: si las reps de prueba se vieron con claridad se guarda el umbral nuevo. */
+    fun finishCalibration(): com.bestrong.core.sensors.RepCalibration {
+        val result = repCounter.finishCalibration()
+        if (result.ok) store.repThreshold = result.threshold
         if (!_repCounting.value) repCounter.stop()
-        return t
+        return result
     }
+
+    /** Corrige de un toque las repeticiones contadas antes de marcar la serie. */
+    fun adjustCountedReps(delta: Int) = repCounter.adjust(delta)
 
     // --- Voz y pesos recientes ---------------------------------------------------------------
 

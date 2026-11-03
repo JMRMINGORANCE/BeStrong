@@ -15,9 +15,7 @@
     <string name="app_name">BeStrong</string>
     <string name="back_to">‹ %1$s</string>
     <string name="calibrate">Zähler kalibrieren</string>
-    <string name="calibrate_done">Schwelle: %1$s</string>
     <string name="calibrate_finish">Fertig</string>
-    <string name="calibrate_hint">Mach 3–5 normale Wdh. und tippe auf Fertig</string>
     <string name="cardio">GPS-Cardio</string>
     <string name="cardio_cycling">Radfahren</string>
     <string name="cardio_distance">%1$s km</string>
@@ -41,7 +39,6 @@
     <string name="complication_today_none">Frei</string>
     <string name="continue_">Fortsetzen</string>
     <string name="count_reps">Wdh. zählen (Beta)</string>
-    <string name="counted_reps">Gezählt: %1$d Wdh. (Beta)</string>
     <string name="create_routine">Routine erstellen</string>
     <string name="create_routines_on_phone">Erstelle Routinen auf dem Handy, dann erscheinen sie hier</string>
     <string name="current_suffix"> · aktuell</string>
@@ -192,4 +189,18 @@
     <string name="copy_previous">Letztes Mal übernehmen</string>
     <string name="unit_reps">Wdh.</string>
     <string name="cardio_needs_sensors">Erlaube Herzfrequenz und körperliche Aktivität, um die Distanz zu messen</string>
+    <string name="calibrate_ready">Nimm die Stange oder Hanteln und stell dich bereit</string>
+    <string name="calibrate_go">Mach %1$d normale Wiederholungen</string>
+    <string name="calibrate_ok">Fertig: Empfindlichkeit %1$s (%2$d Wdh. erkannt)</string>
+    <string name="calibrate_retry_hint">Die Wiederholungen waren nicht klar. Führe sie etwas deutlicher aus und versuch es erneut.</string>
+    <string name="calibrate_retry">Wiederholen</string>
+    <string name="sensitivity_high">hoch</string>
+    <string name="sensitivity_medium">mittel</string>
+    <string name="sensitivity_low">niedrig</string>
+    <string name="counted_reps_conf">Gezählt: %1$d · %2$s</string>
+    <string name="rep_conf_high">zuverlässig</string>
+    <string name="rep_conf_medium">prüfen</string>
+    <string name="rep_conf_low">unsicher</string>
+    <string name="count_minus">Eine Wdh. weniger</string>
+    <string name="count_plus">Eine Wdh. mehr</string>
 </resources>

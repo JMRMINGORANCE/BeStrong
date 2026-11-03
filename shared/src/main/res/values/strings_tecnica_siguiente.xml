@@ -4,7 +4,6 @@
     <string name="set_video_record">Grabar la serie en vídeo</string>
     <string name="set_video_no_camera">No hay ninguna app de cámara para grabar</string>
     <string name="set_video_saved">Vídeo guardado en la ficha del ejercicio</string>
-    <string name="set_video_section">Vídeos de técnica</string>
     <string name="set_video_compare">Comparar</string>
     <string name="set_video_compare_hint">Elige dos vídeos para verlos a la vez</string>
     <string name="set_video_pick">Elegir para comparar</string>
@@ -18,4 +17,8 @@
     <string name="next_exercise_start">Empezar ya</string>
     <string name="next_exercise_setting">Tarjeta «Siguiente ejercicio»</string>
     <string name="next_exercise_setting_body">En el descanso antes de cambiar de ejercicio: peso, discos y nota fija del siguiente</string>
+    <string name="technique_title">Técnica</string>
+    <string name="technique_note_label">Nota fija (se ve en el entreno y en el reloj)</string>
+    <string name="technique_own_video">Vídeo propio</string>
+    <string name="technique_set_video">Serie grabada</string>
 </resources>

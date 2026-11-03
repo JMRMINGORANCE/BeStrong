@@ -4,7 +4,6 @@
     <string name="set_video_record">Satz auf Video aufnehmen</string>
     <string name="set_video_no_camera">Keine Kamera-App zum Aufnehmen vorhanden</string>
     <string name="set_video_saved">Video in den Übungsdetails gespeichert</string>
-    <string name="set_video_section">Technikvideos</string>
     <string name="set_video_compare">Vergleichen</string>
     <string name="set_video_compare_hint">Wähle zwei Videos, um sie gleichzeitig zu sehen</string>
     <string name="set_video_pick">Zum Vergleichen wählen</string>
@@ -18,4 +17,8 @@
     <string name="next_exercise_start">Jetzt starten</string>
     <string name="next_exercise_setting">Karte „Nächste Übung“</string>
     <string name="next_exercise_setting_body">In der Pause vor dem Übungswechsel: Gewicht, Scheiben und Notiz der nächsten Übung</string>
+    <string name="technique_title">Technik</string>
+    <string name="technique_note_label">Feste Notiz (im Training und auf der Uhr sichtbar)</string>
+    <string name="technique_own_video">Eigenes Video</string>
+    <string name="technique_set_video">Aufgenommener Satz</string>
 </resources>
