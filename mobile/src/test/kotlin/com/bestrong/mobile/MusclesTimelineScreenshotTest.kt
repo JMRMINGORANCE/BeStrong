@@ -93,7 +93,10 @@ class MusclesTimelineScreenshotTest {
         compose.mainClock.autoAdvance = false
         seed()
         settle(30)
-        compose.onAllNodesWithText("Perfil")[0].performClick()
+        // Los músculos y patrones están en Progreso → Fuerza
+        compose.onAllNodesWithText("PROGRESO")[0].performClick()
+        settle(30)
+        compose.onNodeWithText("Fuerza").performClick()
         settle(30)
         scrollTo("Músculos")
         shot("m_profile_muscles_week")
@@ -109,7 +112,9 @@ class MusclesTimelineScreenshotTest {
         assertNotNull(compose.onNodeWithText("Mejores 1RM estimados").fetchSemanticsNode())
         shot("m_profile_records")
         // Historial: el mapa de calor y el resumen del año, en un solo bloque
-        compose.onAllNodesWithText("Historial")[0].performClick()
+        compose.onAllNodesWithText("PROGRESO")[0].performClick()
+        settle(30)
+        compose.onNodeWithText("Historial").performClick()
         settle(30)
         scrollTo("Compartir como texto", substring = true)
         shot("m_history_year")
@@ -120,7 +125,7 @@ class MusclesTimelineScreenshotTest {
         compose.mainClock.autoAdvance = false
         seed()
         settle(30)
-        compose.onAllNodesWithText("Ejercicios")[0].performClick()
+        compose.onAllNodesWithText("BIBLIOTECA")[0].performClick()
         settle()
         compose.onNode(hasSetTextAction()).performTextInput("press banca")
         settle()
@@ -140,7 +145,7 @@ class MusclesTimelineScreenshotTest {
         compose.mainClock.autoAdvance = false
         seed()
         settle(30)
-        scrollTo("Volumen semanal")
+        scrollTo("Semana")
         shot("m_home_week")
     }
 }

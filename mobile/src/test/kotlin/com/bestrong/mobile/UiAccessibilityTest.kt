@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -102,7 +103,7 @@ class UiAccessibilityTest {
     @Test
     fun profile_large_font() {
         launch(2.0f)
-        compose.onNodeWithText("Perfil").performClick()
+        compose.onAllNodesWithContentDescription("Tú")[0].performClick()
         settle()
         shot("a11y_profile_font200")
         assertClickablesLabelled()

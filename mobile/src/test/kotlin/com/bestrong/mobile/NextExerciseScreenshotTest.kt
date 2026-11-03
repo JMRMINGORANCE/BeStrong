@@ -90,11 +90,13 @@ class NextExerciseScreenshotTest {
         }
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onAllNodesWithText("Ejercicios")[0].performClick()
+        compose.onAllNodesWithText("BIBLIOTECA")[0].performClick()
         settle()
         compose.onNode(hasSetTextAction()).performTextInput("press banca")
         settle()
         compose.onNodeWithText("Press banca").performClick()
+        settle()
+        compose.onNodeWithText("Técnica").performClick()
         settle()
         compose.mainClock.autoAdvance = true
         compose.onAllNodes(hasScrollToNodeAction())[0].performScrollToNode(hasText("85 kg", substring = true))

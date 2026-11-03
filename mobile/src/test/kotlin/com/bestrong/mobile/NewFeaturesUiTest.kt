@@ -71,7 +71,7 @@ class NewFeaturesUiTest {
     fun logPastWorkoutAsksForARoutineFirst() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Historial").performClick()
+        compose.onAllNodesWithText("PROGRESO")[0].performClick()
         settle()
         compose.onNodeWithContentDescription("Registrar entreno pasado").performClick()
         settle(3)

@@ -88,12 +88,15 @@ class WorkoutFlowScreenshotTest {
         compose.onNodeWithText("Listo").performClick()
         settle()
         // Al terminar se abre el historial: de vuelta a Inicio
-        compose.onAllNodesWithText("Entrenar")[0].performClick()
+        compose.onAllNodesWithText("HOY")[0].performClick()
         settle()
         shot("p2_home")
-        scrollTo("Volumen semanal")
+        scrollTo("Semana")
         shot("p2_home_week")
-        compose.onAllNodesWithText("Perfil")[0].performClick()
+        // Los músculos están en Progreso → Fuerza
+        compose.onAllNodesWithText("PROGRESO")[0].performClick()
+        settle()
+        compose.onNodeWithText("Fuerza").performClick()
         settle()
         // La tarjeta «Músculos» abre en la pestaña «Semana» (silueta y lista)
         scrollTo("Músculos")

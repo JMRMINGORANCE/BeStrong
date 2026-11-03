@@ -79,7 +79,7 @@ class UiScreensTest {
     fun exercise_detail() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onAllNodesWithText("Ejercicios")[0].performClick()
+        compose.onAllNodesWithText("BIBLIOTECA")[0].performClick()
         settle()
         compose.onNode(hasSetTextAction()).performTextInput("press banca")
         settle()
@@ -92,7 +92,7 @@ class UiScreensTest {
     fun measurements() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onAllNodesWithText("Perfil")[0].performClick()
+        compose.onAllNodesWithContentDescription("Tú")[0].performClick()
         settle()
         compose.mainClock.autoAdvance = true
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Medidas corporales"))
