@@ -4,10 +4,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -60,12 +59,15 @@ import com.bestrong.mobile.ui.help.TutorialDialog
 import com.bestrong.mobile.ui.help.WhatsNewDialog
 import com.bestrong.mobile.ui.history.HistoryScreen
 import com.bestrong.mobile.ui.history.HistoryViewModel
+import com.bestrong.mobile.ui.history.ProgressSegment
 import com.bestrong.mobile.ui.home.HomeScreen
 import com.bestrong.mobile.ui.home.HomeViewModel
+import com.bestrong.mobile.ui.profile.BodySection
 import com.bestrong.mobile.ui.profile.MeasurementsScreen
 import com.bestrong.mobile.ui.profile.OnboardingPermissionsDialog
 import com.bestrong.mobile.ui.profile.ProfileScreen
 import com.bestrong.mobile.ui.profile.ProfileViewModel
+import com.bestrong.mobile.ui.profile.StrengthSection
 import com.bestrong.mobile.ui.routines.RoutineEditorScreen
 import com.bestrong.mobile.ui.routines.RoutineEditorViewModel
 import com.bestrong.mobile.ui.workout.ActiveWorkoutScreen
@@ -75,10 +77,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
 enum class TopLevel(val route: String, @StringRes val label: Int, val icon: ImageVector) {
-    TRAIN("train", R.string.nav_train, Icons.Default.FitnessCenter),
-    HISTORY("history", R.string.nav_history, Icons.Default.History),
-    EXERCISES("exercises", R.string.nav_exercises, Icons.AutoMirrored.Filled.List),
-    PROFILE("profile", R.string.nav_profile, Icons.Default.Person),
+    TRAIN("train", R.string.nav_today, Icons.Default.Bolt),
+    HISTORY("history", R.string.nav_progress, Icons.Default.BarChart),
+    EXERCISES("exercises", R.string.nav_library, Icons.Default.Layers),
 }
 
 private object Routes {
@@ -90,6 +91,9 @@ private object Routes {
     const val PICKED = "picked_exercises"
     const val EXISTING = "picker_existing"
     const val SEARCH = "search"
+
+    /** Tú (récords, medidas, ajustes y comunidad): se abre desde el avatar de cualquier pestaña. */
+    const val PROFILE = "profile"
     fun routine(id: String?) = if (id == null) "routine" else "routine?id=$id"
     fun exercise(id: String) = "exercise/$id"
 }
@@ -219,28 +223,22 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
         val scheme = androidx.compose.material3.MaterialTheme.colorScheme
         val itemColors = androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults.itemColors(
             navigationBarItemColors = androidx.compose.material3.NavigationBarItemDefaults.colors(
-                indicatorColor = scheme.primary,
-                selectedIconColor = scheme.onPrimary,
-                selectedTextColor = scheme.primary,
+                indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                selectedIconColor = scheme.primary,
+                selectedTextColor = scheme.onSurface,
                 unselectedIconColor = scheme.onSurfaceVariant,
                 unselectedTextColor = scheme.onSurfaceVariant,
             ),
             navigationRailItemColors = androidx.compose.material3.NavigationRailItemDefaults.colors(
-                indicatorColor = scheme.primary,
-                selectedIconColor = scheme.onPrimary,
-                selectedTextColor = scheme.primary,
+                indicatorColor = androidx.compose.ui.graphics.Color.Transparent,
+                selectedIconColor = scheme.primary,
+                selectedTextColor = scheme.onSurface,
                 unselectedIconColor = scheme.onSurfaceVariant,
                 unselectedTextColor = scheme.onSurfaceVariant,
             ),
         )
-        // Cada pestaña con su color de fondo, como las pantallas de la bienvenida
-        val tabTint = when (topLevel) {
-            TopLevel.entries.getOrNull(1) -> scheme.secondary
-            TopLevel.entries.getOrNull(2) -> scheme.tertiary
-            else -> scheme.primary
-        }
-        com.bestrong.mobile.ui.theme.ScreenBackdrop(tabTint) {
-            // Con letra muy grande no caben las cuatro etiquetas: solo la de la pestaña elegida
+        com.bestrong.mobile.ui.theme.ScreenBackdrop {
+            // Con letra muy grande no caben las tres etiquetas: solo la de la pestaña elegida
             val navLabels = androidx.compose.ui.platform.LocalDensity.current.fontScale <= 1.5f
             NavigationSuiteScaffold(
                 layoutType = layoutType,
@@ -255,7 +253,15 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             selected = dest == topLevel,
                             onClick = { nav.navigateTopLevel(dest.route) },
                             icon = { Icon(dest.icon, contentDescription = stringResource(dest.label)) },
-                            label = { Text(stringResource(dest.label), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            label = {
+                                Text(
+                                    stringResource(dest.label).uppercase(),
+                                    fontFamily = com.bestrong.mobile.ui.theme.FigureFont,
+                                    style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            },
                             alwaysShowLabel = navLabels,
                         )
                     }
@@ -269,6 +275,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             // Un doble toque no abre dos editores (el de debajo pisaría lo guardado en el de arriba)
                             onEditRoutine = { if (entry?.destination?.route == TopLevel.TRAIN.route) nav.navigate(Routes.routine(it)) { launchSingleTop = true } },
                             onOpenSearch = { nav.navigate(Routes.SEARCH) { launchSingleTop = true } },
+                            onOpenProfile = { nav.navigate(Routes.PROFILE) { launchSingleTop = true } },
                         )
                     }
                     composable(TopLevel.HISTORY.route) { historyEntry ->
@@ -280,6 +287,13 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
                             openWorkoutId = openId,
                             onWorkoutOpened = { historyEntry.savedStateHandle[KEY_OPEN_WORKOUT] = null },
+                            onOpenProfile = { nav.navigate(Routes.PROFILE) { launchSingleTop = true } },
+                            // Progreso: junto al historial, el cuerpo (medidas) y la fuerza (récords y estadísticas)
+                            otherSegments = progressSegments(
+                                onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) { launchSingleTop = true } },
+                                onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
+                                onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
+                            ),
                         )
                     }
                     composable(Routes.SEARCH) {
@@ -299,7 +313,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             },
                             onOpenSettings = { page ->
                                 nav.popBackStack(Routes.SEARCH, inclusive = true)
-                                nav.navigateTopLevel(TopLevel.PROFILE.route)
+                                nav.navigate(Routes.PROFILE) { launchSingleTop = true }
                                 nav.currentBackStackEntry?.savedStateHandle?.set(KEY_OPEN_SETTINGS, page)
                             },
                         )
@@ -312,17 +326,21 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             muscle?.let { exercisesVm.showMuscle(it) }
                             entry.savedStateHandle[KEY_MUSCLE_FILTER] = null
                         }
-                        ExerciseLibraryScreen(exercisesVm)
+                        ExerciseLibraryScreen(
+                            exercisesVm,
+                            onOpenProfile = { nav.navigate(Routes.PROFILE) { launchSingleTop = true } },
+                            onEditRoutine = { nav.navigate(Routes.routine(it)) { launchSingleTop = true } },
+                        )
                     }
-                    composable(TopLevel.PROFILE.route) { profileEntry ->
+                    composable(Routes.PROFILE) { profileEntry ->
                         val openPage by profileEntry.savedStateHandle.getStateFlow<String?>(KEY_OPEN_SETTINGS, null).collectAsStateWithLifecycle()
                         ProfileScreen(
                             openSettingsPage = openPage,
                             onSettingsPageOpened = { profileEntry.savedStateHandle[KEY_OPEN_SETTINGS] = null },
                             vm = hiltViewModel<ProfileViewModel>(),
                             onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) { launchSingleTop = true } },
-                            onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
                             onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
+                            onBack = { nav.popBackStack() },
                         )
                     }
                     composable(Routes.WORKOUT) { backStackEntry ->
@@ -397,6 +415,16 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             }
         }
     }
+}
+
+/** Cuerpo y Fuerza, los segmentos de Progreso que no son el historial (viven en :feature:profile). */
+@Composable
+private fun progressSegments(onOpenMeasurements: () -> Unit, onOpenExercise: (String) -> Unit, onGoTrain: () -> Unit): List<ProgressSegment> {
+    val profileVm = hiltViewModel<ProfileViewModel>()
+    return listOf(
+        ProgressSegment(stringResource(R.string.enf_prog_body)) { BodySection(profileVm, onOpenMeasurements) },
+        ProgressSegment(stringResource(R.string.enf_prog_strength)) { StrengthSection(profileVm, onOpenExercise, onGoTrain) },
+    )
 }
 
 private const val KEY_MUSCLE_FILTER = "muscle_filter"

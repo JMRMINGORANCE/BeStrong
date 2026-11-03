@@ -1,6 +1,7 @@
 package com.bestrong.mobile.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -58,14 +59,17 @@ import com.bestrong.mobile.shared.R
  * pantallas de ajustes se montan con estas, así se ven y se tocan igual.
  */
 
-/** Icono blanco dentro de un cuadrado redondeado del color del apartado. */
+/**
+ * Icono en un cuadrado neutro («Enfoque»: el color se reserva para acción, hecho y récord). [tint] queda para quien
+ * quiera marcar un icono que de verdad lo necesite; por defecto no se pinta.
+ */
 @Composable
-fun IconTile(icon: ImageVector, tint: Color, modifier: Modifier = Modifier, size: Int = 38) {
+fun IconTile(icon: ImageVector, tint: Color, modifier: Modifier = Modifier, size: Int = 34) {
     Box(
-        modifier.size(size.dp).clip(RoundedCornerShape((size * 0.3f).dp)).background(tint),
+        modifier.size(size.dp).clip(RoundedCornerShape((size * 0.3f).dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, null, tint = Color.White, modifier = Modifier.size((size * 0.55f).dp))
+        Icon(icon, null, tint = if (tint == Color.Unspecified) MaterialTheme.colorScheme.onSurfaceVariant else tint, modifier = Modifier.size((size * 0.55f).dp))
     }
 }
 
@@ -76,14 +80,17 @@ fun SettingsGroup(title: String?, modifier: Modifier = Modifier, footer: String?
         title?.let {
             Text(
                 it.uppercase(),
-                Modifier.padding(start = 6.dp).semantics { heading() },
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
+                Modifier.padding(start = 4.dp).semantics { heading() },
+                style = com.bestrong.mobile.ui.theme.KickerStyle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Column(
-            Modifier.fillMaxWidth().clip(MaterialTheme.shapes.large).background(MaterialTheme.colorScheme.surfaceContainer).padding(vertical = 4.dp),
+            Modifier.fillMaxWidth()
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, MaterialTheme.shapes.large)
+                .padding(vertical = 2.dp),
             content = content,
         )
         footer?.let {
@@ -95,7 +102,7 @@ fun SettingsGroup(title: String?, modifier: Modifier = Modifier, footer: String?
 /** Línea fina entre filas de un grupo (empieza donde el texto, como en los ajustes del sistema). */
 @Composable
 fun SettingsDivider(inset: Boolean = true) {
-    HorizontalDivider(Modifier.padding(start = if (inset) 66.dp else 16.dp, end = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+    HorizontalDivider(Modifier.padding(start = if (inset) 62.dp else 16.dp, end = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
 }
 
 /** Fila base: icono (opcional), título, descripción y lo que vaya a la derecha. */
@@ -105,12 +112,12 @@ fun SettingsRow(
     modifier: Modifier = Modifier,
     summary: String? = null,
     icon: ImageVector? = null,
-    tint: Color = SettingsTint.Slate,
+    tint: Color = Color.Unspecified,
     titleColor: Color = Color.Unspecified,
     onClick: (() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
-    val base = modifier.fillMaxWidth().heightIn(min = 60.dp)
+    val base = modifier.fillMaxWidth().heightIn(min = 56.dp)
     Row(
         (if (onClick != null) base.clickable(onClick = onClick) else base).padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -118,20 +125,42 @@ fun SettingsRow(
     ) {
         icon?.let { IconTile(it, tint) }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold, color = titleColor)
+            Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = titleColor)
             summary?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         trailing?.invoke()
     }
 }
 
-/** Fila que abre otra pantalla: con la flecha a la derecha (y un aviso opcional, p. ej. «2 pendientes»). */
+/**
+ * Fila que abre otra pantalla: con la flecha a la derecha, el valor actual en la letra de las cifras ([value],
+ * p. ej. «2:30 · vibrar») y un aviso opcional ([badge], p. ej. «2 pendientes»).
+ */
 @Composable
-fun SettingsNavRow(title: String, icon: ImageVector, tint: Color, onClick: () -> Unit, summary: String? = null, badge: String? = null) {
+fun SettingsNavRow(
+    title: String,
+    icon: ImageVector?,
+    tint: Color,
+    onClick: () -> Unit,
+    summary: String? = null,
+    badge: String? = null,
+    value: String? = null,
+) {
     SettingsRow(title, summary = summary, icon = icon, tint = tint, onClick = onClick) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            value?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontFamily = com.bestrong.mobile.ui.theme.FigureFont,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.widthIn(max = 140.dp),
+                )
+            }
             badge?.let {
                 Text(
                     it,
@@ -158,7 +187,7 @@ fun SettingsSwitchRow(
     onChange: (Boolean) -> Unit,
     summary: String? = null,
     icon: ImageVector? = null,
-    tint: Color = SettingsTint.Slate,
+    tint: Color = Color.Unspecified,
     enabled: Boolean = true,
 ) {
     SettingsRow(
@@ -182,19 +211,19 @@ fun <T> SettingsChoice(
     onSelect: (T) -> Unit,
     summary: String? = null,
     icon: ImageVector? = null,
-    tint: Color = SettingsTint.Slate,
+    tint: Color = Color.Unspecified,
     extra: (@Composable () -> Unit)? = null,
 ) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             icon?.let { IconTile(it, tint) }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                summary?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                summary?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
         }
         FlowRow(
-            Modifier.padding(start = if (icon != null) 52.dp else 0.dp),
+            Modifier.padding(start = if (icon != null) 48.dp else 0.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
@@ -214,7 +243,7 @@ fun <T> SettingsChoice(
 @Composable
 fun SettingsPage(title: String, onBack: () -> Unit, subtitle: String? = null, content: LazyListScope.() -> Unit) {
     Dialog(onDismissRequest = onBack, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
-        com.bestrong.mobile.ui.theme.ScreenBackdrop(MaterialTheme.colorScheme.primary) {
+        com.bestrong.mobile.ui.theme.ScreenBackdrop {
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -231,7 +260,7 @@ fun SettingsPage(title: String, onBack: () -> Unit, subtitle: String? = null, co
                     ) {
                         item {
                             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                Text(title, style = MaterialTheme.typography.displaySmall, modifier = Modifier.semantics { heading() })
+                                Text(title, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() })
                                 subtitle?.let { Text(it, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                             }
                         }

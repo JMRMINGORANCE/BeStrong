@@ -17,18 +17,19 @@ import com.bestrong.mobile.shared.R
 
 /**
  * Los estilos visuales que el usuario puede elegir (Ajustes → Apariencia, o al empezar):
- * - Carbono: fibra de carbono, negro mate y rojo racing (telemetría de F1).
+ * - Carbono: negro mate y rojo de acción.
  * - Titanio Blanco: titanio claro con naranja internacional.
+ * En los dos el color significa algo: primary = acción, tertiary = hecho, secondary = récord (ver [enfoque]).
  */
 internal fun styleScheme(style: VisualStyle): ColorScheme = when (style) {
     VisualStyle.CARBONO -> darkColorScheme(
-        primary = Color(0xFFFF2A1F),
+        primary = Color(0xFFE10600),
         onPrimary = Color.White,
-        primaryContainer = Color(0xFF5A0B07),
+        primaryContainer = Color(0xFF4A0703),
         onPrimaryContainer = Color(0xFFFFDAD5),
-        secondary = Color(0xFFFFD400),
-        onSecondary = Color(0xFF231D00),
-        secondaryContainer = Color(0xFFFF2A1F),
+        secondary = Color(0xFFFFB547),
+        onSecondary = Color(0xFF2A1A00),
+        secondaryContainer = Color(0xFFE10600),
         onSecondaryContainer = Color.White,
         tertiary = Color(0xFF00D26A),
         onTertiary = Color(0xFF00210F),
@@ -42,7 +43,7 @@ internal fun styleScheme(style: VisualStyle): ColorScheme = when (style) {
         onSurfaceVariant = Color(0xFFA6A7AB),
         surfaceContainerLowest = Color(0xFF060607),
         surfaceContainerLow = Color(0xFF121214),
-        surfaceContainer = Color(0xFF17171A),
+        surfaceContainer = Color(0xFF151517),
         surfaceContainerHigh = Color(0xFF1F1F22),
         surfaceContainerHighest = Color(0xFF29292D),
         outline = Color(0xFF3A3A3F),
@@ -54,7 +55,7 @@ internal fun styleScheme(style: VisualStyle): ColorScheme = when (style) {
         onPrimary = Color.White,
         primaryContainer = Color(0xFFFFDBCA),
         onPrimaryContainer = Color(0xFF3A1000),
-        secondary = Color(0xFFFF7A3D),
+        secondary = Color(0xFFB7791F),
         onSecondary = Color.White,
         secondaryContainer = Color(0xFFD9480F),
         onSecondaryContainer = Color.White,

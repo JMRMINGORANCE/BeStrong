@@ -187,6 +187,10 @@ class ExercisesViewModel @Inject constructor(
     val hidden: StateFlow<Set<String>> = settingsStore.settings.map { it.hiddenExercises }
         .stateIn(viewModelScope, SharingStarted.Eagerly, settingsStore.settings.value.hiddenExercises)
 
+    /** Rutinas de la Biblioteca (sin las archivadas), en su orden. */
+    val routines: StateFlow<List<com.bestrong.core.model.Routine>> = repo.routines.map { list -> list.filter { !it.archived }.sortedBy { it.position } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     /** Cuántos ocultos existen todavía (los personalizados borrados no cuentan). */
     val hiddenCount: StateFlow<Int> = combine(hidden, repo.exercises) { h, all -> all.count { it.id in h } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)

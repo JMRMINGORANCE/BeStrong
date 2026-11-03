@@ -9,15 +9,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.items
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import androidx.wear.compose.material3.Button
 import androidx.wear.compose.material3.ButtonDefaults
+import androidx.wear.compose.material3.EdgeButton
 import androidx.wear.compose.material3.ListHeader
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.ScreenScaffold
@@ -44,9 +47,11 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
     // La de hoy (como el tile «Hoy toca»), arriba del todo: sin girar la corona para buscarla
     val today = androidx.compose.runtime.remember(routines, history) { container.store.todayRoutine() }
 
-    ScreenScaffold(scrollState = listState) { contentPadding ->
+    // «Enfoque»: con rutina para hoy y sin entreno abierto, EMPEZAR ocupa el borde inferior, como HECHA en la serie
+    val startToday = today?.takeIf { active == null }
+    val body: @Composable androidx.compose.foundation.layout.BoxScope.(androidx.compose.foundation.layout.PaddingValues) -> Unit = { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
-            item { ListHeader { Text(stringResource(R.string.app_name), color = Brand, style = MaterialTheme.typography.titleLarge) } }
+            startToday?.let { r -> item { TodayHero(r) } } ?: item { ListHeader { Text(stringResource(R.string.app_name), color = Brand, style = MaterialTheme.typography.titleLarge) } }
             item {
                 Text(
                     pluralStringResource(R.plurals.week_summary, thisWeek, thisWeek, streak),
@@ -65,17 +70,6 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
                 }
             }
             if (active == null) {
-                today?.let { r ->
-                    item {
-                        Button(
-                            onClick = { container.session.startRoutine(r); onStart() },
-                            label = { Text(r.displayName, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                            secondaryLabel = { Text(stringResource(R.string.tile_today)) },
-                            icon = { Text("▶", Modifier.clearAndSetSemantics { }) },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                }
                 item {
                     Button(
                         onClick = { container.session.startEmpty(); onStart() },
@@ -144,5 +138,43 @@ fun HomeScreen(container: WearContainer, onStart: () -> Unit, onCardio: () -> Un
                 }
             }
         }
+    }
+    if (startToday != null) {
+        ScreenScaffold(
+            scrollState = listState,
+            edgeButton = {
+                EdgeButton(
+                    onClick = { container.session.startRoutine(startToday); onStart() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Brand, contentColor = MaterialTheme.colorScheme.onPrimary),
+                ) { Text(stringResource(R.string.enf_start), fontWeight = FontWeight.Black, letterSpacing = 1.sp) }
+            },
+            content = body,
+        )
+    } else {
+        ScreenScaffold(scrollState = listState, content = body)
+    }
+}
+
+/** «HOY TOCA / Torso A / 6 ejercicios»: lo primero que se ve; EMPEZAR va en el borde inferior. */
+@Composable
+private fun TodayHero(routine: com.bestrong.core.model.Routine) {
+    androidx.compose.foundation.layout.Column(
+        Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 4.dp),
+        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+    ) {
+        Text(stringResource(R.string.tile_today).uppercase(), style = KickerStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            routine.displayName,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            pluralStringResource(R.plurals.n_exercises, routine.exercises.size, routine.exercises.size),
+            style = KickerStyle,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

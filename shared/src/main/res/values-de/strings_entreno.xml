@@ -37,4 +37,25 @@
         <item quantity="one">%1$d neuer Rekord</item>
         <item quantity="other">%1$d neue Rekorde</item>
     </plurals>
+    <string name="enf_wo_set_of">Satz %1$d von %2$d</string>
+    <string name="enf_wo_record_with">Rekord mit %1$d</string>
+    <string name="enf_wo_record_hit">★ Rekord</string>
+    <string name="enf_wo_done">Fertig</string>
+    <string name="enf_wo_all_sets">Alle Sätze</string>
+    <string name="enf_wo_rest">Pause</string>
+    <string name="enf_wo_rest_of">von %1$s</string>
+    <string name="enf_wo_set_done">Satz %1$d fertig · %2$s</string>
+    <string name="enf_wo_next_line">%1$s · Satz %2$d von %3$d</string>
+    <string name="enf_wo_auto_next">Der nächste Satz startet nach der Pause von selbst</string>
+    <string name="enf_wo_skip">Überspringen</string>
+    <string name="enf_wo_rest_less">15 Sekunden Pause weniger</string>
+    <string name="enf_wo_rest_more">15 Sekunden Pause mehr</string>
+    <string name="enf_wo_progress">Satz %1$d von %2$d im Training</string>
+    <string name="enf_wo_hr">Puls %1$d bpm</string>
+    <string name="enf_wo_finished">Training fertig</string>
+    <string name="enf_wo_avg_hr">♥ %1$d im Schnitt</string>
+    <string name="enf_wo_time">Zeit</string>
+    <string name="enf_wo_records">Rekorde</string>
+    <string name="enf_wo_elapsed">Trainingszeit %1$s</string>
+    <string name="enf_wo_undo">Abwählen</string>
 </resources>

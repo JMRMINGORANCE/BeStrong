@@ -51,7 +51,6 @@ import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.LocalWeightUnit
 import com.bestrong.mobile.ui.components.SectionHeader
 import com.bestrong.mobile.ui.components.formatShortDate
-import com.bestrong.mobile.ui.theme.statusColors
 import com.bestrong.mobile.ui.workout.describeSet
 
 /**
@@ -143,9 +142,10 @@ private fun MilestoneRow(
 
 @Composable
 private fun style(kind: MilestoneKind): Pair<ImageVector, Color> = when (kind) {
-    MilestoneKind.RECORD_ONE_REP_MAX, MilestoneKind.RECORD_WEIGHT, MilestoneKind.RECORD_REPS -> Icons.Default.EmojiEvents to MaterialTheme.colorScheme.secondary
-    MilestoneKind.ROUND_WEIGHT -> Icons.Default.FitnessCenter to MaterialTheme.colorScheme.primary
-    MilestoneKind.FIRST_TIME -> Icons.Default.Flag to statusColors.good
+    // Récords en ámbar y logros en verde; el resto, en gris (el color significa algo)
+    MilestoneKind.RECORD_ONE_REP_MAX, MilestoneKind.RECORD_WEIGHT, MilestoneKind.RECORD_REPS -> Icons.Default.EmojiEvents to com.bestrong.mobile.ui.theme.enfoque.record
+    MilestoneKind.ROUND_WEIGHT -> Icons.Default.FitnessCenter to com.bestrong.mobile.ui.theme.enfoque.done
+    MilestoneKind.FIRST_TIME -> Icons.Default.Flag to com.bestrong.mobile.ui.theme.enfoque.done
     MilestoneKind.GYM_CHANGE -> Icons.Default.Place to MaterialTheme.colorScheme.onSurfaceVariant
     MilestoneKind.COMEBACK -> Icons.Default.Replay to MaterialTheme.colorScheme.onSurfaceVariant
     MilestoneKind.DELOAD -> Icons.Default.TrendingDown to MaterialTheme.colorScheme.onSurfaceVariant

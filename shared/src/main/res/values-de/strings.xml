@@ -337,6 +337,10 @@
     </plurals>
     <string name="name">Name</string>
     <string name="nav_exercises">Übungen</string>
+    <string name="nav_today">Heute</string>
+    <string name="nav_progress">Fortschritt</string>
+    <string name="nav_library">Bibliothek</string>
+    <string name="nav_you">Du</string>
     <string name="nav_history">Verlauf</string>
     <string name="nav_profile">Profil</string>
     <string name="nav_train">Training</string>
@@ -1146,4 +1150,36 @@
     <string name="deload_label">Deload</string>
     <string name="achievement_unlocked">Erfolg freigeschaltet: %1$s</string>
     <string name="records_milestones">Rekorde und Meilensteine</string>
+    <string name="enf_home_start">Starten</string>
+    <string name="enf_home_routines">Routinen</string>
+    <string name="enf_home_search">Suchen</string>
+    <string name="enf_home_week">Woche</string>
+    <string name="enf_home_days_ago">vor %1$d T.</string>
+    <string name="enf_home_streak_volume">%1$d Wo. in Folge · %2$s</string>
+    <string name="enf_home_done_today">%1$s erledigt</string>
+    <string name="enf_home_next">Als Nächstes: %1$s</string>
+    <string name="enf_home_last_time">zuletzt %1$s</string>
+    <string name="enf_home_in_progress">Läuft</string>
+    <string name="enf_prog_history">Verlauf</string>
+    <string name="enf_prog_body">Körper</string>
+    <string name="enf_prog_strength">Kraft</string>
+    <string name="enf_prog_all_measures">Alle Messungen</string>
+    <string name="enf_prog_latest">Letzte Messungen</string>
+    <string name="enf_you_weight">Gewicht</string>
+    <string name="enf_you_fat">Körperfett</string>
+    <string name="enf_you_waist">Taille</string>
+    <string name="enf_you_streak">%1$d Wo. in Folge · %2$d Trainings</string>
+    <string name="enf_you_records_sub">Deine Bestwerte und Meilensteine</string>
+    <string name="enf_you_measures_sub">Gewicht und Umfänge</string>
+    <string name="enf_you_settings_sub">Training, Darstellung, Daten und Verbindungen</string>
+    <string name="enf_lib_kicker">Übungen und Routinen</string>
+    <string name="enf_lib_routines">Routinen</string>
+    <string name="enf_lib_exercises">Übungen</string>
+    <string name="enf_lib_no_routines">Noch keine Routinen. Erstelle deine erste, dann erscheint sie hier.</string>
+    <string name="enf_lib_new_routine">Neue Routine</string>
+    <string name="enf_lib_history">Verlauf</string>
+    <string name="enf_lib_technique">Technik</string>
+    <string name="enf_lib_records">Rekorde</string>
+    <string name="enf_lib_e1rm">Geschätztes 1RM</string>
+    <string name="enf_lib_no_folder">Ohne Ordner</string>
 </resources>

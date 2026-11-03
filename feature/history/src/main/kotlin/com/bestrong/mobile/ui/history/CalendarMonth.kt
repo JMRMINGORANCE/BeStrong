@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -51,6 +50,8 @@ fun CalendarMonth(
     selected: LocalDate? = null,
     onEmptyDay: ((LocalDate) -> Unit)? = null,
     onSelect: (LocalDate?) -> Unit = {},
+    /** Días con algún récord: en ámbar (el resto de días entrenados, en verde). */
+    recordDays: Set<LocalDate> = emptySet(),
 ) {
     var monthOffset by rememberSaveable { mutableStateOf(0L) }
     val month = YearMonth.now().plusMonths(monthOffset)
@@ -89,7 +90,7 @@ fun CalendarMonth(
                             onEmptyDay != null && !date.isAfter(today) -> ({ onEmptyDay(date) })
                             else -> null
                         }
-                        DayCell(date, trained, date == selected, date == today, locale, Modifier.weight(1f), onClick)
+                        DayCell(date, DayMark.of(date, trainingDays, recordDays), date == selected, date == today, locale, Modifier.weight(1f), onClick)
                     } else {
                         Box(Modifier.weight(1f).aspectRatio(1f))
                     }
@@ -99,12 +100,36 @@ fun CalendarMonth(
     }
 }
 
+/** Cómo se marca un día: sin entreno, hecho (verde) o con récord (ámbar). */
+private enum class DayMark {
+    NONE,
+    DONE,
+    RECORD,
+    ;
+
+    companion object {
+        fun of(date: LocalDate, trained: Set<LocalDate>, records: Set<LocalDate>) = when (date) {
+            in records -> RECORD
+            in trained -> DONE
+            else -> NONE
+        }
+    }
+}
+
 /**
  * Un día del mes. Toda la celda es la zona táctil (el círculo solo mide ~33 dp) y TalkBack dice la fecha y si
  * se entrenó; [onClick] null = día sin acción (futuro o sin poder apuntar).
  */
 @Composable
-private fun DayCell(date: LocalDate, trained: Boolean, isSelected: Boolean, isToday: Boolean, locale: Locale, modifier: Modifier, onClick: (() -> Unit)?) {
+private fun DayCell(date: LocalDate, mark: DayMark, isSelected: Boolean, isToday: Boolean, locale: Locale, modifier: Modifier, onClick: (() -> Unit)?) {
+    val trained = mark != DayMark.NONE
+    val (fill, ink) = dayColors(mark, isToday)
+    // Hoy, con borde; el elegido para filtrar, con borde del color de acción
+    val ring = when {
+        isSelected -> com.bestrong.mobile.ui.theme.enfoque.action
+        isToday -> MaterialTheme.colorScheme.onSurface
+        else -> null
+    }
     val longDate = date.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.LONG).withLocale(locale))
     val description = if (trained) stringResource(R.string.calendar_day_trained, longDate) else longDate
     val label = stringResource(if (trained) R.string.calendar_day_filter else R.string.log_past_title)
@@ -118,19 +143,34 @@ private fun DayCell(date: LocalDate, trained: Boolean, isSelected: Boolean, isTo
             .padding(2.dp),
         contentAlignment = Alignment.Center,
     ) {
+        val shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
         Box(
-            Modifier.fillMaxWidth(0.8f).aspectRatio(1f).clip(CircleShape)
-                .background(if (trained) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest)
-                .then(if (isSelected) Modifier.border(3.dp, MaterialTheme.colorScheme.tertiary, CircleShape) else Modifier)
+            Modifier.fillMaxWidth(0.86f).aspectRatio(1.2f).clip(shape)
+                .background(fill)
+                .then(if (ring != null) Modifier.border(1.5.dp, ring, shape) else Modifier)
                 .clearAndSetSemantics {},
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 "${date.dayOfMonth}",
                 style = MaterialTheme.typography.labelMedium,
-                fontWeight = if (isToday) FontWeight.Black else FontWeight.Normal,
-                color = if (trained) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                fontFamily = com.bestrong.mobile.ui.theme.FigureFont,
+                fontWeight = if (isToday || trained) FontWeight.Bold else FontWeight.Normal,
+                color = ink,
             )
         }
+    }
+}
+
+/** Fondo y letra de un día: ámbar con récord, verde entrenado, hueco (solo el borde) hoy sin entrenar y gris el resto. */
+@Composable
+private fun dayColors(mark: DayMark, isToday: Boolean): Pair<androidx.compose.ui.graphics.Color, androidx.compose.ui.graphics.Color> {
+    val colors = com.bestrong.mobile.ui.theme.enfoque
+    val scheme = MaterialTheme.colorScheme
+    return when {
+        mark == DayMark.RECORD -> colors.record to colors.onRecord
+        mark == DayMark.DONE -> colors.done to scheme.onTertiary
+        isToday -> androidx.compose.ui.graphics.Color.Transparent to scheme.onSurface
+        else -> scheme.surfaceContainerHighest to scheme.onSurfaceVariant
     }
 }

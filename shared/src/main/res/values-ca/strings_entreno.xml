@@ -37,4 +37,25 @@
         <item quantity="one">%1$d rècord nou</item>
         <item quantity="other">%1$d rècords nous</item>
     </plurals>
+    <string name="enf_wo_set_of">Sèrie %1$d de %2$d</string>
+    <string name="enf_wo_record_with">rècord amb %1$d</string>
+    <string name="enf_wo_record_hit">★ rècord</string>
+    <string name="enf_wo_done">Feta</string>
+    <string name="enf_wo_all_sets">Totes les sèries</string>
+    <string name="enf_wo_rest">Descans</string>
+    <string name="enf_wo_rest_of">de %1$s</string>
+    <string name="enf_wo_set_done">Sèrie %1$d feta · %2$s</string>
+    <string name="enf_wo_next_line">%1$s · sèrie %2$d de %3$d</string>
+    <string name="enf_wo_auto_next">La sèrie següent comença sola en acabar</string>
+    <string name="enf_wo_skip">Saltar</string>
+    <string name="enf_wo_rest_less">Treure 15 segons de descans</string>
+    <string name="enf_wo_rest_more">Afegir 15 segons de descans</string>
+    <string name="enf_wo_progress">Sèrie %1$d de %2$d de l\'entrenament</string>
+    <string name="enf_wo_hr">Pols %1$d ppm</string>
+    <string name="enf_wo_finished">Entrenament fet</string>
+    <string name="enf_wo_avg_hr">♥ %1$d de mitjana</string>
+    <string name="enf_wo_time">Temps</string>
+    <string name="enf_wo_records">Rècords</string>
+    <string name="enf_wo_elapsed">Temps d\'entrenament %1$s</string>
+    <string name="enf_wo_undo">Desmarcar</string>
 </resources>

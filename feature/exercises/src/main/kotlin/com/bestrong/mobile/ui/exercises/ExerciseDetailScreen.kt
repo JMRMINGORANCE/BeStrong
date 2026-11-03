@@ -80,6 +80,8 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
     last.set(s)
     val f = vm.weightFactor(s.exercise)
     var chosenMetric by rememberSaveable { mutableIntStateOf(0) }
+    // Historia (0), Técnica (1) o Récords (2)
+    var section by rememberSaveable(exerciseId) { mutableIntStateOf(0) }
     // Sin peso (dominadas, flexiones) solo tiene sentido la gráfica de reps: el resto serían líneas a 0
     val repsOnly = s.exercise.tracking == com.bestrong.core.model.TrackingType.REPS_ONLY
     val metric = if (repsOnly) METRIC_REPS else chosenMetric
@@ -122,163 +124,184 @@ fun ExerciseDetailScreen(vm: ExercisesViewModel, exerciseId: String, onBack: (()
             },
         )
         LazyColumn(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            item { ExerciseMediaSection(vm, s.exercise) { ExerciseAbout(s.exercise) } }
-            // Técnica: nota fija, fotos y vídeos (los de las series del entreno y los propios), en un solo sitio
-            item { TechniqueSection(vm, s.exercise) }
-            if (com.bestrong.core.stats.ExerciseGoals.supports(s.exercise.tracking)) item { ExerciseGoalCard(vm, s) }
-            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RepRangeCard(vm, s.exercise.id) }
-            if (s.variants.size > 1) {
-                item {
-                    // Variantes enlazadas: historial y récords juntos o por separado
-                    val names = s.variants.filter { it.id != s.exercise.id }.map { it.displayName() }.joinToString()
-                    val desc = stringResource(R.string.include_variants_desc, names)
-                    FilterChip(
-                        selected = includeVariants,
-                        onClick = { includeVariants = !includeVariants },
-                        label = { Text(stringResource(R.string.include_variants, s.variants.size - 1)) },
-                        modifier = Modifier.semantics { stateDescription = desc },
-                    )
+            item { ExerciseHeaderSegments(s.exercise, section) { section = it } }
+            when (section) {
+                SECTION_TECHNIQUE -> {
+                    item { ExerciseMediaSection(vm, s.exercise) { ExerciseAbout(s.exercise) } }
+                    // Técnica: nota fija, fotos y vídeos (los de las series del entreno y los propios), en un solo sitio
+                    item { TechniqueSection(vm, s.exercise) }
+                    if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RepRangeCard(vm, s.exercise.id) }
                 }
-            }
-            if (s.progress.isEmpty()) {
-                item {
-                    Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.AutoMirrored.Filled.ShowChart, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(stringResource(R.string.no_data_title), style = MaterialTheme.typography.titleMedium)
-                        Text(stringResource(R.string.no_data_body), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
-                return@LazyColumn
-            }
-            item {
-                Text(
-                    "${s.exercise.primaryMuscle.label()} · ${s.exercise.equipment.label()}" +
-                        (s.exercise.secondaryMuscles.takeIf { it.isNotEmpty() }?.map { it.label() }?.joinToString()?.let { stringResource(R.string.secondary_muscles, it) } ?: ""),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            // Cardio, distancia y tiempo: su gráfica (distancia o tiempo); con peso y reps, la de 1RM y volumen
-            val timed = s.exercise.tracking in TIMED_TRACKING
-            if (timed) item { CardioProgressChart(s.progress, timeOnly = s.exercise.tracking == com.bestrong.core.model.TrackingType.DURATION) }
-            if (!timed && !repsOnly) {
-                item {
-                    val labels = listOf(
-                        stringResource(R.string.metric_1rm),
-                        stringResource(R.string.metric_max_weight),
-                        stringResource(R.string.metric_volume),
-                        stringResource(R.string.metric_reps),
-                    )
-                    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                        labels.forEachIndexed { i, l ->
-                            SegmentedButton(selected = metric == i, onClick = { chosenMetric = i }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
+                SECTION_RECORDS -> {
+                    if (s.progress.isEmpty()) {
+                        item {
+                            Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(Icons.AutoMirrored.Filled.ShowChart, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(stringResource(R.string.no_data_title), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.no_data_body), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    } else {
+                        item { SectionHeader(stringResource(R.string.personal_records)) }
+                        item {
+                            com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    RecordType.entries.forEach { type ->
+                                        val pr = s.records[type] ?: return@forEach
+                                        Row(Modifier.fillMaxWidth()) {
+                                            Text(type.label(), Modifier.weight(1f))
+                                            Text(
+                                                when (type) {
+                                                    RecordType.MOST_REPS -> pr.value.toInt().let { n -> pluralStringResource(R.plurals.n_reps, n, n) }
+                                                    RecordType.BEST_SET_VOLUME -> unit.formatVolume(pr.value)
+                                                    else -> unit.format(pr.value * f, withUnit = true)
+                                                },
+                                                fontWeight = FontWeight.Bold,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        s.nextTarget?.let { t ->
+                            item {
+                                val work = t.sets.firstOrNull { it.type != SetType.WARMUP } ?: t.sets.first()
+                                com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        SectionHeader(stringResource(R.string.next_target))
+                                        Text(
+                                            t.sets.count { it.type != SetType.WARMUP }.let { n -> pluralStringResource(R.plurals.next_target_line, n, n, describeSet(work, s.exercise, unit, vm.weightFactor(s.exercise))) },
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                        Text(t.reasonText(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                            }
+                        }
+                        if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RpeLoadCard(vm, s.exercise, s.recentOneRepMax) }
+                        s.cardioBests?.let { b -> item { CardioBestsCard(s.exercise, b) } }
+                        if (s.strengthCurve.size >= 2) {
+                            item {
+                                com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                                    Column(Modifier.padding(16.dp)) {
+                                        SectionHeader(stringResource(R.string.strength_curve))
+                                        Text(stringResource(R.string.strength_curve_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        val repsLabel = stringResource(R.string.reps_short)
+                                        BarChart(
+                                            s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps $repsLabel", unit.fromKg(kg * f)) },
+                                            describe = { "${it.label}: ${unit.format(unit.toKg(it.value), withUnit = true)}" },
+                                        )
+                                        // Mejores marcas por repeticiones (1RM, 3RM, 5RM…), las que se suelen buscar
+                                        // N RM = lo más pesado movido al menos N veces (100 kg × 6 también vale como 5RM)
+                                        val repMaxes = REP_MAXES.mapNotNull { r -> s.strengthCurve.filterKeys { it >= r }.values.maxOrNull()?.let { r to it } }
+                                        if (repMaxes.isNotEmpty()) {
+                                            Text(
+                                                repMaxes.map { (r, kg) -> stringResource(R.string.rep_max, r, unit.format(kg * f, withUnit = true)) }.joinToString("  ·  "),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.SemiBold,
+                                                modifier = Modifier.padding(top = 8.dp),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
+                    if (com.bestrong.core.stats.ExerciseGoals.supports(s.exercise.tracking)) item { ExerciseGoalCard(vm, s) }
                 }
-            }
-            if (!timed) {
-                item {
-                    // Sin series que cuenten (asistidas, negativas) no hay 1RM, peso ni reps de ese día: no se pinta un 0
-                    val points = s.progress.filter { p ->
-                        when (metric) { 0 -> p.bestOneRepMax > 0; 1 -> p.heaviestWeight > 0; 2 -> true; else -> p.bestReps > 0 }
-                    }.takeLast(30).map { p ->
-                        ChartPoint(
-                            formatShortDate(p.dateEpochMs),
-                            // Peso con mancuernas como total del par, como en las series; el volumen, como en el resto de la app
-                            when (metric) { 0 -> p.bestOneRepMax * f; 1 -> p.heaviestWeight * f; 2 -> p.volume; else -> p.bestReps.toDouble() },
+                else -> {
+                    item {
+                        Text(
+                            "${s.exercise.primaryMuscle.label()} · ${s.exercise.equipment.label()}" +
+                                (s.exercise.secondaryMuscles.takeIf { it.isNotEmpty() }?.map { it.label() }?.joinToString()?.let { stringResource(R.string.secondary_muscles, it) } ?: ""),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
-                    // Peso en tu unidad, volumen con su unidad y las reps tal cual
-                    val formatter: (Double) -> String = when (metric) {
-                        2 -> { v -> unit.formatVolume(v) }
-                        3 -> { v -> v.toInt().toString() }
-                        // Con su unidad: «Máx 100 kg», no «Máx 100»
-                        else -> { v -> unit.format(v, withUnit = true) }
+                    if (s.variants.size > 1) {
+                        item {
+                            // Variantes enlazadas: historial y récords juntos o por separado
+                            val names = s.variants.filter { it.id != s.exercise.id }.map { it.displayName() }.joinToString()
+                            val desc = stringResource(R.string.include_variants_desc, names)
+                            FilterChip(
+                                selected = includeVariants,
+                                onClick = { includeVariants = !includeVariants },
+                                label = { Text(stringResource(R.string.include_variants, s.variants.size - 1)) },
+                                modifier = Modifier.semantics { stateDescription = desc },
+                            )
+                        }
                     }
-                    // «¿Voy a más?» de un vistazo: la diferencia entre el primer y el último punto
-                    ChartChange(points, if (metric < 2) { v -> unit.format(v, withUnit = true) } else formatter)
-                    LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = formatter)
-                }
-            }
-            if (s.rpeTrend.size >= RPE_MIN_SESSIONS) item { RpeTrendCard(s.rpeTrend) }
-            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { PlateauHint(vm, exerciseId, s.progress) }
-            // Historia del ejercicio: hitos en una línea de tiempo (propuesta 03)
-            item { ExerciseTimelineSection(vm, s.exercise, f) }
-            item { SectionHeader(stringResource(R.string.personal_records)) }
-            item {
-                com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        RecordType.entries.forEach { type ->
-                            val pr = s.records[type] ?: return@forEach
-                            Row(Modifier.fillMaxWidth()) {
-                                Text(type.label(), Modifier.weight(1f))
-                                Text(
-                                    when (type) {
-                                        RecordType.MOST_REPS -> pr.value.toInt().let { n -> pluralStringResource(R.plurals.n_reps, n, n) }
-                                        RecordType.BEST_SET_VOLUME -> unit.formatVolume(pr.value)
-                                        else -> unit.format(pr.value * f, withUnit = true)
-                                    },
-                                    fontWeight = FontWeight.Bold,
-                                )
+                    if (s.progress.isEmpty()) {
+                        item {
+                            Column(Modifier.fillMaxWidth().padding(vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(Icons.AutoMirrored.Filled.ShowChart, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(stringResource(R.string.no_data_title), style = MaterialTheme.typography.titleMedium)
+                                Text(stringResource(R.string.no_data_body), color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
-                }
-            }
-            s.nextTarget?.let { t ->
-                item {
-                    val work = t.sets.firstOrNull { it.type != SetType.WARMUP } ?: t.sets.first()
-                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            SectionHeader(stringResource(R.string.next_target))
-                            Text(
-                                t.sets.count { it.type != SetType.WARMUP }.let { n -> pluralStringResource(R.plurals.next_target_line, n, n, describeSet(work, s.exercise, unit, vm.weightFactor(s.exercise))) },
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                            )
-                            Text(t.reasonText(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                }
-            }
-            if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { RpeLoadCard(vm, s.exercise, s.recentOneRepMax) }
-            s.cardioBests?.let { b -> item { CardioBestsCard(s.exercise, b) } }
-            if (s.strengthCurve.size >= 2) {
-                item {
-                    com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                        Column(Modifier.padding(16.dp)) {
-                            SectionHeader(stringResource(R.string.strength_curve))
-                            Text(stringResource(R.string.strength_curve_hint), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            val repsLabel = stringResource(R.string.reps_short)
-                            BarChart(
-                                s.strengthCurve.map { (reps, kg) -> ChartPoint("$reps $repsLabel", unit.fromKg(kg * f)) },
-                                describe = { "${it.label}: ${unit.format(unit.toKg(it.value), withUnit = true)}" },
-                            )
-                            // Mejores marcas por repeticiones (1RM, 3RM, 5RM…), las que se suelen buscar
-                            // N RM = lo más pesado movido al menos N veces (100 kg × 6 también vale como 5RM)
-                            val repMaxes = REP_MAXES.mapNotNull { r -> s.strengthCurve.filterKeys { it >= r }.values.maxOrNull()?.let { r to it } }
-                            if (repMaxes.isNotEmpty()) {
-                                Text(
-                                    repMaxes.map { (r, kg) -> stringResource(R.string.rep_max, r, unit.format(kg * f, withUnit = true)) }.joinToString("  ·  "),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier.padding(top = 8.dp),
+                    if (s.progress.isNotEmpty()) {
+                        if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { EstimatedOneRepMax(s.progress, f) }
+                        // Cardio, distancia y tiempo: su gráfica (distancia o tiempo); con peso y reps, la de 1RM y volumen
+                        val timed = s.exercise.tracking in TIMED_TRACKING
+                        if (timed) item { CardioProgressChart(s.progress, timeOnly = s.exercise.tracking == com.bestrong.core.model.TrackingType.DURATION) }
+                        if (!timed && !repsOnly) {
+                            item {
+                                val labels = listOf(
+                                    stringResource(R.string.metric_1rm),
+                                    stringResource(R.string.metric_max_weight),
+                                    stringResource(R.string.metric_volume),
+                                    stringResource(R.string.metric_reps),
                                 )
+                                SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                                    labels.forEachIndexed { i, l ->
+                                        SegmentedButton(selected = metric == i, onClick = { chosenMetric = i }, shape = SegmentedButtonDefaults.itemShape(i, labels.size)) { Text(l) }
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-            }
-            item { SectionHeader(stringResource(R.string.nav_history)) }
-            items(s.recentSessions, key = { it.id }) { w ->
-                com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(w.name, fontWeight = FontWeight.SemiBold)
-                        Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
-                        // Notas de ese día para el ejercicio («hombro cargado», «agarre más abierto»…)
-                        s.sessionNotes[w.id]?.let { Text("✎ $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary) }
-                        w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
-                            Text("${i + 1}. ${describeSet(set, s.exercise, unit, f)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax * f)) else "")
-                            setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                        if (!timed) {
+                            item {
+                                // Sin series que cuenten (asistidas, negativas) no hay 1RM, peso ni reps de ese día: no se pinta un 0
+                                val points = s.progress.filter { p ->
+                                    when (metric) { 0 -> p.bestOneRepMax > 0; 1 -> p.heaviestWeight > 0; 2 -> true; else -> p.bestReps > 0 }
+                                }.takeLast(30).map { p ->
+                                    ChartPoint(
+                                        formatShortDate(p.dateEpochMs),
+                                        // Peso con mancuernas como total del par, como en las series; el volumen, como en el resto de la app
+                                        when (metric) { 0 -> p.bestOneRepMax * f; 1 -> p.heaviestWeight * f; 2 -> p.volume; else -> p.bestReps.toDouble() },
+                                    )
+                                }
+                                // Peso en tu unidad, volumen con su unidad y las reps tal cual
+                                val formatter: (Double) -> String = when (metric) {
+                                    2 -> { v -> unit.formatVolume(v) }
+                                    3 -> { v -> v.toInt().toString() }
+                                    // Con su unidad: «Máx 100 kg», no «Máx 100»
+                                    else -> { v -> unit.format(v, withUnit = true) }
+                                }
+                                // «¿Voy a más?» de un vistazo: la diferencia entre el primer y el último punto
+                                ChartChange(points, if (metric < 2) { v -> unit.format(v, withUnit = true) } else formatter)
+                                LineChart(points, Modifier.fillMaxWidth().padding(vertical = 8.dp), valueFormatter = formatter)
+                            }
+                        }
+                        if (s.rpeTrend.size >= RPE_MIN_SESSIONS) item { RpeTrendCard(s.rpeTrend) }
+                        if (s.exercise.tracking == com.bestrong.core.model.TrackingType.WEIGHT_REPS) item { PlateauHint(vm, exerciseId, s.progress) }
+                        // Historia del ejercicio: hitos en una línea de tiempo (propuesta 03)
+                        item { ExerciseTimelineSection(vm, s.exercise, f) }
+                        item { SectionHeader(stringResource(R.string.nav_history)) }
+                        items(s.recentSessions, key = { it.id }) { w ->
+                            com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
+                                Column(Modifier.padding(12.dp)) {
+                                    Text(w.name, fontWeight = FontWeight.SemiBold)
+                                    Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall)
+                                    // Notas de ese día para el ejercicio («hombro cargado», «agarre más abierto»…)
+                                    s.sessionNotes[w.id]?.let { Text("✎ $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary) }
+                                    w.exercises.filter { it.exercise.id == exerciseId }.flatMap { it.sets }.forEachIndexed { i, set ->
+                                        Text("${i + 1}. ${describeSet(set, s.exercise, unit, f)}" + if (set.estimatedOneRepMax > 0) stringResource(R.string.set_line_1rm, unit.format(set.estimatedOneRepMax * f)) else "")
+                                        setRemark(set)?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

@@ -55,7 +55,7 @@ class SearchCompareDiaryScreenshotTest {
 
     /** Un entreno de press banca con [kg] en la primera serie; con [tag], se etiqueta en el resumen. */
     private fun workout(kg: String, tag: String? = null, summaryShot: String? = null) {
-        compose.onAllNodesWithText("Entrenar")[0].performClick()
+        compose.onAllNodesWithText("HOY")[0].performClick()
         settle()
         compose.onNodeWithText("Entrenamiento vacío").performClick()
         settle()
@@ -66,6 +66,10 @@ class SearchCompareDiaryScreenshotTest {
         compose.onNodeWithText("Press banca").performClick()
         settle(3)
         compose.onNode(hasText("Añadir 1"), useUnmergedTree = true).performClick()
+        settle()
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        // (en el Fold desplegado ya se ve la lista)
+        compose.onAllNodesWithContentDescription("Ver lista").fetchSemanticsNodes().firstOrNull()?.let { compose.onNodeWithContentDescription("Ver lista").performClick() }
         settle()
         compose.onAllNodes(hasSetTextAction())[0].performTextReplacement(kg)
         settle()
@@ -83,7 +87,6 @@ class SearchCompareDiaryScreenshotTest {
             settle()
             summaryShot?.let { captureScreenRoboImage("build/outputs/roborazzi/$it.png") }
         }
-        auto { compose.onNodeWithText("Listo").performScrollTo() }
         compose.onNodeWithText("Listo").performClick()
         settle()
     }
@@ -122,7 +125,7 @@ class SearchCompareDiaryScreenshotTest {
         androidx.test.espresso.Espresso.pressBack()
         settle()
         // Búsqueda universal desde Inicio
-        compose.onAllNodesWithText("Entrenar")[0].performClick()
+        compose.onAllNodesWithText("HOY")[0].performClick()
         settle()
         compose.onNodeWithContentDescription("Buscar en BeStrong").performClick()
         settle()

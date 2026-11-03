@@ -5,14 +5,12 @@ import android.speech.RecognizerIntent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
@@ -93,10 +91,21 @@ import com.bestrong.mobile.ui.workout.describeSet
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
-/** Pestaña "Ejercicios": lista y detalle lado a lado en el Fold desplegado. */
+/**
+ * Biblioteca: cabecera con el avatar, segmentos Rutinas · Ejercicios y, en Ejercicios, la lista y la ficha lado a
+ * lado en el Fold desplegado.
+ */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
+fun ExerciseLibraryScreen(
+    vm: ExercisesViewModel,
+    /** Avatar de la cabecera: abre Tú. */
+    onOpenProfile: () -> Unit = {},
+    /** Abrir una rutina en el editor (null = nueva). */
+    onEditRoutine: (String?) -> Unit = {},
+) {
+    // 0 = Rutinas, 1 = Ejercicios (lo que se abre por defecto, como antes la pestaña)
+    var segment by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(1) }
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
     val scope = rememberCoroutineScope()
@@ -109,6 +118,7 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
             while (navigator.canNavigateBack(BackNavigationBehavior.PopLatest)) navigator.navigateBack(BackNavigationBehavior.PopLatest)
             // Si aún queda una ficha (era el destino inicial), se cambia a la lista sin ficha
             if (navigator.currentDestination?.contentKey != null) navigator.navigateTo(ListDetailPaneScaffoldRole.List)
+            segment = 1
             vm.listShown()
         }
     }
@@ -116,13 +126,32 @@ fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
         navigator = navigator,
         listPane = {
             AnimatedPane {
-                ExerciseSearchList(
-                    vm = vm,
-                    title = stringResource(R.string.nav_exercises),
-                    selected = setOfNotNull((navigator.currentDestination?.contentKey as? String)),
-                    multiSelect = false,
-                    onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, it.id) } },
-                )
+                Column(Modifier.fillMaxSize().statusBarsPadding()) {
+                    com.bestrong.mobile.ui.components.EnfoqueHeader(
+                        stringResource(R.string.enf_lib_kicker),
+                        stringResource(R.string.nav_library),
+                        onOpenProfile,
+                        Modifier.padding(horizontal = 20.dp),
+                    )
+                    com.bestrong.mobile.ui.components.EnfoqueSegments(
+                        listOf(stringResource(R.string.enf_lib_routines), stringResource(R.string.enf_lib_exercises)),
+                        segment,
+                        { segment = it },
+                        Modifier.padding(horizontal = 20.dp).padding(bottom = 6.dp),
+                    )
+                    if (segment == 0) {
+                        val routines by vm.routines.collectAsStateWithLifecycle()
+                        RoutinesList(routines, onEditRoutine)
+                    } else {
+                        ExerciseSearchList(
+                            vm = vm,
+                            title = null,
+                            selected = setOfNotNull((navigator.currentDestination?.contentKey as? String)),
+                            multiSelect = false,
+                            onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, it.id) } },
+                        )
+                    }
+                }
             }
         },
         detailPane = {
@@ -268,14 +297,14 @@ fun ExerciseSearchList(
         androidx.compose.runtime.LaunchedEffect(gridState) {
             vm.filter.drop(1).collect { gridState.scrollToItem(0) }
         }
-        // Cuadrícula de tarjetas con la animación grande: se reconoce el ejercicio sin leer
+        // Lista sobria (una columna en el móvil, dos en el Fold desplegado): imagen pequeña, nombre y datos
         androidx.compose.foundation.lazy.grid.LazyVerticalGrid(
             state = gridState,
-            columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(minSize = 156.dp),
+            columns = androidx.compose.foundation.lazy.grid.GridCells.Adaptive(minSize = 320.dp),
             modifier = Modifier.fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 96.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
         ) {
             // Nada encontrado: quitar filtros o crear el ejercicio con lo buscado
             if (results.isEmpty()) {
@@ -329,7 +358,10 @@ fun ExerciseSearchList(
     }
 }
 
-/** Tarjeta de la cuadrícula: animación arriba (con la estrella o la casilla encima) y nombre y datos debajo. */
+/**
+ * Fila de la lista: la imagen en un cuadrado pequeño, el nombre, «músculo · material» y la última vez; a la derecha,
+ * la estrella de favorito (o la casilla al elegir varios).
+ */
 @Composable
 private fun ExerciseCard(
     ex: Exercise,
@@ -341,47 +373,45 @@ private fun ExerciseCard(
     onToggleFavorite: () -> Unit,
     onClick: () -> Unit,
 ) {
-    val shape = MaterialTheme.shapes.large
     val scheme = MaterialTheme.colorScheme
-    Column(
-        Modifier.fillMaxWidth().clip(shape)
-            .background(if (selected) scheme.primary.copy(alpha = 0.16f) else scheme.surfaceContainer)
-            .then(if (selected) Modifier.border(2.dp, scheme.primary, shape) else Modifier)
-            // En selección múltiple toda la tarjeta es la casilla (TalkBack: «Press banca, casilla, marcada»)
-            .then(if (multiSelect) Modifier.toggleable(value = selected, role = Role.Checkbox) { onClick() } else Modifier.clickable(onClick = onClick)),
-    ) {
-        Box(Modifier.fillMaxWidth().aspectRatio(1.1f).padding(8.dp).clip(RoundedCornerShape(18.dp))) {
-            com.bestrong.mobile.ui.components.ExerciseImage(ex, Modifier.matchParentSize())
-            Box(Modifier.align(Alignment.TopEnd).padding(4.dp)) {
-                if (multiSelect) {
-                    Box(
-                        Modifier.size(30.dp).clip(CircleShape).background(if (selected) scheme.primary else scheme.surfaceContainerLowest.copy(alpha = 0.85f)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (selected) Icon(Icons.Default.Check, null, tint = scheme.onPrimary, modifier = Modifier.size(20.dp))
-                    }
-                } else {
-                    IconToggleButton(
-                        checked = favorite,
-                        onCheckedChange = { onToggleFavorite() },
-                        // 48 dp (el mínimo para tocarlo bien) y un fondo claro (sobre la imagen blanca no se ve un círculo negro)
-                        modifier = Modifier.size(48.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Color.White.copy(alpha = 0.8f)),
-                    ) {
-                        Icon(
-                            if (favorite) Icons.Default.Star else Icons.Default.StarBorder,
-                            stringResource(if (favorite) R.string.favorite_remove else R.string.favorite_add, ex.displayName()),
-                            tint = if (favorite) scheme.secondary else androidx.compose.ui.graphics.Color.DarkGray,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
+    Column {
+        Row(
+            Modifier.fillMaxWidth()
+                .clip(MaterialTheme.shapes.medium)
+                .background(if (selected) scheme.primary.copy(alpha = 0.12f) else androidx.compose.ui.graphics.Color.Transparent)
+                // En selección múltiple toda la fila es la casilla (TalkBack: «Press banca, casilla, marcada»)
+                .then(if (multiSelect) Modifier.toggleable(value = selected, role = Role.Checkbox) { onClick() } else Modifier.clickable(onClick = onClick))
+                .padding(vertical = 10.dp, horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(Modifier.size(44.dp).clip(RoundedCornerShape(10.dp)).background(scheme.surfaceContainerHigh)) {
+                com.bestrong.mobile.ui.components.ExerciseImage(ex, Modifier.matchParentSize())
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(ex.displayName(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(meta, style = MaterialTheme.typography.labelSmall, fontFamily = com.bestrong.mobile.ui.theme.FigureFont, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                lastLine?.let { Text(it, style = MaterialTheme.typography.labelSmall, fontFamily = com.bestrong.mobile.ui.theme.FigureFont, color = scheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            }
+            if (multiSelect) {
+                Box(
+                    Modifier.size(26.dp).clip(CircleShape).background(if (selected) scheme.primary else scheme.surfaceContainerHigh),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (selected) Icon(Icons.Default.Check, null, tint = scheme.onPrimary, modifier = Modifier.size(18.dp))
+                }
+            } else {
+                IconToggleButton(checked = favorite, onCheckedChange = { onToggleFavorite() }) {
+                    Icon(
+                        if (favorite) Icons.Default.Star else Icons.Default.StarBorder,
+                        stringResource(if (favorite) R.string.favorite_remove else R.string.favorite_add, ex.displayName()),
+                        tint = if (favorite) com.bestrong.mobile.ui.theme.enfoque.record else scheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp),
+                    )
                 }
             }
         }
-        Column(Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(ex.displayName(), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Text(meta, style = MaterialTheme.typography.labelMedium, color = scheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            lastLine?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = scheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-        }
+        androidx.compose.material3.HorizontalDivider(color = scheme.outlineVariant)
     }
 }
 

@@ -4,8 +4,9 @@ import android.os.Looper
 import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -46,8 +47,14 @@ class TabsScreenshotTest {
         compose.mainClock.autoAdvance = false
         settle()
         shot("dark_train")
-        listOf("Historial" to "dark_history", "Ejercicios" to "dark_exercises", "Perfil" to "dark_profile").forEach { (tab, name) ->
+        listOf("PROGRESO" to "dark_history", "BIBLIOTECA" to "dark_exercises").forEach { (tab, name) ->
             compose.onAllNodesWithText(tab)[0].performClick()
+            settle()
+            shot(name)
+        }
+        run {
+            val name = "dark_profile"
+            compose.onAllNodesWithContentDescription("Tú")[0].performClick()
             settle()
             shot(name)
         }
@@ -70,12 +77,14 @@ class TabsScreenshotTest {
             compose.onNodeWithText(row).performClick()
             settle()
             captureScreenRoboImage("build/outputs/roborazzi/$name.png")
-            compose.onNodeWithContentDescription("Volver").performClick()
+            compose.onAllNodesWithContentDescription("Volver").onLast().performClick()
             settle()
         }
-        // Y la de comunidad (ideas y avisos): una fila al final de «Progreso»
-        compose.onNodeWithText("Progreso").performClick()
-        settle()
+        // Y la de comunidad (ideas y avisos): una fila de Tú
+        while (compose.onAllNodesWithText("Comunidad").fetchSemanticsNodes().isEmpty()) {
+            compose.onAllNodesWithContentDescription("Volver").onLast().performClick()
+            settle()
+        }
         // La rejilla es perezosa: hasta que se desplaza, la fila no existe
         compose.mainClock.autoAdvance = true
         compose.onAllNodes(hasScrollToNodeAction())[0].performScrollToNode(hasText("Comunidad"))

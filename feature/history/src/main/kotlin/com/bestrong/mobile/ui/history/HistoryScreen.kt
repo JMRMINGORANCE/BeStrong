@@ -1,6 +1,7 @@
 package com.bestrong.mobile.ui.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -95,6 +96,10 @@ import com.bestrong.mobile.ui.workout.describeSet
 import com.bestrong.mobile.ui.workout.setRemark
 import kotlinx.coroutines.launch
 
+/**
+ * Progreso: cabecera con el mes y el avatar, segmentos (Historial y los que lleguen en [otherSegments]) y, en
+ * Historial, el calendario, «Tu año» y los entrenos con su detalle al lado en el Fold desplegado.
+ */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(
@@ -104,16 +109,13 @@ fun HistoryScreen(
     /** Entreno a abrir al llegar (desde la búsqueda universal); [onWorkoutOpened] avisa de que ya se abrió. */
     openWorkoutId: String? = null,
     onWorkoutOpened: () -> Unit = {},
+    /** Avatar de la cabecera: abre Tú. */
+    onOpenProfile: () -> Unit = {},
+    otherSegments: List<ProgressSegment> = emptyList(),
 ) {
     val history by vm.history.collectAsStateWithLifecycle()
     val recordCounts by vm.recordCounts.collectAsStateWithLifecycle()
-    val days by vm.trainingDays.collectAsStateWithLifecycle()
-    val query by vm.query.collectAsStateWithLifecycle()
-    val filtered by vm.filtered.collectAsStateWithLifecycle()
-    val year by vm.year.collectAsStateWithLifecycle()
-    val selectedDay by vm.selectedDay.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
-    val view = LocalView.current
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -136,6 +138,8 @@ fun HistoryScreen(
     }
     // Lista de tarjetas o diario (nota, valoración y etiquetas de cada sesión)
     var journal by rememberSaveable { mutableStateOf(false) }
+    // Segmento de Progreso: 0 = Historial; los demás, [otherSegments]
+    var segment by rememberSaveable { androidx.compose.runtime.mutableIntStateOf(0) }
 
     var logging by remember { mutableStateOf(false) }
     // Día tocado en el calendario (sin entreno): el diálogo empieza en él
@@ -160,15 +164,27 @@ fun HistoryScreen(
                 AnimatedPane {
                     // Sin barra superior: el título no puede quedar bajo la barra de estado
                     Column(Modifier.fillMaxSize().statusBarsPadding()) {
-                        com.bestrong.mobile.ui.components.ScreenTitle(
-                            stringResource(R.string.nav_history),
-                            Modifier.padding(horizontal = 20.dp),
-                            overline = androidx.compose.ui.res.pluralStringResource(R.plurals.workout_count, history.size, history.size),
-                        ) {
-                            androidx.compose.material3.FilledTonalIconButton(onClick = {
-                                logStart = null
-                                logging = true
-                            }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
+                        val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
+                        val monthYear = java.time.YearMonth.now().format(java.time.format.DateTimeFormatter.ofPattern("LLLL yyyy", locale))
+                        com.bestrong.mobile.ui.components.EnfoqueHeader(monthYear, stringResource(R.string.nav_progress), onOpenProfile, Modifier.padding(horizontal = 20.dp)) {
+                            if (segment == 0) {
+                                IconButton(onClick = {
+                                    logStart = null
+                                    logging = true
+                                }) { Icon(Icons.Default.EditCalendar, stringResource(R.string.log_past_title)) }
+                            }
+                        }
+                        if (otherSegments.isNotEmpty()) {
+                            com.bestrong.mobile.ui.components.EnfoqueSegments(
+                                listOf(stringResource(R.string.enf_prog_history)) + otherSegments.map { it.label },
+                                segment,
+                                { segment = it },
+                                Modifier.padding(horizontal = 20.dp),
+                            )
+                        }
+                        if (segment > 0) {
+                            otherSegments.getOrNull(segment - 1)?.content?.invoke()
+                            return@Column
                         }
                         if (history.isEmpty()) {
                             EmptyState(
@@ -179,68 +195,17 @@ fun HistoryScreen(
                             )
                             return@Column
                         }
-                        // Primero el calendario (lo que más se mira), luego el año y la lista con su buscador
-                        LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            if (query.isBlank()) {
-                                item {
-                                    com.bestrong.mobile.ui.components.Panel {
-                                        CalendarMonth(
-                                            days,
-                                            Modifier,
-                                            selectedDay,
-                                            onEmptyDay = { day: java.time.LocalDate ->
-                                                logStart = pastWorkoutStart(day)
-                                                logging = true
-                                            },
-                                        ) { vm.selectedDay.value = it }
-                                    }
-                                }
-                                item { com.bestrong.mobile.ui.components.Panel { YearSection(year) } }
-                            }
-                            item { com.bestrong.mobile.ui.components.SectionHeader(stringResource(R.string.history_workouts), large = true) }
-                            item { HistoryViewToggle(journal) { journal = it } }
-                            item { com.bestrong.mobile.ui.components.SearchPill(query, { vm.query.value = it }, stringResource(R.string.history_search)) }
-                            item { GymFilterRow(vm) }
-                            item { RoutineFilterRow(vm) }
-                            item { TagFilterRow(vm) }
-                            if (journal && filtered.isEmpty()) item { Text(stringResource(R.string.diary_empty), color = MaterialTheme.colorScheme.onSurfaceVariant) }
-                            selectedDay?.let { day ->
-                                item {
-                                    // Filtro por el día tocado en el calendario; tocar el chip lo quita
-                                    FilterChip(
-                                        selected = true,
-                                        onClick = { vm.selectedDay.value = null },
-                                        label = { Text(stringResource(R.string.history_day_filter, formatShortDate(day.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()))) },
-                                    )
-                                }
-                            }
-                            item { FilteredSummary(vm, filtered) }
-                            // Separada por meses («Octubre 2026 · 12 entrenos»): con cientos de entrenos se sabe dónde se está
-                            val byMonth = filtered.groupBy { java.time.YearMonth.from(java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(java.time.ZoneId.systemDefault())) }
-                            byMonth.forEach { (month, monthWorkouts) ->
-                                item(key = "m-$month") { MonthHeader(month, monthWorkouts.size) }
-                                items(monthWorkouts, key = { it.id }) { w ->
-                                    if (journal) {
-                                        DiaryEntry(w, onOpen = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } }, onTag = { vm.tagFilter.value = it })
-                                        return@items
-                                    }
-                                    val records = recordCounts.getOrDefault(w.id, 0)
-                                    // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
-                                    val dragText = workoutText(w)
-                                    WorkoutCard(
-                                        w,
-                                        records,
-                                        Modifier.clip(MaterialTheme.shapes.large).combinedClickable(
-                                            // Con etiquetas, TalkBack ofrece también la pulsación larga (si no, no se descubre)
-                                            onClickLabel = stringResource(R.string.action_open),
-                                            onLongClickLabel = stringResource(R.string.action_drag_share),
-                                            onLongClick = { DragShare.start(view, w.name, dragText) },
-                                            onClick = { scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, w.id) } },
-                                        ),
-                                    )
-                                }
-                            }
-                        }
+                        HistoryList(
+                            vm = vm,
+                            journal = journal,
+                            onJournal = { journal = it },
+                            recordCounts = recordCounts,
+                            onOpen = { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } },
+                            onLogDay = { day ->
+                                logStart = pastWorkoutStart(day)
+                                logging = true
+                            },
+                        )
                     }
                 }
             },
@@ -265,6 +230,83 @@ fun HistoryScreen(
     }
 }
 
+/** Historial: calendario, «Tu año» y los entrenos por meses con su buscador y filtros. */
+@Composable
+private fun HistoryList(
+    vm: HistoryViewModel,
+    journal: Boolean,
+    onJournal: (Boolean) -> Unit,
+    recordCounts: Map<String, Int>,
+    onOpen: (String) -> Unit,
+    onLogDay: (java.time.LocalDate) -> Unit,
+) {
+    val history by vm.history.collectAsStateWithLifecycle()
+    val days by vm.trainingDays.collectAsStateWithLifecycle()
+    val query by vm.query.collectAsStateWithLifecycle()
+    val filtered by vm.filtered.collectAsStateWithLifecycle()
+    val year by vm.year.collectAsStateWithLifecycle()
+    val selectedDay by vm.selectedDay.collectAsStateWithLifecycle()
+    val view = LocalView.current
+    // Días con récord: en ámbar en el calendario
+    val recordDays = remember(history, recordCounts) {
+        history.filter { recordCounts.getOrDefault(it.id, 0) > 0 }
+            .map { java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(java.time.ZoneId.systemDefault()).toLocalDate() }.toSet()
+    }
+    // Primero el calendario (lo que más se mira), luego el año y la lista con su buscador
+    LazyColumn(contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (query.isBlank()) {
+            item {
+                com.bestrong.mobile.ui.components.Panel {
+                    CalendarMonth(days, Modifier, selectedDay, onEmptyDay = onLogDay, onSelect = { vm.selectedDay.value = it }, recordDays = recordDays)
+                }
+            }
+            item { com.bestrong.mobile.ui.components.Panel { YearSection(year) } }
+        }
+        item { com.bestrong.mobile.ui.components.SectionHeader(stringResource(R.string.history_workouts), large = true) }
+        item { HistoryViewToggle(journal, onJournal) }
+        item { com.bestrong.mobile.ui.components.SearchPill(query, { vm.query.value = it }, stringResource(R.string.history_search)) }
+        item { GymFilterRow(vm) }
+        item { RoutineFilterRow(vm) }
+        item { TagFilterRow(vm) }
+        if (journal && filtered.isEmpty()) item { Text(stringResource(R.string.diary_empty), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        selectedDay?.let { day ->
+            item {
+                // Filtro por el día tocado en el calendario; tocar el chip lo quita
+                FilterChip(
+                    selected = true,
+                    onClick = { vm.selectedDay.value = null },
+                    label = { Text(stringResource(R.string.history_day_filter, formatShortDate(day.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()))) },
+                )
+            }
+        }
+        item { FilteredSummary(vm, filtered) }
+        // Separada por meses («Octubre 2026 · 12 entrenos»): con cientos de entrenos se sabe dónde se está
+        val byMonth = filtered.groupBy { java.time.YearMonth.from(java.time.Instant.ofEpochMilli(it.startedAtEpochMs).atZone(java.time.ZoneId.systemDefault())) }
+        byMonth.forEach { (month, monthWorkouts) ->
+            item(key = "m-$month") { MonthHeader(month, monthWorkouts.size) }
+            items(monthWorkouts, key = { it.id }) { w ->
+                if (journal) {
+                    DiaryEntry(w, onOpen = { onOpen(w.id) }, onTag = { vm.tagFilter.value = it })
+                    return@items
+                }
+                // Pulsación larga: arrastrar el entreno como texto a otra app (pantalla dividida)
+                val dragText = workoutText(w)
+                WorkoutCard(
+                    w,
+                    recordCounts.getOrDefault(w.id, 0),
+                    Modifier.clip(MaterialTheme.shapes.large).combinedClickable(
+                        // Con etiquetas, TalkBack ofrece también la pulsación larga (si no, no se descubre)
+                        onClickLabel = stringResource(R.string.action_open),
+                        onLongClickLabel = stringResource(R.string.action_drag_share),
+                        onLongClick = { DragShare.start(view, w.name, dragText) },
+                        onClick = { onOpen(w.id) },
+                    ),
+                )
+            }
+        }
+    }
+}
+
 /** Un entreno de la lista: la fecha en un sello a la izquierda, el nombre, sus datos en píldoras y sus ejercicios. */
 @Composable
 private fun WorkoutCard(w: Workout, records: Int, modifier: Modifier = Modifier) {
@@ -274,21 +316,21 @@ private fun WorkoutCard(w: Workout, records: Int, modifier: Modifier = Modifier)
         Row(verticalAlignment = Alignment.CenterVertically) {
             // Sello con el día y el mes
             Column(
-                // Contenedor del acento con su color de texto (el naranja sobre naranja claro no llegaba a 3:1)
-                Modifier.size(54.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.primaryContainer),
+                // Sello neutro: el color se reserva para acción, hecho y récord
+                Modifier.size(52.dp).clip(MaterialTheme.shapes.medium).background(MaterialTheme.colorScheme.surfaceContainerHigh),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text("${date.dayOfMonth}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                Text("${date.dayOfMonth}", style = MaterialTheme.typography.titleLarge, fontFamily = com.bestrong.mobile.ui.theme.FigureFont, fontWeight = FontWeight.Bold)
                 Text(
                     date.month.getDisplayName(java.time.format.TextStyle.SHORT, androidx.compose.ui.platform.LocalConfiguration.current.locales[0]).uppercase(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = com.bestrong.mobile.ui.theme.KickerStyle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Column(Modifier.weight(1f).padding(start = 14.dp)) {
-                Text(w.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
-                Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(w.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                Text(formatDate(w.startedAtEpochMs), style = MaterialTheme.typography.labelMedium, fontFamily = com.bestrong.mobile.ui.theme.FigureFont, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (w.source == WorkoutSource.WATCH) Icon(Icons.Default.Watch, stringResource(R.string.logged_on_watch), Modifier.padding(start = 4.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
@@ -298,7 +340,7 @@ private fun WorkoutCard(w: Workout, records: Int, modifier: Modifier = Modifier)
             if (w.totalVolume > 0) com.bestrong.mobile.ui.components.MetaPill(unit.formatVolume(w.totalVolume))
             com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.history_sets_done, w.completedSetCount, w.completedSetCount))
             // Día de récords a la vista sin abrir el entreno
-            if (records > 0) com.bestrong.mobile.ui.components.MetaPill(androidx.compose.ui.res.pluralStringResource(R.plurals.n_records, records, records))
+            if (records > 0) RecordChip(androidx.compose.ui.res.pluralStringResource(R.plurals.n_records, records, records))
         }
         // Las imágenes de sus ejercicios y, debajo, cuáles fueron
         com.bestrong.mobile.ui.components.ExerciseThumbStrip(w.exercises.map { it.exercise }, 40.dp)
@@ -312,6 +354,23 @@ private fun WorkoutCard(w: Workout, records: Int, modifier: Modifier = Modifier)
             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         )
     }
+}
+
+/** Chip ámbar de récord («★ 2 récords»): el único color de la tarjeta. */
+@Composable
+private fun RecordChip(text: String) {
+    val record = com.bestrong.mobile.ui.theme.enfoque.record
+    Text(
+        "★ $text",
+        Modifier.clip(androidx.compose.foundation.shape.CircleShape)
+            .border(1.dp, record.copy(alpha = 0.5f), androidx.compose.foundation.shape.CircleShape)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+        style = MaterialTheme.typography.labelMedium,
+        fontFamily = com.bestrong.mobile.ui.theme.FigureFont,
+        fontWeight = FontWeight.SemiBold,
+        color = record,
+        maxLines = 1,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

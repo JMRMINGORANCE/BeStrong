@@ -57,7 +57,7 @@ fun ProposalsDialog(initialTab: Int = 0, onDismiss: () -> Unit) {
     var tab by rememberSaveable { mutableIntStateOf(initialTab) }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Fondo opaco: el tema deja transparente el de Scaffold y se veía la pantalla de detrás
-        com.bestrong.mobile.ui.theme.ScreenBackdrop(MaterialTheme.colorScheme.primary) {
+        com.bestrong.mobile.ui.theme.ScreenBackdrop {
             Scaffold(
                 topBar = {
                     TopAppBar(

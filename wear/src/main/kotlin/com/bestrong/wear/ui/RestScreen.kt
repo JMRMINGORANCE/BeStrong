@@ -12,7 +12,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -59,6 +58,7 @@ fun RestScreen(session: WorkoutSession) {
     val recovered by session.recovered.collectAsStateWithLifecycle()
     val record by session.record.collectAsStateWithLifecycle()
 
+    val settings by session.settings.collectAsStateWithLifecycle()
     val unit = LocalWeightUnit.current
     val r = rest ?: return
     // Redondeado hacia arriba: 1:00 al empezar y 0:01 el último segundo (no 0:00 antes de acabar)
@@ -69,31 +69,12 @@ fun RestScreen(session: WorkoutSession) {
 
     val view = androidx.compose.ui.platform.LocalView.current
     val focus = remember { FocusRequester() }
-    var rotary by remember { mutableFloatStateOf(0f) }
+    val rotary = remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     ScreenScaffold(timeText = {}) {
         Box(
             Modifier.fillMaxSize()
-                // Botón rápido del Ultra durante el descanso: saltarlo (o pasar al siguiente ejercicio)
-                .onPreviewKeyEvent { e ->
-                    if (e.key.nativeKeyCode in STEM_KEYS) {
-                        if (e.type == KeyEventType.KeyUp) session.onStemInRest()
-                        true
-                    } else {
-                        false
-                    }
-                }
-                // Corona o bisel: ±15 s por paso, como los botones
-                .onRotaryScrollEvent { e ->
-                    rotary += e.verticalScrollPixels
-                    val steps = (rotary / ROTARY_STEP_PX).toInt()
-                    if (steps != 0) {
-                        rotary -= steps * ROTARY_STEP_PX
-                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-                        session.adjustRest(steps * REST_STEP_S)
-                    }
-                    true
-                }
+                .restInput(session, view, rotary)
                 .focusRequester(focus)
                 .focusable(),
             contentAlignment = Alignment.Center,
@@ -101,37 +82,28 @@ fun RestScreen(session: WorkoutSession) {
             CircularProgressIndicator(
                 progress = { progress },
                 modifier = Modifier.fillMaxSize().padding(4.dp),
-                colors = ProgressIndicatorDefaults.colors(indicatorColor = Brand),
+                // «Enfoque»: anillo blanco; los últimos 10 s, en el color de acción (a punto de volver a la barra)
+                colors = ProgressIndicatorDefaults.colors(indicatorColor = if (remaining <= WARN_SECONDS) Brand else MaterialTheme.colorScheme.onSurface),
                 strokeWidth = 8.dp,
             )
-            val settings by session.settings.collectAsStateWithLifecycle()
             val transition = workout?.takeIf { settings.nextExerciseCard }?.let(::nextExerciseTransition)
             if (transition != null) {
                 NextExerciseContent(transition.first, transition.second, remaining, settings, session)
                 return@Box
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(stringResource(R.string.rest), style = MaterialTheme.typography.labelMedium)
-                Text(formatDuration(remaining), fontSize = 40.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.rest).uppercase(), style = KickerStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(formatDuration(remaining), style = FigureStyle, fontSize = 44.sp)
                 val zone = session.heartRateZone(metrics.heartRate)
                 Text("♥ ${metrics.heartRate ?: "--"}" + if (zone > 0) " · " + stringResource(R.string.hr_zone, zone) else "", color = HeartRed, style = MaterialTheme.typography.labelSmall)
                 // Una sola línea de aviso (el récord manda): con las dos, los botones se iban contra el anillo
                 // Si no hay otro aviso: la serie recién hecha frente a la de la última vez («▲ Última vez: 80×7»)
                 when {
-                    record -> Text(stringResource(R.string.new_record_live), color = Done, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                    record -> Text(stringResource(R.string.new_record_live), color = Record, style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
                     recovered -> Text(stringResource(R.string.recovered), color = Done, style = MaterialTheme.typography.labelSmall, textAlign = TextAlign.Center)
                     else -> LastSetLine(session, workout, unit)
                 }
-                next?.let { (we, s) ->
-                    Text(
-                        stringResource(R.string.next_any, we.exercise.displayName(), setText(s, we.exercise.tracking, unit, stringResource(R.string.unit_reps), session.settings.collectAsStateWithLifecycle().value.weightFactor(we.exercise))),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 28.dp),
-                    )
-                }
+                next?.let { (we, s) -> NextLine(we, s, settings) }
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     TextButton(onClick = { session.adjustRest(-15) }, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_rest_minus))) { Text("-15") }
                     TextButton(onClick = session::stopRest, colors = TextButtonDefaults.filledTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_skip_rest))) { Text("⏭") }
@@ -142,6 +114,47 @@ fun RestScreen(session: WorkoutSession) {
     }
 }
 
+/** Botón rápido del Ultra (saltar el descanso) y corona o bisel (±15 s por paso, como los botones). */
+private fun Modifier.restInput(session: WorkoutSession, view: android.view.View, rotary: androidx.compose.runtime.MutableFloatState): Modifier =
+    onPreviewKeyEvent { e ->
+        val stem = e.key.nativeKeyCode in STEM_KEYS
+        if (stem && e.type == KeyEventType.KeyUp) session.onStemInRest()
+        stem
+    }.onRotaryScrollEvent { e ->
+        rotary.floatValue += e.verticalScrollPixels
+        val steps = (rotary.floatValue / ROTARY_STEP_PX).toInt()
+        if (steps != 0) {
+            rotary.floatValue -= steps * ROTARY_STEP_PX
+            view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+            session.adjustRest(steps * REST_STEP_S)
+        }
+        true
+    }
+
+/**
+ * «SIGUE · REMO 90 × 8» y, si va con barra, los discos por lado («20 + 10 + 5»): lo que hay que cargar.
+ */
+@Composable
+private fun NextLine(we: WorkoutExercise, set: WorkoutSet, settings: SharedSettings) {
+    val unit = LocalWeightUnit.current
+    val what = we.exercise.displayName().uppercase() + " " + setText(set, we.exercise.tracking, unit, stringResource(R.string.unit_reps), settings.weightFactor(we.exercise))
+    Text(
+        stringResource(R.string.enf_next, what),
+        style = KickerStyle,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(horizontal = 28.dp),
+    )
+    if (loadsBar(we.exercise, set)) {
+        val load = PlateCalculator.calculate(unit.fromKg(set.weightKg), unit, unit.fromKg(settings.barKgFor(we.exercise.id)))
+        if (load.perSide.isNotEmpty()) {
+            Text(load.perSide.joinToString(" + ") { formatWeight(it) }, style = KickerStyle, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+        }
+    }
+}
+
+private const val WARN_SECONDS = 10L
 private const val ROTARY_STEP_PX = 60f
 private const val REST_STEP_S = 15
 
@@ -173,7 +186,7 @@ private fun NextExerciseContent(we: WorkoutExercise, set: WorkoutSet, remaining:
         verticalArrangement = Arrangement.spacedBy(1.dp),
         modifier = Modifier.padding(horizontal = 22.dp),
     ) {
-        Text(stringResource(R.string.next_exercise_title).uppercase(), style = MaterialTheme.typography.labelSmall, color = Brand, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.next_exercise_title).uppercase(), style = KickerStyle, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
             we.exercise.displayName(),
             style = MaterialTheme.typography.titleSmall,
@@ -201,7 +214,7 @@ private fun NextExerciseContent(we: WorkoutExercise, set: WorkoutSet, remaining:
         settings.pinnedNotes[we.exercise.id]?.takeIf { it.isNotBlank() }?.let { note ->
             Text(note, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         }
-        Text(formatDuration(remaining), fontSize = 26.sp, fontWeight = FontWeight.Bold)
+        Text(formatDuration(remaining), style = FigureStyle, fontSize = 28.sp)
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             TextButton(onClick = { session.adjustRest(-15) }, colors = TextButtonDefaults.filledTonalTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.a11y_rest_minus))) { Text("-15") }
             TextButton(onClick = session::stopRest, colors = TextButtonDefaults.filledTextButtonColors(), modifier = Modifier.describedAs(stringResource(R.string.next_exercise_start))) { Text("▶") }

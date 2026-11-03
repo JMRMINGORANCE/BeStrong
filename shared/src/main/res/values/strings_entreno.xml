@@ -37,4 +37,25 @@
         <item quantity="one">%1$d récord nuevo</item>
         <item quantity="other">%1$d récords nuevos</item>
     </plurals>
+    <string name="enf_wo_set_of">Serie %1$d de %2$d</string>
+    <string name="enf_wo_record_with">récord con %1$d</string>
+    <string name="enf_wo_record_hit">★ récord</string>
+    <string name="enf_wo_done">Hecha</string>
+    <string name="enf_wo_all_sets">Todas las series</string>
+    <string name="enf_wo_rest">Descanso</string>
+    <string name="enf_wo_rest_of">de %1$s</string>
+    <string name="enf_wo_set_done">Serie %1$d hecha · %2$s</string>
+    <string name="enf_wo_next_line">%1$s · serie %2$d de %3$d</string>
+    <string name="enf_wo_auto_next">La serie siguiente empieza sola al acabar</string>
+    <string name="enf_wo_skip">Saltar</string>
+    <string name="enf_wo_rest_less">Quitar 15 segundos de descanso</string>
+    <string name="enf_wo_rest_more">Añadir 15 segundos de descanso</string>
+    <string name="enf_wo_progress">Serie %1$d de %2$d del entreno</string>
+    <string name="enf_wo_hr">Pulso %1$d ppm</string>
+    <string name="enf_wo_finished">Entreno hecho</string>
+    <string name="enf_wo_avg_hr">♥ %1$d de media</string>
+    <string name="enf_wo_time">Tiempo</string>
+    <string name="enf_wo_records">Récords</string>
+    <string name="enf_wo_elapsed">Tiempo de entreno %1$s</string>
+    <string name="enf_wo_undo">Desmarcar</string>
 </resources>

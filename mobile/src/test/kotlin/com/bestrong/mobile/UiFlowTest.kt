@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -116,7 +117,7 @@ class UiFlowTest {
         startEmptyWorkoutWithBench()
         assertNotNull(compose.onNodeWithText("Press banca").fetchSemanticsNode())
         shot("workout_folded")
-        compose.onNodeWithText("Ejercicios").assertDoesNotExistCompat()
+        compose.onNodeWithText("BIBLIOTECA").assertDoesNotExistCompat()
     }
 
     @Test
@@ -145,7 +146,7 @@ class UiFlowTest {
     fun exercises_unfolded() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Ejercicios").performClick()
+        compose.onAllNodesWithText("BIBLIOTECA")[0].performClick()
         settle()
         compose.onNode(hasSetTextAction()).performTextInput("sentadilla")
         settle()
@@ -178,6 +179,9 @@ class UiFlowTest {
     @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun pause_substitute_undo() {
         startEmptyWorkoutWithBench()
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        compose.onNodeWithContentDescription("Ver lista").performClick()
+        settle()
         // Pausa: el cronómetro se detiene y aparece el aviso
         compose.onNodeWithContentDescription("Pausar entreno").performClick()
         settle()
@@ -208,6 +212,9 @@ class UiFlowTest {
     @Config(qualifiers = "es-w411dp-h891dp-xxhdpi")
     fun step_bar_autofills_following_sets() {
         startEmptyWorkoutWithBench()
+        // El entreno se abre en modo gimnasio: la lista de series está en «Ver lista»
+        compose.onNodeWithContentDescription("Ver lista").performClick()
+        settle()
         // Al tocar el peso aparece la barra ±; sumar en la primera serie rellena las siguientes
         compose.onAllNodes(hasContentDescription("Peso en kg"))[0].performClick()
         settle()
@@ -274,12 +281,11 @@ class UiFlowTest {
         settle()
         shot("program_setup_folded")
         compose.onNodeWithText("Empezar programa").performClick()
-        settleUntil("40×5  45×5  50×5 kg")
-        assertNotNull(compose.onNodeWithText("Hoy toca").fetchSemanticsNode())
-        // Semana 1 del 5/3/1 con TM 60: 65/75/85 % → 40 / 45 / 50 kg
-        assertNotNull(compose.onNodeWithText("40×5  45×5  50×5 kg").fetchSemanticsNode())
+        settleUntil("40–50 kg")
+        // Semana 1 del 5/3/1 con TM 60: 65/75/85 % → de 40 a 50 kg
+        assertNotNull(compose.onNodeWithText("40–50 kg").fetchSemanticsNode())
         shot("today_folded")
-        compose.onNodeWithText("Empezar sesión").performClick()
+        compose.onAllNodesWithText("Empezar")[0].performClick()
         settle()
         assertTrue(compose.onAllNodesWithText("Press militar", substring = true).fetchSemanticsNodes().isNotEmpty())
         shot("today_workout_folded")
@@ -333,7 +339,7 @@ class UiFlowTest {
     fun profile_folded() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Perfil").performClick()
+        compose.onAllNodesWithContentDescription("Tú")[0].performClick()
         settle()
         shot("profile_folded")
         // Ajustes en tema claro: el menú y la pantalla de permisos
@@ -389,7 +395,7 @@ class UiEnglishTest {
     fun profile_unfolded_en() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Profile").performClick()
+        compose.onAllNodesWithContentDescription("You")[0].performClick()
         settle()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/profile_unfolded_en.png")
     }
@@ -428,7 +434,7 @@ class UiDarkTest {
     fun profile_folded_dark() {
         compose.mainClock.autoAdvance = false
         settle()
-        compose.onNodeWithText("Perfil").performClick()
+        compose.onAllNodesWithContentDescription("Tú")[0].performClick()
         settle()
         compose.onRoot().captureRoboImage("build/outputs/roborazzi/profile_folded_dark.png")
     }

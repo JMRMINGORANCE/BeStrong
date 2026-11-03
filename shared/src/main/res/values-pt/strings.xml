@@ -337,6 +337,10 @@
     </plurals>
     <string name="name">Nome</string>
     <string name="nav_exercises">Exercícios</string>
+    <string name="nav_today">Hoje</string>
+    <string name="nav_progress">Progresso</string>
+    <string name="nav_library">Biblioteca</string>
+    <string name="nav_you">Você</string>
     <string name="nav_history">Histórico</string>
     <string name="nav_profile">Perfil</string>
     <string name="nav_train">Treinar</string>
@@ -1146,4 +1150,36 @@
     <string name="deload_label">descarga</string>
     <string name="achievement_unlocked">Conquista desbloqueada: %1$s</string>
     <string name="records_milestones">Recordes e marcos</string>
+    <string name="enf_home_start">Começar</string>
+    <string name="enf_home_routines">Rotinas</string>
+    <string name="enf_home_search">Buscar</string>
+    <string name="enf_home_week">Semana</string>
+    <string name="enf_home_days_ago">há %1$d d</string>
+    <string name="enf_home_streak_volume">%1$d sem. seguidas · %2$s</string>
+    <string name="enf_home_done_today">%1$s feito</string>
+    <string name="enf_home_next">Próximo: %1$s</string>
+    <string name="enf_home_last_time">última vez %1$s</string>
+    <string name="enf_home_in_progress">Em andamento</string>
+    <string name="enf_prog_history">Histórico</string>
+    <string name="enf_prog_body">Corpo</string>
+    <string name="enf_prog_strength">Força</string>
+    <string name="enf_prog_all_measures">Todas as medidas</string>
+    <string name="enf_prog_latest">Últimas medidas</string>
+    <string name="enf_you_weight">Peso</string>
+    <string name="enf_you_fat">Gordura</string>
+    <string name="enf_you_waist">Cintura</string>
+    <string name="enf_you_streak">%1$d sem. seguidas · %2$d treinos</string>
+    <string name="enf_you_records_sub">As suas melhores marcas e conquistas</string>
+    <string name="enf_you_measures_sub">Peso e perímetros</string>
+    <string name="enf_you_settings_sub">Treino, aparência, dados e ligações</string>
+    <string name="enf_lib_kicker">Exercícios e rotinas</string>
+    <string name="enf_lib_routines">Rotinas</string>
+    <string name="enf_lib_exercises">Exercícios</string>
+    <string name="enf_lib_no_routines">Ainda não tem rotinas. Crie a primeira e ela aparecerá aqui.</string>
+    <string name="enf_lib_new_routine">Nova rotina</string>
+    <string name="enf_lib_history">História</string>
+    <string name="enf_lib_technique">Técnica</string>
+    <string name="enf_lib_records">Recordes</string>
+    <string name="enf_lib_e1rm">1RM estimado</string>
+    <string name="enf_lib_no_folder">Sem pasta</string>
 </resources>

@@ -3,8 +3,9 @@ package com.bestrong.mobile
 import android.os.Looper
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -38,8 +39,11 @@ class StylesScreenshotTest {
     }
 
     private fun openAppearance() {
-        compose.onAllNodesWithText("Perfil")[0].performClick()
-        settle()
+        // Tú puede estar ya abierto (vuelta de la vuelta anterior)
+        compose.onAllNodesWithContentDescription("Tú").fetchSemanticsNodes().firstOrNull()?.let {
+            compose.onAllNodesWithContentDescription("Tú")[0].performClick()
+            settle()
+        }
         compose.onNodeWithText("Ajustes").performClick()
         settle()
         compose.mainClock.autoAdvance = true
@@ -62,12 +66,15 @@ class StylesScreenshotTest {
             settle()
             val key = "style_${i + 1}_" + name.lowercase().replace(" ", "_").replace("á", "a").replace("é", "e")
             captureScreenRoboImage("build/outputs/roborazzi/${key}_picker.png")
-            compose.onNodeWithContentDescription("Volver").performClick()
-            settle()
-            compose.onAllNodesWithText("Entrenar")[0].performClick()
+            // De Apariencia a Ajustes, a Tú y a las pestañas
+            while (compose.onAllNodesWithText("HOY").fetchSemanticsNodes().isEmpty()) {
+                compose.onAllNodesWithContentDescription("Volver").onLast().performClick()
+                settle()
+            }
+            compose.onAllNodesWithText("HOY")[0].performClick()
             settle()
             compose.onRoot().captureRoboImage("build/outputs/roborazzi/${key}_home.png")
-            compose.onAllNodesWithText("Perfil")[0].performClick()
+            compose.onAllNodesWithContentDescription("Tú")[0].performClick()
             settle()
             compose.onRoot().captureRoboImage("build/outputs/roborazzi/${key}_profile.png")
         }

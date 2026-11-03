@@ -337,6 +337,10 @@
     </plurals>
     <string name="name">Nom</string>
     <string name="nav_exercises">Exercicis</string>
+    <string name="nav_today">Avui</string>
+    <string name="nav_progress">Progrés</string>
+    <string name="nav_library">Biblioteca</string>
+    <string name="nav_you">Tu</string>
     <string name="nav_history">Historial</string>
     <string name="nav_profile">Perfil</string>
     <string name="nav_train">Entrenar</string>
@@ -1146,4 +1150,36 @@
     <string name="deload_label">descàrrega</string>
     <string name="achievement_unlocked">Assoliment aconseguit: %1$s</string>
     <string name="records_milestones">Rècords i fites</string>
+    <string name="enf_home_start">Començar</string>
+    <string name="enf_home_routines">Rutines</string>
+    <string name="enf_home_search">Cercar</string>
+    <string name="enf_home_week">Setmana</string>
+    <string name="enf_home_days_ago">fa %1$d d</string>
+    <string name="enf_home_streak_volume">%1$d set. seguides · %2$s</string>
+    <string name="enf_home_done_today">%1$s fet</string>
+    <string name="enf_home_next">Següent: %1$s</string>
+    <string name="enf_home_last_time">última vegada %1$s</string>
+    <string name="enf_home_in_progress">En curs</string>
+    <string name="enf_prog_history">Historial</string>
+    <string name="enf_prog_body">Cos</string>
+    <string name="enf_prog_strength">Força</string>
+    <string name="enf_prog_all_measures">Totes les mesures</string>
+    <string name="enf_prog_latest">Últimes mesures</string>
+    <string name="enf_you_weight">Pes</string>
+    <string name="enf_you_fat">Greix</string>
+    <string name="enf_you_waist">Cintura</string>
+    <string name="enf_you_streak">%1$d set. seguides · %2$d entrenaments</string>
+    <string name="enf_you_records_sub">Les teves millors marques i fites</string>
+    <string name="enf_you_measures_sub">Pes i perímetres</string>
+    <string name="enf_you_settings_sub">Entrenament, aparença, dades i connexions</string>
+    <string name="enf_lib_kicker">Exercicis i rutines</string>
+    <string name="enf_lib_routines">Rutines</string>
+    <string name="enf_lib_exercises">Exercicis</string>
+    <string name="enf_lib_no_routines">Encara no tens rutines. Crea la primera i apareixerà aquí.</string>
+    <string name="enf_lib_new_routine">Nova rutina</string>
+    <string name="enf_lib_history">Història</string>
+    <string name="enf_lib_technique">Tècnica</string>
+    <string name="enf_lib_records">Rècords</string>
+    <string name="enf_lib_e1rm">1RM estimat</string>
+    <string name="enf_lib_no_folder">Sense carpeta</string>
 </resources>

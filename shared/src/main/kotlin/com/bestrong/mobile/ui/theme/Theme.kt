@@ -8,10 +8,8 @@ import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -46,25 +44,29 @@ val LocalStatusColors = staticCompositionLocalOf { NormalStatus }
 val LocalScreenColor = staticCompositionLocalOf { Color(0xFF0E0F13) }
 
 /**
- * Fondo de marca de una pantalla: el color de fondo y, arriba, un resplandor del color [tint] que se desvanece
- * (naranja en Entrenar, ámbar en Historial, verde en Ejercicios…).
+ * Fondo de una pantalla: el color de fondo liso, sin degradados («Enfoque»: cero adornos).
  */
 @Composable
-fun ScreenBackdrop(
-    tint: Color = MaterialTheme.colorScheme.primary,
-    modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier,
-    content: @Composable () -> Unit,
-) {
-    val dark = LocalScreenColor.current.luminance() < 0.5f
-    // Un toque de color arriba, sin teñir media pantalla (con más se veía turbio, marrón)
-    val glow by androidx.compose.animation.animateColorAsState(tint.copy(alpha = if (dark) 0.16f else 0.10f), label = "glow")
-    androidx.compose.foundation.layout.Box(
-        modifier.fillMaxSize()
-            .background(LocalScreenColor.current)
-            // Cola suave (sin cambio brusco de pendiente: se veía una línea a media pantalla)
-            .background(androidx.compose.ui.graphics.Brush.verticalGradient(0f to glow, 0.12f to glow.copy(alpha = glow.alpha * 0.5f), 0.24f to glow.copy(alpha = glow.alpha * 0.15f), 0.38f to Color.Transparent)),
-    ) { content() }
+fun ScreenBackdrop(modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier, content: @Composable () -> Unit) {
+    androidx.compose.foundation.layout.Box(modifier.fillMaxSize().background(LocalScreenColor.current)) { content() }
 }
+
+/**
+ * El color significa algo: [action] (rojo/naranja) para lo que se pulsa, [done] (verde) para lo hecho y [record]
+ * (ámbar) para los récords. Nada más lleva color.
+ */
+data class EnfoqueColors(val action: Color, val onAction: Color, val done: Color, val record: Color, val onRecord: Color)
+
+val enfoque: EnfoqueColors
+    @Composable @ReadOnlyComposable
+    get() = MaterialTheme.colorScheme.let { EnfoqueColors(it.primary, it.onPrimary, it.tertiary, it.secondary, it.onSecondary) }
+
+/** Letra de las cifras (peso, reps, tiempos): monoespaciada y tabular, para que no bailen al cambiar. */
+val FigureFont: FontFamily = FontFamily.Monospace
+
+/** Etiqueta pequeña en mayúsculas con aire («HOY TOCA · SEMANA 2»), en la letra de las cifras. */
+val KickerStyle: TextStyle = TextStyle(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.SemiBold, fontSize = 10.sp, letterSpacing = 2.sp)
+
 val LocalAppearance = staticCompositionLocalOf { Appearance() }
 
 /** Atajo para los colores de estado del tema actual. */
