@@ -254,7 +254,6 @@ class HomeViewModel @Inject constructor(
     fun finishForgotten() = viewModelScope.launch {
         // De una vez y bajo el cerrojo (lo marca terminado: un mensaje atrasado del reloj no lo resucita)
         val w = repo.takeActive() ?: return@launch
-        actions.closePartner(withGym = false)
         // Sin sello de gimnasio: pudo quedar abierto días y el activo de ahora no tiene por qué ser aquel
         // Como al terminarlo en el entreno: calorías, lo del reloj que llegara y Health Connect
         val finished = actions.withEnergy(WorkoutEditor.finishAtLastActivity(w))
@@ -272,7 +271,6 @@ class HomeViewModel @Inject constructor(
         // Con el descanso tal como iba: «Deshacer» lo recupera (como al descartar desde el entreno)
         val r = actions.rest.value
         repo.discardActive(r?.endsAtEpochMs, r?.totalSeconds ?: 0)
-        actions.closePartnerOnDiscard()
     }
 
     /** Entreno recién descartado (para el aviso con «Deshacer»). */

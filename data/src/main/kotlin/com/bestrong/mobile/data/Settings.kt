@@ -68,20 +68,10 @@ data class UserSettings(
     val lockProgressPhotos: Boolean = true,
     /** Botones de volumen: subir completa serie, bajar salta el descanso. */
     val volumeKeys: Boolean = false,
-    val mediaControls: Boolean = true,
     val voiceAnnouncements: Boolean = false,
-    /** App de música que abre el botón del entreno (paquete; null = la primera instalada). */
-    val musicApp: String? = null,
     /** Para calcular calorías (metabolismo basal e intensidad): año de nacimiento y altura. */
     val birthYear: Int? = null,
     val heightCm: Int? = null,
-    /** Modo pareja: nombre de la otra persona (vacío = desactivado). */
-    val partnerName: String = "",
-    /**
-     * Nombre con el que están guardados los entrenos de la pareja (el de [partnerName] mientras se escribe aún no):
-     * al confirmar un nombre nuevo se renombra su historial desde este. null = el mismo que [partnerName].
-     */
-    val partnerHistoryName: String? = null,
     /** Tema, acento, AMOLED, alto contraste, modo daltónico y tipo de letra. */
     val appearance: Appearance = Appearance(),
     /** Vibración al acabar el descanso (también en el reloj). */
@@ -138,9 +128,6 @@ data class UserSettings(
     val warmupRestSeconds: Int = 60,
 ) {
     val activeGym: GymProfile get() = gyms.firstOrNull { it.id == activeGymId } ?: gyms.first()
-
-    /** El nombre de la pareja en su historial (el confirmado; mientras se escribe uno nuevo, el de antes). */
-    val partnerAthlete: String get() = partnerHistoryName ?: partnerName
 
     /** Con el perfil de casa (sin barra) o el de gimnasio como activo, según dónde se entrena (configuración inicial). */
     fun trainingAt(home: Boolean): UserSettings {
@@ -231,13 +218,9 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         dumbbellTotal = prefs.getBoolean("dumbbell_total", false),
         lockProgressPhotos = prefs.getBoolean("lock_photos", true),
         volumeKeys = prefs.getBoolean("volume_keys", false),
-        mediaControls = prefs.getBoolean("media_controls", true),
         voiceAnnouncements = prefs.getBoolean("voice_announcements", false),
-        musicApp = prefs.getString("music_app", null),
         birthYear = prefs.getInt("birth_year", 0).takeIf { it > 0 },
         heightCm = prefs.getInt("height_cm", 0).takeIf { it > 0 },
-        partnerName = prefs.getString("partner_name", "").orEmpty(),
-        partnerHistoryName = prefs.getString("partner_history_name", null),
         sex = runCatching { Sex.valueOf(prefs.getString("sex", null) ?: "MALE") }.getOrDefault(Sex.MALE),
         appearance = Appearance(
             amoled = prefs.getBoolean("amoled", false),
@@ -323,13 +306,9 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putString("sex", s.sex.name)
             putBoolean("lock_photos", s.lockProgressPhotos)
             putBoolean("volume_keys", s.volumeKeys)
-            putBoolean("media_controls", s.mediaControls)
             putBoolean("voice_announcements", s.voiceAnnouncements)
-            putString("music_app", s.musicApp)
             putInt("birth_year", s.birthYear ?: 0)
             putInt("height_cm", s.heightCm ?: 0)
-            putString("partner_name", s.partnerName)
-            putString("partner_history_name", s.partnerHistoryName)
             putBoolean("amoled", s.appearance.amoled)
             putBoolean("high_contrast", s.appearance.highContrast)
             putBoolean("colorblind", s.appearance.colorblind)
@@ -413,7 +392,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
     private companion object {
         // Del móvil y no de la copia: la carpeta, y el bloqueo de fotos (quitarlo exige la huella)
         val DEVICE_KEYS = setOf("backup_folder", "backup_last", "backup_folder_lost", "backup_fail_notified", "backup_folder_set", "lock_photos")
-        val NULLABLE_STRING_KEYS = setOf("active_gym", "music_app", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km", "weekly_cardio_min", "partner_history_name", "plateau_snoozed")
+        val NULLABLE_STRING_KEYS = setOf("active_gym", "body_unit", "exercise_increments", "exercise_goals", "exercise_bars", "exercise_rep_ranges", "body_weight_goal", "body_weight_goal_start", "body_weight_goal_date", "waist_goal", "weekly_cardio_km", "weekly_cardio_min", "plateau_snoozed")
         val CARDIO_GOAL_KEYS = setOf("weekly_cardio_km", "weekly_cardio_min")
         val INCREMENTS = MapSerializer(String.serializer(), Double.serializer())
         val REP_RANGES = MapSerializer(String.serializer(), String.serializer())

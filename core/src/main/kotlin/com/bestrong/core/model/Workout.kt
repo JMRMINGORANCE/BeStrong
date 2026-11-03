@@ -149,7 +149,7 @@ data class Workout(
     val pausedTotalMs: Long = 0,
     /** Cómo te sentiste (se pregunta al terminar). */
     val rating: SessionRating? = null,
-    /** Modo pareja: entreno de otra persona en el mismo móvil (null = el tuyo). */
+    /** Antiguo modo pareja: entreno de otra persona (null = el tuyo). Se conserva para leer datos y copias antiguas. */
     val athlete: String? = null,
     /** Gimnasio donde se hizo (su nombre, para el historial y la búsqueda); null si no se sabe (reloj, antiguos). */
     val gymName: String? = null,

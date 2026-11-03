@@ -107,8 +107,6 @@ class WatchSyncService : WearableListenerService() {
                 // Entrenado hoy con el reloj solo: fuera el «hoy toca entrenar» del móvil
                 val day = java.time.Instant.ofEpochMilli(workout.startedAtEpochMs).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
                 if (day == java.time.LocalDate.now()) com.bestrong.mobile.notify.Notifier.cancelReminder(this@WatchSyncService)
-                // Terminado el tuyo en el reloj, lo de la pareja se guarda (si no, quedaba abierto para la próxima vez)
-                if (repository.activeOnce() == null) actions.closePartner()
                 if (isNew) {
                     val records = WorkoutStats.newRecordsIn(workout, repository.historyOnce())
                     Notifier.records(this@WatchSyncService, workout, records, settings.settings.value.unit)
@@ -135,7 +133,6 @@ class WatchSyncService : WearableListenerService() {
             path == SyncContract.PATH_ACTIVE_WORKOUT && isFromOtherNode(item.uri.host) -> {
                 if (event.type == DataEvent.TYPE_DELETED) {
                     repository.clearRemoteActive(null)
-                    if (repository.activeOnce() == null) actions.closePartner()
                 } else {
                     DataMapItem.fromDataItem(item).dataMap.getByteArray(SyncContract.KEY_PAYLOAD)
                         ?.let { runCatching { SyncContract.decodeWorkout(it) }.getOrNull() }

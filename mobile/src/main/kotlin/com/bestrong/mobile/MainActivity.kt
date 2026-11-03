@@ -168,7 +168,7 @@ class MainActivity : ComponentActivity() {
         if (!volumeKeyActive(keyCode)) return super.onKeyDown(keyCode, event)
         if (event.repeatCount == 0) {
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-                lifecycleScope.launch { actions.completeNextSet(visible = true) }
+                lifecycleScope.launch { actions.completeNextSet() }
             } else {
                 restTimer.skip()
             }

@@ -292,15 +292,9 @@
     <string name="measure_chart">%1$s</string>
     <string name="measurements">Body measurements</string>
     <string name="media_add">Photo or video</string>
-    <string name="media_controls">Music controls during workouts</string>
-    <string name="media_controls_body">Apple Music, Spotify, YouTube Music or any player</string>
     <string name="media_delete">Delete</string>
-    <string name="media_next">Next track</string>
-    <string name="media_open_app">Open %1$s</string>
     <string name="media_open_photo">Open photo</string>
     <string name="media_open_video">Play video</string>
-    <string name="media_play_pause">Play or pause music</string>
-    <string name="media_previous">Previous track</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Max weight</string>
     <string name="metric_reps">Reps</string>
@@ -337,8 +331,6 @@
     <string name="muscle_traps">Traps</string>
     <string name="muscle_triceps">Triceps</string>
     <string name="muscles_worked">Muscles worked</string>
-    <string name="music_app">Music app for the button</string>
-    <string name="music_app_auto">Automatic</string>
     <plurals name="n_records">
         <item quantity="one">🏆 %1$d record</item>
         <item quantity="other">🏆 %1$d records</item>
@@ -392,11 +384,6 @@
     <string name="one_handed_body">When a workout starts on the folded phone, one set fills the screen with big buttons within thumb reach. Switch to the list with the button at the top.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Options</string>
-    <string name="partner_history">Show %1$s’s</string>
-    <string name="partner_me">Me</string>
-    <string name="partner_name">Partner mode</string>
-    <string name="partner_name_body">Name of the person training with you (empty = off)</string>
-    <string name="partner_saved">%1$s’s workout saved</string>
     <string name="password">Password</string>
     <string name="password_hint">At least 10 characters. Without it the backup can’t be recovered.</string>
     <string name="password_restore">This backup is encrypted: enter its password</string>
@@ -660,9 +647,6 @@
     <string name="tool_monthly_report">Monthly report</string>
     <string name="tool_scores">DOTS, Wilks and IPF GL</string>
     <string name="tools">Tools</string>
-    <string name="touch_lock">Lock the touch screen</string>
-    <string name="touch_locked">Screen locked</string>
-    <string name="touch_unlock_hint">Long-press to unlock</string>
     <string name="track">Track</string>
     <string name="track_reps">Reps only</string>
     <string name="track_time">Time</string>
@@ -874,14 +858,7 @@
     <string name="set_duplicate">Duplicate set</string>
     <string name="complete_remaining">Mark remaining sets as done (%1$d)</string>
     <string name="rest_real_exercise">Actual rest %1$s · planned %2$s</string>
-    <string name="deadline_title">When do you need to finish?</string>
-    <string name="deadline_over">You\'d go %1$d min past your limit (%2$s): skip or shorten an exercise</string>
-    <string name="deadline_ok">Limit %1$s: you\'re on time</string>
-    <string name="deadline_clear">Remove</string>
     <string name="undo_completed_sets">Sets marked as done</string>
-    <string name="deadline_set_action">set time limit</string>
-    <string name="deadline_fit">Fit to my time limit</string>
-    <string name="undo_trimmed_sets">Removed sets at the end to finish on time</string>
     <string name="rest_use_real">Use %1$s in routine</string>
     <string name="notif_progress_eta">%1$d/%2$d sets · ≈ %3$d min, done %4$s</string>
     <string name="rest_use_real_done">Routine updated: %1$s rest</string>
@@ -1073,7 +1050,6 @@
     <string name="cardio_total_month">Last 30 days: %1$s</string>
     <string name="history_gym_unknown">No gym</string>
     <string name="history_gym_change">Where was it done?</string>
-    <string name="partner_name_taken">“%1$s” already has workouts in the history: choose another name so they don’t get mixed</string>
     <string name="cardio_week">Cardio this week: %1$s km</string>
     <string name="cardio_week_goal">Cardio this week: %1$s of %2$s km</string>
     <string name="cardio_goal_title">Weekly cardio goal</string>
@@ -1086,8 +1062,6 @@
     <string name="trash_open">View</string>
     <string name="trash_restored">Workout restored</string>
     <string name="cardio_week_goal_min">Cardio this week: %1$d of %2$d min</string>
-    <string name="athlete_me">Me</string>
-    <string name="athlete_both">Both</string>
     <string name="trash_delete_forever">Delete forever</string>
     <string name="trash_empty">Empty</string>
     <string name="trash_empty_confirm">Sure? Empty</string>

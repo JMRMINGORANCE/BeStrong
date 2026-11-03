@@ -6,8 +6,8 @@
     <string name="s_body_title">Du und dein Körper</string>
     <string name="s_body_summary_empty">Geschlecht, Geburtsjahr und Größe für die Kalorien</string>
     <string name="s_training_title">Training</string>
-    <string name="s_training_summary">Progression, Aufwärmen, Studios und Partner</string>
-    <string name="s_during_summary">Pause, Vibration, Bildschirm, Musik und Sprache</string>
+    <string name="s_training_summary">Progression, Aufwärmen und Studios</string>
+    <string name="s_during_summary">Pause, Vibration, Bildschirm und Sprache</string>
     <string name="s_units_title">Einheiten und Satztabelle</string>
     <string name="s_units_summary">%1$s · Tabellenspalten</string>
     <string name="s_appearance_summary">Design, Farbe, Kontrast und Schrift</string>
@@ -21,7 +21,7 @@
     <string name="sg_progress">Progression</string>
     <string name="sg_rest">Pause</string>
     <string name="sg_screen">Bildschirm und Bedienung</string>
-    <string name="sg_media">Musik und Sprache</string>
+    <string name="sg_media">Sprache</string>
     <string name="sg_weights">Gewichte</string>
     <string name="sg_table">Satztabelle</string>
     <string name="sg_theme">Design und Farbe</string>

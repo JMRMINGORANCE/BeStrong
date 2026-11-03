@@ -249,8 +249,8 @@ private fun TrashItem(vm: ProfileViewModel) {
                     trash.forEach { t ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Column(Modifier.weight(1f)) {
-                                // De quién es (si es de la pareja) y cuándo se borró: sale de la papelera a los 30 días
-                                Text(listOfNotNull(t.workout.name, t.workout.athlete).joinToString(" · ") + " · " + formatDate(t.workout.startedAtEpochMs))
+                                // Cuándo se borró: sale de la papelera a los 30 días
+                                Text(t.workout.name + " · " + formatDate(t.workout.startedAtEpochMs))
                                 Text(
                                     t.daysLeft(System.currentTimeMillis()).let { left -> pluralStringResource(R.plurals.trash_deleted_left, left, formatDate(t.deletedAtEpochMs), left) },
                                     style = MaterialTheme.typography.bodySmall,

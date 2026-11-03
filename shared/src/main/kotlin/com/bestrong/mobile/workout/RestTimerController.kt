@@ -121,8 +121,7 @@ class RestTimerController @Inject constructor(
     }
 
     /**
-     * Quita el descanso solo si es del entreno [workoutId] (o de origen desconocido): pausar o desmarcar en el de la
-     * pareja no corta el tuyo, ni al revés.
+     * Quita el descanso solo si es del entreno [workoutId] (o de origen desconocido): el de otro entreno no se corta.
      */
     fun skipFor(workoutId: String?) {
         val owner = _rest.value?.workoutId

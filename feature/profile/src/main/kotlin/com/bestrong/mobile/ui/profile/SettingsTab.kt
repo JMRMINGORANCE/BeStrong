@@ -27,13 +27,11 @@ import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MonitorWeight
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Person
@@ -50,11 +48,9 @@ import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -63,7 +59,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -272,29 +267,10 @@ private fun TrainingPage(vm: ProfileViewModel, onBack: () -> Unit) {
                 )
             }
         }
-        item {
-            SettingsGroup(stringResource(R.string.partner_name)) {
-                var partner by remember(settings.partnerName) { mutableStateOf(settings.partnerName) }
-                // También al salir de la pantalla o al pasar la app a segundo plano (sin perder el foco)
-                DisposableEffect(Unit) { onDispose { vm.commitPartnerName() } }
-                androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_STOP) { vm.commitPartnerName() }
-                SettingsRow(stringResource(R.string.partner_name), icon = Icons.Default.Group, tint = SettingsTint.Blue, summary = stringResource(R.string.partner_name_body))
-                // El nombre se guarda con cada letra; su historial se renombra al terminar (Hecho o al salir del campo)
-                OutlinedTextField(
-                    partner,
-                    { partner = it.take(20); vm.setPartnerName(partner) },
-                    placeholder = { Text(stringResource(R.string.partner_name_body)) },
-                    singleLine = true,
-                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = androidx.compose.ui.text.input.ImeAction.Done),
-                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { vm.commitPartnerName() }),
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 12.dp).onFocusChanged { if (!it.isFocused) vm.commitPartnerName() },
-                )
-            }
-        }
     }
 }
 
-/** Descanso, vibración, pantalla, botones y música durante el entreno. */
+/** Descanso, vibración, pantalla, botones y voz durante el entreno. */
 @Composable
 private fun DuringPage(vm: ProfileViewModel, onBack: () -> Unit) {
     val settings by vm.settings.collectAsStateWithLifecycle()
@@ -355,16 +331,6 @@ private fun DuringPage(vm: ProfileViewModel, onBack: () -> Unit) {
         item {
             SettingsGroup(stringResource(R.string.sg_media)) {
                 SettingsSwitchRow(
-                    stringResource(R.string.media_controls),
-                    settings.mediaControls,
-                    { v -> update { it.copy(mediaControls = v) } },
-                    summary = stringResource(R.string.media_controls_body),
-                    icon = Icons.Default.MusicNote,
-                    tint = SettingsTint.Pink,
-                )
-                if (settings.mediaControls) MusicAppChoice(settings.musicApp) { pkg -> update { it.copy(musicApp = pkg) } }
-                SettingsDivider()
-                SettingsSwitchRow(
                     stringResource(R.string.voice_announcements),
                     settings.voiceAnnouncements,
                     { v -> update { it.copy(voiceAnnouncements = v) } },
@@ -375,20 +341,6 @@ private fun DuringPage(vm: ProfileViewModel, onBack: () -> Unit) {
             }
         }
     }
-}
-
-/** Qué app de música abre el botón del entreno (solo las instaladas). */
-@Composable
-private fun MusicAppChoice(selected: String?, onSelect: (String?) -> Unit) {
-    val context = LocalContext.current
-    val apps = remember { com.bestrong.mobile.share.MusicApps.installed(context) }
-    if (apps.isEmpty()) return
-    SettingsChoice(
-        stringResource(R.string.music_app),
-        listOf<Pair<String?, String>>(null to stringResource(R.string.music_app_auto)) + apps.map { it.packageName to it.label },
-        selected,
-        onSelect,
-    )
 }
 
 /** Unidades de peso, mancuernas y columnas de la tabla de series. */
