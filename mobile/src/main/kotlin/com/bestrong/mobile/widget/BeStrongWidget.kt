@@ -56,15 +56,14 @@ class BeStrongWidget : GlanceAppWidget() {
         val first = snapshot(context, entry)
         provideContent {
             // Mientras la sesión del widget sigue viva, una actualización no vuelve a llamar a provideGlance: se
-            // recalcula al cambiar el historial, las rutinas, el plan o los ajustes (si no, se quedaría atrasado)
+            // recalcula al cambiar el historial, las rutinas o los ajustes (si no, se quedaría atrasado)
             val data by androidx.compose.runtime.produceState(first) {
                 kotlinx.coroutines.flow.combine(
                     entry.repository().history,
                     entry.repository().routines,
-                    entry.planning().state,
                     entry.settings().settings,
                     dayTicks(),
-                ) { _, _, _, _, _ -> }.collect { value = snapshot(context, entry) }
+                ) { _, _, _, _ -> }.collect { value = snapshot(context, entry) }
             }
             GlanceTheme { Content(context, data.week, data.streak, data.routines, data.cardio) }
         }
@@ -77,10 +76,9 @@ class BeStrongWidget : GlanceAppWidget() {
         val history = repo.history.value.ifEmpty { repo.historyOnce() }
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
-        // La planificada para hoy primero y luego la que más tiempo lleva sin hacerse
+        // Las que más tiempo llevan sin hacerse
         val weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-        val plannedToday = entry.planning().state.value.planFor(weekStart).routineFor(today.dayOfWeek)
-        val routines = com.bestrong.core.training.QuickRoutines.pick(repo.routines.value.ifEmpty { repo.routinesOnce() }, history, plannedToday, today.atStartOfDay(zone).toInstant().toEpochMilli())
+        val routines = com.bestrong.core.training.QuickRoutines.pick(repo.routines.value.ifEmpty { repo.routinesOnce() }, history)
         val week = WorkoutStats.weeklySummary(history, 1, today, zone).first().workouts
         val streak = WorkoutStats.weeklyStreak(history, today, zone)
         // Cardio de la semana frente al objetivo (si se puso uno)
@@ -161,7 +159,6 @@ class BeStrongWidget : GlanceAppWidget() {
 interface WidgetEntryPoint {
     fun repository(): BeStrongRepository
     fun settings(): com.bestrong.mobile.data.SettingsStore
-    fun planning(): com.bestrong.mobile.data.PlanningStore
 }
 
 class BeStrongWidgetReceiver : GlanceAppWidgetReceiver() {

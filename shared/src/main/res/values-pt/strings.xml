@@ -267,11 +267,6 @@
     <string name="include_variants">Incluir variantes (%1$d)</string>
     <string name="include_variants_desc">Combina o histórico e os recordes de: %1$s</string>
     <string name="injury_warning">⚠ Sobrecarrega: %1$s</string>
-    <string name="intake_add_protein">+20 g proteína</string>
-    <string name="intake_add_water">+250 ml água</string>
-    <string name="intake_protein">Proteína: %1$d g de %2$s g</string>
-    <string name="intake_title">Proteína e água</string>
-    <string name="intake_water">Água: %1$d ml</string>
     <string name="kcal_value">%1$d kcal</string>
     <string name="keep_screen_on">Manter o ecrã ligado durante o treino</string>
     <string name="last_weight">Último peso: %1$s</string>
@@ -471,11 +466,6 @@
     <string name="rating_pain">Desconforto</string>
     <string name="rating_title">Como te sentiste?</string>
     <string name="readiness_connect">Liga o Health Connect no Perfil para usar o sono e a frequência cardíaca em repouso.</string>
-    <string name="readiness_detail">Sono %1$s h · repouso %2$s bpm (média %3$s)</string>
-    <string name="readiness_high">Muito bem: bom dia para puxar (+2,5 %)</string>
-    <string name="readiness_low">Baixa: reduz a carga 10 % ou trabalha a técnica</string>
-    <string name="readiness_normal">Normal: treina como planeado</string>
-    <string name="readiness_title">Prontidão de hoje</string>
     <string name="record_1rm">Melhor 1RM estimado</string>
     <string name="record_heaviest">Peso máximo</string>
     <string name="record_line">%1$s: %2$s %3$s</string>
@@ -649,7 +639,6 @@
     <string name="tempo_help">Segundos de descida-pausa-subida-pausa, ex.: 3-1-1-0 (X = explosivo). O relógio guia-te com vibrações.</string>
     <string name="tempo_invalid">Formato: 3-1-1 ou 3-1-1-0 (0 a 10 s)</string>
     <string name="tempo_line">Tempo %1$s · %2$d s sob tensão por série</string>
-    <string name="tip_home">Dica: mantém premido um exercício durante o treino para o reordenares e usa «Planear» para gerar rotinas à tua medida.</string>
     <string name="tip_swipe">Dica: desliza uma série para a direita para a concluíres e para a esquerda para a apagares. Mantém premido o número para mudar o tipo ou o RPE.</string>
     <string name="today_cycle_week">Ciclo %1$d · semana %2$d de %3$d</string>
     <string name="today_session_n">Sessão %1$d</string>
@@ -753,13 +742,6 @@
     <string name="workout_resume">Retomar</string>
     <string name="workouts_per_week">Treinos por semana</string>
     <string name="wrong_password">Palavra-passe incorreta</string>
-    <string name="zone_elbow">Cotovelo</string>
-    <string name="zone_hip">Anca</string>
-    <string name="zone_knee">Joelho</string>
-    <string name="zone_lower_back">Lombar</string>
-    <string name="zone_neck">Pescoço</string>
-    <string name="zone_shoulder">Ombro</string>
-    <string name="zone_wrist">Pulso</string>
     <string name="body_data">Dados para as calorias</string>
     <string name="body_data_body">Com o teu ano de nascimento, altura e sexo, as calorias são calculadas com o teu metabolismo basal e a tua frequência cardíaca máxima. O peso vem das tuas medidas; se deixares a altura vazia é lida do Health Connect.</string>
     <string name="birth_year">Ano de nascimento</string>
@@ -838,7 +820,6 @@
     <string name="plates_add_per_side">Adicionar por lado</string>
     <string name="plates_use_weight">Usar este peso</string>
     <string name="rep_max">%1$dRM %2$s</string>
-    <string name="home_repeat_last">Repetir «%1$s»</string>
     <string name="notif_weekly_load_high">⚠ Carga %1$s× a tua média: considera uma semana mais leve</string>
     <string name="weight_trend">Média de 7 dias: %1$s</string>
     <string name="weight_trend_change">Média de 7 dias: %1$s (%2$s face à semana anterior)</string>
@@ -859,9 +840,6 @@
     <string name="tool_share_week">Partilhar a semana (texto para o teu treinador)</string>
     <string name="share_week_title">Os meus treinos dos últimos 7 dias (BeStrong)</string>
     <string name="share_week_empty">Não há treinos nos últimos 7 dias</string>
-    <string name="body_weight_last">Peso: %1$s</string>
-    <string name="body_weight_none">Sem peso registado</string>
-    <string name="body_weight_log">Registar o peso de hoje</string>
     <string name="set_copy_following">Copiar para as seguintes (%1$d)</string>
     <string name="remaining_time_eta">≈ %1$d min para terminar · por volta das %2$s</string>
     <string name="rest_real_avg">Descanso real médio: %1$s (previsto %2$s)</string>
@@ -947,8 +925,6 @@
     <string name="weight_goal_reached">🎯 Peso objetivo de %1$s alcançado</string>
     <string name="weight_goal_left">Faltam %1$s para %2$s</string>
     <string name="weight_goal_eta">Faltam %1$s para %2$s · a este ritmo, por volta de %3$s</string>
-    <string name="stale_routine">Não fazes «%1$s» há %2$d dias. Arquivar? Nada é apagado.</string>
-    <string name="stale_keep">Manter</string>
     <string name="goal_field_reps">Repetições numa série</string>
     <string name="goal_field_seconds">Segundos</string>
     <string name="goal_progress_now">A tua melhor marca: %1$s de %2$s</string>
@@ -1010,17 +986,11 @@
     <string name="weight_goal_pace_fast" formatted="false">É mais de 1 % por semana: pondera dar-te mais tempo.</string>
     <string name="weight_goal_date_passed">A data (%1$s) já passou: define uma nova.</string>
     <string name="gym_missing_equipment">⚠ Em «%1$s» não há material para este exercício (%2$s)</string>
-    <string name="missed_session">Saltaste «%1$s» na %2$s.</string>
-    <string name="missed_today">Fazer hoje</string>
-    <string name="missed_tomorrow">Passar para amanhã</string>
-    <string name="missed_skip">Deixar</string>
     <string name="notif_measure_title">Hora de te medires</string>
     <string name="notif_measure_text">Cintura, peito, braço e coxa: uma vez por mês chega para ver a tendência.</string>
     <string name="measure_reminder">Lembrar-me de me medir no dia 1 de cada mês</string>
     <string name="rep_range_all_hint">Aplica-se a estes exercícios em todas as tuas rotinas.</string>
     <string name="enter_weight_first">Indica primeiro o peso da série</string>
-    <string name="year_ago_title">📅 Há um ano</string>
-    <string name="year_ago_line">%1$s: %2$s → %3$s (%4$s %%)</string>
     <string name="gym_collars">Fechos, os dois (%1$s)</string>
     <string name="target_rpe">RPE objetivo:</string>
     <string name="target_rpe_line">🎯 RPE objetivo %1$s nas séries efetivas</string>
@@ -1034,7 +1004,6 @@
     <string name="target_rpe_hint">≈ %1$s para %2$d reps</string>
     <string name="rpe_table_title">Cargas por RPE</string>
     <string name="rpe_table_hint">Com o teu 1RM estimado recente (%1$s): o peso para cada número de reps conforme as que ficam em reserva.</string>
-    <string name="prog_capped_suffix">" · limitado pelo teto semanal"</string>
     <string name="tempo_all">Tempo de toda a rotina</string>
     <string name="undo_rpe_loads">Cargas por RPE aplicadas</string>
     <string name="history_vs_previous">Face à vez anterior: %1$s de volume · 1RM %2$s</string>
@@ -1205,16 +1174,14 @@
     <string name="search_clear_filters">Limpar filtros</string>
     <string name="search_create_named">Criar «%1$s»</string>
     <string name="history_empty_action">Começar a treinar</string>
-    <string name="builder_weekdays_hint">Toca nos dias em que vais treinar (2 a 6): as rotinas vão para o teu calendário.</string>
     <string name="exercise_how_title">Como se faz</string>
-    <string name="day_planned">planeado</string>
     <string name="day_today">hoje</string>
     <string name="rating_scale">1 = pouco · 5 = muito</string>
     <string name="plates_below_bar">Menos que a barra (%1$s)</string>
     <string name="current_set_label">Agora</string>
     <string name="profile_empty_title">Aqui vais ver o teu progresso</string>
     <string name="profile_empty_body">Gráficos, recordes e mapa muscular aparecem assim que terminares o primeiro treino.</string>
-    <string name="builder_which_days">Em que dias treinas?</string>
+    <string name="builder_which_days">Quantos dias por semana?</string>
     <string name="workout_outline">Exercícios do treino</string>
     <string name="routine_rest_apply_all">Aplicar a todos os exercícios</string>
     <string name="workout_empty_title">Adiciona o teu primeiro exercício</string>

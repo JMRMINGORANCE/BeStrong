@@ -48,6 +48,9 @@ import kotlinx.coroutines.launch
 
 private const val MAX_WATCH_NOTE = 140
 
+/** Preferencias de lo que ya no existe (la pantalla Planificar y la proteína y el agua de Inicio): se borran al arrancar. */
+private val LEGACY_PREFS = listOf("planning", "intake")
+
 /** Replica rutinas, historial, ajustes y el entreno en curso al reloj; mantiene el widget al día. */
 // Hilt: las dependencias de la sincronización con el reloj, una por almacén
 @Suppress("LongParameterList")
@@ -57,7 +60,6 @@ class AppSync @Inject constructor(
     @ApplicationScope private val scope: CoroutineScope,
     private val repository: BeStrongRepository,
     private val settings: SettingsStore,
-    private val planning: com.bestrong.mobile.data.PlanningStore,
     private val watchSync: WatchSync,
     private val restTimer: RestTimerController,
     private val watchMetrics: WatchMetricsStore,
@@ -152,12 +154,7 @@ class AppSync @Inject constructor(
         }.distinctUntilChanged().flowOn(Dispatchers.Default)
         combine(
             settings.settings, repository.activeProgram, notes, bests,
-            planning.state.combine(com.bestrong.mobile.widget.dayTicks()) { p, day ->
-                // El tope semanal y la planificación de esta semana y la siguiente (el reloj elige con ella qué toca hoy)
-                val monday = day.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-                p.weeklyCap to listOf(monday, monday.plusWeeks(1)).associate { it.toEpochDay() to p.planFor(it).days }.filterValues { it.isNotEmpty() }
-            }.distinctUntilChanged(),
-        ) { s, program, pinned, (best1rm, heaviest), (cap, weekPlans) ->
+        ) { s, program, pinned, (best1rm, heaviest) ->
             SharedSettings(
                 s.unit, s.progressionEnabled, s.restVibration,
                 weeklyGoal = program?.weeklyGoal ?: s.weeklyGoal,
@@ -171,8 +168,6 @@ class AppSync @Inject constructor(
                 weeklyCardioKm = s.weeklyCardioKm,
                 weeklyCardioMin = s.weeklyCardioMin,
                 dumbbellTotal = s.dumbbellTotal,
-                weeklyCap = cap,
-                weekPlans = weekPlans,
                 pinnedNotes = pinned,
                 warmupRestSeconds = s.warmupRestSeconds,
                 hiddenExercises = s.hiddenExercises,
@@ -192,22 +187,23 @@ class AppSync @Inject constructor(
         // espera y el reloj recibiría «sin rutinas» (vacía de verdad solo si la base de datos también lo está)
         repository.routines.first { it.isNotEmpty() || repository.routinesOnce().isEmpty() }
         // La sesión de hoy del programa activo va la primera, con sus cargas calculadas
-        // También al cambiar de día o de mesociclo: la semana de descarga aligera la sesión del reloj
-        val deloadInputs = combine(planning.state.map { it.mesocycle }.distinctUntilChanged(), com.bestrong.mobile.widget.dayTicks()) { m, d -> m to d }
-        combine(repository.routines, repository.activeProgram, repository.history, deloadInputs) { routines, program, history, _ ->
+        combine(repository.routines, repository.activeProgram, repository.history) { routines, program, history ->
             watchPush.routinesForWatch(routines, program, history)
         }.debounce(1_000).distinctUntilChanged().collect { watchSync.pushRoutines(it) }
     }
 
     @OptIn(FlowPreview::class)
     fun start() {
+        // La planificación (lesiones, semana planificada, mesociclo, tope semanal…) y la proteína y el agua ya no
+        // existen: se borra lo que quedó guardado
+        scope.launch(Dispatchers.IO) { LEGACY_PREFS.forEach { name -> runCatching { context.deleteSharedPreferences(name) } } }
         scope.launch { syncRoutines() }
         scope.launch {
             repository.history.first { it.isNotEmpty() || repository.historyOnce().isEmpty() }
             repository.history.debounce(2_000).collect { watchSync.pushHistory(it) }
         }
         // El widget muestra la semana y la rutina que toca: se redibuja si cambia el historial, las rutinas,
-        // el mínimo de series por músculo, el objetivo de cardio o la planificación (la rutina de hoy), y al cambiar de día
+        // el mínimo de series por músculo o el objetivo de cardio, y al cambiar de día
         scope.launch {
             widgetTriggers().debounce(2_000).collect {
                 BeStrongWidget.refresh(context)
@@ -269,12 +265,11 @@ class AppSync @Inject constructor(
     }
 
     /** Recordatorio de entreno y de pesarse: se reprograman cuando cambian sus ajustes. */
-    /** Lo que cambia los widgets: historial, rutinas, objetivos semanales, la planificación y el cambio de día. */
+    /** Lo que cambia los widgets: historial, rutinas, objetivos semanales y el cambio de día. */
     private fun widgetTriggers() = merge(
         repository.history,
         repository.routines,
         settings.settings.map { Triple(it.weeklySetsTarget, it.weeklyCardioKm, it.weeklyCardioMin) }.distinctUntilChanged(),
-        planning.state,
         com.bestrong.mobile.widget.dayTicks(),
     )
 

@@ -16,7 +16,6 @@
     <string name="tl_show_less">Ver menos</string>
     <string name="tl_open_day">Ver as series dese día</string>
     <string name="tl_pinned">Nota fixa: %1$s</string>
-    <string name="tl_injury">Carga unha zona marcada como lesionada: %1$s</string>
     <string name="pt_title">Equilibrio de patróns</string>
     <string name="pt_body">Series de traballo por patrón de movemento nas últimas 4 semanas.</string>
     <string name="pt_empty">Adestra unhas semanas para ver o teu equilibrio.</string>
@@ -41,5 +40,4 @@
     <string name="mu_tab_30d">30 días</string>
     <string name="mu_tab_trend">Tendencia</string>
     <string name="mu_tab_recovery">Recuperación</string>
-    <string name="mu_lagging_tag">vai atrasado</string>
 </resources>

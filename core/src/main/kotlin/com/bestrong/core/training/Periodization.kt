@@ -75,16 +75,13 @@ data class PeriodizedProgram(
     val tmIncrementKg: Map<String, Double> = emptyMap(),
     /** Ejercicios que necesitan training max. */
     val mainLifts: List<String> = emptyList(),
-    /** Creado por el usuario en el editor de programas. */
-    val custom: Boolean = false,
 ) {
     val daysPerWeek: Int get() = days.size
 
-    // Los del usuario tal cual (su «Fuerza» no se traduce); los de la app, en su idioma
-    fun name(lang: String) = if (custom) nameEs else com.bestrong.core.i18n.ContentText.pick(nameEs, nameEn, lang)
-    fun description(lang: String) = if (custom) descriptionEs else com.bestrong.core.i18n.ContentText.pick(descriptionEs, descriptionEn, lang)
+    fun name(lang: String) = com.bestrong.core.i18n.ContentText.pick(nameEs, nameEn, lang)
+    fun description(lang: String) = com.bestrong.core.i18n.ContentText.pick(descriptionEs, descriptionEn, lang)
 
-    fun dayName(day: ProgramDay, lang: String) = if (custom) day.nameEs else com.bestrong.core.i18n.ContentText.pick(day.nameEs, day.nameEn, lang)
+    fun dayName(day: ProgramDay, lang: String) = com.bestrong.core.i18n.ContentText.pick(day.nameEs, day.nameEn, lang)
 }
 
 /** Programa activo del usuario: qué programa, desde cuándo y con qué training max. */
@@ -132,11 +129,10 @@ object Periodization {
         active: ActiveProgram,
         history: List<Workout>,
         lang: String,
-        custom: List<PeriodizedProgram> = emptyList(),
         texts: ProgramTexts = ProgramTexts.forLang(lang),
         ignoreForLoads: (Workout) -> Boolean = { false },
     ): ProgramSession? {
-        val program = PeriodizedPrograms.byId(active.programId) ?: custom.firstOrNull { it.id == active.programId } ?: return null
+        val program = PeriodizedPrograms.byId(active.programId) ?: return null
         val all = sessionsDone(active, history)
         val n = all.size
         // Las sesiones aligeradas (semana de descarga) cuentan para avanzar, pero no como intento de la progresión
@@ -214,26 +210,16 @@ object Periodization {
     }
 
     /**
-     * [nextSession] con la semana de descarga del [mesocycle] aplicada: hoy en descarga, la sesión se aligera; las de
-     * semanas de descarga pasadas no cuentan para las cargas.
+     * [nextSession] sin contar para las cargas las sesiones hechas aligeradas (las de descarga de versiones anteriores,
+     * que llevan la marca « · [deloadLabel]» en el nombre).
      */
     fun sessionWithDeload(
         active: ActiveProgram,
         history: List<Workout>,
         lang: String,
-        custom: List<PeriodizedProgram>,
         texts: ProgramTexts,
-        mesocycle: Mesocycle?,
         deloadLabel: String,
-        zone: ZoneId = ZoneId.systemDefault(),
-    ): ProgramSession? {
-        // Una sesión hecha aligerada lo sigue siendo aunque el mesociclo se pare o empiece otro (lleva la marca en el nombre)
-        val inDeload = { w: Workout ->
-            w.name.endsWith(" · $deloadLabel") || mesocycle?.isDeloadWeek(Instant.ofEpochMilli(w.startedAtEpochMs).atZone(zone).toLocalDate()) == true
-        }
-        val session = nextSession(active, history, lang, custom, texts, inDeload) ?: return null
-        return if (mesocycle?.isDeloadWeek(LocalDate.now(zone)) == true) session.copy(routine = Fatigue.deload(session.routine, deloadLabel)) else session
-    }
+    ): ProgramSession? = nextSession(active, history, lang, texts) { w -> w.name.endsWith(" · $deloadLabel") }
 
     /** Días entrenados de la semana de [day] (lunes a domingo). */
     fun trainedDaysOfWeek(history: List<Workout>, day: LocalDate, zone: ZoneId): Set<DayOfWeek> {

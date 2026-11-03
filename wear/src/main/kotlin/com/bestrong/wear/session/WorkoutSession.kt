@@ -215,9 +215,8 @@ class WorkoutSession @Inject constructor(
             val ex = store.exerciseFor(exerciseId)
             if (ex != null) {
                 Progression.suggest(ex, base, s.stepKgFor(exerciseId), repRange = s.repRangeFor(exerciseId))?.let { sug ->
-                    val lastWeekBest = com.bestrong.core.training.ProgressionCap.lastWeekBest(exerciseId, store.history.value, System.currentTimeMillis())
                     // Los calentamientos de la última vez delante (la sugerencia solo trae las efectivas)
-                    return previous.filter { it.type == com.bestrong.core.model.SetType.WARMUP } + s.loadable(ex, sug, previous, lastWeekBest)
+                    return previous.filter { it.type == com.bestrong.core.model.SetType.WARMUP } + s.loadable(ex, sug, previous)
                 }
             }
         }

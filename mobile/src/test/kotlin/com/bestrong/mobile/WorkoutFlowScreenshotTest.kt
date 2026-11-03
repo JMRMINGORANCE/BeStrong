@@ -97,7 +97,7 @@ class WorkoutFlowScreenshotTest {
         compose.onAllNodesWithText("Entrenar")[0].performClick()
         settle()
         shot("p2_home")
-        scrollTo("Músculos esta semana")
+        scrollTo("Volumen semanal")
         shot("p2_home_week")
         compose.onAllNodesWithText("Perfil")[0].performClick()
         settle()

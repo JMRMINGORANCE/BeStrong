@@ -4,9 +4,6 @@
     <string name="rd_home_streak">Streak</string>
     <string name="rd_home_vs_last_week">%1$d %% vs last week</string>
     <string name="rd_home_week_volume">Weekly volume</string>
-    <string name="rd_home_muscles_title">Muscles this week</string>
-    <string name="rd_home_muscles_target">sets · minimum %1$d</string>
-    <string name="rd_home_muscle_open">See exercises for this muscle</string>
     <string name="rd_home_start_watch">Start on the watch</string>
     <plurals name="rd_home_streak_weeks">
         <item quantity="one">%1$d week in a row</item>

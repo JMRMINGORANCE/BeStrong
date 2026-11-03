@@ -235,7 +235,7 @@ class ActiveWorkoutViewModel @Inject constructor(
                 Progression.suggest(ex, base, s.stepKgFor(ex.id), repRange = s.repRangeFor(ex.id))
                     ?.let { sug ->
                         val previous = WorkoutStats.previousSets(ex.id, base)
-                        ex.id to sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, previous, history), cappedByWeek = actions.cappedByWeek(ex, sug.sets, history))
+                        ex.id to sug.copy(sets = actions.loadable(ex, sug.sets, sug.kind, previous, history))
                     }
             }.toMap()
         }
