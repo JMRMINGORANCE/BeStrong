@@ -128,14 +128,11 @@ fun WorkoutTimeFields(state: WorkoutTimeState) {
 @Composable
 fun LogPastWorkoutDialog(
     routines: List<Routine>,
-    onLog: (routine: Routine, startMs: Long, endMs: Long, forPartner: Boolean) -> Unit,
+    onLog: (routine: Routine, startMs: Long, endMs: Long) -> Unit,
     onDismiss: () -> Unit,
     startEpochMs: Long? = null,
-    partner: String? = null,
-    forPartnerInitially: Boolean = false,
 ) {
     var selected by remember { mutableStateOf(routines.firstOrNull()) }
-    var forPartner by remember { mutableStateOf(forPartnerInitially && partner != null) }
     // Sin clave: el estado no se reinicia si la lista de rutinas cambia mientras se escribe
     val time = remember { WorkoutTimeState(startEpochMs ?: (System.currentTimeMillis() - 60 * 60_000L), 60) }
     AlertDialog(
@@ -155,13 +152,6 @@ fun LogPastWorkoutDialog(
                             label = { Text(listOfNotNull(r.emoji, r.name).joinToString(" ")) },
                         )
                     }
-                    // Con pareja: para quién se apunta (sus pesos de la última vez, en su historial)
-                    partner?.let { name ->
-                        androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            FilterChip(selected = !forPartner, onClick = { forPartner = false }, label = { Text(stringResource(R.string.athlete_me)) })
-                            FilterChip(selected = forPartner, onClick = { forPartner = true }, label = { Text(name) })
-                        }
-                    }
                     WorkoutTimeFields(time)
                     Text(stringResource(R.string.log_past_hint), style = MaterialTheme.typography.bodySmall)
                 }
@@ -170,7 +160,7 @@ fun LogPastWorkoutDialog(
         confirmButton = {
             val range = time.range
             TextButton(
-                onClick = { selected?.let { r -> range?.let { (s, e) -> onLog(r, s, e, forPartner) } } },
+                onClick = { selected?.let { r -> range?.let { (s, e) -> onLog(r, s, e) } } },
                 enabled = selected != null && range != null,
             ) { Text(stringResource(R.string.action_save)) }
         },

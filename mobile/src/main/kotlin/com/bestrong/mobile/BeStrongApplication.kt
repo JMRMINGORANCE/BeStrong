@@ -63,6 +63,7 @@ class AppSync @Inject constructor(
     private val watchMetrics: WatchMetricsStore,
     private val watchPush: WatchPush,
     private val media: ExerciseMediaStore,
+    private val actions: com.bestrong.mobile.WorkoutActions,
 ) {
     /** Envío inmediato de rutinas (incluida la sesión de hoy) e historial al reloj. */
     suspend fun pushToWatchNow() = watchPush.pushToWatchNow()
@@ -201,6 +202,8 @@ class AppSync @Inject constructor(
 
     @OptIn(FlowPreview::class)
     fun start() {
+        // Ya no hay modo pareja: un entreno suyo que quedara abierto se guarda terminado
+        scope.launch { actions.closeLegacyPartnerWorkout() }
         scope.launch { syncRoutines() }
         scope.launch {
             repository.history.first { it.isNotEmpty() || repository.historyOnce().isEmpty() }

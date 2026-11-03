@@ -1,28 +1,19 @@
 package com.bestrong.mobile.ui.workout
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,14 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.util.formatDuration
 import com.bestrong.mobile.shared.R
 import com.bestrong.mobile.ui.components.displayName
@@ -109,50 +95,4 @@ fun SubstituteDialog(vm: ActiveWorkoutViewModel, weId: String, onDismiss: () -> 
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
-}
-
-/**
- * Bloqueo de toques durante el entreno: cubre toda la pantalla (también el botón atrás)
- * y solo se quita con una pulsación larga en el candado.
- */
-@Composable
-fun TouchLockOverlay(onUnlock: () -> Unit) {
-    androidx.compose.ui.window.Dialog(
-        onDismissRequest = {},
-        properties = androidx.compose.ui.window.DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false,
-            usePlatformDefaultWidth = false,
-        ),
-    ) {
-        val hint = stringResource(R.string.touch_unlock_hint)
-        Box(
-            Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.6f))
-                .pointerInput(Unit) { detectTapGestures(onLongPress = { onUnlock() }) }
-                .semantics { contentDescription = hint },
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.Lock, null, tint = Color.White, modifier = Modifier.size(64.dp))
-                Text(stringResource(R.string.touch_locked), color = Color.White, style = MaterialTheme.typography.titleLarge)
-                Text(hint, color = Color.White)
-            }
-        }
-    }
-}
-
-/** Modo pareja: alterna entre tu entreno y el de la otra persona (comparten el temporizador). */
-@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
-@Composable
-fun PartnerSwitch(vm: ActiveWorkoutViewModel, partnerName: String) {
-    val partner by vm.partnerMode.collectAsStateWithLifecycle()
-    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
-        listOf(false to stringResource(R.string.partner_me), true to partnerName).forEachIndexed { i, (isPartner, label) ->
-            SegmentedButton(
-                selected = partner == isPartner,
-                onClick = { vm.switchAthlete(isPartner) },
-                shape = SegmentedButtonDefaults.itemShape(i, 2),
-            ) { Text(label) }
-        }
-    }
 }

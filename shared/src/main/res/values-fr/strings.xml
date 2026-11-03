@@ -292,15 +292,9 @@
     <string name="measure_chart">%1$s</string>
     <string name="measurements">Mensurations</string>
     <string name="media_add">Photo ou vidéo</string>
-    <string name="media_controls">Contrôles de la musique pendant l’entraînement</string>
-    <string name="media_controls_body">Apple Music, Spotify, YouTube Music ou tout autre lecteur</string>
     <string name="media_delete">Supprimer</string>
-    <string name="media_next">Piste suivante</string>
-    <string name="media_open_app">Ouvrir %1$s</string>
     <string name="media_open_photo">Ouvrir la photo</string>
     <string name="media_open_video">Lire la vidéo</string>
-    <string name="media_play_pause">Lire ou mettre en pause la musique</string>
-    <string name="media_previous">Piste précédente</string>
     <string name="metric_1rm">1RM</string>
     <string name="metric_max_weight">Poids max.</string>
     <string name="metric_reps">Reps</string>
@@ -337,8 +331,6 @@
     <string name="muscle_traps">Trapèzes</string>
     <string name="muscle_triceps">Triceps</string>
     <string name="muscles_worked">Muscles sollicités</string>
-    <string name="music_app">App de musique du bouton</string>
-    <string name="music_app_auto">Automatique</string>
     <plurals name="n_records">
         <item quantity="one">🏆 %1$d record</item>
         <item quantity="other">🏆 %1$d records</item>
@@ -392,11 +384,6 @@
     <string name="one_handed_body">Au début d\'une séance sur le téléphone plié, une seule série occupe l\'écran avec de grands boutons à portée du pouce. Passez à la liste avec le bouton du haut.</string>
     <string name="one_rm_value">1RM %1$s</string>
     <string name="options">Options</string>
-    <string name="partner_history">Voir celui de %1$s</string>
-    <string name="partner_me">Moi</string>
-    <string name="partner_name">Mode partenaire</string>
-    <string name="partner_name_body">Nom de la personne qui s’entraîne avec toi (vide = désactivé)</string>
-    <string name="partner_saved">Entraînement de %1$s enregistré</string>
     <string name="password">Mot de passe</string>
     <string name="password_hint">10 caractères minimum. Sans lui, la sauvegarde est irrécupérable.</string>
     <string name="password_restore">Cette sauvegarde est chiffrée : saisis son mot de passe</string>
@@ -660,9 +647,6 @@
     <string name="tool_monthly_report">Bilan mensuel</string>
     <string name="tool_scores">DOTS, Wilks et IPF GL</string>
     <string name="tools">Outils</string>
-    <string name="touch_lock">Verrouiller l’écran tactile</string>
-    <string name="touch_locked">Écran verrouillé</string>
-    <string name="touch_unlock_hint">Appui long pour déverrouiller</string>
     <string name="track">Suivre</string>
     <string name="track_reps">Répétitions seules</string>
     <string name="track_time">Temps</string>
@@ -874,14 +858,7 @@
     <string name="set_duplicate">Dupliquer la série</string>
     <string name="complete_remaining">Marquer les séries restantes comme faites (%1$d)</string>
     <string name="rest_real_exercise">Repos réel %1$s · prévu %2$s</string>
-    <string name="deadline_title">À quelle heure dois-tu finir ?</string>
-    <string name="deadline_over">Tu dépasserais ton heure limite de %1$d min (%2$s) : saute ou raccourcis un exercice</string>
-    <string name="deadline_ok">Heure limite %1$s : tu es dans les temps</string>
-    <string name="deadline_clear">Retirer</string>
     <string name="undo_completed_sets">Séries marquées comme faites</string>
-    <string name="deadline_set_action">fixer une heure limite</string>
-    <string name="deadline_fit">Ajuster à mon heure limite</string>
-    <string name="undo_trimmed_sets">Séries de fin retirées pour finir à l\'heure</string>
     <string name="rest_use_real">Utiliser %1$s dans la routine</string>
     <string name="notif_progress_eta">%1$d/%2$d séries · ≈ %3$d min, fin %4$s</string>
     <string name="rest_use_real_done">Routine mise à jour : repos de %1$s</string>
@@ -1073,7 +1050,6 @@
     <string name="cardio_total_month">30 derniers jours : %1$s</string>
     <string name="history_gym_unknown">Sans salle</string>
     <string name="history_gym_change">Où a-t-elle eu lieu ?</string>
-    <string name="partner_name_taken">« %1$s » a déjà des séances dans l’historique : choisis un autre nom pour ne pas les mélanger</string>
     <string name="cardio_week">Cardio cette semaine : %1$s km</string>
     <string name="cardio_week_goal">Cardio cette semaine : %1$s sur %2$s km</string>
     <string name="cardio_goal_title">Objectif cardio par semaine</string>
@@ -1086,8 +1062,6 @@
     <string name="trash_open">Voir</string>
     <string name="trash_restored">Séance restaurée</string>
     <string name="cardio_week_goal_min">Cardio cette semaine : %1$d sur %2$d min</string>
-    <string name="athlete_me">Moi</string>
-    <string name="athlete_both">Les deux</string>
     <string name="trash_delete_forever">Supprimer définitivement</string>
     <string name="trash_empty">Vider</string>
     <string name="trash_empty_confirm">Sûr ? Vider</string>

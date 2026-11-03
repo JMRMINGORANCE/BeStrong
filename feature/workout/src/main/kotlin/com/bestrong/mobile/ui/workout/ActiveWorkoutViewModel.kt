@@ -89,86 +89,18 @@ class ActiveWorkoutViewModel @Inject constructor(
     private val media: ExerciseMediaStore,
 ) : ViewModel() {
 
-    /** Modo pareja: true = se está viendo y editando el entreno de la otra persona (sobrevive a la muerte del proceso). */
-    // (y lo sabe WorkoutActions: las teclas de volumen marcan la serie de quien se ve)
-    // Solo mientras exista el de la pareja: cerrado fuera de esta pantalla, los cambios van a tu entreno, no a ninguno
-    val partnerMode: StateFlow<Boolean> = combine(savedState.getStateFlow(KEY_PARTNER_MODE, false), repo.partnerWorkout) { on, p -> on && p != null }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val workout: StateFlow<Workout?> = repo.activeWorkout
 
-    /** Las teclas de volumen marcan la serie de la pareja solo con su entreno a la vista (no desde Inicio). */
-    fun onScreen(visible: Boolean) = actions.partnerOnScreen.update { visible && (savedState[KEY_PARTNER_MODE] ?: false) }
-
-    private fun setPartnerMode(on: Boolean) = savedState.set(KEY_PARTNER_MODE, on.also { actions.partnerOnScreen.value = it })
-
-    val workout: StateFlow<Workout?> = combine(repo.activeWorkout, repo.partnerWorkout, partnerMode) { me, partner, isPartner ->
-        // Sin entreno de la pareja (se cerró desde Inicio, el reloj o al terminar el tuyo): el tuyo, no «sin entreno»
-        if (isPartner && partner != null) partner else me
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, repo.activeWorkout.value)
-
-    /** Cambia entre tu entreno y el de tu pareja; la primera vez copia tus ejercicios con las series sin hacer. */
-    fun switchAthlete(partner: Boolean) = viewModelScope.launch {
-        if (partner && repo.partnerWorkout.value == null) {
-            val name = settings.value.partnerName.ifBlank { return@launch }
-            val mine = repo.activeWorkout.value
-            val now = System.currentTimeMillis()
-            // Sus pesos de la última vez (o su sugerencia); si nunca hizo el ejercicio, los tuyos sin hacer
-            val theirs = actions.prefillLookup(athlete = name)
-            val copy = (mine ?: WorkoutEditor.empty(now)).let { w ->
-                w.copy(
-                    id = com.bestrong.core.util.newId(),
-                    name = "$name · ${w.name}",
-                    startedAtEpochMs = now,
-                    updatedAtEpochMs = now,
-                    athlete = name,
-                    // Lo suyo empieza de cero: ni tus pausas, ni tu pulso, ni tu valoración o notas
-                    pausedAtEpochMs = null,
-                    pausedTotalMs = 0,
-                    heartRateSamples = emptyList(),
-                    avgHeartRate = null,
-                    maxHeartRate = null,
-                    calories = null,
-                    rating = null,
-                    notes = "",
-                    deletedIds = emptyMap(),
-                    exercises = w.exercises.map { we ->
-                        val sets = theirs(we.exercise.id).filter { it.type != com.bestrong.core.model.SetType.WARMUP }
-                            .map { it.asPending() }
-                            .ifEmpty { we.sets.map { it.asPending() } }
-                        we.copy(id = com.bestrong.core.util.newId(), sets = sets)
-                    },
-                )
-            }
-            repo.setPartnerActive(copy)
-            // La hora límite ya puesta también vale para el entreno del compañero recién creado
-            if (savedState.get<Long>(KEY_DEADLINE) != null) {
-                savedState[KEY_DEADLINE_WORKOUT] = listOfNotNull(savedState.get<String>(KEY_DEADLINE_WORKOUT)?.takeIf { it.isNotBlank() }, copy.id).joinToString(",")
-            }
-        }
-        setPartnerMode(partner)
-    }
-
-    /** Historial de quien entrena ahora: el tuyo o, en modo pareja, el suyo (con el nombre de su entreno en curso). */
-    private val athleteHistory: StateFlow<List<Workout>> = combine(repo.history, repo.partnerHistory, partnerMode, repo.partnerWorkout, settingsStore.settings) { me, partner, isPartner, pw, _ ->
-        historyOf(isPartner, me, partner, pw)
-    }.flowOn(Dispatchers.Default).stateIn(
-        viewModelScope,
-        SharingStarted.Eagerly,
-        // Ya el primer valor de quien entrena (tras reiniciar en modo pareja, el suyo)
-        historyOf(partnerMode.value, repo.history.value, repo.partnerHistory.value, repo.partnerWorkout.value),
-    )
-
-    private fun historyOf(isPartner: Boolean, me: List<Workout>, partner: List<Workout>, pw: Workout?): List<Workout> =
-        if (isPartner) partner.filter { it.athlete == (pw?.athlete ?: settingsStore.settings.value.partnerAthlete) } else me
+    /** Tu historial terminado (sugerencias, récords, la vez anterior). */
+    private val ownHistory: StateFlow<List<Workout>> = repo.history
 
     /** «La vez anterior» de cada ejercicio: en este gimnasio si allí ya se hizo (como el relleno), si no la última. */
     val previousSets: StateFlow<(String) -> List<WorkoutSet>> = combine(
         repo.previousSetsLookup,
-        athleteHistory,
-        partnerMode,
+        ownHistory,
         settingsStore.settings.map { s -> s.activeGym.name.takeIf { s.gyms.size > 1 } }.distinctUntilChanged(),
-    ) { mine, history, isPartner, gym ->
-        // En modo pareja, la suya (tu búsqueda ya preparada solo vale para ti)
-        val all: (String) -> List<WorkoutSet> = if (isPartner) WorkoutStats.lastSetsByExercise(history).let { last -> { id: String -> last[id].orEmpty() } } else mine
+    ) { mine, history, gym ->
+        val all: (String) -> List<WorkoutSet> = mine
         if (gym == null) {
             all
         } else {
@@ -182,46 +114,12 @@ class ActiveWorkoutViewModel @Inject constructor(
     val restEndedAt: StateFlow<Long?> = restTimer.restEndedAt
     fun dismissOverrun() = restTimer.clearOverrun()
 
-    /**
-     * Hora a la que hay que acabar (la pone el usuario) del entreno en pantalla; sobrevive a que Android
-     * cierre la app. Va unida a ese entreno: al terminarlo por cualquier vía (Inicio, reloj…) deja de valer.
-     */
-    val deadline: StateFlow<Long?> = combine(
-        savedState.getStateFlow<Long?>(KEY_DEADLINE, null),
-        savedState.getStateFlow<String?>(KEY_DEADLINE_WORKOUT, null),
-        workout,
-    ) { at, ids, w -> at.takeIf { w != null && ids?.split(',')?.contains(w.id) == true } }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
-
-    /** Quita series pendientes del final hasta que la estimación quepa en la hora límite (se puede deshacer). */
-    fun fitToDeadline() {
-        val limit = deadline.value ?: return
-        val partner = partnerMode.value
-        val restEnds = restTimer.rest.value?.endsAtEpochMs
-        val warmup = settings.value.warmupRestSeconds
-        viewModelScope.launch {
-            val now = System.currentTimeMillis()
-            val budget = ((limit - now) / 1000).toInt().coerceAtLeast(0)
-            val (before, after) = update(partner) { w ->
-                WorkoutEditor.trimToFit(w, budget) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = now, warmupRestSeconds = warmup, restEndsAtEpochMs = restEnds) }
-            } ?: return@launch
-            // Se compara lo que importa: la hora de modificación siempre cambia
-            if (before.exercises == after.exercises) return@launch
-            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.TRIM, partner, before.id, restore = WorkoutEditor.undoRemoval(before, after)))
-        }
-    }
-
-    fun setDeadline(epochMs: Long?) {
-        // Vale para tu entreno y el del compañero (la hora de irse es la misma)
-        savedState[KEY_DEADLINE_WORKOUT] = listOfNotNull(repo.activeWorkout.value?.id, repo.partnerWorkout.value?.id).joinToString(",")
-        savedState[KEY_DEADLINE] = epochMs
-    }
     val watchMetrics: StateFlow<LiveMetrics?> = metricsStore.metrics
 
     /** Sugerencia de progresión por ejercicio (id de ejercicio → sugerencia). */
     val suggestions: StateFlow<Map<String, ProgressionSuggestion>> = combine(
         workout.map { w -> w?.exercises?.map { it.exercise }.orEmpty() }.distinctUntilChanged(),
-        athleteHistory,
+        ownHistory,
         settings,
     ) { exercises, history, s ->
         if (!s.progressionEnabled) {
@@ -244,9 +142,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** 1RM estimado reciente de los ejercicios del entreno (para el peso por RPE), calculado fuera del hilo principal. */
     val recentOneRepMax: StateFlow<Map<String, Double>> = combine(
         workout.map { w -> w?.exercises?.map { it.exercise.id }.orEmpty().distinct() }.distinctUntilChanged(),
-        athleteHistory,
+        ownHistory,
     ) { ids, history ->
-        // De quien entrena (en modo pareja, el suyo)
         val now = System.currentTimeMillis()
         ids.mapNotNull { id -> com.bestrong.core.stats.RpeLoad.recentOneRepMax(id, history, now)?.let { id to it } }.toMap()
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
@@ -267,34 +164,24 @@ class ActiveWorkoutViewModel @Inject constructor(
         val previousGym = settings.value.activeGym.id
         if (previousGym == id) return
         settingsStore.update { it.copy(activeGymId = id) }
-        val partner = partnerMode.value
         viewModelScope.launch {
-            // Los dos entrenos (el tuyo y el de la pareja) están en el mismo gimnasio: un solo «deshacer» para todo
-            val visible = refitActive(partner)
-            val hidden = refitActive(!partner)
-            if (visible == null && hidden == null) return@launch
-            // Sin entreno a la vista (solo el otro), el aviso va sobre el otro
-            val onVisible = visible != null || workout.value != null
-            val target = if (onVisible) partner else !partner
-            val workoutId = (if (target) repo.partnerWorkout.value else repo.activeWorkout.value)?.id ?: return@launch
+            val restore = refitActive() ?: return@launch
+            val workoutId = repo.activeWorkout.value?.id ?: return@launch
             _events.tryEmit(
                 WorkoutEvent.Undoable(
-                    UndoKind.GYM, target, workoutId,
-                    alsoUndo = {
-                        if (onVisible) hidden?.let { restore -> update(!partner) { w -> restore(w) } }
-                        // Solo si sigue en este gimnasio (si después se cambió a otro, no se vuelve atrás dos veces)
-                        settingsStore.update { if (it.activeGymId == id) it.copy(activeGymId = previousGym) else it }
-                    },
-                    restore = { w -> (if (onVisible) visible else hidden)?.invoke(w) ?: w },
+                    UndoKind.GYM, workoutId,
+                    // Solo si sigue en este gimnasio (si después se cambió a otro, no se vuelve atrás dos veces)
+                    alsoUndo = { settingsStore.update { if (it.activeGymId == id) it.copy(activeGymId = previousGym) else it } },
+                    restore = restore,
                 ),
             )
         }
     }
 
-    /** Ajusta lo pendiente de uno de los dos entrenos; devuelve cómo deshacerlo (null si no cambió nada). */
-    private suspend fun refitActive(partner: Boolean): ((Workout) -> Workout)? {
+    /** Ajusta lo pendiente del entreno al gimnasio nuevo; devuelve cómo deshacerlo (null si no cambió nada). */
+    private suspend fun refitActive(): ((Workout) -> Workout)? {
         // Si ya llevaba gimnasio (empezado en el reloj), se guarda en el nuevo
-        val (before, after) = update(partner) { w -> w.copy(gymName = w.gymName?.let { settings.value.activeGym.name }, exercises = w.exercises.map { e -> refitToGym(e, settings.value) }) } ?: return null
+        val (before, after) = update { w -> w.copy(gymName = w.gymName?.let { settings.value.activeGym.name }, exercises = w.exercises.map { e -> refitToGym(e, settings.value) }) } ?: return null
         val old = before.exercises.flatMap { it.sets }.associateBy { it.id }
         val changed = after.exercises.flatMap { it.sets }.filter { old[it.id] != null && old[it.id] != it }.associateBy { it.id }
         return changed.takeIf { it.isNotEmpty() || before.gymName != after.gymName }?.let { c ->
@@ -310,8 +197,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun savePinnedNote(exerciseId: String, text: String) = viewModelScope.launch { media.saveNote(exerciseId, text.trim()) }
 
     /** Por ejercicio: (mejor 1RM estimado, peso máximo) del historial, para marcar récords en vivo. */
-    val bests: StateFlow<Map<String, Pair<Double, Double>>> = athleteHistory.map { h ->
-        // En modo pareja se compara con las marcas de la pareja, no con las tuyas
+    val bests: StateFlow<Map<String, Pair<Double, Double>>> = ownHistory.map { h ->
         WorkoutStats.personalRecords(h).mapValues { (_, r) ->
             (r[RecordType.BEST_ONE_REP_MAX]?.value ?: 0.0) to (r[RecordType.HEAVIEST_WEIGHT]?.value ?: 0.0)
         }
@@ -327,8 +213,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     private fun edit(block: (Workout) -> Workout) = viewModelScope.launch { update(block = block) }
 
     /** Cambio bajo el cerrojo del repositorio: devuelve el estado antes y después (null sin entreno). */
-    private suspend fun update(partner: Boolean = partnerMode.value, block: (Workout) -> Workout): Pair<Workout, Workout>? =
-        if (partner) repo.updatePartnerActive(block) else repo.updateActive(block)
+    private suspend fun update(block: (Workout) -> Workout): Pair<Workout, Workout>? = repo.updateActive(block)
 
     fun rename(name: String) = edit { it.copy(name = name.ifBlank { it.name }) }
 
@@ -337,9 +222,7 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     fun addExercises(ids: List<String>) {
         val exercises = ids.mapNotNull { repo.exercise(it) }
-        // En modo pareja, con su historial
-        val athlete = (repo.partnerWorkout.value?.athlete ?: settings.value.partnerName).takeIf { partnerMode.value && it.isNotBlank() }
-        val lookup = actions.prefillLookup(athlete = athlete)
+        val lookup = actions.prefillLookup()
         val history = repo.history.value
         // Descanso automático según el tipo de ejercicio (o el que usaste la última vez)
         edit { WorkoutEditor.addExercises(it, exercises, lookup, restFor = { ex -> RestPolicy.restFor(ex, history) }) }
@@ -352,11 +235,10 @@ class ActiveWorkoutViewModel @Inject constructor(
         /** Borrado que se puede deshacer: [restore] vuelve a meter solo lo borrado en su sitio. */
         class Undoable(
             val kind: UndoKind,
-            val partner: Boolean,
             val workoutId: String,
             /** Aviso que va detrás (p. ej. objetivo conseguido) y que solo se muestra si no se deshace. */
             val followUp: WorkoutEvent? = null,
-            /** Lo demás que se deshace a la vez (el otro entreno, el gimnasio activo…). */
+            /** Lo demás que se deshace a la vez (el gimnasio activo, el descanso…). */
             val alsoUndo: (suspend () -> Unit)? = null,
             val restore: (Workout) -> Workout,
         ) : WorkoutEvent
@@ -365,7 +247,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         /** La serie recién hecha alcanza el objetivo de 1RM que el usuario se puso en ese ejercicio. */
         data class GoalReached(val exercise: Exercise, val goal: String) : WorkoutEvent
     }
-    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, TRIM, RPE_LOAD, GYM }
+    enum class UndoKind { SET, EXERCISE, COPY, COMPLETE, RPE_LOAD, GYM }
 
     private val _events = MutableSharedFlow<WorkoutEvent>(extraBufferCapacity = 4)
     val events: SharedFlow<WorkoutEvent> = _events
@@ -376,17 +258,16 @@ class ActiveWorkoutViewModel @Inject constructor(
     /** Deshace el borrado de ese aviso: se recupera lo borrado sin perder lo que haya cambiado después. */
     fun undo(event: WorkoutEvent.Undoable) {
         viewModelScope.launch {
-            update(event.partner) { w -> if (w.id == event.workoutId) event.restore(w) else w }
+            update { w -> if (w.id == event.workoutId) event.restore(w) else w }
             event.alsoUndo?.invoke()
         }
     }
 
     fun removeExercise(weId: String) {
-        val partner = partnerMode.value
         viewModelScope.launch {
-            val (before, after) = update(partner) { WorkoutEditor.removeExercise(it, weId) } ?: return@launch
+            val (before, after) = update { WorkoutEditor.removeExercise(it, weId) } ?: return@launch
             if (before.exercises.none { it.id == weId }) return@launch
-            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.EXERCISE, partner, before.id, restore = WorkoutEditor.undoRemoval(before, after)))
+            _events.tryEmit(WorkoutEvent.Undoable(UndoKind.EXERCISE, before.id, restore = WorkoutEditor.undoRemoval(before, after)))
         }
     }
     fun moveExercise(from: Int, to: Int) = edit { WorkoutEditor.moveExercise(it, from, to) }
@@ -396,7 +277,7 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Las últimas [limit] sesiones con ese ejercicio (la más reciente primero), del atleta en pantalla. */
     fun historyFor(exerciseId: String, limit: Int = 5): List<Pair<Workout, com.bestrong.core.model.WorkoutExercise>> {
-        return athleteHistory.value.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
+        return ownHistory.value.filter { it.isFinished }.sortedByDescending { it.startedAtEpochMs }.mapNotNull { w ->
             w.exercises.firstOrNull { it.exercise.id == exerciseId && it.completedSets.isNotEmpty() }?.let { w to it }
         }.take(limit)
     }
@@ -418,14 +299,13 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
     fun removeSet(weId: String, setId: String) {
-        val partner = partnerMode.value
         viewModelScope.launch {
-            val (before, _) = update(partner) { WorkoutEditor.removeSet(it, weId, setId) } ?: return@launch
+            val (before, _) = update { WorkoutEditor.removeSet(it, weId, setId) } ?: return@launch
             val sets = before.exercises.firstOrNull { it.id == weId }?.sets ?: return@launch
             val index = sets.indexOfFirst { it.id == setId }
             val removed = sets.getOrNull(index) ?: return@launch
             _events.tryEmit(
-                WorkoutEvent.Undoable(UndoKind.SET, partner, before.id) { w ->
+                WorkoutEvent.Undoable(UndoKind.SET, before.id) { w ->
                     // Con id nuevo y sin quitar la marca de borrado: el reloj ya la tiene, y con el id de antes la fusión la
                     // volvería a quitar
                     WorkoutEditor.updateExercise(w, weId) { we ->
@@ -438,14 +318,13 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Copia la carga a las siguientes series; se puede deshacer (vuelven las que no se hayan tocado después). */
     fun copyToFollowing(weId: String, setId: String) {
-        val partner = partnerMode.value
         viewModelScope.launch {
-            val (before, after) = update(partner) { WorkoutEditor.copyToFollowing(it, weId, setId) } ?: return@launch
+            val (before, after) = update { WorkoutEditor.copyToFollowing(it, weId, setId) } ?: return@launch
             val old = before.exercises.firstOrNull { it.id == weId }?.sets?.associateBy { it.id } ?: return@launch
             val copied = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
             if (copied.isEmpty()) return@launch
             _events.tryEmit(
-                WorkoutEvent.Undoable(UndoKind.COPY, partner, before.id) { w ->
+                WorkoutEvent.Undoable(UndoKind.COPY, before.id) { w ->
                     WorkoutEditor.updateExercise(w, weId) { we ->
                         we.copy(sets = we.sets.map { s -> if (copied[s.id] == s) old.getValue(s.id) else s })
                     }
@@ -457,9 +336,8 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Marca de golpe las series que faltan; arranca el descanso como una serie normal y se puede deshacer. */
     fun completeRemaining(weId: String) {
-        val partner = partnerMode.value
         viewModelScope.launch {
-            val (before, after) = update(partner) { WorkoutEditor.completeRemaining(it, weId) } ?: return@launch
+            val (before, after) = update { WorkoutEditor.completeRemaining(it, weId) } ?: return@launch
             val old = before.exercises.firstOrNull { it.id == weId }?.sets?.associateBy { it.id } ?: return@launch
             val marked = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
             if (marked.isEmpty()) return@launch
@@ -470,18 +348,13 @@ class ActiveWorkoutViewModel @Inject constructor(
             val startedEnd = if (startsRest) restTimer.rest.value?.endsAtEpochMs else null
             // El objetivo también se celebra si se llega marcando de golpe (las marcadas a la vez no cuentan
             // como «ya lo tenías»), pero solo si no se deshace
-            val goal = if (partner) {
-                null
-            } else {
-                after.exercises.firstOrNull { it.id == weId }?.exercise?.tracking?.let { t ->
-                    marked.values.maxByOrNull { ExerciseGoals.valueOf(it, t) }?.let { goalEvent(after, weId, it.id, marked.keys) }
-                }
+            val goal = after.exercises.firstOrNull { it.id == weId }?.exercise?.tracking?.let { t ->
+                marked.values.maxByOrNull { ExerciseGoals.valueOf(it, t) }?.let { goalEvent(after, weId, it.id, marked.keys) }
             }
             _events.tryEmit(
                 // Cada aviso guarda su propio descanso: dos «marcar las que faltan» seguidos no se pisan
                 WorkoutEvent.Undoable(
                     UndoKind.COMPLETE,
-                    partner,
                     before.id,
                     followUp = goal,
                     alsoUndo = startedEnd?.let { end -> { if (restTimer.rest.value?.endsAtEpochMs == end) restTimer.skip() } },
@@ -510,7 +383,7 @@ class ActiveWorkoutViewModel @Inject constructor(
     private fun onWorkoutForRpe(w: Workout?) {
         val sets = w?.exercises.orEmpty().flatMap { we -> we.sets.filter { it.completed }.map { we to it } }
         val now = sets.associate { (_, s) -> s.id to s.rpe }
-        // Otro entreno (pareja, uno nuevo): se empieza a mirar desde cero, sin avisar de lo que ya traía
+        // Otro entreno (uno nuevo): se empieza a mirar desde cero, sin avisar de lo que ya traía
         val before = seenRpes.takeIf { w?.id == seenRpeWorkoutId }
         if (before == null) {
             // Los avisos pendientes eran del otro entreno
@@ -619,19 +492,18 @@ class ActiveWorkoutViewModel @Inject constructor(
      * pesos), redondeado al material y con el tope semanal, como el relleno. Se puede deshacer.
      */
     fun applyRpeLoads(weId: String) {
-        val partner = partnerMode.value
         val s = settings.value
         val e1rms = recentOneRepMax.value
-        val history = athleteHistory.value
+        val history = ownHistory.value
         viewModelScope.launch {
-            val (before, after) = update(partner) { w ->
+            val (before, after) = update { w ->
                 WorkoutEditor.updateExercise(w, weId) { e -> withRpeLoads(e, e1rms[e.exercise.id], s, history, actions) }
             } ?: return@launch
             val old = before.exercises.firstOrNull { it.id == weId }?.sets?.associateBy { it.id } ?: return@launch
             val changed = after.exercises.firstOrNull { it.id == weId }?.sets?.filter { old[it.id] != null && old[it.id] != it }?.associateBy { it.id } ?: return@launch
             if (changed.isEmpty()) return@launch
             _events.tryEmit(
-                WorkoutEvent.Undoable(UndoKind.RPE_LOAD, partner, before.id) { w ->
+                WorkoutEvent.Undoable(UndoKind.RPE_LOAD, before.id) { w ->
                     WorkoutEditor.updateExercise(w, weId) { we -> we.copy(sets = we.sets.map { set -> if (changed[set.id] == set) old.getValue(set.id) else set }) }
                 },
             )
@@ -682,24 +554,23 @@ class ActiveWorkoutViewModel @Inject constructor(
 
     /** Cronómetro de cardio: en el reloj, además, cambia la sesión de pesas a la de esa máquina. */
     fun startCardio(weId: String, setId: String) {
-        // Solo el descanso de quien arranca el cronómetro (el de la pareja, o el tuyo, sigue)
+        // Solo el descanso de este entreno
         restTimer.skipFor(workout.value?.id)
         edit { WorkoutEditor.startCardio(it, weId, setId) }
     }
 
     fun toggleSet(weId: String, setId: String) {
         // El objetivo es tuyo: con el compañero en pantalla no se celebra
-        val partner = partnerMode.value
         viewModelScope.launch {
             // Se decide con el estado real del cambio (bajo el cerrojo), no con una copia que puede ir atrasada
-            val (before, updated) = update(partner) { WorkoutEditor.toggleSetCompleted(it, weId, setId) } ?: return@launch
+            val (before, updated) = update { WorkoutEditor.toggleSetCompleted(it, weId, setId) } ?: return@launch
             val index = updated.exercises.indexOfFirst { it.id == weId }
             fun done(w: Workout) = w.exercises.getOrNull(index)?.sets?.firstOrNull { it.id == setId }?.completed == true
             if (index >= 0 && !done(before) && done(updated)) {
                 onSetCompleted(updated, index)
                 // RPE puesto antes de marcarla: la propuesta de ajuste llega al marcarla
                 rpeSuggestion(updated.exercises[index], setId)
-                if (!partner) goalEvent(updated, weId, setId)?.let { _events.tryEmit(it) }
+                goalEvent(updated, weId, setId)?.let { _events.tryEmit(it) }
             } else if (unticked(before, updated, setId) && wasLastCompleted(before, setId)) {
                 // Marcada por error y desmarcada: el descanso que lanzó ya no tiene sentido (solo el de este entreno)
                 restTimer.skipFor(updated.id)
@@ -769,19 +640,9 @@ class ActiveWorkoutViewModel @Inject constructor(
     fun startTimedSet() = restTimer.skipFor(workout.value?.id)
 
     fun finish() {
-        if (partnerMode.value) {
-            // Entreno de la pareja: se guarda aparte (no cuenta para tus récords ni estadísticas)
-            viewModelScope.launch {
-                actions.closePartner()
-                setPartnerMode(false)
-            }
-            return
-        }
         viewModelScope.launch {
             // Se lee y se quita bajo el cerrojo: no se pierde ninguna serie marcada en el último momento
             val current = repo.takeActive() ?: return@launch
-            // Si la pareja seguía con el suyo, se guarda también: tras terminar el tuyo no habría cómo volver a él
-            actions.closePartner()
             val metrics = metricsStore.metrics.value?.takeIf { it.workoutId == current.id }
             val ended = WorkoutEditor.finish(current, System.currentTimeMillis()).copy(
                 avgHeartRate = metrics?.avgHeartRate ?: current.avgHeartRate,
@@ -805,16 +666,10 @@ class ActiveWorkoutViewModel @Inject constructor(
     }
 
     fun discard() = viewModelScope.launch {
-        if (partnerMode.value) {
-            actions.discardPartner()
-            setPartnerMode(false)
-            return@launch
-        }
         // Se puede deshacer desde Inicio durante unos segundos (con el descanso tal como iba)
         val rest = restTimer.rest.value
         restTimer.skip()
         repo.discardActive(rest?.endsAtEpochMs, rest?.totalSeconds ?: 0)
-        actions.closePartnerOnDiscard()
     }
 
     fun saveSummaryAsRoutine() {
@@ -872,7 +727,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         // Lo mismo que se rellenará al empezar la próxima vez (no una regla aparte que a veces lo contradecía)
         actions.nextTimeAfter(finished, history),
         weeklyGoalReached = weeklyGoalReachedBy(finished, history),
-        achievements = if (finished.athlete != null) emptyList() else com.bestrong.core.stats.Strength.newlyUnlocked(history, finished.id, java.time.ZoneId.systemDefault(), repo.measurements.value.filter { it.weightKg != null }.maxByOrNull { it.dateEpochMs }?.weightKg),
+        achievements = com.bestrong.core.stats.Strength.newlyUnlocked(history, finished.id, java.time.ZoneId.systemDefault(), repo.measurements.value.filter { it.weightKg != null }.maxByOrNull { it.dateEpochMs }?.weightKg),
     )
 
     /** Si con este entreno se llega justo al objetivo de días de la semana (el del programa o el propio). */
@@ -912,10 +767,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         /** Más de esto abierto: entreno olvidado, no se felicita por el objetivo semanal. */
         const val STALE_WORKOUT_MS = 6 * 60 * 60 * 1000L
         const val MAX_WALL_CLOCK_MS = 24 * 60 * 60 * 1000L
-        const val KEY_PARTNER_MODE = "partner_mode"
         const val KEY_SUMMARY_ID = "summary_workout_id"
-        const val KEY_DEADLINE = "deadline"
-        const val KEY_DEADLINE_WORKOUT = "deadline_workout_id"
     }
 }
 

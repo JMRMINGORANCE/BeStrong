@@ -96,24 +96,6 @@ class Iteration12Test {
     }
 }
 
-class TrimToFitTest {
-    @Test fun removesPendingSetsFromTheEndUntilItFits() {
-        val curl = com.bestrong.core.library.ExerciseLibrary.byId("barbell_curl") ?: com.bestrong.core.library.ExerciseLibrary.all[5]
-        val main = WorkoutExercise(exercise = bench, restSeconds = 120, sets = List(3) { WorkoutSet(weightKg = 100.0, reps = 5) })
-        val acc = WorkoutExercise(exercise = curl, restSeconds = 60, sets = List(3) { WorkoutSet(weightKg = 20.0, reps = 10) })
-        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(main, acc))
-        val est = { x: Workout -> WorkoutEditor.estimatedRemainingSeconds(x, nowEpochMs = 0) }
-        // 6×40 + 2×120 + 120 (cambio) + 2×60 = 720; con 500 s debe caer el accesorio
-        val trimmed = WorkoutEditor.trimToFit(w, 500, est)
-        assertEquals(true, est(trimmed) <= 500)
-        assertEquals(3, trimmed.exercises[0].sets.size)
-        // Nunca quita la siguiente serie
-        val minimal = WorkoutEditor.trimToFit(w, 0, est)
-        assertEquals(1, minimal.exercises.size)
-        assertEquals(main.sets[0].id, minimal.exercises[0].sets.single().id)
-    }
-}
-
 class Iteration13Test {
     private val curl = com.bestrong.core.library.ExerciseLibrary.all[5]
 
@@ -135,18 +117,6 @@ class Iteration13Test {
         assertEquals(4, ids.size)
         assertEquals(listOf(a.sets[0].id, a.sets[1].id), ids.take(2))
         assertEquals(extra.id, ids[3])
-    }
-
-    @Test fun trimKeepsNextSetOfStartedExerciseAndClearsLoneSuperset() {
-        val e1 = WorkoutExercise(exercise = bench, restSeconds = 60, sets = listOf(WorkoutSet(reps = 5, completed = true), WorkoutSet(reps = 5)))
-        val e2 = WorkoutExercise(exercise = curl, restSeconds = 60, supersetId = "s", sets = listOf(WorkoutSet(reps = 5, completed = true), WorkoutSet(reps = 5), WorkoutSet(reps = 5)))
-        val e3 = WorkoutExercise(exercise = com.bestrong.core.library.ExerciseLibrary.all[7], restSeconds = 60, supersetId = "s", sets = listOf(WorkoutSet(reps = 5)))
-        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(e1, e2, e3))
-        val out = WorkoutEditor.trimToFit(w, 0) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = 0) }
-        // e3 desaparece; de e2 queda la hecha y la siguiente
-        assertEquals(2, out.exercises.size)
-        assertEquals(2, out.exercises[1].sets.size)
-        assertEquals(null, out.exercises[1].supersetId)
     }
 
     @Test fun bulkCompletedSetsAreNotRest() {
@@ -197,13 +167,6 @@ class Iteration14Test {
         val result = r.normalizedSupersets()
         // «a» quedó suelta (su pareja está lejos): deja de ser superserie; c-d siguen juntas; e sola, fuera
         assertEquals(listOf(null, null, "x", "x", null), result.exercises.map { it.supersetId })
-    }
-
-    @Test fun trimWithNothingToRemoveKeepsWorkoutIdentical() {
-        val lone = WorkoutExercise(exercise = bench, supersetId = "s", sets = listOf(WorkoutSet(reps = 5)))
-        val w = Workout(name = "w", startedAtEpochMs = 0, exercises = listOf(lone))
-        val out = WorkoutEditor.trimToFit(w, 0) { WorkoutEditor.estimatedRemainingSeconds(it, nowEpochMs = 0) }
-        assertEquals(w, out)
     }
 
     @Test fun coachReportShowsBothSides() {

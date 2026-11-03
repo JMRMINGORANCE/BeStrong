@@ -6,8 +6,8 @@
     <string name="s_body_title">Tu i el teu cos</string>
     <string name="s_body_summary_empty">Sexe, any de naixement i alçada per a les calories</string>
     <string name="s_training_title">Entrenament</string>
-    <string name="s_training_summary">Progressió, escalfament, gimnasos i company</string>
-    <string name="s_during_summary">Descans, vibració, pantalla, música i veu</string>
+    <string name="s_training_summary">Progressió, escalfament i gimnasos</string>
+    <string name="s_during_summary">Descans, vibració, pantalla i veu</string>
     <string name="s_units_title">Unitats i taula de sèries</string>
     <string name="s_units_summary">%1$s · columnes de la taula</string>
     <string name="s_appearance_summary">Tema, color, contrast i lletra</string>
@@ -21,7 +21,7 @@
     <string name="sg_progress">Progressió</string>
     <string name="sg_rest">Descans</string>
     <string name="sg_screen">Pantalla i controls</string>
-    <string name="sg_media">Música i veu</string>
+    <string name="sg_media">Veu</string>
     <string name="sg_weights">Pesos</string>
     <string name="sg_table">Taula de sèries</string>
     <string name="sg_theme">Tema i color</string>

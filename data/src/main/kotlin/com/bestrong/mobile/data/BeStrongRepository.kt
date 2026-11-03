@@ -81,12 +81,11 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
         .flowOn(Dispatchers.Default)
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
-    /** Tu historial (sin los entrenos de la pareja, que no cuentan para tus estadísticas). */
+    /**
+     * Tu historial. Los entrenos de otra persona del antiguo modo pareja ([Workout.athlete] no nulo) se quedan guardados
+     * (copias y exportaciones los conservan) pero no se muestran ni cuentan para tus estadísticas.
+     */
     val history: StateFlow<List<Workout>> = allHistory.map { l -> l.filter { it.athlete == null } }
-        .stateIn(scope, SharingStarted.Eagerly, emptyList())
-
-    /** Entrenos hechos en modo pareja. */
-    val partnerHistory: StateFlow<List<Workout>> = allHistory.map { l -> l.filter { it.athlete != null } }
         .stateIn(scope, SharingStarted.Eagerly, emptyList())
 
     val routines: StateFlow<List<Routine>> = dao.routines()
@@ -243,33 +242,14 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     private suspend fun currentActive(): Workout? =
         dao.valueOnce(KEY_ACTIVE)?.let { withContext(Dispatchers.Default) { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
 
-    // --- Modo pareja: segundo entreno activo en el mismo móvil -------------------------------
-
-    val partnerWorkout: StateFlow<Workout?> = dao.value(KEY_PARTNER)
-        // La tabla clave-valor avisa de cualquier escritura: solo se decodifica si cambia esta clave
-        .distinctUntilChanged()
-        .map { s -> s?.let { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
-        .flowOn(Dispatchers.Default)
-        .stateIn(scope, SharingStarted.Eagerly, null)
-
-    suspend fun setPartnerActive(workout: Workout?) = activeMutex.withLock {
-        if (workout == null) dao.deleteValue(KEY_PARTNER) else dao.putValue(KeyValueEntity(KEY_PARTNER, Persistence.encodeWorkout(workout)))
+    /**
+     * Entreno de la pareja que quedó abierto con una versión anterior (ya no hay modo pareja): se saca una vez para
+     * guardarlo terminado y que no quede huérfano.
+     */
+    suspend fun takeLegacyPartnerActive(): Workout? = activeMutex.withLock {
+        dao.valueOnce(KEY_PARTNER)?.also { dao.deleteValue(KEY_PARTNER) }
+            ?.let { withContext(Dispatchers.Default) { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
     }
-
-    suspend fun updatePartnerActive(block: (Workout) -> Workout): Pair<Workout, Workout>? = activeMutex.withLock {
-        val current = currentPartner() ?: return@withLock null
-        val updated = block(current).copy(updatedAtEpochMs = System.currentTimeMillis())
-        dao.putValue(KeyValueEntity(KEY_PARTNER, withContext(Dispatchers.Default) { Persistence.encodeWorkout(updated) }))
-        current to updated
-    }
-
-    /** Como [takeActive], para el entreno de la pareja. */
-    suspend fun takePartnerActive(): Workout? = activeMutex.withLock {
-        currentPartner()?.also { dao.deleteValue(KEY_PARTNER) }
-    }
-
-    private suspend fun currentPartner(): Workout? =
-        dao.valueOnce(KEY_PARTNER)?.let { withContext(Dispatchers.Default) { runCatching { Persistence.decodeWorkout(it) }.getOrNull() } }
 
     private val _syncConflicts = MutableSharedFlow<List<WorkoutMerge.SetConflict>>(extraBufferCapacity = 4)
 
@@ -405,9 +385,9 @@ class BeStrongRepository @Inject constructor(private val dao: BeStrongDao, @Appl
     }
 
     /**
-     * Cambia de una vez (una transacción) los entrenos que cumplen [match], tuyos y de la pareja, con la hora de
+     * Cambia de una vez (una transacción) los entrenos que cumplen [match] (también los del antiguo modo pareja), con la hora de
      * cambio al día (si no, una copia más antigua podría ganar al combinar). En el ámbito de la app: sigue aunque
-     * se cierre la pantalla desde la que se pidió (renombrar un gimnasio o a la pareja y salir con Atrás).
+     * se cierre la pantalla desde la que se pidió (renombrar un gimnasio y salir con Atrás).
      */
     fun rewriteHistory(match: (Workout) -> Boolean, change: (Workout) -> Workout) = scope.launch {
         val now = System.currentTimeMillis()
