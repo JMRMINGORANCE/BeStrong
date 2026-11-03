@@ -2,7 +2,7 @@ package com.bestrong.mobile.ui.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,21 +10,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -38,52 +38,41 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.bestrong.core.util.formatDuration
-import com.bestrong.core.util.formatVolume
-import com.bestrong.core.util.formatWeight
 import com.bestrong.mobile.shared.R
-import com.bestrong.mobile.ui.components.BarChart
-import com.bestrong.mobile.ui.components.ChartPoint
-import com.bestrong.mobile.ui.components.LocalWeightUnit
-import com.bestrong.mobile.ui.components.SectionHeader
-import com.bestrong.mobile.ui.components.StatTile
+import com.bestrong.mobile.ui.components.SettingsDivider
+import com.bestrong.mobile.ui.components.SettingsGroup
+import com.bestrong.mobile.ui.components.SettingsNavRow
 import com.bestrong.mobile.ui.components.formatDate
-import com.bestrong.mobile.ui.components.label
-import java.time.format.DateTimeFormatter
 
+/** Lo que se abre dentro de Tú, encima de la lista. */
+private enum class YouPage { RECORDS, SETTINGS }
+
+/**
+ * Tú (se abre desde el avatar de cualquier pestaña): quién eres en dos líneas, tus cifras del cuerpo y una lista
+ * corta con Récords e hitos, Medidas, Ajustes y Comunidad.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     vm: ProfileViewModel,
     onOpenMeasurements: () -> Unit,
     onOpenExercise: (String) -> Unit,
-    onGoTrain: () -> Unit = {},
+    onBack: () -> Unit,
     /** Página de Ajustes a abrir al llegar (nombre de la página, desde la búsqueda universal). */
     openSettingsPage: String? = null,
     onSettingsPageOpened: () -> Unit = {},
 ) {
-    val unit = LocalWeightUnit.current
     val stats by vm.stats.collectAsStateWithLifecycle()
-    val settings by vm.settings.collectAsStateWithLifecycle()
     val measurements by vm.measurements.collectAsStateWithLifecycle()
-    val advanced by vm.advanced.collectAsStateWithLifecycle()
-    var showOneRm by rememberSaveable { mutableStateOf(false) }
-    var showScores by rememberSaveable { mutableStateOf(false) }
-    var showReport by rememberSaveable { mutableStateOf(false) }
-    if (showReport) MonthlyReportDialog(onShare = { months, pdf -> vm.shareMonthlyReport(months, pdf) }) { showReport = false }
-    if (showOneRm) OneRepMaxDialog { showOneRm = false }
-    if (showScores) ScoresDialog(advanced.bodyWeightKg, settings.sex) { showScores = false }
-    val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
     // Comunidad (ideas y avisos) y, encima, el buzón abierto en «Proponer» (0) o «Mis propuestas» (1); -1, cerrado
     var showCommunity by rememberSaveable { mutableStateOf(false) }
@@ -96,146 +85,90 @@ fun ProfileScreen(
         onPauseOrDispose {}
     }
     LaunchedEffect(Unit) { vm.messages.collect { snackbar.showSnackbar(it) } }
+    var page by rememberSaveable { mutableStateOf<YouPage?>(null) }
+    // Desde la búsqueda: a Ajustes (la página la abre [SettingsTab])
+    LaunchedEffect(openSettingsPage) { if (openSettingsPage != null) page = YouPage.SETTINGS }
+    androidx.activity.compose.BackHandler(enabled = page != null) { page = null }
 
-    var tab by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
-    // Desde la búsqueda: a la pestaña Ajustes (la página la abre [SettingsTab])
-    LaunchedEffect(openSettingsPage) { if (openSettingsPage != null) tab = 1 }
-    Scaffold(snackbarHost = { SnackbarHost(snackbar) }) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 340.dp),
-            modifier = Modifier.padding(padding).fillMaxSize(),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 24.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
+        topBar = {
+            androidx.compose.material3.TopAppBar(
+                title = {},
+                navigationIcon = {
+                    androidx.compose.material3.IconButton(onClick = { if (page != null) page = null else onBack() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        LazyColumn(
+            Modifier.padding(padding).fillMaxSize(),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            // Dos pestañas: el progreso (lo que se mira a menudo) y los ajustes (lo que se toca de vez en cuando)
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    com.bestrong.mobile.ui.components.ScreenTitle(
-                        stringResource(R.string.nav_profile),
-                        overline = if (tab == 0 && stats.totalWorkouts > 0) androidx.compose.ui.res.pluralStringResource(R.plurals.workout_count, stats.totalWorkouts, stats.totalWorkouts) else null,
-                    )
-                    ProfileTabs(tab) { tab = it }
+            when (page) {
+                YouPage.RECORDS -> item {
+                    val advanced by vm.advanced.collectAsStateWithLifecycle()
+                    RecordsCard(stats.topOneRepMax, advanced, vm::exerciseOf, onOpenExercise)
                 }
-            }
-            if (tab == 0) {
-                // Sin entrenos: un solo aviso con su botón (no cuatro ceros y varias gráficas vacías)
-                // Mientras se calculan (un instante) no se enseña ni el aviso de vacío ni las gráficas
-                if (stats.loaded && stats.totalWorkouts == 0) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        com.bestrong.mobile.ui.components.EmptyState(
-                            Icons.Default.FitnessCenter,
-                            stringResource(R.string.profile_empty_title),
-                            stringResource(R.string.profile_empty_body),
-                            Modifier.heightIn(min = 320.dp),
-                            action = stringResource(R.string.history_empty_action) to onGoTrain,
-                        )
+                YouPage.SETTINGS -> item {
+                    Column(Modifier.widthIn(max = 720.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Text(stringResource(R.string.settings), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() })
+                        SettingsTab(vm, openPage = openSettingsPage, onPageOpened = onSettingsPageOpened)
                     }
-                } else if (stats.loaded) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        // 4 en fila en el Fold desplegado; 2 × 2 en la pantalla exterior
-                        BoxWithConstraints {
-                            val tiles: List<Pair<String, String>> = listOf(
-                                stringResource(R.string.stat_workouts) to "${stats.totalWorkouts}",
-                                stringResource(R.string.stat_streak) to "🔥 ${stats.weeklyStreak}",
-                                stringResource(R.string.stat_total_volume) to unit.formatVolume(stats.totalVolume),
-                                stringResource(R.string.stat_time) to formatDuration(stats.totalDurationSec),
-                            )
-                            val perRow = if (maxWidth < 600.dp) 2 else 4
-                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                tiles.chunked(perRow).forEach { row ->
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        row.forEach { (label, value) -> StatTile(label, value, Modifier.weight(1f)) }
-                                    }
-                                }
-                                // Cómo es un entreno típico: duración, series y volumen medios
-                                if (stats.totalWorkouts > 0) {
-                                    val n = stats.totalWorkouts
-                                    Text(
-                                        stringResource(R.string.stat_average_workout, formatDuration(stats.totalDurationSec / n), stats.totalSets / n, unit.formatVolume(stats.totalVolume / n)),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                }
-                            }
-                        }
-                    }
+                }
+                null -> {
+                    item { YouHeader(stats) }
+                    item { BodyTiles(measurements) }
                     item {
-                        com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                            Column(Modifier.padding(16.dp)) {
-                                SectionHeader(stringResource(R.string.weekly_volume, unit.label))
-                                WeekVsAverage(stats.weeks, { it.volume }) { unit.formatVolume(it) }
-                                // «3 oct» y no «3/10» (que en EE. UU. es 10 de marzo)
-                                val f = DateTimeFormatter.ofPattern("d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
-                                // TalkBack lee el volumen como se ve («27.216 lb»), no «27216,5»
-                                BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), unit.fromKg(it.volume)) }, describe = { "${it.label}: ${unit.formatVolume(unit.toKg(it.value))}" })
-                            }
-                        }
-                    }
-                    item {
-                        com.bestrong.mobile.ui.components.Panel(contentPadding = 0.dp) {
-                            Column(Modifier.padding(16.dp)) {
-                                SectionHeader(stringResource(R.string.workouts_per_week))
-                                WeekVsAverage(stats.weeks, { it.workouts.toDouble() }) { formatWeight(it) }
-                                // «3 oct» y no «3/10» (que en EE. UU. es 10 de marzo)
-                                val f = DateTimeFormatter.ofPattern("d MMM", androidx.compose.ui.platform.LocalConfiguration.current.locales[0])
-                                BarChart(stats.weeks.map { ChartPoint(f.format(it.weekStart), it.workouts.toDouble()) })
-                            }
-                        }
-                    }
-                    // Músculos: semana (silueta), 30 días, tendencia y recuperación en una sola tarjeta
-                    item { MusclesCard(stats, advanced, settings.weeklySetsTarget) { n -> vm.updateSettings { it.copy(weeklySetsTarget = n) } } }
-                    item { TrainingLoadCard(advanced) }
-                    item { PatternBalanceCard(advanced) }
-                    // Récords e hitos: reto, mejor marca por ejercicio y logros en una sola tarjeta
-                    item { RecordsCard(stats.topOneRepMax, advanced, vm::exerciseOf, onOpenExercise) }
-                }
-                item {
-                    ToolsCard(
-                        onOneRm = { showOneRm = true },
-                        onScores = { showScores = true },
-                        onReport = { showReport = true },
-                        onShareWeek = {
-                            // Texto de los últimos 7 días para el entrenador (WhatsApp, correo…)
-                            vm.coachWeekText()?.let { text ->
-                                val send = android.content.Intent(android.content.Intent.ACTION_SEND).setType("text/plain").putExtra(android.content.Intent.EXTRA_TEXT, text)
-                                context.startActivity(android.content.Intent.createChooser(send, null))
-                            }
-                        },
-                    )
-                }
-                item {
-                    Card(onClick = onOpenMeasurements) {
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.measurements)) },
-                            supportingContent = {
-                                // En la unidad del cuerpo (con unidades mixtas, la de las cargas puede ser otra) y el último peso apuntado,
-                                // aunque la medida más reciente sea solo de cintura
-                                val bodyUnit = com.bestrong.mobile.ui.components.LocalBodyUnit.current
-                                Text(measurements.firstNotNullOfOrNull { it.weightKg }?.let { stringResource(R.string.last_weight, bodyUnit.format(it, withUnit = true)) } ?: stringResource(R.string.log_measurements))
-                            },
-                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
+                        YouMenu(
+                            onRecords = { page = YouPage.RECORDS },
+                            onMeasurements = onOpenMeasurements,
+                            onSettings = { page = YouPage.SETTINGS },
+                            onCommunity = { showCommunity = true },
                         )
                     }
-                }
-                // Comunidad: buzón de ideas y avisos del equipo, en su propia pantalla
-                item {
-                    Card(onClick = { showCommunity = true }) {
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.community_tab)) },
-                            supportingContent = { Text(stringResource(R.string.community_row_body)) },
-                            leadingContent = { Icon(Icons.Default.Groups, null, tint = MaterialTheme.colorScheme.primary) },
-                            trailingContent = { Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null) },
-                        )
-                    }
-                }
-            } else {
-                // Ajustes: un menú por apartados; cada uno abre su pantalla
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    SettingsTab(vm, modifier = Modifier.widthIn(max = 720.dp), openPage = openSettingsPage, onPageOpened = onSettingsPageOpened)
                 }
             }
         }
+    }
+}
+
+/** Avatar, «Tú» y la racha con el total de entrenos. */
+@Composable
+private fun YouHeader(stats: ProfileStats) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        Box(Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHigh), contentAlignment = Alignment.Center) {
+            Icon(Icons.Default.Person, null, Modifier.size(28.dp))
+        }
+        Column {
+            Text(stringResource(R.string.nav_you), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() })
+            if (stats.loaded) {
+                Text(
+                    stringResource(R.string.enf_you_streak, stats.weeklyStreak, stats.totalWorkouts),
+                    style = MaterialTheme.typography.labelMedium,
+                    fontFamily = com.bestrong.mobile.ui.theme.FigureFont,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+/** La lista de Tú: cada fila abre lo suyo. */
+@Composable
+private fun YouMenu(onRecords: () -> Unit, onMeasurements: () -> Unit, onSettings: () -> Unit, onCommunity: () -> Unit) {
+    val none = androidx.compose.ui.graphics.Color.Unspecified
+    SettingsGroup(null) {
+        SettingsNavRow(stringResource(R.string.records_milestones), Icons.Default.EmojiEvents, none, onRecords, stringResource(R.string.enf_you_records_sub))
+        SettingsDivider()
+        SettingsNavRow(stringResource(R.string.measurements), Icons.Default.Straighten, none, onMeasurements, stringResource(R.string.enf_you_measures_sub))
+        SettingsDivider()
+        SettingsNavRow(stringResource(R.string.settings), Icons.Default.Settings, none, onSettings, stringResource(R.string.enf_you_settings_sub))
+        SettingsDivider()
+        SettingsNavRow(stringResource(R.string.community_tab), Icons.Default.Groups, none, onCommunity, stringResource(R.string.community_row_body))
     }
 }
 
@@ -278,49 +211,5 @@ internal fun AutoBackupPicker(vm: ProfileViewModel) {
             }
         },
         confirmButton = { TextButton(onClick = { vm.autoBackups.value = null }) { Text(stringResource(R.string.action_cancel)) } },
-    )
-}
-
-/** Selector de las pestañas de Perfil (progreso y ajustes), en píldora: la elegida, rellena con el degradado de marca. */
-@Composable
-private fun ProfileTabs(selected: Int, onSelect: (Int) -> Unit) {
-    val labels = listOf(stringResource(R.string.profile_progress), stringResource(R.string.settings))
-    Row(
-        Modifier.fillMaxWidth().then(Modifier.clip(androidx.compose.foundation.shape.CircleShape)).background(MaterialTheme.colorScheme.surfaceContainer).padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        labels.forEachIndexed { i, label ->
-            val on = i == selected
-            androidx.compose.foundation.layout.Box(
-                Modifier.weight(1f).heightIn(min = 48.dp).clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(if (on) com.bestrong.mobile.ui.components.brandGradient() else androidx.compose.ui.graphics.SolidColor(androidx.compose.ui.graphics.Color.Transparent))
-                    .selectable(selected = on, role = androidx.compose.ui.semantics.Role.Tab) { onSelect(i) },
-                contentAlignment = androidx.compose.ui.Alignment.Center,
-            ) {
-                // Con letra grande la etiqueta encoge antes de cortarse («Progr…», «Comu…»)
-                val style = MaterialTheme.typography.bodyLarge
-                androidx.compose.foundation.text.BasicText(
-                    label,
-                    Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-                    style = style.copy(fontWeight = FontWeight.Bold, color = if (on) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant),
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(minFontSize = 10.sp, maxFontSize = style.fontSize),
-                )
-            }
-        }
-    }
-}
-
-/** «Esta semana: 3 · media: 2,5»: las barras no tienen escala, y esto responde a «¿voy por detrás?». */
-@Composable
-private fun WeekVsAverage(weeks: List<com.bestrong.core.stats.WeekBucket>, value: (com.bestrong.core.stats.WeekBucket) -> Double, format: (Double) -> String) {
-    val now = weeks.lastOrNull() ?: return
-    // Semanas ya cerradas y con entreno (las vacías bajarían la media de quien empezó hace poco)
-    val past = weeks.dropLast(1).filter { value(it) > 0 }
-    if (past.isEmpty()) return
-    com.bestrong.mobile.ui.components.MetaPill(
-        stringResource(R.string.stat_week_vs_avg, format(value(now)), format(past.sumOf(value) / past.size)),
-        Modifier.padding(vertical = 6.dp),
     )
 }

@@ -59,12 +59,15 @@ import com.bestrong.mobile.ui.help.TutorialDialog
 import com.bestrong.mobile.ui.help.WhatsNewDialog
 import com.bestrong.mobile.ui.history.HistoryScreen
 import com.bestrong.mobile.ui.history.HistoryViewModel
+import com.bestrong.mobile.ui.history.ProgressSegment
 import com.bestrong.mobile.ui.home.HomeScreen
 import com.bestrong.mobile.ui.home.HomeViewModel
+import com.bestrong.mobile.ui.profile.BodySection
 import com.bestrong.mobile.ui.profile.MeasurementsScreen
 import com.bestrong.mobile.ui.profile.OnboardingPermissionsDialog
 import com.bestrong.mobile.ui.profile.ProfileScreen
 import com.bestrong.mobile.ui.profile.ProfileViewModel
+import com.bestrong.mobile.ui.profile.StrengthSection
 import com.bestrong.mobile.ui.routines.RoutineEditorScreen
 import com.bestrong.mobile.ui.routines.RoutineEditorViewModel
 import com.bestrong.mobile.ui.workout.ActiveWorkoutScreen
@@ -285,6 +288,12 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             openWorkoutId = openId,
                             onWorkoutOpened = { historyEntry.savedStateHandle[KEY_OPEN_WORKOUT] = null },
                             onOpenProfile = { nav.navigate(Routes.PROFILE) { launchSingleTop = true } },
+                            // Progreso: junto al historial, el cuerpo (medidas) y la fuerza (récords y estadísticas)
+                            otherSegments = progressSegments(
+                                onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) { launchSingleTop = true } },
+                                onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
+                                onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
+                            ),
                         )
                     }
                     composable(Routes.SEARCH) {
@@ -317,7 +326,11 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             muscle?.let { exercisesVm.showMuscle(it) }
                             entry.savedStateHandle[KEY_MUSCLE_FILTER] = null
                         }
-                        ExerciseLibraryScreen(exercisesVm, onOpenProfile = { nav.navigate(Routes.PROFILE) { launchSingleTop = true } })
+                        ExerciseLibraryScreen(
+                            exercisesVm,
+                            onOpenProfile = { nav.navigate(Routes.PROFILE) { launchSingleTop = true } },
+                            onEditRoutine = { nav.navigate(Routes.routine(it)) { launchSingleTop = true } },
+                        )
                     }
                     composable(Routes.PROFILE) { profileEntry ->
                         val openPage by profileEntry.savedStateHandle.getStateFlow<String?>(KEY_OPEN_SETTINGS, null).collectAsStateWithLifecycle()
@@ -326,8 +339,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             onSettingsPageOpened = { profileEntry.savedStateHandle[KEY_OPEN_SETTINGS] = null },
                             vm = hiltViewModel<ProfileViewModel>(),
                             onOpenMeasurements = { nav.navigate(Routes.MEASUREMENTS) { launchSingleTop = true } },
-                            onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
                             onOpenExercise = { nav.navigate(Routes.exercise(it)) { launchSingleTop = true } },
+                            onBack = { nav.popBackStack() },
                         )
                     }
                     composable(Routes.WORKOUT) { backStackEntry ->
@@ -402,6 +415,16 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             }
         }
     }
+}
+
+/** Cuerpo y Fuerza, los segmentos de Progreso que no son el historial (viven en :feature:profile). */
+@Composable
+private fun progressSegments(onOpenMeasurements: () -> Unit, onOpenExercise: (String) -> Unit, onGoTrain: () -> Unit): List<ProgressSegment> {
+    val profileVm = hiltViewModel<ProfileViewModel>()
+    return listOf(
+        ProgressSegment(stringResource(R.string.enf_prog_body)) { BodySection(profileVm, onOpenMeasurements) },
+        ProgressSegment(stringResource(R.string.enf_prog_strength)) { StrengthSection(profileVm, onOpenExercise, onGoTrain) },
+    )
 }
 
 private const val KEY_MUSCLE_FILTER = "muscle_filter"

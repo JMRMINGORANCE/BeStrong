@@ -341,7 +341,7 @@ private fun MeasurementDialog(initial: BodyMeasurement?, unit: WeightUnit, onSav
 
 /** Media de 7 días y cambio frente a la semana anterior: el peso de un día suelto sube y baja con el agua y la comida. */
 @Composable
-private fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) {
+internal fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) {
     val t = remember(points) { BodyWeightTrend.of(points, System.currentTimeMillis()) } ?: return
     val average = unit.format(t.averageKg, withUnit = true)
     val change = t.changeKg?.let { c -> (if (c >= 0) "+" else "−") + unit.format(kotlin.math.abs(c), withUnit = true) }
@@ -372,7 +372,7 @@ private fun WeightTrendLine(points: List<Pair<Long, Double>>, unit: WeightUnit) 
 
 /** Peso objetivo: cuánto falta y cuándo llegarías al ritmo actual (para bajar o subir). */
 @Composable
-private fun WeightGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>, unit: WeightUnit) {
+internal fun WeightGoalLine(vm: ProfileViewModel, points: List<Pair<Long, Double>>, unit: WeightUnit) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val goal = settings.bodyWeightGoalKg
     var editing by rememberSaveable { mutableStateOf(false) }
@@ -565,7 +565,7 @@ private const val SAME_GOAL_TOLERANCE = 0.05
 
 /** Cintura/altura y FFMI con las últimas medidas (hace falta la altura del perfil). */
 @Composable
-private fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement>) {
+internal fun BodyCompositionCard(vm: ProfileViewModel, list: List<BodyMeasurement>) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val sorted = list.sortedByDescending { it.dateEpochMs }
     val waist = sorted.firstNotNullOfOrNull { it.waistCm }

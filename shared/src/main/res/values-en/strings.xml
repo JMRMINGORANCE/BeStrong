@@ -1160,4 +1160,26 @@
     <string name="enf_home_next">Next: %1$s</string>
     <string name="enf_home_last_time">last time %1$s</string>
     <string name="enf_home_in_progress">In progress</string>
+    <string name="enf_prog_history">History</string>
+    <string name="enf_prog_body">Body</string>
+    <string name="enf_prog_strength">Strength</string>
+    <string name="enf_prog_all_measures">All measurements</string>
+    <string name="enf_prog_latest">Latest measurements</string>
+    <string name="enf_you_weight">Weight</string>
+    <string name="enf_you_fat">Body fat</string>
+    <string name="enf_you_waist">Waist</string>
+    <string name="enf_you_streak">%1$d wk streak · %2$d workouts</string>
+    <string name="enf_you_records_sub">Your best marks and milestones</string>
+    <string name="enf_you_measures_sub">Weight and girths</string>
+    <string name="enf_you_settings_sub">Training, appearance, data and connections</string>
+    <string name="enf_lib_kicker">Exercises and routines</string>
+    <string name="enf_lib_routines">Routines</string>
+    <string name="enf_lib_exercises">Exercises</string>
+    <string name="enf_lib_no_routines">No routines yet. Create your first one and it will show up here.</string>
+    <string name="enf_lib_new_routine">New routine</string>
+    <string name="enf_lib_history">History</string>
+    <string name="enf_lib_technique">Technique</string>
+    <string name="enf_lib_records">Records</string>
+    <string name="enf_lib_e1rm">Estimated 1RM</string>
+    <string name="enf_lib_no_folder">No folder</string>
 </resources>
