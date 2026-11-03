@@ -193,13 +193,18 @@ class AppSync @Inject constructor(
         }.debounce(1_000).distinctUntilChanged().collect { watchSync.pushRoutines(it) }
     }
 
-    @OptIn(FlowPreview::class)
-    fun start() {
+    /** Borra lo que dejaron funciones que ya no existen. */
+    private fun cleanupLegacyData() {
         // Ya no hay modo pareja: un entreno suyo que quedara abierto se guarda terminado
         scope.launch { actions.closeLegacyPartnerWorkout() }
         // La planificación (lesiones, semana planificada, mesociclo, tope semanal…) y la proteína y el agua ya no
         // existen: se borra lo que quedó guardado
         scope.launch(Dispatchers.IO) { LEGACY_PREFS.forEach { name -> runCatching { context.deleteSharedPreferences(name) } } }
+    }
+
+    @OptIn(FlowPreview::class)
+    fun start() {
+        cleanupLegacyData()
         scope.launch { syncRoutines() }
         scope.launch {
             repository.history.first { it.isNotEmpty() || repository.historyOnce().isEmpty() }
