@@ -12,7 +12,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -70,31 +69,12 @@ fun RestScreen(session: WorkoutSession) {
 
     val view = androidx.compose.ui.platform.LocalView.current
     val focus = remember { FocusRequester() }
-    var rotary by remember { mutableFloatStateOf(0f) }
+    val rotary = remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
     ScreenScaffold(timeText = {}) {
         Box(
             Modifier.fillMaxSize()
-                // Botón rápido del Ultra durante el descanso: saltarlo (o pasar al siguiente ejercicio)
-                .onPreviewKeyEvent { e ->
-                    if (e.key.nativeKeyCode in STEM_KEYS) {
-                        if (e.type == KeyEventType.KeyUp) session.onStemInRest()
-                        true
-                    } else {
-                        false
-                    }
-                }
-                // Corona o bisel: ±15 s por paso, como los botones
-                .onRotaryScrollEvent { e ->
-                    rotary += e.verticalScrollPixels
-                    val steps = (rotary / ROTARY_STEP_PX).toInt()
-                    if (steps != 0) {
-                        rotary -= steps * ROTARY_STEP_PX
-                        view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-                        session.adjustRest(steps * REST_STEP_S)
-                    }
-                    true
-                }
+                .restInput(session, view, rotary)
                 .focusRequester(focus)
                 .focusable(),
             contentAlignment = Alignment.Center,
@@ -133,6 +113,23 @@ fun RestScreen(session: WorkoutSession) {
         }
     }
 }
+
+/** Botón rápido del Ultra (saltar el descanso) y corona o bisel (±15 s por paso, como los botones). */
+private fun Modifier.restInput(session: WorkoutSession, view: android.view.View, rotary: androidx.compose.runtime.MutableFloatState): Modifier =
+    onPreviewKeyEvent { e ->
+        val stem = e.key.nativeKeyCode in STEM_KEYS
+        if (stem && e.type == KeyEventType.KeyUp) session.onStemInRest()
+        stem
+    }.onRotaryScrollEvent { e ->
+        rotary.floatValue += e.verticalScrollPixels
+        val steps = (rotary.floatValue / ROTARY_STEP_PX).toInt()
+        if (steps != 0) {
+            rotary.floatValue -= steps * ROTARY_STEP_PX
+            view.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+            session.adjustRest(steps * REST_STEP_S)
+        }
+        true
+    }
 
 /**
  * «SIGUE · REMO 90 × 8» y, si va con barra, los discos por lado («20 + 10 + 5»): lo que hay que cargar.

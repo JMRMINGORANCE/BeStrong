@@ -96,9 +96,6 @@ import com.bestrong.mobile.ui.workout.describeSet
 import com.bestrong.mobile.ui.workout.setRemark
 import kotlinx.coroutines.launch
 
-/** Otra vista de Progreso (Cuerpo, Fuerza) que se elige en los segmentos de la cabecera, junto al historial. */
-class ProgressSegment(val label: String, val content: @Composable () -> Unit)
-
 /**
  * Progreso: cabecera con el mes y el avatar, segmentos (Historial y los que lleguen en [otherSegments]) y, en
  * Historial, el calendario, «Tu año» y los entrenos con su detalle al lado en el Fold desplegado.

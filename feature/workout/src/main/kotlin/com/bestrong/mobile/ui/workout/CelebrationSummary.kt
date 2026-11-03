@@ -113,7 +113,7 @@ fun WorkoutSummaryDialog(
                 }
                 VolumeComparison(summary)
                 // El detalle de siempre: músculos, comparaciones, desequilibrios y RPE
-                DetailsCard(summary, dumbbellTotal)
+                DetailsCard(summary)
                 if (w.notes.isNotBlank()) Text(w.notes, style = MaterialTheme.typography.bodySmall, fontStyle = FontStyle.Italic)
                 Column(Modifier.fillMaxWidth()) { SessionRatingPicker(onRate) }
                 RoutineButton(summary, onSaveRoutine, onUpdateRoutine)
@@ -359,7 +359,7 @@ private fun Bar(label: String, value: String, fraction: Float, brush: Brush) {
 
 /** Todo el detalle del resumen clásico. */
 @Composable
-private fun DetailsCard(summary: FinishedSummary, dumbbellTotal: Boolean) {
+private fun DetailsCard(summary: FinishedSummary) {
     val w = summary.workout
     val unit = LocalWeightUnit.current
     com.bestrong.mobile.ui.components.Panel(contentPadding = 16.dp) {
