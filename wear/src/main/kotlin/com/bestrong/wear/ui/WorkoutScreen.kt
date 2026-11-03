@@ -158,10 +158,12 @@ fun WorkoutScreen(
                     return@Column
                 }
                 if (we.supersetId != null) Text(stringResource(R.string.superset), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                // «Enfoque»: el ejercicio y la serie en una etiqueta pequeña; lo grande es el peso
+                val position = set?.let { " · $setNumber/${we.sets.size}" }.orEmpty()
                 Text(
-                    we.exercise.displayName(),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Brand,
+                    we.exercise.displayName().uppercase() + position,
+                    style = KickerStyle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
@@ -186,7 +188,7 @@ fun WorkoutScreen(
                     SetType.FAILURE -> stringResource(R.string.type_failure)
                     else -> ""
                 }
-                Text(stringResource(R.string.set_of, setNumber, we.sets.size, typeLabel), style = MaterialTheme.typography.labelSmall)
+                if (typeLabel.isNotBlank()) Text(typeLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
                 we.targetRpe?.takeIf { we.exercise.tracking == TrackingType.WEIGHT_REPS && set.type == SetType.NORMAL }?.let { rpe ->
                     // Con historial, el peso orientativo para las reps de esta serie a ese RPE
                     val load = remember(we.exercise.id, set.reps, rpe, records) { session.targetRpeLoadKg(we.exercise, set.reps, rpe) }
@@ -212,21 +214,7 @@ fun WorkoutScreen(
                     } else {
                         BigValue("${set.durationSec / 60}", "min", selected = true, onClick = null)
                     }
-                    else -> Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        // Lo marcado es lo que mueve el bisel (sin peso a la vista, las reps o los metros)
-                        val effective = session.effectiveTarget(we, set)
-                        if (com.bestrong.wear.session.showsWeight(we, set)) {
-                            BigValue(unit.format(set.weightKg * factor), unit.label, selected = effective == RotaryTarget.WEIGHT) {
-                                session.setRotaryTarget(RotaryTarget.WEIGHT)
-                            }
-                            Text("×", style = MaterialTheme.typography.titleLarge)
-                        }
-                        if (we.exercise.tracking == TrackingType.DISTANCE) {
-                            BigValue("${set.distanceM.toInt()}", "m", selected = effective == RotaryTarget.REPS) { session.setRotaryTarget(RotaryTarget.REPS) }
-                        } else {
-                            BigValue("${set.reps}", stringResource(R.string.unit_reps), selected = effective == RotaryTarget.REPS) { session.setRotaryTarget(RotaryTarget.REPS) }
-                        }
-                    }
+                    else -> LoadValues(we, set, unit, factor, session)
                 }
                 if (repCounting) {
                     CountedRepsLine(countedReps, repConfidence, onAdjust = session::adjustCountedReps)
@@ -255,7 +243,7 @@ fun WorkoutScreen(
                         val doneSignature = w.exercises.sumOf { e -> e.completedSets.sumOf { it.estimatedOneRepMax } }
                         val best = remember(we.exercise.id, doneSignature, records) { session.bestOneRepMax(we.exercise.id) }
                         best?.let { com.bestrong.core.stats.OneRepMax.repsToBeat(it, set.weightKg) }?.let { reps ->
-                            Text(pluralStringResource(R.plurals.record_hint, reps, reps), style = MaterialTheme.typography.labelSmall, color = Done)
+                            Text(pluralStringResource(R.plurals.record_hint, reps, reps), style = MaterialTheme.typography.labelSmall, color = Record)
                         }
                     }
                     // Las reps que planea la rutina para esta serie, si difieren de lo que pone
@@ -283,11 +271,16 @@ fun WorkoutScreen(
                 EdgeButton(
                     onClick = { if (session.completeSet()) onRest() },
                     buttonSize = EdgeButtonSize.Small,
-                    colors = ButtonDefaults.buttonColors(containerColor = Done, contentColor = Color.Black),
+                    // «Enfoque»: HECHA en el borde inferior, en el color de acción
+                    colors = ButtonDefaults.buttonColors(containerColor = Brand, contentColor = MaterialTheme.colorScheme.onPrimary),
                     modifier = Modifier.align(Alignment.BottomCenter).semantics { contentDescription = edgeDescription },
                 ) {
-                    // Cardio: ▶ arranca el cronómetro (y el reloj pasa al modo de esa máquina); ✓ lo para
-                    Text(if (startsTimer) "▶" else "✓", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    // Cardio: ▶ arranca el cronómetro (y el reloj pasa al modo de esa máquina); HECHA lo para
+                    if (startsTimer) {
+                        Text("▶", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    } else {
+                        Text(stringResource(R.string.enf_done), fontSize = 15.sp, fontWeight = FontWeight.Black, letterSpacing = 1.sp)
+                    }
                 }
             }
         }
@@ -312,6 +305,64 @@ private fun BigValue(value: String, unit: String, selected: Boolean, onClick: ((
         Text(unit, style = MaterialTheme.typography.labelSmall)
         Box(Modifier.size(width = 24.dp, height = 2.dp).background(if (selected) Brand else Color.Transparent))
     }
+}
+
+/**
+ * Peso enorme y «× 5 reps» debajo (o solo las reps, o los metros, si no hay peso). Lo marcado es lo que mueve el
+ * bisel; tocar el otro valor le pasa el bisel.
+ */
+@Composable
+private fun LoadValues(
+    we: com.bestrong.core.model.WorkoutExercise,
+    set: com.bestrong.core.model.WorkoutSet,
+    unit: com.bestrong.core.util.WeightUnit,
+    factor: Int,
+    session: WorkoutSession,
+) {
+    val effective = session.effectiveTarget(we, set)
+    val distance = we.exercise.tracking == TrackingType.DISTANCE
+    val value = if (distance) "${set.distanceM.toInt()}" else "${set.reps}"
+    val label = if (distance) "m" else stringResource(R.string.unit_reps)
+    if (com.bestrong.wear.session.showsWeight(we, set)) {
+        HeroValue(unit.format(set.weightKg * factor), unit.label, selected = effective == RotaryTarget.WEIGHT) { session.setRotaryTarget(RotaryTarget.WEIGHT) }
+        CountValue("× $value $label", selected = effective == RotaryTarget.REPS) { session.setRotaryTarget(RotaryTarget.REPS) }
+    } else {
+        HeroValue(value, label, selected = true) { session.setRotaryTarget(RotaryTarget.REPS) }
+    }
+}
+
+/**
+ * La cifra grande de la serie. Tocarla hace que el bisel la ajuste; la raya de acento debajo dice cuál manda.
+ */
+@Composable
+private fun HeroValue(value: String, unit: String, selected: Boolean, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            .selectable(selected = selected, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = onClick)
+            .semantics { contentDescription = "$value $unit" },
+    ) {
+        Text(value, style = FigureStyle, fontSize = 46.sp, lineHeight = 46.sp, maxLines = 1)
+        Box(Modifier.size(width = 28.dp, height = 2.dp).background(if (selected) Brand else Color.Transparent))
+    }
+}
+
+/** «× 5 reps» bajo el peso: tocarlo pasa el bisel a las reps (en el color de acción mientras manda). */
+@Composable
+private fun CountValue(text: String, selected: Boolean, onClick: () -> Unit) {
+    Text(
+        text,
+        fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp,
+        color = if (selected) Brand else MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .sizeIn(minWidth = 48.dp, minHeight = 32.dp)
+            .selectable(selected = selected, role = androidx.compose.ui.semantics.Role.RadioButton, onClick = onClick)
+            .padding(top = 4.dp),
+        textAlign = TextAlign.Center,
+    )
 }
 
 private const val ROTARY_STEP_PX = 48f

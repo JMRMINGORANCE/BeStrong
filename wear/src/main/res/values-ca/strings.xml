@@ -28,7 +28,6 @@
     <string name="chart_hint">Toca la gràfica i gira la corona</string>
     <string name="chart_point">%1$s: %2$s</string>
     <string name="complete_set">Completar sèrie</string>
-    <string name="completed">Completat! 💪</string>
     <plurals name="complication_desc">
         <item quantity="one">%1$d entrenament aquesta setmana</item>
         <item quantity="other">%1$d entrenaments aquesta setmana</item>
@@ -112,7 +111,6 @@
     <string name="routine_rename_voice">Nom per veu</string>
     <string name="routine_save">Desar rutina</string>
     <string name="routines">Rutines</string>
-    <string name="set_of">Sèrie %1$d/%2$d%3$s</string>
     <plurals name="sets_volume">
         <item quantity="one">%1$d sèrie · %2$s</item>
         <item quantity="other">%1$d sèries · %2$s</item>
@@ -185,7 +183,6 @@
     <string name="tile_cardio">Cardio %1$s</string>
     <string name="planned_reps">Pla: %1$d reps</string>
     <string name="previous_any">Anterior: %1$s</string>
-    <string name="next_any">Seg.: %1$s %2$s</string>
     <string name="copy_previous">Fer servir el de l\'última vegada</string>
     <string name="unit_reps">reps</string>
     <string name="cardio_needs_sensors">Dona permís de pols i activitat física per mesurar la distància</string>
@@ -203,4 +200,7 @@
     <string name="rep_conf_low">dubtós</string>
     <string name="count_minus">Una repetició menys</string>
     <string name="count_plus">Una repetició més</string>
+    <string name="enf_done">FETA</string>
+    <string name="enf_start">COMENÇAR</string>
+    <string name="enf_next">DESPRÉS · %1$s</string>
 </resources>

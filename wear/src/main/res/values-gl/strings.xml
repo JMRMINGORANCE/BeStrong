@@ -28,7 +28,6 @@
     <string name="chart_hint">Toca a gráfica e xira a coroa</string>
     <string name="chart_point">%1$s: %2$s</string>
     <string name="complete_set">Completar serie</string>
-    <string name="completed">Completado! 💪</string>
     <plurals name="complication_desc">
         <item quantity="one">%1$d adestramento esta semana</item>
         <item quantity="other">%1$d adestramentos esta semana</item>
@@ -112,7 +111,6 @@
     <string name="routine_rename_voice">Nome por voz</string>
     <string name="routine_save">Gardar rutina</string>
     <string name="routines">Rutinas</string>
-    <string name="set_of">Serie %1$d/%2$d%3$s</string>
     <plurals name="sets_volume">
         <item quantity="one">%1$d serie · %2$s</item>
         <item quantity="other">%1$d series · %2$s</item>
@@ -185,7 +183,6 @@
     <string name="tile_cardio">Cardio %1$s</string>
     <string name="planned_reps">Plan: %1$d reps</string>
     <string name="previous_any">Anterior: %1$s</string>
-    <string name="next_any">Seg.: %1$s %2$s</string>
     <string name="copy_previous">Usar o da última vez</string>
     <string name="unit_reps">reps</string>
     <string name="cardio_needs_sensors">Dá permiso de pulso e actividade física para medir a distancia</string>
@@ -203,4 +200,7 @@
     <string name="rep_conf_low">dubidoso</string>
     <string name="count_minus">Unha repetición menos</string>
     <string name="count_plus">Unha repetición máis</string>
+    <string name="enf_done">FEITA</string>
+    <string name="enf_start">COMEZAR</string>
+    <string name="enf_next">DESPOIS · %1$s</string>
 </resources>

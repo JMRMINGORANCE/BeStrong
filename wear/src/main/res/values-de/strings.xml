@@ -28,7 +28,6 @@
     <string name="chart_hint">Tippe aufs Diagramm und dreh die Krone</string>
     <string name="chart_point">%1$s: %2$s</string>
     <string name="complete_set">Satz abschließen</string>
-    <string name="completed">Geschafft! 💪</string>
     <plurals name="complication_desc">
         <item quantity="one">%1$d Training diese Woche</item>
         <item quantity="other">%1$d Trainings diese Woche</item>
@@ -112,7 +111,6 @@
     <string name="routine_rename_voice">Per Sprache benennen</string>
     <string name="routine_save">Routine speichern</string>
     <string name="routines">Routinen</string>
-    <string name="set_of">Satz %1$d/%2$d%3$s</string>
     <plurals name="sets_volume">
         <item quantity="one">%1$d Satz · %2$s</item>
         <item quantity="other">%1$d Sätze · %2$s</item>
@@ -185,7 +183,6 @@
     <string name="tile_cardio">Cardio %1$s</string>
     <string name="planned_reps">Plan: %1$d Wdh.</string>
     <string name="previous_any">Zuletzt: %1$s</string>
-    <string name="next_any">Nächst.: %1$s %2$s</string>
     <string name="copy_previous">Letztes Mal übernehmen</string>
     <string name="unit_reps">Wdh.</string>
     <string name="cardio_needs_sensors">Erlaube Herzfrequenz und körperliche Aktivität, um die Distanz zu messen</string>
@@ -203,4 +200,7 @@
     <string name="rep_conf_low">unsicher</string>
     <string name="count_minus">Eine Wdh. weniger</string>
     <string name="count_plus">Eine Wdh. mehr</string>
+    <string name="enf_done">FERTIG</string>
+    <string name="enf_start">STARTEN</string>
+    <string name="enf_next">DANACH · %1$s</string>
 </resources>

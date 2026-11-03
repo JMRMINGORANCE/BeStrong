@@ -24,8 +24,8 @@ import com.bestrong.wear.R
 import com.bestrong.wear.session.Summary
 
 /**
- * «Resumen en la muñeca» (propuesta 08): tres anillos concéntricos —series hechas sobre las previstas, volumen frente
- * a la última vez y duración sobre una hora— con la duración en el centro.
+ * «Resumen en la muñeca»: tres anillos concéntricos —series hechas sobre las previstas y volumen frente a la última
+ * vez, en verde (hecho), y los récords en ámbar (uno por ejercicio llena el anillo)— con la duración en el centro.
  */
 @Composable
 fun SummaryRings(s: Summary) {
@@ -38,21 +38,22 @@ fun SummaryRings(s: Summary) {
         .sumOf { we -> we.completedSets.sumOf { it.weightKg * it.reps } }
     val before = compared - delta
     val volume = if (before > 0) (compared / before).toFloat() else 1f
-    val duration = (w.durationSeconds() / 3600f).coerceAtMost(1f)
-    val colors = listOf(Brand, MaterialTheme.colorScheme.secondary, Done)
+    val exercises = w.exercises.count { it.completedSets.isNotEmpty() }.coerceAtLeast(1)
+    val records = (s.records.map { it.exerciseId }.distinct().size.toFloat() / exercises).coerceAtMost(1f)
+    val colors = listOf(Done, Done.copy(alpha = 0.6f), Record)
     val description = stringResource(R.string.summary_rings_desc, w.completedSetCount, w.totalSetCount, unit.formatVolume(w.totalVolume), formatDuration(w.durationSeconds()))
     val track = MaterialTheme.colorScheme.surfaceContainer
     val extra = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
     Box(Modifier.size(120.dp).clearAndSetSemantics { contentDescription = description }, contentAlignment = Alignment.Center) {
         Canvas(Modifier.size(120.dp)) {
-            listOf(sets, volume, duration).forEachIndexed { i, v ->
+            listOf(sets, volume, records).forEachIndexed { i, v ->
                 val stroke = 9.dp.toPx()
                 val inset = stroke / 2 + i * (stroke + 3.dp.toPx())
                 val box = Size(size.width - inset * 2, size.height - inset * 2)
                 drawArc(track, -90f, 360f, false, Offset(inset, inset), box, style = Stroke(stroke))
                 drawArc(colors[i], -90f, 360f * v.coerceIn(0f, 1f), false, Offset(inset, inset), box, style = Stroke(stroke, cap = StrokeCap.Round))
                 // Más que la última vez: un trazo fino encima con lo que se ha superado
-                if (v > 1f) drawArc(extra, -90f, 360f * (v - 1f).coerceAtMost(1f), false, Offset(inset, inset), box, style = Stroke(stroke / 3, cap = StrokeCap.Round))
+                if (i == 1 && v > 1f) drawArc(extra, -90f, 360f * (v - 1f).coerceAtMost(1f), false, Offset(inset, inset), box, style = Stroke(stroke / 3, cap = StrokeCap.Round))
             }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

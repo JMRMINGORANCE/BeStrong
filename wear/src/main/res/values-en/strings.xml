@@ -28,7 +28,6 @@
     <string name="chart_hint">Tap the chart and turn the crown</string>
     <string name="chart_point">%1$s: %2$s</string>
     <string name="complete_set">Complete set</string>
-    <string name="completed">Done! 💪</string>
     <plurals name="complication_desc">
         <item quantity="one">%1$d workout this week</item>
         <item quantity="other">%1$d workouts this week</item>
@@ -112,7 +111,6 @@
     <string name="routine_rename_voice">Name by voice</string>
     <string name="routine_save">Save routine</string>
     <string name="routines">Routines</string>
-    <string name="set_of">Set %1$d/%2$d%3$s</string>
     <plurals name="sets_volume">
         <item quantity="one">%1$d set · %2$s</item>
         <item quantity="other">%1$d sets · %2$s</item>
@@ -185,7 +183,6 @@
     <string name="tile_cardio">Cardio %1$s</string>
     <string name="planned_reps">Plan: %1$d reps</string>
     <string name="previous_any">Last: %1$s</string>
-    <string name="next_any">Next: %1$s %2$s</string>
     <string name="copy_previous">Use last time\'s</string>
     <string name="unit_reps">reps</string>
     <string name="cardio_needs_sensors">Allow heart rate and physical activity to measure distance</string>
@@ -203,4 +200,7 @@
     <string name="rep_conf_low">unsure</string>
     <string name="count_minus">One rep fewer</string>
     <string name="count_plus">One rep more</string>
+    <string name="enf_done">DONE</string>
+    <string name="enf_start">START</string>
+    <string name="enf_next">NEXT · %1$s</string>
 </resources>

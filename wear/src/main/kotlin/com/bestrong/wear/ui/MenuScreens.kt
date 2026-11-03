@@ -1,6 +1,7 @@
 package com.bestrong.wear.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -13,6 +14,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.ScalingLazyListScope
@@ -269,11 +271,22 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
         edgeButton = { EdgeButton(onClick = onDone) { Text(stringResource(R.string.done)) } },
     ) { contentPadding ->
         ScalingLazyColumn(state = listState, contentPadding = contentPadding, modifier = Modifier.fillMaxWidth()) {
-            item { ListHeader { Text(stringResource(R.string.completed), color = Brand) } }
+            // «Enfoque»: «TORSO A · 54:10» arriba, en pequeño; lo que manda son los anillos
+            item {
+                Text(
+                    "${w.name.uppercase()} · ${formatDuration(w.durationSeconds())}",
+                    style = KickerStyle,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
             // Anillos de series, volumen y duración (propuesta 08)
             item { SummaryRings(s) }
             item {
-                androidx.wear.compose.material3.FilledTonalButton(
+                androidx.wear.compose.material3.Button(
                     onClick = {
                         scope.launch {
                             if (com.bestrong.wear.data.PhoneLink.openWorkout(context, w.id)) {
@@ -284,6 +297,7 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Brand, contentColor = MaterialTheme.colorScheme.onPrimary),
                     icon = { androidx.wear.compose.material3.Icon(androidx.compose.ui.res.painterResource(R.drawable.ic_phone), null) },
                     label = { Text(stringResource(R.string.open_on_phone)) },
                 )
@@ -320,8 +334,9 @@ fun SummaryScreen(session: WorkoutSession, onDone: () -> Unit) {
                 item { ListHeader { Text(pluralStringResource(R.plurals.n_records, s.records.size, s.records.size)) } }
                 items(s.records) { pr ->
                     Text(
-                        "${recordName(pr)}: ${pr.type.formatValue(pr.value, unit)}",
+                        "★ ${recordName(pr)}: ${pr.type.formatValue(pr.value, unit)}",
                         style = MaterialTheme.typography.labelSmall,
+                        color = Record,
                         textAlign = TextAlign.Center,
                     )
                 }
