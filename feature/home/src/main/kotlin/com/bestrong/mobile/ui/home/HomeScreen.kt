@@ -94,6 +94,8 @@ fun HomeScreen(
     onEditRoutine: (String?) -> Unit,
     /** Búsqueda universal (lupa del saludo). */
     onOpenSearch: () -> Unit = {},
+    /** Avatar de la cabecera: abre Tú. */
+    onOpenProfile: () -> Unit = {},
 ) {
     val routines by vm.routines.collectAsStateWithLifecycle()
     val active by vm.active.collectAsStateWithLifecycle()

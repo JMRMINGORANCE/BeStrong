@@ -337,6 +337,10 @@
     </plurals>
     <string name="name">Nome</string>
     <string name="nav_exercises">Exercicios</string>
+    <string name="nav_today">Hoxe</string>
+    <string name="nav_progress">Progreso</string>
+    <string name="nav_library">Biblioteca</string>
+    <string name="nav_you">Ti</string>
     <string name="nav_history">Historial</string>
     <string name="nav_profile">Perfil</string>
     <string name="nav_train">Adestrar</string>

@@ -117,7 +117,7 @@ private val FAQ = listOf(
 @Composable
 fun HelpDialog(onDismiss: () -> Unit, onReplayTutorial: () -> Unit) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        com.bestrong.mobile.ui.theme.ScreenBackdrop(MaterialTheme.colorScheme.secondary) {
+        com.bestrong.mobile.ui.theme.ScreenBackdrop {
             Scaffold(
                 topBar = {
                     TopAppBar(

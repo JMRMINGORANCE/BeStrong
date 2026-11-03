@@ -120,7 +120,7 @@ fun CommunityDialog(onPropose: () -> Unit, onMine: () -> Unit, onDismiss: () -> 
     val announcements = androidx.compose.runtime.remember { com.bestrong.mobile.notify.AnnouncementsWorker.cached(context) }
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
         // Fondo opaco: el tema deja transparente el de Scaffold y se veía la pantalla de detrás
-        com.bestrong.mobile.ui.theme.ScreenBackdrop(MaterialTheme.colorScheme.primary) {
+        com.bestrong.mobile.ui.theme.ScreenBackdrop {
             androidx.compose.material3.Scaffold(
                 topBar = {
                     androidx.compose.material3.TopAppBar(

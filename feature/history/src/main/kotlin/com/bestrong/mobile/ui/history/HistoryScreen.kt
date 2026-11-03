@@ -104,6 +104,8 @@ fun HistoryScreen(
     /** Entreno a abrir al llegar (desde la búsqueda universal); [onWorkoutOpened] avisa de que ya se abrió. */
     openWorkoutId: String? = null,
     onWorkoutOpened: () -> Unit = {},
+    /** Avatar de la cabecera: abre Tú. */
+    onOpenProfile: () -> Unit = {},
 ) {
     val history by vm.history.collectAsStateWithLifecycle()
     val recordCounts by vm.recordCounts.collectAsStateWithLifecycle()

@@ -96,7 +96,11 @@ import kotlinx.coroutines.launch
 /** Pestaña "Ejercicios": lista y detalle lado a lado en el Fold desplegado. */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun ExerciseLibraryScreen(vm: ExercisesViewModel) {
+fun ExerciseLibraryScreen(
+    vm: ExercisesViewModel,
+    /** Avatar de la cabecera: abre Tú. */
+    onOpenProfile: () -> Unit = {},
+) {
     val navigator = rememberListDetailPaneScaffoldNavigator<Any>()
     // Material3 Adaptive 1.1: la navegación entre paneles es suspend (animada)
     val scope = rememberCoroutineScope()

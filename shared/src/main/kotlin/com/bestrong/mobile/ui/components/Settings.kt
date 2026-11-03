@@ -214,7 +214,7 @@ fun <T> SettingsChoice(
 @Composable
 fun SettingsPage(title: String, onBack: () -> Unit, subtitle: String? = null, content: LazyListScope.() -> Unit) {
     Dialog(onDismissRequest = onBack, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
-        com.bestrong.mobile.ui.theme.ScreenBackdrop(MaterialTheme.colorScheme.primary) {
+        com.bestrong.mobile.ui.theme.ScreenBackdrop {
             Scaffold(
                 topBar = {
                     TopAppBar(
