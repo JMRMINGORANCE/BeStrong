@@ -226,6 +226,22 @@ object Programs {
                 RoutineTemplate("Pierna B", "Legs B", listOf(i("hip_thrust", 3, 10, 90, true), i("bulgarian_split_squat", 3, 10, 60), i("seated_leg_curl", 3, 12, 60), i("leg_extension", 3, 15, 45), i("hanging_leg_raise", 3, 12, 45), cardio("stair_climber", 15)), supersetPairs = listOf(1 to 2, 3 to 4)),
             ),
         ),
+        // --- Recomposición: ganar músculo y perder grasa a la vez ---
+        // Torso/pierna: cada músculo dos veces por semana con unas 10-14 series (volumen moderado, sostenible en
+        // déficit), básicos pesados con descanso completo para conservar la carga y solo 10 min de cardio suave
+        // (poca interferencia con la pierna; el déficit lo pone la dieta, no el cardio)
+        TrainingProgram(
+            "recomposition_4", "Recomposición 4 días", "Body recomposition 4 days",
+            "Para ganar músculo y perder grasa a la vez, de principiante a intermedio: torso/pierna 4 días con básicos a 6-8 reps y accesorios a 8-12 (a 1-3 reps del fallo), descansos completos para mantener la carga y 10 min de cardio suave al final. Come en ligero déficit con mucha proteína (1,6-2,2 g/kg).",
+            "To build muscle and lose fat at the same time, beginner to intermediate: 4-day upper/lower with main lifts at 6-8 reps and accessories at 8-12 (1-3 reps short of failure), full rests to keep the load up and 10 min of easy cardio at the end. Eat in a slight deficit with plenty of protein (1.6-2.2 g/kg).",
+            4,
+            listOf(
+                RoutineTemplate("Torso A", "Upper A", listOf(i("bench_press", 4, 6, 180, true), i("barbell_row", 4, 8, 150), i("overhead_press", 3, 8, 120), i("lat_pulldown", 3, 10, 90), i("lateral_raise", 3, 12, 60), i("triceps_pushdown", 3, 12, 60), cardio("treadmill", 10)), supersetPairs = listOf(4 to 5)),
+                RoutineTemplate("Pierna A", "Legs A", listOf(i("squat", 4, 6, 180, true), i("romanian_deadlift", 3, 8, 150), i("leg_press", 3, 10, 120), i("leg_curl", 3, 12, 75), i("standing_calf_raise", 3, 12, 60), i("plank", 3, 45, 60), cardio("elliptical", 10))),
+                RoutineTemplate("Torso B", "Upper B", listOf(i("db_incline_press", 4, 8, 150, true), i("pull_up", 4, 6, 150), i("seated_cable_row", 3, 10, 90), i("dips", 3, 10, 90), i("face_pull", 3, 15, 60), i("db_curl", 3, 12, 60), cardio("stair_climber", 10)), supersetPairs = listOf(4 to 5)),
+                RoutineTemplate("Pierna B", "Legs B", listOf(i("hip_thrust", 4, 8, 150, true), i("bulgarian_split_squat", 3, 10, 90), i("seated_leg_curl", 3, 12, 75), i("leg_extension", 3, 12, 75), i("seated_calf_raise", 3, 12, 60), i("hanging_leg_raise", 3, 12, 60), cardio("stationary_bike", 10))),
+            ),
+        ),
         // --- En casa con mancuernas (y banco) ---
         TrainingProgram(
             "dumbbell_full_body_3", "Mancuernas: Full Body 3 días", "Dumbbells: Full Body 3 days",

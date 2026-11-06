@@ -557,6 +557,7 @@ val GOAL_LABELS = mapOf(
     com.bestrong.core.training.Goal.FAT_LOSS to R.string.goal_fat_loss,
     com.bestrong.core.training.Goal.ENDURANCE to R.string.goal_endurance,
     com.bestrong.core.training.Goal.GENERAL to R.string.goal_general,
+    com.bestrong.core.training.Goal.RECOMPOSITION to R.string.goal_recomposition,
 )
 
 /** Material con el que se entrena: decide qué ejercicios entran en el programa a medida. */

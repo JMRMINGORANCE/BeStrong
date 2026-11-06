@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuesta #3: objetivo de recomposición corporal y color de acento de la app. -->
+<resources>
+    <string name="goal_recomposition">Recomposition</string>
+    <string name="goal_recomposition_desc">Prendre du muscle et perdre du gras en même temps : charges lourdes, repos complets et un peu de cardio</string>
+    <string name="propuesta3_accent_title">Couleur de l\'app</string>
+    <string name="propuesta3_accent_footer">La couleur des boutons et de ce que tu fais. La montre l\'utilise aussi (sauf le vert, qui y signifie « fait »).</string>
+    <string name="propuesta3_accent_original">Celle du style</string>
+    <string name="propuesta3_accent_blue">Bleu</string>
+    <string name="propuesta3_accent_green">Vert</string>
+    <string name="propuesta3_accent_purple">Violet</string>
+    <string name="propuesta3_accent_pink">Rose</string>
+</resources>
