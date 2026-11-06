@@ -82,7 +82,7 @@ fun WearApp(container: WearContainer, startRequest: StateFlow<String?>, ambient:
         }
     }
 
-    BeStrongWearTheme(settings.visualStyle) {
+    BeStrongWearTheme(settings.visualStyle, settings.accentColor) {
         CompositionLocalProvider(LocalWeightUnit provides settings.unit) {
             if (isAmbient && active != null) {
                 AmbientWorkoutScreen(session)

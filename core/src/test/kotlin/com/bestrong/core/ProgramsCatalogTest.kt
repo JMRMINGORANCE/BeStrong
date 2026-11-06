@@ -11,12 +11,12 @@ import org.junit.Test
 class ProgramsCatalogTest {
     private val bodyweight = setOf("calisthenics_3", "bodyweight_conditioning_3")
     private val dumbbells = setOf("dumbbell_full_body_3", "dumbbell_upper_lower_4", "fat_loss_home_3")
-    private val withCardio = setOf("fat_loss_3", "fat_loss_4", "fat_loss_home_3", "bodyweight_conditioning_3", "endurance_circuit_3")
+    private val withCardio = setOf("fat_loss_3", "fat_loss_4", "fat_loss_home_3", "bodyweight_conditioning_3", "endurance_circuit_3", "recomposition_4")
 
     @Test fun everyProgramBuildsWithEnoughExercises() {
         val ids = Programs.all.map { it.id }
         assertEquals(ids.size, ids.toSet().size)
-        assertTrue(Programs.all.size in 14..20)
+        assertTrue(Programs.all.size in 14..21)
         Programs.all.forEach { p ->
             val routines = p.toRoutines("es")
             assertEquals(p.id, p.routines.size, routines.size)
@@ -56,5 +56,22 @@ class ProgramsCatalogTest {
         // Los isométricos siguen con su duración
         val plank = Programs.all.first { it.id == "full_body_3" }.toRoutines("es").first().exercises.first { it.exercise.id == "plank" }
         assertEquals(45, plank.sets.first().durationSec)
+    }
+
+    @Test fun recompositionKeepsLoadAndModerateVolume() {
+        val p = Programs.all.first { it.id == "recomposition_4" }
+        assertEquals(4, p.daysPerWeek)
+        p.toRoutines("es").forEach { r ->
+            val lifts = r.exercises.dropLast(1)
+            // Básicos pesados (6-8 reps) con descanso completo; nada de descansos cortos de definición
+            assertTrue(r.name, lifts.first().sets.first { it.type != com.bestrong.core.model.SetType.WARMUP }.reps in 6..8)
+            assertTrue(r.name, lifts.first().restSeconds >= 150)
+            assertTrue(r.name, lifts.all { it.restSeconds >= 60 })
+            // Cardio corto y suave: 10 min
+            assertEquals(10 * 60, r.exercises.last().sets.single().durationSec)
+        }
+        // Unas 10-14 series semanales por músculo grande (volumen moderado, sostenible en déficit)
+        val sets = p.routines.flatMap { it.items }.filter { it.exerciseId in setOf("bench_press", "db_incline_press", "dips") }.sumOf { it.sets }
+        assertTrue("$sets", sets in 10..14)
     }
 }

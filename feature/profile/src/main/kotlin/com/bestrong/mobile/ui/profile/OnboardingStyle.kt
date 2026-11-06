@@ -30,11 +30,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.mobile.shared.R
+import com.bestrong.mobile.ui.components.AccentPicker
 import com.bestrong.mobile.ui.components.STYLE_CARD_MIN_WIDTH
 import com.bestrong.mobile.ui.components.StyleGrid
 
 /**
- * Primer arranque, tras los permisos: elegir el estilo visual de la app y del reloj. Al tocar uno la app cambia al
+ * Primer arranque, tras los permisos: elegir el estilo visual de la app y del reloj y su color de acento. Al tocar uno la app cambia al
  * momento (se ve cómo queda); se puede cambiar cuando se quiera en Ajustes → Apariencia.
  */
 @Composable
@@ -71,8 +72,16 @@ fun OnboardingStyleDialog(vm: ProfileViewModel, onDone: () -> Unit) {
                     )
                     BoxWithConstraints(Modifier.widthIn(max = 720.dp).fillMaxWidth()) {
                         val columns = (maxWidth / STYLE_CARD_MIN_WIDTH).toInt().coerceIn(2, 3)
-                        StyleGrid(settings.appearance.style, { st -> vm.updateSettings { it.copy(appearance = it.appearance.copy(style = st)) } }, columns = columns)
+                        StyleGrid(settings.appearance.style, { st -> vm.updateSettings { it.copy(appearance = it.appearance.copy(style = st)) } }, columns = columns, accent = settings.appearance.accent)
                     }
+                    // Color de la app sobre el estilo elegido
+                    Text(
+                        stringResource(R.string.propuesta3_accent_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp).semantics { heading() },
+                    )
+                    AccentPicker(settings.appearance.style, settings.appearance.accent, { ac -> vm.updateSettings { it.copy(appearance = it.appearance.copy(accent = ac)) } })
                 }
                 Spacer(Modifier.height(12.dp))
                 Button(onClick = onDone, modifier = Modifier.fillMaxWidth().height(56.dp)) {
