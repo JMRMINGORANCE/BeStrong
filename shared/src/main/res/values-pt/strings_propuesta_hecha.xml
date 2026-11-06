@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Banner cuando se hace una propuesta que envió este usuario (una vez por propuesta). -->
+<resources>
+    <string name="implemented_banner_title">A tua proposta já é realidade!</string>
+    <string name="implemented_banner_text">Fizemos «%1$s», a melhoria que nos propuseste. Obrigado por ajudares a melhorar a BeStrong. Se ainda não a vês, atualiza a app.</string>
+    <string name="implemented_banner_ok">Fixe!</string>
+</resources>

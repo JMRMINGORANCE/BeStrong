@@ -20,6 +20,8 @@ import androidx.lifecycle.withResumed
 import com.bestrong.core.io.RoutineLink
 import com.bestrong.mobile.data.BeStrongRepository
 import com.bestrong.mobile.data.SettingsStore
+import com.bestrong.mobile.notify.ImplementedProposalBanner
+import com.bestrong.mobile.notify.ImplementedProposals
 import com.bestrong.mobile.ui.BeStrongApp
 import com.bestrong.mobile.ui.theme.BeStrongTheme
 import com.bestrong.mobile.ui.workout.RestPip
@@ -70,6 +72,9 @@ class MainActivity : ComponentActivity() {
 
     /** Versión nueva en Google Play: diálogo con «Actualizar» (y «Reiniciar» cuando se ha descargado). */
     private val updates = AppUpdates(this)
+
+    /** Propuestas de este usuario que ya se han hecho: banner una vez por propuesta. */
+    private val implemented = ImplementedProposals(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,12 +136,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** El aviso de versión nueva espera a que no haya un entreno en marcha (no interrumpe una serie). */
+    /** El aviso de versión nueva (y el de propuesta hecha) espera a que no haya un entreno en marcha (no interrumpe una serie). */
     @androidx.compose.runtime.Composable
     private fun UpdatePromptIfIdle() {
         val prompt by updates.prompt.collectAsStateWithLifecycle()
         val active by repository.activeWorkout.collectAsStateWithLifecycle()
         if (active == null) UpdateDialog(prompt, updates)
+        // El banner de propuesta hecha tampoco interrumpe un entreno ni se pone encima del aviso de versión
+        val proposal by implemented.banner.collectAsStateWithLifecycle()
+        if (active == null && prompt == com.bestrong.mobile.update.UpdatePrompt.None) ImplementedProposalBanner(proposal, implemented::dismiss)
     }
 
     private fun updatePipParams(active: Boolean) {

@@ -1,9 +1,1 @@
-- Al empezar, activa los permisos en una sola pantalla
-- Ajustes ordenados por apartados
-- Nueva pantalla «Permisos y conexiones»: actívalo todo de un toque
-- Pestaña Comunidad: propón mejoras y sigue sus respuestas
-- Cronómetro de cardio y cambio de ejercicio desde el reloj
-- Avisos del equipo con las novedades
-- Aviso de versión nueva con botón para actualizar
-- Nuevo objetivo y programa de recomposición corporal
-- Elige el color de la app: azul, verde, morado o rosa
+- Cuando hagamos una mejora que propusiste, te avisamos con un banner en la app
