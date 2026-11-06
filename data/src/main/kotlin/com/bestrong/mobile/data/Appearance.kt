@@ -12,6 +12,12 @@ enum class VisualStyle(val dark: Boolean) {
     TITANIO_BLANCO(false),
 }
 
+/**
+ * Color de acento sobre el estilo elegido (botones, acción en curso, selección). [ORIGINAL] deja el del estilo (rojo en
+ * Carbono, naranja en Titanio Blanco); los demás lo cambian manteniendo el resto de la paleta.
+ */
+enum class AccentColor { ORIGINAL, AZUL, VERDE, MORADO, ROSA }
+
 /** Opciones de apariencia y accesibilidad (Perfil → Apariencia). */
 data class Appearance(
     val amoled: Boolean = false,
@@ -19,4 +25,5 @@ data class Appearance(
     val colorblind: Boolean = false,
     val font: AppFont = AppFont.SYSTEM,
     val style: VisualStyle = VisualStyle.CARBONO,
+    val accent: AccentColor = AccentColor.ORIGINAL,
 )

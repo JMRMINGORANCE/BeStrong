@@ -439,7 +439,7 @@ private fun SetupPage(
     }
 }
 
-/** «¿Cuál es tu objetivo?»: ganar músculo, fuerza, perder grasa, resistencia o salud. */
+/** «¿Cuál es tu objetivo?»: ganar músculo, recomposición, fuerza, perder grasa, resistencia o salud. */
 @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 private fun TrainingGoalChoice(selected: com.bestrong.core.training.Goal, onChange: (com.bestrong.core.training.Goal) -> Unit) {
@@ -454,6 +454,7 @@ private fun TrainingGoalChoice(selected: com.bestrong.core.training.Goal, onChan
 /** Los objetivos con su nombre, en el orden en que se ofrecen. */
 fun trainingGoals(): List<Pair<com.bestrong.core.training.Goal, Int>> = listOf(
     com.bestrong.core.training.Goal.HYPERTROPHY to R.string.goal_muscle,
+    com.bestrong.core.training.Goal.RECOMPOSITION to R.string.goal_recomposition,
     com.bestrong.core.training.Goal.FAT_LOSS to R.string.goal_fat_loss,
     com.bestrong.core.training.Goal.STRENGTH to R.string.goal_strength,
     com.bestrong.core.training.Goal.ENDURANCE to R.string.goal_endurance,

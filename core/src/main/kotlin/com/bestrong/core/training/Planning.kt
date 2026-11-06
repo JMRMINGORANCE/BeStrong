@@ -13,8 +13,11 @@ import com.bestrong.core.stats.WorkoutStats
 
 // --- Generador de rutinas ----------------------------------------------------------------------
 
-/** Objetivo de la persona: cambia el reparto de días, las series × reps, los descansos y si hay remate de cardio. */
-enum class Goal { STRENGTH, HYPERTROPHY, FAT_LOSS, ENDURANCE, GENERAL }
+/**
+ * Objetivo de la persona: cambia el reparto de días, las series × reps, los descansos y si hay remate de cardio.
+ * [RECOMPOSITION]: ganar músculo y perder grasa a la vez (en ligero déficit o mantenimiento).
+ */
+enum class Goal { STRENGTH, HYPERTROPHY, FAT_LOSS, ENDURANCE, GENERAL, RECOMPOSITION }
 
 /** Experiencia: cambia cuántas series se hacen (menos al empezar, más con años de gimnasio). */
 enum class Level(val extraSets: Int) { BEGINNER(-1), INTERMEDIATE(0), ADVANCED(1) }
@@ -100,7 +103,8 @@ object RoutineGenerator {
     /**
      * Qué toca cada día según los días y el objetivo: cuerpo completo con pocos días; con más, divisiones que dejan
      * descansar cada músculo y lo entrenan dos veces por semana (para ganar músculo, torso/pierna/completo con 3 días
-     * y empuje/tirón/pierna con 5-6; para fuerza, torso/pierna y cuerpo completo para repetir los básicos).
+     * y empuje/tirón/pierna con 5-6; para fuerza, torso/pierna y cuerpo completo para repetir los básicos). La
+     * recomposición reparte como ganar músculo con 3 días y, con más, torso/pierna/completo para repetir los básicos.
      */
     fun split(days: Int, goal: Goal = Goal.HYPERTROPHY, limitedEquipment: Boolean = false): List<String> =
         // Sin pesas no hay ejercicios para llenar un día de tirón o de empuje: se reparte como para salud
@@ -110,7 +114,7 @@ object RoutineGenerator {
         1 -> listOf("full")
         2 -> listOf("full", "full")
         // Empuje/tirón/pierna en 3 días entrena cada músculo una sola vez: mejor dos veces
-        3 -> if (goal == Goal.HYPERTROPHY) listOf("upper", "lower", "full") else listOf("full", "full", "full")
+        3 -> if (goal == Goal.HYPERTROPHY || goal == Goal.RECOMPOSITION) listOf("upper", "lower", "full") else listOf("full", "full", "full")
         4 -> listOf("upper", "lower", "upper", "lower")
         5 -> when (goal) {
             Goal.HYPERTROPHY -> listOf("upper", "lower", "push", "pull", "legs")
@@ -133,6 +137,8 @@ object RoutineGenerator {
         Goal.FAT_LOSS -> Prescription(3, 10, 60)
         Goal.ENDURANCE -> Prescription(3, 15, 45)
         Goal.GENERAL -> Prescription(3, 10, 90)
+        // Recomposición: la carga manda (6 reps a 1-3 del fallo) y descansos completos para no perderla en déficit
+        Goal.RECOMPOSITION -> Prescription(4, 6, 150)
     }
 
     /** El resto (accesorios). */
@@ -142,6 +148,8 @@ object RoutineGenerator {
         Goal.FAT_LOSS -> Prescription(3, 12, 45)
         Goal.ENDURANCE -> Prescription(3, 20, 30)
         Goal.GENERAL -> Prescription(3, 12, 60)
+        // Volumen moderado (sostenible con menos calorías) y sin superseries: 8-12 reps con descanso suficiente
+        Goal.RECOMPOSITION -> Prescription(3, 10, 90)
     }
 
     /** Series según el nivel (siempre al menos 2). */
@@ -153,7 +161,8 @@ object RoutineGenerator {
     /**
      * Minutos de cardio al final de la sesión: para perder grasa o ganar resistencia, una cuarta parte de la sesión
      * (entre 10 y 20 min; 25 en resistencia), a múltiplos de 5. Para salud, 10 min si la sesión da para ello
-     * (hacia los 150 min semanales de actividad aeróbica). 0 con otros objetivos.
+     * (hacia los 150 min semanales de actividad aeróbica). En recomposición, 10 min de cardio suave solo si la sesión
+     * es de una hora o más (con menos, el tiempo es para las pesas). 0 con otros objetivos.
      */
     fun cardioMinutes(goal: Goal, minutesPerSession: Int): Int {
         val scaled = ((minutesPerSession / 4 + 2) / 5 * 5)
@@ -161,6 +170,7 @@ object RoutineGenerator {
             Goal.FAT_LOSS -> scaled.coerceIn(CARDIO_MIN, CARDIO_MAX_FAT_LOSS)
             Goal.ENDURANCE -> scaled.coerceIn(CARDIO_MIN, CARDIO_MAX_ENDURANCE)
             Goal.GENERAL -> if (minutesPerSession >= CARDIO_GENERAL_FROM) CARDIO_MIN else 0
+            Goal.RECOMPOSITION -> if (minutesPerSession >= CARDIO_RECOMPOSITION_FROM) CARDIO_MIN else 0
             else -> 0
         }
     }
@@ -185,6 +195,7 @@ object RoutineGenerator {
     private val CARDIO_FREE = listOf("walking", "jump_rope", "running")
     private const val CARDIO_MIN = 10
     private const val CARDIO_GENERAL_FROM = 45
+    private const val CARDIO_RECOMPOSITION_FROM = 60
     private const val CARDIO_MAX_FAT_LOSS = 20
     private const val CARDIO_MAX_ENDURANCE = 25
 
@@ -291,6 +302,7 @@ object ProgramGenerator {
         Goal.FAT_LOSS to ("Definición" to "Fat loss"),
         Goal.ENDURANCE to ("Resistencia" to "Endurance"),
         Goal.GENERAL to ("Forma física" to "Fitness"),
+        Goal.RECOMPOSITION to ("Recomposición" to "Recomposition"),
     )
 
     /** Nombre y descripción a medida (para los idiomas que no son español ni inglés): días, básicos y accesorios. */

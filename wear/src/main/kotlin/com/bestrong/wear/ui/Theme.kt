@@ -41,7 +41,7 @@ val LocalWeightUnit = staticCompositionLocalOf { WeightUnit.KG }
  * Colores del reloj para cada estilo del móvil. El fondo sigue negro (pantalla OLED, batería) también en los estilos
  * claros: del estilo se toman el acento y los contenedores.
  */
-private fun wearColors(style: String): ColorScheme {
+private fun wearColors(style: String, accent: String): ColorScheme {
     fun scheme(primary: Long, onPrimary: Long, container: Long, onContainer: Long, secondary: Long, onSecondary: Long, surface: Long) = ColorScheme(
         primary = Color(primary),
         onPrimary = Color(onPrimary),
@@ -53,15 +53,25 @@ private fun wearColors(style: String): ColorScheme {
         onTertiary = Color.Black,
         surfaceContainer = Color(surface),
     )
-    return when (style) {
-        "TITANIO_BLANCO" -> scheme(0xFFD9480F, 0xFFFFFFFF, 0xFF6B2A0A, 0xFFFFDBCA, 0xFFFFB547, 0xFF2A1A00, 0xFF222326)
-        // Carbono (también si llega un nombre desconocido)
-        else -> scheme(0xFFE10600, 0xFFFFFFFF, 0xFF4A0703, 0xFFFFDAD5, 0xFFFFB547, 0xFF2A1A00, 0xFF151517)
+    val titanio = style == "TITANIO_BLANCO"
+    val surface = if (titanio) 0xFF222326 else 0xFF151517
+    // Acento elegido en el móvil (con fondo negro siempre se usan sus tonos oscuros). El verde no se aplica en el
+    // reloj: es el color de «hecho» y en la pantalla pequeña acción y hecho se confundirían
+    return when (accent) {
+        "AZUL" -> scheme(0xFF2F80FF, 0xFFFFFFFF, 0xFF0A2A5C, 0xFFD6E3FF, 0xFFFFB547, 0xFF2A1A00, surface)
+        "MORADO" -> scheme(0xFF9B5CFF, 0xFFFFFFFF, 0xFF2E1260, 0xFFEBDDFF, 0xFFFFB547, 0xFF2A1A00, surface)
+        "ROSA" -> scheme(0xFFFF3D8B, 0xFFFFFFFF, 0xFF5C0A2E, 0xFFFFD9E4, 0xFFFFB547, 0xFF2A1A00, surface)
+        else -> if (titanio) {
+            scheme(0xFFD9480F, 0xFFFFFFFF, 0xFF6B2A0A, 0xFFFFDBCA, 0xFFFFB547, 0xFF2A1A00, surface)
+        } else {
+            // Carbono (también si llega un nombre desconocido)
+            scheme(0xFFE10600, 0xFFFFFFFF, 0xFF4A0703, 0xFFFFDAD5, 0xFFFFB547, 0xFF2A1A00, surface)
+        }
     }
 }
 
 /** Material 3 para Wear OS con los colores del estilo elegido en el móvil. */
 @Composable
-fun BeStrongWearTheme(style: String = "CARBONO", content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = wearColors(style), content = content)
+fun BeStrongWearTheme(style: String = "CARBONO", accent: String = "ORIGINAL", content: @Composable () -> Unit) {
+    MaterialTheme(colorScheme = wearColors(style, accent), content = content)
 }

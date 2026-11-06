@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.bestrong.mobile.data.AccentColor
 import com.bestrong.mobile.data.VisualStyle
 import com.bestrong.mobile.shared.R
 
@@ -79,6 +80,43 @@ internal fun styleScheme(style: VisualStyle): ColorScheme = when (style) {
     )
 }
 
+/** Tonos de un acento: el color, el texto encima, su contenedor y el texto del contenedor. */
+private class AccentTones(val main: Long, val on: Long, val container: Long, val onContainer: Long)
+
+/** Tonos del acento para el estilo oscuro (Carbono) o claro (Titanio Blanco); null = el del estilo. */
+private fun accentTones(accent: AccentColor, dark: Boolean): AccentTones? = when (accent) {
+    AccentColor.ORIGINAL -> null
+    AccentColor.AZUL -> if (dark) AccentTones(0xFF2F80FF, 0xFFFFFFFF, 0xFF0A2A5C, 0xFFD6E3FF) else AccentTones(0xFF1F5FD6, 0xFFFFFFFF, 0xFFD8E2FF, 0xFF001A41)
+    AccentColor.VERDE -> if (dark) AccentTones(0xFF00C46A, 0xFF00210F, 0xFF0B3F24, 0xFFB8F5D0) else AccentTones(0xFF1E8E4E, 0xFFFFFFFF, 0xFFD3EEDC, 0xFF0D3A1B)
+    AccentColor.MORADO -> if (dark) AccentTones(0xFF9B5CFF, 0xFFFFFFFF, 0xFF2E1260, 0xFFEBDDFF) else AccentTones(0xFF6B3FD4, 0xFFFFFFFF, 0xFFE8DDFF, 0xFF21005D)
+    AccentColor.ROSA -> if (dark) AccentTones(0xFFFF3D8B, 0xFFFFFFFF, 0xFF5C0A2E, 0xFFFFD9E4) else AccentTones(0xFFC2185B, 0xFFFFFFFF, 0xFFFFD9E2, 0xFF3E001D)
+}
+
+/**
+ * La paleta del estilo con el acento elegido: cambia la acción (primary y sus contenedores) y deja igual récord y
+ * fondo. Con el acento verde, «hecho» (tertiary, verde) pasa a azul cian para que acción y hecho no se confundan.
+ */
+internal fun styleScheme(style: VisualStyle, accent: AccentColor): ColorScheme {
+    val base = styleScheme(style)
+    val t = accentTones(accent, style.dark) ?: return base
+    val withAccent = base.copy(
+        primary = Color(t.main),
+        onPrimary = Color(t.on),
+        primaryContainer = Color(t.container),
+        onPrimaryContainer = Color(t.onContainer),
+        secondaryContainer = Color(t.main),
+        onSecondaryContainer = Color(t.on),
+    )
+    return when {
+        accent != AccentColor.VERDE -> withAccent
+        style.dark -> withAccent.copy(tertiary = Color(0xFF3DB8FF), onTertiary = Color(0xFF00213A), tertiaryContainer = Color(0xFF0A3550), onTertiaryContainer = Color(0xFFCDEBFF))
+        else -> withAccent.copy(tertiary = Color(0xFF0B6E99), onTertiary = Color.White, tertiaryContainer = Color(0xFFCDE8F5), onTertiaryContainer = Color(0xFF00293D))
+    }
+}
+
+/** Color con el que se pinta cada acento en el selector (el del estilo para [AccentColor.ORIGINAL]). */
+fun accentSwatch(style: VisualStyle, accent: AccentColor): Color = styleScheme(style, accent).primary
+
 /** Letra de los títulos y las cifras grandes de cada estilo (el cuerpo sigue con la del sistema, más legible). */
 internal fun styleDisplayFont(style: VisualStyle): FontFamily = when (style) {
     VisualStyle.CARBONO -> FontFamily(Font(R.font.style_carbono_bold, FontWeight.Bold), Font(R.font.style_carbono_black, FontWeight.Black))
@@ -117,8 +155,8 @@ private fun shapes(xs: Int, s: Int, m: Int, l: Int, xl: Int) = Shapes(
 /** Muestra de colores para el selector de estilo: fondo, tarjeta, acento y texto. */
 data class StyleSwatch(val background: Color, val card: Color, val accent: Color, val text: Color, val muted: Color)
 
-fun styleSwatch(style: VisualStyle): StyleSwatch {
-    val s = styleScheme(style)
+fun styleSwatch(style: VisualStyle, accent: AccentColor = AccentColor.ORIGINAL): StyleSwatch {
+    val s = styleScheme(style, accent)
     return StyleSwatch(s.background, s.surfaceContainer, s.primary, s.onSurface, s.onSurfaceVariant)
 }
 

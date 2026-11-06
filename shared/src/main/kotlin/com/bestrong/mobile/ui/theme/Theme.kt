@@ -157,9 +157,9 @@ private fun Typography.withFont(family: FontFamily?): Typography {
 /** Colores de marca (o el acento elegido), con modo AMOLED, alto contraste y letra accesible. Paleta en :designsystem. */
 @Composable
 fun BeStrongTheme(appearance: Appearance = Appearance(), content: @Composable () -> Unit) {
-    // El estilo elegido (Carbono o Titanio Blanco) trae su paleta, oscura o clara
+    // El estilo elegido (Carbono o Titanio Blanco) trae su paleta, oscura o clara, con el acento elegido encima
     val dark = appearance.style.dark
-    var scheme = styleScheme(appearance.style)
+    var scheme = styleScheme(appearance.style, appearance.accent)
     if (dark && appearance.amoled) scheme = scheme.amoled()
     if (appearance.highContrast) scheme = scheme.highContrast(dark)
     val family = when (appearance.font) {

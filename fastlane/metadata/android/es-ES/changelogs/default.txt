@@ -1,5 +1,3 @@
-- Arreglado: conectar con Health Connect no hacía nada; ahora abre sus permisos
-- Nuevo diseño más limpio, en claro y en oscuro
 - Al empezar, activa los permisos en una sola pantalla
 - Ajustes ordenados por apartados
 - Nueva pantalla «Permisos y conexiones»: actívalo todo de un toque
@@ -7,3 +5,5 @@
 - Cronómetro de cardio y cambio de ejercicio desde el reloj
 - Avisos del equipo con las novedades
 - Aviso de versión nueva con botón para actualizar
+- Nuevo objetivo y programa de recomposición corporal
+- Elige el color de la app: azul, verde, morado o rosa

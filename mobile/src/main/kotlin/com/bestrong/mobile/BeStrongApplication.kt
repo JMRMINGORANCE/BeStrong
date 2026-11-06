@@ -176,6 +176,7 @@ class AppSync @Inject constructor(
                 bestOneRepMaxKg = best1rm,
                 heaviestKg = heaviest,
                 visualStyle = s.appearance.style.name,
+                accentColor = s.appearance.accent.name,
                 nextExerciseCard = s.nextExerciseCard,
             )
         }.distinctUntilChanged()

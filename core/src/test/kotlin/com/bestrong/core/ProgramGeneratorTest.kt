@@ -46,6 +46,28 @@ class ProgramGeneratorTest {
         assertTrue(ProgramGenerator.build(3, Goal.STRENGTH, gym, 60).routines.none { r -> r.exercises.any { it.exercise.tracking == com.bestrong.core.model.TrackingType.CARDIO } })
     }
 
+    @Test fun recompositionPrescription() {
+        // Básicos 4×6 con descanso completo, accesorios 3×10, sin superseries y 10 min de cardio en sesiones de 1 h
+        assertEquals(com.bestrong.core.training.Prescription(4, 6, 150), RoutineGenerator.main(Goal.RECOMPOSITION))
+        assertEquals(com.bestrong.core.training.Prescription(3, 10, 90), RoutineGenerator.accessory(Goal.RECOMPOSITION))
+        assertEquals(listOf("upper", "lower", "full"), RoutineGenerator.split(3, Goal.RECOMPOSITION))
+        val p = ProgramGenerator.build(4, Goal.RECOMPOSITION, gym, 60)
+        assertEquals(4, p.routines.size)
+        p.routines.forEach { r ->
+            val lifts = r.exercises.dropLast(1)
+            assertTrue(r.name, lifts.size >= 3)
+            assertEquals(6, lifts.first().sets.first().reps)
+            assertTrue(r.name, lifts.all { it.restSeconds >= 90 && it.supersetId == null })
+            assertEquals(com.bestrong.core.model.TrackingType.CARDIO, r.exercises.last().exercise.tracking)
+            assertEquals(10 * 60, r.exercises.last().sets.single().durationSec)
+        }
+        assertTrue(p.description.contains("10 min"))
+        // Con 45 min el tiempo es para las pesas: sin cardio ni burpees
+        assertEquals(0, RoutineGenerator.cardioMinutes(Goal.RECOMPOSITION, 45))
+        val short = ProgramGenerator.build(3, Goal.RECOMPOSITION, gym, 45).routines
+        assertTrue(short.none { r -> r.exercises.any { it.exercise.tracking == com.bestrong.core.model.TrackingType.CARDIO || it.exercise.id == "burpee" } })
+    }
+
     @Test fun bodyweightOnlyUsesBodyweight() {
         // Salud: pesas solo de peso corporal y 10 min de cardio sin máquinas al final (caminar, comba, correr)
         val p = ProgramGenerator.build(4, Goal.GENERAL, setOf(Equipment.BODYWEIGHT), 45)

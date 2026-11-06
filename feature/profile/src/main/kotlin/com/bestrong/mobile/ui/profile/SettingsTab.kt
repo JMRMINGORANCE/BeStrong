@@ -359,8 +359,14 @@ private fun AppearancePage(vm: ProfileViewModel, onBack: () -> Unit) {
             SettingsGroup(stringResource(R.string.style_title), footer = stringResource(R.string.style_footer)) {
                 androidx.compose.foundation.layout.BoxWithConstraints(Modifier.padding(12.dp)) {
                     val columns = (maxWidth / com.bestrong.mobile.ui.components.STYLE_CARD_MIN_WIDTH).toInt().coerceIn(2, 3)
-                    com.bestrong.mobile.ui.components.StyleGrid(a.style, { st -> setA { it.copy(style = st) } }, columns = columns)
+                    com.bestrong.mobile.ui.components.StyleGrid(a.style, { st -> setA { it.copy(style = st) } }, columns = columns, accent = a.accent)
                 }
+            }
+        }
+        // Color de acento sobre el estilo (azul, verde, morado, rosa o el del estilo)
+        item {
+            SettingsGroup(stringResource(R.string.propuesta3_accent_title), footer = stringResource(R.string.propuesta3_accent_footer)) {
+                com.bestrong.mobile.ui.components.AccentPicker(a.style, a.accent, { ac -> setA { it.copy(accent = ac) } }, Modifier.padding(12.dp))
             }
         }
         // Negro puro solo tiene sentido en el estilo oscuro (con el claro el grupo quedaría vacío)
