@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.wear.WearUiTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-06T21:06:40.845Z" hostname="runnervmwuk1x" time="6.854">
+  <properties/>
+  <testcase name="create_routine_on_watch" classname="com.bestrong.wear.WearUiTest" time="1.16"/>
+  <testcase name="cardio_and_new_routine" classname="com.bestrong.wear.WearUiTest" time="0.738"/>
+  <testcase name="flow" classname="com.bestrong.wear.WearUiTest" time="2.203"/>
+  <testcase name="menu_and_info" classname="com.bestrong.wear.WearUiTest" time="2.75"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Intent = Intent { act=androidx.wear.tiles.action.REQUEST_TILE_UPDATE pkg=com.copidev.bestrong }; Matching wrappers: []
+Intent = Intent { act=androidx.wear.tiles.action.REQUEST_TILE_UPDATE pkg=com.copidev.bestrong }; Matching wrappers: []
+Intent = Intent { act=android.support.wearable.complications.ACTION_REQUEST_UPDATE_ALL pkg=com.google.android.wearable.app (has extras) }; Matching wrappers: []
+Intent = Intent { act=android.support.wearable.complications.ACTION_REQUEST_UPDATE_ALL pkg=com.google.android.wearable.app (has extras) }; Matching wrappers: []
+Intent = Intent { act=android.support.wearable.complications.ACTION_REQUEST_UPDATE_ALL pkg=com.google.android.wearable.app (has extras) }; Matching wrappers: []
+Intent = Intent { act=android.support.wearable.complications.ACTION_REQUEST_UPDATE_ALL pkg=com.google.android.wearable.app (has extras) }; Matching wrappers: []
+]]></system-err>
+</testsuite>

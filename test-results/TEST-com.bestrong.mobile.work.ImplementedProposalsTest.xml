@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.mobile.work.ImplementedProposalsTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-06T21:09:19.334Z" hostname="runnervmwuk1x" time="0.131">
+  <properties/>
+  <testcase name="eachOnlyOnce" classname="com.bestrong.mobile.work.ImplementedProposalsTest" time="0.052"/>
+  <testcase name="onlyImplementedOldestFirst" classname="com.bestrong.mobile.work.ImplementedProposalsTest" time="0.04"/>
+  <testcase name="emptyOrBrokenResponse" classname="com.bestrong.mobile.work.ImplementedProposalsTest" time="0.036"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
