@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.filled.Balance
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FitnessCenter
@@ -78,6 +79,8 @@ private data class GoalOption(val goal: Goal, val icon: ImageVector, val title: 
 
 private val GOALS = listOf(
     GoalOption(Goal.HYPERTROPHY, Icons.Default.FitnessCenter, R.string.goal_muscle, R.string.goal_hypertrophy_desc),
+    // Ganar músculo y perder grasa a la vez, justo después de ganar músculo (el más parecido)
+    GoalOption(Goal.RECOMPOSITION, Icons.Default.Balance, R.string.goal_recomposition, R.string.goal_recomposition_desc),
     GoalOption(Goal.STRENGTH, Icons.Default.SportsGymnastics, R.string.goal_strength, R.string.goal_strength_desc),
     GoalOption(Goal.FAT_LOSS, Icons.Default.LocalFireDepartment, R.string.goal_fat_loss, R.string.goal_fat_loss_desc),
     GoalOption(Goal.ENDURANCE, Icons.AutoMirrored.Filled.DirectionsRun, R.string.goal_endurance, R.string.goal_endurance_desc),
