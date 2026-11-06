@@ -230,6 +230,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             colorblind = prefs.getBoolean("colorblind", false),
             font = enumOr("font", AppFont.SYSTEM),
             style = enumOr("visual_style", VisualStyle.CARBONO),
+            accent = enumOr("accent_color", AccentColor.ORIGINAL),
         ),
         restVibration = enumOr("rest_vibration", VibrationStyle.TRIPLE),
         bodyUnit = prefs.getString("body_unit", null)?.let { runCatching { WeightUnit.valueOf(it) }.getOrNull() },
@@ -316,6 +317,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
             putBoolean("colorblind", s.appearance.colorblind)
             putString("font", s.appearance.font.name)
             putString("visual_style", s.appearance.style.name)
+            putString("accent_color", s.appearance.accent.name)
             putString("rest_vibration", s.restVibration.name)
             putGoals(s)
             putInt("weekly_sets_target", s.weeklySetsTarget)
