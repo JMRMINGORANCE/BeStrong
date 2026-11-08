@@ -192,6 +192,7 @@ fun HistoryScreen(
                                 stringResource(R.string.history_empty_title),
                                 stringResource(R.string.history_empty_body),
                                 action = stringResource(R.string.history_empty_action) to onGoTrain,
+                                footer = { com.bestrong.mobile.community.ProposalNudge(R.string.ideas_nudge_history) },
                             )
                             return@Column
                         }

@@ -118,6 +118,8 @@ fun WorkoutSummaryDialog(
                 Column(Modifier.fillMaxWidth()) { SessionRatingPicker(onRate) }
                 RoutineButton(summary, onSaveRoutine, onUpdateRoutine)
                 TextButton(onClick = onShareText, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text(stringResource(R.string.share_as_text)) }
+                // En un buen momento (hito o récord) se pide una idea; si no, solo una línea discreta
+                com.bestrong.mobile.community.SummaryProposalPrompt(w.id, hasRecords)
             }
             SummaryActions(onShare, onDone)
         }
