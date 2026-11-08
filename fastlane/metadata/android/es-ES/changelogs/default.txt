@@ -1,1 +1,1 @@
-- Cuando hagamos una mejora que propusiste, te avisamos con un banner en la app
+- Si hacemos una mejora que propusiste, te avisamos también con una notificación aunque no abras la app

@@ -78,6 +78,8 @@ class AppSync @Inject constructor(
         runCatching { WeeklySummaryWorker.schedule(context) }
         // Avisos del equipo (cada pocas horas, solo con conexión)
         runCatching { AnnouncementsWorker.schedule(context) }
+        // Propuestas de este usuario que ya se han hecho: notificación con la app cerrada (una vez por propuesta)
+        runCatching { com.bestrong.mobile.notify.ImplementedProposalsWorker.schedule(context) }
     }
 
     private suspend fun scheduleCardioNudge() =

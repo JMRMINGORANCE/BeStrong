@@ -48,11 +48,12 @@ data class ImplementedProposal(val number: Int, val title: String)
 
 /**
  * Aviso dentro de la app cuando se hace una propuesta que envió este usuario: un banner arriba, una sola vez por
- * propuesta. Solo pregunta al buzón si este móvil ha enviado alguna propuesta (si no, no hay identificador y no se
- * hace nada) y como mucho cada [MIN_GAP_MS]. Usa la misma petición que Perfil › Comunidad: no envía nada nuevo.
+ * propuesta (con la app cerrada avisa [ImplementedProposalsWorker] con una notificación). Solo pregunta al buzón si
+ * este móvil ha enviado alguna propuesta (si no, no hay identificador y no se hace nada) y como mucho cada
+ * [MIN_GAP_MS]. Usa la misma petición que Perfil › Comunidad: no envía nada nuevo.
  */
 class ImplementedProposals(private val activity: ComponentActivity) : DefaultLifecycleObserver {
-    private val prefs by lazy { activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
+    private val prefs by lazy { storeOf(activity) }
     private val _banner = MutableStateFlow<ImplementedProposal?>(null)
 
     /** La propuesta que toca enseñar ahora (la más antigua sin enseñar), o null. */
@@ -65,30 +66,22 @@ class ImplementedProposals(private val activity: ComponentActivity) : DefaultLif
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        val device = prefs.getString(KEY_DEVICE, null) ?: return
+        val device = device(activity) ?: return
         val last = prefs.getLong(KEY_LAST_CHECK, 0)
         if (job?.isActive == true || System.currentTimeMillis() - last < MIN_GAP_MS) return
         job = activity.lifecycleScope.launch {
             val list = withContext(Dispatchers.IO) { runCatching { fetch(device) }.getOrNull() } ?: return@launch
             prefs.edit().putLong(KEY_LAST_CHECK, System.currentTimeMillis()).apply()
-            pending = toShow(list, shown())
+            pending = toShow(list, shown(activity))
             _banner.value = pending.firstOrNull()
         }
     }
 
     /** «Genial» o cerrar: no se vuelve a enseñar esa propuesta; si hay otra, sale después. */
     fun dismiss(number: Int) {
-        prefs.edit().putStringSet(KEY_SHOWN, shown().map { it.toString() }.toSet() + number.toString()).apply()
+        markShown(activity, number)
         pending = pending.filter { it.number != number }
         _banner.value = pending.firstOrNull()
-    }
-
-    private fun shown(): Set<Int> = prefs.getStringSet(KEY_SHOWN, emptySet()).orEmpty().mapNotNull { it.toIntOrNull() }.toSet()
-
-    private fun fetch(device: String): List<Pair<ImplementedProposal, String>>? {
-        val id = URLEncoder.encode(device, "UTF-8")
-        val json = JSONObject(AppsScript.request(URL("${AppsScript.ENDPOINT}?key=${AppsScript.APP_KEY}&device=$id"), null))
-        return if (json.optBoolean("ok")) parse(json) else null
     }
 
     companion object {
@@ -100,6 +93,25 @@ class ImplementedProposals(private val activity: ComponentActivity) : DefaultLif
         private const val MIN_GAP_MS = 3 * 60 * 60 * 1000L
         private const val MAX_TITLE = 80
         const val IMPLEMENTED = "implementada"
+
+        private fun storeOf(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+        /** Identificador de esta instalación en el buzón; null si nunca ha enviado una propuesta. */
+        fun device(context: Context): String? = storeOf(context).getString(KEY_DEVICE, null)
+
+        /** Propuestas ya avisadas (con el banner o con una notificación): cada una solo una vez. */
+        fun shown(context: Context): Set<Int> = storeOf(context).getStringSet(KEY_SHOWN, emptySet()).orEmpty().mapNotNull { it.toIntOrNull() }.toSet()
+
+        fun markShown(context: Context, number: Int) {
+            storeOf(context).edit().putStringSet(KEY_SHOWN, shown(context).map { it.toString() }.toSet() + number.toString()).apply()
+        }
+
+        /** Lista de propuestas de este dispositivo (la misma petición que Perfil › Comunidad); null si falla. */
+        fun fetch(device: String): List<Pair<ImplementedProposal, String>>? {
+            val id = URLEncoder.encode(device, "UTF-8")
+            val json = JSONObject(AppsScript.request(URL("${AppsScript.ENDPOINT}?key=${AppsScript.APP_KEY}&device=$id"), null))
+            return if (json.optBoolean("ok")) parse(json) else null
+        }
 
         /** Respuesta del script: {ok, proposals:[{number, title, status}]} → (propuesta, estado). */
         fun parse(json: JSONObject): List<Pair<ImplementedProposal, String>> {
