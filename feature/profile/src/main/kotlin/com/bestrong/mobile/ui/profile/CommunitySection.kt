@@ -136,6 +136,7 @@ fun CommunityDialog(onPropose: () -> Unit, onMine: () -> Unit, onDismiss: () -> 
                 Box(Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
                     Column(Modifier.widthIn(max = 720.dp).padding(horizontal = 20.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         CommunitySection(onPropose, onMine)
+                        CommunityIdeasPanel()
                         AnnouncementsPanel(announcements)
                     }
                 }
@@ -146,7 +147,7 @@ fun CommunityDialog(onPropose: () -> Unit, onMine: () -> Unit, onDismiss: () -> 
 
 /** Avisos del equipo, el más reciente primero; sin ninguno, se explica dónde llegarán. */
 @Composable
-private fun AnnouncementsPanel(list: List<com.bestrong.mobile.notify.Announcement>) {
+internal fun AnnouncementsPanel(list: List<com.bestrong.mobile.notify.Announcement>) {
     com.bestrong.mobile.ui.components.Panel {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {

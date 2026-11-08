@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -80,6 +81,9 @@ enum class TopLevel(val route: String, @StringRes val label: Int, val icon: Imag
     TRAIN("train", R.string.nav_today, Icons.Default.Bolt),
     HISTORY("history", R.string.nav_progress, Icons.Default.BarChart),
     EXERCISES("exercises", R.string.nav_library, Icons.Default.Layers),
+
+    /** Ideas: el buzón de propuestas a mano, con un punto si el equipo ha respondido. */
+    IDEAS("ideas", R.string.nav_ideas, Icons.Default.Lightbulb),
 }
 
 private object Routes {
@@ -122,6 +126,14 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
     val appVm: AppViewModel = hiltViewModel()
     val settings by appVm.settings.collectAsStateWithLifecycle()
     val request by launchRequest.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val unreadReplies by remember { com.bestrong.mobile.community.ProposalsInbox.unread(context) }.collectAsStateWithLifecycle()
+
+    // Buzón de ideas, que se puede abrir desde cualquier pantalla (pestaña Ideas, fin del entreno, pantallas vacías…)
+    var proposalRequest by remember { mutableStateOf<com.bestrong.mobile.community.ProposalRequest?>(null) }
+    proposalRequest?.let { r ->
+        com.bestrong.mobile.ui.profile.ProposalsDialog(initialTab = r.tab, initialCategory = r.category, initialTitle = r.title) { proposalRequest = null }
+    }
 
     // Tras la bienvenida del primer arranque, los permisos (notificaciones y Health Connect) en una pantalla
     var askPermissions by rememberSaveable { mutableStateOf(false) }
@@ -165,7 +177,9 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                 onSex = { sex -> appVm.update { it.copy(sex = sex) } },
             )
         } else if (settings.lastSeenVersion < BuildConfig.VERSION_CODE) {
-            WhatsNewDialog { appVm.update { it.copy(lastSeenVersion = BuildConfig.VERSION_CODE) } }
+            WhatsNewDialog(onPropose = { proposalRequest = com.bestrong.mobile.community.ProposalRequest() }) {
+                appVm.update { it.copy(lastSeenVersion = BuildConfig.VERSION_CODE) }
+            }
         }
     }
 
@@ -212,6 +226,7 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
         com.bestrong.mobile.ui.components.LocalDumbbellTotal provides settings.dumbbellTotal,
         LocalBodyUnit provides (settings.bodyUnit ?: settings.unit),
         LocalSetColumns provides SetColumns(settings.showPreviousColumn, settings.showComparison),
+        com.bestrong.mobile.community.LocalOpenProposals provides { r: com.bestrong.mobile.community.ProposalRequest -> proposalRequest = r },
         LocalAppInfo provides AppInfo(BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE, BuildConfig.REPO_URL, BuildConfig.DONATION_URL),
         LocalTips provides Tips(settings.dismissedTips) { id ->
             // Al descartar uno, se olvidan los avisos con fecha que ya no pueden volver
@@ -238,8 +253,8 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
             ),
         )
         com.bestrong.mobile.ui.theme.ScreenBackdrop {
-            // Con letra muy grande no caben las tres etiquetas: solo la de la pestaña elegida
-            val navLabels = androidx.compose.ui.platform.LocalDensity.current.fontScale <= 1.5f
+            // Con letra grande no caben las cuatro etiquetas: solo la de la pestaña elegida
+            val navLabels = androidx.compose.ui.platform.LocalDensity.current.fontScale <= 1.3f
             NavigationSuiteScaffold(
                 layoutType = layoutType,
                 navigationSuiteColors = androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults.colors(
@@ -252,7 +267,17 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                             colors = itemColors,
                             selected = dest == topLevel,
                             onClick = { nav.navigateTopLevel(dest.route) },
-                            icon = { Icon(dest.icon, contentDescription = stringResource(dest.label)) },
+                            icon = {
+                                // Punto en Ideas cuando el equipo ha respondido a una propuesta y aún no se ha visto
+                                if (dest == TopLevel.IDEAS && unreadReplies) {
+                                    val badge = stringResource(R.string.ideas_unread_badge)
+                                    androidx.compose.material3.BadgedBox(badge = { androidx.compose.material3.Badge() }) {
+                                        Icon(dest.icon, contentDescription = "${stringResource(dest.label)}, $badge")
+                                    }
+                                } else {
+                                    Icon(dest.icon, contentDescription = stringResource(dest.label))
+                                }
+                            },
                             label = {
                                 Text(
                                     stringResource(dest.label).uppercase(),
@@ -295,6 +320,9 @@ fun BeStrongApp(launchRequest: StateFlow<LaunchRequest?>, onLaunchHandled: () ->
                                 onGoTrain = { nav.navigateTopLevel(TopLevel.TRAIN.route) },
                             ),
                         )
+                    }
+                    composable(TopLevel.IDEAS.route) {
+                        com.bestrong.mobile.ui.profile.IdeasScreen(onOpenProfile = { nav.navigate(Routes.PROFILE) { launchSingleTop = true } })
                     }
                     composable(Routes.SEARCH) {
                         com.bestrong.mobile.ui.home.UniversalSearchScreen(

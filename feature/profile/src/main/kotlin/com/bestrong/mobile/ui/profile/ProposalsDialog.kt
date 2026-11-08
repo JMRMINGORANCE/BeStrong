@@ -1,8 +1,11 @@
 package com.bestrong.mobile.ui.profile
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,13 +51,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.bestrong.mobile.community.ProposalCategory
+import com.bestrong.mobile.community.ProposalsInbox
 import com.bestrong.mobile.shared.R
 import kotlinx.coroutines.launch
 
-/** Buzón de ideas: proponer una mejora y ver las respuestas (se abre desde Perfil › Comunidad o el aviso de Ajustes). */
+/**
+ * Buzón de ideas: proponer una mejora y ver las respuestas (se abre desde la pestaña Ideas, Perfil › Comunidad, el
+ * resumen del entreno o las pantallas vacías). [initialCategory] e [initialTitle] dejan la propuesta empezada.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProposalsDialog(initialTab: Int = 0, onDismiss: () -> Unit) {
+fun ProposalsDialog(
+    initialTab: Int = 0,
+    initialCategory: ProposalCategory? = null,
+    initialTitle: String = "",
+    onDismiss: () -> Unit,
+) {
     var tab by rememberSaveable { mutableIntStateOf(initialTab) }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         // Fondo opaco: el tema deja transparente el de Scaffold y se veía la pantalla de detrás
@@ -74,7 +88,7 @@ fun ProposalsDialog(initialTab: Int = 0, onDismiss: () -> Unit) {
                     }
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
                         val content = Modifier.widthIn(max = 720.dp).fillMaxWidth()
-                        if (tab == 0) NewProposal(content, onSent = { tab = 1 }) else MyProposals(content)
+                        if (tab == 0) NewProposal(content, initialCategory, initialTitle, onSent = { tab = 1 }) else MyProposals(content)
                     }
                 }
             }
@@ -82,20 +96,48 @@ fun ProposalsDialog(initialTab: Int = 0, onDismiss: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun NewProposal(modifier: Modifier, onSent: () -> Unit) {
+private fun NewProposal(modifier: Modifier, initialCategory: ProposalCategory?, initialTitle: String, onSent: () -> Unit) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var title by rememberSaveable { mutableStateOf("") }
+    var category by rememberSaveable { mutableStateOf(initialCategory) }
+    var title by rememberSaveable { mutableStateOf(initialTitle.take(80)) }
     var what by rememberSaveable { mutableStateOf("") }
     var how by rememberSaveable { mutableStateOf("") }
     var sending by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     Column(modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.proposals_intro))
-        OutlinedTextField(title, { title = it.take(80) }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.proposals_field_title)) }, singleLine = true)
-        OutlinedTextField(what, { what = it.take(3000) }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.proposals_field_what)) }, minLines = 4)
+        // De qué trata, con un toque (opcional): ayuda a entenderla y cambia el ejemplo del título
+        Text(stringResource(R.string.ideas_cat_label), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ProposalCategory.entries.forEach { c ->
+                FilterChip(
+                    selected = category == c,
+                    onClick = { category = if (category == c) null else c },
+                    label = { Text(stringResource(c.label)) },
+                )
+            }
+        }
+        OutlinedTextField(
+            title,
+            { title = it.take(80) },
+            Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.proposals_field_title)) },
+            placeholder = { Text(stringResource(exampleTitle(category))) },
+            singleLine = true,
+        )
+        OutlinedTextField(
+            what,
+            { what = it.take(3000) },
+            Modifier.fillMaxWidth(),
+            label = { Text(stringResource(R.string.proposals_field_what)) },
+            placeholder = { Text(stringResource(R.string.ideas_example_what)) },
+            minLines = 4,
+        )
         OutlinedTextField(how, { how = it.take(3000) }, Modifier.fillMaxWidth(), label = { Text(stringResource(R.string.proposals_field_how)) }, minLines = 3)
+        Text(stringResource(R.string.ideas_no_account), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
         Text(stringResource(R.string.proposals_privacy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         error?.let { Text(errorText(it), color = MaterialTheme.colorScheme.error) }
         Button(
@@ -103,12 +145,15 @@ private fun NewProposal(modifier: Modifier, onSent: () -> Unit) {
                 sending = true
                 error = null
                 scope.launch {
-                    val result = ProposalsApi.send(context, title, what, how)
+                    // La categoría va como primera línea del texto (el buzón no tiene un campo para ella)
+                    val text = category?.let { "Tipo: ${it.tag}\n\n$what" } ?: what
+                    val result = ProposalsApi.send(context, title, text, how)
                     sending = false
                     if (result.ok) {
                         title = ""
                         what = ""
                         how = ""
+                        category = null
                         android.widget.Toast.makeText(context, R.string.proposals_sent, android.widget.Toast.LENGTH_LONG).show()
                         onSent()
                     } else {
@@ -132,6 +177,8 @@ private fun MyProposals(modifier: Modifier) {
         loading = true
         proposals = ProposalsApi.list(context)
         loading = false
+        // Abiertas: las respuestas del equipo quedan vistas (se apaga el punto de la pestaña Ideas)
+        proposals?.let { list -> ProposalsInbox.markSeen(context, list.associate { p -> p.number to p.messages.count { !it.fromUser } }) }
     }
     val list = proposals
     when {
@@ -192,6 +239,15 @@ private fun ProposalCard(proposal: Proposal, onReplied: () -> Unit) {
             }
         }
     }
+}
+
+@StringRes
+private fun exampleTitle(category: ProposalCategory?): Int = when (category) {
+    ProposalCategory.EXERCISE -> R.string.ideas_example_exercise
+    ProposalCategory.PROGRAM -> R.string.ideas_example_program
+    ProposalCategory.DESIGN -> R.string.ideas_example_design
+    ProposalCategory.BUG -> R.string.ideas_example_bug
+    ProposalCategory.OTHER, null -> R.string.ideas_example_other
 }
 
 @Composable
