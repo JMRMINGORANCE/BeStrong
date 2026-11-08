@@ -32,7 +32,7 @@ class ImplementedProposalsWorker(context: Context, params: WorkerParameters) : C
         val context = applicationContext
         val device = ImplementedProposals.device(context)
         // Sin conexión o sin respuesta del buzón (list = null): se prueba en la siguiente vuelta
-        val list = if (device != null && canNotify(context)) runCatching { ImplementedProposals.fetch(device) }.getOrNull() else null
+        val list = if (device != null && canNotify(context)) runCatching { ImplementedProposals.fetch(device, context) }.getOrNull() else null
         ImplementedProposals.toShow(list.orEmpty(), ImplementedProposals.shown(context)).forEach { p ->
             notify(context, p)
             ImplementedProposals.markShown(context, p.number)

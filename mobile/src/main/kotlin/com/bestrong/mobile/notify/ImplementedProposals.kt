@@ -31,6 +31,7 @@ import androidx.compose.ui.window.Popup
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.bestrong.mobile.community.ProposalsInbox
 import com.bestrong.mobile.net.AppsScript
 import com.bestrong.mobile.shared.R
 import java.net.URL
@@ -70,7 +71,7 @@ class ImplementedProposals(private val activity: ComponentActivity) : DefaultLif
         val last = prefs.getLong(KEY_LAST_CHECK, 0)
         if (job?.isActive == true || System.currentTimeMillis() - last < MIN_GAP_MS) return
         job = activity.lifecycleScope.launch {
-            val list = withContext(Dispatchers.IO) { runCatching { fetch(device) }.getOrNull() } ?: return@launch
+            val list = withContext(Dispatchers.IO) { runCatching { fetch(device, activity) }.getOrNull() } ?: return@launch
             prefs.edit().putLong(KEY_LAST_CHECK, System.currentTimeMillis()).apply()
             pending = toShow(list, shown(activity))
             _banner.value = pending.firstOrNull()
@@ -106,11 +107,27 @@ class ImplementedProposals(private val activity: ComponentActivity) : DefaultLif
             storeOf(context).edit().putStringSet(KEY_SHOWN, shown(context).map { it.toString() }.toSet() + number.toString()).apply()
         }
 
-        /** Lista de propuestas de este dispositivo (la misma petición que Perfil › Comunidad); null si falla. */
-        fun fetch(device: String): List<Pair<ImplementedProposal, String>>? {
+        /**
+         * Lista de propuestas de este dispositivo (la misma petición que Perfil › Comunidad); null si falla. Con
+         * [context], apunta también cuántos mensajes del equipo hay (el punto de «respuestas nuevas» en Ideas).
+         */
+        fun fetch(device: String, context: Context? = null): List<Pair<ImplementedProposal, String>>? {
             val id = URLEncoder.encode(device, "UTF-8")
             val json = JSONObject(AppsScript.request(URL("${AppsScript.ENDPOINT}?key=${AppsScript.APP_KEY}&device=$id"), null))
-            return if (json.optBoolean("ok")) parse(json) else null
+            if (!json.optBoolean("ok")) return null
+            context?.let { ProposalsInbox.updateLatest(it, teamMessages(json)) }
+            return parse(json)
+        }
+
+        /** Mensajes del equipo (no del usuario) por propuesta. */
+        fun teamMessages(json: JSONObject): Map<Int, Int> {
+            val array = json.optJSONArray("proposals") ?: return emptyMap()
+            return (0 until array.length()).mapNotNull { i ->
+                val p = array.optJSONObject(i) ?: return@mapNotNull null
+                val messages = p.optJSONArray("messages")
+                val team = if (messages == null) 0 else (0 until messages.length()).count { j -> messages.optJSONObject(j)?.optBoolean("fromUser") == false }
+                p.optInt("number").takeIf { it > 0 }?.let { it to team }
+            }.toMap()
         }
 
         /** Respuesta del script: {ok, proposals:[{number, title, status}]} → (propuesta, estado). */

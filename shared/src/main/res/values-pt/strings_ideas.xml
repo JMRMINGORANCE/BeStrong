@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pestaña Ideas y formas de animar a proponer mejoras (buzón de propuestas). -->
+<resources>
+    <string name="nav_ideas">Ideias</string>
+    <string name="ideas_kicker">Feita em comunidade</string>
+    <string name="ideas_nudge">Sente falta de algo? Proponha uma melhoria</string>
+    <string name="ideas_nudge_history">O que gostaria de ver aqui? Proponha uma ideia</string>
+    <string name="ideas_nudge_exercise">O seu exercício não está? Peça-o</string>
+    <string name="ideas_ask_title">Como está a correr com o BeStrong?</string>
+    <string name="ideas_ask_title_record">Recorde! E na app, o que melhoraria?</string>
+    <string name="ideas_ask_body">O BeStrong faz-se com as ideias de quem o usa. Diga-nos o que melhoraria: um minuto e sem contas.</string>
+    <string name="ideas_ask_propose">Propor</string>
+    <string name="ideas_ask_later">Agora não</string>
+    <string name="ideas_ask_never">Não voltar a perguntar</string>
+    <string name="ideas_cat_label">De que se trata?</string>
+    <string name="ideas_cat_exercise">Exercício em falta</string>
+    <string name="ideas_cat_program">Programa ou rotina</string>
+    <string name="ideas_cat_design">Design</string>
+    <string name="ideas_cat_bug">Algo não funciona</string>
+    <string name="ideas_cat_other">Outra coisa</string>
+    <string name="ideas_example_exercise">Ex.: Adicionar o landmine press</string>
+    <string name="ideas_example_program">Ex.: Programa de 3 dias para começar</string>
+    <string name="ideas_example_design">Ex.: Números maiores no descanso</string>
+    <string name="ideas_example_bug">Ex.: O descanso não toca em silêncio</string>
+    <string name="ideas_example_other">Ex.: Exportar os treinos para uma folha de cálculo</string>
+    <string name="ideas_example_what">Com as suas palavras: o que faz agora e o que gostaria de poder fazer.</string>
+    <string name="ideas_no_account">Sem conta nem registo: só a sua ideia.</string>
+    <string name="ideas_done_title">Já na app graças a vocês</string>
+    <string name="ideas_done_badge">Ideia da comunidade</string>
+    <string name="ideas_done_2">As permissões são pedidas no fim das boas-vindas</string>
+    <string name="ideas_done_3">Objetivo de recomposição corporal e escolher a cor da app</string>
+    <string name="ideas_unread_title">Tem respostas novas</string>
+    <string name="ideas_unread_body">A equipa respondeu às suas propostas. Veja em «As minhas propostas».</string>
+    <string name="ideas_unread_badge">Respostas novas</string>
+    <plurals name="ideas_counter">
+        <item quantity="one">%d ideia da comunidade já está na app</item>
+        <item quantity="other">%d ideias da comunidade já estão na app</item>
+    </plurals>
+    <plurals name="whats_new_ideas">
+        <item quantity="one">💡 %d ideia da comunidade já está no BeStrong. Tem outra?</item>
+        <item quantity="other">💡 %d ideias da comunidade já estão no BeStrong. Tem outra?</item>
+    </plurals>
+</resources>

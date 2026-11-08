@@ -1,1 +1,5 @@
-- Si hacemos una mejora que propusiste, te avisamos también con una notificación aunque no abras la app
+- Nueva pestaña Ideas: propón mejoras y sigue cómo van tus propuestas
+- Un punto en Ideas te avisa cuando el equipo responde a tu propuesta
+- Al proponer, elige de qué trata con un toque y con ejemplos
+- Proponer a mano al terminar el entreno, en la biblioteca y en pantallas vacías
+- Lista de ideas de la comunidad que ya están en la app

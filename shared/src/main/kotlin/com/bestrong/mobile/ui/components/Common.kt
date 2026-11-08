@@ -217,6 +217,8 @@ fun EmptyState(
     orbit: List<ImageVector> = emptyList(),
     /** Botón para salir del vacío («Empezar a entrenar»). */
     action: Pair<String, () -> Unit>? = null,
+    /** Algo discreto debajo de todo (p. ej. proponer una idea). */
+    footer: (@Composable () -> Unit)? = null,
 ) {
     Box(modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
         // En pantallas anchas (Fold abierto, tablet) no se estira de lado a lado
@@ -235,6 +237,7 @@ fun EmptyState(
                     Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
             }
+            footer?.invoke()
         }
     }
 }

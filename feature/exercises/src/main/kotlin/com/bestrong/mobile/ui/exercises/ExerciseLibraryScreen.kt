@@ -340,6 +340,17 @@ fun ExerciseSearchList(
                     onClick = { onClick(ex) },
                 )
             }
+            // Al final de la lista: si falta un ejercicio, se pide (sin resultados ya lo ofrece [NoResults])
+            if (results.isNotEmpty()) {
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
+                    Box(Modifier.fillMaxWidth().padding(top = 12.dp), contentAlignment = Alignment.Center) {
+                        com.bestrong.mobile.community.ProposalNudge(
+                            R.string.ideas_nudge_exercise,
+                            request = com.bestrong.mobile.community.ProposalRequest(category = com.bestrong.mobile.community.ProposalCategory.EXERCISE),
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -437,6 +448,11 @@ private fun NoResults(query: String, filtered: Boolean, onClearFilters: () -> Un
                 Text(stringResource(R.string.search_create_named, query), Modifier.padding(start = 6.dp), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
+        // O pedir que se añada a la biblioteca para todos
+        com.bestrong.mobile.community.ProposalNudge(
+            R.string.ideas_nudge_exercise,
+            request = com.bestrong.mobile.community.ProposalRequest(category = com.bestrong.mobile.community.ProposalCategory.EXERCISE, title = query),
+        )
     }
 }
 

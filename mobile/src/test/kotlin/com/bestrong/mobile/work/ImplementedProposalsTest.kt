@@ -37,6 +37,19 @@ class ImplementedProposalsTest {
         assertTrue(ImplementedProposals.toShow(list, setOf(5, 7)).isEmpty())
     }
 
+    @Test fun countsOnlyTeamMessages() {
+        val withMessages = JSONObject(
+            """
+            {"ok": true, "proposals": [
+              {"number": 4, "messages": [{"fromUser": false, "text": "¿Qué ejercicio?"}, {"fromUser": true, "text": "Landmine"}]},
+              {"number": 8},
+              {"number": 0, "messages": [{"fromUser": false, "text": "x"}]}
+            ]}
+            """,
+        )
+        assertEquals(mapOf(4 to 1, 8 to 0), ImplementedProposals.teamMessages(withMessages))
+    }
+
     @Test fun emptyOrBrokenResponse() {
         assertTrue(ImplementedProposals.parse(JSONObject("""{"ok": true}""")).isEmpty())
     }

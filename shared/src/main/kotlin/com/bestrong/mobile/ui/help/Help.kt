@@ -475,12 +475,34 @@ private fun PlaceChoice(home: Boolean, onChange: (Boolean) -> Unit) {
 
 /** Novedades de la versión, una vez tras actualizar. */
 @Composable
-fun WhatsNewDialog(onDismiss: () -> Unit) {
+fun WhatsNewDialog(onPropose: (() -> Unit)? = null, onDismiss: () -> Unit) {
+    val ideas = com.bestrong.mobile.community.CommunityIdeas.all.size
+    val proposeButton: (@Composable () -> Unit)? = onPropose?.let { propose ->
+        @Composable {
+            TextButton(onClick = {
+                onDismiss()
+                propose()
+            }) { Text(stringResource(R.string.proposals_open)) }
+        }
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.whats_new)) },
-        text = { Text(stringResource(R.string.whats_new_latest)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.whats_new_latest))
+                // Lo que ya han traído las ideas de usuarios, y una invitación a proponer otra
+                if (onPropose != null && ideas > 0) {
+                    Text(
+                        androidx.compose.ui.res.pluralStringResource(R.plurals.whats_new_ideas, ideas, ideas),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.got_it)) } },
+        dismissButton = proposeButton,
     )
 }
 
