@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pestaña Ideas y formas de animar a proponer mejoras (buzón de propuestas). -->
+<resources>
+    <string name="nav_ideas">Idées</string>
+    <string name="ideas_kicker">Faite avec la communauté</string>
+    <string name="ideas_nudge">Il vous manque quelque chose ? Proposez une amélioration</string>
+    <string name="ideas_nudge_history">Qu’aimeriez-vous voir ici ? Proposez une idée</string>
+    <string name="ideas_nudge_exercise">Votre exercice n’y est pas ? Demandez-le</string>
+    <string name="ideas_ask_title">Comment ça se passe avec BeStrong ?</string>
+    <string name="ideas_ask_title_record">Record ! Et l’app, qu’amélioreriez-vous ?</string>
+    <string name="ideas_ask_body">BeStrong se construit avec les idées de ceux qui l’utilisent. Dites-nous ce que vous amélioreriez : une minute, sans compte.</string>
+    <string name="ideas_ask_propose">Proposer</string>
+    <string name="ideas_ask_later">Plus tard</string>
+    <string name="ideas_ask_never">Ne plus demander</string>
+    <string name="ideas_cat_label">De quoi s’agit-il ?</string>
+    <string name="ideas_cat_exercise">Exercice manquant</string>
+    <string name="ideas_cat_program">Programme ou routine</string>
+    <string name="ideas_cat_design">Design</string>
+    <string name="ideas_cat_bug">Quelque chose ne marche pas</string>
+    <string name="ideas_cat_other">Autre chose</string>
+    <string name="ideas_example_exercise">Ex. : Ajouter le landmine press</string>
+    <string name="ideas_example_program">Ex. : Programme de 3 jours pour débuter</string>
+    <string name="ideas_example_design">Ex. : Chiffres plus grands pendant le repos</string>
+    <string name="ideas_example_bug">Ex. : Le repos ne sonne pas en mode silencieux</string>
+    <string name="ideas_example_other">Ex. : Exporter mes séances vers un tableur</string>
+    <string name="ideas_example_what">Avec vos mots : ce que vous faites aujourd’hui et ce que vous aimeriez pouvoir faire.</string>
+    <string name="ideas_no_account">Sans compte ni inscription : juste votre idée.</string>
+    <string name="ideas_done_title">Déjà dans l’app grâce à vous</string>
+    <string name="ideas_done_badge">Idée de la communauté</string>
+    <string name="ideas_done_2">Les autorisations sont demandées à la fin de l’accueil</string>
+    <string name="ideas_done_3">Objectif de recomposition corporelle et choix de la couleur de l’app</string>
+    <string name="ideas_unread_title">Vous avez de nouvelles réponses</string>
+    <string name="ideas_unread_body">L’équipe a répondu à vos propositions. Consultez « Mes propositions ».</string>
+    <string name="ideas_unread_badge">Nouvelles réponses</string>
+    <plurals name="ideas_counter">
+        <item quantity="one">%d idée de la communauté est déjà dans l’app</item>
+        <item quantity="other">%d idées de la communauté sont déjà dans l’app</item>
+    </plurals>
+    <plurals name="whats_new_ideas">
+        <item quantity="one">💡 %d idée de la communauté est déjà dans BeStrong. Vous en avez une autre ?</item>
+        <item quantity="other">💡 %d idées de la communauté sont déjà dans BeStrong. Vous en avez une autre ?</item>
+    </plurals>
+</resources>
