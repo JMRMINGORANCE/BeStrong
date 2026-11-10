@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.mobile.work.AnnouncementsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-10T11:28:46.943Z" hostname="runnervmwuk1x" time="0.166">
+  <properties/>
+  <testcase name="showsOnlyTheNewestUnseen" classname="com.bestrong.mobile.work.AnnouncementsTest" time="0.027"/>
+  <testcase name="keepsPlainBoundedText" classname="com.bestrong.mobile.work.AnnouncementsTest" time="0.03"/>
+  <testcase name="picksDeviceLanguageThenSpanishThenAny" classname="com.bestrong.mobile.work.AnnouncementsTest" time="0.03"/>
+  <testcase name="cacheRoundTripsForTheCommunityScreen" classname="com.bestrong.mobile.work.AnnouncementsTest" time="0.075"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

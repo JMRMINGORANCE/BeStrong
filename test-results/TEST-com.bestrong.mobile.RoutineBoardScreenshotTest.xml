@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.mobile.RoutineBoardScreenshotTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-10T11:26:30.887Z" hostname="runnervmwuk1x" time="3.49">
+  <properties/>
+  <testcase name="board_editor_unfolded" classname="com.bestrong.mobile.RoutineBoardScreenshotTest" time="3.488"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

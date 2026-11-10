@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.mobile.data.RepositoryTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-10T11:28:43.914Z" hostname="runnervmwuk1x" time="2.846">
+  <properties/>
+  <testcase name="oldJsonWithoutVersionIsMigratedOnRead" classname="com.bestrong.mobile.data.RepositoryTest" time="2.449"/>
+  <testcase name="backupCarriesActiveProgramAndExtras" classname="com.bestrong.mobile.data.RepositoryTest" time="0.088"/>
+  <testcase name="backupRestoreAddsOnlyMissing" classname="com.bestrong.mobile.data.RepositoryTest" time="0.087"/>
+  <testcase name="activeOnceReadsDatabase" classname="com.bestrong.mobile.data.RepositoryTest" time="0.055"/>
+  <testcase name="remoteActiveWorkoutIsMergedSetBySet" classname="com.bestrong.mobile.data.RepositoryTest" time="0.06"/>
+  <testcase name="activeProgramRoundTrip" classname="com.bestrong.mobile.data.RepositoryTest" time="0.046"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
