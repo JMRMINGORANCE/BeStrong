@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuesta #5: zonas a cuidar y a reforzar en el programa a medida. -->
+<resources>
+    <string name="propuesta5_care_title">Alguna zona a cuidar?</string>
+    <string name="propuesta5_care_hint">Opcional. Si alguna cosa et molesta, el programa evita els exercicis que més carreguen aquesta zona i fa servir alternatives més controlades.</string>
+    <string name="propuesta5_focus_title">Què vols reforçar?</string>
+    <string name="propuesta5_focus_hint">Opcional, fins a 2. Més sèries i un exercici extra els dies que l\'entrenen.</string>
+    <string name="propuesta5_disclaimer">Ajustos orientatius, no consell mèdic. Si sents dolor (no només molèstia), para i consulta un professional sanitari.</string>
+    <string name="propuesta5_zone_shoulder">Espatlla</string>
+    <string name="propuesta5_zone_elbow">Colze</string>
+    <string name="propuesta5_zone_wrist">Canell</string>
+    <string name="propuesta5_zone_neck">Coll</string>
+    <string name="propuesta5_zone_lower_back">Lumbar</string>
+    <string name="propuesta5_zone_hip">Maluc</string>
+    <string name="propuesta5_zone_knee">Genoll</string>
+    <string name="propuesta5_zone_ankle">Turmell</string>
+    <string name="propuesta5_area_chest">Pit</string>
+    <string name="propuesta5_area_back">Esquena</string>
+    <string name="propuesta5_area_shoulders">Espatlles</string>
+    <string name="propuesta5_area_arms">Braços</string>
+    <string name="propuesta5_area_glutes">Glutis</string>
+    <string name="propuesta5_area_legs">Cames</string>
+    <string name="propuesta5_area_calves">Bessons</string>
+    <string name="propuesta5_area_core">Core</string>
+</resources>

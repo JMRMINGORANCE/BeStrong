@@ -412,6 +412,8 @@ class HomeViewModel @Inject constructor(
         kit: Kit,
         minutes: Int,
         level: com.bestrong.core.training.Level = com.bestrong.core.training.Level.INTERMEDIATE,
+        care: Set<com.bestrong.core.training.CareZone> = emptySet(),
+        focus: Set<com.bestrong.core.training.FocusArea> = emptySet(),
     ): com.bestrong.core.training.GeneratedProgram {
         val hidden = settingsStore.settings.value.hiddenExercises
         val res = context.resources
@@ -440,6 +442,8 @@ class HomeViewModel @Inject constructor(
             allowed = { it.id !in hidden && (kit == Kit.GYM || it.id !in NEEDS_BAR) },
             texts = texts,
             level = level,
+            care = care,
+            focus = focus,
         )
     }
 
