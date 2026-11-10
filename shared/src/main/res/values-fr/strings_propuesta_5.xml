@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuesta #5: zonas a cuidar y a reforzar en el programa a medida. -->
+<resources>
+    <string name="propuesta5_care_title">Une zone à ménager ?</string>
+    <string name="propuesta5_care_hint">Facultatif. Si quelque chose te gêne, le programme évite les exercices qui sollicitent le plus cette zone et utilise des alternatives plus contrôlées.</string>
+    <string name="propuesta5_focus_title">Que veux-tu renforcer ?</string>
+    <string name="propuesta5_focus_hint">Facultatif, jusqu\'à 2. Plus de séries et un exercice en plus les jours qui la travaillent.</string>
+    <string name="propuesta5_disclaimer">Conseils indicatifs, pas un avis médical. Si tu as mal (pas seulement une gêne), arrête et consulte un professionnel de santé.</string>
+    <string name="propuesta5_zone_shoulder">Épaule</string>
+    <string name="propuesta5_zone_elbow">Coude</string>
+    <string name="propuesta5_zone_wrist">Poignet</string>
+    <string name="propuesta5_zone_neck">Cou</string>
+    <string name="propuesta5_zone_lower_back">Lombaires</string>
+    <string name="propuesta5_zone_hip">Hanche</string>
+    <string name="propuesta5_zone_knee">Genou</string>
+    <string name="propuesta5_zone_ankle">Cheville</string>
+    <string name="propuesta5_area_chest">Pectoraux</string>
+    <string name="propuesta5_area_back">Dos</string>
+    <string name="propuesta5_area_shoulders">Épaules</string>
+    <string name="propuesta5_area_arms">Bras</string>
+    <string name="propuesta5_area_glutes">Fessiers</string>
+    <string name="propuesta5_area_legs">Jambes</string>
+    <string name="propuesta5_area_calves">Mollets</string>
+    <string name="propuesta5_area_core">Gainage</string>
+</resources>

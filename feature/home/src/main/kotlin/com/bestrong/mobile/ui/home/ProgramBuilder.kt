@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.SportsGymnastics
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -64,6 +65,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bestrong.core.library.TrainingProgram
 import com.bestrong.core.model.Routine
+import com.bestrong.core.training.BodyFocus
+import com.bestrong.core.training.CareZone
+import com.bestrong.core.training.FocusArea
 import com.bestrong.core.training.Goal
 import com.bestrong.core.training.PeriodizedProgram
 import com.bestrong.mobile.shared.R
@@ -112,7 +116,12 @@ fun ProgramBuilderScreen(
     var level by rememberSaveable {
         mutableStateOf(if (vm.history.value.none { it.isFinished }) com.bestrong.core.training.Level.BEGINNER else com.bestrong.core.training.Level.INTERMEDIATE)
     }
-    val program = remember(goal, days, kit, minutes, level) { vm.buildProgram(days, goal, kit, minutes, level) }
+    // Zonas a cuidar y a reforzar (propuesta #5): solo para este programa, no se guardan
+    var careNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    var focusNames by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    val care = remember(careNames) { careNames.mapTo(HashSet()) { CareZone.valueOf(it) } }
+    val focus = remember(focusNames) { focusNames.mapTo(HashSet()) { FocusArea.valueOf(it) } }
+    val program = remember(goal, days, kit, minutes, level, care, focus) { vm.buildProgram(days, goal, kit, minutes, level, care, focus) }
     val lang = com.bestrong.mobile.ui.components.appLanguage()
     BackHandler(onBack = onDismiss)
     Scaffold(
@@ -164,6 +173,33 @@ fun ProgramBuilderScreen(
             item { KitPicker(kit) { kit = it } }
             item { SectionHeader(stringResource(R.string.builder_minutes), large = true) }
             item { Segmented(MINUTES.map { "$it min" }, MINUTES.indexOf(minutes)) { minutes = MINUTES[it] } }
+            item { SectionHeader(stringResource(R.string.propuesta5_care_title), large = true) }
+            item {
+                ZoneChips(
+                    hint = stringResource(R.string.propuesta5_care_hint),
+                    options = CareZone.entries.map { it.name to stringResource(CARE_LABELS.getValue(it)) },
+                    selected = careNames,
+                    max = CareZone.entries.size,
+                ) { careNames = it }
+            }
+            item { SectionHeader(stringResource(R.string.propuesta5_focus_title), large = true) }
+            item {
+                ZoneChips(
+                    hint = stringResource(R.string.propuesta5_focus_hint),
+                    options = FocusArea.entries.map { it.name to stringResource(FOCUS_LABELS.getValue(it)) },
+                    selected = focusNames,
+                    max = BodyFocus.MAX_FOCUS,
+                ) { focusNames = it }
+            }
+            if (care.isNotEmpty() || focus.isNotEmpty()) {
+                item {
+                    Text(
+                        stringResource(R.string.propuesta5_disclaimer),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             item { SectionHeader(stringResource(R.string.builder_preview), large = true) }
             item { ProgramHeader(program.name, program.description) }
             items(program.routines.size, key = { "gen-$it" }) { i -> GeneratedRoutineCard(program.routines[i]) }
@@ -240,6 +276,55 @@ private fun KitPicker(kit: Kit, onPick: (Kit) -> Unit) {
         }
     }
 }
+
+/**
+ * Chips de varias zonas con su explicación. Con [max] ya elegidas, las demás se desactivan (reforzar: como mucho 2).
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ZoneChips(hint: String, options: List<Pair<String, String>>, selected: List<String>, max: Int, onChange: (List<String>) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(hint, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            options.forEach { (key, label) ->
+                val on = key in selected
+                FilterChip(
+                    selected = on,
+                    onClick = { onChange(if (on) selected - key else selected + key) },
+                    enabled = on || selected.size < max,
+                    label = { Text(label) },
+                    leadingIcon = if (on) {
+                        { Icon(Icons.Default.Check, null, Modifier.size(18.dp)) }
+                    } else {
+                        null
+                    },
+                )
+            }
+        }
+    }
+}
+
+private val CARE_LABELS = mapOf(
+    CareZone.SHOULDER to R.string.propuesta5_zone_shoulder,
+    CareZone.ELBOW to R.string.propuesta5_zone_elbow,
+    CareZone.WRIST to R.string.propuesta5_zone_wrist,
+    CareZone.NECK to R.string.propuesta5_zone_neck,
+    CareZone.LOWER_BACK to R.string.propuesta5_zone_lower_back,
+    CareZone.HIP to R.string.propuesta5_zone_hip,
+    CareZone.KNEE to R.string.propuesta5_zone_knee,
+    CareZone.ANKLE to R.string.propuesta5_zone_ankle,
+)
+
+private val FOCUS_LABELS = mapOf(
+    FocusArea.CHEST to R.string.propuesta5_area_chest,
+    FocusArea.BACK to R.string.propuesta5_area_back,
+    FocusArea.SHOULDERS to R.string.propuesta5_area_shoulders,
+    FocusArea.ARMS to R.string.propuesta5_area_arms,
+    FocusArea.GLUTES to R.string.propuesta5_area_glutes,
+    FocusArea.LEGS to R.string.propuesta5_area_legs,
+    FocusArea.CALVES to R.string.propuesta5_area_calves,
+    FocusArea.CORE to R.string.propuesta5_area_core,
+)
 
 /** Selector en píldora (la opción elegida, rellena). */
 @Composable

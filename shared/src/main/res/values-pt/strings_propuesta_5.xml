@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuesta #5: zonas a cuidar y a reforzar en el programa a medida. -->
+<resources>
+    <string name="propuesta5_care_title">Alguma zona a proteger?</string>
+    <string name="propuesta5_care_hint">Opcional. Se algo te incomoda, o programa evita os exercícios que mais carregam essa zona e usa alternativas mais controladas.</string>
+    <string name="propuesta5_focus_title">O que queres reforçar?</string>
+    <string name="propuesta5_focus_hint">Opcional, até 2. Mais séries e um exercício extra nos dias que a treinam.</string>
+    <string name="propuesta5_disclaimer">Indicações gerais, não aconselhamento médico. Se sentires dor (não só desconforto), para e consulta um profissional de saúde.</string>
+    <string name="propuesta5_zone_shoulder">Ombro</string>
+    <string name="propuesta5_zone_elbow">Cotovelo</string>
+    <string name="propuesta5_zone_wrist">Pulso</string>
+    <string name="propuesta5_zone_neck">Pescoço</string>
+    <string name="propuesta5_zone_lower_back">Lombar</string>
+    <string name="propuesta5_zone_hip">Anca</string>
+    <string name="propuesta5_zone_knee">Joelho</string>
+    <string name="propuesta5_zone_ankle">Tornozelo</string>
+    <string name="propuesta5_area_chest">Peito</string>
+    <string name="propuesta5_area_back">Costas</string>
+    <string name="propuesta5_area_shoulders">Ombros</string>
+    <string name="propuesta5_area_arms">Braços</string>
+    <string name="propuesta5_area_glutes">Glúteos</string>
+    <string name="propuesta5_area_legs">Pernas</string>
+    <string name="propuesta5_area_calves">Gémeos</string>
+    <string name="propuesta5_area_core">Core</string>
+</resources>

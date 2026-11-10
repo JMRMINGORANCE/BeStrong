@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuesta #5: zonas a cuidar y a reforzar en el programa a medida. -->
+<resources>
+    <string name="propuesta5_care_title">Any area to look after?</string>
+    <string name="propuesta5_care_hint">Optional. If something bothers you, the program avoids the exercises that load that area most and uses gentler alternatives.</string>
+    <string name="propuesta5_focus_title">What do you want to strengthen?</string>
+    <string name="propuesta5_focus_hint">Optional, up to 2. More sets and an extra exercise on the days that train it.</string>
+    <string name="propuesta5_disclaimer">General guidance, not medical advice. If you feel pain (not just discomfort), stop and see a health professional.</string>
+    <string name="propuesta5_zone_shoulder">Shoulder</string>
+    <string name="propuesta5_zone_elbow">Elbow</string>
+    <string name="propuesta5_zone_wrist">Wrist</string>
+    <string name="propuesta5_zone_neck">Neck</string>
+    <string name="propuesta5_zone_lower_back">Lower back</string>
+    <string name="propuesta5_zone_hip">Hip</string>
+    <string name="propuesta5_zone_knee">Knee</string>
+    <string name="propuesta5_zone_ankle">Ankle</string>
+    <string name="propuesta5_area_chest">Chest</string>
+    <string name="propuesta5_area_back">Back</string>
+    <string name="propuesta5_area_shoulders">Shoulders</string>
+    <string name="propuesta5_area_arms">Arms</string>
+    <string name="propuesta5_area_glutes">Glutes</string>
+    <string name="propuesta5_area_legs">Legs</string>
+    <string name="propuesta5_area_calves">Calves</string>
+    <string name="propuesta5_area_core">Core</string>
+</resources>

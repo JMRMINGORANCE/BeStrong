@@ -214,6 +214,10 @@ object RoutineGenerator {
         /** Nombres de cada tipo de día en el idioma de la app (si no, español o inglés). */
         dayLabels: Map<String, String> = emptyMap(),
         level: Level = Level.INTERMEDIATE,
+        /** Zonas con molestias: se evitan los ejercicios que más las cargan. */
+        care: Set<CareZone> = emptySet(),
+        /** Zonas a reforzar: más series y un ejercicio extra (ver [BodyFocus]). */
+        focus: Set<FocusArea> = emptySet(),
     ): List<Routine> {
         val main = main(goal).withLevel(level)
         val acc = accessory(goal).withLevel(level)
@@ -223,20 +227,29 @@ object RoutineGenerator {
         // El cardio del final (perder grasa, resistencia) sale del tiempo de la sesión
         val cardioMin = cardioMinutes(goal, minutesPerSession)
         val maxExercises = (2 + ((minutesPerSession - cardioMin) * 60 - 2 * mainCost) / accCost).coerceIn(3, 8)
-        val usable: (Exercise) -> Boolean = { (it.equipment in equipment || it.equipment == Equipment.BODYWEIGHT) && allowed(it) }
+        val safe: (Exercise) -> Boolean = { allowed(it) && BodyFocus.isSafe(it, care) }
+        val usable: (Exercise) -> Boolean = { (it.equipment in equipment || it.equipment == Equipment.BODYWEIGHT) && safe(it) }
         val limited = equipment.none { it == Equipment.BARBELL || it == Equipment.DUMBBELL || it == Equipment.MACHINE || it == Equipment.CABLE }
         val days = split(daysPerWeek, goal, limited)
-        return days.mapIndexed { dayIndex, type ->
-            val (cardio, finisherEx) = dayEnd(goal, cardioMin, dayIndex, equipment, allowed, usable)
+        val ends = days.indices.map { dayIndex -> dayEnd(goal, cardioMin, dayIndex, equipment, safe, usable) }
+        val strength = days.mapIndexed { dayIndex, type ->
+            val finisherEx = ends[dayIndex].second
             // Segundo/tercer día del mismo tipo (A/B/C): otra opción de cada hueco para variar
             val variant = days.take(dayIndex).count { it == type }
             // El remate cuenta dentro del tiempo de la sesión
             val room = if (finisherEx != null) maxExercises - 1 else maxExercises
-            val picks = picksFor(type, variant, usable, finisherEx, room)
+            picksFor(type, variant, usable, finisherEx, room).mapIndexed { i, ex -> routineExercise(ex, if (i < 2) main else acc) }
+        }
+        // Zonas a reforzar: el extra no se añade a principiantes (con poco volumen ya progresan)
+        val extra = BodyFocus.extraPrescription.withLevel(level)
+        val reinforced = BodyFocus.reinforce(strength, focus, addExtras = level != Level.BEGINNER, usable = usable) { routineExercise(it, extra) }
+        return days.mapIndexed { dayIndex, type ->
+            val (cardio, finisherEx) = ends[dayIndex]
+            val variant = days.take(dayIndex).count { it == type }
             val label = dayLabels[type] ?: dayNames.getValue(type).let { (es, en) -> com.bestrong.core.i18n.ContentText.pick(es, en, lang) }
             val letter = if (days.count { it == type } > 1) " " + ('A' + variant) else ""
             // Superseries solo entre accesorios; el remate va suelto al final
-            val exercises = pairAccessories(picks.mapIndexed { i, ex -> routineExercise(ex, if (i < 2) main else acc) }, goal)
+            val exercises = pairAccessories(reinforced[dayIndex], goal)
             val cardioBlock = cardio?.let { RoutineExercise(exercise = it, sets = listOf(RoutineSet(reps = 0, durationSec = cardioMin * 60)), restSeconds = 0) }
             Routine(name = label + letter, exercises = exercises + listOfNotNull(finisherEx?.let { routineExercise(it, acc) }, cardioBlock))
         }
@@ -323,10 +336,12 @@ object ProgramGenerator {
         allowed: (Exercise) -> Boolean = { true },
         texts: Texts? = null,
         level: Level = Level.INTERMEDIATE,
+        care: Set<CareZone> = emptySet(),
+        focus: Set<FocusArea> = emptySet(),
     ): GeneratedProgram {
         // Con 7 días salen 6 rutinas que se repiten a lo largo de la semana
         val days = daysPerWeek.coerceIn(1, 7)
-        val routines = RoutineGenerator.generate(days, equipment, goal, minutesPerSession, lang, allowed, texts?.dayLabels.orEmpty(), level)
+        val routines = RoutineGenerator.generate(days, equipment, goal, minutesPerSession, lang, allowed, texts?.dayLabels.orEmpty(), level, care, focus)
         val (es, en) = goalNames.getValue(goal)
         val name = texts?.name ?: if (lang == "en") "$en · $days days" else "$es · $days días"
         val m = RoutineGenerator.main(goal).let { it.copy(sets = (it.sets + level.extraSets).coerceAtLeast(2)) }

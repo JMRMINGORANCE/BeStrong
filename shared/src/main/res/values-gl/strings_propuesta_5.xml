@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Propuesta #5: zonas a cuidar y a reforzar en el programa a medida. -->
+<resources>
+    <string name="propuesta5_care_title">Algunha zona que coidar?</string>
+    <string name="propuesta5_care_hint">Opcional. Se algo che molesta, o programa evita os exercicios que máis cargan esa zona e usa alternativas máis controladas.</string>
+    <string name="propuesta5_focus_title">Que queres reforzar?</string>
+    <string name="propuesta5_focus_hint">Opcional, ata 2. Máis series e un exercicio extra nos días que a adestran.</string>
+    <string name="propuesta5_disclaimer">Axustes orientativos, non consello médico. Se sentes dor (non só molestia), para e consulta a un profesional sanitario.</string>
+    <string name="propuesta5_zone_shoulder">Ombreiro</string>
+    <string name="propuesta5_zone_elbow">Cóbado</string>
+    <string name="propuesta5_zone_wrist">Pulso</string>
+    <string name="propuesta5_zone_neck">Pescozo</string>
+    <string name="propuesta5_zone_lower_back">Lumbar</string>
+    <string name="propuesta5_zone_hip">Cadeira</string>
+    <string name="propuesta5_zone_knee">Xeonllo</string>
+    <string name="propuesta5_zone_ankle">Nocello</string>
+    <string name="propuesta5_area_chest">Peito</string>
+    <string name="propuesta5_area_back">Costas</string>
+    <string name="propuesta5_area_shoulders">Ombreiros</string>
+    <string name="propuesta5_area_arms">Brazos</string>
+    <string name="propuesta5_area_glutes">Glúteos</string>
+    <string name="propuesta5_area_legs">Pernas</string>
+    <string name="propuesta5_area_calves">Xemelgos</string>
+    <string name="propuesta5_area_core">Core</string>
+</resources>
