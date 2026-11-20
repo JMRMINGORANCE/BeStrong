@@ -126,6 +126,7 @@ EDB_ALIASES = {
     "seated_calf_raise": ["lever seated calf raise"],
     "plank": ["front plank"],
     "crunch": ["crunch floor"],
+    "machine_crunch": ["lever seated crunch (chest pad)", "lever seated crunch"],
     "hanging_leg_raise": ["hanging leg raise"],
     "ab_wheel": ["wheel rollout", "wheel run"],
     "lunge": ["dumbbell lunge", "barbell lunge"],

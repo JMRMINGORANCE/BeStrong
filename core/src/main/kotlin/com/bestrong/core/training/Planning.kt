@@ -87,7 +87,7 @@ object RoutineGenerator {
             listOf("leg_extension", "wall_sit"),
             listOf("leg_curl", "seated_leg_curl", "glute_kickback", "hyperextension"),
             listOf("standing_calf_raise", "seated_calf_raise"),
-            listOf("hanging_leg_raise", "ab_wheel", "cable_crunch", "plank"),
+            listOf("hanging_leg_raise", "ab_wheel", "cable_crunch", "machine_crunch", "plank"),
         ),
     )
 
