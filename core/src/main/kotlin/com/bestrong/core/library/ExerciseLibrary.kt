@@ -82,6 +82,7 @@ object ExerciseLibrary {
         "triceps_pushdown" to listOf("extension de triceps en polea", "pushdown"),
         "leg_press" to listOf("prensa"),
         "plank" to listOf("plancha", "isometrico abdominal"),
+        "machine_crunch" to listOf("crunch maquina", "maquina de abdominales", "abdominales sentado", "ab crunch machine"),
         "kb_swing" to listOf("swing", "kettlebell"),
         "db_row" to listOf("remo a una mano"),
         "lateral_raise" to listOf("elevaciones", "vuelos laterales"),
@@ -158,6 +159,7 @@ object ExerciseLibrary {
         ex("crunch", "Crunch abdominal", ABS, BODYWEIGHT, tracking = TrackingType.REPS_ONLY),
         ex("hanging_leg_raise", "Elevación de piernas colgado", ABS, BODYWEIGHT, tracking = TrackingType.REPS_ONLY),
         ex("cable_crunch", "Crunch en polea", ABS, CABLE),
+        ex("machine_crunch", "Crunch en máquina (sentado)", ABS, MACHINE),
         ex("ab_wheel", "Rueda abdominal", ABS, BODYWEIGHT, tracking = TrackingType.REPS_ONLY),
         ex("russian_twist", "Giros rusos", ABS, BODYWEIGHT, tracking = TrackingType.REPS_ONLY),
         // Cuerpo completo
@@ -240,6 +242,7 @@ object ExerciseLibrary {
         "Hip Abduction (Machine)" to "hip_abduction", "Standing Calf Raise" to "standing_calf_raise", "Standing Calf Raise (Machine)" to "standing_calf_raise",
         "Seated Calf Raise" to "seated_calf_raise", "Seated Calf Raise (Machine)" to "seated_calf_raise",
         "Plank" to "plank", "Crunch" to "crunch", "Hanging Leg Raise" to "hanging_leg_raise", "Cable Crunch" to "cable_crunch",
+        "Crunch (Machine)" to "machine_crunch", "Seated Crunch (Machine)" to "machine_crunch", "Ab Crunch Machine" to "machine_crunch",
         "Ab Wheel" to "ab_wheel", "Russian Twist" to "russian_twist", "Kettlebell Swing" to "kb_swing",
         "Clean and Press" to "clean_and_press", "Farmers Walk" to "farmers_walk", "Burpee" to "burpee",
         "Running" to "running", "Walking" to "walking", "Cycling" to "cycling",
