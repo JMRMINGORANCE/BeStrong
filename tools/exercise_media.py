@@ -126,7 +126,8 @@ EDB_ALIASES = {
     "seated_calf_raise": ["lever seated calf raise"],
     "plank": ["front plank"],
     "crunch": ["crunch floor"],
-    "machine_crunch": ["lever seated crunch (chest pad)", "lever seated crunch"],
+    # El dataset gratuito no tiene la máquina de palanca: el crunch sentado en polea es el gesto más parecido
+    "machine_crunch": ["lever seated crunch (chest pad)", "lever seated crunch", "cable seated crunch"],
     "hanging_leg_raise": ["hanging leg raise"],
     "ab_wheel": ["wheel rollout", "wheel run"],
     "lunge": ["dumbbell lunge", "barbell lunge"],
@@ -270,6 +271,16 @@ def main():
         v.setdefault("source", "wger")
     out = {**out, **edb}
     report = edb_report + report
+    # Solo se añaden imágenes: las que ya había se conservan (el dataset gratuito no tiene todas y si no, se perderían)
+    try:
+        prev = json.load(open(OUT, encoding="utf-8"))
+    except (OSError, ValueError):
+        prev = {}
+    kept = {k: v for k, v in prev.items() if k in ours}
+    added = sorted(k for k in out if k not in kept)
+    out = {**out, **kept}
+    report.append("NUEVAS: " + (", ".join(added) if added else "ninguna"))
+    print("Nuevas:", added)
     import os
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     os.makedirs(os.path.dirname(REPORT), exist_ok=True)

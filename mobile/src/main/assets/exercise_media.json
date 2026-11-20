@@ -613,6 +613,16 @@
   "wgerName": "Machine Chest Press",
   "wgerUrl": "https://exercisedb.dev"
  },
+ "machine_crunch": {
+  "author": "AscendAPI (ExerciseDB)",
+  "isGif": true,
+  "license": "ExerciseDB v1 · uso no comercial",
+  "licenseUrl": "https://oss.exercisedb.dev/docs",
+  "source": "exercisedb",
+  "url": "https://static.exercisedb.dev/media/8xUv4J7.gif",
+  "wgerName": "cable seated crunch",
+  "wgerUrl": "https://exercisedb.dev"
+ },
  "muscle_up": {
   "author": "AscendAPI (ExerciseDB)",
   "isGif": true,
@@ -684,6 +694,18 @@
   "url": "https://static.exercisedb.dev/media/r0z6xzQ.gif",
   "wgerName": "barbell pendlay row",
   "wgerUrl": "https://exercisedb.dev"
+ },
+ "pike_push_up": {
+  "author": "",
+  "authorUrl": "",
+  "license": "CC-BY-SA 4",
+  "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/deed.en",
+  "source": "wger",
+  "sourceUrl": "",
+  "title": "",
+  "url": "https://wger.de/media/exercise-images/454/447f3c17-405f-46e0-b138-65c2a8caaab0.png",
+  "wgerName": "Pike Push Ups",
+  "wgerUrl": "https://wger.de/exercise/454/view/"
  },
  "pistol_squat": {
   "author": "AscendAPI (ExerciseDB)",
