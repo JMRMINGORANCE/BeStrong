@@ -67,6 +67,7 @@ object ExerciseInfo {
         "crunch" to "Manos en el pecho o sienes. Enrolla la columna levantando los hombros, sin tirar del cuello.",
         "hanging_leg_raise" to "Colgado de la barra, sube las piernas sin balancear, enrollando la pelvis arriba.",
         "cable_crunch" to "De rodillas frente a la polea alta. Flexiona el tronco llevando los codos a los muslos.",
+        "machine_crunch" to "Sentado, pies sujetos y pecho o manos en las almohadillas. Enrolla el tronco hacia las rodillas con el abdomen, sin tirar con los brazos, y vuelve despacio.",
         "ab_wheel" to "Desde rodillas, rueda hacia delante con la espalda neutra y vuelve con el abdomen.",
         "russian_twist" to "Sentado con el torso inclinado y pies elevados. Gira el tronco de lado a lado.",
         "kb_swing" to "Bisagra de cadera, no sentadilla. Proyecta la kettlebell con un golpe de cadera hasta la altura del pecho.",

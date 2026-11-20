@@ -80,7 +80,7 @@ object BodyFocus {
         FocusArea.GLUTES to listOf("hip_thrust", "hip_abduction", "glute_kickback", "bulgarian_split_squat", "lunge", "hyperextension", "kb_swing"),
         FocusArea.LEGS to listOf("leg_press", "seated_leg_curl", "leg_extension", "leg_curl", "goblet_squat", "bulgarian_split_squat", "romanian_deadlift", "air_squat"),
         FocusArea.CALVES to listOf("seated_calf_raise", "standing_calf_raise"),
-        FocusArea.CORE to listOf("cable_crunch", "hanging_leg_raise", "ab_wheel", "side_plank", "plank", "hollow_hold", "crunch"),
+        FocusArea.CORE to listOf("cable_crunch", "machine_crunch", "hanging_leg_raise", "ab_wheel", "side_plank", "plank", "hollow_hold", "crunch"),
     )
 
     /** Ids que se evitan con esa zona. */

@@ -1,2 +1,1 @@
-- Programa a medida: marca zonas a cuidar (hombro, rodilla, lumbar…) y evita los ejercicios que más las cargan
-- Programa a medida: elige hasta 2 zonas a reforzar y tendrás más series y un ejercicio extra
+- Nuevo ejercicio: crunch en máquina (sentado), con búsqueda, importación y uso en las rutinas generadas

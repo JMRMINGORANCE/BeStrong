@@ -86,7 +86,7 @@ object MovementPatterns {
         put(
             MovementPattern.CORE,
             "plank", "crunch", "hanging_leg_raise", "cable_crunch", "ab_wheel", "russian_twist", "hollow_hold", "side_plank",
-            "l_sit", "farmers_walk",
+            "l_sit", "farmers_walk", "machine_crunch",
         )
     }
 
