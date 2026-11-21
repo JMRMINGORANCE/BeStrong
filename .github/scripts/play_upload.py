@@ -5,8 +5,9 @@ Variables: PLAY_SERVICE_ACCOUNT_JSON (clave de la cuenta de servicio), PLAY_PACK
 defecto), PLAY_TRACK (canal del móvil, «alpha» por defecto), PLAY_WEAR_TRACK (canal del reloj; si no existe se busca el
 canal de Wear OS que ya tenga versiones), BESTRONG_VERSION (nombre de la versión).
 Las notas de la versión salen de fastlane/metadata/android/<idioma>/changelogs/default.txt.
-La ficha de Play (title.txt, short_description.txt, full_description.txt de cada idioma) se actualiza después, en otra
-edición: si falla (p. ej. la cuenta de servicio no tiene permiso para la ficha), solo avisa y la versión ya está subida.
+La ficha de Play (title.txt, short_description.txt, full_description.txt de cada idioma) se actualiza antes, en otra
+edición: si falla (p. ej. la cuenta de servicio no tiene permiso para la ficha), solo avisa y la versión se sube igual.
+Las notas solo se envían en los idiomas que ya tiene la ficha (Play rechaza notas en idiomas que no están en ella).
 Mientras la app no esté publicada (borrador en Play Console), Play solo acepta versiones en borrador: se suben así y
 hay que enviar a revisión esa primera versión a mano desde Play Console.
 """
@@ -105,7 +106,8 @@ def upload(session, phone_aab, wear_aab, status):
     if phone_track not in tracks:
         sys.exit(f"No existe el canal del móvil «{phone_track}». Canales: {', '.join(tracks)}. Ponlo en la variable PLAY_TRACK.")
     wear_track = pick_wear_track(tracks, os.environ.get("PLAY_WEAR_TRACK") or "wear:Reloj - prueba cerrada")
-    notes = release_notes()
+    languages = {item["language"] for item in check(session.get(f"{API}/edits/{edit}/listings")).get("listings", [])}
+    notes = [n for n in release_notes() if not languages or n["language"] in languages]
     version = os.environ.get("BESTRONG_VERSION", "")
 
     for aab, track in ((phone_aab, phone_track), (wear_aab, wear_track)):
@@ -133,6 +135,11 @@ def main():
     session = AuthorizedSession(credentials)
 
     try:
+        update_listings(session)
+    except PlayError as e:
+        print(f"::warning::No se ha podido actualizar la ficha de Play: {e}")
+
+    try:
         try:
             upload(session, phone_aab, wear_aab, "completed")
         except PlayError as e:
@@ -145,11 +152,6 @@ def main():
     except PlayError as e:
         sys.exit(str(e))
     print("Enviado a Google Play")
-
-    try:
-        update_listings(session)
-    except PlayError as e:
-        print(f"::warning::No se ha podido actualizar la ficha de Play: {e}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,41 @@
+BeStrong est une app de musculation pour Android et Wear OS. Note tes séries en quelques secondes, suis un programme qui progresse tout seul et vois tes progrès. Sans compte, sans publicité, et tes données restent uniquement sur ton appareil.
+
+ENTRAÎNE-TOI
+• Tableau des séries avec poids × répétitions, répétitions seules ou durée, et la colonne « Précédent » avec ce que tu as fait la dernière fois.
+• Séries d’échauffement, normales, dégressives et jusqu’à l’échec, RPE, notes et tempo par exercice.
+• Repos automatique à chaque série terminée, aussi dans la notification écran éteint.
+• Échauffement automatique et calculateur de disques (kg ou lb).
+• Supersets et circuits, mode concentration et « exercice suivant » avec compte à rebours.
+
+PROGRAMMES ET ROUTINES
+• Programmes prêts à l’emploi : Full Body, Push / Pull / Legs, Haut / Bas du corps, 5×5 Force, Fessiers et jambes, Recomposition et plus, ou un plan selon ton objectif.
+• Programmes à progression automatique : 5/3/1 Boring But Big et GZCLP.
+• Surcharge progressive : propose d’augmenter la charge quand tu réussis toutes les séries, et une décharge quand tu stagnes.
+• « Aujourd’hui » sur l’accueil, avec les charges déjà calculées.
+• Crée, duplique et réorganise tes routines, ou enregistre une séance comme routine.
+
+TES PROGRÈS
+• Records personnels célébrés à la fin de la séance.
+• Graphiques par exercice : 1RM estimé, charge maximale, volume et répétitions.
+• Carte musculaire hebdomadaire avec les séries efficaces par muscle et l’équilibre des schémas de mouvement.
+• Historique avec calendrier, comparaison de deux séances et journal avec étiquettes.
+• Mensurations avec graphique du poids.
+• Partage ta séance en image.
+
+GALAXY WATCH ET WEAR OS
+• Entraîne-toi depuis la montre ou le téléphone : la séance est partagée en direct et tu peux passer de l’un à l’autre.
+• Fréquence cardiaque en direct et calories, repos avec vibration et guide de tempo.
+• Valide la série avec le bouton physique et règle la charge avec la lunette ou la couronne.
+• Tuile et complication pour le cadran.
+
+PLIABLES
+• Pensée pour le Galaxy Z Fold : liste et détail côte à côte, panneau latéral pendant la séance et mode table.
+
+TES DONNÉES T’APPARTIENNENT
+• Fonctionne hors ligne et sans inscription.
+• Sauvegardes dans le dossier de ton choix, export et import CSV.
+• Health Connect en option : tes séances apparaissent dans Samsung Health.
+
+Et aussi : bibliothèque d’exercices avec images et conseils de technique, exercices personnalisés, widget, rappels, thème clair ou sombre et couleur d’accent au choix.
+
+Une idée ? Envoie-la depuis les Réglages et nous l’étudierons.

@@ -1,0 +1,41 @@
+BeStrong is a strength training app for Android and Wear OS. Log your sets in seconds, follow a program that progresses on its own and see how you improve. No accounts, no ads, and your data stays only on your device.
+
+TRAIN
+• Set table with weight × reps, reps only or time, plus the “Previous” column showing what you did last time.
+• Warm-up, normal, drop and failure sets, RPE, notes and tempo for each exercise.
+• Automatic rest timer when you complete a set, also in the notification with the screen off.
+• Automatic warm-up and plate calculator (kg or lb).
+• Supersets and circuits, focus mode and “next exercise” with a countdown.
+
+PROGRAMS AND ROUTINES
+• Ready-to-go programs: Full Body, Push / Pull / Legs, Upper / Lower, 5×5 Strength, Glutes and legs, Body recomposition and more, or a plan based on your goal.
+• Programs with automatic progression: 5/3/1 Boring But Big and GZCLP.
+• Progressive overload: suggests adding weight when you complete every set, and a deload when you stall.
+• “Today” on the home screen, with the loads already worked out.
+• Create, duplicate and reorder your routines, or save a workout as a routine.
+
+YOUR PROGRESS
+• Personal records, celebrated when you finish your workout.
+• Charts for each exercise: estimated 1RM, top weight, volume and reps.
+• Weekly muscle map with effective sets per muscle and balance between movement patterns.
+• History with calendar, compare two workouts and a journal with tags.
+• Body measurements with a weight chart.
+• Share your workout as an image.
+
+GALAXY WATCH AND WEAR OS
+• Train from your watch or your phone: the workout is shared live and you can switch between them.
+• Live heart rate and calories, rest with vibration and tempo guidance.
+• Complete a set with the physical button and adjust the weight with the bezel or crown.
+• Tile and watch face complication.
+
+FOLDABLES
+• Designed for Galaxy Z Fold: list and detail side by side, side panel during workouts and tabletop mode.
+
+YOUR DATA IS YOURS
+• Works offline and without signing up.
+• Backups to the folder you choose, plus CSV export and import.
+• Optional Health Connect: your workouts show up in Samsung Health.
+
+Plus: exercise library with images and technique tips, custom exercises, widget, reminders, light or dark theme and your choice of accent colour.
+
+Got an idea? Send it from Settings and we’ll look at it.

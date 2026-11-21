@@ -1,0 +1,41 @@
+BeStrong ist eine Krafttraining-App für Android und Wear OS. Trage deine Sätze in Sekunden ein, folge einem Programm, das sich von selbst steigert, und sieh, wie du besser wirst. Ohne Konto, ohne Werbung und deine Daten bleiben nur auf deinem Gerät.
+
+TRAINIEREN
+• Satztabelle mit Gewicht × Wiederholungen, nur Wiederholungen oder Zeit, dazu die Spalte „Vorher“ mit dem, was du letztes Mal gemacht hast.
+• Aufwärm-, normale, Drop- und Sätze bis zum Versagen, RPE, Notizen und Tempo pro Übung.
+• Automatischer Pausentimer nach jedem Satz, auch in der Benachrichtigung bei ausgeschaltetem Bildschirm.
+• Automatisches Aufwärmen und Scheibenrechner (kg oder lb).
+• Supersätze und Zirkel, Fokusmodus und „nächste Übung“ mit Countdown.
+
+PROGRAMME UND ROUTINEN
+• Startklare Programme: Full Body, Push / Pull / Legs, Oberkörper / Unterkörper, 5×5 Kraft, Po und Beine, Rekomposition und mehr, oder ein Plan nach deinem Ziel.
+• Programme mit automatischer Progression: 5/3/1 Boring But Big und GZCLP.
+• Progressive Überlastung: schlägt mehr Gewicht vor, wenn du alle Sätze schaffst, und eine Deload-Phase, wenn du stagnierst.
+• „Heute“ auf dem Startbildschirm, mit bereits berechneten Gewichten.
+• Erstelle, dupliziere und sortiere deine Routinen oder speichere ein Training als Routine.
+
+DEIN FORTSCHRITT
+• Persönliche Rekorde, die am Ende des Trainings gefeiert werden.
+• Diagramme pro Übung: geschätztes 1RM, Höchstgewicht, Volumen und Wiederholungen.
+• Wöchentliche Muskelkarte mit effektiven Sätzen pro Muskel und Balance der Bewegungsmuster.
+• Verlauf mit Kalender, zwei Trainings vergleichen und Tagebuch mit Tags.
+• Körpermaße mit Gewichtsdiagramm.
+• Teile dein Training als Bild.
+
+GALAXY WATCH UND WEAR OS
+• Trainiere mit der Uhr oder dem Handy: Das Training wird live geteilt und du kannst jederzeit wechseln.
+• Live-Puls und Kalorien, Pause mit Vibration und Tempo-Führung.
+• Schließe den Satz mit der Taste ab und stelle das Gewicht mit Lünette oder Krone ein.
+• Kachel und Komplikation fürs Zifferblatt.
+
+FALTBARE GERÄTE
+• Gemacht für das Galaxy Z Fold: Liste und Detail nebeneinander, Seitenleiste im Training und Tischmodus.
+
+DEINE DATEN GEHÖREN DIR
+• Funktioniert offline und ohne Anmeldung.
+• Backups in einen Ordner deiner Wahl sowie CSV-Export und -Import.
+• Optional Health Connect: Deine Trainings erscheinen in Samsung Health.
+
+Außerdem: Übungsbibliothek mit Bildern und Technikhinweisen, eigene Übungen, Widget, Erinnerungen, helles oder dunkles Design und Akzentfarbe nach Wahl.
+
+Hast du eine Idee? Schick sie uns über die Einstellungen und wir sehen sie uns an.

@@ -45,7 +45,8 @@ Para que cada versión vaya directa a todos los usuarios: *Variables* del reposi
 producción se publica a mano desde Play Console.
 
 La ficha de Play se actualiza sola en cada versión desde `fastlane/metadata/android/<idioma>/` (`title.txt`,
-`short_description.txt` ≤ 80, `full_description.txt` ≤ 4000; solo se tocan los archivos que existen). La cuenta de
+`short_description.txt` ≤ 80, `full_description.txt` ≤ 4000; solo se tocan los archivos que existen). Idiomas: es-ES, en-US, ca, de-DE, fr-FR, gl-ES y pt-PT (los de la app); las notas de
+la versión van en `<idioma>/changelogs/default.txt` y solo se envían en los idiomas que ya tiene la ficha. La cuenta de
 servicio necesita además el permiso «Gestionar la presencia en Play Store»; sin él la versión sale igual y la CI solo avisa.
 
 Si los canales cambian de nombre, ponlos en *Variables* del repositorio: `PLAY_TRACK` (móvil) y `PLAY_WEAR_TRACK` (reloj).

@@ -1,0 +1,41 @@
+BeStrong é uma app de treino de força para Android e Wear OS. Regista as tuas séries em segundos, segue um programa que progride sozinho e vê como melhoras. Sem contas, sem anúncios e com os teus dados guardados apenas no teu dispositivo.
+
+TREINA
+• Tabela de séries com peso × repetições, só repetições ou tempo, e a coluna «Anterior» com o que fizeste da última vez.
+• Séries de aquecimento, normais, drop e até à falha, RPE, notas e tempo por exercício.
+• Descanso automático ao completar cada série, também na notificação com o ecrã desligado.
+• Aquecimento automático e calculadora de discos (kg ou lb).
+• Supersséries e circuitos, modo foco e «próximo exercício» com contagem decrescente.
+
+PROGRAMAS E ROTINAS
+• Programas prontos a começar: Full Body, Push / Pull / Legs, Tronco / Pernas, 5×5 Força, Glúteos e pernas, Recomposição e mais, ou um plano segundo o teu objetivo.
+• Programas com progressão automática: 5/3/1 Boring But Big e GZCLP.
+• Sobrecarga progressiva: propõe subir o peso quando completas todas as séries, e uma descarga quando estagnas.
+• «Hoje» no início, com as cargas já calculadas.
+• Cria, duplica e reordena as tuas rotinas, ou guarda um treino como rotina.
+
+O TEU PROGRESSO
+• Recordes pessoais celebrados no fim do treino.
+• Gráficos por exercício: 1RM estimado, peso máximo, volume e repetições.
+• Mapa muscular semanal com as séries efetivas por músculo e equilíbrio dos padrões de movimento.
+• Histórico com calendário, comparar dois treinos e diário com etiquetas.
+• Medidas corporais com gráfico de peso.
+• Partilha o teu treino como imagem.
+
+GALAXY WATCH E WEAR OS
+• Treina a partir do relógio ou do telemóvel: o treino é partilhado em direto e podes mudar de um para o outro.
+• Frequência cardíaca em direto e calorias, descanso com vibração e guia de tempo.
+• Completa a série com o botão físico e ajusta o peso com o bisel ou a coroa.
+• Tile e complicação para o mostrador.
+
+DOBRÁVEIS
+• Pensada para o Galaxy Z Fold: lista e detalhe lado a lado, painel lateral no treino e modo mesa.
+
+OS TEUS DADOS SÃO TEUS
+• Funciona sem ligação e sem registo.
+• Cópias de segurança na pasta que escolheres e exportação e importação em CSV.
+• Health Connect opcional: os teus treinos aparecem no Samsung Health.
+
+E ainda: biblioteca de exercícios com imagens e instruções de técnica, exercícios personalizados, widget, lembretes, tema claro ou escuro e cor de destaque à tua escolha.
+
+Tens uma ideia? Envia-a a partir das Definições e vamos estudá-la.
