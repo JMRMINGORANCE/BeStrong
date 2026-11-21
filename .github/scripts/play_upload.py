@@ -5,6 +5,8 @@ Variables: PLAY_SERVICE_ACCOUNT_JSON (clave de la cuenta de servicio), PLAY_PACK
 defecto), PLAY_TRACK (canal del móvil, «alpha» por defecto), PLAY_WEAR_TRACK (canal del reloj; si no existe se busca el
 canal de Wear OS que ya tenga versiones), BESTRONG_VERSION (nombre de la versión).
 Las notas de la versión salen de fastlane/metadata/android/<idioma>/changelogs/default.txt.
+La ficha de Play (title.txt, short_description.txt, full_description.txt de cada idioma) se actualiza después, en otra
+edición: si falla (p. ej. la cuenta de servicio no tiene permiso para la ficha), solo avisa y la versión ya está subida.
 Mientras la app no esté publicada (borrador en Play Console), Play solo acepta versiones en borrador: se suben así y
 hay que enviar a revisión esa primera versión a mano desde Play Console.
 """
@@ -39,6 +41,48 @@ def release_notes():
         if text:
             notes.append({"language": path.parent.parent.name, "text": text[:500]})
     return notes
+
+
+LISTING_FIELDS = {"title": 30, "shortDescription": 80, "fullDescription": 4000}
+LISTING_FILES = {"title": "title.txt", "shortDescription": "short_description.txt", "fullDescription": "full_description.txt"}
+
+
+def listings():
+    result = {}
+    for folder in sorted(p for p in Path("fastlane/metadata/android").iterdir() if p.is_dir()):
+        fields = {}
+        for field, name in LISTING_FILES.items():
+            path = folder / name
+            if path.is_file():
+                text = path.read_text(encoding="utf-8").strip()
+                if text:
+                    fields[field] = text[:LISTING_FIELDS[field]]
+        if fields:
+            result[folder.name] = fields
+    return result
+
+
+def update_listings(session):
+    wanted = listings()
+    if not wanted:
+        return
+    edit = check(session.post(f"{API}/edits"))["id"]
+    current = {
+        item["language"]: item
+        for item in check(session.get(f"{API}/edits/{edit}/listings")).get("listings", [])
+    }
+    changed = False
+    for language, fields in wanted.items():
+        old = current.get(language, {})
+        if all(old.get(k) == v for k, v in fields.items()):
+            continue
+        check(session.patch(f"{API}/edits/{edit}/listings/{language}", json={"language": language, **fields}))
+        print(f"Ficha de Play actualizada: {language} ({', '.join(fields)})")
+        changed = True
+    if changed:
+        check(session.post(f"{API}/edits/{edit}:commit"))
+    else:
+        print("Ficha de Play sin cambios")
 
 
 def pick_wear_track(tracks, wanted):
@@ -101,6 +145,11 @@ def main():
     except PlayError as e:
         sys.exit(str(e))
     print("Enviado a Google Play")
+
+    try:
+        update_listings(session)
+    except PlayError as e:
+        print(f"::warning::No se ha podido actualizar la ficha de Play: {e}")
 
 
 if __name__ == "__main__":
