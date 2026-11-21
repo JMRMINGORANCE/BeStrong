@@ -1,4 +1,17 @@
-BeStrong est une app de musculation pour Android et Wear OS. Note tes séries en quelques secondes, suis un programme qui progresse tout seul et vois tes progrès. Sans compte, sans publicité, et tes données restent uniquement sur ton appareil.
+BeStrong est une app de musculation pour Android et Wear OS, entièrement gratuite : pas d’achats intégrés, pas d’abonnement, pas de fonctions payantes et pas de publicité. Tout ce que tu vois est disponible pour tout le monde dès le premier jour.
+
+Et elle s’améliore chaque jour : tes suggestions nous arrivent directement depuis l’app et, avec l’aide de l’intelligence artificielle, les bonnes idées deviennent de nouvelles fonctions en très peu de temps. Beaucoup des nouveautés de chaque version ont été demandées par les utilisateurs eux-mêmes.
+
+Note tes séries en quelques secondes, suis un programme qui progresse tout seul et vois tes progrès. Sans compte, et tes données restent uniquement sur ton appareil.
+
+100 % GRATUITE, VRAIMENT
+• Pas d’achats, pas d’abonnement, pas de version « Pro » et pas de publicité.
+• Toutes les fonctions, programmes et statistiques, pour tout le monde.
+
+UNE APP QUI GRANDIT AVEC TOI
+• Envoie tes idées depuis les Réglages (icône de l’ampoule) et suis leur état sans quitter l’app.
+• Grâce à l’IA, les suggestions sont étudiées et réalisées en quelques jours, pas en quelques mois.
+• De nouvelles versions très souvent, avec ce que demande la communauté.
 
 ENTRAÎNE-TOI
 • Tableau des séries avec poids × répétitions, répétitions seules ou durée, et la colonne « Précédent » avec ce que tu as fait la dernière fois.
@@ -38,4 +51,4 @@ TES DONNÉES T’APPARTIENNENT
 
 Et aussi : bibliothèque d’exercices avec images et conseils de technique, exercices personnalisés, widget, rappels, thème clair ou sombre et couleur d’accent au choix.
 
-Une idée ? Envoie-la depuis les Réglages et nous l’étudierons.
+Une idée ? Envoie-la depuis les Réglages : elle pourrait être dans la prochaine version.

@@ -1,4 +1,17 @@
-BeStrong é uma app de treino de força para Android e Wear OS. Regista as tuas séries em segundos, segue um programa que progride sozinho e vê como melhoras. Sem contas, sem anúncios e com os teus dados guardados apenas no teu dispositivo.
+BeStrong é uma app de treino de força para Android e Wear OS, totalmente gratuita: sem compras na app, sem subscrições, sem funções pagas e sem anúncios. Tudo o que vês está disponível para todos desde o primeiro dia.
+
+E melhora todos os dias: as tuas propostas chegam diretamente a partir da app e, com a ajuda da inteligência artificial, as boas ideias transformam-se em novas funções em muito pouco tempo. Muitas das novidades de cada versão foram pedidas pelos próprios utilizadores.
+
+Regista as tuas séries em segundos, segue um programa que progride sozinho e vê como melhoras. Sem contas e com os teus dados guardados apenas no teu dispositivo.
+
+100% GRÁTIS, A SÉRIO
+• Sem compras, sem subscrições, sem versão «Pro» e sem anúncios.
+• Todas as funções, programas e estatísticas, para todos.
+
+UMA APP QUE CRESCE CONTIGO
+• Envia as tuas ideias a partir das Definições (ícone da lâmpada) e acompanha o estado sem sair da app.
+• Graças à IA, as propostas são estudadas e tornam-se realidade em dias, não em meses.
+• Novas versões muito frequentes, com o que a comunidade pede.
 
 TREINA
 • Tabela de séries com peso × repetições, só repetições ou tempo, e a coluna «Anterior» com o que fizeste da última vez.
@@ -38,4 +51,4 @@ OS TEUS DADOS SÃO TEUS
 
 E ainda: biblioteca de exercícios com imagens e instruções de técnica, exercícios personalizados, widget, lembretes, tema claro ou escuro e cor de destaque à tua escolha.
 
-Tens uma ideia? Envia-a a partir das Definições e vamos estudá-la.
+Tens uma ideia? Envia-a a partir das Definições: pode estar na próxima versão.
