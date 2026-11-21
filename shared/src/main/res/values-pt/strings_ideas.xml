@@ -29,6 +29,8 @@
     <string name="ideas_done_badge">Ideia da comunidade</string>
     <string name="ideas_done_2">As permissões são pedidas no fim das boas-vindas</string>
     <string name="ideas_done_3">Objetivo de recomposição corporal e escolher a cor da app</string>
+    <string name="ideas_done_5">Zonas a proteger e zonas a reforçar ao criar o teu programa</string>
+    <string name="ideas_done_6">Crunch na máquina (sentado) na biblioteca de exercícios</string>
     <string name="ideas_unread_title">Tem respostas novas</string>
     <string name="ideas_unread_body">A equipa respondeu às suas propostas. Veja em «As minhas propostas».</string>
     <string name="ideas_unread_badge">Respostas novas</string>
