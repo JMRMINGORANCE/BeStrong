@@ -1,0 +1,55 @@
+BeStrong és una app d’entrenament de força per a Android i Wear OS, totalment gratuïta: sense compres dins de l’app, sense subscripcions, sense funcions de pagament i sense anuncis. Tot el que veus està disponible per a tothom des del primer dia.
+
+I millora cada dia: les teves propostes arriben directament des de l’app i, amb l’ajuda de la intel·ligència artificial, les bones idees es converteixen en funcions noves en molt poc temps. Moltes de les novetats de cada versió les han demanat els mateixos usuaris.
+
+Apunta les sèries en segons, segueix un programa que progressa sol i mira com millores. Sense comptes i amb les teves dades guardades només al teu dispositiu.
+
+100 % GRATIS, DE VERITAT
+• Sense compres, sense subscripcions, sense versió «Pro» i sense anuncis.
+• Totes les funcions, programes i estadístiques, per a tothom.
+
+UNA APP QUE CREIX AMB TU
+• Envia les teves idees des d’Ajustos (icona de la bombeta) i segueix-ne l’estat sense sortir de l’app.
+• Gràcies a la IA, les propostes s’estudien i es fan realitat en dies, no en mesos.
+• Versions noves molt sovint, amb el que demana la comunitat.
+
+ENTRENA
+• Taula de sèries amb pes × repeticions, només repeticions o temps, i la columna «Anterior» amb el que vas fer l’última vegada.
+• Sèries d’escalfament, normals, drop i fins a la fallada, RPE, notes i tempo per exercici.
+• Descans automàtic en completar cada sèrie, també a la notificació amb la pantalla apagada.
+• Escalfament automàtic i calculadora de discos (kg o lb).
+• Superseries i circuits, mode focus i «següent exercici» amb compte enrere.
+
+PROGRAMES I RUTINES
+• Programes a punt per començar: Full Body, Push / Pull / Legs, Tors / Cama, 5×5 Força, Glutis i cama, Recomposició i més, o un pla segons el teu objectiu.
+• Programes amb progressió automàtica: 5/3/1 Boring But Big i GZCLP.
+• Sobrecàrrega progressiva: et proposa pujar pes quan completes totes les sèries, i una descàrrega quan t’estanques.
+• «Avui toca» a l’inici, amb les càrregues ja calculades.
+• Crea, duplica i reordena les teves rutines, o desa un entrenament com a rutina.
+
+EL TEU PROGRÉS
+• Rècords personals que es celebren en acabar l’entrenament.
+• Gràfiques per exercici: 1RM estimat, pes màxim, volum i repeticions.
+• Mapa muscular setmanal amb les sèries efectives per múscul i equilibri de patrons de moviment.
+• Historial amb calendari, comparar dos entrenaments i diari amb etiquetes.
+• Mesures corporals amb gràfica de pes.
+• Comparteix l’entrenament com a imatge.
+
+RELLOTGES WEAR OS
+• Compatible amb qualsevol rellotge Wear OS 3 o posterior: Galaxy Watch, Pixel Watch i molts més.
+• Entrena des del rellotge o des del mòbil: l’entrenament es comparteix en directe i pots canviar d’un a l’altre.
+• Pols en directe i calories, descans amb vibració i guia de tempo.
+• Completa la sèrie amb el botó físic i ajusta el pes amb el bisell o la corona.
+• Tile i complicació per a l’esfera.
+
+PLEGABLES
+• Pensada per al Galaxy Z Fold: llista i detall de costat, panell lateral a l’entrenament i mode taula.
+
+LES TEVES DADES SÓN TEVES
+• Funciona sense connexió i sense registre.
+• Còpies de seguretat a la carpeta que triïs i exportació i importació en CSV.
+• Health Connect opcional: els teus entrenaments apareixen a Samsung Health.
+
+I a més: biblioteca d’exercicis amb imatges i instruccions de tècnica, exercicis personalitzats, widget, recordatoris, tema clar o fosc i color d’accent al teu gust.
+
+Tens una idea? Envia-la des d’Ajustos: pot ser a la propera versió.

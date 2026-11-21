@@ -38,5 +38,16 @@ Mientras la app está en borrador, Play solo acepta versiones en borrador: la pr
 borrador en la prueba cerrada y hay que **enviarla a revisión a mano** (después de completar *Contenido de la aplicación*:
 política de privacidad, seguridad de los datos, clasificación, público objetivo, permisos de salud). Las siguientes salen solas.
 
+## Producción y ficha
+
+Para que cada versión vaya directa a todos los usuarios: *Variables* del repositorio `PLAY_TRACK=production` y
+`PLAY_WEAR_TRACK=wear:production`, y a la cuenta de servicio el permiso «Publicar en producción…». La primera versión de
+producción se publica a mano desde Play Console.
+
+La ficha de Play se actualiza sola en cada versión desde `fastlane/metadata/android/<idioma>/` (`title.txt`,
+`short_description.txt` ≤ 80, `full_description.txt` ≤ 4000; solo se tocan los archivos que existen). Idiomas: es-ES, en-US, ca, de-DE, fr-FR, gl-ES y pt-PT (los de la app); las notas de
+la versión van en `<idioma>/changelogs/default.txt` y solo se envían en los idiomas que ya tiene la ficha. La cuenta de
+servicio necesita además el permiso «Gestionar la presencia en Play Store»; sin él la versión sale igual y la CI solo avisa.
+
 Si los canales cambian de nombre, ponlos en *Variables* del repositorio: `PLAY_TRACK` (móvil) y `PLAY_WEAR_TRACK` (reloj).
 Si un nombre no existe, el paso falla y muestra la lista de canales que hay.
