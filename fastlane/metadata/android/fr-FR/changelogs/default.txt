@@ -1,1 +1,1 @@
-- Nous préparons BeStrong pour son arrivée sur Google Play.
+- « Idées » affiche désormais toutes les suggestions de la communauté déjà dans l’app, et le compteur est à jour.

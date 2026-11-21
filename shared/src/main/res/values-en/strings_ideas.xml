@@ -29,6 +29,8 @@
     <string name="ideas_done_badge">Community idea</string>
     <string name="ideas_done_2">Permissions are requested after the welcome screens</string>
     <string name="ideas_done_3">Body recomposition goal and choosing the app colour</string>
+    <string name="ideas_done_5">Areas to protect and areas to strengthen when building your program</string>
+    <string name="ideas_done_6">Seated machine crunch in the exercise library</string>
     <string name="ideas_unread_title">You have new replies</string>
     <string name="ideas_unread_body">The team has answered your suggestions. Check “My suggestions”.</string>
     <string name="ideas_unread_badge">New replies</string>
