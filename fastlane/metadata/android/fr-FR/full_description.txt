@@ -35,7 +35,8 @@ TES PROGRÈS
 • Mensurations avec graphique du poids.
 • Partage ta séance en image.
 
-GALAXY WATCH ET WEAR OS
+MONTRES WEAR OS
+• Compatible avec toutes les montres Wear OS 3 ou plus récentes : Galaxy Watch, Pixel Watch et bien d’autres.
 • Entraîne-toi depuis la montre ou le téléphone : la séance est partagée en direct et tu peux passer de l’un à l’autre.
 • Fréquence cardiaque en direct et calories, repos avec vibration et guide de tempo.
 • Valide la série avec le bouton physique et règle la charge avec la lunette ou la couronne.

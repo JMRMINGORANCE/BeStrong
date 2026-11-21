@@ -35,7 +35,8 @@ YOUR PROGRESS
 • Body measurements with a weight chart.
 • Share your workout as an image.
 
-GALAXY WATCH AND WEAR OS
+WEAR OS WATCHES
+• Works with any Wear OS 3 or later watch: Galaxy Watch, Pixel Watch and many more.
 • Train from your watch or your phone: the workout is shared live and you can switch between them.
 • Live heart rate and calories, rest with vibration and tempo guidance.
 • Complete a set with the physical button and adjust the weight with the bezel or crown.

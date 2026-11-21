@@ -35,7 +35,8 @@ EL TEU PROGRÉS
 • Mesures corporals amb gràfica de pes.
 • Comparteix l’entrenament com a imatge.
 
-GALAXY WATCH I WEAR OS
+RELLOTGES WEAR OS
+• Compatible amb qualsevol rellotge Wear OS 3 o posterior: Galaxy Watch, Pixel Watch i molts més.
 • Entrena des del rellotge o des del mòbil: l’entrenament es comparteix en directe i pots canviar d’un a l’altre.
 • Pols en directe i calories, descans amb vibració i guia de tempo.
 • Completa la sèrie amb el botó físic i ajusta el pes amb el bisell o la corona.

@@ -35,7 +35,8 @@ O TEU PROGRESSO
 • Medidas corporais com gráfico de peso.
 • Partilha o teu treino como imagem.
 
-GALAXY WATCH E WEAR OS
+RELÓGIOS WEAR OS
+• Compatível com qualquer relógio Wear OS 3 ou posterior: Galaxy Watch, Pixel Watch e muitos mais.
 • Treina a partir do relógio ou do telemóvel: o treino é partilhado em direto e podes mudar de um para o outro.
 • Frequência cardíaca em direto e calorias, descanso com vibração e guia de tempo.
 • Completa a série com o botão físico e ajusta o peso com o bisel ou a coroa.
