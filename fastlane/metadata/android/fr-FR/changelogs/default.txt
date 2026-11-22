@@ -1,1 +1,1 @@
-- « Idées » affiche désormais toutes les suggestions de la communauté déjà dans l’app, et le compteur est à jour.
+- Tu peux maintenant activer un son discret à la fin du repos, pour savoir quand commencer la série suivante sans regarder ton téléphone. C’est dans Réglages, « Pendant l’entraînement », et il ne sonne pas si ton téléphone est en silencieux. Une idée de la communauté.

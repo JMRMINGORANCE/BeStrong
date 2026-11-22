@@ -1,1 +1,1 @@
-- Em «Ideias» já aparecem todas as propostas da comunidade que estão na app, e o contador está atualizado.
+- Agora podes ativar um som discreto no fim do descanso, para saberes quando começar a série seguinte sem olhar para o telemóvel. Está nas Definições, «Durante o treino», e não toca se o telemóvel estiver em silêncio. Uma ideia da comunidade.
