@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rest_sound">Som discreto no fim do descanso</string>
+    <string name="rest_sound_body">Um bipe curto. Não toca se o telemóvel estiver em silêncio.</string>
+</resources>

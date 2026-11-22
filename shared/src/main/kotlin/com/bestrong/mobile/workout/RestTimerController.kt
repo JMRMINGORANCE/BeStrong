@@ -34,6 +34,11 @@ class RestTimerController @Inject constructor(
 ) {
     private val vibrateEnabled: () -> Boolean = { settings.settings.value.vibrateOnRestEnd }
 
+    /** Pitido discreto al acabar el descanso, si se ha activado en los ajustes. */
+    private fun chime() {
+        if (settings.settings.value.restSound) RestChime.play()
+    }
+
     /** El descanso se guarda: si Android cierra la app, al volver sigue donde estaba. */
     private val prefs = context.getSharedPreferences("rest_timer", Context.MODE_PRIVATE)
     private val _rest = MutableStateFlow(restore())
@@ -80,6 +85,7 @@ class RestTimerController @Inject constructor(
         if (ends <= 0 || late !in 0..MISSED_END_MS) return
         persist(null)
         if (vibrateEnabled()) vibrate()
+        chime()
         announcer.say(context.getString(com.bestrong.mobile.shared.R.string.tts_go))
     }
 
@@ -155,6 +161,7 @@ class RestTimerController @Inject constructor(
                 if (generation.get() != gen || !_rest.compareAndSet(r, null)) return@launch
                 persist(null)
                 if (vibrateEnabled()) vibrate()
+                chime()
                 announcer.say(context.getString(com.bestrong.mobile.shared.R.string.tts_go))
             } finally {
                 if (generation.get() == gen) releaseWakeLock()

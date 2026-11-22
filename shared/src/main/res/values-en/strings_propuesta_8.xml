@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rest_sound">Subtle sound when rest ends</string>
+    <string name="rest_sound_body">A short beep. It stays quiet when your phone is on silent.</string>
+</resources>

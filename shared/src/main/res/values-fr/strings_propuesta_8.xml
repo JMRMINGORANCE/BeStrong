@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rest_sound">Son discret à la fin du repos</string>
+    <string name="rest_sound_body">Un bip court. Il ne sonne pas si ton téléphone est en silencieux.</string>
+</resources>

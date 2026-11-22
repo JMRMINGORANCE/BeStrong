@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rest_sound">Sonido discreto al terminar el descanso</string>
+    <string name="rest_sound_body">Un pitido corto. No suena si el móvil está en silencio.</string>
+</resources>

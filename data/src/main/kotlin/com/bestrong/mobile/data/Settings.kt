@@ -94,6 +94,8 @@ data class UserSettings(
     val cardioNudge: Boolean = true,
     /** Cuenta atrás con tres toques (3-2-1) antes de que acabe el descanso. */
     val restCountdown: Boolean = false,
+    /** Pitido corto y discreto al acabar el descanso (además de la vibración, si está activada). */
+    val restSound: Boolean = false,
     /** Día del aviso (1 = lunes … 7 = domingo); el jueves por defecto. */
     val cardioNudgeDay: Int = 4,
     /** Cintura objetivo (cm); null = sin objetivo. */
@@ -185,6 +187,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         cardioNudge = prefs.getBoolean("cardio_nudge", true),
         cardioNudgeDay = prefs.getInt("cardio_nudge_day", 4).coerceIn(1, 7),
         restCountdown = prefs.getBoolean("rest_countdown", false),
+        restSound = prefs.getBoolean("rest_sound", false),
         plateauSnoozed = prefs.decodeMap("plateau_snoozed", INCREMENTS),
     )
 
@@ -266,6 +269,7 @@ class SettingsStore @Inject constructor(@ApplicationContext context: Context) {
         putString("plateau_snoozed", SyncContract.json.encodeToString(INCREMENTS, s.plateauSnoozed))
         putInt("cardio_nudge_day", s.cardioNudgeDay)
         putBoolean("rest_countdown", s.restCountdown)
+        putBoolean("rest_sound", s.restSound)
     }
 
     /** Estado de la copia automática (propio de este móvil: no viaja en las copias). */
