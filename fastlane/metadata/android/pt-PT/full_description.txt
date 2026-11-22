@@ -16,7 +16,7 @@ UMA APP QUE CRESCE CONTIGO
 TREINA
 • Tabela de séries com peso × repetições, só repetições ou tempo, e a coluna «Anterior» com o que fizeste da última vez.
 • Séries de aquecimento, normais, drop e até à falha, RPE, notas e tempo por exercício.
-• Descanso automático ao completar cada série, também na notificação com o ecrã desligado.
+• Descanso automático ao completar cada série, também na notificação com o ecrã desligado, com vibração ou um som discreto no fim.
 • Aquecimento automático e calculadora de discos (kg ou lb).
 • Supersséries e circuitos, modo foco e «próximo exercício» com contagem decrescente.
 

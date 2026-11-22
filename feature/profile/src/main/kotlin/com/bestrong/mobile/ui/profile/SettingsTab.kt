@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MonitorWeight
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Policy
 import androidx.compose.material.icons.filled.RecordVoiceOver
@@ -234,6 +235,19 @@ private fun DuringGroup(settings: com.bestrong.mobile.data.UserSettings, update:
         SettingsSwitchRow(stringResource(R.string.rest_countdown), settings.restCountdown, { v -> update { it.copy(restCountdown = v) } }, icon = Icons.Default.Timer, tint = SettingsTint.Green)
         SettingsDivider()
         SettingsSwitchRow(stringResource(R.string.vibrate_rest), settings.vibrateOnRestEnd, { v -> update { it.copy(vibrateOnRestEnd = v) } }, icon = Icons.Default.Vibration, tint = SettingsTint.Purple)
+        SettingsDivider()
+        SettingsSwitchRow(
+            stringResource(R.string.rest_sound),
+            settings.restSound,
+            { v ->
+                update { it.copy(restSound = v) }
+                // Al activarlo suena una vez, para saber cómo es
+                if (v) com.bestrong.mobile.workout.RestChime.play()
+            },
+            summary = stringResource(R.string.rest_sound_body),
+            icon = Icons.Default.NotificationsActive,
+            tint = SettingsTint.Pink,
+        )
         SettingsDivider()
         SettingsSwitchRow(
             stringResource(R.string.next_exercise_setting),

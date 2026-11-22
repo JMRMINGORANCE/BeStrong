@@ -16,7 +16,7 @@ AN APP THAT GROWS WITH YOU
 TRAIN
 • Set table with weight × reps, reps only or time, plus the “Previous” column showing what you did last time.
 • Warm-up, normal, drop and failure sets, RPE, notes and tempo for each exercise.
-• Automatic rest timer when you complete a set, also in the notification with the screen off.
+• Automatic rest timer when you complete a set, also in the notification with the screen off, with a vibration or a subtle sound when it ends.
 • Automatic warm-up and plate calculator (kg or lb).
 • Supersets and circuits, focus mode and “next exercise” with a countdown.
 

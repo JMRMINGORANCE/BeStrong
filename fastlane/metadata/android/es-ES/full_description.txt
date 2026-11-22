@@ -16,7 +16,7 @@ UNA APP QUE CRECE CONTIGO
 ENTRENA
 • Tabla de series con peso × reps, solo reps o tiempo, y la columna «Anterior» con lo que hiciste la última vez.
 • Series de calentamiento, normales, drop y al fallo, RPE, notas y tempo por ejercicio.
-• Descanso automático al completar cada serie, también en la notificación con la pantalla apagada.
+• Descanso automático al completar cada serie, también en la notificación con la pantalla apagada, con vibración o un sonido discreto al acabar.
 • Calentamiento automático y calculadora de discos (kg o lb).
 • Superseries y circuitos, modo foco y «siguiente ejercicio» con cuenta atrás.
 
