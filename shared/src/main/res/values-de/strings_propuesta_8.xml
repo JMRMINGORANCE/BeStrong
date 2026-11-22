@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rest_sound">Dezenter Ton am Pausenende</string>
+    <string name="rest_sound_body">Ein kurzer Piepton. Ist dein Handy lautlos, bleibt er stumm.</string>
+</resources>

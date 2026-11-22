@@ -16,7 +16,7 @@ EINE APP, DIE MIT DIR WÄCHST
 TRAINIEREN
 • Satztabelle mit Gewicht × Wiederholungen, nur Wiederholungen oder Zeit, dazu die Spalte „Vorher“ mit dem, was du letztes Mal gemacht hast.
 • Aufwärm-, normale, Drop- und Sätze bis zum Versagen, RPE, Notizen und Tempo pro Übung.
-• Automatischer Pausentimer nach jedem Satz, auch in der Benachrichtigung bei ausgeschaltetem Bildschirm.
+• Automatischer Pausentimer nach jedem Satz, auch in der Benachrichtigung bei ausgeschaltetem Bildschirm, mit Vibration oder dezentem Ton am Ende.
 • Automatisches Aufwärmen und Scheibenrechner (kg oder lb).
 • Supersätze und Zirkel, Fokusmodus und „nächste Übung“ mit Countdown.
 

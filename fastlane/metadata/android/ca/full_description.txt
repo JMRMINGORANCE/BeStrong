@@ -16,7 +16,7 @@ UNA APP QUE CREIX AMB TU
 ENTRENA
 • Taula de sèries amb pes × repeticions, només repeticions o temps, i la columna «Anterior» amb el que vas fer l’última vegada.
 • Sèries d’escalfament, normals, drop i fins a la fallada, RPE, notes i tempo per exercici.
-• Descans automàtic en completar cada sèrie, també a la notificació amb la pantalla apagada.
+• Descans automàtic en completar cada sèrie, també a la notificació amb la pantalla apagada, amb vibració o un so discret en acabar.
 • Escalfament automàtic i calculadora de discos (kg o lb).
 • Superseries i circuits, mode focus i «següent exercici» amb compte enrere.
 

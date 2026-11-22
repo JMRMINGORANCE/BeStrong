@@ -55,6 +55,7 @@ data class CommunityIdea(val number: Int, @StringRes val title: Int)
 
 object CommunityIdeas {
     val all = listOf(
+        CommunityIdea(8, R.string.ideas_done_8),
         CommunityIdea(6, R.string.ideas_done_6),
         CommunityIdea(5, R.string.ideas_done_5),
         CommunityIdea(3, R.string.ideas_done_3),

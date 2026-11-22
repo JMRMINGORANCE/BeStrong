@@ -1,1 +1,1 @@
-- «Ideas» now shows every community suggestion that is already in the app, and the counter is up to date.
+- You can now turn on a subtle sound when your rest ends, so you know when to start your next set without looking at your phone. Find it in Settings, "During the workout". It stays quiet when your phone is on silent. A community idea.

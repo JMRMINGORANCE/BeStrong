@@ -1,1 +1,1 @@
-- En «Ideas» ya aparecen todas las propuestas de la comunidad que están en la app, y el contador está al día.
+- Ahora puedes activar un sonido discreto al terminar el descanso, para saber cuándo empezar la siguiente serie sin mirar el móvil. Está en Ajustes, «Durante el entreno», y no suena si el móvil está en silencio. Una idea de la comunidad.

@@ -16,7 +16,7 @@ UNHA APP QUE MEDRA CONTIGO
 ADESTRA
 • Táboa de series con peso × repeticións, só repeticións ou tempo, e a columna «Anterior» co que fixeches a última vez.
 • Series de quecemento, normais, drop e ao fallo, RPE, notas e tempo por exercicio.
-• Descanso automático ao completar cada serie, tamén na notificación coa pantalla apagada.
+• Descanso automático ao completar cada serie, tamén na notificación coa pantalla apagada, con vibración ou un son discreto ao rematar.
 • Quecemento automático e calculadora de discos (kg ou lb).
 • Superseries e circuítos, modo foco e «seguinte exercicio» con conta atrás.
 

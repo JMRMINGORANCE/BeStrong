@@ -16,7 +16,7 @@ UNE APP QUI GRANDIT AVEC TOI
 ENTRAÎNE-TOI
 • Tableau des séries avec poids × répétitions, répétitions seules ou durée, et la colonne « Précédent » avec ce que tu as fait la dernière fois.
 • Séries d’échauffement, normales, dégressives et jusqu’à l’échec, RPE, notes et tempo par exercice.
-• Repos automatique à chaque série terminée, aussi dans la notification écran éteint.
+• Repos automatique à chaque série terminée, aussi dans la notification écran éteint, avec une vibration ou un son discret à la fin.
 • Échauffement automatique et calculateur de disques (kg ou lb).
 • Supersets et circuits, mode concentration et « exercice suivant » avec compte à rebours.
 

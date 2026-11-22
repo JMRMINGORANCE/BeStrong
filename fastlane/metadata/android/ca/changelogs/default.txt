@@ -1,1 +1,1 @@
-- A «Idees» ja apareixen totes les propostes de la comunitat que són a l’app, i el comptador està al dia.
+- Ara pots activar un so discret en acabar el descans, per saber quan començar la sèrie següent sense mirar el mòbil. És a Configuració, «Durant l’entrenament», i no sona si el mòbil està en silenci. Una idea de la comunitat.
