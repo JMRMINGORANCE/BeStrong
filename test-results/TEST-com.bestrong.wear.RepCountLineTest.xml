@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.bestrong.wear.RepCountLineTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-28T13:33:37.434Z" hostname="runnervm3lb7s" time="9.964">
+  <properties/>
+  <testcase name="counted_reps_line_corrects_count" classname="com.bestrong.wear.RepCountLineTest" time="9.77"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
