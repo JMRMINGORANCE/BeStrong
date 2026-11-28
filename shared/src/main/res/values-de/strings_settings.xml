@@ -41,7 +41,7 @@
     <string name="perm_hc_write_t">In Health Connect speichern</string>
     <string name="perm_hc_write_d">Deine Trainings, Kalorien, Puls und Distanz in Samsung Health, Google Fit und anderen Apps.</string>
     <string name="perm_hc_read_t">Aus Health Connect lesen</string>
-    <string name="perm_hc_read_d">Gewicht, Größe, Schlaf und Ruhepuls für die Tagesform und die Kalorien.</string>
+    <string name="perm_hc_read_d">Gewicht und Größe für die Kalorienberechnung.</string>
     <string name="perm_battery_t">Keine Akku-Einschränkungen</string>
     <string name="perm_battery_d">Damit Stoppuhr und Pausenhinweis bei ausgeschaltetem Bildschirm weiterlaufen.</string>
     <string name="perm_watch_t">Wear-OS-Uhr</string>

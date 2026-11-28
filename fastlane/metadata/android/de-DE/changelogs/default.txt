@@ -1,1 +1,2 @@
-- Du kannst jetzt einen dezenten Ton am Pausenende einschalten, damit du ohne Blick aufs Handy weißt, wann der nächste Satz beginnt. Du findest ihn in den Einstellungen unter „Während des Trainings“. Ist dein Handy lautlos, bleibt er stumm. Eine Idee aus der Community.
+- BeStrong fragt in Health Connect nicht mehr nach Zugriff auf deinen Schlaf oder deinen Ruhepuls: Es liest nur dein Gewicht, deine Größe und die Herzfrequenz deiner Trainings, die es für die Berechnung deiner Kalorien braucht.
+- Verbesserte Stabilität.

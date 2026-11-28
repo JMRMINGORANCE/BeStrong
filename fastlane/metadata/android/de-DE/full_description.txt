@@ -40,7 +40,7 @@ WEAR-OS-UHREN
 • Trainiere mit der Uhr oder dem Handy: Das Training wird live geteilt und du kannst jederzeit wechseln.
 • Live-Puls und Kalorien, Pause mit Vibration und Tempo-Führung.
 • Schließe den Satz mit der Taste ab und stelle das Gewicht mit Lünette oder Krone ein.
-• Kachel und Komplikation fürs Zifferblatt.
+• Kacheln (Tiles) auf der Uhr: „Heute“ mit der Routine des Tages und einem Start-Button, und deine Woche mit Trainings, Serie und Button zum Trainieren. Dazu Komplikationen fürs Zifferblatt.
 
 FALTBARE GERÄTE
 • Gemacht für das Galaxy Z Fold: Liste und Detail nebeneinander, Seitenleiste im Training und Tischmodus.

@@ -1,1 +1,2 @@
-- Agora podes activar un son discreto ao rematar o descanso, para saber cando comezar a seguinte serie sen mirar o móbil. Está en Axustes, «Durante o adestramento», e non soa se o móbil está en silencio. Unha idea da comunidade.
+- BeStrong xa non pide acceso ao teu sono nin ao teu pulso en repouso en Health Connect: só le o teu peso, a túa altura e o pulso dos teus adestramentos, que é o que usa para calcular as túas calorías.
+- Melloras de estabilidade.

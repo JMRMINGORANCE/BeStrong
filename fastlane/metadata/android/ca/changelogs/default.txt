@@ -1,1 +1,2 @@
-- Ara pots activar un so discret en acabar el descans, per saber quan començar la sèrie següent sense mirar el mòbil. És a Configuració, «Durant l’entrenament», i no sona si el mòbil està en silenci. Una idea de la comunitat.
+- BeStrong ja no demana accés al teu son ni al teu pols en repòs a Health Connect: només llegeix el teu pes, la teva alçada i el pols dels teus entrenaments, que és el que fa servir per calcular les teves calories.
+- Millores d’estabilitat.
