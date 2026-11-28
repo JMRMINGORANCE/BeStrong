@@ -35,6 +35,17 @@ def check(response):
     return response.json()
 
 
+def commit(session, edit):
+    """Confirma la edición. Si Play no deja enviarla a revisión sola (p. ej. tras un rechazo), la confirma sin enviarla."""
+    response = session.post(f"{API}/edits/{edit}:commit")
+    if not response.ok and "changesNotSentForReview" in response.text:
+        check(session.post(f"{API}/edits/{edit}:commit", params={"changesNotSentForReview": "true"}))
+        print("::warning::Google Play no permite enviar estos cambios a revisión automáticamente: están guardados y hay que "
+              "enviarlos a mano desde Play Console › Resumen de publicación.")
+        return
+    check(response)
+
+
 def release_notes():
     notes = []
     for path in sorted(Path("fastlane/metadata/android").glob("*/changelogs/default.txt")):
@@ -77,11 +88,12 @@ def update_listings(session):
         old = current.get(language, {})
         if all(old.get(k) == v for k, v in fields.items()):
             continue
-        check(session.patch(f"{API}/edits/{edit}/listings/{language}", json={"language": language, **fields}))
+        # PUT crea la ficha del idioma si aún no existe (PATCH da 404); se conservan los campos que no se envían
+        check(session.put(f"{API}/edits/{edit}/listings/{language}", json={**old, "language": language, **fields}))
         print(f"Ficha de Play actualizada: {language} ({', '.join(fields)})")
         changed = True
     if changed:
-        check(session.post(f"{API}/edits/{edit}:commit"))
+        commit(session, edit)
     else:
         print("Ficha de Play sin cambios")
 
@@ -123,7 +135,7 @@ def upload(session, phone_aab, wear_aab, status):
         check(session.put(f"{API}/edits/{edit}/tracks/{quote(track, safe='')}", json={"track": track, "releases": [release]}))
         print(f"{Path(aab).name} (versionCode {code}) → {track} [{status}]")
 
-    check(session.post(f"{API}/edits/{edit}:commit"))
+    commit(session, edit)
 
 
 def main():
