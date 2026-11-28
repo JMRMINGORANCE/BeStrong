@@ -40,7 +40,7 @@ RELOJES WEAR OS
 • Entrena desde el reloj o desde el móvil: el entreno se comparte en vivo y puedes cambiar de uno a otro.
 • Pulso en directo y calorías, descanso con vibración y guía de tempo.
 • Completa la serie con el botón físico y ajusta el peso con el bisel o la corona.
-• Tile y complicación para la esfera.
+• Tiles en el reloj: «Hoy toca», con la rutina del día y un botón para empezarla, y tu semana, con entrenos, racha y botón para entrenar. Y complicaciones para la esfera.
 
 PLEGABLES
 • Pensada para Galaxy Z Fold: lista y detalle lado a lado, panel lateral en el entreno y modo mesa.

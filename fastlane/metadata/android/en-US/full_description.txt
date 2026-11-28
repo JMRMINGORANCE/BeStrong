@@ -40,7 +40,7 @@ WEAR OS WATCHES
 • Train from your watch or your phone: the workout is shared live and you can switch between them.
 • Live heart rate and calories, rest with vibration and tempo guidance.
 • Complete a set with the physical button and adjust the weight with the bezel or crown.
-• Tile and watch face complication.
+• Watch tiles: “Today”, with the day’s routine and a button to start it, and your week, with workouts, streak and a button to train. Plus watch face complications.
 
 FOLDABLES
 • Designed for Galaxy Z Fold: list and detail side by side, side panel during workouts and tabletop mode.

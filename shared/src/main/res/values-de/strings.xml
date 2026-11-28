@@ -152,7 +152,7 @@
     <string name="faq">FAQ</string>
     <string name="faq_backup_a">Nur auf deinem Handy (und in deinem Google-Backup, falls aktiviert). Du kannst sie im Profil exportieren oder ein verschlüsseltes Backup erstellen.</string>
     <string name="faq_backup_q">Wo sind meine Daten?</string>
-    <string name="faq_hc_a">Um Trainings in Samsung Health zu speichern und dein Gewicht, deinen Schlaf und Ruhepuls (tägliche Tagesform) zu lesen. Es ist optional.</string>
+    <string name="faq_hc_a">Um Trainings in Samsung Health zu speichern und dein Gewicht und deine Größe zu lesen (für die Kalorienberechnung). Es ist optional.</string>
     <string name="faq_hc_q">Wofür ist Health Connect?</string>
     <string name="faq_progress_a">Sie schaut aufs letzte Mal: Hast du alle Wiederholungen geschafft, legt sie etwas drauf; sonst wiederholt sie. Du kannst das in den Einstellungen ausschalten.</string>
     <string name="faq_progress_q">Wie wählt die App das Gewicht?</string>
@@ -406,7 +406,7 @@
     <string name="privacy_csv_title">Export und Import</string>
     <string name="privacy_delete">Durch Deinstallieren der App oder Löschen ihrer Daten in den Android-Einstellungen werden alle BeStrong-Informationen vom Gerät entfernt.</string>
     <string name="privacy_delete_title">Deine Daten löschen</string>
-    <string name="privacy_hc">Wenn du den Export aktivierst, schreibt BeStrong jedes beendete Training als Krafttrainings- oder Cardio-Sitzung (Beginn, Ende, Name und Notizen) in Health Connect, dazu die gesamten und aktiven Kalorien (von der Uhr gemessen oder ohne Uhr aus Herzfrequenz bzw. Dauer und Gewicht berechnet), die von der Uhr gemessene Herzfrequenzkurve sowie die beim Laufen, Gehen, auf dem Laufband oder Rad zurückgelegte Distanz. Wenn du es erlaubst, liest es außerdem Gewicht, Größe, Schlaf und Ruhepuls, um die Tagesform und deinen Energieverbrauch zu berechnen, sowie die von anderen Geräten während deiner Trainings aufgezeichnete Herzfrequenz, um deren Intensität abzuschätzen. Du kannst die Berechtigungen jederzeit unter Einstellungen › Health Connect widerrufen. Außerdem schreibt es jeden Satz als Abschnitt der Einheit (Übungsart und Wiederholungen) sowie Gewicht und Körperfett-%, die du unter Maße einträgst.</string>
+    <string name="privacy_hc">Wenn du den Export aktivierst, schreibt BeStrong jedes beendete Training als Krafttrainings- oder Cardio-Sitzung (Beginn, Ende, Name und Notizen) in Health Connect, dazu die gesamten und aktiven Kalorien (von der Uhr gemessen oder ohne Uhr aus Herzfrequenz bzw. Dauer und Gewicht berechnet), die von der Uhr gemessene Herzfrequenzkurve sowie die beim Laufen, Gehen, auf dem Laufband oder Rad zurückgelegte Distanz. Wenn du es erlaubst, liest es außerdem Gewicht und Größe, um deinen Energieverbrauch zu berechnen, sowie die von anderen Geräten während deiner Trainings aufgezeichnete Herzfrequenz, um deren Intensität abzuschätzen. Du kannst die Berechtigungen jederzeit unter Einstellungen › Health Connect widerrufen. Außerdem schreibt es jeden Satz als Abschnitt der Einheit (Übungsart und Wiederholungen) sowie Gewicht und Körperfett-%, die du unter Maße einträgst.</string>
     <string name="privacy_hc_title">Health Connect</string>
     <string name="privacy_images">Übungsanimationen und -bilder werden von exercisedb.dev (AscendAPI) und wger.de geladen. Dabei werden keine persönlichen Daten gesendet. Deine Technikfotos und -videos liegen nur im privaten Speicher der App.</string>
     <string name="privacy_images_title">Übungsbilder</string>

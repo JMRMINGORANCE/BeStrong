@@ -1,1 +1,2 @@
-- Tu peux maintenant activer un son discret à la fin du repos, pour savoir quand commencer la série suivante sans regarder ton téléphone. C’est dans Réglages, « Pendant l’entraînement », et il ne sonne pas si ton téléphone est en silencieux. Une idée de la communauté.
+- BeStrong ne demande plus l’accès à ton sommeil ni à ta fréquence cardiaque au repos dans Health Connect : il lit seulement ton poids, ta taille et la fréquence cardiaque de tes séances, ce qui lui sert à calculer tes calories.
+- Amélioration de la stabilité.

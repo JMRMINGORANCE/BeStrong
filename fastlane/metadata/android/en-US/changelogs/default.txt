@@ -1,1 +1,2 @@
-- You can now turn on a subtle sound when your rest ends, so you know when to start your next set without looking at your phone. Find it in Settings, "During the workout". It stays quiet when your phone is on silent. A community idea.
+- BeStrong no longer asks for access to your sleep or resting heart rate in Health Connect: it only reads your weight, your height and the heart rate from your workouts, which is what it uses to calculate your calories.
+- Stability improvements.

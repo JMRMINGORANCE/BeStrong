@@ -1,1 +1,2 @@
-- Agora podes ativar um som discreto no fim do descanso, para saberes quando começar a série seguinte sem olhar para o telemóvel. Está nas Definições, «Durante o treino», e não toca se o telemóvel estiver em silêncio. Uma ideia da comunidade.
+- O BeStrong já não pede acesso ao teu sono nem à tua frequência cardíaca em repouso no Health Connect: só lê o teu peso, a tua altura e a frequência cardíaca dos teus treinos, que é o que usa para calcular as tuas calorias.
+- Melhorias de estabilidade.

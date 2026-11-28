@@ -41,7 +41,7 @@
     <string name="perm_hc_write_t">Guardar en Health Connect</string>
     <string name="perm_hc_write_d">Tus entrenos, calorías, pulso y distancia en Samsung Health, Google Fit y otras apps.</string>
     <string name="perm_hc_read_t">Leer de Health Connect</string>
-    <string name="perm_hc_read_d">Peso, altura, sueño y pulso en reposo para la preparación del día y las calorías.</string>
+    <string name="perm_hc_read_d">Peso y altura para calcular las calorías.</string>
     <string name="perm_battery_t">Sin restricciones de batería</string>
     <string name="perm_battery_d">Que el cronómetro y el aviso de descanso no se paren con la pantalla apagada.</string>
     <string name="perm_watch_t">Reloj Wear OS</string>

@@ -40,7 +40,7 @@ MONTRES WEAR OS
 • Entraîne-toi depuis la montre ou le téléphone : la séance est partagée en direct et tu peux passer de l’un à l’autre.
 • Fréquence cardiaque en direct et calories, repos avec vibration et guide de tempo.
 • Valide la série avec le bouton physique et règle la charge avec la lunette ou la couronne.
-• Tuile et complication pour le cadran.
+• Tuiles (tiles) sur la montre : « Aujourd’hui », avec la routine du jour et un bouton pour la lancer, et ta semaine, avec séances, série et bouton pour t’entraîner. Et complications pour le cadran.
 
 PLIABLES
 • Pensée pour le Galaxy Z Fold : liste et détail côte à côte, panneau latéral pendant la séance et mode table.

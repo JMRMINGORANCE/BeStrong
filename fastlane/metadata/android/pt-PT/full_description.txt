@@ -40,7 +40,7 @@ RELÓGIOS WEAR OS
 • Treina a partir do relógio ou do telemóvel: o treino é partilhado em direto e podes mudar de um para o outro.
 • Frequência cardíaca em direto e calorias, descanso com vibração e guia de tempo.
 • Completa a série com o botão físico e ajusta o peso com o bisel ou a coroa.
-• Tile e complicação para o mostrador.
+• Tiles no relógio: «Hoje», com a rotina do dia e um botão para a começar, e a tua semana, com treinos, sequência e botão para treinar. E complicações para o mostrador.
 
 DOBRÁVEIS
 • Pensada para o Galaxy Z Fold: lista e detalhe lado a lado, painel lateral no treino e modo mesa.

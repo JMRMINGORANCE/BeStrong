@@ -41,7 +41,7 @@
     <string name="perm_hc_write_t">Desar a Health Connect</string>
     <string name="perm_hc_write_d">Els teus entrenaments, calories, pols i distància a Samsung Health, Google Fit i altres apps.</string>
     <string name="perm_hc_read_t">Llegir de Health Connect</string>
-    <string name="perm_hc_read_d">Pes, alçada, son i pols en repòs per a la preparació del dia i les calories.</string>
+    <string name="perm_hc_read_d">Pes i alçada per calcular les calories.</string>
     <string name="perm_battery_t">Sense restriccions de bateria</string>
     <string name="perm_battery_d">Que el cronòmetre i l\'avís de descans no s\'aturin amb la pantalla apagada.</string>
     <string name="perm_watch_t">Rellotge Wear OS</string>

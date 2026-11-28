@@ -41,7 +41,7 @@
     <string name="perm_hc_write_t">Save to Health Connect</string>
     <string name="perm_hc_write_d">Your workouts, calories, heart rate and distance in Samsung Health, Google Fit and other apps.</string>
     <string name="perm_hc_read_t">Read from Health Connect</string>
-    <string name="perm_hc_read_d">Weight, height, sleep and resting heart rate for daily readiness and calories.</string>
+    <string name="perm_hc_read_d">Weight and height to calculate calories.</string>
     <string name="perm_battery_t">No battery restrictions</string>
     <string name="perm_battery_d">So the timer and rest alert keep running with the screen off.</string>
     <string name="perm_watch_t">Wear OS watch</string>

@@ -1,1 +1,2 @@
-- Ahora puedes activar un sonido discreto al terminar el descanso, para saber cuándo empezar la siguiente serie sin mirar el móvil. Está en Ajustes, «Durante el entreno», y no suena si el móvil está en silencio. Una idea de la comunidad.
+- BeStrong ya no pide acceso a tu sueño ni a tu pulso en reposo en Health Connect: solo lee tu peso, tu altura y el pulso de tus entrenos, que es lo que usa para calcular tus calorías.
+- Mejoras de estabilidad.
