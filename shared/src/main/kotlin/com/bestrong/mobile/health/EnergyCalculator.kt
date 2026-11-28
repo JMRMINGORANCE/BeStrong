@@ -37,7 +37,6 @@ class EnergyCalculator @Inject constructor(
             heightCm = s.heightCm?.toDouble() ?: snapshot?.heightCm,
             age = s.birthYear?.let { java.time.Instant.ofEpochMilli(atEpochMs).atZone(java.time.ZoneId.systemDefault()).year - it }?.takeIf { it in 10..100 },
             sex = s.sex,
-            restingHr = snapshot?.restingHr,
         )
     }
 

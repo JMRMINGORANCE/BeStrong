@@ -6,8 +6,6 @@ import androidx.health.connect.client.HealthConnectFeatures
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeightRecord
-import androidx.health.connect.client.records.RestingHeartRateRecord
-import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
@@ -23,11 +21,6 @@ import javax.inject.Singleton
 data class HealthSnapshot(
     /** (fecha, kg) de los últimos 90 días. */
     val weights: List<Pair<Long, Double>> = emptyList(),
-    /** Horas dormidas en las últimas 24 h. */
-    val sleepHours: Double? = null,
-    /** Pulso en reposo más reciente y media de 30 días. */
-    val restingHr: Int? = null,
-    val baselineRestingHr: Int? = null,
     /** Altura más reciente (cm). */
     val heightCm: Double? = null,
 )
@@ -41,8 +34,6 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
     val permissions: Set<String> by lazy {
         setOfNotNull(
             HealthPermission.getReadPermission(WeightRecord::class),
-            HealthPermission.getReadPermission(SleepSessionRecord::class),
-            HealthPermission.getReadPermission(RestingHeartRateRecord::class),
             // Para calcular calorías más precisas: altura (metabolismo basal) y pulso durante el entreno
             HealthPermission.getReadPermission(HeightRecord::class),
             HealthPermission.getReadPermission(HeartRateRecord::class),
@@ -72,24 +63,6 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
         } else {
             emptyList()
         }
-        val sleep = if (HealthPermission.getReadPermission(SleepSessionRecord::class) in ok) {
-            runCatching {
-                val from = now.minus(Duration.ofHours(24))
-                val records = client.readRecords(ReadRecordsRequest(SleepSessionRecord::class, TimeRangeFilter.between(from, now))).records
-                // Dos apps que apuntan la misma noche no son 16 h: se recortan a las 24 h y se unen los solapes
-                mergedMinutes(records.map { maxOf(it.startTime, from) to minOf(it.endTime, now) }) / 60.0
-            }.getOrNull()?.takeIf { it > 0 }
-        } else {
-            null
-        }
-        val resting = if (HealthPermission.getReadPermission(RestingHeartRateRecord::class) in ok) {
-            runCatching {
-                client.readRecords(ReadRecordsRequest(RestingHeartRateRecord::class, TimeRangeFilter.between(now.minus(Duration.ofDays(30)), now)))
-                    .records.sortedBy { it.time }.map { it.time to it.beatsPerMinute.toInt() }
-            }.getOrDefault(emptyList())
-        } else {
-            emptyList()
-        }
         val height = if (HealthPermission.getReadPermission(HeightRecord::class) in ok) {
             runCatching {
                 client.readRecords(ReadRecordsRequest(HeightRecord::class, TimeRangeFilter.between(now.minus(Duration.ofDays(3650)), now)))
@@ -101,10 +74,6 @@ class HealthConnectReader @Inject constructor(@ApplicationContext private val co
         return HealthSnapshot(
             heightCm = height,
             weights = weights,
-            sleepHours = sleep,
-            // El de hoy solo si es reciente (uno de hace dos semanas, enfermo, no dice cómo estás hoy); la media, del mes
-            restingHr = resting.lastOrNull()?.takeIf { (time, _) -> time > now.minus(Duration.ofHours(RECENT_RESTING_HOURS)) }?.second,
-            baselineRestingHr = resting.takeIf { it.size >= 3 }?.map { it.second }?.average()?.toInt(),
         )
     }
 
@@ -144,6 +113,3 @@ fun mergedMinutes(intervals: List<Pair<java.time.Instant, java.time.Instant>>): 
     if (start != null && end != null) total += Duration.between(start, end).toMinutes()
     return total
 }
-
-/** Pulso en reposo que todavía vale como «el de hoy». */
-private const val RECENT_RESTING_HOURS = 36L
